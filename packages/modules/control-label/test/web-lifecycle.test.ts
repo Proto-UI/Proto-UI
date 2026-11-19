@@ -70,6 +70,25 @@ function fixture(parent: HTMLElement | ShadowRoot | null = document.body) {
   };
 }
 
+it('ignores unrelated child-list changes without probing each anchor against the subtree', async () => {
+  const labels = Array.from({ length: 12 }, () => fixture());
+  await mutations();
+  for (const label of labels) label.change.mockClear();
+
+  const branch = document.createElement('section');
+  const contains = vi.spyOn(branch, 'contains');
+  document.body.append(branch);
+  contains.mockClear();
+  await mutations();
+  expect(contains).not.toHaveBeenCalled();
+  expect(labels.every((label) => label.change.mock.calls.length === 0)).toBe(true);
+
+  branch.append(labels[0]!.el);
+  await mutations();
+  expect(labels[0]!.change).toHaveBeenCalledOnce();
+  expect(labels.slice(1).every((label) => label.change.mock.calls.length === 0)).toBe(true);
+});
+
 describe('Control Label detached view discovery', () => {
   it.each(['open', 'closed'] as const)(
     'finds delayed reinsertion into another %s ShadowRoot and rebinds its observer',

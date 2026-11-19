@@ -10,7 +10,11 @@ import { launchBrowser, startServer, stopServer } from './browser-harness';
 
 const quick = '/zh-cn/start-here/quick-start/';
 const long = '/zh-cn/ui-libraries/base/transition/';
-const out = process.env.PROTO_UI_CODE_SCROLL_EVIDENCE_DIR ?? '/tmp/pui-code-scroll-chain';
+const out =
+  process.env.PROTO_UI_CODE_SCROLL_EVIDENCE_DIR ??
+  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'code-scroll-chain')
+    : '/tmp/pui-code-scroll-chain');
 let browser: Browser;
 let baseUrl: string;
 const receipt: any = {

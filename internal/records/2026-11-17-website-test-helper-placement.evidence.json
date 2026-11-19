@@ -1,0 +1,531 @@
+{
+  "scopeId": "www-test-helper-placement-20261117",
+  "result": "partial",
+  "boundedRelocationVerified": true,
+  "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+  "candidateState": "Reviewed source included in the adjacent commit; execution remains bound to base and candidatePatchSha256.",
+  "candidatePatchSha256": "edec4a441cf9d2e0d365842348446ae974c78425cd5352cc9fa5d7bb0fdcddf8",
+  "toolchain": {
+    "node": "24.22.1",
+    "pnpm": "10.32.1",
+    "install": "frozen offline ignore-scripts; 557 reused, 0 downloaded; own-worktree physical node_modules"
+  },
+  "implementation": {
+    "helpersMovedByteIdentically": 3,
+    "consumerTestFiles": 13,
+    "pathStringEdits": 14,
+    "assertionsChanged": 0,
+    "productionSourceChanges": 0,
+    "scannerPolicyChanges": 0,
+    "onlyExpectedPathsChanged": true
+  },
+  "checks": {
+    "baseline": {
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-11-17T08:42:35.671941+00:00",
+      "elapsedSeconds": 206.987,
+      "returncode": 1,
+      "source": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "worktreeStatus": "",
+      "logSha256": "9b2846c77ff89ce1b4634d9d6fcc36b08473bc28871b43a5bf3766fd8a8c1b0e",
+      "diagnosticCount": 1419,
+      "coverageEnvironment": {}
+    },
+    "candidate": {
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-11-17T08:48:44.545299+00:00",
+      "elapsedSeconds": 191.328,
+      "returncode": 1,
+      "baseSource": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "candidatePatchSha256": "edec4a441cf9d2e0d365842348446ae974c78425cd5352cc9fa5d7bb0fdcddf8",
+      "logSha256": "987eb5f97d2ceadccd162f39664499a344e9b4c0d22a8c092812bc11787688dc",
+      "diagnosticCount": 1413,
+      "coverageEnvironment": {}
+    },
+    "diagnosticDiff": {
+      "baselineCount": 1419,
+      "candidateCount": 1413,
+      "removed": [
+        "- internal/website/self-hosting-coverage-matrix.md: DOM style body in `apps/www/src/components/Homepage/generated-stylesheet.ts` is unverified; CSS must be a static string with no unresolved browser imports",
+        "- internal/website/self-hosting-coverage-matrix.md: runtime code compilation in `apps/www/src/content/docs/zh-cn/docs-query-timing.mjs` is unverified; recognized eval/Function, WebAssembly and string-or-unresolved timer entry points require an explicit reviewed admission",
+        "- internal/website/self-hosting-coverage-matrix.md: interactive website source `apps/www/src/content/docs/zh-cn/accordion-activation-observation.ts` is missing a reviewed Source-scan binding and fingerprint",
+        "- internal/website/self-hosting-coverage-matrix.md: interactive website source `apps/www/src/content/docs/zh-cn/docs-query-timing.mjs` is missing a reviewed Source-scan binding and fingerprint",
+        "- internal/website/self-hosting-coverage-matrix.md: interactive website source `apps/www/src/content/docs/zh-cn/accordion-activation-observation.ts` is not bound to a matrix row",
+        "- internal/website/self-hosting-coverage-matrix.md: interactive website source `apps/www/src/content/docs/zh-cn/docs-query-timing.mjs` is not bound to a matrix row"
+      ],
+      "added": [],
+      "exactExpectedSixRemoved": true,
+      "remainingIdentitiesUnchanged": true,
+      "sameCommandAndEnvironment": true,
+      "coverageGateStatus": "FAILED; remaining diagnostics are retained debt, not passed acceptance"
+    },
+    "helperTests": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/helper-placement/helper-tests.vitest.json",
+        "apps/www/src/content/docs/zh-cn/docs-query-timing.test.ts",
+        "apps/www/src/content/docs/zh-cn/accordion-activation-observation.test.ts"
+      ],
+      "startedAt": "2026-11-17T08:47:40.517810+00:00",
+      "elapsedSeconds": 1.934,
+      "returncode": 0,
+      "logSha256": "c049fc48f5e377604461bd03351b0512be710dcee2534b5c0d4046a4ad4f8d6a",
+      "summary": {
+        "numTotalTestSuites": 7,
+        "numPassedTestSuites": 7,
+        "numFailedTestSuites": 0,
+        "numTotalTests": 21,
+        "numPassedTests": 21,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "executedFiles": [
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-ci-helpers/apps/www/src/content/docs/zh-cn/accordion-activation-observation.test.ts",
+          "status": "passed",
+          "assertions": 5
+        },
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-ci-helpers/apps/www/src/content/docs/zh-cn/docs-query-timing.test.ts",
+          "status": "passed",
+          "assertions": 16
+        }
+      ]
+    },
+    "productionReachabilityControls": {
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "--test-name-pattern=^(scans test-named modules reachable from production Website sources|scans interaction in test-named modules reachable from production|closure review: Vite-root context survives a shared helper outside its app directory)$",
+        "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+      ],
+      "startedAt": "2026-11-17T08:48:21.848184+00:00",
+      "elapsedSeconds": 2.532,
+      "returncode": 0,
+      "logSha256": "6f1916db598409d18f32873a863a444cebcfd2347836a143a5fba01bc197f90e",
+      "summaryLines": [
+        "# tests 3",
+        "# suites 0",
+        "# pass 3",
+        "# fail 0",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 2364.807113"
+      ],
+      "selectedResults": [
+        "ok 1 - scans test-named modules reachable from production Website sources",
+        "ok 2 - scans interaction in test-named modules reachable from production",
+        "ok 3 - closure review: Vite-root context survives a shared helper outside its app directory"
+      ]
+    },
+    "diffCheck": "passed",
+    "pathResolution": "14/14 resolve; accordion vi.mock resolves to same docs helper imported by moved accordion helper"
+  },
+  "criterionStatus": {
+    "implementation": "bounded path repair verified locally; requires independent review and integration before development-complete tracking",
+    "coverageAcceptance": "FAILED: remaining 1413 diagnostics retained unchanged",
+    "homepageConsumers": "8 files NOT RUN: missing generated proto-ui-tokens.generated.css and CLI dist; no build or foreign generated assets authorized in this window",
+    "nativeConsumers": "3 browser test files import-only changes; NOT RUN",
+    "otherChecks": "Whole types, build, browser, whole fixture suite and full CI were NOT RUN on candidate"
+  },
+  "evidenceDiscipline": {
+    "kind": "internal governance/source placement repair",
+    "requestParaphrase": "Continue the frozen 0.3 repairs by relocating three Node-only website test helpers without changing their behavior, tests, or scanner policy.",
+    "observations": [
+      {
+        "state": "baseline source layout",
+        "diagnostics": 1419,
+        "testHelperDiagnostics": 6,
+        "reference": "baseline-checker.json"
+      },
+      {
+        "state": "candidate layout, exact same helper bytes and only consumer path edits",
+        "diagnostics": 1413,
+        "testHelperDiagnostics": 0,
+        "addedDiagnostics": 0,
+        "reference": "candidate-checker.json"
+      },
+      {
+        "state": "unchanged production reachability controls",
+        "casesPassed": 3,
+        "reference": "production-reachability-controls.receipt.json"
+      }
+    ],
+    "causalWalkthrough": "The scanner seeds ordinary files under apps/www/src, excluding test-named source unless production-reachable. These three ordinary-named helper files lived inside that production seed root although every executable consumer is a test or the other moved test helper. Moving byte-identical helpers under apps/www/test/helpers removes the false seed membership. Source inspection explains that mechanism; complete before/after diagnostic observations verify exactly its six attributed diagnostics. The unchanged scanner still follows real production imports beyond the source root and into test-named modules, as exercised by the three existing negative controls.",
+    "visualDisposition": "No UI changed; executed diagnostics, immutable source comparison and scoped behavioral controls are the applicable evidence. No fabricated screenshot.",
+    "publication": "No external write or upload performed; parent owns reviewed source publication and exact receipt."
+  },
+  "nextOwner": "/root independent review; compiler_recovery owns next shared validation window",
+  "handoff": "All owned test/checker processes exited; no further tests/builds started by this child.",
+  "publication": "No claim of formal independent GitHub approval or integration.",
+  "homepageFollowup": {
+    "head": "2e4f8f19713e3626ccf0492bbadaf8a4fcb1d889",
+    "runs": [
+      {
+        "command": ["corepack", "pnpm@10.32.1", "--filter", "@proto.ui/cli", "build"],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup",
+        "head": "2e4f8f19713e3626ccf0492bbadaf8a4fcb1d889",
+        "startedAt": "2026-11-17T09:27:17.227539+00:00",
+        "timeoutSeconds": 600,
+        "exitCode": 0,
+        "durationSeconds": 3.934,
+        "logSha256": "25adfdbdb4681c7970e22478be51924f2baf640c7dd4c5cd5902d7fc5899be69"
+      },
+      {
+        "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup",
+        "head": "2e4f8f19713e3626ccf0492bbadaf8a4fcb1d889",
+        "startedAt": "2026-11-17T09:27:21.164032+00:00",
+        "timeoutSeconds": 240,
+        "exitCode": 0,
+        "durationSeconds": 71.506,
+        "logSha256": "0c59fcfc0c3ad7f30c045c24c2d64bb5d9559cb303e798b2eddeecb1f912ea97",
+        "generatedFiles": {
+          "apps/www/src/styles/proto-ui-tokens.generated.css": "0df4acc7d6d60a079f81bde214110bf7cdbca782eb7e82f6bd8f35966a283f93",
+          "apps/www/src/styles/proto-ui-shadow-style.generated.js": "ebb546f1c87e32fc6b1bfbacab81bb3cb3dcf242cb1dbe0053a0f5dd9c5290b4",
+          "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+        }
+      },
+      {
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "apps/www/src/components/Homepage/homepage-composition.integration.test.ts",
+          "apps/www/src/components/Homepage/homepage-dialog-focus.integration.test.ts",
+          "apps/www/src/components/Homepage/homepage-gallery-props.test.ts",
+          "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+          "apps/www/src/components/Homepage/homepage-showcase.integration.test.ts",
+          "apps/www/src/components/Homepage/homepage-showcase.react19.test.ts",
+          "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+          "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=verbose",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/8077f6e9f3a8/recovery-20261117/helper-homepage-consumers.json"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup",
+        "head": "2e4f8f19713e3626ccf0492bbadaf8a4fcb1d889",
+        "startedAt": "2026-11-17T09:28:32.677631+00:00",
+        "timeoutSeconds": 360,
+        "exitCode": 0,
+        "durationSeconds": 136.087,
+        "logSha256": "9acd6fb29324a4f3c4b29255624a817a0e7ec69b01ba1af172def9dd7d276413",
+        "tests": {
+          "numTotalTests": 59,
+          "numPassedTests": 59,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "success": true
+        },
+        "jsonSha256": "7e1efe641911e027cb9af9394c6f469380d12dac213705fc24ff1c56f13143c3",
+        "suites": [
+          {
+            "file": "apps/www/src/components/Homepage/homepage-composition.integration.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "shadcn homepage scenes real WC integration mounts ten real cards, decorative icons, a labelled sample chart and attribution",
+                "status": "passed"
+              },
+              {
+                "name": "shadcn homepage scenes real WC integration filters Command, skips disabled results and accepts Arrow/Enter into Slider and Progress",
+                "status": "passed"
+              },
+              {
+                "name": "shadcn homepage scenes real WC integration keeps Slider configuration through keyboard changes and repeated resets, then revokes queued writes",
+                "status": "passed"
+              },
+              {
+                "name": "shadcn homepage scenes real WC integration opens every Accordion panel with unique heading relations and retires closed views",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist homepage scenes real WC integration mounts ten real cards, decorative icons, a labelled sample chart and attribution",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist homepage scenes real WC integration filters Command, skips disabled results and accepts Arrow/Enter into Slider and Progress",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist homepage scenes real WC integration keeps Slider configuration through keyboard changes and repeated resets, then revokes queued writes",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist homepage scenes real WC integration opens every Accordion panel with unique heading relations and retires closed views",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2 homepage scenes real WC integration mounts ten real cards, decorative icons, a labelled sample chart and attribution",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2 homepage scenes real WC integration filters Command, skips disabled results and accepts Arrow/Enter into Slider and Progress",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2 homepage scenes real WC integration keeps Slider configuration through keyboard changes and repeated resets, then revokes queued writes",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2 homepage scenes real WC integration opens every Accordion panel with unique heading relations and retires closed views",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-dialog-focus.integration.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "wc Gallery Dialog enters and restores focus after initial acquisition delay=false",
+                "status": "passed"
+              },
+              {
+                "name": "wc Gallery Dialog enters and restores focus after initial acquisition delay=true",
+                "status": "passed"
+              },
+              {
+                "name": "react Gallery Dialog enters and restores focus after initial acquisition delay=false",
+                "status": "passed"
+              },
+              {
+                "name": "react Gallery Dialog enters and restores focus after initial acquisition delay=true",
+                "status": "passed"
+              },
+              {
+                "name": "vue Gallery Dialog enters and restores focus after initial acquisition delay=false",
+                "status": "passed"
+              },
+              {
+                "name": "vue Gallery Dialog enters and restores focus after initial acquisition delay=true",
+                "status": "passed"
+              },
+              {
+                "name": "vue2 Gallery Dialog enters and restores focus after initial acquisition delay=false",
+                "status": "passed"
+              },
+              {
+                "name": "vue2 Gallery Dialog enters and restores focus after initial acquisition delay=true",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery-props.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "shadcn retains full editor and preferences props through edits and resets",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist retains full editor and preferences props through edits and resets",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2 retains full editor and preferences props through edits and resets",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "shadcn/wc real gallery keeps every declared physical part in the owning generation",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist/wc real gallery keeps every declared physical part in the owning generation",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2/wc real gallery keeps every declared physical part in the owning generation",
+                "status": "passed"
+              },
+              {
+                "name": "shadcn/react real gallery keeps every declared physical part in the owning generation",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist/react real gallery keeps every declared physical part in the owning generation",
+                "status": "passed"
+              },
+              {
+                "name": "bootstrap-2-3-2/react real gallery keeps every declared physical part in the owning generation",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-showcase.integration.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "shadcn workspace real WC integration lets Select own close/focus, preserves controlled IME, and saves/restores actual input",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist workspace real WC integration lets Select own close/focus, preserves controlled IME, and saves/restores actual input",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-showcase.react19.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "shadcn workspace local React 19 compatibility lets Select own close/focus, preserves controlled IME, and saves/restores actual input",
+                "status": "passed"
+              },
+              {
+                "name": "brutalist workspace local React 19 compatibility lets Select own close/focus, preserves controlled IME, and saves/restores actual input",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "Homepage block text layout across runtime hosts leaves unrelated inline text and its surrounding sentence unchanged",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts shadcn/wc preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts shadcn/react preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts shadcn/vue preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts shadcn/vue2 preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts brutalist/wc preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts brutalist/react preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts brutalist/vue preserves the block text formatting context",
+                "status": "passed"
+              },
+              {
+                "name": "Homepage block text layout across runtime hosts brutalist/vue2 preserves the block text formatting context",
+                "status": "passed"
+              }
+            ]
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "status": "passed",
+            "assertions": [
+              {
+                "name": "homepage passive typography refresh preserves real gallery state viewport: keeps the original logical owners, draft, switch, caret and page snapshot",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state new source heading: keeps the original logical owners, draft, switch, caret and page snapshot",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state prepare failure keeps the current gallery, typography owner and page snapshot",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state partial activate failure keeps the current gallery, typography owner and page snapshot",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state coalesces source and viewport changes during local preparation without activating stale source",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state a whole-page family commit revokes an older same-generation local preparation",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state whole-page publication rollback restores the latest locally refreshed typography and live gallery",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state a failed publication keeps the committed owner and no replacement batch",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state a source added during a failed publication joins the retained generation",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state a source added during a whole-page runtime preparation joins its committed generation without a second page commit",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state destroy waits for and retires an in-flight local batch without reviving source or framework owners",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state change role: observes only the authored change, keeps gallery state and settles after one batch",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state remove role: observes only the authored change, keeps gallery state and settles after one batch",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state new marker: observes only the authored change, keeps gallery state and settles after one batch",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state keeps language and complete textContent replacement fresh in the same page generation",
+                "status": "passed"
+              },
+              {
+                "name": "homepage passive typography refresh preserves real gallery state reconciles source changes arriving while a failed local batch is being disposed",
+                "status": "passed"
+              },
+              {
+                "name": "publishes a committed runtime preference when a live family request supersedes its pending retirement observer",
+                "status": "passed"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "generatedTokens": 1433,
+    "dependencyPolicy": "Own physical frozen dependencies, actual current-tree CLI build and canonical website generator; no donor generated files",
+    "scope": "Eight Homepage consumers, 59 passed; not native browser or full website/release build"
+  }
+}

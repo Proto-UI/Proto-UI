@@ -150,6 +150,7 @@ import {
   createWebComponentPortalMount,
   getWebComponentPortalProjectionForOrigin,
   isWebComponentPortaled,
+  isWebComponentPortalTargetOwnedBy,
 } from '../portal-mount';
 import {
   composedParentElement,
@@ -262,6 +263,7 @@ const entryStyleWatches = new WeakMap<
   Window,
   {
     subscribers: Set<(inlineOnly: boolean) => void>;
+    inlineSubscribers: Set<(inlineOnly: boolean) => void>;
     methodPatches: EntryStyleMethodPatch[];
     setterPatches: EntryStyleSetterPatch[];
     observer: MutationObserver;
@@ -972,7 +974,7 @@ function collectEntryStyleDependencies(
 function watchEntryStyleInvalidation(
   view: (Window & typeof globalThis) | null,
   onInvalidate: (inlineOnly: boolean) => void
-): (() => void) | null {
+): { observeInline(enabled: boolean): void; dispose(): void } | null {
   const Sheet = view?.CSSStyleSheet;
   const StyleSheetCtor = view?.StyleSheet;
   const Declaration = view?.CSSStyleDeclaration;
@@ -994,8 +996,10 @@ function watchEntryStyleInvalidation(
   let watch = entryStyleWatches.get(view as Window);
   if (!watch) {
     const subscribers = new Set<(inlineOnly: boolean) => void>();
+    const inlineSubscribers = new Set<(inlineOnly: boolean) => void>();
     let pending: 'inline' | 'stylesheet' | null = null;
     const schedule = (inlineOnly: boolean) => {
+      if (inlineOnly && !inlineSubscribers.size) return;
       if (pending) {
         if (!inlineOnly) pending = 'stylesheet';
         return;
@@ -1004,7 +1008,8 @@ function watchEntryStyleInvalidation(
       queueMicrotask(() => {
         const inlineOnly = pending === 'inline';
         pending = null;
-        for (const subscriber of subscribers) subscriber(inlineOnly);
+        for (const subscriber of inlineOnly ? inlineSubscribers : subscribers)
+          subscriber(inlineOnly);
       });
     };
     const notify = () => schedule(false);
@@ -1163,6 +1168,7 @@ function watchEntryStyleInvalidation(
     };
     watch = {
       subscribers,
+      inlineSubscribers,
       methodPatches,
       setterPatches,
       observer,
@@ -1171,11 +1177,10 @@ function watchEntryStyleInvalidation(
     entryStyleWatches.set(view as Window, watch);
   }
   watch.subscribers.add(onInvalidate);
-  return () => {
-    const current = entryStyleWatches.get(view as Window);
-    if (!current) return;
-    current.subscribers.delete(onInvalidate);
-    if (current.subscribers.size > 0) return;
+  const current = watch;
+  const dispose = () => {
+    current.inlineSubscribers.delete(onInvalidate);
+    if (!current.subscribers.delete(onInvalidate) || current.subscribers.size > 0) return;
     current.observer.disconnect();
     current.stopEvents();
     for (const patch of current.methodPatches) {
@@ -1189,6 +1194,13 @@ function watchEntryStyleInvalidation(
       }
     }
     entryStyleWatches.delete(view as Window);
+  };
+  return {
+    observeInline(enabled) {
+      if (enabled) current.inlineSubscribers.add(onInvalidate);
+      else current.inlineSubscribers.delete(onInvalidate);
+    },
+    dispose,
   };
 }
 
@@ -1563,7 +1575,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let stopEntryRadioStateWatch: (() => void) | null = null;
   let stopEntryImageStateWatch: (() => void) | null = null;
   let stopEntryAttachShadowWatch: (() => void) | null = null;
-  let stopEntryStyleWatch: (() => void) | null = null;
+  let entryStyleWatch: ReturnType<typeof watchEntryStyleInvalidation> = null;
   let stopEntryMotionWatch: (() => void) | null = null;
   let stopEntrySlotWatch: (() => void) | null = null;
   let stopEntryUpgradeWatch: (() => void) | null = null;
@@ -1585,14 +1597,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     stopEntryRadioStateWatch?.();
     stopEntryImageStateWatch?.();
     stopEntryAttachShadowWatch?.();
-    stopEntryStyleWatch?.();
+    entryStyleWatch?.dispose();
+    entryStyleWatch = null;
     stopEntryMotionWatch?.();
     stopEntrySlotWatch?.();
     stopEntryUpgradeWatch?.();
     stopEntryRadioStateWatch =
       stopEntryImageStateWatch =
       stopEntryAttachShadowWatch =
-      stopEntryStyleWatch =
       stopEntryMotionWatch =
       stopEntrySlotWatch =
       stopEntryUpgradeWatch =
@@ -2004,6 +2016,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // Named radio peers and image-map images can depend on inline
               // style outside the entry's observed DOM, including ancestors.
               hasExternalStyleInputs = hasArea || radioTrees.size > 0;
+              entryStyleWatch?.observeInline(hasExternalStyleInputs);
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
                 if (
@@ -2303,6 +2316,39 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (event.type.startsWith('transition')) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (!propertyAffectsEntryEligibility(propertyName)) return;
+                  const path = event.composedPath();
+                  const origin = path[0];
+                  if (
+                    event.isTrusted &&
+                    !hasExternalStyleInputs &&
+                    origin instanceof view!.Element
+                  ) {
+                    let related = path.includes(target) || belongsToObservedEntryTree(origin);
+                    // Portals and slotted regions can have physical or composed
+                    // ancestors outside the container. Consult their live paths.
+                    for (const root of observedRoots) {
+                      if (related) break;
+                      if (isWebComponentPortalTargetOwnedBy(root, origin)) {
+                        related = true;
+                        break;
+                      }
+                      let ancestor: Node | null = root;
+                      while (ancestor) {
+                        if (ancestor === origin) {
+                          related = true;
+                          break;
+                        }
+                        ancestor =
+                          (ancestor as Node & { assignedSlot?: HTMLSlotElement | null })
+                            .assignedSlot ??
+                          ancestor.parentNode ??
+                          (ancestor.nodeType === 11 && 'host' in ancestor
+                            ? (ancestor as ShadowRoot).host
+                            : null);
+                      }
+                    }
+                    if (!related) return;
+                  }
                 }
                 if (event.type === 'animationstart')
                   trackEligibilityAnimation(event as AnimationEvent);
@@ -2521,12 +2567,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               }
             });
             if (view)
-              stopEntryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
+              entryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
                 // DOM and stylesheet invalidation can share one observer
                 // checkpoint. Use the same pending sample instead of rebuilding
                 // the dependency graph once here and again for the DOM signal.
                 if (!inlineOnly) scheduleEntrySample(true);
-                else if (hasExternalStyleInputs) projectCurrent();
+                else projectCurrent();
               });
             observeTree();
           }

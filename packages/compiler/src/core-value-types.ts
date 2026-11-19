@@ -68,6 +68,42 @@ export const PRESENTATION_RECEIPT_TYPE = readonlyRecord({
 });
 export const COMPLETION_REQUEST_TYPE = readonlyRecord({ receipt: PRESENTATION_RECEIPT_TYPE });
 
+/** Core Scroll requests retain their discriminants and Anatomy authority in portable IR. */
+export const SCROLL_AXIS_TYPE = literals('horizontal', 'vertical');
+export const SCROLL_POSITION_REQUEST_TYPE = joinValueTypes([
+  record({ kind: { kind: 'literal', value: 'by' }, axis: SCROLL_AXIS_TYPE, delta: 'number' }),
+  record({ kind: { kind: 'literal', value: 'to' }, axis: SCROLL_AXIS_TYPE, position: 'number' }),
+  record({
+    kind: { kind: 'literal', value: 'page' },
+    axis: SCROLL_AXIS_TYPE,
+    direction: literals('before', 'after'),
+  }),
+  record({
+    kind: { kind: 'literal', value: 'control-drag' },
+    axis: SCROLL_AXIS_TYPE,
+    position: 'number',
+  }),
+  record({ kind: { kind: 'literal', value: 'to-end' }, axis: SCROLL_AXIS_TYPE }),
+]);
+export const SCROLL_REVEAL_REQUEST_TYPE = record({
+  kind: { kind: 'literal', value: 'reveal' },
+  axis: { kind: 'literal', value: 'vertical' },
+  family: 'anatomy-family',
+  part: 'anatomy-part',
+});
+export const SCROLL_REQUEST_TYPE = joinValueTypes([
+  SCROLL_POSITION_REQUEST_TYPE,
+  SCROLL_REVEAL_REQUEST_TYPE,
+]);
+export const SCROLL_REQUEST_OUTCOME_TYPE = joinValueTypes([
+  record({ kind: { kind: 'literal', value: 'dispatched' } }),
+  record({ kind: { kind: 'literal', value: 'queued' } }),
+  record({
+    kind: { kind: 'literal', value: 'rejected' },
+    reason: literals('not-mounted', 'not-declared', 'unavailable'),
+  }),
+]);
+
 /** These are ordinary per-installation records; they grant no definition or Run authority. */
 export const HOOK_API_TYPE: ValueType = record({
   name: 'string',
@@ -104,6 +140,11 @@ export const CORE_VALUE_TYPES: Readonly<Record<string, ValueType>> = {
   PresentationOwnerFrame: PRESENTATION_FRAME_TYPE,
   PresentationReceipt: PRESENTATION_RECEIPT_TYPE,
   CompletionRequest: COMPLETION_REQUEST_TYPE,
+  ScrollAxis: SCROLL_AXIS_TYPE,
+  ScrollSurfacePositionRequest: SCROLL_POSITION_REQUEST_TYPE,
+  ScrollSurfaceRevealRequest: SCROLL_REVEAL_REQUEST_TYPE,
+  ScrollSurfaceRequest: SCROLL_REQUEST_TYPE,
+  ScrollSurfaceRequestOutcome: SCROLL_REQUEST_OUTCOME_TYPE,
   HookConfigApi: HOOK_API_TYPE,
   AsHookConfigApi: HOOK_API_TYPE,
   HookConfigureTools: HOOK_TOOLS_TYPE,

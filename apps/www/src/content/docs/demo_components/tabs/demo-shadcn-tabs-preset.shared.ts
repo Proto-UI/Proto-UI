@@ -1,5 +1,5 @@
 import { withShadcnRheaDemo } from '../../shadcn-demo-style';
-import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoSpec } from '../../../../components/PrototypePreviewer/demo-types';
 
 /**
  * Builds the bounded Shadcn Tabs preset exhibition recipe for a supported

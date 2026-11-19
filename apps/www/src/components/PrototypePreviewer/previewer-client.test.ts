@@ -114,6 +114,41 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     document.body.innerHTML = '';
   });
 
+  it('shares body removal observation and retires only the detached preview', async () => {
+    const first = createPreviewerRoot();
+    const second = createPreviewerRoot();
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    try {
+      for (const root of [first, second]) {
+        initPreviewer({
+          root,
+          prototypeId: 'demo',
+          initialRuntime: 'wc',
+          demoProps: {},
+          runtimeList: ['wc'],
+        });
+      }
+      await vi.waitFor(() => expect(runtimeSpies.mount).toHaveBeenCalledTimes(2));
+      const bodyObservers = observe.mock.calls.filter(
+        ([target, options]) => target === document.body && options?.childList && options.subtree
+      );
+      expect(bodyObservers).toHaveLength(1);
+
+      first.remove();
+      second.remove();
+      document.body.appendChild(second);
+      await vi.waitFor(() => expect(runtimeSpies.unmount).toHaveBeenCalledTimes(1));
+      expect(runtimeSpies.unmount.mock.lastCall?.[0]).toBe('wc');
+      expect(runtimeSpies.unmount.mock.lastCall?.[1]).toBe(first.querySelector('.host'));
+    } finally {
+      observe.mockRestore();
+      await (first as any).__previewer__?.destroy();
+      await (second as any).__previewer__?.destroy();
+      first.remove();
+      second.remove();
+    }
+  });
+
   it('retains the original live loading status through module loading and renderer preparation', async () => {
     const root = createPreviewerRoot();
     const host = root.querySelector<HTMLElement>('.host')!;

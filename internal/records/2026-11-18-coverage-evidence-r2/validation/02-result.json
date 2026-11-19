@@ -1,0 +1,7 @@
+{
+  "command": "node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+  "outcome": "second supervisor timeout",
+  "deadlineSeconds": 900,
+  "stdout": "validation/02.stdout.txt",
+  "stderr": "validation/02.stderr.txt"
+}

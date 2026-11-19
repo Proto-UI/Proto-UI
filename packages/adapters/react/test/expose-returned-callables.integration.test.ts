@@ -166,4 +166,56 @@ describe('real Runtime React public callable result boundary', () => {
     expect(values.controls.read()).toBe(values.data);
     expect(values.read()).toBe(values.data);
   });
+
+  it.each(['raw-first', 'projection-first'] as const)(
+    'refreshes mixed raw and projected State controls (%s)',
+    async (order) => {
+      type Controls = { value: number; obsolete?: string; next?(): number };
+      const owner = await mount(
+        definePrototype({
+          name: `runtime-mixed-expose-alias-${order}`,
+          setup(def) {
+            const count = def.state.numberDiscrete('count', 0);
+            const controls: Controls = { value: 1, obsolete: 'remove' };
+            def.expose.value('controls', controls);
+            def.expose.method('install', () => {
+              controls.value = 2;
+              delete controls.obsolete;
+              controls.next = () => {
+                count.set(count.get() + 1);
+                return count.get();
+              };
+            });
+            def.expose.method('pair', (echo: Controls) =>
+              order === 'raw-first' ? { current: controls, echo } : { echo, current: controls }
+            );
+            def.expose.method('readCount', () => count.get());
+            return (r) => r.el('output', 'ready');
+          },
+        })
+      );
+      const exposed = owner.handle.getExposes() as {
+        controls: Controls;
+        install(): void;
+        pair(echo: Controls): { current: Controls; echo: Controls };
+        readCount(): number;
+      };
+      const projected = exposed.controls;
+      exposed.install();
+      expect(projected.value).toBe(1);
+      expect(projected.next).toBeUndefined();
+
+      const next = exposed.pair(projected);
+      expect(next.current).toBe(projected);
+      expect(next.echo).toBe(projected);
+      expect(projected.value).toBe(2);
+      expect(Object.hasOwn(projected, 'obsolete')).toBe(false);
+      const heldNext = next.echo.next!;
+      expect(heldNext()).toBe(1);
+      expect(exposed.readCount()).toBe(1);
+
+      await owner.dispose();
+      expect(() => heldNext()).toThrow(/dispos|terminal/i);
+    }
+  );
 });

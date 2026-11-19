@@ -586,6 +586,32 @@ test('complete contributor comparisons beyond the unpaged API limit can publish 
   assert.equal(gh.writes.length, 1);
 });
 
+test('an acknowledged PR can be read back before the author list includes it', (t) => {
+  const f = fixture(t);
+  const gh = server({ pull: true });
+  const runner = (binary, args, options) => {
+    if (gh.writes.length && args.some((arg) => arg.includes('/issues?'))) return '[]';
+    return gh.runner(binary, args, options);
+  };
+  const first = createComparedPull(f, { runner });
+  assert.equal(first.status, 'published');
+  assert.equal(createComparedPull(f, gh).status, 'already-published');
+  assert.equal(gh.writes.length, 1);
+});
+
+test('a mismatched acknowledged PR readback remains unknown after one write', (t) => {
+  const f = fixture(t);
+  const gh = server({ pull: true });
+  const runner = (binary, args, options) => {
+    const result = gh.runner(binary, args, options);
+    if (!args.some((arg) => /\/pulls\/\d+$/.test(arg))) return result;
+    const pull = JSON.parse(result);
+    return JSON.stringify({ ...pull, body: 'Different public body' });
+  };
+  assert.throws(() => createComparedPull(f, { runner }), PublicationUnknown);
+  assert.equal(gh.writes.length, 1);
+});
+
 test('a missing comparison page cannot create a partially attributed PR', (t) => {
   const f = fixture(t);
   const gh = server({ pull: true, comparisonPages: completeComparisonPages().slice(0, 2) });
@@ -612,6 +638,18 @@ test('a public READ contributor can propose the exact fork head without rewritin
     protectedBranch: true,
     foreignCommit: true,
   });
+  let comparisonReads = 0;
+  const runner = (binary, args, options) => {
+    const endpoint = args.find((arg) => arg.includes('/compare/'));
+    if (endpoint) {
+      assert.equal(
+        endpoint,
+        `repos/fixture-owner/fixture-repository/compare/${'d'.repeat(40)}...${LOGIN}:${'c'.repeat(40)}?per_page=100`
+      );
+      comparisonReads++;
+    }
+    return gh.runner(binary, args, options);
+  };
   const head = `${LOGIN}:fixture-contributor-branch`;
   const result = runPublishCli(
     [
@@ -627,9 +665,10 @@ test('a public READ contributor can propose the exact fork head without rewritin
       '--head',
       head,
     ],
-    { runner: gh.runner, now: f.now }
+    { runner, now: f.now }
   );
   assert.equal(result.status, 'published');
+  assert.equal(comparisonReads, 2);
   assert.equal(gh.writes.length, 1);
 });
 

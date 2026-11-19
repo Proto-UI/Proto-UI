@@ -4,7 +4,7 @@ import { EventEmitter } from 'node:events';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 
-const source = readFileSync('apps/www/src/content/docs/zh-cn/docs-query-timing.mjs', 'utf8');
+const source = readFileSync('apps/www/test/helpers/docs-query-timing.mjs', 'utf8');
 const helper = (name: string, next: string) => {
   const start = source.indexOf(`const ${name} = `);
   const end = source.indexOf(`\n  const ${next} = `, start);

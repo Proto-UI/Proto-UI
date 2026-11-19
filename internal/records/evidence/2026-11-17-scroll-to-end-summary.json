@@ -1,0 +1,310 @@
+{
+  "kind": "proto-ui.compiler-scroll-to-end-verification-summary",
+  "version": 1,
+  "recordedAt": "2026-11-17T12:02:05.617627+00:00",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "status": "frozen bounded implementation; broader Compiler and native acceptance remains partial",
+  "baseCommit": "385d7c706c9e4c35280878efbb6e42d63d7df786",
+  "baseSourceTree": "f9ab2cb2a96cd687a67a00bfa4a174cf5daccd71",
+  "sourceTree": "b76024a82d48f9413ed0f377913cbe35ecb832c1",
+  "sourceFileCount": 7,
+  "fileSha256": {
+    "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+    "packages/compiler/src/vue2-source.ts": "d2b62301a7cb04b198be36d514e9add1d88636ee886177681bfca031186d177b",
+    "packages/compiler/test/native-scroll-reveal.test.ts": "6bd1ed3a5f2dd53e302f17abde9e6040f7b7423cc9bc1fbff935ce70264a150a",
+    "packages/compiler/test/scroll-reveal-consumer.ts": "f3fae67c95b6c0690182b8da76a939e9064784caa790432fbf5a1067c2d3bb3f",
+    "packages/compiler/test/scroll-to-end-consumers.test.ts": "90032434213469ff877fdfe628872db0dc257b886d7b837be6ce6fb7565e8a74",
+    "packages/compiler/test/scroll-to-end-types.test.ts": "b7a459bc45ba4113014f6af0f6cf5abe0b40c7d762cbd1a89339e6772df0c318",
+    "internal/records/2026-11-17-compiler-scroll-to-end-completion.zh-CN.md": "5107f8053766a3c57268c738ed20cdaa72674387ddb92c33665fe10022767c55"
+  },
+  "incrementalPatch": {
+    "member": "scroll-to-end-v1-frozen/scroll-to-end-v1-incremental.patch",
+    "sha256": "ea638eb78468d0fc6b725a563912af2ec45f14b5956d4a9ca587a1ddc31cf40a"
+  },
+  "sourceManifest": {
+    "member": "scroll-to-end-v1-frozen/scroll-to-end-v1-frozen-manifest.json",
+    "sha256": "477cdbf040ef14c68656f068672e849f5e35af7aa6f7430b518fcb264d511a06"
+  },
+  "rawArchive": {
+    "repositoryPath": "internal/records/evidence/2026-11-17-scroll-to-end-raw-evidence.tar.gz",
+    "sha256": "848c3ba0773e3aec142c6c110d0643c9f75dcae8da9d9a6e15359ccde02aa08c",
+    "bytes": 3203987,
+    "memberCount": 378
+  },
+  "rawMemberManifest": {
+    "repositoryPath": "internal/records/evidence/2026-11-17-scroll-to-end-raw-evidence-manifest.json",
+    "sha256": "2d43fa3b77ce7448096311b5a1e75c72ea53d8d208f1223689bc0e229953be28"
+  },
+  "runs": [
+    {
+      "run": "to-end-applied-two-v4-red",
+      "scope": "2 host controls on v4",
+      "passed": 1,
+      "failed": 1,
+      "filtered": 17,
+      "otherPending": 0,
+      "durationSeconds": 7.4966973929986125,
+      "exitCode": 1,
+      "inputsUnchanged": true,
+      "inputFileCount": 10,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "eee4559c9be5af0f412370cc5f4501c4bff5297ac9d5c72153160f150952550f",
+        "packages/compiler/src/vue2-source.ts": "db6c6d7f39be8fa9e63d4655ea169f5d7db9b5839dcbb4d51eddf4f4a4af7df8"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-applied-diagnostic-v1/to-end-applied-two-v4-red.log",
+          "sha256": "e4ba51db0708f9c4eff66b705646123a7d19f4757fc062d290f632b2c62f7492"
+        },
+        ".json": {
+          "member": "to-end-applied-diagnostic-v1/to-end-applied-two-v4-red.json",
+          "sha256": "65f0a811f9298746f299d2fd6064380f0dc22785df812d5a4e3df9b03851cfa1"
+        },
+        "-receipt.json": {
+          "member": "to-end-applied-diagnostic-v1/to-end-applied-two-v4-red-receipt.json",
+          "sha256": "a18babc6991168be933c600d16eb08ae4fbff51db19f3cb0198d8fe448e07f2f"
+        }
+      }
+    },
+    {
+      "run": "to-end-eight-v4-baseline",
+      "scope": "8 host controls on v4",
+      "passed": 4,
+      "failed": 4,
+      "filtered": 17,
+      "otherPending": 0,
+      "durationSeconds": 6.159209954006656,
+      "exitCode": 1,
+      "inputsUnchanged": true,
+      "inputFileCount": 10,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "eee4559c9be5af0f412370cc5f4501c4bff5297ac9d5c72153160f150952550f",
+        "packages/compiler/src/vue2-source.ts": "db6c6d7f39be8fa9e63d4655ea169f5d7db9b5839dcbb4d51eddf4f4a4af7df8"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-applied-controls-v2/to-end-eight-v4-baseline.log",
+          "sha256": "59ddad8676fa005ecb2f37af9e9fea84a0c4fc497b026595f96cb7650d78f87d"
+        },
+        ".json": {
+          "member": "to-end-applied-controls-v2/to-end-eight-v4-baseline.json",
+          "sha256": "668634b31bbb87bc2f3bd2ee6c95fdff8d458ffca9050c96e285ac9131e41145"
+        },
+        "-receipt.json": {
+          "member": "to-end-applied-controls-v2/to-end-eight-v4-baseline-receipt.json",
+          "sha256": "5316eb5aa9f2784d5819f6884ec2d974acd94f9b70448bec6d40b05d9436afda"
+        }
+      }
+    },
+    {
+      "run": "to-end-guarded-v1-full25-candidate",
+      "scope": "24 host behavior +1 support strict on guarded DOM",
+      "passed": 25,
+      "failed": 0,
+      "filtered": 0,
+      "otherPending": 0,
+      "durationSeconds": 6.999694079997425,
+      "exitCode": 0,
+      "inputsUnchanged": true,
+      "inputFileCount": 10,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/vue2-source.ts": "db6c6d7f39be8fa9e63d4655ea169f5d7db9b5839dcbb4d51eddf4f4a4af7df8"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-guarded-v1/to-end-guarded-v1-full25-candidate.log",
+          "sha256": "b4c2be2a027249d7c68cc96766b0d1645241175032def412d92b281866dce097"
+        },
+        ".json": {
+          "member": "to-end-guarded-v1/to-end-guarded-v1-full25-candidate.json",
+          "sha256": "85612b496f0e1a58a6aa64e16a36b9cd7db7be2a5ed8622cf29dbe4c7b23ea86"
+        },
+        "-receipt.json": {
+          "member": "to-end-guarded-v1/to-end-guarded-v1-full25-candidate-receipt.json",
+          "sha256": "8aa613a80a40b49f947348f5abf61db0812574309baa15b6217a9f2877211354"
+        }
+      }
+    },
+    {
+      "run": "to-end-ordinary-four-v4-baseline",
+      "scope": "4 ordinary consumers on exact temporary v4 product",
+      "passed": 0,
+      "failed": 4,
+      "filtered": 0,
+      "otherPending": 0,
+      "durationSeconds": 9.200817199001904,
+      "exitCode": 1,
+      "inputsUnchanged": true,
+      "inputFileCount": 11,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "eee4559c9be5af0f412370cc5f4501c4bff5297ac9d5c72153160f150952550f",
+        "packages/compiler/src/vue2-source.ts": "db6c6d7f39be8fa9e63d4655ea169f5d7db9b5839dcbb4d51eddf4f4a4af7df8"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-v4-baseline.log",
+          "sha256": "d46ab0edade70bcac35e431f42380972978b2cf8cbc9bff1389ff02eaaabce22"
+        },
+        ".json": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-v4-baseline.json",
+          "sha256": "6cdf330a621b60cbc5e6adaba9abb93437fedf3963639c40c50d2b83eba7059a"
+        },
+        "-receipt.json": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-v4-baseline-receipt.json",
+          "sha256": "f76e7db00f4da7ed3327a844c337edf219bd15f19400009ccff4601f7ad4e7ad"
+        }
+      }
+    },
+    {
+      "run": "to-end-ordinary-four-guarded-candidate",
+      "scope": "same 4 ordinary consumers on guarded DOM, before state-next mapping",
+      "passed": 4,
+      "failed": 0,
+      "filtered": 0,
+      "otherPending": 0,
+      "durationSeconds": 9.746596996003063,
+      "exitCode": 0,
+      "inputsUnchanged": true,
+      "inputFileCount": 7294,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/vue2-source.ts": "db6c6d7f39be8fa9e63d4655ea169f5d7db9b5839dcbb4d51eddf4f4a4af7df8"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-guarded-candidate.log",
+          "sha256": "ac3a1a63502cc97d251a8f03b31e126e48694188433e571d9d1c4e3baf0c715a"
+        },
+        ".json": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-guarded-candidate.json",
+          "sha256": "c847d102440725463b5f8bcc25e86d56e407c4008a1d6798d172bf4c12c50c72"
+        },
+        "-receipt.json": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-guarded-candidate-receipt.json",
+          "sha256": "e98e73c84e52a71b5ed6b2a1e4dbfcd1111031d5e3b7d56eafa5a373af4f5dc2"
+        }
+      }
+    },
+    {
+      "run": "to-end-ordinary-four-guarded-strict",
+      "scope": "4 complete actual captured ordinary graphs, before state-next mapping",
+      "passed": 3,
+      "failed": 1,
+      "filtered": 0,
+      "otherPending": 0,
+      "durationSeconds": 13.35637303099793,
+      "exitCode": 1,
+      "inputsUnchanged": true,
+      "inputFileCount": 7295,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/vue2-source.ts": "db6c6d7f39be8fa9e63d4655ea169f5d7db9b5839dcbb4d51eddf4f4a4af7df8"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-guarded-strict.log",
+          "sha256": "5c11deb0bd5bccfba94e593677c893abc27fcec28987a2142b73562433df48bc"
+        },
+        ".json": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-guarded-strict.json",
+          "sha256": "3ab377212cf9c3cbcd085eebec47e72069ed80575e53624b6f22543c193ae924"
+        },
+        "-receipt.json": {
+          "member": "to-end-ordinary-v1/to-end-ordinary-four-guarded-strict-receipt.json",
+          "sha256": "4c8e7e780dedc20cc025bdea0e539ee840db8ce1fecb4559d27939dda1400679"
+        }
+      }
+    },
+    {
+      "run": "to-end-state-next-four-fresh-strict",
+      "scope": "4 fresh complete graphs from identical author files, after state-next mapping",
+      "passed": 4,
+      "failed": 0,
+      "filtered": 0,
+      "otherPending": 0,
+      "durationSeconds": 15.838901806004287,
+      "exitCode": 0,
+      "inputsUnchanged": true,
+      "inputFileCount": 7295,
+      "productInputs": {
+        "packages/compiler/src/native-support/dom-modules.template.ts": "4cc1d836904b75fb4fd9fb87d1b3b020dbbb7cc6b058eaf121415f0e52271215",
+        "packages/compiler/src/vue2-source.ts": "d2b62301a7cb04b198be36d514e9add1d88636ee886177681bfca031186d177b"
+      },
+      "raw": {
+        ".log": {
+          "member": "to-end-vue2-state-next-v1/to-end-state-next-four-fresh-strict.log",
+          "sha256": "b27ba7221ae4e1103a96e2693e32bb1bb5015a082278bce342e3f3fa957016e2"
+        },
+        ".json": {
+          "member": "to-end-vue2-state-next-v1/to-end-state-next-four-fresh-strict.json",
+          "sha256": "a54d1bbae4a01e7bcad835d2707b27dce91b6da41761a9aa3f346c4b80ecd041"
+        },
+        "-receipt.json": {
+          "member": "to-end-vue2-state-next-v1/to-end-state-next-four-fresh-strict-receipt.json",
+          "sha256": "377cbe8126faf607e8b3c1f6ee53b2eaba3b78a3cbf5800832ae1f9d948e7f66"
+        }
+      }
+    }
+  ],
+  "ordinaryCausalObservation": {
+    "allProfiles": [
+      "react-dom-source-v1",
+      "vue-source-v1",
+      "vue2-source-v1",
+      "web-component-source-v1"
+    ],
+    "sameFixture": true,
+    "physicalWritesBeforeAndAfter": [300, 150],
+    "finalOffsetBeforeAndAfter": 150,
+    "watcherEntry": {
+      "state": "following",
+      "atEnd": true
+    },
+    "nestedRevealReturn": {
+      "outcome": "dispatched",
+      "state": "paused",
+      "atEnd": false
+    },
+    "v4OuterReturn": {
+      "state": "following",
+      "requestStatus": "applied"
+    },
+    "guardedOuterReturn": {
+      "state": "paused",
+      "requestStatus": "applied"
+    }
+  },
+  "typeGapClosure": {
+    "initial": "Vue2 TS2571 at Surface.js offset56222/line940 from unknown narrow JSDoc",
+    "rootCause": "Checked state-next:string atom missing from Vue2 typeName; author event.type short-circuit remains unchanged",
+    "repairPatchSha256": "8f91d355711aa84522cfc33a1165652f9785963870cfceba4a75743a34f28c09",
+    "actualGeneratedSourceDelta": "Only Vue2 Surface.js narrow annotation changes from unknown to Extract<StateEvent<string>,next>; other three profile TS/JS and all support sources unchanged",
+    "freshStrictDiagnostics": {
+      "react-dom-source-v1": 0,
+      "vue-source-v1": 0,
+      "vue2-source-v1": 0,
+      "web-component-source-v1": 0
+    },
+    "sourceRootCounts": {
+      "react-dom-source-v1": 12,
+      "vue-source-v1": 11,
+      "vue2-source-v1": 11,
+      "web-component-source-v1": 12
+    },
+    "sameAuthorFiles": 16,
+    "rawIrDumpCaptured": false
+  },
+  "boundaries": [
+    "No summed historical count or root final-head execution claim",
+    "Host25 is24 direct emitted-host behavior +1 support strict; does not alone certify normal owner phase",
+    "Ordinary4 uses explicit HappyDOM geometry and held RAF; not real browser layout/native input evidence",
+    "Final fresh strict4 binds state-next candidate; prior ordinary4 predates only that JSDoc mapping and is not rewritten as a final-source behavior run",
+    "All five request-status writes increment monotonic version before observed set; same-value ABA protection source-reasoned without a dedicated ABA execution case",
+    "Explicit to-end pending/layout-ready, nonmatching/disabled axis, readerIntent clearing and earlier-axis complete snapshot atomicity remain unresolved",
+    "Core AnatomyPartView alias, mutable typed callable initializer context and non-Web/native work remain independent",
+    "No formal APPROVED, catalog activation, publication or merge claim"
+  ],
+  "integration": "Root applies these seven-file hunks to its combined input, retaining defaults/owner changes; root combined73 evidence is separate."
+}

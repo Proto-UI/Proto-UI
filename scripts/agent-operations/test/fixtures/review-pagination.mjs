@@ -84,6 +84,7 @@ export function paginationFixture({ large = true, mutate = () => {} } = {}) {
     body: 'Bounded pagination',
     baseRefName: 'main',
     baseRefOid: oid(1000),
+    baseRef: { target: { oid: oid(1000) } },
     headRefOid: commits.at(-1).commit.oid,
     author: { login: 'author' },
   };
@@ -97,6 +98,7 @@ export function paginationFixture({ large = true, mutate = () => {} } = {}) {
           viewerPermission: 'WRITE',
           pullRequest: {
             ...state,
+            baseRef: structuredClone(state.baseRef),
             ...Object.fromEntries(
               ['commits', 'reviews', 'comments', 'reviewThreads'].map((key) => [
                 key,

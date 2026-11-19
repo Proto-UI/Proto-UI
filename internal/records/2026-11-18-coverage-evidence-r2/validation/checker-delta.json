@@ -1,0 +1,14 @@
+{
+  "baselineRecordedIssueCount": 1156,
+  "currentReportedIssueCount": 1156,
+  "reportedCountDelta": 0,
+  "baselineIssueLines": 1156,
+  "currentIssueLines": 1156,
+  "baselineUniqueVerbatimMessageCount": 457,
+  "currentUniqueVerbatimMessageCount": 457,
+  "newUniqueMessagesIgnoringMatrixLineNumbers": 0,
+  "removedUniqueMessagesIgnoringMatrixLineNumbers": 0,
+  "note": "The prior receipt calls 1156 unique findings. Native output actually contains 1156 issue instances, 457 unique verbatim diagnostic lines. Both baseline and current counts agree under either definition; no removed or added diagnostic identities after matrix line numbers are ignored.",
+  "baselineSha256": "4d627d4a8169067778c7c34c0d4c1adcf07832281c5a827598a4baa3a1a10e5d",
+  "currentSha256": "eafc2c35234ea6e9bdeb2308f0e0080ed28b57831d7865d12c2aa9f005a2604a"
+}

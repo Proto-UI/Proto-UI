@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPortalConcealBarrier } from '../src/portal-conceal';
 import { createWebComponentPortalMount, isWebComponentPortaled } from '../src/portal-mount';
 import { AdaptToWebComponent, setElementProps } from '../src';
-import { getLogicalParent } from '../src/platform/instance-tree';
+import { getLogicalParent, subscribeLogicalTriggerSurface } from '../src/platform/instance-tree';
 import { dialogRoot, dialogContent, dialogClose } from '../../../prototypes/base/src/dialog';
 import type { TransitionControls } from '../../../prototypes/base/src/transition';
 
@@ -160,6 +160,46 @@ describe('WC portal conceal rendering barrier', () => {
 
     second.append(child);
     expect(getLogicalParent(childToken)).toBe((second as any)._instanceToken);
+  });
+
+  it('keeps the same logical parent visible during a same-owner reconnect', () => {
+    const Parent = AdaptToWebComponent(
+      { name: 'same-owner-reconnect-parent', setup: () => undefined },
+      { shadow: false }
+    );
+    const Child = AdaptToWebComponent(
+      { name: 'same-owner-reconnect-child', setup: () => undefined },
+      { shadow: false }
+    );
+    const owner = new Parent();
+    const next = new Parent();
+    const left = document.createElement('div');
+    const right = document.createElement('div');
+    const child = new Child();
+    left.append(child);
+    owner.append(left, right);
+    document.body.append(owner, next);
+    const childToken = (child as any)._instanceToken;
+    const ownerToken = (owner as any)._instanceToken;
+    const nextToken = (next as any)._instanceToken;
+    expect(getLogicalParent(childToken)).toBe(ownerToken);
+
+    const observed: unknown[] = [];
+    const off = subscribeLogicalTriggerSurface(childToken, () => {
+      observed.push(getLogicalParent(childToken));
+    });
+    try {
+      right.append(child);
+      expect(child.parentElement).toBe(right);
+      expect((child as any)._instanceToken).toBe(childToken);
+      expect(observed).toEqual([ownerToken]);
+      expect(getLogicalParent(childToken)).toBe(ownerToken);
+
+      next.append(child);
+      expect(getLogicalParent(childToken)).toBe(nextToken);
+    } finally {
+      off();
+    }
   });
 
   it('refreshes portaled ancestry when a plain origin wrapper moves between owners', async () => {

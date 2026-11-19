@@ -1,4 +1,11 @@
 // packages/adapters/base/src/events/web-event-router.ts
+import type { SemanticEventType } from '@proto.ui/types';
+import {
+  clearKeyboardPressOwner,
+  KEYBOARD_PRESS_OWNER,
+  markBridgedKeyboardReset,
+  retainNativeKeyboardReset,
+} from './keyboard-press-owner';
 import { readPointerSampleField } from './pointer-sample';
 import { createWebPointerContactWriter, type WebPointerContact } from './pointer-contact';
 import {
@@ -9,7 +16,6 @@ import {
 
 type Unsub = () => void;
 const PRESS_COMMIT_EMITTED_ROOTS = Symbol.for('@proto.ui/router/press-commit-emitted-roots');
-const KEYBOARD_PRESS_OWNER = Symbol.for('@proto.ui/router/keyboard-press-owner');
 const PROTO_PARENT_INSTANCE_MARK = Symbol.for('@proto.ui/adapter-base/__proto_parent_instance');
 const PROTO_INSTANCE_MARKS = [
   Symbol.for('@proto.ui/adapter-web-component/__proto_instance'),
@@ -77,6 +83,10 @@ export function createWebProtoEventRouter(opt: {
   ) => SemanticEventRouteResolution | null;
   /** @deprecated Use resolveSemanticEventRoute so non-surface hits can be rejected. */
   resolveEventRouteOwner?: (target: EventTarget | null) => object | null;
+  /** Setup-time registration inventory for stateless root events. */
+  rootRegistrations?: { hasRootRegistration?(type: SemanticEventType): boolean };
+  /** Setup-time global key.up demand if the adapter has the complete inventory. */
+  globalKeyUp?: boolean;
   globalEl?: EventTarget; // window by default
   isEnabled: () => boolean; // bridge to eventGate
 }) {
@@ -87,6 +97,11 @@ export function createWebProtoEventRouter(opt: {
 
   const rootEl = opt.rootEl;
   const globalEl = opt.globalEl ?? window;
+  // Trigger surfaces can also serve a different owner's registrations.
+  const rootRegistrations =
+    opt.rootRegistrations?.hasRootRegistration && !opt.resolveSemanticEventRoute?.(rootEl)
+      ? opt.rootRegistrations
+      : undefined;
   const routerIdentity = {};
   activeRouterByRoot.set(rootEl, routerIdentity);
   const isEnabled = () => activeRouterByRoot.get(rootEl) === routerIdentity && opt.isEnabled();
@@ -523,18 +538,22 @@ export function createWebProtoEventRouter(opt: {
       emitFromPhysicalRoot('pointer.cancel', e);
     })
   );
-  unsubs.push(
-    listen(rootEl, 'pointerenter', (e) => {
-      if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.enter', e);
-    })
-  );
-  unsubs.push(
-    listen(rootEl, 'pointerleave', (e) => {
-      if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.leave', e);
-    })
-  );
+  if (rootRegistrations?.hasRootRegistration?.('pointer.enter') !== false) {
+    unsubs.push(
+      listen(rootEl, 'pointerenter', (e) => {
+        if (!isEnabled()) return;
+        emit(protoRootBus, 'pointer.enter', e);
+      })
+    );
+  }
+  if (rootRegistrations?.hasRootRegistration?.('pointer.leave') !== false) {
+    unsubs.push(
+      listen(rootEl, 'pointerleave', (e) => {
+        if (!isEnabled()) return;
+        emit(protoRootBus, 'pointer.leave', e);
+      })
+    );
+  }
 
   unsubs.push(
     listen(rootEl, 'lostpointercapture', (e: PointerEvent) => {
@@ -612,14 +631,20 @@ export function createWebProtoEventRouter(opt: {
 
   // The owner marker is shared through the native Event while routers process one dispatch.
   // Clear a prior dispatch's marker before either a root-local or global route can observe it.
-  const clearKeyboardPressOwner = (native: Event) => {
-    delete (native as Event & { [KEYBOARD_PRESS_OWNER]?: object })[KEYBOARD_PRESS_OWNER];
-  };
-  rootEl.addEventListener('keydown', clearKeyboardPressOwner, true);
-  unsubs.push(() => rootEl.removeEventListener('keydown', clearKeyboardPressOwner, true));
+  const resetAtRoot = (native: Event) => clearKeyboardPressOwner(native);
+  rootEl.addEventListener('keydown', resetAtRoot, true);
+  unsubs.push(() => rootEl.removeEventListener('keydown', resetAtRoot, true));
   if (globalEl !== rootEl) {
-    globalEl.addEventListener('keydown', clearKeyboardPressOwner, true);
-    unsubs.push(() => globalEl.removeEventListener('keydown', clearKeyboardPressOwner, true));
+    // The marker is private to dispatch. One native Window capture reset
+    // serves its routers before their existing bubble listeners run.
+    const release = retainNativeKeyboardReset(globalEl, rootEl);
+    if (release) {
+      unsubs.push(release);
+    } else {
+      markBridgedKeyboardReset(resetAtRoot, rootEl);
+      globalEl.addEventListener('keydown', resetAtRoot, true);
+      unsubs.push(() => globalEl.removeEventListener('keydown', resetAtRoot, true));
+    }
   }
 
   // key -> key.* (global)
@@ -653,16 +678,23 @@ export function createWebProtoEventRouter(opt: {
     })
   );
 
-  unsubs.push(
-    listen(globalEl, 'keyup', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;
-      emit(protoGlobalBus, 'key.up', e);
-      if (rootProxy.__hasProtoListeners('key.up') && shouldRouteToCurrentRoot(e)) {
-        emit(protoRootBus, 'key.up', e);
-      }
-      if (isCommitKey(e.key)) queueMicrotask(() => (suppressFollowupDirectClick = false));
-    })
-  );
+  // A committed key still uses release to retire its follow-up click suppression.
+  if (
+    opt.globalKeyUp !== false ||
+    rootRegistrations?.hasRootRegistration?.('key.up') !== false ||
+    rootRegistrations?.hasRootRegistration?.('press.commit') !== false
+  ) {
+    unsubs.push(
+      listen(globalEl, 'keyup', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;
+        emit(protoGlobalBus, 'key.up', e);
+        if (rootProxy.__hasProtoListeners('key.up') && shouldRouteToCurrentRoot(e)) {
+          emit(protoRootBus, 'key.up', e);
+        }
+        if (isCommitKey(e.key)) queueMicrotask(() => (suppressFollowupDirectClick = false));
+      })
+    );
+  }
 
   // click -> press.commit (root)
   // 只响应真实的 MouseEvent；由 event.emit() 分发的 CustomEvent 不触发 press.commit，
@@ -693,21 +725,23 @@ export function createWebProtoEventRouter(opt: {
     })
   );
 
-  // contextmenu -> context.menu
-  unsubs.push(
-    listen(rootEl, 'contextmenu', (e) => {
-      if (!isEnabled()) return;
-      emitFromPhysicalRoot('context.menu', e);
-    })
-  );
+  if (rootRegistrations?.hasRootRegistration?.('context.menu') !== false) {
+    // contextmenu -> context.menu
+    unsubs.push(
+      listen(rootEl, 'contextmenu', (e) => {
+        if (!isEnabled() || !shouldRouteToCurrentRoot(e, { includeActiveFallback: false })) return;
+        emitFromPhysicalRoot('context.menu', e);
+      })
+    );
 
-  unsubs.push(
-    listen(globalEl, 'contextmenu', (e) => {
-      if (!isEnabled()) return;
-      if (!shouldRouteGlobalRootEvent(e, { includeActiveFallback: false })) return;
-      emit(protoRootBus, 'context.menu', e);
-    })
-  );
+    unsubs.push(
+      listen(globalEl, 'contextmenu', (e) => {
+        if (!isEnabled()) return;
+        if (!shouldRouteGlobalRootEvent(e, { includeActiveFallback: false })) return;
+        emit(protoRootBus, 'context.menu', e);
+      })
+    );
+  }
 
   // -------------------------
   // (B) 懒绑定：host:* host-bound events

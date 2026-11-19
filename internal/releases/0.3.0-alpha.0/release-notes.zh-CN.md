@@ -1,6 +1,6 @@
 # Proto UI 0.3.0-alpha.0
 
-> Draft release notes。本版本尚未发布；npm、Git tag、GitHub prerelease、dist-tag 与不可变 snapshot 证据仍待完成。
+> 已于 2026 年 9 月 7 日通过 npm `next` channel 发布。该次发行中由已发布 `package-bom-0.3.0-alpha.0.json` 发行物料列出的全部 43 个公开 package、`v0.3.0-alpha.0` tag、prerelease GitHub Release 与不可变 spec snapshot 共享这一精确发行身份。
 
 Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。使用 alpha 是有意的：本阶段仍可接纳经过评审的架构调整、顶层 API 变化与新能力，它不是 release candidate，也不构成 stable compatibility 承诺。
 
@@ -30,14 +30,14 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 
 - 新增公开 package `@proto.ui/module-image-view`，并将其纳入精确的 43-package release identity，作为 Base Image 与 Runtime 使用的 host-mediated image presentation protocol。
 - 通过可执行 fake-host 与 runtime 证据覆盖 generation-bound loading、stale completion rejection、replacement visual clearing、显式 accessibility mode，以及 `source` 的直接投影。
-- 首次 `@proto.ui/module-image-view` npm identity bootstrap、受保护 release workflow 配置与 registry readiness 仍是发布前显式门禁；bootstrap 不得占用 `latest` 或 `next`。
+- 首次 `@proto.ui/module-image-view` npm identity bootstrap、受保护 release workflow 配置与 registry readiness 仍是发布前显式门禁；就该 package 而言，registry 当前仍把 `latest` 解析到 deprecated 的 `0.0.0-bootstrap.0` 版本，把 `next` 解析到 `0.3.0-alpha.1`（2026-11-17 观测）。
 
 ## Official Vue 2 Adapter
 
 - 接纳 `@proto.ui/adapter-vue2` 作为面向 Vue `>=2.6.0 <2.7` 的 official Web Adapter profile，并与 Vue 3 的 `@proto.ui/adapter-vue` package 保持独立。
 - 将 Vue 2 纳入公开 Previewer registry，以及共享 Dialog、Select controlled-value 与 Scroll Area Move conformance journey。
 - 补齐公开 package metadata、精确版本 BOM、lifecycle / view-epoch 回归证据与 `A-VUE-2-0001` profile。
-- 首次 npm identity bootstrap 与 Trusted Publisher 配置仍是发布前显式门禁；本 draft 不声称 package 已经可从 npm 安装。
+- 首次 npm identity bootstrap 与 Trusted Publisher 配置仍是发布前显式门禁；`@proto.ui/adapter-vue2` 现在已有已发布的 npm 版本 `0.3.0-alpha.0` 与 `0.3.0-alpha.1`（2026-11-17 观测）。
 
 ## A11y direct-reference transport
 
@@ -48,6 +48,8 @@ Proto UI 0.3.0-alpha.0 开启 0.3 的架构、API 与 Prototype 演进阶段。�
 - 在共享 explicit-id contribution 变化或释放时重新解析仍存活的 generated-reference dependent，覆盖 writer 更新与 detached 终态释放，同时保留既有 reservation availability 与 host-baseline provenance。
 - #549 / PR #553 的 anatomy family/domain/role/key matcher 与 Tabs migration 不属于这一 lower-level transport slice。
 
-## 发布状态
+## 发版验证
 
-本准备变更不发布 package、不创建 `v0.3.0-alpha.0`、不移动 npm `next`，也不激活 `V-PROTO-UI-0009`。这些动作必须在变更合入 `main` 后，基于最终已评审 package set 通过完整 release rehearsal、受保护发布与独立 evidence review 完成。
+受保护的发布 workflow 运行 <https://github.com/Proto-UI/Proto-UI/actions/runs/34125326136> 对 head `f0a9c95e988ee882a5815e319a8211e69924b968` 的结论为 `success`，该 commit 正是 `v0.3.0-alpha.0` lightweight tag 解析到的对象。npm 在 `2026-09-07T13:06:11.110Z` 写入首个 package，在 `2026-09-07T13:13:21.196Z` 写入最后一个 package；prerelease GitHub Release 的发布时间为 `2026-09-07T13:11:41Z`。该 Release 附带的不可变 spec snapshot 的 SHA-256 为 `1d908781ac057312c7a6e17b0c51cbe5ba3ac505b13bca24088de976ff36fcdd`，与其已发布 checksum 文件一致。这 43 个 package 在 registry 中至今都仍存在精确版本 `0.3.0-alpha.0`，但 `next` dist-tag 此后已前进到 `0.3.0-alpha.1`，即后续那次发行所确立的状态。npm 未为这些版本发布 `gitHead`，因此 commit 绑定来自发布 workflow 的 head 与 tag 目标，而不是 registry metadata。
+
+这些发行事实已于 2026-11-17 与 2026-11-18 从 npm registry 与 GitHub release API 复读。它们只描述本次已发布发行：不激活 `V-PROTO-UI-0009`，也不对后续任何 release train 作断言。

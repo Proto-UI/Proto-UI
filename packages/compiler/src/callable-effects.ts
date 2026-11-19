@@ -17,6 +17,7 @@ import {
   type CallbackContext,
 } from './operations';
 import { isDataValueType, lexicalStoredType } from './ir';
+import { arrayEveryCallbackParameters, valueAlternatives } from './value-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 
 type Known = readonly Atom[];
@@ -114,6 +115,11 @@ export interface CallableDemandObserver {
   expression(value: ExpressionIR): void;
   function(value: FunctionIR): void;
   hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>, recursive?: boolean): void;
+  /** Actual call provenance, including separate invocations of a shared helper. */
+  call?(
+    value: Extract<ExpressionIR, { kind: 'call' }>,
+    provenance: { external: boolean; authored: readonly FunctionIR[] }
+  ): void;
   /** An opaque/cyclic callable edge prevents a closed invocation proof. */
   opaque(): void;
 }
@@ -599,7 +605,12 @@ function analyzeCallableFlow(
         let argument = args[index] ?? UNDEFINED;
         if (
           parameter.default &&
-          argument.some((value) => value.kind === 'undefined' || value.kind === 'unknown')
+          argument.some(
+            (value) =>
+              value.kind === 'undefined' ||
+              (value.kind === 'unknown' &&
+                (!value.data || valueAlternatives(value.data).includes('void')))
+          )
         ) {
           const supplied = argument.filter((value) => value.kind !== 'undefined');
           argument = branches([
@@ -831,9 +842,14 @@ function analyzeCallableFlow(
                   const args = value.arguments.map((argument) =>
                     expression(argument, scope, execution)
                   );
-                  return reachable
-                    ? calls(present, args, execution, value.span, value.arguments)
-                    : [];
+                  if (!reachable) return [];
+                  demand?.call?.(value, {
+                    external: present.some((target) => target.kind === 'native'),
+                    authored: present.flatMap((target) =>
+                      target.kind === 'closure' ? [target.fn] : []
+                    ),
+                  });
+                  return calls(present, args, execution, value.span, value.arguments);
                 },
               ]
             : []),
@@ -954,7 +970,22 @@ function analyzeCallableFlow(
         return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
       case 'intrinsic': {
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
-        if (value.name === 'array.every') calls(args[1] ?? UNKNOWN, [UNKNOWN], execution);
+        const array = value.arguments[0]?.type;
+        if (
+          value.name === 'array.every' &&
+          array &&
+          typeof array !== 'string' &&
+          array.kind === 'array'
+        ) {
+          const parameters = arrayEveryCallbackParameters(array);
+          calls(
+            args[1] ?? UNKNOWN,
+            parameters.map((parameter) => dataFact(parameter.type)),
+            execution,
+            value.span,
+            parameters
+          );
+        }
         return value.name === 'object.freeze' ? args[0] : UNKNOWN;
       }
       case 'lexical-cell': {

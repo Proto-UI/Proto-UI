@@ -360,7 +360,7 @@ export function siteTypographyParticipant(
         (family !== 'shadcn' && family !== 'brutalist' && family !== 'bootstrap-2-3-2')
       )
         throw new Error('[SiteTypography] Unsupported projection selection.');
-      const selected = targets();
+      let selected = targets();
       const isCompact = compact();
       const heroScale = heroViewport();
       const host = document.createElement('span');
@@ -397,8 +397,17 @@ export function siteTypographyParticipant(
         if (disposed) return;
         disposed = true;
         restoreNative();
-        // Legal renderer parent ownership restored before framework teardown.
-        if (batch) for (const view of views) batch.append(view.carrier);
+        // Keep the renderer's teardown order without reconnecting an already
+        // restored batch. Appending the carriers would produce this same suffix.
+        if (batch) {
+          let tail = batch.lastChild;
+          let index = views.length - 1;
+          while (index >= 0 && tail === views[index]!.carrier) {
+            tail = tail.previousSibling;
+            index--;
+          }
+          if (index >= 0) for (const view of views) batch.append(view.carrier);
+        }
         try {
           if (renderer) await renderer.destroy();
           else releaseHostMount(host);
@@ -408,6 +417,12 @@ export function siteTypographyParticipant(
       };
       try {
         theme = resolveProjectionThemeSurfaceStyle(family, root);
+        if (selected.length) {
+          await Promise.all([prepareDemoRuntime(runtime), loadPrototypes([`${family}-text-root`])]);
+          if (!alive) throw new Error('[SiteTypography] Scope was disposed during preparation.');
+          // Native document targets can arrive while the renderer modules load.
+          selected = targets();
+        }
         if (selected.length === 0)
           return {
             host,
@@ -421,8 +436,6 @@ export function siteTypographyParticipant(
             setThemeSurfaceStyle() {},
             dispose,
           };
-        await Promise.all([prepareDemoRuntime(runtime), loadPrototypes([`${family}-text-root`])]);
-        if (!alive) throw new Error('[SiteTypography] Scope was disposed during preparation.');
         const demo: DemoSpec = {
           type: 'demo',
           root: {

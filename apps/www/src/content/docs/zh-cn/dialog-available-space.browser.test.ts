@@ -333,8 +333,16 @@ async function reachableActions(
     await action.scrollIntoViewIfNeeded();
     const fact = await action.evaluate((e) => {
       const dialog = e.closest('[role="dialog"]')!;
-      const r = e.getBoundingClientRect(),
-        d = dialog.getBoundingClientRect();
+      let r = e.getBoundingClientRect();
+      const d = dialog.getBoundingClientRect();
+      if (r.height > dialog.clientHeight) {
+        // A partially visible tall Button can have its center outside the
+        // scrollport after scrollIntoViewIfNeeded. Put that same point in view.
+        const center = r.top + r.height / 2;
+        const scrollportCenter = d.top + dialog.clientTop + dialog.clientHeight / 2;
+        dialog.scrollBy({ top: center - scrollportCenter, behavior: 'instant' });
+        r = e.getBoundingClientRect();
+      }
       const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
       const close = e.parentElement?.closest<HTMLElement>('[data-pui-root]');
       const layout = close?.parentElement;
@@ -345,6 +353,7 @@ async function reachableActions(
         scrollWidth: e.scrollWidth,
         clientWidth: e.clientWidth,
         whiteSpace: getComputedStyle(e).whiteSpace,
+        overflowWrap: getComputedStyle(e).overflowWrap,
         rootFontSize: getComputedStyle(document.documentElement).fontSize,
         semanticParent: close && {
           style: close.getAttribute('data-pui-style'),
@@ -390,6 +399,7 @@ async function reachableActions(
       expect(fact.layout!.left).toBeGreaterThanOrEqual(fact.contentLeft - 1);
       expect(fact.layout!.right).toBeLessThanOrEqual(fact.contentRight + 1);
       expect(fact.whiteSpace).toBe('normal');
+      expect(fact.overflowWrap).toBe('anywhere');
       expect(
         fact.scrollWidth,
         'The long action label remains inside its Button'
@@ -585,6 +595,50 @@ for (const family of ['shadcn', 'brutalist'] as const)
           ).toBeLessThanOrEqual(narrow.clientWidth + 1);
           await reachableActions(page, dialog, family, `${family}-${runtime}-320-long-font200`);
           await capture(page, dialog, `${family}-${runtime}-320-long-action-reachable`);
+          // A contiguous Latin label discriminates anywhere wrapping from the
+          // existing CJK fixture, which also wraps at ordinary line boundaries.
+          // Keep the real Button, handlers, passive layout and generated CSS.
+          await dialog
+            .getByRole('button', {
+              name: '保存全部个人资料更改并继续下一步',
+              exact: true,
+            })
+            .evaluate((e) => {
+              const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+              for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+                if (node.textContent?.trim() === '保存全部个人资料更改并继续下一步') {
+                  node.textContent = 'UnbrokenActionLabel'.repeat(12);
+                  return;
+                }
+              }
+              throw new Error('Missing localized action label text node');
+            });
+          await frames(page);
+          const unbroken = await capture(page, dialog, `${family}-${runtime}-320-unbroken-font200`);
+          bounded(unbroken);
+          expect(
+            unbroken.scrollWidth,
+            'Unbroken footer fits the inline region'
+          ).toBeLessThanOrEqual(unbroken.clientWidth + 1);
+          await reachableActions(page, dialog, family, `${family}-${runtime}-320-unbroken-font200`);
+          // Restore the localized label so the following zoom phase keeps
+          // exercising the CJK label that the unbroken Latin phase replaced.
+          await dialog
+            .getByRole('button', {
+              name: 'UnbrokenActionLabel'.repeat(12),
+              exact: true,
+            })
+            .evaluate((e) => {
+              const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+              for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+                if (node.textContent?.trim() === 'UnbrokenActionLabel'.repeat(12)) {
+                  node.textContent = '保存全部个人资料更改并继续下一步';
+                  return;
+                }
+              }
+              throw new Error('Missing unbroken action label text node');
+            });
+          await frames(page);
         }
         await page.evaluate(() => document.documentElement.style.removeProperty('font-size'));
         await dialog.locator('[data-dialog-long-fixture]').evaluate((e) => e.remove());

@@ -150,17 +150,13 @@ describe('native typography browser ownership and bounded registration', () => {
       /finally \{ await capture\( page, record|finally \{ await capture\(page, record/
     );
   });
-  it('is excluded from unit tests and admitted exactly once across all eight browser shards', () => {
+  it('is excluded from unit tests and admitted exactly once in the browser plan', () => {
     assertBrowserInventory();
-    assert.equal(BROWSER_SHARD_COUNT, 8);
+    const shards = browserShards();
+    assert.equal(shards.length, BROWSER_SHARD_COUNT);
     assert.equal(BROWSER_SUITES.filter((path) => path === suitePath).length, 1);
     assert.equal(PRODUCTION_BROWSER_SUITES.includes(suitePath), false);
-    assert.equal(
-      browserShards()
-        .flat()
-        .filter((path) => path === suitePath).length,
-      1
-    );
+    assert.equal(shards.flat().filter((path) => path === suitePath).length, 1);
     const [general] = createRuntimeTestPlan([], { phase: 'general' });
     assert.equal(general.args[general.args.indexOf(suitePath) - 1], '--exclude');
   });

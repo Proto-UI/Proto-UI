@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "kind": "coverage-unearned-repair-r2-change-bindings",
+  "generatedAt": "2026-11-18T14:31:29+08:00",
+  "subject": {
+    "repository": "Proto-UI/Proto-UI",
+    "auditedRevision": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447",
+    "auditArtifact": "/tmp/contributor-eight-1117/coverage-allowlist-audit-r1/allowlist-audit.json",
+    "auditCounts": {
+      "entries": 339,
+      "earned": 236,
+      "blockedByDebt": 88,
+      "unearned": 15
+    }
+  },
+  "parent": {
+    "revision": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447",
+    "commitLine": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447|2026-11-17T20:59:41+08:00|fix(coverage): bind earned startup prerender import admission (#1493)",
+    "contentIdenticalAt": [
+      "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    ]
+  },
+  "changes": [
+    {
+      "id": "C1",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "kind": "comment-only (no executable change)",
+      "proposedLines": [
+        171,
+        175
+      ],
+      "what": "Adds one scope-precise note to the inline website raw-import allowlist: an entry without a `sourceSha256` certifies the import edge only, never the source body; post-admission body drift stays source-review debt under #420 and the affected sources/owning rows are enumerated in the website Source-scan ledger.",
+      "corrects": "The overclaim that a specifier-only allowance is an acceptance of the admitted source body (audit M3 / F6).",
+      "auditEntries": [
+        "M3 (7 unearned of 43)",
+        "F6"
+      ],
+      "why": "The 7 drifted specifier-only sources live in three separate comment groups (lines 264, 304 and the uncommented demo entries), so a group-scoped note could not state the property for the whole inline set; one self-limiting note at the head of the inline set states it exactly.",
+      "evidence": [
+        "audit allowlist-audit.json entries classified unearned / mechanism website-raw-import-inline",
+        "independent recomputation: 7 sources carry no sourceSha256 and their last change (2026-11-15/16/17) is after the allowance boundary commit a46b18cd2 (2026-11-11)"
+      ],
+      "behaviorChange": false
+    },
+    {
+      "id": "C2",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "kind": "comment-only (no executable change)",
+      "proposedLines": [
+        269,
+        271
+      ],
+      "what": "Replaces the group comment 'Accepted main integrations: ...' with 'Main integration sources: ...' that states the bindings do not certify the admitted source body.",
+      "corrects": "The word 'Accepted' presented drifted, un-reviewed specifier-only entries as accepted integrations.",
+      "auditEntries": [
+        "M3 (7 unearned of 43)",
+        "F6"
+      ],
+      "why": "Keeps the group's real constraint (no draft promotion, no sibling imports) while removing the acceptance claim; the import-edge property is stated once in C1.",
+      "evidence": [
+        "the 8 entries in this group carry specifiers/resolvedPaths only; none carries sourceSha256"
+      ],
+      "behaviorChange": false
+    },
+    {
+      "id": "C3",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "kind": "comment-only (no executable change)",
+      "proposedLines": [
+        458,
+        464
+      ],
+      "what": "Replaces the Harness allowance comment with an explicit statement that the Harness app does not exist at this revision, that the entry admits nothing today, that it is not an earned admission and not prior approval for a file that later appears at that path, and that it must be re-admitted with the Harness application's own review under #533.",
+      "corrects": "The dangling-target allowance (audit M4 / F7) was presented as an M0 authorization of the React Adapter entry.",
+      "auditEntries": [
+        "M4 (1 unearned of 1)",
+        "F7"
+      ],
+      "why": "The entry itself is retained: removing it changes the gate's Harness consumer-wall semantics, contradicts the governed dogfood row harness.infrastructure.react-bootstrap (#533) and breaks the retained negative/positive control 'allows only the reviewed Adapter entry at the Harness bootstrap boundary' (scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:2418). The unearned claim is corrected instead; the removal option is recorded as an open decision for the parent/reviewer.",
+      "evidence": [
+        "git ls-tree ff75a0a2 apps/ -> only apps/workspace, apps/www (no apps/agent-harness)",
+        "internal/agent-harness/dogfood-coverage-matrix.md:31 'No row is dogfooded at M0 because apps/agent-harness does not yet exist'",
+        "internal/agent-harness/dogfood-coverage-matrix.md:100 row harness.infrastructure.react-bootstrap, state infrastructure-exempt, 'Absent; Harness not implemented'",
+        "internal/agent-harness/dogfood-coverage-matrix.md:321 the row's owner/re-review issue is #533"
+      ],
+      "behaviorChange": false
+    },
+    {
+      "id": "C4",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "kind": "governance prose annotation",
+      "proposedLines": [
+        124,
+        126
+      ],
+      "what": "Two paragraphs under '## Source-scan bindings': (1) the seven specifier-only allowances are import-edge constraints whose changed bodies have no retained re-review, and are not source-body acceptance or earned consumer evidence; owners remain the existing website shell/search/demonstration owners and #420/#1323 retain the source and consumer review debt; re-review the exact source delta and the applicable owning row, and do not refresh hashes to clear the gate. (2) the seven stale bindings that had no previously named source-review debt, with their owning rows, recorded as explicit #420 source-review debt; the retained hashes stay unchanged so the fingerprint mismatch remains a real failure until exact-delta review establishes an admissible replacement or the source is restored.",
+      "corrects": "Seven unearned Source-scan bindings (audit M8) whose owners are all infrastructure-exempt, so no named debt covered them.",
+      "auditEntries": [
+        "M8 (7 unearned of 158)",
+        "F1",
+        "F6"
+      ],
+      "why": "The ledger rows keep their reviewed hashes and row states: a mechanical refresh is not acceptance (audit policy), and the rows' owners are already tracked for #420 re-review in the matrix's own owner-disposition table.",
+      "evidence": [
+        "independent recomputation at ff75a0a2: 158 binding rows, 81 mismatched, 77 matched; the 7 infrastructure-exempt-only mismatches are exactly demo-associations.ts:176, demo-renderer.ts:202, preview-material-scene.ts:203, projection-materializer.ts:215, projection-theme.ts:216, wc-registry.ts:219, SiteLibraryStyle.astro:222",
+        "owner dispositions: www.demo.prototype-previewer (line 439), www.demo.demo-matrix (446), www.demo.raw-adapter-runtimes (447), www.demo.brutalist-theme-style (449), www.build.style-generation (458) all read 'Re-review in #420 ...'",
+        "internal/website/self-hosting-coverage-matrix.md:373 already records that current source drift remains outstanding"
+      ],
+      "behaviorChange": false
+    },
+    {
+      "id": "C5",
+      "file": "internal/agent-harness/dogfood-coverage-matrix.md",
+      "kind": "governance prose annotation",
+      "proposedLines": [
+        141,
+        141
+      ],
+      "what": "One paragraph after the 'sole initial raw Adapter integration allowlist' statement: the checker's allowance for apps/agent-harness/src/proto-ui/bootstrap.tsx names a path that does not exist at this revision, so it admits nothing today, is not an earned admission and is not prior approval for a future file at that path; under #533 the exact entry must be re-admitted with the Harness application's own review in the change that creates that application.",
+      "corrects": "The dangling Harness allowance (audit M4 / F7) as presented in its owning matrix.",
+      "auditEntries": [
+        "M4 (1 unearned of 1)",
+        "F7"
+      ],
+      "why": "The Harness allowance's owner is this matrix, so the pending observation belongs here; the paragraph is outside the '<!-- coverage-matrix:start/end -->' markers, so the generated inventory (internal/coverage-matrices/prototype-coverage-matrix.json) is unaffected.",
+      "evidence": [
+        "prototype-coverage.mjs:174 reads only the content between '<!-- coverage-matrix:start' and '<!-- coverage-matrix:end'",
+        "the marked coverage table is byte-identical before and after the candidate (verified)"
+      ],
+      "behaviorChange": false
+    }
+  ],
+  "noExecutableChangeProof": {
+    "method": "every non-comment line of the proposed checker is identical to the parent checker",
+    "codeLinesCompared": 12775,
+    "identical": true,
+    "allowlistEntryCount": {
+      "parent": 52,
+      "candidate": 52
+    },
+    "harnessAllowlistEntryRetained": true,
+    "websiteBindingRows": {
+      "parent": 158,
+      "candidate": 158,
+      "cellsIdentical": true
+    },
+    "dogfoodMarkedCoverageTableIdentical": true
+  }
+}

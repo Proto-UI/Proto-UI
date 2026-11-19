@@ -70,16 +70,16 @@
 
   /* Native document owners retain a matching no-script size and line box.
      Enhanced Text still owns its paint through public size/leading inputs. */
-  [data-site-family-scope][data-site-library-family='shadcn']:not(:has([data-homepage-runtime]))
-    main[data-pagefind-body]
+  [data-site-family-scope][data-site-library-family='shadcn']
+    main[data-pagefind-body]:not(.homepage-canvas *)
     :is(h1[data-site-typography='h1'], [data-doc-flow] h1):not(
       :where(aside *, .starlight-aside *, [data-previewer-id] *)
     ) {
     @apply text-3xl leading-tight text-foreground;
   }
 
-  [data-site-family-scope][data-site-library-family='shadcn']:not(:has([data-homepage-runtime]))
-    main[data-pagefind-body]
+  [data-site-family-scope][data-site-library-family='shadcn']
+    main[data-pagefind-body]:not(.homepage-canvas *)
     p[data-site-typography='tagline']:not(
       :where(aside *, .starlight-aside *, [data-previewer-id] *)
     ) {

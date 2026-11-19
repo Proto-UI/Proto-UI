@@ -65,6 +65,12 @@ describe('real ExpressiveCode frame-to-passive-surface grammar', () => {
       const root = result.renderedGroupAst as Node;
       const frames = find(root, (node) => node.properties?.['data-site-code-surface'] === 'frame');
       expect(frames).toHaveLength(1);
+      const frameChildren = frames[0]!.children ?? [];
+      const source = frameChildren.findIndex((node) => node.tagName === 'pre');
+      expect(source).toBeGreaterThanOrEqual(0);
+      expect(
+        frameChildren.slice(0, source).some((node) => node.properties?.['data-code-toolbar'] === '')
+      ).toBe(toolbar);
       const headers = find(root, (node) => node.properties?.['data-code-toolbar'] !== undefined);
       expect(headers).toHaveLength(toolbar ? 1 : 0);
       const labels = find(root, (node) => node.properties?.['data-code-label'] !== undefined);

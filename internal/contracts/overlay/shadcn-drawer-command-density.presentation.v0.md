@@ -30,4 +30,12 @@ Hover uses the existing hovered State, focus the existing focusVisible State, an
 
 Mapping: `packages/prototypes/shadcn/src/drawer/trigger.proto.ts`, `close.proto.ts`, `types.ts`, `packages/prototypes/shadcn/test/drawer-command-density.test.ts`, and `apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts`.
 
+## Current consumer scope (2026-11-18)
+
+This explanation distinguishes the retained New York command migration above from the website's explicit Rhea composition; it adds no stable guarantee or lifecycle promotion. The applicable `spec/prototypes/P-SHADCN-BUTTON.yaml` remains draft. Its `P-SHADCN-BUTTON-RHEA-LUMA-PROFILES` criterion describes Rhea's default 2rem height (32/64px at root16/root32), 0.75rem inline padding and theme-radius-plus-8px corners. `P-SHADCN-BUTTON-WRAP-PROP` describes optional bounded wrapping and growth, without prescribing an overflow-wrap utility keyword. `P-SHADCN-BUTTON-NEW-YORK-PAINT` and `P-SHADCN-BUTTON-MODERN-PAINT` keep the direct Button profiles and compound command paint distinct.
+
+The website's three Shadcn Drawer demos directly nest public outline Buttons in headless Rhea Trigger/Close members. The public Button supplies the physical activation/focus surface; the Drawer member retains the open-request behavior under `C-AS-TRIGGER-0001-D/F/J`. The long-content demo enables the Button's existing public `wrap` option. This consumer composition does not replace the passive New York command recipe or change Root ownership.
+
+The separately reviewed native-oracle R2 proposal therefore assigns the 56 Shadcn rows to public Rhea Button geometry and keeps Drawer-member accessibility as a separate subject. Those rows are not native acceptance of the legacy New York command. The 36/72px New York native obligation in Acceptance 3 remains OPEN; source-host token assertions do not close it. The 56 Brutalist rows retain their independent subject. All 112 candidate native rows still require fresh exact-source evidence, including long/unbroken-label fit and growth. Historical failures and older 32/64px receipts cannot certify this composition, and this explanation claims no native pass.
+
 Agent: dot

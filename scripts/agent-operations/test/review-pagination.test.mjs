@@ -250,7 +250,7 @@ for (const [name, mutate, message] of [
 
 for (const field of [
   'headRefOid',
-  'baseRefOid',
+  'baseRef',
   'baseRefName',
   'body',
   'state',
@@ -263,7 +263,7 @@ for (const field of [
         if (operation !== 'ProtoUiReviewCommits') return;
         response.data.repository.pullRequest[field] = {
           headRefOid: oid(999),
-          baseRefOid: oid(999),
+          baseRef: { target: { oid: oid(999) } },
           baseRefName: 'other',
           body: 'changed',
           state: 'CLOSED',
@@ -278,6 +278,65 @@ for (const field of [
     );
   });
 }
+
+test('canonical base binds the stable ref target despite stale comparison baselines', () => {
+  const fixture = paginationFixture({
+    large: false,
+    mutate({ response, operation }) {
+      if (!operation.startsWith('ProtoUiReview')) return;
+      // These comparison values deliberately disagree with the actual branch,
+      // and with one another, without moving the branch or PR updatedAt.
+      response.data.repository.pullRequest.baseRefOid =
+        operation === 'ProtoUiReviewState' ? oid(998) : oid(999);
+    },
+  });
+  const live = collectLiveReviewInput(repositoryId, 487, { runner: fixture.runner });
+  assert.equal(live.input.baseSha, oid(1000));
+  const query = fixture.calls[0].args.find((arg) => arg.startsWith('query='));
+  assert.match(query, /baseRef \{ target \{ oid \} \}/);
+  assert.ok(!query.includes('baseRefOid'));
+});
+
+for (const boundary of ['second scan', 'final state read']) {
+  test(`collection rejects an actual base target move at the ${boundary}`, () => {
+    let scans = 0;
+    const fixture = paginationFixture({
+      large: false,
+      mutate({ response, operation }) {
+        if (operation === 'ProtoUiReviewInput') scans += 1;
+        if (
+          scans === 2 &&
+          (boundary === 'second scan' || operation === 'ProtoUiReviewState') &&
+          operation.startsWith('ProtoUiReview')
+        )
+          response.data.repository.pullRequest.baseRef.target.oid = oid(999);
+      },
+    });
+    assert.throws(
+      () => collectLiveReviewInput(repositoryId, 487, { runner: fixture.runner }),
+      /changed.*collection/
+    );
+  });
+}
+
+for (const baseRef of [
+  void 0,
+  null,
+  {},
+  { target: null },
+  { target: {} },
+  { target: { oid: 'bad' } },
+]) {
+  test(`collection rejects an unavailable actual base target: ${JSON.stringify(baseRef)}`, () => {
+    const fixture = paginationFixture({ large: false });
+    fixture.state.baseRef = baseRef;
+    assert.throws(
+      () => collectLiveReviewInput(repositoryId, 487, { runner: fixture.runner }),
+      /binding.*malformed/
+    );
+  });
+}
+
 for (const [name, change] of [
   [
     'repository identity',

@@ -1,4 +1,5 @@
 import { emitRecordedNotification } from '../notification-plan';
+import { NATIVE_SCROLL_REVEAL_SOURCE } from '../native-scroll-reveal';
 /** Compiler-owned DOM capability implementation. Specialization consumes its TypeScript AST. */
 export const DOM_MODULE_TEMPLATE = String.raw`// Standalone full DOM capability lowering. No Proto Runtime/Adapter or semantic-IR interpreter.
 import { autoUpdate, computePosition, offset, flip, shift, size, type Middleware, type Placement } from '@floating-ui/dom';
@@ -36,7 +37,10 @@ export interface NativeOverlay { readonly open: NativeObserved<boolean>; configu
 export interface NativeScrollAxis { position: NativeObserved<number>; visibleRatio: NativeObserved<number>; canScrollBefore: NativeObserved<boolean>; canScrollAfter: NativeObserved<boolean>; atEnd: NativeObserved<boolean> }
 export type NativeScrollAxisSnapshot = Readonly<{position: number; visibleRatio: number; canScrollBefore: boolean; canScrollAfter: boolean; atEnd: boolean}>;
 export type NativeScrollSnapshot = Readonly<{axes: string; horizontal: NativeScrollAxisSnapshot; vertical: NativeScrollAxisSnapshot; scrolling: boolean; projection: string; endFollow: Readonly<{state: string; requestStatus: string}>}>;
-export interface NativeScroll { axes: NativeObserved<string>; horizontal: NativeScrollAxis; vertical: NativeScrollAxis; scrolling: NativeObserved<boolean>; projection: NativeObserved<string>; endFollow: { state: NativeObserved<string>; requestStatus: NativeObserved<string> }; configure(config: NativeConfig): void; bindComposedChrome(binding: NativeConfig): void; request(request: NativeConfig): void; getSnapshot(): NativeScrollSnapshot }
+export type NativeScrollPositionRequest = {kind:'by';axis:'horizontal'|'vertical';delta:number}|{kind:'to'|'control-drag';axis:'horizontal'|'vertical';position:number}|{kind:'page';axis:'horizontal'|'vertical';direction:'before'|'after'}|{kind:'to-end';axis:'horizontal'|'vertical'};
+export type NativeScrollRequest = NativeScrollPositionRequest | {kind:'reveal';axis:'vertical';family:NativeAnatomyFamily;part:NativeAnatomyPart};
+export type NativeScrollRequestOutcome = {kind:'dispatched'}|{kind:'queued'}|{kind:'rejected';reason:'not-mounted'|'not-declared'|'unavailable'};
+export interface NativeScroll { axes: NativeObserved<string>; horizontal: NativeScrollAxis; vertical: NativeScrollAxis; scrolling: NativeObserved<boolean>; projection: NativeObserved<string>; endFollow: { state: NativeObserved<string>; requestStatus: NativeObserved<string> }; configure(config: NativeConfig): void; bindComposedChrome(binding: NativeConfig): void; request(request: NativeScrollRequest): NativeScrollRequestOutcome; getSnapshot(): NativeScrollSnapshot }
 export type NativeTextEvent = Readonly<{type: string; value: string; composing: boolean; data: string | null; inputType: string | null}>;
 export type NativeImageEvent = Readonly<{status: string; previousStatus: string; source: string}>;
 export interface NativeTextControl<Run = unknown> { on(type: string, callback: (run: Run, event: NativeTextEvent) => void): () => void; sync(patch: NativeConfig): void; snapshot(): { value: string; composing: boolean } | null }
@@ -213,6 +217,8 @@ function projectNativeTable(input: NativeTableInput): NativeTableSnapshot {
       columnHeaders: Object.freeze(cell.columnHeaders), rowHeaders: Object.freeze(cell.rowHeaders), orderedHeaders: Object.freeze(cell.orderedHeaders) }))) }))),
     valid: !diagnostics.length, diagnostics: Object.freeze(diagnostics.map(diagnostic => Object.freeze(diagnostic))) });
 }
+${NATIVE_SCROLL_REVEAL_SOURCE}
+
 function logicalRoot(owner: Owner): Owner {
   let current = owner;
   const visited = new Set<object>();
@@ -288,9 +294,9 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     terminalCleanups.push(() => listeners.clear());
     return { handle, set(next: T) {
       if (Object.is(value, next)) return;
-      const prev = value; value = next; const epoch = generation;
+      const prev = value; value = next; const epoch = generation, viewRoot = root;
       const event = { type: 'next' as const, prev, next, reason: 'native-module' };
-      ${emitRecordedNotification({ queue: 'nativeNotifications', draining: 'nativeNotifying', subscribers: 'listeners', alive: '!disposed && options.isAlive()', deliver: 'if (epoch === generation && ready() && (options.isReady?.() ?? true)) options.invoke(() => subscriber(event))' })}
+      ${emitRecordedNotification({ queue: 'nativeNotifications', draining: 'nativeNotifying', subscribers: 'listeners', alive: '!disposed && options.isAlive()', deliver: 'if (viewRoot !== null && viewRoot === root && epoch === generation && ready() && (options.isReady?.() ?? true)) options.invoke(() => subscriber(event))' })}
     } };
   };
   const scopeActive = observed<boolean>(false), hasFocused = observed<boolean>(false), rovingActive = observed<boolean>(false), rovingHasFocused = observed<boolean>(false);
@@ -970,61 +976,142 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   };
   const scrollAxes = observed<string>('vertical'), scrollProjection = observed<string>('unresolved'), scrolling = observed<boolean>(false);
   const followState = observed<string>('off'), followRequest = observed<string>('idle');
-  function axisFacts(): { handle: NativeScrollAxis; update(position: number, viewport: number, extent: number): void } {
+  let scrollRequestStatusVersion = 0;
+  function setScrollRequestStatus(next: string) {
+    ++scrollRequestStatusVersion;
+    followRequest.set(next);
+  }
+  function axisFacts(): { handle: NativeScrollAxis; update(position: number, viewport: number, extent: number, current: () => boolean): void } {
     const position = observed<number>(0), ratio = observed<number>(1), before = observed<boolean>(false), after = observed<boolean>(false), end = observed<boolean>(true);
     return { handle: { position: position.handle, visibleRatio: ratio.handle, canScrollBefore: before.handle, canScrollAfter: after.handle, atEnd: end.handle },
-      update(offsetValue, viewport, extent) { const range = Math.max(0, extent - viewport); const clamped = Math.min(range, Math.max(0, offsetValue)); position.set(range > 0 ? clamped / range : 0); ratio.set(extent > 0 ? Math.max(0, Math.min(1, viewport / extent)) : 1); before.set(clamped > 0); after.set(clamped < range); end.set(range - clamped <= 1); },
+      update(offsetValue, viewport, extent, current) {
+        const range = Math.max(0, extent - viewport), clamped = Math.min(range, Math.max(0, offsetValue));
+        position.set(range > 0 ? clamped / range : 0); if (!current()) return;
+        ratio.set(extent > 0 ? Math.max(0, Math.min(1, viewport / extent)) : 1); if (!current()) return;
+        before.set(clamped > 0); if (!current()) return;
+        after.set(clamped < range); if (!current()) return;
+        end.set(range - clamped <= 1);
+      },
     };
   }
   const horizontal = axisFacts(), vertical = axisFacts();
   let scrollConfig: NativeConfig = { axes: 'vertical', projection: 'auto', endFollow: { mode: 'off' } };
   let scrollChrome: NativeConfig | null = null, readerContacts = 0, scrollTimer: number | undefined;
-  let readerIntent = 0, scrollEndFrame: number | null = null;
+  type ScrollBinding = { surface: HTMLElement; epoch: number };
+  type ScrollEndWork = { binding: ScrollBinding; axis: 'horizontal' | 'vertical'; frame: number | null };
+  let scrollBinding: ScrollBinding | null = null;
+  let scrollAttachment: { binding: ScrollBinding; requests: NativeConfig[] } | null = null;
+  let scrollEndWork: ScrollEndWork | null = null;
+  let readerIntent = 0;
   const chromeCleanups: (() => void)[] = [];
   const chromeTargets = new Map<HTMLElement, { width: string; height: string; transform: string; display: string; size: string; offset: string }>();
-  function scrollFacts() {
-    if (!ready() || !hooks.has('asScrollSurface')) return;
-    horizontal.update(root!.scrollLeft, root!.clientWidth, root!.scrollWidth);
-    vertical.update(root!.scrollTop, root!.clientHeight, root!.scrollHeight);
+  function currentScrollBinding(binding: ScrollBinding): boolean {
+    return scrollBinding === binding && generation === binding.epoch && root === binding.surface && ready();
+  }
+  function scrollFacts(resumeEndAxis?: 'horizontal' | 'vertical') {
+    const binding = scrollBinding;
+    if (!binding || !currentScrollBinding(binding)) return;
+    const current = () => currentScrollBinding(binding), surface = binding.surface;
+    const left = surface.scrollLeft, width = surface.clientWidth, scrollWidth = surface.scrollWidth;
+    const top = surface.scrollTop, height = surface.clientHeight, scrollHeight = surface.scrollHeight;
+    if (!current()) return;
+    horizontal.update(left, width, scrollWidth, current); if (!current()) return;
+    vertical.update(top, height, scrollHeight, current); if (!current()) return;
     const follow = scrollConfig.endFollow as NativeConfig;
     if (follow?.mode === 'while-at-end') {
-      const atEnd = follow.axis === 'horizontal' ? horizontal.handle.atEnd.get() : vertical.handle.atEnd.get();
-      if (readerContacts || !atEnd && Date.now() < readerIntent) followState.set('paused');
+      const followAxis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
+      const atEnd = (followAxis === 'horizontal' ? horizontal.handle : vertical.handle).atEnd.get();
+      if (resumeEndAxis === followAxis && atEnd) followState.set('following');
+      else if (readerContacts || !atEnd && Date.now() < readerIntent) followState.set('paused');
       else if (atEnd) followState.set('following');
     }
-    projectChrome();
+    if (current()) projectChrome();
   }
-  function applyScroll(request: NativeConfig) {
-    if (!ready()) { pendingScroll = request; return; }
+  function cancelScrollEnd(binding: ScrollBinding, axis: 'horizontal' | 'vertical') {
+    const work = scrollEndWork;
+    if (!work || work.binding !== binding || work.axis !== axis) return;
+    scrollEndWork = null;
+    if (work.frame !== null) binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
+    if (currentScrollBinding(binding)) setScrollRequestStatus('rejected');
+  }
+  function revealScroll(request: NativeConfig, binding: ScrollBinding): NativeScrollRequestOutcome {
+    const rejected = { kind: 'rejected', reason: 'unavailable' } as const;
+    if (request.axis !== 'vertical' || scrollConfig.axes === 'horizontal' || scrollAttachment) return rejected;
+    const family = request.family as NativeAnatomyFamily, part = request.part as NativeAnatomyPart;
+    const participant = part && typeof part === 'object' ? parts.get(part) : undefined;
+    const role = claims.get(family)?.role, familyRoot = role ? domain(family, false) : null;
+    if (!participant || participant === owner || !role || !familyRoot) return rejected;
+    const currentPart = () => currentScrollBinding(binding) && !scrollAttachment &&
+      claims.get(family)?.role === role && domain(family, false) === familyRoot &&
+      participant.alive() && participant.claims.get(family)?.part === part &&
+      ancestor(participant, candidate => candidate.claims.get(family)?.role === 'root') === familyRoot &&
+      ancestor(participant, candidate => candidate !== participant && candidate.claims.get(family)?.role === role) === owner;
+    if (!currentPart()) return rejected;
+    const target = participant.target();
+    if (!target) return rejected;
+    const currentTarget = () => currentPart() && participant.target() === target && targets.get(target) === participant && currentPart();
+    if (!revealNativeScrollTarget(binding.surface, target, currentTarget, () => cancelScrollEnd(binding, 'vertical')) || !currentTarget()) return rejected;
+    scrollFacts();
+    if (!currentTarget()) return rejected;
+    const follow = scrollConfig.endFollow as NativeConfig;
+    if (follow?.mode === 'while-at-end' && (follow.axis ?? 'vertical') === 'vertical') followState.set(vertical.handle.atEnd.get() ? 'following' : 'paused');
+    return currentTarget() ? { kind: 'dispatched' } : rejected;
+  }
+  function applyScroll(request: NativeConfig): NativeScrollRequestOutcome {
+    if (!hooks.has('asScrollSurface')) return {kind:'rejected',reason:'not-declared'};
+    if (!root) return {kind:'rejected',reason:'not-mounted'};
+    const surface = root, epoch = generation;
+    const currentView = () => epoch === generation && root === surface && ready();
+    if (!currentView()) return {kind:'rejected',reason:'unavailable'};
     if (request.axis !== 'horizontal' && request.axis !== 'vertical') throw new Error('[Scroll] request axis must be horizontal or vertical.');
+    const binding = scrollBinding;
+    if (request.kind === 'reveal') return binding && currentScrollBinding(binding) ? revealScroll(request, binding) : {kind:'rejected',reason:'unavailable'};
+    if (!['by', 'to', 'control-drag', 'page', 'to-end'].includes(String(request.kind))) throw new Error('[Scroll] invalid request kind.');
+    const attachment = scrollAttachment;
+    if (attachment && attachment.binding.surface === surface && attachment.binding.epoch === epoch) {
+      const queued = { ...request };
+      if (!currentView() || scrollAttachment !== attachment) return {kind:'rejected',reason:'unavailable'};
+      attachment.requests.push(queued);
+      return {kind:'queued'};
+    }
+    if (!binding || !currentScrollBinding(binding)) return {kind:'rejected',reason:'unavailable'};
     const horizontalAxis = request.axis === 'horizontal';
-    const viewport = horizontalAxis ? root!.clientWidth : root!.clientHeight, extent = horizontalAxis ? root!.scrollWidth : root!.scrollHeight;
-    const current = horizontalAxis ? root!.scrollLeft : root!.scrollTop, range = Math.max(0, extent - viewport);
+    const viewport = horizontalAxis ? surface.clientWidth : surface.clientHeight, extent = horizontalAxis ? surface.scrollWidth : surface.scrollHeight;
+    const current = horizontalAxis ? surface.scrollLeft : surface.scrollTop, range = Math.max(0, extent - viewport);
     let next: number;
     if (request.kind === 'by') next = current + Number(request.delta);
-    else if (request.kind === 'to') next = Number(request.position);
-    else if (request.kind === 'control-drag') next = Math.max(0, Math.min(1, Number(request.position))) * range;
+    else if (request.kind === 'to' || request.kind === 'control-drag') next = Math.max(0, Math.min(1, Number(request.position))) * range;
     else if (request.kind === 'page') next = current + (request.direction === 'before' ? -viewport : viewport);
     else if (request.kind === 'to-end') next = range;
     else throw new Error('[Scroll] invalid request kind.');
     if (!Number.isFinite(next)) throw new Error('[Scroll] request coordinate must be finite.');
-    if (horizontalAxis) root!.scrollLeft = Math.max(0, Math.min(range, next)); else root!.scrollTop = Math.max(0, Math.min(range, next));
-    scrollFacts();
-    if (request.kind === 'to-end') { followRequest.set('applied'); followState.set('following'); }
+    if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    const statusVersion = scrollRequestStatusVersion;
+    if (horizontalAxis) surface.scrollLeft = Math.max(0, Math.min(range, next)); else surface.scrollTop = Math.max(0, Math.min(range, next));
+    if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    scrollFacts(request.kind === 'to-end' ? horizontalAxis ? 'horizontal' : 'vertical' : undefined);
+    if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    if (request.kind === 'to-end' && statusVersion === scrollRequestStatusVersion) setScrollRequestStatus('applied');
+    return {kind:'dispatched'};
   }
-  let pendingScroll: NativeConfig | null = null;
   function endFollowContentChanged() {
-    if (!ready()) return;
+    const binding = scrollBinding;
+    if (!binding || !currentScrollBinding(binding) || scrollAttachment) return;
     const follow = scrollConfig.endFollow as NativeConfig;
     if (follow?.mode !== 'while-at-end' || followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
-    const view = root!.ownerDocument.defaultView, epoch = generation;
-    if (!view || scrollEndFrame !== null) return;
-    followRequest.set('pending');
-    scrollEndFrame = view.requestAnimationFrame(() => {
-      scrollEndFrame = null;
-      if (epoch !== generation || !ready()) return;
-      if (readerContacts || Date.now() < readerIntent || followState.handle.get() !== 'following') { followRequest.set('rejected'); return; }
-      options.invoke(() => applyScroll({ kind: 'to-end', axis: follow.axis ?? 'vertical' }));
+    const view = binding.surface.ownerDocument.defaultView;
+    if (!view || scrollEndWork) return;
+    const axis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
+    const work: ScrollEndWork = { binding, axis, frame: null };
+    scrollEndWork = work;
+    setScrollRequestStatus('pending');
+    if (scrollEndWork !== work || !currentScrollBinding(binding)) return;
+    work.frame = view.requestAnimationFrame(() => {
+      if (scrollEndWork !== work) return;
+      scrollEndWork = null;
+      if (!currentScrollBinding(binding)) return;
+      if (readerContacts || Date.now() < readerIntent || followState.handle.get() !== 'following') { setScrollRequestStatus('rejected'); return; }
+      options.invoke(() => applyScroll({ kind: 'to-end', axis }));
     });
   }
   function chromeParts(): { track: HTMLElement; thumb: HTMLElement; axis: string }[] {
@@ -1092,29 +1179,66 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     axes: scrollAxes.handle, horizontal: horizontal.handle, vertical: vertical.handle, scrolling: scrolling.handle, projection: scrollProjection.handle, endFollow: { state: followState.handle, requestStatus: followRequest.handle },
     configure(config) { setup('scroll.configure'); if (config.axes && !['horizontal','vertical','both'].includes(String(config.axes))) throw new Error('[Scroll] invalid axes.'); if (config.projection && !['auto','system','composed'].includes(String(config.projection))) throw new Error('[Scroll] invalid projection.'); scrollConfig = { ...scrollConfig, ...config }; scrollAxes.set(String(scrollConfig.axes)); const follow = scrollConfig.endFollow as NativeConfig; followState.set(follow?.mode === 'while-at-end' ? 'pending' : 'off'); },
     bindComposedChrome(binding) { setup('scroll.bindComposedChrome'); if (!binding.anatomy || !binding.scrollbarRole || !binding.thumbRole || !binding.orientationExpose || !binding.scope) throw new Error('[Scroll] composed chrome requires explicit Context/Anatomy binding.'); scrollChrome = binding; },
-    request(request) { runtime('scroll.request'); applyScroll(request); },
+    request(request) { runtime('scroll.request'); return applyScroll(request); },
     getSnapshot() {
       alive(); const snapshot = (axis: NativeScrollAxis) => Object.freeze({ position: axis.position.get(), visibleRatio: axis.visibleRatio.get(), canScrollBefore: axis.canScrollBefore.get(), canScrollAfter: axis.canScrollAfter.get(), atEnd: axis.atEnd.get() });
       return Object.freeze({ axes: scrollAxes.handle.get(), horizontal: snapshot(horizontal.handle), vertical: snapshot(vertical.handle), scrolling: scrolling.handle.get(), projection: scrollProjection.handle.get(), endFollow: { state: followState.handle.get(), requestStatus: followRequest.handle.get() } });
     },
   };
   function attachScroll() {
-    if (!hooks.has('asScrollSurface')) return;
-    const preference = String(scrollConfig.requireProjection ?? scrollConfig.projection);
-    if (preference === 'composed' && !scrollChrome) throw new Error('[Scroll] required composed projection needs authored chrome binding.');
-    scrollProjection.set(preference === 'composed' || preference === 'auto' && scrollChrome ? 'composed' : 'system');
-    if (scrollProjection.handle.get() === 'composed') { styleProperty(root!, 'scrollbar-width', 'none'); styleProperty(root!, '-ms-overflow-style', 'none'); }
-    styleProperty(root!, 'overflow-x', scrollConfig.axes === 'vertical' ? 'hidden' : 'auto'); styleProperty(root!, 'overflow-y', scrollConfig.axes === 'horizontal' ? 'hidden' : 'auto');
-    listen(root!, 'scroll', () => { scrolling.set(true); scrollFacts(); root!.ownerDocument.defaultView?.clearTimeout(scrollTimer); const epoch = generation; scrollTimer = root!.ownerDocument.defaultView!.setTimeout(() => { scrollTimer = undefined; if (epoch === generation && ready()) { scrolling.set(false); scrollFacts(); } }, 120); }, { passive: true });
-    listen(root!, 'wheel', event => { readerIntent = Date.now() + 250; const wheel = event as WheelEvent; if (scrollProjection.handle.get() === 'composed') { const axis = scrollConfig.axes === 'horizontal' || Math.abs(wheel.deltaX) > Math.abs(wheel.deltaY) ? 'horizontal' : 'vertical'; const delta = axis === 'horizontal' ? wheel.deltaX || wheel.deltaY : wheel.deltaY; options.invoke(() => applyScroll({ kind: 'by', axis, delta: delta * (wheel.deltaMode === 1 ? 16 : wheel.deltaMode === 2 ? root!.clientHeight : 1) })); event.preventDefault(); } if (followState.handle.get() !== 'off' && !(scrollConfig.axes === 'horizontal' ? horizontal.handle : vertical.handle).atEnd.get()) followState.set('paused'); }, { passive: false });
-    listen(root!, 'pointerdown', () => { readerContacts++; readerIntent = Date.now() + 250; });
-    const endContact = () => { readerContacts = Math.max(0, readerContacts - 1); readerIntent = Date.now() + 250; scrollFacts(); };
-    listen(root!.ownerDocument, 'pointerup', endContact, { capture: true }); listen(root!.ownerDocument, 'pointercancel', endContact, { capture: true });
-    listen(root!, 'keydown', () => { readerIntent = Date.now() + 250; });
-    if (typeof ResizeObserver !== 'undefined') { const resize = new ResizeObserver(endFollowContentChanged); resize.observe(root!); for (const child of root!.children) resize.observe(child); cleanups.push(() => resize.disconnect()); }
-    if (typeof MutationObserver !== 'undefined') { const mutation = new MutationObserver(records => { if (records.every(record => record.type === 'attributes' && (record.target === root || isElement(record.target) && chromeTargets.has(record.target) && record.attributeName === 'style'))) return; endFollowContentChanged(); attachChrome(); }); mutation.observe(root!, { childList: true, subtree: true, characterData: true, attributes: true }); cleanups.push(() => mutation.disconnect()); }
-    scrollFacts(); attachChrome();
-    if (pendingScroll) { const request = pendingScroll; pendingScroll = null; options.invoke(() => applyScroll(request)); }
+    if (!hooks.has('asScrollSurface') || !root) return;
+    const binding: ScrollBinding = { surface: root, epoch: generation }, surface = binding.surface;
+    const attachment = { binding, requests: [] as NativeConfig[] };
+    scrollAttachment = attachment;
+    const acquiring = () => scrollAttachment === attachment && generation === binding.epoch && root === surface && ready();
+    const current = () => currentScrollBinding(binding);
+    let acquired = false;
+    try {
+      const preference = String(scrollConfig.requireProjection ?? scrollConfig.projection);
+      if (preference === 'composed' && !scrollChrome) throw new Error('[Scroll] required composed projection needs authored chrome binding.');
+      const projection = preference === 'composed' || preference === 'auto' && scrollChrome ? 'composed' : 'system';
+      if (projection === 'composed') { styleProperty(surface, 'scrollbar-width', 'none'); styleProperty(surface, '-ms-overflow-style', 'none'); }
+      styleProperty(surface, 'overflow-x', scrollConfig.axes === 'vertical' ? 'hidden' : 'auto'); styleProperty(surface, 'overflow-y', scrollConfig.axes === 'horizontal' ? 'hidden' : 'auto');
+      if (!acquiring()) return;
+      const view = surface.ownerDocument.defaultView;
+      listen(surface, 'scroll', () => {
+        if (!current()) return;
+        scrolling.set(true); if (!current()) return;
+        scrollFacts(); if (!current()) return;
+        view?.clearTimeout(scrollTimer);
+        scrollTimer = view?.setTimeout(() => { if (!current()) return; scrollTimer = undefined; scrolling.set(false); if (current()) scrollFacts(); }, 120);
+      }, { passive: true });
+      listen(surface, 'wheel', event => {
+        if (!current()) return;
+        readerIntent = Date.now() + 250; const wheel = event as WheelEvent;
+        if (scrollProjection.handle.get() === 'composed') {
+          const axis = scrollConfig.axes === 'horizontal' || Math.abs(wheel.deltaX) > Math.abs(wheel.deltaY) ? 'horizontal' : 'vertical';
+          const delta = axis === 'horizontal' ? wheel.deltaX || wheel.deltaY : wheel.deltaY;
+          options.invoke(() => applyScroll({ kind: 'by', axis, delta: delta * (wheel.deltaMode === 1 ? 16 : wheel.deltaMode === 2 ? surface.clientHeight : 1) })); event.preventDefault();
+        }
+        if (current() && followState.handle.get() !== 'off' && !(scrollConfig.axes === 'horizontal' ? horizontal.handle : vertical.handle).atEnd.get()) followState.set('paused');
+      }, { passive: false });
+      listen(surface, 'pointerdown', () => { if (current()) { readerContacts++; readerIntent = Date.now() + 250; } });
+      const endContact = () => { if (current()) { readerContacts = Math.max(0, readerContacts - 1); readerIntent = Date.now() + 250; scrollFacts(); } };
+      listen(surface.ownerDocument, 'pointerup', endContact, { capture: true }); listen(surface.ownerDocument, 'pointercancel', endContact, { capture: true });
+      listen(surface, 'keydown', () => { if (current()) readerIntent = Date.now() + 250; });
+      if (typeof ResizeObserver !== 'undefined') { const resize = new ResizeObserver(() => { if (current()) endFollowContentChanged(); }); resize.observe(surface); for (const child of surface.children) resize.observe(child); cleanups.push(() => resize.disconnect()); }
+      if (typeof MutationObserver !== 'undefined') { const mutation = new MutationObserver(records => {
+        if (!current() || records.every(record => record.type === 'attributes' && (record.target === surface || isElement(record.target) && chromeTargets.has(record.target) && record.attributeName === 'style'))) return;
+        endFollowContentChanged(); if (current()) attachChrome();
+      }); mutation.observe(surface, { childList: true, subtree: true, characterData: true, attributes: true }); cleanups.push(() => mutation.disconnect()); }
+      if (!acquiring()) return;
+      scrollBinding = binding;
+      attachChrome(); if (!acquiring()) return;
+      // Publish only after host resources are acquired. Reentrant position
+      // requests belong to this transaction; reveal never joins its queue.
+      scrollProjection.set(projection); if (!acquiring()) return;
+      scrollFacts(); if (!acquiring()) return;
+      acquired = true;
+    } finally {
+      if (scrollAttachment === attachment) scrollAttachment = null;
+    }
+    if (acquired) for (const request of attachment.requests) { if (!current()) break; applyScroll(request); }
   }
   let positionConnection: NativeConfig | null = null, positionSnapshot: NativePositionSnapshot | null = null, positionGeneration = 0;
   let removePosition: (() => void) | null = null;
@@ -1369,6 +1493,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('positioning')) stopPosition();
     if (__nativeFeature('overlay')) unlockModal();
     root = null;
+    if (__nativeFeature('scroll')) {
+      scrollBinding = null; scrollAttachment = null;
+      const work = scrollEndWork; scrollEndWork = null;
+      if (work && work.frame !== null) work.binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
+      if (work) setScrollRequestStatus('rejected');
+      scrollProjection.set('unresolved');
+    }
     if (__nativeFeature('table') && table) { tableSignature = null; clearTable(); }
     if (previous && targets.get(previous) === owner) targets.delete(previous);
     const failures: unknown[] = [];
@@ -1377,8 +1508,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('hit')) for (const target of [...hitApplied]) releaseHit(target);
     if (previous) {
       if (__nativeFeature('boundary')) { const stack = boundaryStacks.get(previous.ownerDocument); const index = stack?.indexOf(owner) ?? -1; if (index >= 0) stack!.splice(index, 1); }
-      if (__nativeFeature('scroll')) { previous.ownerDocument.defaultView?.clearTimeout(scrollTimer); scrollTimer = undefined;
-      if (scrollEndFrame !== null) previous.ownerDocument.defaultView?.cancelAnimationFrame(scrollEndFrame); scrollEndFrame = null; }
+      if (__nativeFeature('scroll')) { previous.ownerDocument.defaultView?.clearTimeout(scrollTimer); scrollTimer = undefined; }
       for (const [name, ownership] of attributeBaselines) if (previous.getAttribute(name) === ownership.projected) { if (ownership.baseline === null) previous.removeAttribute(name); else previous.setAttribute(name, ownership.baseline); }
       for (const [name, ownership] of propertyBaselines) if (previous.style.getPropertyValue(name) === ownership.projected) { if (ownership.value) previous.style.setProperty(name, ownership.value); else previous.style.removeProperty(name); }
     }
@@ -1401,6 +1531,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     alive(); const candidate = options.getRoot(); if (root === candidate && ready()) { refresh(); return; }
     unmount(); root = candidate;
     if (!root) return;
+    const mountEpoch = generation;
     targets.set(root, owner);
     if (root.id) hostIds.set(options.identity, root.id);
     try {
@@ -1432,12 +1563,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (__nativeFeature('overlay')) listen(doc, 'focusin', native => { if (overlayOpen.handle.get() && overlayConfig.closeOnFocusOutside && classify({ target: native.target, nativeEvent: native }) === 'outside') options.invoke(() => setOverlayOpen(false, 'focus.outside')); });
       if (__nativeFeature('text')) attachText();
       if (__nativeFeature('image')) attachImage();
-      if (__nativeFeature('scroll')) attachScroll();
+      if (__nativeFeature('scroll')) { attachScroll(); if (mountEpoch !== generation || root !== candidate) return; }
       if (__nativeFeature('positioning')) attachPosition();
       if (__nativeFeature('boundary')) reconcileStack();
       refresh(); announceTopology();
       if ((__nativeFeature('anatomy') || __nativeFeature('scope') || __nativeFeature('roving') || __nativeFeature('scroll')) && typeof MutationObserver !== 'undefined' && (claims.size || __nativeFeature('scope') && owner.scopeDeclared || __nativeFeature('roving') && owner.rovingDeclared || __nativeFeature('scroll') && scrollChrome)) { const mutation = new MutationObserver(records => { if (!records.some(record => record.type === 'childList')) return; announceTopology(); if (__nativeFeature('scope') && ownedEntry) fulfillOwnedEntry(); if (__nativeFeature('scroll') && scrollChrome) attachChrome(); }); mutation.observe(root, { childList: true, subtree: true }); cleanups.push(() => mutation.disconnect()); }
-    } catch (error) { try { unmount(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Modules] mount and cleanup failed.'); } throw error; }
+    } catch (error) { if (mountEpoch === generation && root === candidate) try { unmount(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Modules] mount and cleanup failed.'); } throw error; }
   }
   const registeredFacts = new Set<object>();
   function registerFacts<T extends boolean | string | number>(state: NativeObserved<T>) { if (registeredFacts.has(state)) return; registeredFacts.add(state); options.registerObservedState?.(state); }

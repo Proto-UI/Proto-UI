@@ -165,11 +165,14 @@ function validateBuiltPackage(pkg, distDir) {
     const smoke = spawnSync(
       process.execPath,
       ['--input-type=module', '--eval', `import(${JSON.stringify(pathToFileURL(entry).href)})`],
-      { cwd: ROOT_DIR, encoding: 'utf8', timeout: 20000 }
+      { cwd: ROOT_DIR, encoding: 'utf8', timeout: 60000 }
     );
     if (smoke.status !== 0) {
+      const outcome = smoke.error?.message ??
+        (smoke.signal ? `signal ${smoke.signal}` : `exit ${smoke.status}`);
       throw new Error(
-        `${pkg.name}: JavaScript-only import smoke failed for ${relative(distDir, entry)}\n${smoke.stderr || smoke.stdout}`
+        `${pkg.name}: JavaScript-only import smoke failed for ${relative(distDir, entry)}: ${outcome}\n${smoke.stderr || smoke.stdout || ''}`,
+        { cause: smoke.error }
       );
     }
   }

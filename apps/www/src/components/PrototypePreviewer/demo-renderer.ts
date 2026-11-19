@@ -58,7 +58,11 @@ const vue2Runtime = retryableModule(
   () => import('./runtimes/vue2-runtime'),
   runtimeUrls.vue2Runtime
 );
-const reactModules = () => Promise.all([reactAdapter(), reactRuntime()]);
+const reactModules = (canLoad: () => boolean = () => true) =>
+  Promise.all([
+    reactAdapter(),
+    reactRuntime().then((runtime) => (canLoad() ? runtime.loadReact() : undefined)),
+  ]);
 const vueModules = () => Promise.all([vueAdapter(), vueRuntime()]);
 const vue2Modules = () => Promise.all([vue2Adapter(), vue2Runtime()]);
 
@@ -133,7 +137,7 @@ export async function prepareDemoRuntime(runtime: RuntimeId): Promise<void> {
     case 'wc':
       return;
     case 'react':
-      await (await reactModules())[1].loadReact();
+      await reactModules();
       return;
     case 'vue':
       await (await vueModules())[1].loadVue();
@@ -352,6 +356,8 @@ function resolvePath(obj: unknown, path: string): unknown {
   }, obj);
 }
 
+const isDemoCallbackProp = (name: string) => /^on[A-Z]/.test(name);
+
 /** Website onX convention over the WC Adapter's outward CustomEvent carrier. */
 function createWcDemoCallbacks(isCurrent: () => boolean) {
   type Binding = { callback: (payload: unknown) => void; listener: EventListener };
@@ -363,7 +369,7 @@ function createWcDemoCallbacks(isCurrent: () => boolean) {
       if (!live || !isCurrent()) return;
       for (const [prop, value] of Object.entries(next)) {
         if (!live || !isCurrent()) return;
-        if (!/^on[A-Z]/.test(prop)) continue;
+        if (!isDemoCallbackProp(prop)) continue;
         // Match the existing React/Vue callback convention: only the first
         // character after `on` is lowercased; the rest of the key is exact.
         const key = prop[2]!.toLowerCase() + prop.slice(3);
@@ -548,6 +554,12 @@ async function renderDemoWc(
       callbacks.patch(el, Object.fromEntries(keys.map((name) => [name, undefined])));
       if (!ownsLease(opt, lease)) return;
       for (const name of keys) delete current[name];
+      if (keys.length > 0 && keys.every(isDemoCallbackProp)) {
+        // Removing only outward callbacks still withdraws their raw keys, but
+        // does not request a Template commit on an unpresented portal view.
+        setElementProps(el, { ...current, ...(wcSurfaceProps.get(el) ?? {}) });
+        return;
+      }
       api.setProps(ref, {});
     },
     setProps(ref, next) {
@@ -572,7 +584,12 @@ async function renderDemoWc(
       // it with update would commit twice and could update a lease retired by
       // a synchronous props watcher before this ownership check.
       setElementProps(el, { ...current, ...(wcSurfaceProps.get(el) ?? {}) });
-      if (ownsLease(opt, lease)) el.update?.();
+      const keys = Object.keys(patch);
+      // onX registration is owned by callbacks.patch above. Preserve the full
+      // raw snapshot and Props notifications without forcing unrelated Template
+      // reuse before its portal epoch commits. Mixed/empty patches keep update.
+      if (ownsLease(opt, lease) && !(keys.length > 0 && keys.every(isDemoCallbackProp)))
+        el.update?.();
     },
   };
 
@@ -970,12 +987,10 @@ async function renderDemoReact(
   const refs: Record<string, HTMLElement> = Object.create(null);
   let stopRefObservation: (() => void) | undefined;
 
-  // Non-WC modules join the graph only when this runtime is selected. A
-  // superseded owner must not proceed to CDN loading after that import boundary.
-  const [{ createReactAdapter }, { loadReact }] = await reactModules();
-  if (!ownsLease(opt, lease)) return abandonLease(lease);
-  const { React, ReactDOM } = await loadReact();
-  if (!ownsLease(opt, lease)) return abandonLease(lease);
+  // A current owner can prepare the browser package while the adapter loads.
+  const [{ createReactAdapter }, runtime] = await reactModules(() => ownsLease(opt, lease));
+  if (!runtime || !ownsLease(opt, lease)) return abandonLease(lease);
+  const { React, ReactDOM } = runtime;
   const adapter = createReactAdapter({
     ...React,
     createPortal: ReactDOM.createPortal,
@@ -1322,6 +1337,7 @@ async function renderDemoVue(
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = Vue.reactive<Record<string, Record<string, unknown>>>(Object.create(null));
   const surfaceStyles = Vue.reactive<Record<string, DemoSurfaceStyle>>(Object.create(null));
+  const pendingEqualValueUpdates = new Map<string, object>();
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
@@ -1420,6 +1436,7 @@ async function renderDemoVue(
   if (
     !lease.commit(() => {
       stopRefObservation?.();
+      pendingEqualValueUpdates.clear();
       dynamicQueue?.dispose();
       dynamic.dispose();
       const currentCleanup = cleanup;
@@ -1484,17 +1501,40 @@ async function renderDemoVue(
       if (!ownsLease(opt, lease) || !Object.hasOwn(propsMap, ref)) return;
       const keys = [...names];
       if (!ownsLease(opt, lease)) return;
+      pendingEqualValueUpdates.delete(ref);
       for (const name of keys) delete propsMap[ref][name];
       // Vue owns the reactive deletion commit just as it owns setProps.
     },
     setProps(ref, next) {
       if (!ownsLease(opt, lease)) return;
-      if (propsMap[ref]) {
-        Object.assign(propsMap[ref], next);
-      }
+      const current = propsMap[ref];
+      if (!current) return;
+      const patch = { ...next };
+      if (!ownsLease(opt, lease)) return;
+      const equalValues = Object.keys(patch).every((key) =>
+        Object.hasOwn(current, key) && Object.is(current[key], patch[key]) &&
+        (patch[key] === null || typeof patch[key] !== 'object')
+      );
+      pendingEqualValueUpdates.delete(ref);
+      Object.assign(current, patch);
       // The actual Vue adapter reconciles changed host props after its commit.
       // An additional controller update can replace that pending feedback
       // commit with an unchanged one and lose a later controlled prop's paint.
+      if (!equalValues || !ownsLease(opt, lease)) return;
+      // Equal public props still request projection onto a rematerialized view.
+      // Vue emits no prop notification for them, so replay only after its own
+      // commit; any newer props or owner/instance replacement cancels this work.
+      const instance = componentRefs.get(ref);
+      if (typeof instance?.update !== 'function') return;
+      const request = {};
+      pendingEqualValueUpdates.set(ref, request);
+      void Vue.nextTick().then(() => {
+        if (pendingEqualValueUpdates.get(ref) !== request) return;
+        pendingEqualValueUpdates.delete(ref);
+        if (!ownsLease(opt, lease) || componentRefs.get(ref) !== instance || propsMap[ref] !== current)
+          return;
+        instance.update?.();
+      }).catch((error) => revokeFailedDemoRender(lease, error));
     },
   };
 

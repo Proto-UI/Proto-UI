@@ -14,7 +14,7 @@ import { createHomepageShowcase } from './homepage-showcase';
 import { createProjectionComposition } from '../PrototypePreviewer/projection-composition';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
-import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 
 beforeAll(() => {
   installGeneratedProtoUiStylesheet();

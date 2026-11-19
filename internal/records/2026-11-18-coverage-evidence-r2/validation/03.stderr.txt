@@ -1,0 +1,267 @@
+Consumer source field drift: www.shell.site-title.Re-review or removal issue
+Consumer source field drift: www.shell.skip-link.Re-review or removal issue
+Consumer source field drift: www.shell.primary-nav.Dependency and owner
+Consumer source field drift: www.shell.primary-nav.Re-review or removal issue
+Consumer source field drift: www.shell.social-links.Dependency and owner
+Consumer source field drift: www.shell.social-links.Re-review or removal issue
+Consumer source field drift: www.shell.header-separators.Dependency and owner
+Consumer source field drift: www.shell.header-separators.Re-review or removal issue
+Consumer source field drift: www.shell.theme-toggle.Dependency and owner
+Consumer source field drift: www.shell.theme-toggle.Re-review or removal issue
+Consumer source field drift: www.shell.theme-provider.Dependency and owner
+Consumer source field drift: www.shell.theme-provider.Re-review or removal issue
+Consumer source field drift: www.shell.language-select.Dependency and owner
+Consumer source field drift: www.shell.language-select.Re-review or removal issue
+Consumer source field drift: www.shell.adapter-select.Dependency and owner
+Consumer source field drift: www.shell.adapter-select.Re-review or removal issue
+Consumer source field drift: www.shell.mobile-menu-toggle.Dependency and owner
+Consumer source field drift: www.shell.mobile-menu-toggle.Re-review or removal issue
+Consumer source field drift: www.shell.mobile-menu-panel.Dependency and owner
+Consumer source field drift: www.shell.mobile-menu-panel.Re-review or removal issue
+Consumer source field drift: www.shell.mobile-theme-select.Dependency and owner
+Consumer source field drift: www.shell.mobile-theme-select.Re-review or removal issue
+Consumer source field drift: www.shell.sidebar-navigation.Dependency and owner
+Consumer source field drift: www.shell.sidebar-navigation.Re-review or removal issue
+Consumer source field drift: www.shell.page-layout.Re-review or removal issue
+Consumer source field drift: www.shell.page-title.Re-review or removal issue
+Consumer source field drift: www.shell.table-of-contents.Dependency and owner
+Consumer source field drift: www.shell.table-of-contents.Re-review or removal issue
+Consumer source field drift: www.shell.mobile-table-of-contents.Dependency and owner
+Consumer source field drift: www.shell.mobile-table-of-contents.Re-review or removal issue
+Consumer source field drift: www.shell.footer.Re-review or removal issue
+Consumer source field drift: www.shell.pagination.Re-review or removal issue
+Consumer source field drift: www.shell.hero-actions.Dependency and owner
+Consumer source field drift: www.shell.hero-actions.Re-review or removal issue
+Consumer source field drift: www.shell.hero-hash-scroll.Dependency and owner
+Consumer source field drift: www.shell.hero-hash-scroll.Re-review or removal issue
+Consumer source field drift: www.search.launcher.Dependency and owner
+Consumer source field drift: www.search.launcher.Re-review or removal issue
+Consumer source field drift: www.search.dialog.Dependency and owner
+Consumer source field drift: www.search.dialog.Re-review or removal issue
+Consumer source field drift: www.search.input-results.Dependency and owner
+Consumer source field drift: www.search.input-results.Re-review or removal issue
+Consumer source field drift: www.search.loading-failure.Dependency and owner
+Consumer source field drift: www.search.loading-failure.Re-review or removal issue
+Consumer source field drift: www.search.pagefind-engine.Dependency and owner
+Consumer source field drift: www.search.pagefind-engine.Re-review or removal issue
+Consumer source field drift: www.docs.code-example-host-tabs.Dependency and owner
+Consumer source field drift: www.docs.code-example-host-tabs.Re-review or removal issue
+Consumer source field drift: www.docs.code-example-file-tabs.Dependency and owner
+Consumer source field drift: www.docs.code-example-file-tabs.Re-review or removal issue
+Consumer source field drift: www.docs.code-panel-copy.Dependency and owner
+Consumer source field drift: www.docs.code-panel-copy.Re-review or removal issue
+Consumer source field drift: www.docs.code-panel-expand.Dependency and owner
+Consumer source field drift: www.docs.code-panel-expand.Re-review or removal issue
+Consumer source field drift: www.docs.expressive-code-copy-feedback.Dependency and owner
+Consumer source field drift: www.docs.expressive-code-copy-feedback.Re-review or removal issue
+Consumer source field drift: www.docs.expressive-code-scroll-focus.Dependency and owner
+Consumer source field drift: www.docs.expressive-code-scroll-focus.Re-review or removal issue
+Consumer source field drift: www.docs.install-manager-tabs.Dependency and owner
+Consumer source field drift: www.docs.install-manager-tabs.Re-review or removal issue
+Consumer source field drift: www.docs.install-copy.Dependency and owner
+Consumer source field drift: www.docs.install-copy.Re-review or removal issue
+Consumer source field drift: www.docs.wiki-term.Dependency and owner
+Consumer source field drift: www.docs.wiki-term.Re-review or removal issue
+Consumer source field drift: www.docs.spec-contract-preview.Re-review or removal issue
+Consumer source field drift: www.docs.api-table.Re-review or removal issue
+Consumer source field drift: www.docs.stage-notice.Re-review or removal issue
+Consumer source field drift: www.docs.phase-badge.Dependency and owner
+Consumer source field drift: www.docs.phase-badge.Re-review or removal issue
+Consumer source field drift: www.docs.entity-links.Re-review or removal issue
+Consumer source field drift: www.docs.whitepaper-diagram-viewer.Dependency and owner
+Consumer source field drift: www.docs.whitepaper-diagram-viewer.Re-review or removal issue
+Consumer source field drift: www.gallery.lucide-search.Dependency and owner
+Consumer source field drift: www.gallery.lucide-search.Re-review or removal issue
+Consumer source field drift: www.gallery.lucide-load-more.Dependency and owner
+Consumer source field drift: www.gallery.lucide-load-more.Re-review or removal issue
+Consumer source field drift: www.gallery.lucide-card-grid.Re-review or removal issue
+Consumer source field drift: www.gallery.lucide-dialog.Dependency and owner
+Consumer source field drift: www.gallery.lucide-dialog.Re-review or removal issue
+Consumer source field drift: www.gallery.lucide-copy.Dependency and owner
+Consumer source field drift: www.gallery.lucide-copy.Re-review or removal issue
+Consumer source field drift: www.gallery.lucide-lazy-loader.Dependency and owner
+Consumer source field drift: www.gallery.lucide-lazy-loader.Re-review or removal issue
+Consumer source field drift: www.gallery.ui-library-cards.Path
+Consumer source field drift: www.gallery.ui-library-cards.Dependency and owner
+Consumer source field drift: www.gallery.ui-library-cards.Re-review or removal issue
+Consumer source field drift: www.gallery.prototype-library-cards.Path
+Consumer source field drift: www.gallery.prototype-library-cards.User job
+Consumer source field drift: www.gallery.prototype-library-cards.Current owner
+Consumer source field drift: www.gallery.prototype-library-cards.Proto UI chain
+Consumer source field drift: www.gallery.prototype-library-cards.Lifecycle
+Consumer source field drift: www.gallery.prototype-library-cards.WC host and SSR/no-JS strategy
+Consumer source field drift: www.gallery.prototype-library-cards.Dependency and owner
+Consumer source field drift: www.gallery.prototype-library-cards.Evidence
+Consumer source field drift: www.gallery.prototype-library-cards.Escape or exemption
+Consumer source field drift: www.gallery.prototype-library-cards.Re-review or removal issue
+Consumer source field drift: www.icons.static-lucide.Dependency and owner
+Consumer source field drift: www.icons.static-lucide.Re-review or removal issue
+Consumer source field drift: www.demo.prototype-previewer.Dependency and owner
+Consumer source field drift: www.demo.prototype-previewer.Re-review or removal issue
+Consumer source field drift: www.demo.runtime-select.Dependency and owner
+Consumer source field drift: www.demo.runtime-select.Re-review or removal issue
+Consumer source field drift: www.demo.authored-controllers.Dependency and owner
+Consumer source field drift: www.demo.authored-controllers.Re-review or removal issue
+Consumer source field drift: www.demo.base-image-controls.Dependency and owner
+Consumer source field drift: www.demo.base-image-controls.Re-review or removal issue
+Consumer source field drift: www.demo.brutalist-separator.Dependency and owner
+Consumer source field drift: www.demo.brutalist-separator.Re-review or removal issue
+Consumer source field drift: www.demo.home-demo-select.Dependency and owner
+Consumer source field drift: www.demo.home-demo-select.Re-review or removal issue
+Consumer source field drift: www.demo.code-panel.Dependency and owner
+Consumer source field drift: www.demo.code-panel.Re-review or removal issue
+Consumer source field drift: www.demo.demo-matrix.Dependency and owner
+Consumer source field drift: www.demo.demo-matrix.Re-review or removal issue
+Consumer source field drift: www.demo.raw-adapter-runtimes.Dependency and owner
+Consumer source field drift: www.demo.raw-adapter-runtimes.Re-review or removal issue
+Consumer source field drift: www.demo.lazy-mount-observer.Dependency and owner
+Consumer source field drift: www.demo.lazy-mount-observer.Re-review or removal issue
+Consumer source field drift: www.demo.brutalist-theme-style.Dependency and owner
+Consumer source field drift: www.demo.brutalist-theme-style.Re-review or removal issue
+Consumer source field drift: www.route.root-locale-redirect.Dependency and owner
+Consumer source field drift: www.route.root-locale-redirect.Re-review or removal issue
+Consumer source field drift: www.route.locale-middleware.Dependency and owner
+Consumer source field drift: www.route.locale-middleware.Re-review or removal issue
+Consumer source field drift: www.route.content-collections.Dependency and owner
+Consumer source field drift: www.route.content-collections.Re-review or removal issue
+Consumer source field drift: www.route.astro-starlight.Dependency and owner
+Consumer source field drift: www.route.astro-starlight.Re-review or removal issue
+Consumer source field drift: www.build.markdown-mdx.Dependency and owner
+Consumer source field drift: www.build.markdown-mdx.Re-review or removal issue
+Consumer source field drift: www.build.pagefind-index.Dependency and owner
+Consumer source field drift: www.build.pagefind-index.Re-review or removal issue
+Consumer source field drift: www.build.shiki.Dependency and owner
+Consumer source field drift: www.build.shiki.Re-review or removal issue
+Consumer source field drift: www.build.sitemap.Dependency and owner
+Consumer source field drift: www.build.sitemap.Re-review or removal issue
+Consumer source field drift: www.build.style-generation.Dependency and owner
+Consumer source field drift: www.build.style-generation.Re-review or removal issue
+Consumer source field drift: www.content.native-disclosures.Dependency and owner
+Consumer source field drift: www.content.native-disclosures.Re-review or removal issue
+Consumer source field drift: www.content.document-semantics.Re-review or removal issue
+Consumer source field drift: www.content.draft-notice.Re-review or removal issue
+Consumer source field drift: www.shell.native-link-presentation.Dependency and owner
+Consumer source field drift: www.shell.native-link-presentation.Re-review or removal issue
+Consumer source field drift: www.content.typography-presentation.Dependency and owner
+Consumer source field drift: www.content.typography-presentation.Re-review or removal issue
+Consumer source field drift: www.docs.note-surface.Dependency and owner
+Consumer source field drift: www.docs.note-surface.Re-review or removal issue
+Consumer source field drift: www.demo.preview-surface.Dependency and owner
+Consumer source field drift: www.demo.preview-surface.Re-review or removal issue
+Consumer source field drift: www.docs.code-surface.Dependency and owner
+Consumer source field drift: www.docs.code-surface.Re-review or removal issue
+Consumer source field drift: harness.shell.frame.Dependency and owner
+Consumer source field drift: harness.shell.frame.Re-review or removal issue
+Consumer source field drift: harness.shell.brand.Dependency and owner
+Consumer source field drift: harness.shell.brand.Re-review or removal issue
+Consumer source field drift: harness.shell.theme-control.Dependency and owner
+Consumer source field drift: harness.shell.theme-control.Re-review or removal issue
+Consumer source field drift: harness.shell.mobile-navigation.Dependency and owner
+Consumer source field drift: harness.shell.mobile-navigation.Re-review or removal issue
+Consumer source field drift: harness.shell.resizable-panes.Dependency and owner
+Consumer source field drift: harness.sessions.list.Dependency and owner
+Consumer source field drift: harness.sessions.list.Re-review or removal issue
+Consumer source field drift: harness.sessions.search.Dependency and owner
+Consumer source field drift: harness.sessions.search.Re-review or removal issue
+Consumer source field drift: harness.sessions.create.Dependency and owner
+Consumer source field drift: harness.sessions.create.Re-review or removal issue
+Consumer source field drift: harness.sessions.selection.Dependency and owner
+Consumer source field drift: harness.sessions.selection.Re-review or removal issue
+Consumer source field drift: harness.sessions.rename.Dependency and owner
+Consumer source field drift: harness.sessions.rename.Re-review or removal issue
+Consumer source field drift: harness.sessions.archive-delete.Dependency and owner
+Consumer source field drift: harness.sessions.archive-delete.Re-review or removal issue
+Consumer source field drift: harness.sessions.state-indicator.Dependency and owner
+Consumer source field drift: harness.sessions.state-indicator.Re-review or removal issue
+Consumer source field drift: harness.run.header.Dependency and owner
+Consumer source field drift: harness.run.header.Re-review or removal issue
+Consumer source field drift: harness.run.status.Dependency and owner
+Consumer source field drift: harness.run.status.Re-review or removal issue
+Consumer source field drift: harness.run.usage-summary.Dependency and owner
+Consumer source field drift: harness.run.usage-summary.Re-review or removal issue
+Consumer source field drift: harness.run.stop-retry.Dependency and owner
+Consumer source field drift: harness.run.stop-retry.Re-review or removal issue
+Consumer source field drift: harness.run.reasoning-trace.Dependency and owner
+Consumer source field drift: harness.run.reasoning-trace.Re-review or removal issue
+Consumer source field drift: harness.run.agent-lanes.Dependency and owner
+Consumer source field drift: harness.run.agent-lanes.Re-review or removal issue
+Consumer source field drift: harness.run.tool-invocation.Dependency and owner
+Consumer source field drift: harness.run.tool-invocation.Re-review or removal issue
+Consumer source field drift: harness.run.approval-request.Dependency and owner
+Consumer source field drift: harness.run.approval-request.Re-review or removal issue
+Consumer source field drift: harness.run.questionnaire.Dependency and owner
+Consumer source field drift: harness.run.questionnaire.Re-review or removal issue
+Consumer source field drift: harness.transcript.viewport.Dependency and owner
+Consumer source field drift: harness.transcript.viewport.Re-review or removal issue
+Consumer source field drift: harness.transcript.follow-tail.Dependency and owner
+Consumer source field drift: harness.transcript.history-anchor.Dependency and owner
+Consumer source field drift: harness.transcript.history-anchor.Re-review or removal issue
+Consumer source field drift: harness.transcript.windowing.Dependency and owner
+Consumer source field drift: harness.transcript.windowing.Re-review or removal issue
+Consumer source field drift: harness.transcript.user-message.Dependency and owner
+Consumer source field drift: harness.transcript.user-message.Re-review or removal issue
+Consumer source field drift: harness.transcript.assistant-message.Dependency and owner
+Consumer source field drift: harness.transcript.assistant-message.Re-review or removal issue
+Consumer source field drift: harness.transcript.authored-content.Re-review or removal issue
+Consumer source field drift: harness.transcript.code-block.Dependency and owner
+Consumer source field drift: harness.transcript.code-block.Re-review or removal issue
+Consumer source field drift: harness.transcript.attachment.Dependency and owner
+Consumer source field drift: harness.transcript.attachment.Re-review or removal issue
+Consumer source field drift: harness.transcript.empty-loading-error.Dependency and owner
+Consumer source field drift: harness.transcript.empty-loading-error.Re-review or removal issue
+Consumer source field drift: harness.transcript.live-feedback.Dependency and owner
+Consumer source field drift: harness.transcript.live-feedback.Re-review or removal issue
+Consumer source field drift: harness.composer.root.Dependency and owner
+Consumer source field drift: harness.composer.root.Re-review or removal issue
+Consumer source field drift: harness.composer.input.Dependency and owner
+Consumer source field drift: harness.composer.input.Re-review or removal issue
+Consumer source field drift: harness.composer.actions.Dependency and owner
+Consumer source field drift: harness.composer.actions.Re-review or removal issue
+Consumer source field drift: harness.composer.suggestions.Dependency and owner
+Consumer source field drift: harness.composer.suggestions.Re-review or removal issue
+Consumer source field drift: harness.composer.attachments.Dependency and owner
+Consumer source field drift: harness.composer.attachments.Re-review or removal issue
+Consumer source field drift: harness.composer.file-intake.Dependency and owner
+Consumer source field drift: harness.composer.file-intake.Re-review or removal issue
+Consumer source field drift: harness.composer.feedback.Dependency and owner
+Consumer source field drift: harness.composer.feedback.Re-review or removal issue
+Consumer source field drift: harness.workspace.plan-todo.Dependency and owner
+Consumer source field drift: harness.workspace.branch-checkpoints.Dependency and owner
+Consumer source field drift: harness.workspace.branch-checkpoints.Re-review or removal issue
+Consumer source field drift: harness.workspace.artifact-workspace.Dependency and owner
+Consumer source field drift: harness.workspace.artifact-workspace.Re-review or removal issue
+Consumer source field drift: harness.workspace.artifact-tabs.Dependency and owner
+Consumer source field drift: harness.workspace.artifact-tabs.Re-review or removal issue
+Consumer source field drift: harness.workspace.code-log.Dependency and owner
+Consumer source field drift: harness.workspace.code-log.Re-review or removal issue
+Consumer source field drift: harness.workspace.static-diff.Dependency and owner
+Consumer source field drift: harness.workspace.static-diff.Re-review or removal issue
+Consumer source field drift: harness.workspace.image-artifact.Dependency and owner
+Consumer source field drift: harness.workspace.image-artifact.Re-review or removal issue
+Consumer source field drift: harness.workspace.inspector.Dependency and owner
+Consumer source field drift: harness.workspace.inspector.Re-review or removal issue
+Consumer source field drift: harness.workspace.artifact-actions.Dependency and owner
+Consumer source field drift: harness.workspace.artifact-actions.Re-review or removal issue
+Consumer source field drift: harness.workspace.empty.Dependency and owner
+Consumer source field drift: harness.workspace.empty.Re-review or removal issue
+Consumer source field drift: harness.future.terminal-chrome.Dependency and owner
+Consumer source field drift: harness.future.terminal-chrome.Re-review or removal issue
+Consumer source field drift: harness.future.terminal-engine.Dependency and owner
+Consumer source field drift: harness.future.terminal-engine.Re-review or removal issue
+Consumer source field drift: harness.future.preview-chrome.Dependency and owner
+Consumer source field drift: harness.future.preview-chrome.Re-review or removal issue
+Consumer source field drift: harness.future.preview-engine.Dependency and owner
+Consumer source field drift: harness.future.preview-engine.Re-review or removal issue
+Consumer source field drift: harness.infrastructure.markdown.Re-review or removal issue
+Consumer source field drift: harness.infrastructure.syntax-highlighter.Re-review or removal issue
+Consumer source field drift: harness.infrastructure.diff-engine.Dependency and owner
+Consumer source field drift: harness.infrastructure.diff-engine.Re-review or removal issue
+Consumer source field drift: harness.infrastructure.agent-backend.Dependency and owner
+Consumer source field drift: harness.infrastructure.agent-backend.Re-review or removal issue
+Consumer source field drift: harness.infrastructure.react-bootstrap.Dependency and owner
+Consumer source field drift: harness.infrastructure.react-bootstrap.Re-review or removal issue
+Consumer source field drift: harness.shared.icons.Dependency and owner
+Consumer source field drift: harness.shared.icons.Re-review or removal issue
+Candidate source cannot be validated: ENOENT: no such file or directory, open '/workspace/worktrees/markup-provenance-apply-1118/internal/fixtures/shadcn-style-source/LICENSE.md'
+Readable view is stale; run with --write
+Finf checklist view is stale

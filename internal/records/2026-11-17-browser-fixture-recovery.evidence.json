@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 1,
+  "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+  "scope": "Card HTTP owner and CodeExample native grammar observation boundary",
+  "card": {
+    "sourcePreservation": {
+      "beforeControlBlockSHA256": "db2336a001cce9949f103444eab7051e3b72863849b7d17b96c7fbaf4de3c5a6",
+      "originalAssertionsSHA256": "06a1ce5e44e2ce6fd1a8a0aaab023a6edd0a808212e18320c46c8a167083dadb",
+      "originalArmsSHA256": "e11ac702034df2ed6425c6ea8adf7000f6d5c579fb32bd4ec88b17bef26aa708",
+      "globalHooksCollectorAndOtherTwelve": true,
+      "originalAssertions": true,
+      "sixArms": true,
+      "deadlineMilliseconds": 30000
+    },
+    "transportProbe": {
+      "role": "Real Node HTTP transport probe of the AST-extracted candidate server; not original native browser controls",
+      "startedAt": "2026-11-17T08:48:34.682Z",
+      "completedAt": "2026-11-17T08:48:34.789Z",
+      "elapsedMs": 106.4873540000001,
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "sourceFile": "apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts",
+      "sourceSHA256": "6aad5a64d0142810d6b5fa9bd63708e1cfd7ec23f001964f53743140f9d1e3dd",
+      "helperSHA256": "ee4af4e37b4b57c40cde00bc007b5565f395eeb9576f425d7f28b559020964c1",
+      "runner": {
+        "node": "v24.22.1",
+        "typescript": "5.9.3",
+        "nativeBrowserJourneys": 0
+      },
+      "preservedBytes": {
+        "beforeControlBlockSHA256": "db2336a001cce9949f103444eab7051e3b72863849b7d17b96c7fbaf4de3c5a6",
+        "originalAssertionsSHA256": "06a1ce5e44e2ce6fd1a8a0aaab023a6edd0a808212e18320c46c8a167083dadb",
+        "originalArmsSHA256": "e11ac702034df2ed6425c6ea8adf7000f6d5c579fb32bd4ec88b17bef26aa708",
+        "globalHooksCollectorAndOtherTwelve": true,
+        "originalAssertions": true,
+        "sixArms": true,
+        "deadlineMilliseconds": 30000
+      },
+      "syntaxDiagnostics": 0,
+      "helperStrictTypeDiagnostics": 0,
+      "font": {
+        "bytes": 169056,
+        "sha256": "73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659"
+      },
+      "cases": [
+        {
+          "arm": "success",
+          "responses": [
+            {
+              "url": "http://127.0.0.1:34365/__pui_response_collector__/redirect",
+              "status": 301,
+              "location": "/__pui_response_collector__/redirect?step=1",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:34365/__pui_response_collector__/redirect?step=1",
+              "status": 302,
+              "location": "/__pui_response_collector__/redirect?step=2",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:34365/__pui_response_collector__/redirect?step=2",
+              "status": 303,
+              "location": "/__pui_response_collector__/redirect?step=3",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:34365/__pui_response_collector__/redirect?step=3",
+              "status": 307,
+              "location": "/__pui_response_collector__/redirect?step=4",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:34365/__pui_response_collector__/redirect?step=4",
+              "status": 308,
+              "location": "/__pui_response_collector__/font",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:34365/__pui_response_collector__/font",
+              "status": 200,
+              "location": null,
+              "contentType": "font/ttf",
+              "bytes": 169056,
+              "bodySHA256": "73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659"
+            }
+          ],
+          "requestFailure": null,
+          "released": true,
+          "fetchClient": {
+            "status": 200,
+            "bytes": 169056
+          },
+          "invalidPathAndStepInputs": ["outside-control-prefix", "-1", "5", "NaN", "0.5"]
+        },
+        {
+          "arm": "http-error",
+          "responses": [
+            {
+              "url": "http://127.0.0.1:45403/__pui_response_collector__/redirect",
+              "status": 301,
+              "location": "/__pui_response_collector__/redirect?step=1",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:45403/__pui_response_collector__/redirect?step=1",
+              "status": 302,
+              "location": "/__pui_response_collector__/redirect?step=2",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:45403/__pui_response_collector__/redirect?step=2",
+              "status": 303,
+              "location": "/__pui_response_collector__/redirect?step=3",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:45403/__pui_response_collector__/redirect?step=3",
+              "status": 307,
+              "location": "/__pui_response_collector__/redirect?step=4",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:45403/__pui_response_collector__/redirect?step=4",
+              "status": 308,
+              "location": "/__pui_response_collector__/font",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:45403/__pui_response_collector__/font",
+              "status": 404,
+              "location": null,
+              "contentType": "text/plain",
+              "bytes": 20,
+              "bodySHA256": "c859d7ffc235882df5f68786829d4f6d514b9274319d20414291ae9986a435c2"
+            }
+          ],
+          "requestFailure": null,
+          "released": true,
+          "fetchClient": {
+            "status": 404,
+            "bytes": 20
+          }
+        },
+        {
+          "arm": "request-abort",
+          "responses": [
+            {
+              "url": "http://127.0.0.1:36529/__pui_response_collector__/redirect",
+              "status": 301,
+              "location": "/__pui_response_collector__/redirect?step=1",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:36529/__pui_response_collector__/redirect?step=1",
+              "status": 302,
+              "location": "/__pui_response_collector__/redirect?step=2",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:36529/__pui_response_collector__/redirect?step=2",
+              "status": 303,
+              "location": "/__pui_response_collector__/redirect?step=3",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:36529/__pui_response_collector__/redirect?step=3",
+              "status": 307,
+              "location": "/__pui_response_collector__/redirect?step=4",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "url": "http://127.0.0.1:36529/__pui_response_collector__/redirect?step=4",
+              "status": 308,
+              "location": "/__pui_response_collector__/font",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "requestFailure": {
+            "url": "http://127.0.0.1:36529/__pui_response_collector__/font",
+            "code": "ECONNRESET",
+            "message": "Error: socket hang up"
+          },
+          "released": true,
+          "fetchClient": {
+            "rejected": true
+          }
+        },
+        {
+          "arm": "missing-location",
+          "responses": [
+            {
+              "url": "http://127.0.0.1:41499/__pui_response_collector__/redirect",
+              "status": 302,
+              "location": null,
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "requestFailure": null,
+          "released": true,
+          "fetchClient": {
+            "status": 302,
+            "bytes": 0
+          }
+        },
+        {
+          "arm": "invalid-location",
+          "responses": [
+            {
+              "url": "http://127.0.0.1:35461/__pui_response_collector__/redirect",
+              "status": 302,
+              "location": "http://[",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "requestFailure": null,
+          "released": true,
+          "fetchClient": {
+            "rejected": true
+          }
+        },
+        {
+          "arm": "unknown-status",
+          "responses": [
+            {
+              "url": "http://127.0.0.1:34349/__pui_response_collector__/redirect",
+              "status": 300,
+              "location": "/__pui_response_collector__/font",
+              "contentType": null,
+              "bytes": 0,
+              "bodySHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "requestFailure": null,
+          "released": true,
+          "fetchClient": {
+            "status": 300,
+            "bytes": 0
+          }
+        }
+      ],
+      "conclusion": "Six transport arms and resource release passed; original six Chromium controls remain unrun on repaired source."
+    },
+    "commands": {
+      "initial": [
+        {
+          "status": "fulfilled",
+          "value": {
+            "chunk_id": "1fa557",
+            "wall_time_seconds": 2.22889386,
+            "exit_code": 0,
+            "original_token_count": 70,
+            "output": "{\n  \"sourceSHA256\": \"022051bf241b2a55c62ae5c08dae6917546f5ea06a864b3a230d530b011989f4\",\n  \"elapsedMs\": 177.0866820000001,\n  \"passedTransportArms\": 6,\n  \"nativeBrowserJourneys\": 0,\n  \"report\": \"/workspace/scratch/8077f6e9f3a8/native-card-repair-20261117/http-owner-probe.json\"\n}\n"
+          }
+        },
+        {
+          "status": "fulfilled",
+          "value": {
+            "chunk_id": "1d1c0f",
+            "wall_time_seconds": 1.388830002,
+            "exit_code": 1,
+            "original_token_count": 63,
+            "output": "Checking formatting...\n[warn] apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts\n[warn] internal/records/2026-11-17-card-response-control-owner.md\n[warn] Code style issues found in 2 files. Run Prettier with --write to fix.\n"
+          }
+        },
+        {
+          "status": "fulfilled",
+          "value": {
+            "chunk_id": "8829c1",
+            "wall_time_seconds": 2.9107e-5,
+            "exit_code": 0,
+            "original_token_count": 0,
+            "output": ""
+          }
+        }
+      ],
+      "final": [
+        {
+          "status": "fulfilled",
+          "value": {
+            "name": "http-probe",
+            "cmd": "node /workspace/scratch/8077f6e9f3a8/native-card-repair-20261117/http-owner-probe.mjs",
+            "chunk_id": "6fb74f",
+            "wall_time_seconds": 1.3904566059999999,
+            "exit_code": 0,
+            "original_token_count": 70,
+            "output": "{\n  \"sourceSHA256\": \"6aad5a64d0142810d6b5fa9bd63708e1cfd7ec23f001964f53743140f9d1e3dd\",\n  \"elapsedMs\": 106.4873540000001,\n  \"passedTransportArms\": 6,\n  \"nativeBrowserJourneys\": 0,\n  \"report\": \"/workspace/scratch/8077f6e9f3a8/native-card-repair-20261117/http-owner-probe.json\"\n}\n"
+          }
+        },
+        {
+          "status": "fulfilled",
+          "value": {
+            "name": "format",
+            "cmd": "corepack pnpm@10.32.1 exec prettier --check apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts internal/records/2026-11-17-card-response-control-owner.md",
+            "chunk_id": "bb0e52",
+            "wall_time_seconds": 1.006142447,
+            "exit_code": 0,
+            "original_token_count": 17,
+            "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+          }
+        },
+        {
+          "status": "fulfilled",
+          "value": {
+            "name": "diff-check",
+            "cmd": "git diff --check",
+            "chunk_id": "953881",
+            "wall_time_seconds": 5.3135e-5,
+            "exit_code": 0,
+            "original_token_count": 0,
+            "output": ""
+          }
+        }
+      ]
+    },
+    "report": {
+      "status": "partial",
+      "executionMode": "human-assisted",
+      "executionModeSource": "current-user",
+      "sourceFiles": [
+        {
+          "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-native/apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts",
+          "bytes": 39924,
+          "sha256": "6aad5a64d0142810d6b5fa9bd63708e1cfd7ec23f001964f53743140f9d1e3dd",
+          "gitBlob": "27012a974a667a803148a7145aeacf819a9a9638"
+        },
+        {
+          "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-native/internal/records/2026-11-17-card-response-control-owner.md",
+          "bytes": 4290,
+          "sha256": "8a6d8f2692a485fb35a03b232c6125063f6296031670fa01d64f51a69f9a7b0e",
+          "gitBlob": "a3a0ca19da45e38f1f9a51ace9783b50668e4fc7"
+        }
+      ],
+      "completedDevelopmentCriterion": "Original six response-control HTTP routes own all redirect successors and terminal responses in a loopback HTTP server; source preserves existing collector and assertions",
+      "actualValidation": {
+        "commandReceipts": "/workspace/scratch/8077f6e9f3a8/native-card-repair-20261117/validation-command-receipts.json",
+        "httpTransport": {
+          "arms": 6,
+          "passed": 6,
+          "elapsedMs": 106.4873540000001,
+          "originalBrowserJourneys": 0,
+          "report": "/workspace/scratch/8077f6e9f3a8/native-card-repair-20261117/http-owner-probe.json"
+        },
+        "sourcePreservation": {
+          "beforeControlBlockSHA256": "db2336a001cce9949f103444eab7051e3b72863849b7d17b96c7fbaf4de3c5a6",
+          "originalAssertionsSHA256": "06a1ce5e44e2ce6fd1a8a0aaab023a6edd0a808212e18320c46c8a167083dadb",
+          "originalArmsSHA256": "e11ac702034df2ed6425c6ea8adf7000f6d5c579fb32bd4ec88b17bef26aa708",
+          "globalHooksCollectorAndOtherTwelve": true,
+          "originalAssertions": true,
+          "sixArms": true,
+          "deadlineMilliseconds": 30000
+        },
+        "syntaxDiagnostics": 0,
+        "helperStrictTypeDiagnostics": 0,
+        "prettier": "passed for both changed files",
+        "gitDiffCheck": "passed"
+      },
+      "initialFailure": "First formatting check failed only on newly added helper layouts and record wrapping; retained in initial-evidence-report.json and raw logs",
+      "acceptanceRemaining": [
+        "Original six native controls on exact candidate using normal sandbox-capable runner",
+        "Containing original18-case suite",
+        "Independent parent review"
+      ],
+      "notRun": [
+        "No Chromium retry after parent normal-sandbox EPERM observation",
+        "No full workspace type check",
+        "No GitHub writes"
+      ],
+      "agentEvidence": {
+        "requestParaphrase": "Continue unfinished work; repair the Card owned response fixture while retaining original assertions and acceptance limits.",
+        "type": "Internal HTTP transport ownership; actual source-bound HTTP observations and native baseline log; no fabricated UI",
+        "publication": "None requested; existing CI artifact URL retained",
+        "disposition": "Transport development evidence complete; repaired native acceptance blocked pending usable runner"
+      },
+      "reviewLimit": "This author report is not independent approval."
+    }
+  },
+  "codeExampleTree": {
+    "report": {
+      "status": "partial",
+      "executionMode": "human-assisted",
+      "executionModeSource": "current-user",
+      "sourceFiles": [
+        {
+          "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-code-tree/apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+          "bytes": 56293,
+          "sha256": "af63811c790096f25fdd3f5ac4f70de9b96a52f79c1dbb47050af1ca14888146",
+          "gitBlob": "57d4e38c261fed8e56f0c94e71db9c36f6092f1b"
+        },
+        {
+          "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-code-tree/internal/records/2026-11-17-code-example-tree-admission.md",
+          "bytes": 5171,
+          "sha256": "f88c96f78b43b43c56b1c9894b30f98348d00c017550ecccb337e32a2f1341f1",
+          "gitBlob": "3c7c9e9c6c38ab0ab3ad8cbfce1ffac4b7c18ae9"
+        }
+      ],
+      "nativeBaseline": {
+        "head": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "total": 26,
+        "pass": 14,
+        "fail": 12,
+        "job": "https://github.com/Proto-UI/Proto-UI/actions/runs/44038705347/job/133905785039",
+        "artifact": "https://github.com/Proto-UI/Proto-UI/actions/runs/44038705347/artifacts/14311530497",
+        "zipSHA256": "137d90267c2febb97c6dc7ce8bcbd470b787081109232181f704bc5fd61d7e58",
+        "boundary": "No postfailure DOM/trace; initial React Tree screenshots only."
+      },
+      "actualModelDiagnostic": {
+        "receipt": "/workspace/scratch/8077f6e9f3a8/code-tree-diagnosis-20261117/scheduler-case-receipt.json",
+        "rawDOMJournal": "/workspace/scratch/8077f6e9f3a8/code-tree-diagnosis-20261117/scheduler-observations.jsonl",
+        "selected": 1,
+        "passed": 1,
+        "filtered": 12,
+        "scheduler": "actual window.setTimeout fallback",
+        "nativeBrowserJourneys": 0,
+        "observation": "Selected WC hidden=false/Tree0/native-list visible before next task; Tree1/role tree/native-list hidden after actual task; source identities retained."
+      },
+      "staticValidation": {
+        "observedAt": "2026-11-17T08:59:49.339Z",
+        "head": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "source": {
+          "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-code-tree/apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+          "beforeSHA256": "8df729fd8854e5c0ffb3d8b44d9fe2b066c7bb8631ddbe794f3cd4d2703df900",
+          "afterSHA256": "af63811c790096f25fdd3f5ac4f70de9b96a52f79c1dbb47050af1ca14888146",
+          "insertionSHA256": "f2580eaaf971f40bc848c4667e7dee1e6b867854508cd029488da628eefeb7ca"
+        },
+        "preservation": {
+          "removingOnlySixInsertedLinesRestoresOriginalBytes": true,
+          "originalTimeoutsUnchanged": true,
+          "originalAssertionsUnchanged": true,
+          "productCodeUnchangedFromObservedModel": true,
+          "cardFrozenFilesUnchanged": true
+        },
+        "syntaxDiagnostics": 0,
+        "insertedAwaitStrictTypeDiagnostics": 0,
+        "playwrightDeclarationVersion": "1.58.2",
+        "deadline": {
+          "addedAdmissionCapMs": 1000,
+          "originalCaseTotalMs": 120000
+        },
+        "nativeBrowserJourneys": 0,
+        "limitation": "Static validation and existing nonnative model evidence; repaired native grammar matrix has not run."
+      },
+      "format": "New WHY record check passed. Entire preexisting grammar source preserved except six-line insertion; no broad reformat claimed.",
+      "diffCheck": "passed",
+      "initialValidationFailure": "Scratch strict checker initially pointed at a nonexistent root-level playwright-core declaration. Corrected checker to the actual apps/www-resolved1.58.2 declaration; no dependency or source change. Initial log retained.",
+      "agentEvidence": {
+        "type": "Actual native preassertion captures plus actual source-bound DOM model observations; not invented visuals",
+        "disposition": "partial native acceptance",
+        "publication": "None; existing actual CI source/artifact URLs retained",
+        "nextAction": "Run original twelve native journeys and full26 grammar on exact repaired source with fixed1000ms admission cap and unchanged120000ms total deadline"
+      },
+      "remaining": [
+        "No repaired native run",
+        "No native eventual WC outcome inferred",
+        "Parent independent review before integration"
+      ],
+      "noWrites": ["GitHub", "Box", "product implementation", "frozen Card files"]
+    },
+    "schedulerObservation": [
+      {
+        "stage": "after-native-selection-before-next-task",
+        "observedAt": "2026-11-17T08:54:48.159Z",
+        "scheduler": "actual window.setTimeout fallback",
+        "visibleHosts": ["panel-wc"],
+        "treeCount": 0,
+        "treeRole": null,
+        "nativeFileListHidden": false,
+        "sameSourceNodes": true
+      },
+      {
+        "stage": "after-real-timer-admission",
+        "observedAt": "2026-11-17T08:54:48.263Z",
+        "scheduler": "actual window.setTimeout fallback",
+        "visibleHosts": ["panel-wc"],
+        "treeCount": 1,
+        "treeRole": "tree",
+        "nativeFileListHidden": true,
+        "sameSourceNodes": true
+      }
+    ],
+    "schedulerCase": {
+      "startedAt": "2026-11-17T08:54:41.251931+00:00",
+      "completedAt": "2026-11-17T08:54:48.511205+00:00",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "/workspace/scratch/8077f6e9f3a8/code-tree-diagnosis-20261117/observe-existing-case.config.ts",
+        "apps/www/src/components/code-example-tree.test.ts",
+        "-t",
+        "composes queued real host Tabs and file Tree without duplicating source or resetting each host file",
+        "--reporter=verbose"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 7.259294359002524,
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "before": {
+        "apps/www/src/components/code-example-tree.test.ts": "3f9f4f04557d472e63bf5b3a9699e190ab18ef57d50852da3df6fcba095c2e91",
+        "apps/www/src/components/code-example-client.ts": "4d78d40daf862af7f343e838d5ab16d08e92b856c8145964dcb2276c1e26e5b9",
+        "apps/www/src/components/code-example-tabs.ts": "88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058",
+        "apps/www/src/components/code-example-tree.ts": "062bda52d104c20b998a73305a437d79af47540d52201129a4de32a998736b17"
+      },
+      "after": {
+        "apps/www/src/components/code-example-tree.test.ts": "3f9f4f04557d472e63bf5b3a9699e190ab18ef57d50852da3df6fcba095c2e91",
+        "apps/www/src/components/code-example-client.ts": "4d78d40daf862af7f343e838d5ab16d08e92b856c8145964dcb2276c1e26e5b9",
+        "apps/www/src/components/code-example-tabs.ts": "88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058",
+        "apps/www/src/components/code-example-tree.ts": "062bda52d104c20b998a73305a437d79af47540d52201129a4de32a998736b17"
+      },
+      "role": "Existing real-WC HappyDOM case with observation-only Vite transform; not native browser evidence",
+      "nativeBrowserJourneys": 0,
+      "logSHA256": "4e1d94f0f10bcf2fd00faaef3c81ba9a061c3b043bb04159045b0c2f4b8bc689"
+    }
+  },
+  "remainingAcceptance": [
+    "Card original six controls and complete eighteen on exact candidate native runner",
+    "CodeExample original twelve host journeys and complete twenty-six grammar on exact candidate native runner",
+    "HappyDOM single-case ordering is not native latency or rendering acceptance"
+  ],
+  "localReview": {
+    "reviewer": "root (separate agent from implementer)",
+    "scope": "source diffs, prior native observations, retained original assertions and deadlines, actual Node/HappyDOM evidence boundaries",
+    "formalGitHubApproval": false
+  }
+}

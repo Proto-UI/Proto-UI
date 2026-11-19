@@ -4,7 +4,7 @@ import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
 import { homepageButtonVariant } from './homepage-button-variants';
-import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-families';
 
 /**
