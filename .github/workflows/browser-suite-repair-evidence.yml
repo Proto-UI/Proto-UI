@@ -4,16 +4,16 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: oracle-repairs-evidence-${{ github.ref }}
+  group: oracle-native-evidence-${{ github.ref }}
   cancel-in-progress: false
 
 env:
-  CANDIDATE_SHA: 6cea4c8edd2ed7a7c0d45c1cb7bcc5037e5366f0
+  CANDIDATE_SHA: b8c7f77fa94a3ae6102a90c82ffef4825a9e212a
 
 jobs:
-  shadcn-oracles:
+  oracle-repairs:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,7 +40,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts demo-select-draft-projections.browser.test.ts demo-accordion-family.browser.test.ts demo-shadcn-controls.browser.test.ts \
             --reporter=default --reporter=json \
             --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
       - uses: actions/upload-artifact@v4
@@ -50,4 +50,3 @@ jobs:
           path: ${{ runner.temp }}/oracle-native
           if-no-files-found: warn
           retention-days: 30
-
