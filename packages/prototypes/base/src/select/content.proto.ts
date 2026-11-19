@@ -235,8 +235,11 @@ function setupSelectContent(
     return entries[0]?.part ?? null;
   };
 
-  const retireFocusHandoff = (run: RunHandle<SelectContentProps>, ctx: SelectContextValue) => {
-    const handoff = ctx.focusHandoff ?? 0;
+  const retireFocusHandoff = (
+    run: RunHandle<SelectContentProps>,
+    ctx: SelectContextValue,
+    handoff = ctx.focusHandoff ?? 0
+  ) => {
     if (handoff <= (ctx.focusHandoffBaseline ?? 0)) return;
     run.context.update(SELECT_CONTEXT, (latest: SelectContextValue) =>
       latest.rootId === ctx.rootId && latest.open === ctx.open && latest.value === ctx.value
@@ -245,24 +248,13 @@ function setupSelectContent(
     );
   };
 
-  const completeEntryFocus = (
-    run: RunHandle<SelectContentProps>,
-    target: AnatomyPartView | null
-  ) => {
-    // Entry itself can publish focus through both the Item and Root Boundary.
-    // Consume that observation only while this target still owns actual focus;
-    // a reentrant Item/external handoff must remain newer than the baseline.
-    if (!(target?.getExpose('focused') as { get?: () => boolean } | null)?.get?.()) return;
-    const ctx = readContext(run);
-    if (ctx?.open) retireFocusHandoff(run, ctx);
-  };
-
   const applyEntryFocus = (
     run: RunHandle<SelectContentProps>,
     target: AnatomyPartView,
     focus: () => void,
     current: () => boolean
   ) => {
+    if (!current()) return;
     const ctx = readContext(run);
     const previous = entryFocus;
     const attempt = {
@@ -273,7 +265,16 @@ function setupSelectContent(
     entryFocus = attempt;
     try {
       focus();
-      if (!attempt.superseded && current()) completeEntryFocus(run, target);
+      // Retire only tokens observed while this attempt owned focus. A native
+      // focus callback may disable the row and invalidate collection readiness
+      // before returning; that does not turn entry itself into a competing owner.
+      if (
+        !attempt.superseded &&
+        !ownerDisposed &&
+        ctx &&
+        attempt.handoff > (ctx.focusHandoff ?? 0)
+      )
+        retireFocusHandoff(run, ctx, attempt.handoff);
     } finally {
       if (entryFocus === attempt) entryFocus = previous;
     }
@@ -523,17 +524,16 @@ function setupSelectContent(
 
   def.context.subscribe(SELECT_CONTEXT, (run, next) => {
     const attempt = entryFocus;
-    if (
-      attempt &&
-      !attempt.superseded &&
-      (next.focusHandoff ?? 0) > attempt.handoff &&
-      !(attempt.target.getExpose('focused') as { get?: () => boolean } | null)?.get?.()
-    ) {
-      // A reentrant native handoff can leave the in-flight host request pending.
-      // Revoke that attempt before it queues a retry, and retain the newer token.
-      attempt.superseded = true;
-      const cancel = attempt.target.getExpose('__cancelPendingEntryFocus') as (() => void) | null;
-      cancel?.();
+    if (attempt && !attempt.superseded && (next.focusHandoff ?? 0) > attempt.handoff) {
+      if ((attempt.target.getExpose('focused') as { get?: () => boolean } | null)?.get?.()) {
+        attempt.handoff = next.focusHandoff ?? 0;
+      } else {
+        // A reentrant native handoff can leave the in-flight host request pending.
+        // Revoke that attempt before it queues a retry, and retain the newer token.
+        attempt.superseded = true;
+        const cancel = attempt.target.getExpose('__cancelPendingEntryFocus') as (() => void) | null;
+        cancel?.();
+      }
     }
     updateOpen(run, readContext(run) ?? next, 'reason: select context sync => content open');
   });

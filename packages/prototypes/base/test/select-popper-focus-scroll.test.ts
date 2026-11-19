@@ -292,6 +292,47 @@ describe.each(families)('$name Select popper host focus scroll policy', (family)
     expect(f.root.getExposes().value.get()).toBe('alpha');
   });
 
+  it.each([
+    { entry: 'selected-or-first', target: 2 },
+    { entry: 'selected-or-last', target: 3 },
+  ] as const)(
+    'retires automatic focus when the selected Item disables itself during native focus ($entry)',
+    async ({ entry, target }) => {
+      // T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL
+      // The real host focus event changes collection eligibility before the
+      // automatic focus call returns. No newer Item/external owner is injected.
+      vi.useFakeTimers();
+      const f = createSelect(family, true, 'alpha');
+      await settle();
+      f.trigger.focus();
+      const selectedFocus = vi.spyOn(f.items[0], 'focus');
+      const successorFocus = vi.spyOn(f.items[target], 'focus');
+      const disableSelected = vi.fn(() => setElementProps(f.items[0], { disabled: true }));
+      const valueChange = vi.fn();
+      f.root.addEventListener('valueChange', valueChange);
+      f.items[0].addEventListener('focus', disableSelected, { once: true });
+
+      f.root.getExposes().requestOpen({
+        open: true,
+        reason: 'automatic-entry-disabled-during-focus',
+        focusReason: 'programmatic',
+        entry,
+      });
+      await settle();
+
+      expect(disableSelected).toHaveBeenCalledOnce();
+      expect(selectedFocus).toHaveBeenCalledOnce();
+      expect(f.items[0].getAttribute('aria-disabled')).toBe('true');
+      expect(f.items[0].getExposes().focused.get()).toBe(false);
+      expect(successorFocus).toHaveBeenCalledWith({ preventScroll: false });
+      expect(document.activeElement).toBe(f.items[target]);
+      expect(f.items[target].getExposes().focused.get()).toBe(true);
+      expect(f.root.getExposes().open.get()).toBe(true);
+      expect(f.root.getExposes().value.get()).toBe('alpha');
+      expect(valueChange).not.toHaveBeenCalled();
+    }
+  );
+
   it.each(['item', 'external'] as const)(
     'retains a reentrant %s handoff during automatic entry',
     async (owner) => {

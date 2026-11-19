@@ -49,6 +49,7 @@ cases:
       - WC cases exercise complete Popper Item and external handoffs from uncontrolled and synchronously accepting controlled callbacks across Base, Shadcn and Brutalist.
       - Real React cases exercise a batched controlled setOpen followed by actual external button focus across Base and Shadcn, plus refusal, supersession, an Expose Event-isolated callback throw followed by owner acceptance, genuine value replacement and close/reopen. They do not establish batched Item focus, Vue, native or compiled-host behavior.
       - WC cases distinguish automatic entry from a newer reentrant owner, prohibit reacquisition after that handoff or a record update, retain genuine value/open admission, and replace Content after a named structural abort without closing Root. These repair assertions require candidate execution.
+      - WC cases also disable the selected Item synchronously from its real host focus event and require enabled first/last boundary entry without changing committed selection; the automatic handoff must retire despite its collection revision becoming stale. These new assertions are unexecuted.
       - Host focus options under Happy DOM establish policy delivery, not actual browser clipping, scroll offsets or assistive-technology acceptance.
   - id: T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     title: Content retains leave view and portals a collision-aware Trigger-anchored surface
