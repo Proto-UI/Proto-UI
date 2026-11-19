@@ -22,7 +22,7 @@ export function enhanceCodeExampleTree(options: {
   list: HTMLElement;
   tabs: HTMLElement[];
   panels: HTMLElement[];
-  onSelect(index: number): void;
+  onSelect(index: number, panel: HTMLElement): void;
   directories?: readonly string[];
 }): TreeProjection {
   const { list, tabs, panels, onSelect } = options;
@@ -30,6 +30,16 @@ export function enhanceCodeExampleTree(options: {
   if (list.contains(doc.activeElement) || panels.some((panel) => panel.contains(doc.activeElement)))
     return { select() {}, destroy() {} };
   if (tabs.length !== panels.length || !tabs.length) throw new Error('[CodeExample] File controls and source panels must match.');
+  const panelsById = new Map(panels.map((panel) => [panel.id, panel]));
+  // File links follow directory order; source panels follow authored order.
+  const panelsInTabOrder = tabs.map((tab) => {
+    const target = tab.getAttribute('aria-controls');
+    const panel = target ? panelsById.get(target) : undefined;
+    if (!panel) throw new Error('[CodeExample] File controls and source panels must match.');
+    return panel;
+  });
+  if (new Set(panelsInTabOrder).size !== panels.length)
+    throw new Error('[CodeExample] File controls and source panels must match.');
   const nodes = codeFileNodes(tabs.map((tab) => tab.dataset.codeFilePath ?? tab.textContent?.trim() ?? ''), options.directories);
   const familyScope = list.closest<HTMLElement>('[data-projection-family], [data-site-library-family]');
   const family = (familyScope?.dataset.projectionFamily ?? familyScope?.dataset.siteLibraryFamily ?? doc.documentElement.dataset.siteLibraryFamily) === 'brutalist' ? 'brutalist' : 'shadcn';
@@ -64,7 +74,7 @@ export function enhanceCodeExampleTree(options: {
     if (node.fileIndex !== undefined) {
       item.dataset.codeFileIndex = String(node.fileIndex);
       item.id = `${tabs[node.fileIndex].id}-tree`;
-      item.setAttribute('aria-controls', panels[node.fileIndex].id);
+      item.setAttribute('aria-controls', panelsInTabOrder[node.fileIndex].id);
     }
     // Indentation is consumer layout; the actual Tree owns all state paint.
     setElementProps(item, {
@@ -172,7 +182,7 @@ export function enhanceCodeExampleTree(options: {
       expanded = expanded.includes(node.key) ? expanded.filter((key) => key !== node.key) : [...expanded, node.key];
     } else {
       value = node.fileIndex;
-      onSelect(value);
+      onSelect(value, panelsInTabOrder[value]);
     }
     publish();
   };
@@ -215,7 +225,7 @@ export function enhanceCodeExampleTree(options: {
     if (root.getAttribute('role') !== 'tree' || [...items.values()].some((item) => item.getAttribute('role') !== 'treeitem'))
       throw new Error('[CodeExample] Tree did not initialize; native file controls retained.');
     if (list.contains(doc.activeElement)) { destroy(); return { select() {}, destroy() {} }; }
-    panels.forEach((panel, index) => {
+    panelsInTabOrder.forEach((panel, index) => {
       panel.setAttribute('role', 'region');
       panel.setAttribute('aria-labelledby', items.get(path(index))!.id);
     });
