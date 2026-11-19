@@ -926,7 +926,12 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         path.join(directory, 'normal-close-mutations.json'),
         JSON.stringify({ source, observations: closeObservations }, null, 2)
       );
-    for (const family of ['shadcn', 'brutalist'] as const) {
+    const familyRoutes = {
+      shadcn: '/zh-cn/ui-libraries/shadcn/button/',
+      brutalist: '/zh-cn/ui-libraries/brutalist/components/button/',
+      'bootstrap-2-3-2': '/zh-cn/ui-libraries/bootstrap-2-3-2/button/',
+    } as const;
+    for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       const context = await browser.newContext({
         viewport: { width: 390, height: 844 },
         colorScheme: 'dark',
@@ -966,11 +971,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           }).observe({ type: 'longtask', buffered: true });
       });
       try {
-        const route =
-          family === 'shadcn'
-            ? '/zh-cn/ui-libraries/shadcn/button/'
-            : '/zh-cn/ui-libraries/brutalist/components/button/';
-        await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+        await page.goto(`${baseUrl}${familyRoutes[family]}`, { waitUntil: 'networkidle' });
         const root = page.locator('[data-site-contents-command]');
         const command = root.locator(
           '[data-projection-generation-state="active"] [data-site-contents-button]'
@@ -1430,7 +1431,12 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           expect(facts.height).toBeGreaterThanOrEqual(44);
           expect(facts.ownsCenter).toBe(true);
           expect(facts.focusVisible).toBe(true);
-          expect(facts.tokens).toContain(family === 'shadcn' ? 'border-ring' : 'rounded-base');
+          const expectedFocusPaint = {
+            shadcn: 'border-ring',
+            brutalist: 'rounded-base',
+            'bootstrap-2-3-2': 'rounded-[4px]',
+          } as const;
+          expect(facts.tokens).toContain(expectedFocusPaint[family]);
           const id = `${family}-${runtime}-keyboard-focus`;
           const record = {
             source,
