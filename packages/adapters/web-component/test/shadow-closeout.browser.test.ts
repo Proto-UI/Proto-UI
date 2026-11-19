@@ -1119,6 +1119,9 @@ describe('Shadow closeout native boundaries', () => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       try {
+        // Native bare :hover matching must use the standards-mode semantics
+        // of the application, rather than about:blank's BackCompat behavior.
+        await page.setContent('<!doctype html><html><head></head><body></body></html>');
         await page.addScriptTag({ content: script });
         await page.mouse.move(600, 400);
         await page.evaluate(({ artifact, mode }) => {
@@ -1184,9 +1187,11 @@ describe('Shadow closeout native boundaries', () => {
           }
           const fixture: SelectorOpacityFixture = {
             snapshot: () => ({
+              compatMode: document.compatMode,
               opacity: getComputedStyle(surface).opacity,
               delay: getComputedStyle(surface).transitionDelay,
               hovered: host.matches(':hover'),
+              qualifiedHovered: host.matches('[data-pui-split-root-style~="hover:opacity-0"]:hover'),
               transitions: surface.getAnimations().length,
               tokens: surface.getAttribute('data-pui-style'),
               identity: identity(),
@@ -1277,11 +1282,27 @@ describe('Shadow closeout native boundaries', () => {
           caller: true, surface: true, slot: true, decoration: true,
           controller: true, generation: true, resources: true, setups: 1,
         };
+        const expectSnapshot = async (expected: unknown) => {
+          let lastSnapshot: unknown;
+          try {
+            await expect.poll(async () => {
+              lastSnapshot = await page.evaluate(() =>
+                (window as unknown as SelectorOpacityWindow).selectorOpacity.snapshot()
+              );
+              return lastSnapshot;
+            }).toEqual(expected);
+          } catch (cause) {
+            throw new Error(
+              `Selector opacity ${mode}: last native snapshot ${JSON.stringify(lastSnapshot)}`,
+              { cause }
+            );
+          }
+        };
         if (mode !== 'foreign withdrawal') await page.mouse.move(30, 30);
-        await expect.poll(() => page.evaluate(() =>
-          (window as unknown as SelectorOpacityWindow).selectorOpacity.snapshot()
-        )).toEqual({
+        await expectSnapshot({
+          compatMode: 'CSS1Compat',
           opacity: '0', delay: '0s', hovered: mode !== 'foreign withdrawal', transitions: 0,
+          qualifiedHovered: mode !== 'foreign withdrawal',
           tokens: 'transition-opacity hover:opacity-0', identity,
         });
         if (mode === 'foreign withdrawal') {
@@ -1306,9 +1327,8 @@ describe('Shadow closeout native boundaries', () => {
         });
         expect(leave?.delay).toBe('0s');
         if (mode === 'native') {
-          await expect.poll(() => page.evaluate(() =>
-            (window as unknown as SelectorOpacityWindow).selectorOpacity.snapshot()
-          )).toEqual({
+          await expectSnapshot({
+            compatMode: 'CSS1Compat', qualifiedHovered: false,
             opacity: '1', delay: '0s', hovered: false, transitions: 0,
             tokens: 'transition-opacity hover:opacity-0', identity,
           });
