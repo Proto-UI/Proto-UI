@@ -121,8 +121,9 @@ async function openMenu(page: Page, trigger: Locator) {
   const id = await trigger.getAttribute('aria-controls');
   if (!id) throw new Error('The selected demo trigger must identify its own menu.');
   const menu = page.locator(`[id=${JSON.stringify(id)}][role="menu"]`);
-  expect(await menu.count()).toBe(1);
+  // The trigger can publish its expanded state before the host mounts the menu.
   await menu.waitFor({ state: 'visible' });
+  expect(await menu.count()).toBe(1);
   // Observe the real enter animation; do not inject CSS or hide it with a sleep.
   await expect
     .poll(
