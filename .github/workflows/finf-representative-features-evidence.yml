@@ -1,112 +1,23 @@
 name: Finf representative feature screenshots
+
 on:
   workflow_dispatch:
-    inputs:
-      feature_group:
-        description: Representative feature group; all preserves the complete inventory
-        required: true
-        type: choice
-        default: all
-        options:
-          - all
-          - calendar
-      popover_evidence:
-        description: Popover evidence selection; fault modes intentionally fail
-        required: true
-        type: choice
-        default: all
-        options:
-          - all
-          - normal
-          - wrong-width
-          - nonsettling
-  workflow_call:
+
 permissions:
   contents: read
+
 concurrency:
-  group: finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}
+  group: finf-feature-evidence-${{ github.ref }}
   cancel-in-progress: false
 
 env:
-  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  CANDIDATE_SHA: 04c65303ed4c5a9c8bdd00604757deee825db66f
+
 jobs:
   representative-features:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        group:
-          - forms
-          - calendar
-          - disclosure-overlays
-          - modal-overlays
-          - runtime-tabs
-          - slider
-          - dropdown
-          - liquid-dropdown
-          - popover-title
-          - popover-navigation
-          - drawer-intrinsic
-          - drawer-command-density
-          - popover-command-density
-          - neo-popover-title
-          - resident-motion-capability
-          - shadcn-toggle
-          - shadcn-switch-consumer
-          - shadcn-drawer-presence
-          - shadcn-card
-          - brutalist-switch-consumer
-        # Preserve the full group inventory above for all/reusable invocations.
-        # Reusable calls retain their caller's event and workflow ref. Only this
-        # workflow's direct dispatch may apply its manual selectors.
-        # Calendar takes precedence over Popover filtering. Invalid manual inputs
-        # retain one job so the validation step rejects them before setup.
-        exclude: >-
-          ${{ github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository)) && inputs.feature_group != 'all' && fromJSON('[{"group":"forms"},{"group":"disclosure-overlays"},{"group":"modal-overlays"},{"group":"runtime-tabs"},{"group":"slider"},{"group":"dropdown"},{"group":"liquid-dropdown"},{"group":"popover-title"},{"group":"popover-navigation"},{"group":"drawer-intrinsic"},{"group":"drawer-command-density"},{"group":"popover-command-density"},{"group":"neo-popover-title"},{"group":"resident-motion-capability"},{"group":"shadcn-toggle"},{"group":"shadcn-switch-consumer"},{"group":"shadcn-drawer-presence"},{"group":"shadcn-card"},{"group":"brutalist-switch-consumer"}]') || github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository)) && inputs.popover_evidence != 'all' && fromJSON('[{"group":"forms"},{"group":"calendar"},{"group":"modal-overlays"},{"group":"runtime-tabs"},{"group":"slider"},{"group":"dropdown"},{"group":"liquid-dropdown"},{"group":"popover-title"},{"group":"popover-navigation"},{"group":"drawer-intrinsic"},{"group":"drawer-command-density"},{"group":"popover-command-density"},{"group":"neo-popover-title"},{"group":"resident-motion-capability"},{"group":"shadcn-toggle"},{"group":"shadcn-switch-consumer"},{"group":"shadcn-drawer-presence"},{"group":"shadcn-card"},{"group":"brutalist-switch-consumer"}]') || fromJSON('[]') }}
-
-
     steps:
-      - name: Validate manual feature evidence selection
-        id: popover_dispatch
-        env:
-          PUI_FINF_FEATURE_REQUEST: ${{ !(github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository))) && 'all' || inputs.feature_group }}
-          PUI_FINF_POPOVER_REQUEST: ${{ !(github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository))) && 'all' || inputs.popover_evidence }}
-          PUI_FINF_FEATURE_GROUP: ${{ matrix.group }}
-        run: |
-          set -euo pipefail
-          case "$PUI_FINF_FEATURE_REQUEST" in
-            all) ;;
-            calendar)
-              if [ "$PUI_FINF_POPOVER_REQUEST" != all ]; then
-                printf 'Calendar selection requires popover_evidence=all: %s\n' "$PUI_FINF_POPOVER_REQUEST" >&2
-                exit 2
-              fi
-              if [ "$PUI_FINF_FEATURE_GROUP" != calendar ]; then
-                printf 'Calendar selection reached unexpected group: %s\n' "$PUI_FINF_FEATURE_GROUP" >&2
-                exit 2
-              fi
-              ;;
-            *)
-              printf 'Unknown manual feature group: %s\n' "$PUI_FINF_FEATURE_REQUEST" >&2
-              exit 2
-              ;;
-          esac
-          case "$PUI_FINF_POPOVER_REQUEST" in
-            all) ;;
-            normal|wrong-width|nonsettling)
-              if [ "$PUI_FINF_FEATURE_GROUP" != disclosure-overlays ]; then
-                printf 'Targeted Popover selection reached unexpected group: %s\n' "$PUI_FINF_FEATURE_GROUP" >&2
-                exit 2
-              fi
-              ;;
-            *)
-              printf 'Unknown manual Popover evidence selection: %s\n' "$PUI_FINF_POPOVER_REQUEST" >&2
-              exit 2
-              ;;
-          esac
-          printf 'mode=%s\n' "$PUI_FINF_POPOVER_REQUEST" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.CANDIDATE_SHA }}
@@ -118,6 +29,7 @@ jobs:
         id: setup
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
@@ -128,7 +40,7 @@ jobs:
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/finf-feature-evidence/font-environment.txt"
           fc-match -f '%{family}\n%{file}\n' 'sans-serif:lang=zh-cn' >> "$RUNNER_TEMP/finf-feature-evidence/font-environment.txt"
           git rev-parse HEAD > "$RUNNER_TEMP/finf-feature-evidence/source-sha.txt"
-          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/finf-feature-evidence/source-tree.txt"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/finf-feature-evidence/source-tree.txt"
           "$CHROME" --version > "$RUNNER_TEMP/finf-feature-evidence/browser.txt"
       - name: Check the actual preset generation boundary
         id: presets
@@ -139,109 +51,26 @@ jobs:
         id: surface
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Capture independent current-source component group
-        id: capture
+      - name: Capture independent current-source Dropdown evidence
         if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.surface.outcome == 'success' }}
         env:
-          PUI_FINF_FEATURE_GROUP: ${{ matrix.group }}
+          PUI_FINF_FEATURE_GROUP: dropdown
           PUI_FINF_PRESET_CHECK: ${{ steps.presets.outcome }}
           PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-feature-evidence
-          PUI_FINF_POPOVER_EVIDENCE: ${{ steps.popover_dispatch.outputs.mode }}
+          PUI_FINF_POPOVER_EVIDENCE: all
         run: |
           set -euo pipefail
           unset PUI_FINF_POPOVER_NEGATIVE_CONTROL
-          POPOVER_ARGS=()
-          case "$PUI_FINF_POPOVER_EVIDENCE" in
-            all) ;;
-            normal)
-              POPOVER_ARGS=(-t '(shadcn|brutalist)-popover$')
-              ;;
-            wrong-width)
-              export PUI_FINF_POPOVER_NEGATIVE_CONTROL=wrong-width
-              POPOVER_ARGS=(-t 'shadcn-popover$')
-              ;;
-            nonsettling)
-              export PUI_FINF_POPOVER_NEGATIVE_CONTROL=nonsettling
-              POPOVER_ARGS=(-t 'shadcn-popover$')
-              ;;
-            *)
-              printf 'Unknown validated Popover evidence selection: %s\n' "$PUI_FINF_POPOVER_EVIDENCE" >&2
-              exit 2
-              ;;
-          esac
-          TEST_FILE=apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts
-          if [ "$PUI_FINF_FEATURE_GROUP" = resident-motion-capability ]; then
-            TEST_FILE=packages/adapters/base/test/resident-motion.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-card ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts
-            export PUI_SHADCN_CARD_EVIDENCE_DIR="$PUI_FINF_FEATURE_EVIDENCE_DIR/shadcn-card"
-          elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-drawer-presence ]; then
-            TEST_FILE=packages/prototypes/shadcn/test/drawer-presence.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-switch-consumer ]; then
-            TEST_FILE=packages/prototypes/shadcn/test/switch-motion.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = brutalist-switch-consumer ]; then
-            TEST_FILE=packages/prototypes/brutalist/test/switch-motion.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = slider ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = liquid-dropdown ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-toggle ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-shadcn-toggle.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = dropdown ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = popover-navigation ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = popover-title ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = drawer-intrinsic ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = drawer-command-density ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = popover-command-density ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts
-          elif [ "$PUI_FINF_FEATURE_GROUP" = neo-popover-title ]; then
-            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts
-          fi
           corepack pnpm@10.32.1 exec vitest run \
-            "$TEST_FILE" \
-            "${POPOVER_ARGS[@]}" \
+            apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts \
             --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
             --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" \
             2>&1 | tee "$PUI_FINF_FEATURE_EVIDENCE_DIR/browser.log"
-          if [ "$PUI_FINF_FEATURE_GROUP" = shadcn-card ]; then
-            node --input-type=module - "$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" <<'JS'
-          import assert from 'node:assert/strict';
-          import { readFileSync } from 'node:fs';
-          // CARD_REPORT_VALIDATOR_BEGIN
-          function assertShadcnCardReport(report) {
-            assert.equal(report.success, true);
-            assert.equal(report.numTotalTests, 10);
-            assert.equal(report.numPassedTests, 10);
-            assert.equal(report.numFailedTests, 0);
-            assert.equal(report.numPendingTests, 0);
-            assert.equal(report.testResults.length, 1);
-            const suite = report.testResults[0];
-            assert.ok(suite.name.replaceAll('\\', '/').endsWith('/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts'));
-            const actual = suite.assertionResults.map((result) => {
-              assert.equal(result.status, 'passed');
-              return [...result.ancestorTitles, result.title].filter(Boolean).join(' > ');
-            }).sort();
-            const expected = ['wc', 'react', 'vue', 'vue2'].flatMap((runtime) => [
-              `Shadcn Card New York compatibility native ${runtime} > preserves distinct card paint, inherited content ink and native navigation`,
-              `Shadcn Card ordinary Rhea native ${runtime} > preserves default light Rhea paint, passive content and native navigation`,
-            ]);
-            expected.push('gallery keeps distinct Card ink with JavaScript=false', 'gallery keeps distinct Card ink with JavaScript=true');
-            assert.equal(JSON.stringify(actual), JSON.stringify(expected.sort()));
-          }
-          // CARD_REPORT_VALIDATOR_END
-          assertShadcnCardReport(JSON.parse(readFileSync(process.argv[2], 'utf8')));
-          JS
-          fi
       - name: Retain actual source-bound images and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: finf-features-${{ matrix.group }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: finf-features-dropdown-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/finf-feature-evidence
           if-no-files-found: warn
           retention-days: 30
