@@ -1,55 +1,46 @@
 name: Browser suite repair evidence
-
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
-concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  focused-browser:
+  menubar-roving-probe:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
-        run: |
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
-        run: |
-          set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+      - name: Prepare locked dependencies and browser
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/menubar-roving
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          chrome=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
+          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
+          "$chrome" --version > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Observe WC failure and Vue 2 control
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/menubar-roving
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts \
+            -t '(wc (light|dark)|vue2 light) preserves closed focus' --no-file-parallelism --maxWorkers=1 \
+            --reporter=default --reporter=json --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
+          name: menubar-roving-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/menubar-roving/
           if-no-files-found: warn
           retention-days: 30
