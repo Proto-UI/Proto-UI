@@ -7,6 +7,7 @@ import { Window } from 'happy-dom';
 import { createRootStyleEffect, resolveRootStyleEntry } from '@proto.ui/core/internal';
 import { run } from '../src/index';
 import { renderShadowStyleDelivery } from '../src/services/shadow-style-delivery';
+import { collectProtoShadowStyleTokenUsage } from '../src/services/prototype-style-tokens';
 import { renderProtoShadowStyleTokenCss } from '../src/services/proto-style-css';
 import { SHADCN_STYLE_TOKENS } from '../src/generated/shadcn-style-tokens';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
@@ -38,7 +39,7 @@ async function generate(source: string, recipes: Record<string, string> = {}) {
   const artifact = validateShadowStyleArtifact(
     JSON.parse(module.match(/const artifact = Object\.freeze\((.+)\);/)![1])
   );
-  return { artifact, documentCss: await readFile(path.join(dir, 'tokens.css'), 'utf8') };
+  return { artifact, documentCss: await readFile(path.join(dir, 'tokens.css'), 'utf8'), dir };
 }
 
 const template = (tokens: string) => `
@@ -104,6 +105,14 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }});`,
     `definePrototype({ name: 'helper-parent', setup(def) {
       return r => helper.el('section', {}, r.el('span', { style: tw('p-[10%]') }));
+    }});`,
+    `definePrototype({ name: 'unknown-renderer-method', setup(def) {
+      const target = def.feedback.style.declareDecoration();
+      return r => [
+        r.el('div', { style: tw('p-[10%]') }, r.slot()),
+        r.decoration(target),
+        r.unknown(target),
+      ];
     }});`,
   ])('does not trust helper receivers or escaping style handles: %s', async (source) => {
     await expect(
@@ -1375,6 +1384,31 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).toContain('padding: 10%;');
     expect(artifact.cssText).toContain('padding: var(--space);');
     expect(artifact.cssText).toContain('::placeholder');
+  });
+
+  it('keeps inner Template styles outside Root recipes alongside owned decoration', async () => {
+    const { artifact, documentCss, dir } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'template-with-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.use(tw('p-2'));
+        def.feedback.style.to(target).use(tw('opacity-50'));
+        return r => [
+          r.el('div', { style: tw('p-[10%]') }, r.slot()),
+          r.decoration(target),
+        ];
+      }});
+    `);
+    const usage = await collectProtoShadowStyleTokenUsage(dir);
+    expect(usage.rootTokens).toEqual(['p-2']);
+    expect(usage.templateTokens).toEqual(['opacity-50', 'p-[10%]']);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    for (const token of ['p-[10%]', 'opacity-50']) {
+      expect(artifact.cssText).toContain(`[data-pui-style~="${token}"]`);
+      expect(artifact.cssText).not.toContain(`[data-pui-split-root-style~="${token}"]`);
+      expect(documentCss).toContain(`[data-pui-style~="${token}"]`);
+    }
+    expect(artifact.cssText).toContain('[data-pui-split-root-style~="p-2"]');
   });
 
   it('does not turn Template membership into runtime Root admission', async () => {

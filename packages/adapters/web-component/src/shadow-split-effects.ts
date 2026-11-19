@@ -405,7 +405,7 @@ export function createShadowSplitEffectsPort({
   let disposed = false;
   let flushing = false;
   let flushRequested = false;
-  let zeroOpacityTransition: { animation: CSSTransition; target: string } | null = null;
+  let zeroOpacityTransition: { animation: CSSTransition; target: string | null } | null = null;
   const isLiveSurfaceToken = (token: string) => {
     const selector = compiledReceiptSelector(token, 'element');
     return (
@@ -419,6 +419,15 @@ export function createShadowSplitEffectsPort({
       (token) =>
         (token === 'opacity-0' || token.endsWith(':opacity-0')) && isLiveSurfaceToken(token)
     ) ?? false;
+  const isCurrentOpacityTarget = (target: string | null) =>
+    target !== null
+      ? isLiveSurfaceToken(target) === true
+      : !!applied &&
+        !applied.surface.some((token) => /(?:^|:)opacity-/.test(token)) &&
+        applied.surface.some(
+          (token) =>
+            /(?:^|:)transition-(?:opacity|all)$/.test(token) && isLiveSurfaceToken(token)
+        );
   const ownsZeroOpacityAnimation = (direction: 'in' | 'out') => {
     const hasPaint = (name: string) =>
       applied?.surface.some(
@@ -457,7 +466,7 @@ export function createShadowSplitEffectsPort({
       const transition = zeroOpacityTransition;
       return (
         !!transition &&
-        isLiveSurfaceToken(transition.target) === true &&
+        isCurrentOpacityTarget(transition.target) &&
         (transition.animation.pending || transition.animation.playState === 'running') &&
         surface.getAnimations().includes(transition.animation)
       );
@@ -465,9 +474,9 @@ export function createShadowSplitEffectsPort({
   });
 
   const captureZeroOpacityTransition = (
-    eligible: readonly string[],
+    eligible: readonly (string | null)[],
     before: readonly Animation[]
-  ): { animation: CSSTransition; target: string } | null => {
+  ): { animation: CSSTransition; target: string | null } | null => {
     const view = surface.ownerDocument.defaultView;
     if (!view?.CSSTransition || !view.KeyframeEffect) return null;
     for (const animation of surface.getAnimations()) {
@@ -489,10 +498,12 @@ export function createShadowSplitEffectsPort({
       const finalOpacity = Number(keyframes.at(-1)?.opacity);
       const target = eligible.find(
         (token) =>
-          Number(/(?:^|:)opacity-(\d+)$/.exec(token)?.[1]) / 100 === finalOpacity &&
-          isLiveSurfaceToken(token)
+          (token === null
+            ? finalOpacity === 1
+            : Number(/(?:^|:)opacity-(\d+)$/.exec(token)?.[1]) / 100 === finalOpacity) &&
+          isCurrentOpacityTarget(token)
       );
-      if (target) return { animation, target };
+      if (target !== undefined) return { animation, target };
     }
     return null;
   };
@@ -626,12 +637,15 @@ export function createShadowSplitEffectsPort({
     const previous = applied;
     const next = latest;
     try {
-      // Capture the native transition only on an owned zero-to-positive write.
+      // Removing the final owned opacity token also transitions to default 1.
+      // Capture only the native transition created by this owned write.
       // Subsequent equal projections must not acquire a different animation.
       const eligible =
         ownsZeroOpacity() &&
         next.surface.some((token) => /(?:^|:)transition-(?:opacity|all)$/.test(token))
-          ? next.surface.filter((token) => /(?:^|:)opacity-[1-9]\d*$/.test(token))
+          ? next.surface.some((token) => /(?:^|:)opacity-/.test(token))
+            ? next.surface.filter((token) => /(?:^|:)opacity-[1-9]\d*$/.test(token))
+            : [null]
           : [];
       const before = eligible.length && surface.getAnimations ? surface.getAnimations() : null;
       host.setAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR, next.root);
@@ -640,7 +654,7 @@ export function createShadowSplitEffectsPort({
       applier.apply(next.surface);
       applied = next;
       if (before) zeroOpacityTransition = captureZeroOpacityTransition(eligible, before);
-      else if (zeroOpacityTransition && !next.surface.includes(zeroOpacityTransition.target))
+      else if (zeroOpacityTransition && !isCurrentOpacityTarget(zeroOpacityTransition.target))
         zeroOpacityTransition = null;
     } catch (error) {
       // Restore both owned projections even when the failing target mutated before throwing.

@@ -1528,7 +1528,7 @@ function isTemplateStyleCall(node, scope) {
         !(
           ts.isPropertyAccessExpression(access) &&
           access.expression === current &&
-          ['el', 'slot'].includes(access.name.text) &&
+          ['el', 'slot', 'decoration'].includes(access.name.text) &&
           ts.isCallExpression(access.parent) &&
           access.parent.expression === access
         )
