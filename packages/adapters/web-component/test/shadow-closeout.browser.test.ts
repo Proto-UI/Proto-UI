@@ -733,6 +733,103 @@ describe('Shadow closeout native boundaries', () => {
     }
   );
 
+  it.each(['unchanged', 'replace selection', 'mutate the assigned list'] as const)(
+    'preserves caller file membership through split publication (%s)',
+    async (mutation) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, mutation }) => {
+            const { adapt, define } = (
+              window as unknown as {
+                Closeout: { adapt: typeof AdaptToWebComponent; define: typeof definePrototype };
+              }
+            ).Closeout;
+            const host = document.createElement('closeout-split-file-upgrade');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            const transfer = new DataTransfer();
+            transfer.items.add(new File(['first'], 'first.txt', { type: 'text/plain' }));
+            transfer.items.add(new File(['second'], 'second.txt', { type: 'text/plain' }));
+            input.files = transfer.files;
+            const files = Array.from(input.files!);
+            const initialValue = input.value;
+            host.append(input);
+            document.body.append(host);
+            const errors: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              event.preventDefault();
+            });
+            let reaction: { retainedFirstName: boolean; count: number } | null = null;
+            customElements.define(
+              'closeout-split-file-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  if (mutation === 'replace selection') {
+                    const selected = new DataTransfer();
+                    selected.items.add(files[0]);
+                    input.files = selected.files;
+                  } else if (mutation === 'mutate the assigned list') {
+                    transfer.items.remove(1);
+                  }
+                  reaction = {
+                    retainedFirstName: input.value === initialValue,
+                    count: input.files!.length,
+                  };
+                }
+              }
+            );
+            adapt(
+              define({
+                name: 'closeout-split-file-upgrade',
+                setup(def) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-file-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            return {
+              reaction,
+              errors,
+              keptCaller: host.firstChild === input,
+              retainedValue: input.value === initialValue,
+              files: Array.from(input.files!, (file) => ({
+                name: file.name,
+                original: files.indexOf(file),
+              })),
+            };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation }
+        );
+        expect(result.reaction).toEqual({
+          retainedFirstName: true,
+          count: mutation === 'unchanged' ? 2 : 1,
+        });
+        expect(result.keptCaller).toBe(true);
+        expect(result.retainedValue).toBe(true);
+        expect(result.files).toEqual([
+          { name: 'first.txt', original: 0 },
+          { name: 'second.txt', original: 1 },
+        ]);
+        expect(result.errors).toEqual(
+          mutation === 'unchanged'
+            ? []
+            : [expect.stringContaining('decoration caller projection changed')]
+        );
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('accepts an admitted split exit animation at its retained zero opacity', async () => {
     const page = await browser.newPage();
     try {

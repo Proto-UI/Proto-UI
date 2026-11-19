@@ -167,9 +167,19 @@ function captureCallerControlState(node: Element): CallerSnapshot {
   const { value, selectionStart, selectionEnd, selectionDirection } = control;
   const checked = input?.checked;
   const indeterminate = input?.indeterminate;
-  const files = input?.files;
+  const assignedFiles = input?.files;
+  // A DataTransfer-backed FileList can change without changing input.value.
+  const files = assignedFiles ? Array.from(assignedFiles) : null;
+  const hasSameFiles = () => {
+    if (!files) return true;
+    const current = input?.files;
+    return (
+      current?.length === files.length && files.every((file, index) => current[index] === file)
+    );
+  };
   return {
     isCurrent: () =>
+      hasSameFiles() &&
       control.value === value &&
       control.selectionStart === selectionStart &&
       control.selectionEnd === selectionEnd &&
@@ -178,9 +188,14 @@ function captureCallerControlState(node: Element): CallerSnapshot {
       input?.indeterminate === indeterminate,
     restore() {
       if (control.ownerDocument !== document) return;
-      if (control.value !== value) {
-        if (input?.type === 'file' && files) input.files = files;
-        else control.value = value;
+      if (input?.type === 'file' && files) {
+        if (!hasSameFiles()) {
+          const transfer = new (document.defaultView?.DataTransfer ?? DataTransfer)();
+          for (const file of files) transfer.items.add(file);
+          input.files = transfer.files;
+        }
+      } else if (control.value !== value) {
+        control.value = value;
       }
       if (input && checked !== undefined && input.checked !== checked) input.checked = checked;
       if (input && indeterminate !== undefined && input.indeterminate !== indeterminate)
