@@ -644,6 +644,49 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
           expect(reduced.reducedMotion).toBe(true);
           expect(reduced.rootTransitions).toEqual([]);
           expect(reduced.thumbTransitions).toEqual([]);
+          // Restore motion on the same controlled owner, before the later remount.
+          await page.emulateMedia({ reducedMotion: 'no-preference' });
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              )
+          );
+          const restoredReady = await sample('motion-restored-ready');
+          expect(restoredReady.reducedMotion).toBe(false);
+          expect(restoredReady.checked).toBe(true);
+          expect(restoredReady.thumb.x).toBeCloseTo(reduced.thumb.x, 1);
+          expect(restoredReady.color).toBe(reduced.color);
+          await setProps({ checked: false });
+          await page.waitForTimeout(45);
+          const restoredMiddle = await sample('motion-restored-midpoint');
+          expect(restoredMiddle.checked).toBe(false);
+          expect(restoredMiddle.rootTransitions).toContain('background-color');
+          expect(restoredMiddle.thumbTransitions).toContain('transform');
+          expect(restoredMiddle.thumb.x - controlled.thumb.x).toBeGreaterThan(0);
+          expect(restoredMiddle.thumb.x - controlled.thumb.x).toBeLessThan(travel);
+          expect(restoredMiddle.color).not.toBe(reduced.color);
+          expect(restoredMiddle.color).not.toBe(controlled.color);
+          expect(restoredMiddle.inlineColor).toBe('');
+          expect(restoredMiddle.paletteBindings).toBe(0);
+          await page.waitForTimeout(200);
+          const restoredEnd = await sample('motion-restored-settled');
+          expect(restoredEnd.checked).toBe(false);
+          expect(restoredEnd.thumb.x).toBeCloseTo(controlled.thumb.x, 1);
+          expect(restoredEnd.color).toBe(controlled.color);
+          expect(restoredEnd.rootTransitions).toEqual([]);
+          expect(restoredEnd.thumbTransitions).toEqual([]);
+          // Continue the existing disabled, remount and CSSOM phases in reduced motion.
+          await page.emulateMedia({ reducedMotion: 'reduce' });
+          await setProps({ checked: true });
+          await page.waitForTimeout(30);
+          const reducedAgain = await sample('reduced-again');
+          expect(reducedAgain.reducedMotion).toBe(true);
+          expect(reducedAgain.checked).toBe(true);
+          expect(reducedAgain.thumb.x - initial.thumb.x).toBeCloseTo(travel, 1);
+          expect(reducedAgain.color).toBe(end.color);
+          expect(reducedAgain.rootTransitions).toEqual([]);
+          expect(reducedAgain.thumbTransitions).toEqual([]);
           await setProps({ checked: true, disabled: true });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + initial.root.height / 2);
           expect((await sample('disabled-outside')).checked).toBe(true);
