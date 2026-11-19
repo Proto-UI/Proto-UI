@@ -418,7 +418,7 @@ fn begin_native_detach(owner:&OwnerRef)->bool{
     withdraw_entry_view(owner);
     let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
 }
-pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
+pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}crate::gpui_native_move::move_blur(owner);withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
 pub fn detach_native_view(owner:&OwnerRef){
     let mounted=begin_native_detach(owner);
     let mut failure=None;

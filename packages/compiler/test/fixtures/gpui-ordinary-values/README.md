@@ -54,6 +54,38 @@ Native callbacks without a return channel report failures through stderr and the
 
 ## Explicit capability boundary
 
+The native SDK's `gpui_native_move` module realizes the draft
+`C-MOVE-GESTURE-0001` / `HC-MOVE-GESTURE-0001` immediate mouse-contact slice.
+Native consumers attach an `OwnerWeak` and `MoveGestureBinding` after construction,
+including before first paint. Recognition waits for committed mount, the same
+window's physical hitbox and HitParticipation eligibility. No portable author
+coordinate API or `asMove` / `asDrag` hook is added.
+
+`MoveGestureSample.position` subtracts the live target hitbox origin. `delta` and
+`total_delta` measure pointer displacement in window coordinates, preserving motion
+when the target's origin changes. Samples include modifiers and monotonic milliseconds.
+The axis remains a recognition hint; directional activation fails with an explicit
+unsupported error. The pinned GPUI mouse stream establishes no touch/pen, threshold,
+velocity, keyboard-move or gesture-arena guarantee.
+
+Mouse move/up listeners run during native capture and are qualified by the exact
+target owner and window. An accepted contact continues outside its initial hit region
+within that window; exit, missing primary-button ownership and window blur cancel it.
+Replacement, detach, owner disposal and lease disposal terminate accepted sessions
+with explicit reasons. `cancel` leaves the binding attached for a subsequent contact;
+`dispose` and Rust `Drop` release it. Cancellation callbacks receive optional live
+Window/App context because lifecycle teardown can occur without either host reference.
+Callbacks run after registry and owner borrows have ended.
+
+The `move_gesture_*` tests in the same full `ordinary.rs` consumer exercise early
+attachment, local samples, movement outside the initial bounds, modifiers, release
+before a downstream child's stopped bubble, restart after cancellation, detach,
+disposal, cross-window isolation and loss of ownership. Run the complete consumer
+command above; these are framework dispatch checks, not OS-device certification.
+No new Cargo feature is required on the published pin. A workspace-selected modern
+GPUI revision uses the existing `gpui-modern-element-api` SDK feature for its element
+ABI; this move module introduces no additional ABI feature or dependency.
+
 The pinned published GPUI revision lacks `Window::resolve_focus_entry`, `focus_tree_generation` and `observe_focus_tree`. Default compilation rejects physical FocusEntry operations and Scope's `entryFallback: 'entry'` with a specific diagnostic. Manual SDK entry points also reject them. Ordinary focus, logical scope navigation and roving do not need those APIs and are exercised here. The disabled `experimental-focus-tree` feature preserves research source for a separately verified local upstream patch; enabling it against the pinned published dependency is not supported.
 
 SDK `0.2.0` changes ordinary value, borrowed-state, nominal declaration and Context-key ABI, and makes fallible host results explicit. Previously generated native crates must be recompiled together; a `0.1` consumer must use the safe constructor and handle the new `Result` return values. Historical fixtures retain their original ABI evidence. Historical copied Transition source is retained only in the compiler archive and is never emitted.
