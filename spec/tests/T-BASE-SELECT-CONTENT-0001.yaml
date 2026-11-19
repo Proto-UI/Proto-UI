@@ -46,6 +46,7 @@ cases:
     expectation: popper-focus-does-not-suppress-native-scroll-and-item-aligned-policy-is-preserved
     notes:
       - Covers selected and enabled boundary entry, reopen, and uncommitted typeahead across Base, Shadcn and Brutalist with complete and legacy parts.
+      - Host-readiness retries retain automatic entry ownership through acquisition, removal, and newer Item or outside focus.
       - WC cases exercise complete Popper Item and external handoffs from uncontrolled and synchronously accepting controlled callbacks across Base, Shadcn and Brutalist.
       - Real React cases exercise a batched controlled setOpen followed by actual external button focus across Base and Shadcn, plus refusal, supersession, an Expose Event-isolated callback throw followed by owner acceptance, genuine value replacement and close/reopen. They do not establish batched Item focus, Vue, native or compiled-host behavior.
       - WC cases distinguish automatic entry from a newer reentrant owner, prohibit reacquisition after that handoff or a record update, retain genuine value/open admission, and replace Content after a named structural abort without closing Root. These repair assertions require candidate execution.

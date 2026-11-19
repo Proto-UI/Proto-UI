@@ -333,6 +333,94 @@ describe.each(families)('$name Select popper host focus scroll policy', (family)
     }
   );
 
+  it('readmits a successor after automatic entry completes through host readiness', async () => {
+    vi.useFakeTimers();
+    const f = createSelect(family, true, 'alpha');
+    await settle();
+    f.trigger.focus();
+    const selected = f.items[0];
+    const focus = vi.spyOn(selected, 'focus').mockImplementationOnce(() => {});
+    f.root.getExposes().requestOpen({
+      open: true,
+      reason: 'entry-readiness-removal',
+      focusReason: 'programmatic',
+    });
+    await settle();
+    await settle();
+
+    // The first host call did not acquire focus. The real WC adapter's
+    // readiness retry must apply the retained request before withdrawal.
+    expect(focus.mock.calls.length).toBeGreaterThan(1);
+    expect(document.activeElement).toBe(selected);
+    expect(selected.getExposes().focused.get()).toBe(true);
+
+    selected.remove();
+    await settle();
+
+    expect(f.root.getExposes().open.get()).toBe(true);
+    expect(f.root.getExposes().value.get()).toBe('alpha');
+    expect(document.activeElement).toBe(f.items[2]);
+    expect(f.items[2].getExposes().focused.get()).toBe(true);
+  });
+
+  it.each(['item', 'external'] as const)(
+    'keeps a newer %s owner when a pending automatic entry would retry',
+    async (owner) => {
+      vi.useFakeTimers();
+      const f = createSelect(family, true, 'alpha');
+      const outside = document.createElement('button');
+      document.body.append(outside);
+      await settle();
+      f.trigger.focus();
+      const target = owner === 'item' ? f.items[2] : outside;
+      const selected = f.items[0];
+      let observed = false;
+      const focus = vi.spyOn(selected, 'focus').mockImplementationOnce(() => {
+        void Promise.resolve().then(() => {
+          target.focus();
+          observed = document.activeElement === target;
+        });
+      });
+      f.root.getExposes().requestOpen({
+        open: true,
+        reason: 'entry-readiness-handoff',
+        focusReason: 'programmatic',
+      });
+      await settle();
+
+      expect(observed).toBe(true);
+      expect(focus).toHaveBeenCalledOnce();
+      expect(document.activeElement).toBe(target);
+      expect(f.root.getExposes().open.get()).toBe(true);
+      expect(f.root.getExposes().value.get()).toBe('alpha');
+    }
+  );
+
+  it('keeps an outside owner established during the host retry', async () => {
+    vi.useFakeTimers();
+    const f = createSelect(family, true, 'alpha');
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    await settle();
+    f.trigger.focus();
+    const selected = f.items[0];
+    const focus = vi.spyOn(selected, 'focus').mockImplementationOnce(() => {});
+    const handoff = vi.fn(() => outside.focus());
+    selected.addEventListener('focus', handoff, { once: true });
+    f.root.getExposes().requestOpen({
+      open: true,
+      reason: 'entry-readiness-reentrant-outside',
+      focusReason: 'programmatic',
+    });
+    await settle();
+    await settle();
+
+    expect(handoff).toHaveBeenCalledOnce();
+    expect(focus).toHaveBeenCalledTimes(2);
+    expect(document.activeElement).toBe(outside);
+    expect(f.root.getExposes().open.get()).toBe(true);
+  });
+
   it.each(['item', 'external'] as const)(
     'retains a reentrant %s handoff during automatic entry',
     async (owner) => {
