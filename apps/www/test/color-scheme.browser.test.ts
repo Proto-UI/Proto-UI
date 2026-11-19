@@ -187,7 +187,9 @@ describe.sequential('default-document colorScheme browser contract', () => {
         await theme(page, 'dark');
         await expect.poll(async () => alpha((await paint(button)).background)).toBe(0.2);
         await expect.poll(async () => alpha((await paint(probe)).background)).toBe(0.2);
-        await expect.poll(async () => alpha((await paint(outline)).background)).toBe(0.045);
+        // The fixture Button uses the default Rhea profile, whose dark outline
+        // stays transparent instead of the Nova bg-input/30 surface.
+        await expect.poll(async () => alpha((await paint(outline)).background)).toBe(0);
         await expect.poll(async () => alpha((await paint(checkbox)).background)).toBe(0.045);
         await expect.poll(async () => alpha((await paint(switchRoot)).background)).toBe(0.12);
         expect(await stats(page)).toEqual(initialStats);
@@ -531,7 +533,7 @@ describe.sequential('default-document colorScheme browser contract', () => {
         if (mountedRecommit) expect((await stats(page)).probeRenders).toBeGreaterThan(1);
         for (const [id, expected] of Object.entries({
           button: 0.2,
-          outline: 0.045,
+          outline: 0,
           checkbox: 0.045,
           switch: 0.12,
           textarea: 0.045,
