@@ -63,6 +63,7 @@ jobs:
       - name: Capture independent current-source Dropdown evidence
         if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.surface.outcome == 'success' }}
         env:
+          CANDIDATE_SHA: ${{ github.sha }}
           PUI_FINF_FEATURE_GROUP: dropdown
           PUI_FINF_PRESET_CHECK: ${{ steps.presets.outcome }}
           PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-feature-evidence
