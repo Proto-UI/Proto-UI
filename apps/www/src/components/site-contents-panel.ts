@@ -100,7 +100,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
     },
     async materialize(request: ProjectionScopeMaterializeRequest, namespace = 'docs') {
       const family = request.selection.projectionFamilyId;
-      if (family !== 'shadcn' && family !== 'brutalist')
+      if (family !== 'shadcn' && family !== 'brutalist' && family !== 'bootstrap-2-3-2')
         throw new Error('Contents Popover family is unavailable');
       const lease: NativeTreeLease = { close: () => closePublicView() };
       const slotId = `${owner}-${namespace}-${request.generation}`;
