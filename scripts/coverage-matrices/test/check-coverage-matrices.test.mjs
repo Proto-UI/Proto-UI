@@ -18973,6 +18973,62 @@ for (const [relative, allowed] of [
     );
   });
 
+for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+  test(`virtual-list demo import boundary: ${family} exact bytes, foreign importer and adjacent imports`, () => {
+    const root = createRoot();
+    const relative = `apps/www/src/content/docs/zh-cn/demo-${family}-virtual-list.demo.ts`;
+    const target = path.join(root, relative);
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, reviewed);
+    writeValidMatrices(root, {}, {}, {
+      websiteBindings: [[relative, ['www.demo.authored-controllers']]],
+    });
+    const allowed = [
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ];
+    const raw = (file, specifier) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const exact = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    for (const specifier of allowed) {
+      assert.ok(!exact.includes(raw(relative, specifier)), exact);
+    }
+    assert.ok(!exact.includes(`source fingerprint for \`${relative}\``), exact);
+
+    const foreign = relative.replace('.demo.ts', '-foreign.demo.ts');
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+    const copied = validationMessage(root);
+    for (const specifier of allowed) {
+      assert.ok(copied.includes(raw(foreign, specifier)), copied);
+      assert.ok(!copied.includes(raw(relative, specifier)), copied);
+    }
+
+    for (const changed of [
+      Buffer.concat([reviewed, Buffer.from('\n// Changed importer requires review.\n')]),
+      Buffer.from(reviewed.toString('utf8').replace(/\n/gu, '\r\n')),
+    ]) {
+      fs.writeFileSync(target, changed);
+      const message = validationMessage(root);
+      for (const specifier of allowed) {
+        assert.ok(message.includes(raw(relative, specifier)), message);
+      }
+    }
+
+    for (const adjacent of [
+      '@proto.ui/prototypes-base/virtual-list/web/adjacent',
+      '@proto.ui/prototypes-base/virtual-list/adjacent',
+      '@proto.ui/prototypes-base/tree',
+    ]) {
+      fs.writeFileSync(target, Buffer.concat([reviewed, Buffer.from(`\nimport '${adjacent}';\n`)]));
+      const message = validationMessage(root);
+      assert.ok(message.includes(raw(relative, adjacent)), message);
+      for (const specifier of allowed) {
+        assert.ok(message.includes(raw(relative, specifier)), message);
+      }
+    }
+  });
+}
+
 test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed resolver bytes', () => {
   const source = fs.readFileSync(
     new URL('../../../apps/www/astro.config.mjs', import.meta.url),

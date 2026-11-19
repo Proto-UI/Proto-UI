@@ -266,6 +266,44 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
+  // Exact demo compositions delegating geometry/materialization to the public Web
+  // attachment. Their authored-controller owner remains blocked. Bootstrap and
+  // Liquid Glass remain WIP/Experimental; these ten edges grant no family support.
+  'apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: '97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: '8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
   // and unpinned entries do not certify the source body (see the note above).
