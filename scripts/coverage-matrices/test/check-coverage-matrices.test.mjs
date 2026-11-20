@@ -18945,3 +18945,48 @@ test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed res
       source.indexOf("slug: 'ui-libraries/shadcn/button'")
   );
 });
+
+for (const scenario of [
+  'exact',
+  'changed-importer',
+  'changed-companion',
+  'missing-companion',
+  'foreign-importer',
+  'obsolete-astro-importer',
+]) {
+  test(`Pagefind dynamic import boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const owner = 'apps/www/src/components/site-search-owner.ts';
+    const companion = 'apps/www/src/components/site-pagefind-resource.ts';
+    const sourcePath =
+      scenario === 'foreign-importer'
+        ? 'apps/www/src/components/ForeignPagefindOwner.ts'
+        : scenario === 'obsolete-astro-importer'
+          ? 'apps/www/src/components/override/Search.astro'
+          : owner;
+    const target = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    if (scenario === 'obsolete-astro-importer') {
+      fs.writeFileSync(
+        target,
+        '<script>export function load(bundlePath) { return import(/* @vite-ignore */ `${bundlePath}pagefind.js`); }</script>'
+      );
+    } else {
+      const ownerBytes = fs.readFileSync(new URL(`../../../${owner}`, import.meta.url));
+      fs.writeFileSync(target, ownerBytes);
+      if (scenario === 'changed-importer') fs.appendFileSync(target, '\n// changed importer');
+    }
+    if (scenario !== 'missing-companion') {
+      fs.copyFileSync(new URL(`../../../${companion}`, import.meta.url), path.join(root, companion));
+    }
+    if (scenario === 'changed-companion') {
+      fs.appendFileSync(path.join(root, companion), '\n// changed companion');
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    const rejected = message.includes(
+      `@vite-ignore dynamic import in \`${sourcePath}\` is not reviewed against an exact URL boundary`
+    );
+    assert.equal(rejected, scenario !== 'exact', message);
+  });
+}
