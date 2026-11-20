@@ -72,6 +72,8 @@ Structural width subtyping may omit additional pure-data fields. A type annotati
 
 ## Evaluation boundary
 
+Static member reads on the compiler's coarse `record` marker return `unknown` in both source admission and portable IR validation. Raw Props snapshots (`run.props.getRaw()`, renderer raw reads, and raw watcher snapshots) use this opaque boundary: a read does not prove key presence, acquire the resolved declaration's type, or materialize a default. The marker also represents opaque watcher metadata; it is distinct from a finite structural record or object, whose missing-member checks remain enforced. An opaque member supplies no callable or owner capability. Member writes still require a declared mutable ordinary field, including through aliases; this read rule grants no write permission or dynamic-index support.
+
 Top-level runtime calls remain limited to statically admitted declarations. Aliasing a factory preserves this rule; it cannot make an arbitrary function or effectful initializer safe. A source file reached only for an erased type can contain runtime syntax without that syntax being executed or emitted. Once the same file is reached as a runtime dependency, runtime admission applies normally.
 
 The compiler's normalization tests compare semantic IR after removing spans and source provenance, and separately verify that the complete source graph remains recorded. These tests cover declaration renaming, import aliases, re-exports, local type shadowing, setup normalization, and effectful-source rejection.
