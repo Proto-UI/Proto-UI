@@ -3,7 +3,8 @@ import { createRuntimeTabs, type RuntimeTabsFocusLease } from './runtime-tabs';
 // src/next-www/src/components/PrototypePreviewer/previewer-client.ts
 import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
-import { renderDemo } from './demo-renderer';
+import { prepareDemoRuntime, renderDemo } from './demo-renderer';
+import { createInitialRenderAdmission } from './previewer-initial-render';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import { createRuntimePreviewSurface, runtimePreviewFamily } from './runtime-preview-surface';
 import {
@@ -164,6 +165,8 @@ export function initPreviewer(options: PreviewerOptions) {
   let stopFamilyObserver: (() => void) | null = null;
   let destroyPromise: Promise<void> | null = null;
   let activeFocusLease: RuntimeTabsFocusLease | null = null;
+  const initialRenderOwner = new AbortController();
+  const initialRenderAdmission = createInitialRenderAdmission(root, initialRenderOwner.signal);
 
   const codeHighlights: Record<string, string> = root.dataset.codeHighlights
     ? JSON.parse(root.dataset.codeHighlights)
@@ -306,13 +309,14 @@ export function initPreviewer(options: PreviewerOptions) {
 
   async function switchTo(
     id: string,
-    options: { force?: boolean; focusLease?: RuntimeTabsFocusLease | null } = {}
+    options: { force?: boolean; focusLease?: RuntimeTabsFocusLease | null; initial?: boolean } = {}
   ) {
     if (destroyed) {
       options.focusLease?.cancel();
       return;
     }
     const runtime = id as RuntimeId;
+    if (!options.initial) initialRenderAdmission.promote();
     const activeRuntime = currentDemo?.id ?? null;
     if (
       !options.force &&
@@ -328,6 +332,7 @@ export function initPreviewer(options: PreviewerOptions) {
     let committed = false;
     requestedRuntime = runtime;
     const myVersion = ++version;
+    if (!options.initial) initialRenderOwner.abort();
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.
     releaseHostMount(host);
@@ -367,7 +372,11 @@ export function initPreviewer(options: PreviewerOptions) {
       // The direct Prototype was already loaded above, including a caller's
       // custom loader. Only newly composed parts require this module table.
       if (!demoId && prototypeId) ids.delete(prototypeId);
-      await loadPrototypes(Array.from(ids));
+      await Promise.all([loadPrototypes(Array.from(ids)), prepareDemoRuntime(runtime)]);
+      if (destroyed || myVersion !== version) return;
+      if (options.initial && root.dataset.lazy !== 'true') {
+        await initialRenderAdmission.acquire();
+      }
       if (destroyed || myVersion !== version) return;
       const result = await renderDemo({
         runtime,
@@ -428,14 +437,18 @@ export function initPreviewer(options: PreviewerOptions) {
       // 显示错误信息
       reportSwitchError(err);
     } finally {
-      if (myVersion === version && !destroyed) {
-        requestedRuntime = null;
-        setPreviewerSelectDisabled(false);
-        if (activeFocusLease === focusLease) activeFocusLease = null;
-        if (committed) focusLease?.restore();
-        else focusLease?.cancel();
-      } else {
-        focusLease?.cancel();
+      try {
+        if (myVersion === version && !destroyed) {
+          requestedRuntime = null;
+          setPreviewerSelectDisabled(false);
+          if (activeFocusLease === focusLease) activeFocusLease = null;
+          if (committed) focusLease?.restore();
+          else focusLease?.cancel();
+        } else {
+          focusLease?.cancel();
+        }
+      } finally {
+        if (options.initial) initialRenderAdmission.release();
       }
     }
     // The actual panel is inside Runtime Tabs. Complete its temporary input
@@ -456,7 +469,7 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   // 首次挂载（统一走 runtime 生命周期，避免 WC 单走一套）
-  void switchTo(selectedInitialRuntime);
+  void switchTo(selectedInitialRuntime, { initial: true });
 
   // AdapterSelect synchronizes all selector instances and broadcasts the selected
   // runtime. Listen on document so the page-level selector also remounts every
@@ -497,6 +510,7 @@ export function initPreviewer(options: PreviewerOptions) {
   (root as any).__previewer__ = {
     switchRuntime: (id: string) => switchTo(id),
     reload: () => {
+      initialRenderAdmission.promote();
       if (currentDemo) return switchTo(currentDemo.id, { force: true });
       return null;
     },
@@ -512,6 +526,7 @@ export function initPreviewer(options: PreviewerOptions) {
     destroy: () => {
       if (destroyPromise) return destroyPromise;
       destroyed = true;
+      initialRenderOwner.abort();
       version++;
       activeFocusLease?.cancel();
       activeFocusLease = null;

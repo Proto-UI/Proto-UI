@@ -13,6 +13,7 @@ import {
   type ProjectionFamilyManifest,
 } from './projection-families';
 import { loadDemo } from './demo-modules';
+import { createInitialRenderAdmission } from './previewer-initial-render';
 import { createRuntimePreviewSurface, runtimePreviewRecipe } from './runtime-preview-surface';
 import {
   materializeProjectionCandidate,
@@ -99,6 +100,8 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   let desiredIntentRevision = 0;
   let controller!: ProjectionScopeController;
   const startupOwner = new AbortController();
+  const initialRenderOwner = new AbortController();
+  const initialRenderAdmission = createInitialRenderAdmission(root, initialRenderOwner.signal);
   let destroyed = false;
   let requestEpoch = 0;
   let mounted = false;
@@ -147,6 +150,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     if (snapshot.generation > 0) return Promise.resolve(snapshot);
     if (startPromise) return startPromise;
     startPromise = controller.start().finally(() => {
+      initialRenderAdmission.release();
       startPromise = null;
     });
     return startPromise;
@@ -184,6 +188,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   ): Promise<ProjectionScopeSnapshot> => {
     if (destroyed) return Promise.resolve(controller.getSnapshot());
     if (!runtimeList.includes(runtimeId)) return Promise.resolve(controller.getSnapshot());
+    initialRenderAdmission.promote();
     if (runtimeId === desiredRuntimeId && controller.getSnapshot().phase !== 'idle') {
       return Promise.resolve(controller.getSnapshot());
     }
@@ -265,6 +270,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       projectionFamilyId,
     },
     async materialize(request) {
+      if (request.generation > 1) initialRenderOwner.abort();
       latestMaterializationGeneration = Math.max(
         latestMaterializationGeneration,
         request.generation
@@ -293,6 +299,10 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         componentId,
         controls: controls(),
         controlIds: toolbar ? ['runtime'] : [],
+        acquireInitialRender:
+          request.generation === 1 && root.dataset.lazy !== 'true'
+            ? () => initialRenderAdmission.acquire()
+            : undefined,
         backgroundPreparation:
           request.generation === 1 && root.dataset.lazy !== 'true'
             ? { signal: startupOwner.signal, isPending: () => !mounted }
@@ -489,6 +499,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     destroyPromise = (async () => {
       destroyed = true;
       startupOwner.abort();
+      initialRenderOwner.abort();
       requestEpoch += 1;
       stopThemeWatcher?.();
       stopThemeWatcher = null;
@@ -512,6 +523,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         ? requestRuntime(runtimeId)
         : Promise.resolve(controller.getSnapshot()),
     reload: () => {
+      initialRenderAdmission.promote();
       const snapshot = controller.getSnapshot();
       const runtimeId = snapshot.selection.runtimeId as RuntimeId;
       if (snapshot.generation === 0) return observeRequest(ensureStarted(), runtimeId);

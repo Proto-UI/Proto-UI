@@ -55,6 +55,8 @@ export type ProjectionMaterializerOptions = Readonly<{
   yieldAfterPaint?: boolean;
   /** First-view preparation can yield while another consumer is preparing. */
   backgroundPreparation?: Readonly<{ signal: AbortSignal; isPending(): boolean }>;
+  /** The preview owner holds this admission through controller publication or cleanup. */
+  acquireInitialRender?: () => Promise<void>;
   /**
    * Host-owned seal for the open portals of the generation that is leaving.
    *
@@ -379,6 +381,8 @@ async function prepareProjectionCandidate(
   // framework render in the same foreground turn.
   const renderPreparation = backgroundPreparationTask(options);
   if (renderPreparation) await renderPreparation;
+  options.backgroundPreparation?.signal.throwIfAborted();
+  if (options.acquireInitialRender) await options.acquireInitialRender();
   options.backgroundPreparation?.signal.throwIfAborted();
 
   const host = options.mount.ownerDocument.createElement('div');

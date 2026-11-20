@@ -50,7 +50,10 @@ vi.mock('./projection-theme', () => ({
     return vi.fn();
   },
 }));
-vi.mock('./demo-renderer', () => ({ renderDemo: demoSpies.render }));
+vi.mock('./demo-renderer', () => ({
+  prepareDemoRuntime: async () => {},
+  renderDemo: demoSpies.render,
+}));
 vi.mock('./runtimes/host-mount', () => ({
   releaseHostMount: (host: HTMLElement) => hostMountSpies.release(host),
 }));
