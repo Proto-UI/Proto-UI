@@ -59,9 +59,9 @@ const DISABLED = 3;
 const FOCUS_TARGET = 4;
 const CHECKBOX_COUNT = 5;
 
-/** Upstream transitions exactly these two properties, at the Tailwind defaults. */
+/** The demo selects Rhea: these two properties, 200ms, and the generated easing. */
 const TRANSITION_PROPERTY = 'color, box-shadow';
-const TRANSITION_DURATION = '0.15s';
+const TRANSITION_DURATION = '0.2s';
 const TRANSITION_TIMING = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
 type BoxPaint = {
@@ -149,11 +149,7 @@ async function waitForStableEditorProjection(page: Page): Promise<void> {
         return false;
       }
       const tokens = editor.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
-      return (
-        tokens.includes('transition-[color,box-shadow]') &&
-        tokens.includes('duration-150') &&
-        tokens.includes('ease-in-out')
-      );
+      return tokens.includes('transition-[color,box-shadow]') && tokens.includes('duration-200');
     },
     undefined,
     { timeout: 20_000 }
@@ -392,7 +388,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectToolbarlessRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await selectToolbarlessRuntime(page, previewer, runtime, 'textarea', 3);
         const mountScope = await previewer.evaluate((root) => ({
           previewerRoots: root.querySelectorAll('[data-pui-root]').length,
           demoRoots:
@@ -444,7 +440,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectToolbarlessRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await selectToolbarlessRuntime(page, previewer, runtime, 'textarea', 3);
         await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
 
@@ -515,19 +511,30 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectToolbarlessRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await selectToolbarlessRuntime(page, previewer, runtime, 'textarea', 3);
         await waitForStableEditorProjection(page);
 
         // The background is outside the transition set, so each read is the
         // settled value and no animation-aware waiting is needed here.
+        // Rhea's bg-input/50 mixes opaque light input and 15%-alpha dark input
+        // at 50%. Allow one alpha step for the canvas's 8-bit quantization.
         await applyColorScheme(page, 'light');
-        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-before`).toBe(0);
+        expect(
+          Math.abs((await editorStyle(page)).backgroundAlpha - 0.5),
+          `${runtime}/light-before`
+        ).toBeLessThanOrEqual(1 / 255);
 
         await applyColorScheme(page, 'dark');
-        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/dark`).toBeGreaterThan(0);
+        expect(
+          Math.abs((await editorStyle(page)).backgroundAlpha - 0.075),
+          `${runtime}/dark`
+        ).toBeLessThanOrEqual(1 / 255);
 
         await applyColorScheme(page, 'light');
-        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-after`).toBe(0);
+        expect(
+          Math.abs((await editorStyle(page)).backgroundAlpha - 0.5),
+          `${runtime}/light-after`
+        ).toBeLessThanOrEqual(1 / 255);
       }
     } finally {
       await context.close();
