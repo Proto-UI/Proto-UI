@@ -1,5 +1,10 @@
 import { AdapterIds, type PublicRuntimeId } from './PrototypePreviewer/runtimes/ids';
-import { selectValue, setSelectValue, type SiteSelectRoot } from './site-shadcn-controls';
+import {
+  selectValue,
+  setSelectValue,
+  supportsSiteSelectValue,
+  type SiteSelectRoot,
+} from './site-shadcn-controls';
 
 import { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
 export { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
@@ -27,9 +32,7 @@ function supportsAdapter(control: AdapterSelectControl, adapter: PublicRuntimeId
   if (isNativeSelect(control)) {
     return Array.from(control.options).some((option) => option.value === adapter);
   }
-  return Array.from(
-    control.querySelectorAll<HTMLElement>('wc-shadcn-select-item, wc-brutalist-select-item')
-  ).some((item) => item.dataset.value === adapter);
+  return supportsSiteSelectValue(control, adapter);
 }
 
 function readControlValue(control: AdapterSelectControl): string {
