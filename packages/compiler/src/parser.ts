@@ -35,6 +35,8 @@ import {
   sourceName,
   sourceSpan,
   scalarInitializer,
+  staticDataInitializer,
+  staticJoin,
   isSourceFunction,
   CORE_FUNCTIONS,
   type FunctionNode,
@@ -948,6 +950,7 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
+    nodes = lowerObjectPatterns(nodes);
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
@@ -1318,6 +1321,20 @@ class Frontend {
       return { kind: 'literal', value: null, type: 'null', span };
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
       return { kind: 'literal', value: node.text, type: literalType(node.text), span };
+    const joined = staticJoin(node);
+    if (joined) {
+      // Folded at compile time: a join of finite literal strings is itself a
+      // literal, so nothing is evaluated when the artifact loads.
+      const parts = this.staticStrings(this.expression(module, joined.receiver, scope, phase));
+      if (!parts)
+        rejectNode(
+          node,
+          'PUI1004',
+          'join() is admitted only on a static array of string literals.'
+        );
+      const value = parts.join(joined.separator ? joined.separator.text : ',');
+      return { kind: 'literal', value, type: literalType(value), span };
+    }
     if (ts.isNumericLiteral(node)) {
       const value = Number(node.text);
       if (!Number.isFinite(value)) rejectNode(node, 'PUI1006', 'Numeric literals must be finite.');
@@ -1416,7 +1433,7 @@ class Frontend {
           );
           return { kind: 'reference', name: helper.name, type: functionValueType(helper.fn), span };
         }
-        if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
+        if (resolved.module && moduleDataNode(resolved.node)) {
           const binding = this.moduleValue(
             resolved.module,
             resolved.name,
@@ -1947,6 +1964,25 @@ class Frontend {
         : undefined;
   }
 
+  /** The literal strings of a static array, following module data references. */
+  private staticStrings(value: ExpressionIR): string[] | undefined {
+    while (value.kind === 'narrow') value = value.value;
+    if (value.kind === 'reference') {
+      const bound = this.moduleBindings.find((binding) => binding.name === value.name)?.value;
+      if (!bound) return undefined;
+      return this.staticStrings(bound);
+    }
+    if (value.kind !== 'array') return undefined;
+    const out: string[] = [];
+    for (const element of value.elements) {
+      let item = element;
+      while (item.kind === 'narrow') item = item.value;
+      if (item.kind !== 'literal' || typeof item.value !== 'string') return undefined;
+      out.push(item.value);
+    }
+    return out;
+  }
+
   private moduleValue(
     module: SourceModule,
     name: string,
@@ -1956,17 +1992,30 @@ class Frontend {
     const previous = this.moduleValues.get(id);
     if (previous) return previous;
     const initial = this.expression(module, value, new Map(), 'setup');
-    if (initial.type !== 'boolean' && initial.type !== 'number' && initial.type !== 'string')
+    const scalar =
+      initial.type === 'boolean' || initial.type === 'number' || initial.type === 'string';
+    // Shared mutable storage stays scalar; an immutable binding may hold any
+    // finite data written as a literal (finiteness is checked below).
+    if (!scalar && (module.mutableBindings.has(name) || scalarInitializer(value)))
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
     const annotation = ts.isVariableDeclaration(value.parent) ? value.parent.type : undefined;
-    const stored = annotation
+    const declared = annotation
       ? parseSourceValueType(module, annotation, this.substitutions)
       : initial.type;
-    if (!isDataValueType(stored))
+    if (!isDataValueType(declared))
       rejectNode(
         annotation ?? value,
         'PUI1006',
         'Shared module storage requires finite data; owner closures and capabilities cannot escape into module storage.'
+      );
+    // Immutable module data is shared by every instance, so every field
+    // reached through it is read-only whatever the literal's inferred type.
+    const stored = scalar ? declared : deepReadonly(declared);
+    if (stored === undefined)
+      rejectNode(
+        value,
+        'PUI1006',
+        'Module data must be scalars, scalar arrays or records of such data.'
       );
     if (!assignable(initial.type, stored))
       rejectNode(
@@ -2020,7 +2069,7 @@ class Frontend {
       name = node.text;
     if (!binding && (module.declarations.has(name) || module.imports.has(name))) {
       const resolved = this.graph.resolveBinding(module, name);
-      if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
+      if (resolved.module && moduleDataNode(resolved.node)) {
         const value = this.moduleValue(
           resolved.module,
           resolved.name,
@@ -3074,7 +3123,7 @@ class Frontend {
     ]);
     for (const loaded of this.graph.modules.values())
       for (const [name, declaration] of loaded.declarations) {
-        if (ts.isCallExpression(declaration)) {
+        if (ts.isCallExpression(declaration) && !staticJoin(declaration)) {
           if (
             ts.isIdentifier(declaration.expression) &&
             this.graph.resolveCoreImport(loaded, declaration.expression.text) === 'createContextKey'
@@ -3184,4 +3233,156 @@ export function parsePrototype(
       ],
     };
   }
+}
+
+/** A module declaration that is lowered as a shared module value. */
+function moduleDataNode(node: ts.Node): boolean {
+  if (!ts.isExpression(node)) return false;
+  if (scalarInitializer(node)) return true;
+  return !ts.isIdentifier(node) && !isSourceFunction(node) && staticDataInitializer(node);
+}
+
+/**
+ * The type immutable module data is stored as: every record becomes an object
+ * view whose fields are read-only at every depth, so no instance can write
+ * through data all instances share. Arrays of records have no read-only element
+ * form in the IR and are not admitted as module data.
+ */
+function deepReadonly(type: ValueType): ValueType | undefined {
+  if (typeof type === 'string') return type;
+  if (type.kind === 'literal') return type;
+  if (type.kind === 'record' || type.kind === 'object') {
+    if (type.kind === 'object' && type.index !== undefined) return undefined;
+    const fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[] = [];
+    for (const field of type.fields) {
+      const inner = deepReadonly(field.type);
+      if (inner === undefined) return undefined;
+      fields.push({
+        name: field.name,
+        type: inner,
+        ...(field.optional ? { optional: true } : {}),
+        readonly: true,
+      });
+    }
+    return { kind: 'object', fields };
+  }
+  if (type.kind === 'array')
+    return valueAlternatives(type.element).every(
+      (member) => typeof member === 'string' || member.kind === 'literal'
+    )
+      ? type
+      : undefined;
+  if (type.kind === 'union') {
+    const members = type.members.map(deepReadonly);
+    return members.every(
+      (member) => (member !== undefined && typeof member === 'string') || member?.kind === 'literal'
+    )
+      ? type
+      : undefined;
+  }
+  return undefined;
+}
+
+const loweredPatterns = new WeakMap<ts.Statement, ts.Statement>();
+
+/**
+ * `const { a, b: c } = source` declares `a` and `c` as reads of `source.a` and
+ * `source.b`. A source that is not a plain identifier is evaluated once into a
+ * compiler-named binding first, so its effects and its value are not repeated.
+ * Each synthesized node keeps the source range it came from, so diagnostics,
+ * binding identities and provenance still point at the authored pattern.
+ * Defaults, rest elements, nested and computed patterns keep an explicit
+ * diagnostic until they have their own definition.
+ */
+function lowerObjectPatterns(nodes: readonly ts.Statement[]): readonly ts.Statement[] {
+  if (!nodes.some(hasObjectPattern)) return nodes;
+  return nodes.map((node) => {
+    if (!hasObjectPattern(node)) return node;
+    const cached = loweredPatterns.get(node);
+    if (cached) return cached;
+    const statement = node as ts.VariableStatement;
+    const factory = ts.factory;
+    const ranged = <T extends ts.Node>(created: T, from: ts.TextRange): T =>
+      ts.setTextRange(created, from);
+    const declarations: ts.VariableDeclaration[] = [];
+    for (const declaration of statement.declarationList.declarations) {
+      const pattern = declaration.name;
+      if (!ts.isObjectBindingPattern(pattern)) {
+        declarations.push(declaration);
+        continue;
+      }
+      if (!declaration.initializer)
+        rejectNode(declaration, 'PUI1004', 'A destructuring declaration requires an initializer.');
+      const init = declaration.initializer;
+      let source: () => ts.Expression;
+      if (ts.isIdentifier(init) && !declaration.type) {
+        source = () => ranged(factory.createIdentifier(init.text), init);
+      } else {
+        const name = `__puiPattern${declaration.pos}`;
+        declarations.push(
+          ranged(
+            factory.createVariableDeclaration(
+              ranged(factory.createIdentifier(name), pattern),
+              undefined,
+              declaration.type,
+              init
+            ),
+            declaration
+          )
+        );
+        source = () => ranged(factory.createIdentifier(name), init);
+      }
+      for (const element of pattern.elements) {
+        if (element.dotDotDotToken)
+          rejectNode(
+            element,
+            'PUI1004',
+            'Rest elements in a destructuring pattern are not admitted.'
+          );
+        if (element.initializer)
+          rejectNode(element, 'PUI1004', 'Defaults in a destructuring pattern are not admitted.');
+        if (!ts.isIdentifier(element.name))
+          rejectNode(element, 'PUI1004', 'Nested destructuring patterns are not admitted.');
+        const key = element.propertyName;
+        if (key && !ts.isIdentifier(key) && !ts.isStringLiteral(key))
+          rejectNode(key, 'PUI1004', 'A destructured key must be a static name.');
+        const field = key ? key.text : element.name.text;
+        const read = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(field)
+          ? factory.createPropertyAccessExpression(source(), field)
+          : factory.createElementAccessExpression(source(), factory.createStringLiteral(field));
+        declarations.push(
+          ranged(
+            factory.createVariableDeclaration(
+              ranged(factory.createIdentifier(element.name.text), element.name),
+              undefined,
+              undefined,
+              ranged(read, element)
+            ),
+            element
+          )
+        );
+      }
+    }
+    const list = ranged(
+      factory.createVariableDeclarationList(
+        declarations,
+        statement.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let)
+      ),
+      statement.declarationList
+    );
+    const lowered = ranged(factory.createVariableStatement(statement.modifiers, list), statement);
+    (lowered as { parent: ts.Node }).parent = statement.parent;
+    ts.setParentRecursive(lowered, true);
+    loweredPatterns.set(node, lowered);
+    return lowered;
+  });
+}
+
+function hasObjectPattern(node: ts.Statement): boolean {
+  return (
+    ts.isVariableStatement(node) &&
+    node.declarationList.declarations.some((declaration) =>
+      ts.isObjectBindingPattern(declaration.name)
+    )
+  );
 }

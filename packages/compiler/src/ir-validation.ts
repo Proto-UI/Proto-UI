@@ -2020,6 +2020,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     const moduleScope: Scope = new Map();
     if (root.moduleBindings !== undefined) {
+      const moduleNames = new Set<string>(
+        array(root.moduleBindings).map((item) =>
+          String(object(item, ['kind', 'name', 'bindingId', 'value', 'span']).name)
+        )
+      );
       for (const value of array(root.moduleBindings)) {
         const binding = object(value, ['kind', 'name', 'bindingId', 'value', 'span']);
         if (binding.kind !== 'const')
@@ -2036,6 +2041,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             ? object(initializer.value, EXPRESSION_FIELDS)
             : initializer;
         while (scalar.kind === 'narrow') scalar = object(scalar.value, EXPRESSION_FIELDS);
+        if (
+          initializer.kind !== 'lexical-cell' &&
+          (scalar.kind === 'array' || scalar.kind === 'record') &&
+          staticDataExpression(scalar, moduleNames) &&
+          readonlyModuleData(valueType(initializer.type, span(binding.span)))
+        )
+          continue;
         if (
           initializer.kind !== 'function' &&
           scalar.kind !== 'literal' &&
@@ -2150,4 +2162,52 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       ],
     };
   }
+}
+
+/** A literal data tree: literals, arrays and records of them, and references
+ *  to other shared module bindings. Nothing in it calls or captures. */
+function staticDataExpression(
+  expression: Record<string, unknown>,
+  moduleNames: ReadonlySet<string>
+): boolean {
+  let node = expression;
+  while (node.kind === 'narrow') node = node.value as Record<string, unknown>;
+  if (node.kind === 'literal') return true;
+  if (node.kind === 'unary')
+    return (
+      (node.operator === '+' || node.operator === '-') &&
+      (node.operand as { kind?: unknown })?.kind === 'literal'
+    );
+  if (node.kind === 'reference') return typeof node.name === 'string' && moduleNames.has(node.name);
+  if (node.kind === 'array')
+    return (
+      Array.isArray(node.elements) &&
+      node.elements.every((element) => staticDataExpression(element, moduleNames))
+    );
+  if (node.kind === 'record')
+    return (
+      Array.isArray(node.entries) &&
+      node.entries.every((entry: { value: Record<string, unknown> }) =>
+        staticDataExpression(entry.value, moduleNames)
+      )
+    );
+  return false;
+}
+
+/** Shared module data must be a read-only view at every depth. */
+function readonlyModuleData(type: ValueType): boolean {
+  if (typeof type === 'string') return isDataValueType(type);
+  if (type.kind === 'literal') return true;
+  if (type.kind === 'object')
+    return (
+      type.index === undefined &&
+      type.fields.every((field) => field.readonly === true && readonlyModuleData(field.type))
+    );
+  if (type.kind === 'array')
+    return valueAlternatives(type.element).every(
+      (member) => typeof member === 'string' || member.kind === 'literal'
+    );
+  if (type.kind === 'union')
+    return type.members.every((member) => typeof member === 'string' || member.kind === 'literal');
+  return false;
 }

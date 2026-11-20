@@ -24,6 +24,7 @@ import {
   propertyName,
   rejectNode,
   scalarInitializer,
+  staticDataInitializer,
   sourceSpan,
   unwrapSourceExpression,
   type FunctionNode,
@@ -36,6 +37,8 @@ export {
   propertyName,
   rejectNode,
   scalarInitializer,
+  staticDataInitializer,
+  staticJoin,
   sourceSpan,
   unwrapSourceExpression,
   type FunctionNode,
@@ -290,6 +293,10 @@ export class SourceGraph {
                 'PUI1004',
                 'Shared module mutable storage requires pure scalar data; owner closures and capabilities cannot escape into module storage.'
               );
+            if (!ts.isIdentifier(value) && staticDataInitializer(value)) {
+              this.add(result, identifier(declaration.name), value, statement);
+              continue;
+            }
             if (
               ts.isArrowFunction(value) ||
               ts.isFunctionExpression(value) ||
@@ -656,6 +663,29 @@ export class SourceGraph {
     return { module, node, factory };
   }
 
+  /** The module requirements of `<hook>.modules`, when `<hook>` resolves to a
+   *  static `defineHook`/`defineAsHook` declaration; otherwise undefined. */
+  private inheritedModules(
+    module: SourceModule,
+    node: ts.Expression
+  ): ModuleDeclarationIR[] | undefined {
+    node = unwrapSourceExpression(node);
+    if (
+      !ts.isPropertyAccessExpression(node) ||
+      node.name.text !== 'modules' ||
+      !ts.isIdentifier(node.expression)
+    )
+      return undefined;
+    const resolved = this.resolveBinding(module, node.expression.text);
+    if (resolved.module === null || !ts.isCallExpression(resolved.node)) return undefined;
+    const callee = resolved.node.expression;
+    const factory = ts.isIdentifier(callee)
+      ? this.resolveCoreImport(resolved.module, callee.text)
+      : undefined;
+    if (factory !== 'defineHook' && factory !== 'defineAsHook') return undefined;
+    return this.descriptor(resolved.module, resolved.node).modules;
+  }
+
   descriptor(
     module: SourceModule,
     node: ts.CallExpression
@@ -703,11 +733,23 @@ export class SourceGraph {
       )
         name = property.initializer.text;
       else if (key === 'modules' && ts.isPropertyAssignment(property)) {
+        // `modules: asFamily.modules` reuses the requirements another static
+        // hook declaration already states, read from its own descriptor.
+        const inherited = this.inheritedModules(module, property.initializer);
+        if (inherited) {
+          for (const declaration of inherited) {
+            if (keys.has(`module:${declaration.id}`))
+              rejectNode(property, 'PUI1025', `Duplicate Module declaration ${declaration.id}.`);
+            keys.add(`module:${declaration.id}`);
+            modules.push(declaration);
+          }
+          continue;
+        }
         if (!ts.isArrayLiteralExpression(property.initializer))
           rejectNode(
             property.initializer,
             'PUI1025',
-            'Module requirements must be a checked literal declaration array.'
+            "Module requirements must be a checked literal declaration array or a static hook declaration's modules."
           );
         const ids = new Set<string>();
         for (const expression of property.initializer.elements) {
