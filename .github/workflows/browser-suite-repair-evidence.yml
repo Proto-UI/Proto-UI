@@ -1,55 +1,37 @@
-name: Browser suite repair evidence
-
+name: Shadow Split S2 instrumented click
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
-concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  focused-browser:
+  s2-click:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Install locked dependencies
-        run: |
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
-        run: |
-          set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Exercise S2 through the native checked click
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          S2_DIAGNOSTIC_DIR: ${{ runner.temp }}/s2-click-evidence
+          DEBUG: pw:protocol,pw:api
+          DEBUG_FILE: ${{ runner.temp }}/s2-click-evidence/playwright-protocol.log
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p "$S2_DIAGNOSTIC_DIR"
+          git rev-parse HEAD > "$S2_DIAGNOSTIC_DIR/source.txt"
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          timeout --signal=TERM --kill-after=10s 720s corepack pnpm@10.32.1 exec vitest run --minWorkers=1 --maxWorkers=1 apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts -t 'retains mixed context, controlled state and slot ownership across move/reconnect'
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
-          retention-days: 30
+          name: shadow-s2-instrumented-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/s2-click-evidence
+          if-no-files-found: error
