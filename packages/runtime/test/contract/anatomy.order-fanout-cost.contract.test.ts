@@ -25,7 +25,7 @@ afterEach(async () => {
 });
 
 /** Real Runtime sessions with instrumented DOM order capabilities, not elapsed-time assertions. */
-function createDomain(subscriberCount: number, itemCount = 12) {
+function createDomain(subscriberCount: number, itemCount = 12, shareBridge = false) {
   const family = createAnatomyFamily('runtime-order-fanout-cost', {
     roles: {
       root: { cardinality: { min: 1, max: 1 } },
@@ -37,12 +37,20 @@ function createDomain(subscriberCount: number, itemCount = 12) {
   document.body.append(element);
   const targets = new Map<Owner, HTMLElement>([[root, element]]);
   const parents = new Map<Owner, Owner | null>([[root, null]]);
+  const parentReads = new Map<Owner, number>();
+  const getParent = (instance: unknown) => {
+    const owner = instance as Owner;
+    parentReads.set(owner, (parentReads.get(owner) ?? 0) + 1);
+    return parents.get(owner) ?? null;
+  };
   const prototypes = new Map<Owner, Prototype<any>>();
   const executions = new Map<Owner, Execution>();
   const notifications = new Map<Owner, string[][]>();
   const handlers = new Map<Owner, (run: RunHandle<any>, ids: string[]) => void>();
   const metadata = new Map<Owner, { label: string }>();
   const observers = new Map<object, () => void>();
+  const unreadyTargets = new Set<Owner>();
+  const observerRegistration = new Map<object, () => void>();
   let comparisons = 0;
 
   const instrument = (target: HTMLElement) => {
@@ -85,13 +93,23 @@ function createDomain(subscriberCount: number, itemCount = 12) {
       onRuntimeReady(wiring) {
         wiring.attach('anatomy', [
           [ANATOMY_INSTANCE_TOKEN_CAP, owner],
-          [ANATOMY_PARENT_CAP, (instance: unknown) => parents.get(instance as Owner) ?? null],
+          [
+            ANATOMY_PARENT_CAP,
+            shareBridge ? getParent : (instance: unknown) => getParent(instance),
+          ],
           [ANATOMY_GET_PROTO_CAP, (instance: unknown) => prototypes.get(instance as Owner) ?? null],
-          [ANATOMY_ROOT_TARGET_CAP, (instance: unknown) => targets.get(instance as Owner) ?? null],
+          [
+            ANATOMY_ROOT_TARGET_CAP,
+            (instance: unknown) => {
+              const owner = instance as Owner;
+              return unreadyTargets.has(owner) ? null : (targets.get(owner) ?? null);
+            },
+          ],
           [
             ANATOMY_ORDER_OBSERVER_CAP,
             (target: AnatomyRootTarget, notify: () => void) => {
               observers.set(target, notify);
+              observerRegistration.get(target)?.();
               return () => {
                 observers.delete(target);
               };
@@ -128,6 +146,7 @@ function createDomain(subscriberCount: number, itemCount = 12) {
 
   const reset = () => {
     comparisons = 0;
+    parentReads.clear();
     for (const rows of notifications.values()) rows.length = 0;
   };
   cleanups.push(async () => {
@@ -146,6 +165,9 @@ function createDomain(subscriberCount: number, itemCount = 12) {
     items,
     targets,
     parents,
+    parentReads,
+    unreadyTargets,
+    observerRegistration,
     metadata,
     handlers,
     executions,
@@ -184,6 +206,81 @@ describe('Runtime Anatomy synchronous order fanout cost', () => {
       expect(many.comparisons()).toBeLessThanOrEqual(singleReaderComparisons * 2);
     });
   }
+
+  for (const source of ['sync', 'notify'] as const) {
+    it(`${source}: reads shared logical ancestors once in a stable notification`, () => {
+      const domain = createDomain(12, 12, true);
+      const bridge: Owner = { id: 'bridge' };
+      domain.parents.set(bridge, domain.root);
+      for (const item of domain.items) domain.parents.set(item, bridge);
+
+      domain[source]();
+
+      expect(domain.parentReads.get(bridge)).toBe(1);
+      expect([...domain.notifications.values()].flat()).toEqual([]);
+    });
+  }
+
+  it('reads a later subscriber in the new domain after a synchronous author callback', () => {
+    const domain = createDomain(3, 3, true);
+    const [first, second, later] = domain.items;
+    const inner = domain.add('inner-root', 'root');
+    domain.add('inner-item', 'item', inner);
+    domain.reset();
+    let callbackQuery: string[] = [];
+    domain.handlers.set(first!, () => {
+      domain.handlers.delete(first!);
+      domain.parents.set(later!, inner);
+      domain.targets.get(inner)!.append(domain.targets.get(later!)!);
+      callbackQuery = domain.query(later!);
+    });
+
+    domain.element.prepend(domain.targets.get(second!)!);
+    domain.sync();
+
+    expect(callbackQuery).toEqual(['inner-item', 'item-2']);
+    expect(domain.notifications.get(later!)).toEqual([callbackQuery]);
+  });
+
+  it('keeps shared order reads while the root target is unavailable', () => {
+    const domain = createDomain(0, 0, true);
+    domain.unreadyTargets.add(domain.root);
+    const bridge: Owner = { id: 'bridge' };
+    domain.parents.set(bridge, domain.root);
+    for (let index = 0; index < 12; index++) {
+      domain.add('reader-' + index, 'item', bridge, true, domain.element);
+    }
+    domain.reset();
+
+    domain.sync();
+
+    expect(domain.parentReads.get(bridge)).toBe(1);
+    expect([...domain.notifications.values()].flat()).toEqual([]);
+  });
+
+  it('rebuilds domain reads when attaching a host observer moves a later subscriber', () => {
+    const domain = createDomain(0, 0, true);
+    const inner = domain.add('inner-root', 'root');
+    const innerTarget = domain.targets.get(inner)!;
+    domain.unreadyTargets.add(inner);
+    const innerReader = domain.add('inner-reader', 'item', inner, true);
+    const later = domain.add('later', 'item', domain.root, true);
+    domain.unreadyTargets.delete(inner);
+    domain.observerRegistration.set(innerTarget, () => {
+      domain.observerRegistration.delete(innerTarget);
+      domain.parents.set(later, inner);
+      innerTarget.append(domain.targets.get(later)!);
+    });
+    domain.reset();
+
+    domain.sync();
+
+    expect(domain.notifications.get(innerReader)).toEqual([]);
+    expect(domain.notifications.get(later)).toEqual([['inner-reader', 'later']]);
+    const version = domain.version(later);
+    domain.sync();
+    expect(domain.version(later)).toBe(version);
+  });
 
   it('keeps registration and business-only changes silent', () => {
     const domain = createDomain(1, 1);
