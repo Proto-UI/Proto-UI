@@ -1,55 +1,94 @@
-name: Browser suite repair evidence
+name: PR1579 workspace lifecycle evidence
 
 on:
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   contents: read
 
-concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  focused-browser:
+  lifecycle:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out immutable PR1579 source
+        id: checkout
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: d4671545c9193cbb229caa561ef3c22496353f6e
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - name: Select existing browser-suite Node baseline
+        id: node
+        uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
-        run: |
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
-        run: |
-          set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+      - name: Record source, prepare existing setup and execute exact file
+        id: evidence
+        shell: bash
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          EVIDENCE_DIR: ${{ runner.temp }}/pr1579-workspace-lifecycle
+          PROTO_UI_LIFECYCLE_SCREENSHOT_DIR: ${{ runner.temp }}/pr1579-workspace-lifecycle/screenshots
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          mkdir -p "$EVIDENCE_DIR"
+          exec > >(tee "$EVIDENCE_DIR/terminal.log") 2>&1
+          trap 'status=$?; printf "workflow-shell\t%s\n" "$status" >> "$EVIDENCE_DIR/terminal-results.tsv"' EXIT
+          run() {
+            printf '\nCOMMAND:'
+            printf ' %q' "$@"
+            printf '\n'
+            printf '%q ' "$@" >> "$EVIDENCE_DIR/commands.txt"
+            printf '\n' >> "$EVIDENCE_DIR/commands.txt"
+            set +e
+            "$@"
+            status=$?
+            set -e
+            printf 'RESULT: %s\n' "$status"
+            printf '%q ' "$@" >> "$EVIDENCE_DIR/terminal-results.tsv"
+            printf '\t%s\n' "$status" >> "$EVIDENCE_DIR/terminal-results.tsv"
+            return "$status"
+          }
+          run git rev-parse HEAD
+          test "$(git rev-parse HEAD)" = d4671545c9193cbb229caa561ef3c22496353f6e
+          git rev-parse HEAD > "$EVIDENCE_DIR/source-sha.txt"
+          git show -s --format=fuller HEAD > "$EVIDENCE_DIR/source-commit.txt"
+          git ls-tree -r HEAD > "$EVIDENCE_DIR/source-tree.txt"
+          sha256sum apps/workspace/test/lifecycle.browser.test.ts apps/workspace/package.json apps/workspace/vite.config.ts apps/workspace/scripts/generate-spec-dataset.ts apps/www/src/content/docs/zh-cn/browser-harness.ts vitest.config.ts package.json pnpm-lock.yaml > "$EVIDENCE_DIR/source-sha256.txt"
+          cp apps/workspace/test/lifecycle.browser.test.ts "$EVIDENCE_DIR/lifecycle.browser.test.ts"
+          {
+            printf 'runner=%s\narchitecture=%s\nCI=%s\n' "$RUNNER_OS" "$RUNNER_ARCH" "$CI"
+            printf 'source=d4671545c9193cbb229caa561ef3c22496353f6e\n'
+            printf 'workspace server=owned by unchanged lifecycle test; loopback dynamic port; strictPort\n'
+            printf 'PROTO_UI_WORKSPACE_BASE_URL=unset\n'
+            printf 'PROTO_UI_LIFECYCLE_SCREENSHOT_DIR=%s\n' "$PROTO_UI_LIFECYCLE_SCREENSHOT_DIR"
+            uname -a
+            cat /etc/os-release
+            node --version
+            corepack --version
+          } > "$EVIDENCE_DIR/environment.txt"
+          unset PROTO_UI_WORKSPACE_BASE_URL
+          run corepack enable
+          run corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          export CHROME_PATH="$CHROME"
+          printf 'CHROME_PATH=%s\n' "$CHROME_PATH" >> "$EVIDENCE_DIR/environment.txt"
+          run "$CHROME_PATH" --version
+          "$CHROME_PATH" --version >> "$EVIDENCE_DIR/environment.txt"
+          run corepack pnpm@10.32.1 --version
+          run timeout --signal=TERM --kill-after=10s 720s corepack pnpm@10.32.1 exec vitest run --no-file-parallelism apps/workspace/test/lifecycle.browser.test.ts --reporter=default --reporter=json --outputFile.json="$EVIDENCE_DIR/vitest-results.json"
+      - name: Record every step outcome
+        if: always()
+        shell: bash
+        env:
+          STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/pr1579-workspace-lifecycle"
+          printf '%s\n' "$STEP_RESULTS" > "$RUNNER_TEMP/pr1579-workspace-lifecycle/step-results.json"
+      - name: Retain successful and failed terminal evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
+          name: pr1579-workspace-lifecycle-d4671545c9193cbb229caa561ef3c22496353f6e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/pr1579-workspace-lifecycle
+          if-no-files-found: error
           retention-days: 30
