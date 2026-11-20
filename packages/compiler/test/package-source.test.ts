@@ -194,6 +194,13 @@ export default definePrototype({name:'types',setup(def){def.expose.method('label
       barrels: { 'barrel.ts': `export * from './values';` },
     },
     {
+      name: 'local import and export aliases',
+      binding: 'Renamed',
+      barrels: {
+        'barrel.ts': `import {IDs as Local} from './values'; export {Local as Renamed};`,
+      },
+    },
+    {
       name: 'transitive diamond',
       binding: 'Renamed',
       barrels: {

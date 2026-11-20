@@ -272,6 +272,19 @@ export function requiredTypeSourceSpecifiers(
     ts.forEachChild(node, visit);
   };
   visit(file);
+  if (includeExports) {
+    for (const statement of file.statements) {
+      if (
+        ts.isExportDeclaration(statement) &&
+        !statement.moduleSpecifier &&
+        statement.exportClause &&
+        ts.isNamedExports(statement.exportClause)
+      ) {
+        for (const element of statement.exportClause.elements)
+          names.add((element.propertyName ?? element.name).text);
+      }
+    }
+  }
   const result = new Set<string>();
   for (const statement of file.statements) {
     if (
