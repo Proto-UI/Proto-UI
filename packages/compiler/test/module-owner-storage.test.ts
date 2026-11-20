@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
+import { emitGpuiSource } from '../src/gpui-source';
 import type { PrototypeIR } from '../src/ir';
 import { partitionModuleBindings } from '../src/source-module-bindings';
 
@@ -15,6 +16,65 @@ function checked(source: string): PrototypeIR {
 }
 
 describe('shared module storage and owner closures', () => {
+  it('emits checked detached data dispatch only for direct portable module functions', () => {
+    const ir = checked(`${core}
+      type Input = { held: boolean };
+      type Decision = { consumed: boolean; effects: string[] };
+      function reply(consumed: boolean, effects: string[]): Decision {
+        return { consumed, effects };
+      }
+      function decide(input: Input): Decision {
+        const held = input.held;
+        if (held) return reply(true, ['hold']);
+        return reply(false, []);
+      }
+      let counter = 0;
+      function readCounter(): number { return counter; }
+      function readIndirect(): number { return readCounter(); }
+      export default definePrototype({ name: 'data-entry', setup(def) {
+        const flag = def.state.bool('flag', false);
+        def.expose.method('decide', decide);
+        def.expose.method('readIndirect', readIndirect);
+        def.expose.method('readFlag', () => flag.get());
+      }});`);
+    const result = emitGpuiSource(ir, { componentName: 'DataEntry' });
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    const { code } = result.value;
+    const detached = code.slice(
+      code.indexOf('pub fn call_data_method('),
+      code.indexOf('pub fn owner(&self)')
+    );
+    expect(detached).toMatch(
+      /"decide" => \{[\s\S]*\.with\(\|function\| function\.call_authored\(arguments\)\)/
+    );
+    expect(detached).toContain('check_method(name, &arguments)');
+    expect(detached).toContain('exposed method returned invalid portable data');
+    expect(detached).toContain('unknown or ineligible data method');
+    expect(detached).not.toContain('"readIndirect"');
+    expect(detached).not.toContain('"readFlag"');
+    expect(code).toContain(
+      'pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App)'
+    );
+    expect(code).toContain('expose_method(&owner, Value::string("readFlag")');
+  });
+
+  it.each([
+    "def.expose.method('decide', () => flag.get());",
+    "if (true) { def.expose.method('decide', () => flag.get()); }",
+  ])('rejects ambiguous detached registration when setup also contains %s', (registration) => {
+    const ir = checked(`${core}
+      function decide(): boolean { return true; }
+      export default definePrototype({ name: 'ambiguous-entry', setup(def) {
+        const flag = def.state.bool('flag', false);
+        def.expose.method('decide', decide);
+        ${registration}
+      }});`);
+    const result = emitGpuiSource(ir);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).not.toContain('pub fn call_data_method(');
+    expect(result.value.code).toContain('expose_method(&owner, Value::string("decide")');
+  });
+
   it('retains owner dependencies in defaults without promoting scalar-only module helpers', () => {
     const ir = checked(`import {definePrototype,delay} from '@proto.ui/core';
       function wait(task=delay(0,()=>{})){return 1;}
