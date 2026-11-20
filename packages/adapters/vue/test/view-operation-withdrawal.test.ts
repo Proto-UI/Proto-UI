@@ -5,6 +5,7 @@ import { createMountedVueAdapter, flushVue } from './utils/vue';
 it('uses actual Vue view replacement and teardown rather than a synthetic readiness flag', async () => {
   let run!: RunHandle<any>;
   let setups = 0;
+  let captured: ViewOperation | null = null;
   const proto = definePrototype({
     name: 'vue-view-operation-source',
     setup(def) {
@@ -13,7 +14,7 @@ it('uses actual Vue view replacement and teardown rather than a synthetic readin
         run = value;
       });
       def.expose('view', {
-        capture: () => run.lifecycle.captureViewOperation(),
+        capture: () => (captured = run.lifecycle.captureViewOperation()),
         present: (value: boolean) => run.lifecycle.setPresent(value),
       });
       return (r) => r.el('span', 'Source');
@@ -33,12 +34,18 @@ it('uses actual Vue view replacement and teardown rather than a synthetic readin
     await flushVue();
     expect(setups).toBe(1);
     expect(first.isCurrent()).toBe(false);
-    const second = view.capture() as ViewOperation;
+    const exposedSecond = view.capture() as ViewOperation;
+    // Expose return values are callback-scoped; retain the producer's identity
+    // separately to query lifecycle invalidation after the owner is disposed.
+    const second = captured!;
     expect(second.isCurrent()).toBe(true);
     mounted.unmount();
     unmounted = true;
     await flushVue();
     expect(second.isCurrent()).toBe(false);
+    expect(() => exposedSecond.isCurrent()).toThrow(
+      '[AdapterHost] cannot invoke an exposed callable after terminal disposal'
+    );
   } finally {
     try {
       if (!unmounted) mounted.unmount();

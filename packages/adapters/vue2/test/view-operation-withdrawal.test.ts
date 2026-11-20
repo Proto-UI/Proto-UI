@@ -5,6 +5,7 @@ import { createMountedVue2Adapter, flushVue2 } from './utils/vue2';
 it('uses actual Vue2 retained view replacement and owner destruction', async () => {
   let run!: RunHandle<any>;
   let setups = 0;
+  let captured: ViewOperation | null = null;
   const proto = definePrototype({
     name: 'vue2-view-operation-source',
     setup(def) {
@@ -13,7 +14,7 @@ it('uses actual Vue2 retained view replacement and owner destruction', async () 
         run = value;
       });
       def.expose('view', {
-        capture: () => run.lifecycle.captureViewOperation(),
+        capture: () => (captured = run.lifecycle.captureViewOperation()),
         present: (value: boolean) => run.lifecycle.setPresent(value),
       });
       return (r) => r.el('span', 'Source');
@@ -33,12 +34,18 @@ it('uses actual Vue2 retained view replacement and owner destruction', async () 
     await flushVue2();
     expect(setups).toBe(1);
     expect(first.isCurrent()).toBe(false);
-    const second = view.capture() as ViewOperation;
+    const exposedSecond = view.capture() as ViewOperation;
+    // Expose return values are callback-scoped; retain the producer's identity
+    // separately to query lifecycle invalidation after the owner is disposed.
+    const second = captured!;
     expect(second.isCurrent()).toBe(true);
     mounted.unmount();
     unmounted = true;
     await flushVue2();
     expect(second.isCurrent()).toBe(false);
+    expect(() => exposedSecond.isCurrent()).toThrow(
+      '[AdapterHost] cannot invoke an exposed callable after terminal disposal'
+    );
   } finally {
     try {
       if (!unmounted) mounted.unmount();
