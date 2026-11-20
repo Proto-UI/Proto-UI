@@ -453,14 +453,19 @@ describe.sequential('default-document colorScheme browser contract', () => {
         }
         const localTheme = page.locator('[data-case="textarea"] > div');
         await localTheme.evaluate((element) => element.classList.add('dark'));
-        await expect.poll(async () => alpha((await paint(textarea)).background)).toBe(0.3);
+        const localDark = await paint(textarea);
+        observations.localDarkUnderLight = localDark;
+        // The local marker does not change the default document reader or this
+        // fixture's root-scoped theme variables.
+        expect(localDark.tokens?.split(/\s+/)).toContain('bg-transparent');
+        expect(alpha(localDark.background)).toBe(0);
         const readerSamples = await page.evaluate(() =>
           (window as any).colorSchemeFixture.readerSamples()
         );
         expect(readerSamples).toEqual({ default: 'light', customTextarea: 'dark' });
         observations.exclusions = {
           readerSamples,
-          localDark: await paint(textarea),
+          localDark,
           customDark: await paint(customEditor),
         };
         await localTheme.evaluate((element) => {
