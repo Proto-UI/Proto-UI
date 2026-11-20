@@ -815,6 +815,13 @@ describe.sequential(
               const portalId = await trigger.getAttribute('aria-controls');
               expect(portalId).toBeTruthy();
               const portal = page.locator(`[id=${JSON.stringify(portalId)}]`);
+              // Expansion precedes the popup's deferred entry focus on some hosts.
+              const expectEntryFocus = async (name: string) => {
+                const option = portal.getByRole('option', { name, exact: true });
+                await expect
+                  .poll(() => option.and(portal.locator(':focus')).count(), { timeout: 3_000 })
+                  .toBe(1);
+              };
               await expect.poll(() => portal.count()).toBe(1);
               await expect.poll(() => portal.getByRole('option').count()).toBe(3);
               const surface = portal.locator('[data-projection-prototype="shadcn-select-surface"]');
@@ -909,6 +916,7 @@ describe.sequential(
               expect(background).not.toBe('transparent');
               expect(background).not.toBe('rgba(0, 0, 0, 0)');
               await capture('select-rhea-open');
+              await expectEntryFocus('Email');
               await page.keyboard.press('End');
               await page.keyboard.press('Enter');
               await attribute(trigger, 'aria-expanded', 'false');
@@ -920,6 +928,7 @@ describe.sequential(
               expect(await sameEditor()).toBe(true);
               await trigger.press('ArrowDown');
               await attribute(trigger, 'aria-expanded', 'true');
+              await expectEntryFocus('In-app');
               await page.keyboard.press('Home');
               await page.keyboard.press('Enter');
               await attribute(trigger, 'aria-expanded', 'false');

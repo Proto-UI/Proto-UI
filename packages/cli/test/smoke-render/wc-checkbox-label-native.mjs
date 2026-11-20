@@ -180,12 +180,12 @@ const resources = new Map([
 // styles, and independently check the actual installed adapter's DOM output.
 const infrastructureStyles = {
   'proto-ui-view-visibility':
-    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
+    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]:not([data-pui-view-revealing="presence"])) { animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
   'proto-ui-wc-host-display': '\n:where(.pui-host-root) { display: block; }\n',
 };
 const infrastructureHashes = [
   'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
-  'sha256-B/uN6mebmNl6Y8KAmaGkix/y4Eiyvq/jCIEHnporMZQ=',
+  'sha256-JP2tlJrMZnKtNcUS+K4kbUOIJZZuA+cmoYSIT9eTL7A=',
   'sha256-+IRPBUpbuxn0ME6GWUx2UPIkh/vCUT0KS1CXnXBjQAY=',
 ];
 assert.deepEqual(

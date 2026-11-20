@@ -262,9 +262,24 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2',
   }),
 
+  // Exact public caption binding consumed by the blocked application controller.
+  'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts': Object.freeze({
+    sourceSha256: '57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894',
+    specifiers: Object.freeze(['@proto.ui/prototypes-base/calendar']),
+  }),
   // Reviewed Field validation request type consumed by the blocked demo controller.
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
+  }),
+  // The recipe projects serializable intent into the render-local association scope.
+  'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts': Object.freeze({
+    sourceSha256: '249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/checkbox']),
+  }),
+  // The application demo supplies view lifetime and disposes the public binding.
+  'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts': Object.freeze({
+    sourceSha256: '64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
@@ -424,8 +439,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/prototypes/liquid-glass/src/theme',
     ]),
   }),
-  'apps/www/src/components/override/Search.astro': Object.freeze({
-    viteIgnoredDynamicImports: Object.freeze(['`${bundlePath}pagefind.js`']),
+  // The resource supplies `url` only after same-origin HTTP(S) validation.
+  // Neither the importer nor its URL-construction companion may drift alone.
+  'apps/www/src/components/site-search-owner.ts': Object.freeze({
+    viteIgnoredDynamicImports: Object.freeze(['url']),
+    sourceSha256: 'aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580',
+    companionSource: Object.freeze({
+      path: 'apps/www/src/components/site-pagefind-resource.ts',
+      sha256: '1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a',
+    }),
   }),
 });
 
@@ -9226,24 +9248,31 @@ function isReviewedPrototypePackageDependency(sourcePath, guardedImport) {
   );
 }
 
+function reviewedWebsiteImportSourceMatches(rootDir, sourcePath, sourceSha256) {
+  const target = path.join(rootDir, sourcePath);
+  try {
+    assertPromotionModulePath(rootDir, target);
+    return (
+      fs.lstatSync(target).isFile() &&
+      createHash('sha256').update(fs.readFileSync(target)).digest('hex') === sourceSha256
+    );
+  } catch {
+    return false;
+  }
+}
+
 function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir) {
   if (isReviewedPrototypePackageDependency(sourcePath, guardedImport)) return true;
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
-  if (allowance.sourceSha256) {
-    const target = path.join(rootDir, sourcePath);
-    try {
-      assertPromotionModulePath(rootDir, target);
-      if (
-        !fs.lstatSync(target).isFile() ||
-        createHash('sha256').update(fs.readFileSync(target)).digest('hex') !==
-          allowance.sourceSha256
-      )
-        return false;
-    } catch {
-      return false;
-    }
-  }
+  if (
+    allowance.sourceSha256 &&
+    !reviewedWebsiteImportSourceMatches(rootDir, sourcePath, allowance.sourceSha256)
+  )
+    return false;
+  const companion = allowance.companionSource;
+  if (companion && !reviewedWebsiteImportSourceMatches(rootDir, companion.path, companion.sha256))
+    return false;
 
   if (
     guardedImport.category === 'vite-ignored-dynamic-import' &&

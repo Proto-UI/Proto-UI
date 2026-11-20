@@ -7,6 +7,9 @@ import insetDemo from '../demo-shadcn-dropdown-inset.demo';
 import { parse } from 'yaml';
 import {
   DROPDOWN_DEMOS,
+  dropdownEvidenceRecipes,
+  dropdownInsetRem,
+  newYorkDropdownDemo,
   dropdownPreviewSelector,
   channelsClose,
   hasNamedDropdownGroup,
@@ -88,7 +91,8 @@ it('separates rest/focus/held press, checks disabled ownership and inset/Lucide 
     "page.keyboard.press('End')",
     "page.keyboard.press('Space')",
     "menu.waitFor({ state: 'hidden' })",
-    'measured.rem * 2',
+    'measured.rem * insetRem',
+    'observeDropdownGeometries(menu, refs)',
     'label.rem * 0.5',
     "viewBox: '0 0 24 24'",
     'width: 16',
@@ -158,7 +162,7 @@ it('drives inset changes through the public demo control and keeps the fixed phy
   expect(source).toContain('[true, false, true].entries()');
   expect(source).toContain('geometry.paddingRight');
   expect(source).toContain('geometry.direction');
-  expect(source).toContain('.toBe(enabled ? 2 : 0.5)');
+  expect(source).toContain('.toBe(enabled ? insetRem : 0.5)');
 });
 
 it('sets direction at the demo author boundary and observes portal propagation before geometry', () => {
@@ -174,4 +178,21 @@ it('sets direction at the demo author boundary and observes portal propagation b
   expect(source).not.toContain('document.documentElement.dir = dir');
   expect(source).toContain('expect(geometry.direction).toBe(direction)');
   expect(source).toContain("if (original === null) element.removeAttribute('dir')");
+});
+
+it('selects a fixed New York consumer without changing the authored Rhea recipe', () => {
+  const fixture = newYorkDropdownDemo(insetDemo);
+  expect(fixture.setup).toBe(insetDemo.setup);
+  expect(fixture.root).toEqual({
+    ...insetDemo.root,
+    props: { ...insetDemo.root.props, styleProfile: 'new-york-v4' },
+  });
+  expect(fixture.root).not.toBe(insetDemo.root);
+  expect(insetDemo.root.props.styleProfile).toBe('rhea');
+  expect(dropdownEvidenceRecipes).toEqual([
+    { recipe: 'destructive', profile: 'new-york-v4' },
+    { recipe: 'inset', profile: 'new-york-v4' },
+    { recipe: 'inset', profile: 'rhea' },
+  ]);
+  expect(dropdownInsetRem).toEqual({ 'new-york-v4': 2, rhea: 1.75 });
 });
