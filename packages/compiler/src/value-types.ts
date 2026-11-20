@@ -257,6 +257,8 @@ export function memberValueType(owner: ValueType, key: string, optional = false)
       throw new TypeError(`Cannot read ${key} on a nullish value.`);
     }
     if (isDataValueType(type)) return memberDataType(type, key, { optional });
+    // Opaque snapshots expose keys without proving their presence or value shape.
+    if (type === 'record') return 'unknown';
     const field = objectFields(type)?.find((field) => field.name === key);
     if (!field) {
       if (typeof type !== 'string' && type.kind === 'object' && type.index !== undefined)
