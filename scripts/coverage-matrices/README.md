@@ -4,6 +4,8 @@ The independent prototype/projection portfolio is [documented here](../../intern
 
 `node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
 
+The [#834 browser study](https://github.com/Proto-UI/Proto-UI/issues/834) uses the [current source reference](test/fixtures/website-markup-provenance-current.json) for its sampled routes. The [original reference](test/fixtures/website-markup-provenance-source.json) preserves the earlier review baseline. The suite rejects changed bytes before launching the Website. Review any changes to the sampled inputs and their ownership before updating the current reference. Both references record unverified source admission. The served build and transitive source closure require separate evidence.
+
 Explicit repository source paths are literal identities, including bracketed Astro route names such as `[runtime].astro`; they are never glob-expanded. Wildcard operators (`*`, `?`, `{`, `}`) and parent traversal remain inadmissible. A Source-scan binding for a literal route still requires an existing file, its reviewed SHA-256 and a unique binding; brackets do not waive those checks.
 
 ## Verified GPUI rows and portable native source proofs
@@ -49,6 +51,42 @@ Harness native event-property assignments, including compound assignments, use t
 Calls through an ESM-imported Node `createRequire` factory (`node:module` or `module`) cannot silently add a consumer dependency. The source scanner follows direct/renamed imports, namespace/default members (including renamed default imports), static namespace destructuring and bounded lexical factory/loader aliases. Actual loader consumption is unresolved for consumer-wall and promotion evidence; literal `@proto.ui/*` identities also enter the existing governed-layer check. It does not treat a Node loader's arbitrary resolution base as the Website Vite resolver. Inert factory acquisition and `.resolve` path lookup are not consumption. Business factories, erased imports and lexical shadows are not classified by spelling. Captured outer bindings and assignments retain possible native provenance across function text order; the scanner does not infer when that function runs. Reassigned native provenance and depth exhaustion remain unverified; this is not a CommonJS interpreter or arbitrary aggregate/getter/bind/call/apply proof. See [Node createRequire](https://nodejs.org/docs/latest-v24.x/api/module.html#modulecreaterequirefilename).
 
 The modeled executable-navigation profile currently covers proven native Location writes and `assign`/`replace`, not `window.open`. Likewise, the worklet profile covers Paint and Audio, not the CSS Animation/Layout Worklet drafts. Reproductions for [window.open](https://github.com/Proto-UI/Proto-UI/pull/563#discussion_r4182138198) and [Animation/Layout](https://github.com/Proto-UI/Proto-UI/pull/563#discussion_r4182138211) remain explicitly unmodeled research; a passing scan does not certify those entry points. A future consumer using them requires source review and a reviewed profile/evidence decision before promotion. Absence from today's sources is not a safety argument. The bounded source checker is not a general JavaScript execution proof, and production validation still inspects the Rollup graph rather than emitted bytes. Research scope and acceptance work are retained in [the follow-up record](../../internal/records/2026-10-05-coverage-post-ci-followups.md); the originating review comments remain open pending formal explanation and follow-up publication.
+
+## Exact Retry virtual-module inputs
+
+The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from
+`apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three
+`runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal
+`virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance.
+Other owners, near-match IDs, HTML and public assets remain outside this profile.
+
+Every current-profile input below must be a regular file at its exact authored
+path, with no repository-local symlink component, and match its raw-byte SHA-256.
+Successful admission includes all five files as promotion evidence metadata;
+recording a helper elsewhere cannot replace this conjunction.
+
+| Input | SHA-256 |
+| --- | --- |
+| `apps/www/astro.config.mjs` | `eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7` |
+| `apps/www/scripts/runtime-retry-urls.mjs` | `510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224` |
+| `apps/www/scripts/contrast-provenance.mjs` | `a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a` |
+| `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
+| `apps/www/scripts/accordion-activation-probe.mjs` | `9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b` |
+
+This current config remains unrecognized by `promotionBarePackageTargets` for
+general bare-package promotion. Its extracted resolver and optional activation
+probe are bound as source inputs, without certifying general resolver parity,
+probe activation, transformed Adapter bytes, installed framework bytes, emitted
+URLs, or runtime behavior. The virtual edge remains terminal in source traversal;
+the separate production module-graph checks retain their existing responsibility.
+
+Historical Retry configs retain their original Retry/contrast helper requirements.
+Their exact inert inputs are retained in
+`test/fixtures/promotion-resolver-finf-retry-audit.txt` (`428f9cbe…f8ac`) and
+`test/fixtures/promotion-resolver-shadcn-card-retry-audit.txt` (`4ac9f16e…625a`).
+General resolver fixtures and parity controls select historical bytes explicitly;
+current virtual-module fixtures copy the five current inputs separately. The
+full control file is `node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs`.
 
 ## Document bases and runtime graph entries
 

@@ -28,3 +28,15 @@ The eight affected Homepage files then passed **59/59 tests, zero failed or skip
 Three importing browser test files have path-only changes and have not run here. Whole types, the full website/public-package build, the whole scanner fixture suite and full CI are not represented by the bounded checks above. The CLI build alone is not a complete website or release build.
 
 The accompanying JSON records source and log hashes, complete commands, the exact six-diagnostic difference, and the source-preservation audit. A separate local agent reviewed the file placement and import resolution; this is local engineering review and is not a formal GitHub approval.
+
+## Liquid hover evidence helper placement follow-up
+
+The follow-up based on `af43d613171fe18a8acf61fe3fbffec5610f67a1` moves the Node-only evidence helper `apps/www/src/content/docs/zh-cn/liquid-hover-plan.ts` to `apps/www/test/helpers/liquid-hover-plan.ts`. Its browser-harness type and hover-fixture imports retain their original targets, and its two test consumers use the new path. The helper's behavior and all test assertions are unchanged. Historical migration inventories retain their original paths and hashes. Scanner and server-readiness sources are unchanged.
+
+The validation results above describe the earlier placement repair only; they do not establish validation of this follow-up.
+
+## Liquid toggle failure diagnostics helper placement follow-up
+
+The source-only follow-up based on `da83ef2008f0289cdecc3e77cd37698131c43861` moves `apps/www/src/content/docs/zh-cn/liquid-toggle-failure-diagnostics.ts` to `apps/www/test/helpers/liquid-toggle-failure-diagnostics.ts`. The helper was an ordinary Website source seed whose import of `apps/www/scripts/diagnose-select-click.ts` led through `browser-harness.ts` to `scripts/test/server-readiness.mjs`. Its new relative import retains the exact diagnostic script target. Both live consumers, `demo-liquid-glass-toggle.browser.test.ts` and `liquid-toggle-failure-diagnostics.test.ts`, now import the relocated helper. The helper implementation and test assertions are unchanged; the diagnostic script, scanner, and historical artifacts are unchanged.
+
+Source-only review identified the import chain and the two live consumers. Parent validation is pending for the complete `liquid-hover-plan.test.ts` and `liquid-toggle-failure-diagnostics.test.ts` modules under Node 24. No test, build, or scanner result is claimed for this follow-up; the earlier validation results above do not establish that the remaining readiness diagnostics have cleared.

@@ -2,8 +2,11 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { RuntimeId } from './browser-harness';
-import { LIQUID_HOVER_NEGATIVES, LIQUID_HOVER_PARTS } from './liquid-hover-fixture';
+import type { RuntimeId } from '../../src/content/docs/zh-cn/browser-harness';
+import {
+  LIQUID_HOVER_NEGATIVES,
+  LIQUID_HOVER_PARTS,
+} from '../../src/content/docs/zh-cn/liquid-hover-fixture';
 
 export const LIQUID_HOVER_THEMES = ['light', 'dark'] as const;
 export const LIQUID_HOVER_JOURNEYS = ['interaction', 'policy-and-boundaries'] as const;
