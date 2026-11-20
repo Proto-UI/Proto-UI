@@ -4,40 +4,68 @@ on:
 permissions:
   contents: read
 jobs:
-  website-coverage:
-    strategy:
-      fail-fast: false
-      matrix:
-        revision: [baseline, candidate]
+  website-checks:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.revision == 'baseline' && '3992ae27691ae65d52138e00681d27177623fcb4' || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and native video decoder
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y ffmpeg python3
+          /usr/bin/ffprobe -version | /usr/bin/grep -E '^ffprobe version 6\.1\.'
+      - name: Run complete scanner test module
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/website-checks"
+          mkdir -p "$evidence"
+          git rev-parse HEAD > "$evidence/source.txt"
+          node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs 2>&1 | tee "$evidence/checker.tap"
+      - name: Run repository coverage scanner
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/website-checks"
+          mkdir -p "$evidence"
+          node scripts/coverage-matrices/check-coverage-matrices.mjs > "$evidence/scanner.log" 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: website-checks-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/website-checks
+          if-no-files-found: error
+          retention-days: 30
+  website-types:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Install locked workspace dependencies
-        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-      - name: Run repository coverage scanner
+        run: corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Verify type checking with the existing Search repair
         run: |
           set -euo pipefail
-          evidence="$RUNNER_TEMP/coverage"
+          evidence="$RUNNER_TEMP/website-types"
           mkdir -p "$evidence"
           git rev-parse HEAD > "$evidence/source.txt"
-          node --version > "$evidence/node.txt"
-          set +e
-          node scripts/coverage-matrices/check-coverage-matrices.mjs > "$evidence/scanner.log" 2>&1
-          status=$?
-          set -e
-          printf '%s\n' "$status" > "$evidence/exit.txt"
-          exit "$status"
+          sha256sum apps/www/src/components/site-search-commands.disposal.test.ts > "$evidence/search-fixture.txt"
+          corepack pnpm@10.32.1 -s check:types 2>&1 | tee "$evidence/types.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-${{ matrix.revision }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/coverage/
+          name: website-types-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/website-types
           if-no-files-found: error
           retention-days: 30
