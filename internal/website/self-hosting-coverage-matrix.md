@@ -308,8 +308,8 @@ The same review binds committed association-key retirement to `www.demo.prototyp
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `9bae80be9b490ab0f5e5da698d7b5f863fb16b42c3c37697ee42e6f335b7f8c3` |
 | `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `9f14efcd4e059a441b798c3f9ff074f7546c5f3e85f95ec13abeba6e73c120cf` |
 | `apps/www/src/components/override/Hero.astro` | `www.shell.hero-actions`, `www.shell.native-link-presentation` | `d3cd9ed290558c323292af0a56586bb3372c11324bf2ca6c0107c89b62952e34` |
-| `apps/www/src/components/override/LanguageSelect.astro` | `www.shell.language-select` | `334ec8188645e8ba055a57e75c5f4e2a15fd085995722bf010f8e787c4abc410` |
-| `apps/www/src/components/override/PageFrame.astro` | `www.docs.whitepaper-diagram-viewer`, `www.docs.wiki-term`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.page-layout`, `www.shell.sidebar-navigation` | `38adff23ef29d8dcfde1346572bb34848652d1cbeaddb5c47947161384ec5cdc` |
+| `apps/www/src/components/override/LanguageSelect.astro` | `www.shell.language-select` | `41e302ab355590a3a252f152a3807ed9510ac41ac5dcf0ff4c4769f13d80b5c9` |
+| `apps/www/src/components/override/PageFrame.astro` | `www.docs.whitepaper-diagram-viewer`, `www.docs.wiki-term`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.page-layout`, `www.shell.sidebar-navigation` | `753f40ce6c26eafd0ea860450c60c277a7bbff6adddc83cb65c753211fad8d57` |
 | `apps/www/src/components/override/Search.astro` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher`, `www.search.loading-failure`, `www.search.pagefind-engine` | `5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0` |
 | `apps/www/src/components/override/Select.astro` | `www.shell.language-select` | `2de370ac250545ea251fcdd6a837c4d793dfa21ae5b659805c30bed6507a5c51` |
 | `apps/www/src/components/override/SocialIcons.astro` | `www.shell.native-link-presentation`, `www.shell.social-links` | `12d59a437c47767ead0edf80c2877b94f071b303bdbeb4542260ab82af8ad401` |
@@ -317,7 +317,7 @@ The same review binds committed association-key retirement to `www.demo.prototyp
 | `apps/www/src/components/override/TableOfContents/TableOfContentsList.astro` | `www.shell.table-of-contents` | `91882176089ca527813973dfc37d7b4982683ecebb860632c20904507da39c1b` |
 | `apps/www/src/components/override/TableOfContents/starlight-toc.ts` | `www.shell.table-of-contents` | `0081183e4d4fde2d4c2df9c990e01b49b230f397d75b2e48c73afa409146b9a1` |
 | `apps/www/src/components/override/ThemeProvider.astro` | `www.shell.theme-provider` | `7357e80613d87dcba985a5318d2d03b853537cef660ac76fbd457145cb227993` |
-| `apps/www/src/components/override/ThemeToggle.astro` | `www.shell.theme-toggle` | `fafa8e0a447a55bde801580ee38fd8dca919dc41570950c500e1492d81e02714` |
+| `apps/www/src/components/override/ThemeToggle.astro` | `www.shell.theme-toggle` | `0e0717ece099a80a5d3facff933d8f187f43367e79d0be94c4e911931a367cfe` |
 | `apps/www/src/components/site-code-surface.ts` | `www.docs.code-surface`, `www.docs.note-surface` | `0aeee7dbda6debe1dafb449924738c3674f5216fe5ad64c76cd31e63701ea9e1` |
 | `apps/www/src/components/site-contents-command.ts` | `www.shell.mobile-menu-toggle` | `5c2a4374a6e8c28c0f5d1d5aac9f367a96709f57047db5c49343b3b139da5579` |
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
