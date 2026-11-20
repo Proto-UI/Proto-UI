@@ -164,6 +164,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
             'link',
           ]) {
             await page.locator(`${S2} [data-option="variant"]`).selectOption(variant);
+            const paint = await expectedPaint(page, variant, dark);
             for (const [size, height] of [
               ['default', 32],
               ['sm', 28],
@@ -175,7 +176,6 @@ describe.sequential('S2 public Shadow split settings paths', () => {
               await settle(page);
               const rows = await read(page);
               parity(rows);
-              const paint = await expectedPaint(page, variant, dark);
               for (const row of rows) {
                 expect(row.button.size[1]).toBe(height);
                 if (size === 'icon') expect(row.button.size[0]).toBe(32);
@@ -258,7 +258,17 @@ describe.sequential('S2 public Shadow split settings paths', () => {
       for (const profile of profiles)
         for (const kind of ['button', 'switch', 'checkbox']) {
           const el = component(page, profile, kind);
-          await el.click({ force: true });
+          await el.scrollIntoViewIfNeeded();
+          const box = await el.boundingBox();
+          const viewport = page.viewportSize();
+          if (!box || !viewport) throw new Error(`Missing pointer geometry for ${profile} ${kind}`);
+          const x = box.x + box.width / 2;
+          const y = box.y + box.height / 2;
+          expect(x).toBeGreaterThanOrEqual(0);
+          expect(x).toBeLessThan(viewport.width);
+          expect(y).toBeGreaterThanOrEqual(0);
+          expect(y).toBeLessThan(viewport.height);
+          await page.mouse.click(x, y);
           await el.focus();
           await page.keyboard.press('Space');
           await page.keyboard.press('Enter');
