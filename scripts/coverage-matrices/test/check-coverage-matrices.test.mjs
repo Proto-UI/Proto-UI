@@ -2873,16 +2873,21 @@ test('restricts Lucide component allowances to the Lucide package family', () =>
 
 test('accepts Lucide package root and subpath imports in reviewed Lucide components', () => {
   const root = createRoot();
-  writeValidMatrices(root);
+  const gallery = 'apps/www/src/components/LucideIconGallery.astro';
   for (const [sourcePath, specifier] of [
-    ['apps/www/src/components/LucideIconGallery.astro', '@proto.ui/prototypes-lucide'],
+    [gallery, '@proto.ui/prototypes-lucide'],
     ['apps/www/src/components/StaticLucideIcon.astro', '@proto.ui/prototypes-lucide/check'],
   ]) {
     const absolutePath = path.join(root, sourcePath);
     fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
     fs.writeFileSync(absolutePath, ['---', `import icon from '${specifier}';`, '---'].join('\n'));
   }
+  writeValidMatrices(root);
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  fs.appendFileSync(path.join(root, gallery), '\n<!-- Unreviewed source bytes. -->\n');
+  assert.ok(
+    validationMessage(root).includes(`source fingerprint for \`${gallery}\` does not match`)
+  );
 });
 
 test('accepts reviewed demo raw imports and ignores import-looking code strings', () => {
@@ -6995,6 +7000,7 @@ test('accepts reviewed fingerprints embedded in Website source bindings', () => 
       '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
       '| --- | --- | --- |',
       `| \`${sourcePath}\` | \`www.shell.primary-nav\`, \`www.shell.header-separators\` | \`${digest}\` |`,
+      `| \`apps/www/src/components/LucideIconGallery.astro\` | \`www.gallery.lucide-card-grid\`, \`www.gallery.prototype-library-cards\` | \`${sourceScanDigest(root, 'apps/www/src/components/LucideIconGallery.astro')}\` |`,
     ].join('\n'),
   });
   writeMatrix(
@@ -17666,7 +17672,16 @@ for (const helper of ['browser-harness', 'site-search-evidence']) {
 for (const [source, specifiers] of [
   ['Homepage/homepage-text.ts', ['@proto.ui/prototypes-base/text']],
   ['InstallCommandCard.astro', ['@proto.ui/adapter-web-component']],
-  ['site-link-recipes.ts', ['@proto.ui/prototypes-base/surface', '@proto.ui/prototypes-base/text']],
+  [
+    'site-link-recipes.ts',
+    [
+      '@proto.ui/prototypes-base/surface',
+      '@proto.ui/prototypes-base/text',
+      '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-brutalist/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+    ],
+  ],
   [
     'site-native-controls.ts',
     [
@@ -17675,6 +17690,8 @@ for (const [source, specifiers] of [
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
     ],
   ],
   ['site-search-commands.ts', ['@proto.ui/module-expose-state']],
@@ -17702,9 +17719,9 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    // Search now admits exact reviewed importer bytes rather than a synthetic body.
+    const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
     const content =
-      source === 'site-search-commands.ts'
+      nativeLinkSource || source === 'site-search-commands.ts'
         ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
         : source.endsWith('.astro')
           ? `<script>${code}</script>`
@@ -17720,6 +17737,16 @@ for (const [source, specifiers] of [
         message
       );
       assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copy}\``), message);
+    }
+    if (nativeLinkSource) {
+      fs.writeFileSync(path.join(root, relative), `${content}\n// Unreviewed importer bytes.\n`);
+      const changed = validationMessage(root);
+      for (const specifier of specifiers) {
+        assert.ok(
+          changed.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``),
+          changed
+        );
+      }
     }
     fs.writeFileSync(
       path.join(root, relative),
