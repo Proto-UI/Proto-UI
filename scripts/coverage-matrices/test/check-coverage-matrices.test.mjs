@@ -19069,6 +19069,30 @@ test('Hero fixed-icon import remains exact, content-bound and owner-bound', () =
   );
 });
 
+test('Homepage gallery glyph imports require the reviewed file and bytes', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/components/Homepage/homepage-gallery-icons.ts';
+  const target = path.join(root, relative);
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, reviewed);
+  const rawImport = (specifier, file) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+  const bell = '@proto.ui/prototypes-lucide/icons/bell';
+  const foreign = 'apps/www/src/components/copied-homepage-gallery-icons.ts';
+  const exact = collectCoverageMatrixIssues({ rootDir: root });
+  assert.ok(
+    !exact.some((issue) => issue.includes(`in \`${relative}\` escapes the website consumer-wall allowlist`))
+  );
+  fs.writeFileSync(path.join(root, foreign), reviewed);
+  assert.ok(validationMessage(root).includes(rawImport(bell, foreign)));
+  const otherIcon = '@proto.ui/prototypes-lucide/icons/arrow-left';
+  fs.writeFileSync(target, `${reviewed}\nimport '${otherIcon}';\n`);
+  const message = validationMessage(root);
+  assert.ok(message.includes(rawImport(bell, relative)));
+  assert.ok(message.includes(rawImport(otherIcon, relative)));
+});
+
 for (const source of [
   'packages/adapters/base/src/material/geometry-watch.ts',
   'packages/adapters/base/src/material/initial-paint-experiment.ts',

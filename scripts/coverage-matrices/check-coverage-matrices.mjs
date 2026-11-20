@@ -623,6 +623,21 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: 'f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c',
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
+  'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
+    sourceSha256: 'ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-lucide/icons/bell',
+      '@proto.ui/prototypes-lucide/icons/chart-no-axes-column-increasing',
+      '@proto.ui/prototypes-lucide/icons/circle-question-mark',
+      '@proto.ui/prototypes-lucide/icons/layers',
+      '@proto.ui/prototypes-lucide/icons/mouse-pointer-click',
+      '@proto.ui/prototypes-lucide/icons/scan-search',
+      '@proto.ui/prototypes-lucide/icons/settings-2',
+      '@proto.ui/prototypes-lucide/icons/sliders-horizontal',
+      '@proto.ui/prototypes-lucide/icons/square-check-big',
+      '@proto.ui/prototypes-lucide/icons/text-cursor-input',
+    ]),
+  }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
