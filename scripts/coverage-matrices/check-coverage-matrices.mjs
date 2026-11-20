@@ -250,10 +250,17 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Exact opt-in optical host and its owned-source diagnostics, not app controls.
   'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-feedback']),
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/module-feedback',
+      '@proto.ui/adapter-base',
+    ]),
   }),
   'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/adapter-base/web-material']),
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-base',
+      '@proto.ui/adapter-base/web-material',
+    ]),
     resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
   }),
   'packages/adapters/base/src/material/program-pool.ts': Object.freeze({
@@ -602,7 +609,11 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/prototypes/brutalist/src/theme',
       'packages/prototypes/bootstrap-2-3-2/src/theme',
       'packages/prototypes/liquid-glass/src/theme',
+      'packages/prototypes/shadcn/src/text/typography',
     ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/canonical-motion-palette.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-base', '@proto.ui/module-feedback']),
   }),
   'apps/www/src/components/LucideIconGallery.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
