@@ -19224,9 +19224,6 @@ test('Calendar caption import and controller binding require reviewed source', (
   const row = {
     ID: owner,
     Path: relative,
-    'Target class': 'site-composition',
-    'Dependency and owner': 'Issue #1323; owner: Website demonstration UI',
-    State: 'blocked',
   };
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, reviewed);
@@ -19239,7 +19236,7 @@ test('Calendar caption import and controller binding require reviewed source', (
     missing
   );
 
-  writeValidMatrices(root, row, {}, { websiteBindings: [[relative, ['www.shell.search']]] });
+  writeValidMatrices(root, row, {}, { websiteBindings: [[relative, ['www.demo.runtime-select']]] });
   const wrongOwner = validationMessage(root);
   assert.ok(wrongOwner.includes(wrongBinding), wrongOwner);
 
