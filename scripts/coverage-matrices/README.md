@@ -50,6 +50,42 @@ Calls through an ESM-imported Node `createRequire` factory (`node:module` or `mo
 
 The modeled executable-navigation profile currently covers proven native Location writes and `assign`/`replace`, not `window.open`. Likewise, the worklet profile covers Paint and Audio, not the CSS Animation/Layout Worklet drafts. Reproductions for [window.open](https://github.com/Proto-UI/Proto-UI/pull/563#discussion_r4182138198) and [Animation/Layout](https://github.com/Proto-UI/Proto-UI/pull/563#discussion_r4182138211) remain explicitly unmodeled research; a passing scan does not certify those entry points. A future consumer using them requires source review and a reviewed profile/evidence decision before promotion. Absence from today's sources is not a safety argument. The bounded source checker is not a general JavaScript execution proof, and production validation still inspects the Rollup graph rather than emitted bytes. Research scope and acceptance work are retained in [the follow-up record](../../internal/records/2026-10-05-coverage-post-ci-followups.md); the originating review comments remain open pending formal explanation and follow-up publication.
 
+## Exact Retry virtual-module inputs
+
+The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from
+`apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three
+`runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal
+`virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance.
+Other owners, near-match IDs, HTML and public assets remain outside this profile.
+
+Every current-profile input below must be a regular file at its exact authored
+path, with no repository-local symlink component, and match its raw-byte SHA-256.
+Successful admission includes all five files as promotion evidence metadata;
+recording a helper elsewhere cannot replace this conjunction.
+
+| Input | SHA-256 |
+| --- | --- |
+| `apps/www/astro.config.mjs` | `eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7` |
+| `apps/www/scripts/runtime-retry-urls.mjs` | `510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224` |
+| `apps/www/scripts/contrast-provenance.mjs` | `a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a` |
+| `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
+| `apps/www/scripts/accordion-activation-probe.mjs` | `9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b` |
+
+This current config remains unrecognized by `promotionBarePackageTargets` for
+general bare-package promotion. Its extracted resolver and optional activation
+probe are bound as source inputs, without certifying general resolver parity,
+probe activation, transformed Adapter bytes, installed framework bytes, emitted
+URLs, or runtime behavior. The virtual edge remains terminal in source traversal;
+the separate production module-graph checks retain their existing responsibility.
+
+Historical Retry configs retain their original Retry/contrast helper requirements.
+Their exact inert inputs are retained in
+`test/fixtures/promotion-resolver-finf-retry-audit.txt` (`428f9cbe…f8ac`) and
+`test/fixtures/promotion-resolver-shadcn-card-retry-audit.txt` (`4ac9f16e…625a`).
+General resolver fixtures and parity controls select historical bytes explicitly;
+current virtual-module fixtures copy the five current inputs separately. The
+full control file is `node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs`.
+
 ## Document bases and runtime graph entries
 
 Promotion does not infer a rendered document's base URL from a component source directory. An authored native `base` with `href`, a bound href or opaque attributes remains unverified for promotion, including case-insensitive HTML href names, local bases and bases supplied through the modeled Astro head configuration. Parser-proven style/text/title regions and template contents retain their inert document context; a Vue structural template stays active, and foreign-content text is not automatically treated as HTML raw text. This also protects inline-style resources on the page. Ordinary source inventory still permits static local bases; target-only bases, inert examples and custom components do not become document-base evidence. A future supported document-base profile needs separate resolution proof before these pages can be promoted. See the [HTML base element](https://html.spec.whatwg.org/multipage/semantics.html#the-base-element).
