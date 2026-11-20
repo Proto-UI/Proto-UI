@@ -810,7 +810,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         if (!isDataValueType(valueType(exposure.payload, location)))
           bad('Outward event payload must be serializable data.', location);
       } else if (exposure.kind === 'method') {
-        parameters(exposure.parameters);
+        parameters(exposure.parameters, false);
         if (!isPublicValueType(valueType(exposure.returnType, location)))
           bad('Exposed methods cannot return setup or execution-scope capabilities.', location);
       } else bad('Invalid exposure kind.', location);
@@ -926,7 +926,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     for (const requirement of array(root.requirements)) text(requirement);
     const active = new Set<object>();
-    function parameters(value: unknown): Parameter[] {
+    function parameters(value: unknown, declaration = true): Parameter[] {
       const names = new Set<string>();
       let optionalSeen = false;
       return array(value).map((item) => {
@@ -937,7 +937,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           (param.optional !== undefined && typeof param.optional !== 'boolean')
         )
           bad('Invalid function parameter.');
-        if (optionalSeen && param.optional !== true && param.default === undefined)
+        // Expose signatures project defaults to optional slots without carrying
+        // initializer expressions. Only declarations obey source optional order.
+        if (declaration && optionalSeen && param.optional !== true && param.default === undefined)
           bad('Required parameter follows an optional parameter.');
         optionalSeen ||= param.optional === true && param.default === undefined;
         names.add(param.name);
@@ -1745,7 +1747,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 const exposure = exposures.get(first.value);
                 if (!exposure || exposure.kind !== 'method')
                   bad('Expose method must have recorded signature.', location);
-                bindings.methodParameters = parameters(exposure.parameters);
+                bindings.methodParameters = parameters(exposure.parameters, false);
                 bindings.methodReturnType = valueType(exposure.returnType, location);
               }
             }
