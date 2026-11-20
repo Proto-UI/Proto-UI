@@ -701,7 +701,7 @@ fn data_methods_preserve_argument_presence_registration_and_terminal_lifetime(cx
         let original = one.owner.borrow_mut().exposes.insert(
             "decide".into(), Value::Function(Rc::new(|_| Value::json(json!(99)))),
         ).unwrap();
-        assert_eq!(one.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(99));
+        assert_eq!(one.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(99.0));
         one.owner.borrow_mut().exposes.insert("decide".into(), original);
         detach_native_view(&one.owner);
         assert_eq!(one.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(10.0));
