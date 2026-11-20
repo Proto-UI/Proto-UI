@@ -11,6 +11,10 @@ const scrollAreaThumb = definePrototype<ShadcnScrollAreaThumbProps, ShadcnScroll
     const style = setupShadcnStyleSelection(def, 'new-york-v4');
     def.feedback.style.use(tw('relative flex-1 bg-border'));
     def.rule({
+      when: (w) => w.meta('preference.forcedColors').eq('active'),
+      intent: (i) => i.feedback.style.use(tw('box-border border border-current')),
+    });
+    def.rule({
       when: (w) => w.any(w.state(style).eq('lyra'), w.state(style).eq('sera')),
       intent: (i) => i.feedback.style.use(tw('rounded-none')),
     });
