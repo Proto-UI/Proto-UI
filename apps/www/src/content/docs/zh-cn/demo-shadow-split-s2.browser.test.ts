@@ -46,7 +46,7 @@ async function expectedPaint(page: Page, variant: string, dark: boolean) {
                 ? mix('destructive', dark ? 20 : 10)
                 : variant === 'outline'
                   ? dark
-                    ? mix('input', 30)
+                    ? 'transparent'
                     : 'var(--pui-background)'
                   : variant === 'secondary'
                     ? 'var(--pui-secondary)'
