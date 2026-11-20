@@ -132,7 +132,13 @@ const afterFilter = compile(
   afterSource.slice(afterSource.indexOf('function prefilter(')),
   'prefilter'
 );
-const filterReport = { kind: 'cpu-prefilter-only-not-browser-fps', ...metadata, cases: [] };
+const filterReport = {
+  kind: 'cpu-prefilter-only-not-browser-fps',
+  ...metadata,
+  preparationBackend: 'cpu-fallback-only',
+  allocationMode: 'fresh scratch and output per call; excludes production buffer reuse',
+  cases: [],
+};
 let seed = 19;
 for (const [width, height] of [
   [128, 64],
@@ -171,20 +177,27 @@ const legacyHelpers =
   chunk(style, 'export function opaqueRgba', 'export function resolvePaletteColor') +
   chunk(style, 'export function colorContrast', '/** Resolves only') +
   chunk(tint, 'const weights', '/** Adapter-private proof inputs');
-const legacyLoop = chunk(beforeSource, '      let opaqueSamples = 0;', '      const encoding');
-const newHelpers = chunk(afterSource, 'const decodeSrgb', 'export type OpticalGeometry');
-const newLoop = chunk(
-  afterSource,
-  '      const foregroundLuminance =',
-  '      const encoding'
-).replace('      metrics.contrastMilliseconds += performance.now() - contrastStarted;', '');
+const optimizedContrast = (source) => ({
+  helpers: chunk(source, 'const decodeSrgb', 'export type OpticalGeometry'),
+  loop: chunk(source, '      const foregroundLuminance =', '      const encoding').replace(
+    '      metrics.contrastMilliseconds += performance.now() - contrastStarted;',
+    ''
+  ),
+});
+const beforeContrastSource = beforeSource.includes('const decodeSrgb')
+  ? optimizedContrast(beforeSource)
+  : {
+      helpers: legacyHelpers,
+      loop: chunk(beforeSource, '      let opaqueSamples = 0;', '      const encoding'),
+    };
+const afterContrastSource = optimizedContrast(afterSource);
 const verifier = (helpers, loop) =>
   compile(
     `${helpers}\nfunction validate(pixels, frame, tintEnvelope) {\n${loop}\nreturn opaqueSamples;}`,
     'validate'
   );
-const beforeContrast = verifier(legacyHelpers, legacyLoop);
-const afterContrast = verifier(newHelpers, newLoop);
+const beforeContrast = verifier(beforeContrastSource.helpers, beforeContrastSource.loop);
+const afterContrast = verifier(afterContrastSource.helpers, afterContrastSource.loop);
 const envelope = compile(
   chunk(tint, 'const weights', 'const helpers =') +
     chunk(style, 'export function colorContrast', '/** Resolves only') +

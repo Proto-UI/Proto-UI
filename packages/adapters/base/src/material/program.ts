@@ -7,6 +7,7 @@ import {
 import { vertex, fragment, uniformNames } from './liquidgl-kernel.generated';
 import type { OpaqueRgba } from './style';
 import type { CanvasBackdropFrame } from './source';
+import { createWebOpticalPrefilter, type WebOpticalPrefilter } from './prefilter';
 
 const decodeSrgb = (channel: number) =>
   channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
@@ -49,7 +50,9 @@ export type OpticalFrame = {
  * source acquisition, or reinterpretation of the historical v1 compiler. */
 export function createWebOpticalProgram(
   canvas: HTMLCanvasElement,
-  diagnostic: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null
+  diagnostic: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null,
+  /** Internal comparison control; the provider always uses auto. */
+  sourcePreparation: 'auto' | 'cpu' = 'auto'
 ) {
   type PipelineKey = `${'static' | 'contact'}:${'neutral' | 'style-tint'}`;
   type Pipeline = {
@@ -70,6 +73,11 @@ export function createWebOpticalProgram(
     sourcePreparations: 0,
     sourcePreparationMilliseconds: 0,
     sourcePreparationCacheHits: 0,
+    cpuSourcePreparations: 0,
+    cpuSourcePreparationMilliseconds: 0,
+    gpuSourcePreparations: 0,
+    gpuSourcePreparationSubmitMilliseconds: 0,
+    prefilterProgramBuilds: 0,
     readbackAllocations: 0,
     readbackMilliseconds: 0,
     contrastMilliseconds: 0,
@@ -86,10 +94,13 @@ export function createWebOpticalProgram(
     height: number;
     byteOffset: number;
   };
-  type PreparedSource = { identity: SourceIdentity; pixels: Uint8Array };
+  type PreparedSource = { identity: SourceIdentity; byteLength: number } & (
+    | { backend: 'cpu'; pixels: Uint8Array }
+    | { backend: 'gpu'; texture: WebGLTexture; release(): void }
+  );
   const FrameReference = typeof WeakRef === 'function' ? WeakRef : null;
-  // Only retained filtered RGBA bytes are budgeted here, not input, scratch,
-  // readback or GPU memory. Tiny sources also need a finite metadata limit.
+  // Only retained filtered RGBA8 storage (CPU or GPU) is budgeted here, not
+  // input, working textures/scratch or readback. Tiny sources also need a finite metadata limit.
   // Older hosts retain the existing single strong source slot.
   const preparedEntryLimit = FrameReference ? 4 : 1,
     preparedByteLimit = 4 * 1024 * 1024;
@@ -100,6 +111,8 @@ export function createWebOpticalProgram(
     variant: string;
     identity: SourceIdentity;
   } | null = null;
+  let gpuPrefilter: WebOpticalPrefilter | null | undefined;
+  let prefilterScratch: Uint32Array | null = null;
   let readback: Uint8Array | null = null;
   function sourceIdentity(source: CanvasBackdropFrame): SourceIdentity {
     return {
@@ -128,8 +141,9 @@ export function createWebOpticalProgram(
     );
   }
   function retirePrepared(index: number) {
-    preparedBytes -= prepared[index].pixels.byteLength;
-    prepared.splice(index, 1);
+    const [entry] = prepared.splice(index, 1);
+    preparedBytes -= entry.byteLength;
+    if (entry.backend === 'gpu') entry.release();
   }
   function prunePrepared(source: CanvasBackdropFrame) {
     for (let index = prepared.length - 1; index >= 0; index--) {
@@ -159,19 +173,58 @@ export function createWebOpticalProgram(
     )
       retirePrepared(0);
     const preparationStarted = performance.now();
-    const pixels = prefilter(source.pixels, source.width, source.height);
-    metrics.sourcePreparations++;
-    metrics.sourcePreparationMilliseconds += performance.now() - preparationStarted;
-    const entry = { identity: sourceIdentity(source), pixels };
-    prepared.push(entry);
-    preparedBytes += pixels.byteLength;
-    return entry;
+    try {
+      if (gpuPrefilter === undefined) {
+        gpuPrefilter = sourcePreparation === 'cpu' ? null : createWebOpticalPrefilter(gl!);
+        if (gpuPrefilter) metrics.prefilterProgramBuilds++;
+      }
+      let entry: PreparedSource;
+      if (gpuPrefilter) {
+        const output = gpuPrefilter.filter(source.pixels, source.width, source.height);
+        entry = {
+          identity: sourceIdentity(source),
+          byteLength: source.pixels.byteLength,
+          backend: 'gpu',
+          ...output,
+        };
+        metrics.gpuSourcePreparations++;
+        metrics.sourceUploads++;
+        // Submission/validation CPU time is NOT GPU execution time. The final
+        // readPixels still synchronizes preparation and the optical draw, and
+        // full render timing continues to include that synchronization.
+        metrics.gpuSourcePreparationSubmitMilliseconds += performance.now() - preparationStarted;
+      } else {
+        if (prefilterScratch?.length !== source.pixels.length / 4)
+          prefilterScratch = new Uint32Array(source.pixels.length / 4);
+        const pixels = prefilter(source.pixels, source.width, source.height, prefilterScratch);
+        // Each retained entry owns its output bytes. Only scratch is reused:
+        // overwriting another entry's output would corrupt A -> B -> A reuse.
+        entry = {
+          identity: sourceIdentity(source),
+          byteLength: pixels.byteLength,
+          backend: 'cpu',
+          pixels,
+        };
+        metrics.cpuSourcePreparations++;
+        metrics.cpuSourcePreparationMilliseconds += performance.now() - preparationStarted;
+      }
+      metrics.sourcePreparations++;
+      metrics.sourcePreparationMilliseconds += performance.now() - preparationStarted;
+      prepared.push(entry);
+      preparedBytes += entry.byteLength;
+      return entry;
+    } catch (error) {
+      clear();
+      throw error;
+    }
   }
   function clear() {
     canvas.width = 0;
     canvas.height = 0;
-    prepared.length = 0;
-    preparedBytes = 0;
+    while (prepared.length) retirePrepared(prepared.length - 1);
+    gpuPrefilter?.dispose();
+    gpuPrefilter = undefined;
+    prefilterScratch = null;
     uploaded = null;
     readback = null;
     if (!gl) return;
@@ -284,6 +337,14 @@ export function createWebOpticalProgram(
       ...metrics,
       sourcePreparationCacheEntries: prepared.length,
       sourcePreparationCacheBytes: preparedBytes,
+      sourcePreparationCpuCacheBytes: prepared.reduce(
+        (sum, entry) => sum + (entry.backend === 'cpu' ? entry.byteLength : 0),
+        0
+      ),
+      sourcePreparationGpuCacheBytes: prepared.reduce(
+        (sum, entry) => sum + (entry.backend === 'gpu' ? entry.byteLength : 0),
+        0
+      ),
     }),
     dispose() {
       clear();
@@ -355,22 +416,29 @@ export function createWebOpticalProgram(
         g = gl!;
       if (canvas.width !== width) canvas.width = width;
       if (canvas.height !== height) canvas.height = height;
+      // Run after every admission guard, including the full source alpha scan.
+      // Clear frames must also retire older revisions of their canvas/scope.
+      prunePrepared(source);
+      const currentPrepared = variant === 'regular' ? prepareSource(source) : null;
+      // The prefilter has its own framebuffer/program/VAO. Reassert every main
+      // draw binding rather than relying on a particular preparation backend.
       g.viewport(0, 0, width, height);
       g.useProgram(pipeline.program);
       g.bindBuffer(g.ARRAY_BUFFER, buffer);
       g.enableVertexAttribArray(pipeline.attribute);
       g.vertexAttribPointer(pipeline.attribute, 2, g.FLOAT, false, 0, 0);
       g.activeTexture(g.TEXTURE0);
-      g.bindTexture(g.TEXTURE_2D, textures[0]);
+      const gpuTexture = currentPrepared?.backend === 'gpu' ? currentPrepared.texture : null;
+      // The old CPU/clear slot strongly owns only its current sampled frame.
+      // A GPU cache entry must not keep an unrelated earlier clear source alive.
+      if (gpuTexture) uploaded = null;
+      g.bindTexture(g.TEXTURE_2D, gpuTexture ?? textures[0]);
       g.pixelStorei(g.UNPACK_ALIGNMENT, 1);
-      // Run after every admission guard, including the full source alpha scan.
-      // Clear frames must also retire older revisions of their canvas/scope.
-      prunePrepared(source);
-      const currentPrepared = variant === 'regular' ? prepareSource(source) : null;
       if (
-        uploaded?.source !== source ||
-        uploaded.variant !== variant ||
-        !sameSource(uploaded.identity, source)
+        !gpuTexture &&
+        (uploaded?.source !== source ||
+          uploaded.variant !== variant ||
+          !sameSource(uploaded.identity, source))
       ) {
         g.texImage2D(
           g.TEXTURE_2D,
@@ -381,7 +449,7 @@ export function createWebOpticalProgram(
           0,
           g.RGBA,
           g.UNSIGNED_BYTE,
-          currentPrepared ? currentPrepared.pixels : source.pixels
+          currentPrepared?.backend === 'cpu' ? currentPrepared.pixels : source.pixels
         );
         // This still tracks only the texture currently bound to the one context.
         uploaded = {
@@ -526,66 +594,89 @@ export function createWebOpticalProgram(
     },
   };
 }
-function prefilter(pixels: Uint8Array, width: number, height: number): Uint8Array {
-  const scratch = new Uint8Array(pixels.length),
-    output = new Uint8Array(pixels.length),
-    row = width * 4;
-  // Clamp horizontal neighbors once per column, rather than for every tap and
-  // row. Integer sums are at most 255 * 64, so regrouping symmetric taps and
-  // rounding with +32 >> 6 preserves both original rounded passes exactly.
+function prefilter(
+  pixels: Uint8Array,
+  width: number,
+  height: number,
+  scratch: Uint32Array = new Uint32Array(pixels.length / 4),
+  output: Uint8Array = new Uint8Array(pixels.length)
+): Uint8Array {
+  // Every source alpha has already been checked, including on cached frames.
+  // Work on four byte lanes, irrespective of native endianness. A nonaligned
+  // input view needs a bounded copy; never read beyond its declared byte range.
+  const aligned = pixels.byteOffset % 4 === 0 ? pixels : new Uint8Array(pixels);
+  const input = new Uint32Array(aligned.buffer, aligned.byteOffset, pixels.length / 4);
+  const target = new Uint32Array(output.buffer, output.byteOffset, output.length / 4);
+  // Each pair holds two independent 16-bit lanes. A weighted channel sum is
+  // <= 255 * 64 = 16320; adding 32 cannot carry into the adjacent lane. Masking
+  // after >>> 6 preserves Math.round(sum / 64) for BOTH original passes. The
+  // same filter preserves the already-opaque alpha at 255, on either byte order.
+  function sample(
+    a: number,
+    b: number,
+    c: number,
+    center: number,
+    d: number,
+    e: number,
+    f: number
+  ) {
+    const even =
+      (a & 0x00ff00ff) +
+      (f & 0x00ff00ff) +
+      6 * ((b & 0x00ff00ff) + (e & 0x00ff00ff)) +
+      15 * ((c & 0x00ff00ff) + (d & 0x00ff00ff)) +
+      20 * (center & 0x00ff00ff) +
+      0x00200020;
+    const odd =
+      ((a >>> 8) & 0x00ff00ff) +
+      ((f >>> 8) & 0x00ff00ff) +
+      6 * (((b >>> 8) & 0x00ff00ff) + ((e >>> 8) & 0x00ff00ff)) +
+      15 * (((c >>> 8) & 0x00ff00ff) + ((d >>> 8) & 0x00ff00ff)) +
+      20 * ((center >>> 8) & 0x00ff00ff) +
+      0x00200020;
+    return ((even >>> 6) & 0x00ff00ff) | (((odd >>> 6) & 0x00ff00ff) << 8);
+  }
+  // Clamp the horizontal neighborhood once per column, not per pixel or lane.
   const offsets = new Int32Array(width * 6);
   for (let x = 0; x < width; x++) {
     let at = x * 6;
-    for (let k = -3; k < 0; k++) offsets[at++] = Math.max(0, x + k) * 4;
-    for (let k = 1; k <= 3; k++) offsets[at++] = Math.min(width - 1, x + k) * 4;
+    for (let k = -3; k < 0; k++) offsets[at++] = Math.max(0, x + k);
+    for (let k = 1; k <= 3; k++) offsets[at++] = Math.min(width - 1, x + k);
   }
   for (let y = 0; y < height; y++) {
-    const base = y * row;
+    const base = y * width;
     for (let x = 0; x < width; x++) {
-      const at = base + x * 4,
-        offset = x * 6,
-        a = base + offsets[offset],
-        b = base + offsets[offset + 1],
-        c = base + offsets[offset + 2],
-        d = base + offsets[offset + 3],
-        e = base + offsets[offset + 4],
-        f = base + offsets[offset + 5];
-      for (let channel = 0; channel < 3; channel++) {
-        scratch[at + channel] =
-          (pixels[a + channel] +
-            pixels[f + channel] +
-            6 * (pixels[b + channel] + pixels[e + channel]) +
-            15 * (pixels[c + channel] + pixels[d + channel]) +
-            20 * pixels[at + channel] +
-            32) >>>
-          6;
-      }
-      scratch[at + 3] = 255;
+      const at = base + x,
+        offset = x * 6;
+      scratch[at] = sample(
+        input[base + offsets[offset]],
+        input[base + offsets[offset + 1]],
+        input[base + offsets[offset + 2]],
+        input[at],
+        input[base + offsets[offset + 3]],
+        input[base + offsets[offset + 4]],
+        input[base + offsets[offset + 5]]
+      );
     }
   }
   for (let y = 0; y < height; y++) {
-    const base = y * row,
-      a = Math.max(0, y - 3) * row,
-      b = Math.max(0, y - 2) * row,
-      c = Math.max(0, y - 1) * row,
-      d = Math.min(height - 1, y + 1) * row,
-      e = Math.min(height - 1, y + 2) * row,
-      f = Math.min(height - 1, y + 3) * row;
-    for (let x = 0; x < row; x += 4) {
-      const at = base + x;
-      for (let channel = 0; channel < 3; channel++) {
-        const offset = x + channel;
-        output[at + channel] =
-          (scratch[a + offset] +
-            scratch[f + offset] +
-            6 * (scratch[b + offset] + scratch[e + offset]) +
-            15 * (scratch[c + offset] + scratch[d + offset]) +
-            20 * scratch[at + channel] +
-            32) >>>
-          6;
-      }
-      output[at + 3] = 255;
-    }
+    const base = y * width,
+      a = Math.max(0, y - 3) * width,
+      b = Math.max(0, y - 2) * width,
+      c = Math.max(0, y - 1) * width,
+      d = Math.min(height - 1, y + 1) * width,
+      e = Math.min(height - 1, y + 2) * width,
+      f = Math.min(height - 1, y + 3) * width;
+    for (let x = 0; x < width; x++)
+      target[base + x] = sample(
+        scratch[a + x],
+        scratch[b + x],
+        scratch[c + x],
+        scratch[base + x],
+        scratch[d + x],
+        scratch[e + x],
+        scratch[f + x]
+      );
   }
   return output;
 }

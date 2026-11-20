@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { EffectsPort } from '@proto.ui/core';
 import { resolveWebPortalDestination } from '@proto.ui/adapter-base';
 import { inspectCanvasBackdrop } from '@proto.ui/adapter-base/web-material';
+import * as webMaterial from '@proto.ui/adapter-base/web-material';
 import { createPreviewMaterialScene, attachPreviewMaterialScene } from './preview-material-scene';
 import { findPreviewMaterialProvider } from './preview-material-provider';
+import { THEME } from '../../../../../packages/prototypes/liquid-glass/src/theme';
 
 // Deterministic layout/source-lease evidence only. Pixels and layout below are
 // stubs, never native optical evidence; the dedicated browser suite owns that.
@@ -340,10 +343,12 @@ describe('framework-owned static stage attachments', () => {
 
 describe('public material scene presentation', () => {
   let reducedMotion: boolean;
+  let systemDark: boolean;
   let media: Map<string, EventTarget>;
   let intersection: IntersectionObserverCallback;
   beforeEach(() => {
     reducedMotion = false;
+    systemDark = false;
     media = new Map();
     vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
       if (!media.has(query)) {
@@ -354,6 +359,7 @@ describe('public material scene presentation', () => {
             get: () => {
               if (query === '(prefers-reduced-motion: no-preference)') return !reducedMotion;
               if (query === '(prefers-reduced-motion: reduce)') return reducedMotion;
+              if (query === '(prefers-color-scheme: dark)') return systemDark;
               return /: no-preference\)|forced-colors: none\)|resolution:/.test(query);
             },
           },
@@ -400,6 +406,68 @@ describe('public material scene presentation', () => {
     expect(s.lease.current()?.revision).toBeGreaterThan(initial!.revision);
     expect(frames.size).toBe(0);
   });
+
+  it.each(['class', 'data-theme'])(
+    'keeps the source and consumer palette aligned with the nearest %s theme',
+    async (attribute) => {
+      const parent = document.createElement('div');
+      parent.setAttribute(attribute, 'light');
+      document.body.append(parent);
+      const s = createPreviewMaterialScene(parent, { presentation: 'preview' });
+      cleanups.push(() => s.dispose());
+
+      // Inspect the actual palette supplied to consumers, without instantiating
+      // a GPU sink or interpreting these controlled pixels as visual evidence.
+      const createSink = vi
+        .spyOn(webMaterial, 'createWebMaterialSink')
+        .mockReturnValue({ commit() {}, release() {} });
+      const host = document.createElement('button');
+      s.mount.append(host);
+      findPreviewMaterialProvider(host)!(host, {
+        queueStyle() {},
+        requestFlush() {},
+      } as EffectsPort);
+      const palette = createSink.mock.calls[0][2].palette;
+      const invalidate = vi.fn();
+      cleanups.push(palette.subscribe(invalidate));
+      expect(palette.current().colors).toEqual(THEME.light);
+
+      async function theme(element: HTMLElement, value: 'light' | 'dark' | null) {
+        // Await real observer delivery. No scene.redraw/refresh call may hide
+        // a missing observation or a disagreement about the theme owner.
+        await new Promise<void>((resolve) => {
+          const delivery = new MutationObserver(() => {
+            delivery.disconnect();
+            resolve();
+          });
+          delivery.observe(element, { attributes: true, attributeFilter: [attribute] });
+          if (value === null) element.removeAttribute(attribute);
+          else element.setAttribute(attribute, value);
+        });
+      }
+
+      const initialSource = s.lease.current()!;
+      await theme(s.scope, 'dark');
+      expect(palette.current().colors).toEqual(THEME.dark);
+      expect(invalidate).toHaveBeenCalledTimes(1);
+      expect(s.lease.current()!.revision).toBeGreaterThan(initialSource.revision);
+
+      await theme(parent, 'dark');
+      const inheritedDarkSource = s.lease.current()!;
+      await theme(s.scope, 'light');
+      expect(palette.current().colors).toEqual(THEME.light);
+      expect(s.lease.current()!.revision).toBeGreaterThan(inheritedDarkSource.revision);
+
+      await theme(s.scope, null);
+      expect(palette.current().colors).toEqual(THEME.dark);
+      await theme(parent, null);
+      expect(palette.current().colors).toEqual(THEME.light);
+      systemDark = true;
+      media.get('(prefers-color-scheme: dark)')!.dispatchEvent(new Event('change'));
+      expect(palette.current().colors).toEqual(THEME.dark);
+      expect(frames.size).toBe(0);
+    }
+  );
 
   it('retains the historical diagnostic pattern and cadence for unchanged optical fixtures', () => {
     const s = createPreviewMaterialScene(document.body);

@@ -33,6 +33,49 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe('visible in-app canvas backdrop lease', () => {
+  it('owns the exact readback range without copying or exposing bytes outside that snapshot', () => {
+    const { canvas, lease } = fixture();
+    const allocation = new Uint8ClampedArray(400 * 240 * 4 + 16);
+    const data = allocation.subarray(7, allocation.length - 9);
+    data.fill(255);
+    data[0] = 37;
+    Object.assign(canvas.getContext('2d')!, { getImageData: () => ({ data }) });
+    lease.draw(() => {});
+    const frame = lease.current()!;
+    expect(frame.pixels).toBeInstanceOf(Uint8Array);
+    expect(frame.pixels.buffer).toBe(data.buffer);
+    expect(frame.pixels.byteOffset).toBe(7);
+    expect(frame.pixels).toHaveLength(400 * 240 * 4);
+    expect(frame.pixels[0]).toBe(37);
+    expect(frame.pixels.at(-1)).toBe(255);
+    lease.dispose();
+  });
+
+  it('retains independent snapshot bytes across canvas redraw and revocation', () => {
+    const { canvas, lease } = fixture();
+    const canvasPixels = new Uint8ClampedArray(400 * 240 * 4).fill(255);
+    Object.assign(canvas.getContext('2d')!, {
+      // Native getImageData returns a new snapshot, not the canvas backing store.
+      getImageData: () => ({ data: canvasPixels.slice() }),
+    });
+    lease.draw(() => {
+      canvasPixels[0] = 23;
+    });
+    const first = lease.current()!;
+    lease.draw(() => {
+      canvasPixels[0] = 91;
+    });
+    const second = lease.current()!;
+    expect(first.pixels.buffer).not.toBe(second.pixels.buffer);
+    expect(first.pixels[0]).toBe(23);
+    expect(second.pixels[0]).toBe(91);
+    lease.revoke();
+    expect(lease.current()).toBeNull();
+    expect(first.pixels[0]).toBe(23);
+    expect(second.pixels[0]).toBe(91);
+    lease.dispose();
+  });
+
   it('resets same-sized producer backing once without a redundant height assignment', () => {
     const { canvas, lease } = fixture();
     const context = canvas.getContext('2d')!;

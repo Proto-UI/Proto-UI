@@ -207,7 +207,9 @@ function createScene(
     let palette: MaterialPaletteSnapshot = { revision: 0, colors: THEME.light };
     const paletteListeners = new Set<() => void>();
     const isDark = () => {
-      for (let node: Element | null = parent; node; node = node.parentElement) {
+      // The scene may override its surrounding page's appearance. Resolve the
+      // same scope-to-root chain watched by the appearance observer below.
+      for (let node: Element | null = scope; node; node = node.parentElement) {
         if (node.classList.contains('dark') || node.getAttribute('data-theme') === 'dark')
           return true;
         if (node.classList.contains('light') || node.getAttribute('data-theme') === 'light')

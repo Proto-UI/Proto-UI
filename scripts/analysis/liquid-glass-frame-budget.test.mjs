@@ -3,11 +3,51 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import {
   assertCandidatePublicCaptures,
+  assertCandidateScopedThemeCaptures,
+  assertStableSource,
+  comparisonRevisions,
   distribution,
+  freshPressStages,
   isFreshPressCommit,
   summarizeFreshPressLatency,
   summarizeWindow,
 } from './liquid-glass-frame-budget.mjs';
+
+test('matched comparisons require exact explicit revisions and retain the historical default', () => {
+  assert.deepEqual(comparisonRevisions({}), {
+    baseline: '543c8a2990239dec7c08458a902da3f5a97b49dd',
+    candidate: undefined,
+  });
+  assert.deepEqual(
+    comparisonRevisions({ BASELINE_SHA: 'a'.repeat(40), CANDIDATE_SHA: 'b'.repeat(40) }),
+    {
+      baseline: 'a'.repeat(40),
+      candidate: 'b'.repeat(40),
+    }
+  );
+  for (const value of ['', 'main', '84dde63', 'g'.repeat(40)])
+    assert.throws(() => comparisonRevisions({ BASELINE_SHA: value }), /exact commit/);
+  assert.throws(() => comparisonRevisions({ CANDIDATE_SHA: 'HEAD' }), /exact commit/);
+});
+
+test('a mid-run source edit or new material helper invalidates the observation', () => {
+  const before = { sha: 'a', tree: 'b', diffSha256: 'c', hashes: { 'program.ts': 'd' } };
+  assert.doesNotThrow(() => assertStableSource(before, structuredClone(before)));
+  assert.throws(() => assertStableSource(before, { ...before, sha: 'new-head' }), /HEAD changed/);
+  assert.throws(
+    () => assertStableSource(before, { ...before, diffSha256: 'new-patch' }),
+    /patch changed/
+  );
+  assert.throws(
+    () => assertStableSource(before, { ...before, hashes: { 'program.ts': 'changed' } }),
+    /Measured source changed/
+  );
+  assert.throws(
+    () =>
+      assertStableSource(before, { ...before, hashes: { ...before.hashes, 'helper.ts': 'new' } }),
+    /Measured source changed/
+  );
+});
 
 test('empty timing is unmeasured; percentiles retain tails', () => {
   assert.equal(distribution([]), null);
@@ -165,6 +205,30 @@ test('disabled committed=false does not excuse a non-none background image', () 
   );
 });
 
+test('scene-local theme checks real pixels against the opposite global theme', () => {
+  const captures = ['light', 'dark'].map((pageTheme) => {
+    const localTheme = pageTheme === 'light' ? 'dark' : 'light';
+    const before = { pageTheme, width: 512, height: 240, pngSha256: `${pageTheme}-pixels` };
+    return {
+      pageTheme,
+      localTheme,
+      before,
+      overridden: { ...before, pngSha256: `${localTheme}-pixels` },
+      restored: { ...before },
+    };
+  });
+  assert.doesNotThrow(() => assertCandidateScopedThemeCaptures(captures));
+  const unchanged = structuredClone(captures);
+  unchanged[0].overridden = unchanged[0].before;
+  assert.throws(() => assertCandidateScopedThemeCaptures(unchanged), /did not repaint/);
+  const onlyDatasetChanged = structuredClone(captures);
+  onlyDatasetChanged[0].overridden.pngSha256 = 'unrelated-pixels';
+  assert.throws(() => assertCandidateScopedThemeCaptures(onlyDatasetChanged), /pixels differ/);
+  const notRestored = structuredClone(captures);
+  notRestored[0].restored.pngSha256 = 'dark-pixels';
+  assert.throws(() => assertCandidateScopedThemeCaptures(notRestored), /did not restore/);
+});
+
 function freshTrial() {
   const down = {
     time: 2,
@@ -257,4 +321,30 @@ test('fresh press summary retains slow, missing and unattempted denominators', (
     'Slow samples remain resolved, not filtered or retried'
   );
   assert.equal(summary.dynamic.notAttempted, 60);
+});
+
+test('press stages retain pre-handler delay and distinct source-work intervals', () => {
+  const trial = freshTrial();
+  trial.down.timestamp = 1;
+  trial.down.time = 21;
+  trial.held.time = 26;
+  trial.resourcesBefore = { sourcePreparations: 2, renders: 3 };
+  trial.down.resources = { sourcePreparations: 3, renders: 4 };
+  trial.held.resources = { sourcePreparations: 3, renders: 5 };
+  const stages = freshPressStages(trial);
+  assert.equal(stages.eventTimestampToListenerMs, 20);
+  assert.equal(stages.listenerToHeldCommitMs, 5);
+  assert.equal(stages.armedToListenerResources.sourcePreparations, 1);
+  assert.equal(stages.listenerToHeldResources.sourcePreparations, 0);
+  const summary = summarizeFreshPressLatency({
+    workload: { plannedPerMode: 60 },
+    samples: [trial],
+  });
+  assert.equal(summary.static.eventTimestampToListenerMs.p95, 20);
+  assert.equal(summary.static.eventTimestampToHeldCommitMs.p95, 25);
+  assert.equal(summary.static.listenerToHeldCommitMs.p95, 5);
+  assert.equal(summary.static.armedToListenerSourcePreparationTrials, 1);
+  assert.equal(summary.static.listenerToHeldSourcePreparationTrials, 0);
+  assert.equal(freshPressStages({}).armedToListenerResources, null);
+  assert.equal(freshPressStages({}).eventTimestampToListenerMs, null);
 });

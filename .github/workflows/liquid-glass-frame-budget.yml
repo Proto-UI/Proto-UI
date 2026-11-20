@@ -1,14 +1,26 @@
 name: Liquid Glass matched frame-budget observations
 on:
   workflow_dispatch:
+    inputs:
+      baseline_sha:
+        description: Exact baseline commit for the matched observation
+        type: string
+        required: true
+        default: 543c8a2990239dec7c08458a902da3f5a97b49dd
   workflow_call:
+    inputs:
+      baseline_sha:
+        description: Exact baseline commit for the matched observation
+        type: string
+        required: false
+        default: 543c8a2990239dec7c08458a902da3f5a97b49dd
 permissions:
   contents: read
 concurrency:
   group: liquid-glass-frame-budget-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 env:
-  BASELINE_SHA: 543c8a2990239dec7c08458a902da3f5a97b49dd
+  BASELINE_SHA: ${{ inputs.baseline_sha || '543c8a2990239dec7c08458a902da3f5a97b49dd' }}
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   ASTRO_TELEMETRY_DISABLED: '1'
 jobs:
@@ -29,6 +41,14 @@ jobs:
           ref: ${{ env.BASELINE_SHA }}
           path: baseline
           persist-credentials: false
+      - name: Verify exact source revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$BASELINE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git -C baseline rev-parse HEAD)" = "$BASELINE_SHA"
+          test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_SHA"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -48,7 +68,9 @@ jobs:
           corepack pnpm@10.32.1 --dir baseline --filter apps-www exec astro preferences disable devToolbar
       - name: Check measurement attribution
         working-directory: candidate
-        run: node --test scripts/analysis/liquid-glass-frame-budget.test.mjs
+        run: |
+          node --test scripts/analysis/liquid-glass-frame-budget.test.mjs \
+            scripts/analysis/liquid-glass-gpu-prefilter.test.mjs
       - name: Install and record the same Chinese fonts for both revisions
         timeout-minutes: 3
         run: |
@@ -79,6 +101,15 @@ jobs:
             node --import tsx scripts/analysis/liquid-glass-frame-budget.mjs \
             "$RUNNER_TEMP/liquid-frame-budget/candidate" 3 \
             2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/candidate.log"
+      - name: Verify GPU prefilter bytes outside timing windows
+        working-directory: candidate
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 2m \
+            node --import tsx scripts/analysis/liquid-glass-gpu-prefilter.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/gpu-prefilter" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/gpu-prefilter.log"
       - name: Retain comparison and propagate evidence failures
         if: always()
         working-directory: candidate

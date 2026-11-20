@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -52,6 +52,29 @@ const SOURCE_FILES = [
   'apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/button.mdx',
 ];
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+
+export function comparisonRevisions(environment = process.env) {
+  const baseline = environment.BASELINE_SHA ?? '543c8a2990239dec7c08458a902da3f5a97b49dd';
+  const candidate = environment.CANDIDATE_SHA;
+  for (const [name, value] of [
+    ['BASELINE_SHA', baseline],
+    ['CANDIDATE_SHA', candidate],
+  ])
+    if (value !== undefined)
+      assert.match(value, /^[a-f0-9]{40}$/, `${name} must identify an exact commit`);
+  return { baseline, candidate };
+}
+
+export function assertStableSource(before, after) {
+  assert.equal(after.sha, before.sha, 'HEAD changed during the observation');
+  assert.equal(after.tree, before.tree, 'Committed tree changed during the observation');
+  assert.equal(
+    after.diffSha256,
+    before.diffSha256,
+    'Working-tree patch changed during the observation'
+  );
+  assert.deepEqual(after.hashes, before.hashes, 'Measured source changed during the observation');
+}
 
 export function distribution(values) {
   if (!values.length) return null;
@@ -149,6 +172,39 @@ export function assertCandidatePublicCaptures(captures) {
   }
 }
 
+/** Local scene appearance is tested against real static canvas pixels from
+ * the opposite whole-page theme. It makes no promise that a page-level CSS
+ * theme owner also follows an attribute authored inside its scene. */
+export function assertCandidateScopedThemeCaptures(captures) {
+  assert.deepEqual(captures.map((capture) => capture.pageTheme).sort(), ['dark', 'light']);
+  for (const capture of captures) {
+    const reference = captures.find((entry) => entry.pageTheme === capture.localTheme);
+    assert.ok(reference, 'Missing opposite-theme reference');
+    assert.equal(capture.localTheme, capture.pageTheme === 'light' ? 'dark' : 'light');
+    for (const sample of [capture.before, capture.overridden, capture.restored]) {
+      assert.equal(sample.pageTheme, capture.pageTheme, 'Local override changed the whole page');
+      assert.ok(sample.width > 0 && sample.height > 0);
+    }
+    assert.equal(capture.overridden.width, reference.before.width);
+    assert.equal(capture.overridden.height, reference.before.height);
+    assert.notEqual(
+      capture.overridden.pngSha256,
+      capture.before.pngSha256,
+      'Local theme did not repaint the scene'
+    );
+    assert.equal(
+      capture.overridden.pngSha256,
+      reference.before.pngSha256,
+      'Local scene pixels differ from the same whole-page theme'
+    );
+    assert.deepEqual(
+      capture.restored,
+      capture.before,
+      'Removing local theme did not restore the scene'
+    );
+  }
+}
+
 // Self-contained so the browser collector uses the same ownership predicate.
 export function isFreshPressCommit(trial, commit) {
   const integer = (value) => {
@@ -188,6 +244,29 @@ export function isFreshPressCommit(trial, commit) {
   );
 }
 
+/** Resource counters are document-wide. The armed-to-listener interval may
+ * contain source work before the event was created, so it is association, not
+ * proof that a particular source update delayed this input in the event queue. */
+export function freshPressStages(trial) {
+  const validTimestamp =
+    trial.down &&
+    Number.isFinite(trial.down.timestamp) &&
+    trial.down.timestamp >= 0 &&
+    trial.down.timestamp <= trial.down.time;
+  return {
+    eventTimestampToListenerMs: validTimestamp ? trial.down.time - trial.down.timestamp : null,
+    listenerToHeldCommitMs: trial.held && trial.down ? trial.held.time - trial.down.time : null,
+    armedToListenerResources:
+      trial.resourcesBefore && trial.down?.resources
+        ? deltas(trial.resourcesBefore, trial.down.resources)
+        : null,
+    listenerToHeldResources:
+      trial.down?.resources && trial.held?.resources
+        ? deltas(trial.down.resources, trial.held.resources)
+        : null,
+  };
+}
+
 export function summarizeFreshPressLatency(evidence) {
   return Object.fromEntries(
     ['static', 'dynamic'].map((mode) => {
@@ -201,6 +280,7 @@ export function summarizeFreshPressLatency(evidence) {
       const eventTime = resolved
         .filter((trial) => trial.down.timestamp >= 0 && trial.down.timestamp <= trial.down.time)
         .map((trial) => trial.held.time - trial.down.timestamp);
+      const stages = resolved.map(freshPressStages);
       const phaseBins = {};
       for (const trial of attempted) {
         const bin = trial.down?.phaseBin ?? 'unknown';
@@ -216,6 +296,19 @@ export function summarizeFreshPressLatency(evidence) {
           notAttempted: evidence.workload.plannedPerMode - attempted.length,
           listenerToHeldCommitMs: distribution(listener),
           eventTimestampToHeldCommitMs: distribution(eventTime),
+          eventTimestampToListenerMs: distribution(
+            stages
+              .map((stage) => stage.eventTimestampToListenerMs)
+              .filter((value) => value !== null)
+          ),
+          armedToListenerSourcePreparationTrials: stages.filter(
+            (stage) => stage.armedToListenerResources?.sourcePreparations > 0
+          ).length,
+          listenerToHeldSourcePreparationTrials: stages.filter(
+            (stage) => stage.listenerToHeldResources?.sourcePreparations > 0
+          ).length,
+          sourceWorkAttribution:
+            'Document-wide counters; armed-to-listener includes time before event creation and does not prove event-queue causality.',
           listenerOver10Ms: listener.filter((value) => value > 10).length,
           eventTimestampOver10Ms: eventTime.filter((value) => value > 10).length,
           invalidEventTimestamps: resolved.length - eventTime.length,
@@ -290,6 +383,13 @@ export function summarizeWindow(window) {
         )
         .map(({ input, commit }) => commit.time - input.timestamp)
     ),
+    contactStartEventTimestampToListenerMs: distribution(
+      matchedStarts
+        .filter(
+          ({ input, commit }) => commit && input.timestamp >= 0 && input.timestamp <= input.time
+        )
+        .map(({ input }) => input.time - input.timestamp)
+    ),
     unresolvedContactStarts: matchedStarts.filter((entry) => !entry.commit).length,
     dragEventToNextHeldCommitOpportunityMs: distribution(
       opportunities
@@ -308,6 +408,20 @@ export function summarizeWindow(window) {
     nonOpticalStates: sample.states.filter((entry) => entry.quality !== 'self-optical'),
     longTaskMs: distribution(sample.longtasks.map((entry) => entry.duration)),
     resourceDelta: resources,
+    sourcePreparation: {
+      cpuCount: resources.cpuSourcePreparations ?? null,
+      gpuCount: resources.gpuSourcePreparations ?? null,
+      meanCpuMs:
+        resources.cpuSourcePreparations > 0
+          ? resources.cpuSourcePreparationMilliseconds / resources.cpuSourcePreparations
+          : null,
+      meanGpuSubmitMs:
+        resources.gpuSourcePreparations > 0
+          ? resources.gpuSourcePreparationSubmitMilliseconds / resources.gpuSourcePreparations
+          : null,
+      scope:
+        'CPU preparation and GPU submission are application-side times; GPU execution is not measured. Missing historical counters remain null.',
+    },
     // Existing renderMilliseconds includes encodeMilliseconds. Do not add them.
     meanRenderIncludingEncodeMs:
       resources.renders > 0 ? resources.renderMilliseconds / resources.renders : null,
@@ -317,6 +431,7 @@ export function summarizeWindow(window) {
 }
 
 async function compare(baselineFile, candidateFile, output) {
+  const expected = comparisonRevisions();
   await mkdir(output, { recursive: true });
   const baseline = JSON.parse(await readFile(baselineFile, 'utf8'));
   const candidate = JSON.parse(await readFile(candidateFile, 'utf8'));
@@ -327,6 +442,13 @@ async function compare(baselineFile, candidateFile, output) {
   } catch (error) {
     // Retain the rejected captures and comparison before returning a failure.
     publicAcceptance = { passed: false, message: String(error) };
+  }
+  let scopedThemeAcceptance;
+  try {
+    assertCandidateScopedThemeCaptures(candidate.scopedThemes);
+    scopedThemeAcceptance = { passed: true };
+  } catch (error) {
+    scopedThemeAcceptance = { passed: false, message: String(error) };
   }
   const matched =
     baseline.probe.sha256 === candidate.probe.sha256 &&
@@ -341,6 +463,7 @@ async function compare(baselineFile, candidateFile, output) {
       'packages/adapters/base/src/material/liquidgl-kernel.generated.ts',
     ].every((file) => baseline.source.hashes[file] === candidate.source.hashes[file]);
   const result = {
+    expectedRevisions: expected,
     sameProbeWorkloadBrowserLockfileAndFixture: matched,
     limitations: candidate.limitations,
     baseline: {
@@ -351,6 +474,7 @@ async function compare(baselineFile, candidateFile, output) {
       runtimeSmoke: baseline.runtimeSmoke,
       freshPressLatency: summarizeFreshPressLatency(baseline.freshPressLatency),
       public: baseline.public,
+      scopedThemes: baseline.scopedThemes,
     },
     candidate: {
       source: candidate.source,
@@ -361,6 +485,8 @@ async function compare(baselineFile, candidateFile, output) {
       freshPressLatency: summarizeFreshPressLatency(candidate.freshPressLatency),
       public: candidate.public,
       publicAcceptance,
+      scopedThemes: candidate.scopedThemes,
+      scopedThemeAcceptance,
     },
   };
   await writeFile(path.join(output, 'comparison.json'), JSON.stringify(result, null, 2));
@@ -368,7 +494,7 @@ async function compare(baselineFile, candidateFile, output) {
   const lines = [
     '# Liquid Glass matched browser observations',
     '',
-    `Baseline: \`${baseline.source.sha}\`; candidate: \`${candidate.source.sha}\`.`,
+    `Baseline: \`${baseline.source.sha}\`${baseline.source.changes ? ' (working tree modified; exact file hashes retained)' : ''}; candidate: \`${candidate.source.sha}\`${candidate.source.changes ? ' (working tree modified; exact file hashes retained)' : ''}.`,
     '',
     `Matched probe, workload, browser, lockfile and fixture: **${matched}**.`,
     '',
@@ -393,7 +519,7 @@ async function compare(baselineFile, candidateFile, output) {
     lines.push('', `## ${label} repeated fresh presses`, '');
     for (const [mode, row] of Object.entries(report.freshPressLatency))
       lines.push(
-        `- ${mode}: ${row.resolved}/${row.planned} resolved; handler p50/p95/p99/max ${number(row.listenerToHeldCommitMs?.p50)}/${number(row.listenerToHeldCommitMs?.p95)}/${number(row.listenerToHeldCommitMs?.p99)}/${number(row.listenerToHeldCommitMs?.max)} ms; >10 ms: ${row.listenerOver10Ms}; missing ${row.unresolvedAttempted}, unattempted ${row.notAttempted}. Event-timestamp p95 ${number(row.eventTimestampToHeldCommitMs?.p95)} ms, >10 ms: ${row.eventTimestampOver10Ms}. These observations are not physical presentation or a latency guarantee.`
+        `- ${mode}: ${row.resolved}/${row.planned} resolved; handler p50/p95/p99/max ${number(row.listenerToHeldCommitMs?.p50)}/${number(row.listenerToHeldCommitMs?.p95)}/${number(row.listenerToHeldCommitMs?.p99)}/${number(row.listenerToHeldCommitMs?.max)} ms; >10 ms: ${row.listenerOver10Ms}; missing ${row.unresolvedAttempted}, unattempted ${row.notAttempted}. Event timestamp → handler p95 ${number(row.eventTimestampToListenerMs?.p95)} ms; event timestamp → commit p95 ${number(row.eventTimestampToHeldCommitMs?.p95)} ms, >10 ms: ${row.eventTimestampOver10Ms}. These observations are not physical presentation or a latency guarantee.`
       );
     lines.push('', `## ${label} public captures and interaction smoke`, '');
     for (const capture of report.public) {
@@ -406,6 +532,10 @@ async function compare(baselineFile, candidateFile, output) {
       lines.push(
         `- Candidate public acceptance: ${report.publicAcceptance.passed ? 'passed for both enabled buttons and disabled fallback in every view' : report.publicAcceptance.message}.`
       );
+    if (report.scopedThemeAcceptance)
+      lines.push(
+        `- Local scene theme pixels: ${report.scopedThemeAcceptance.passed ? 'matched both opposite whole-page themes and restored exactly' : report.scopedThemeAcceptance.message}. This checks the canvas theme owner, not a new public local-theme API.`
+      );
     for (const smoke of report.runtimeSmoke ?? [])
       lines.push(
         `- ${smoke.runtime} pointer smoke: ${smoke.failure ?? 'held optical paint, release and activation observed'}.`
@@ -415,9 +545,10 @@ async function compare(baselineFile, candidateFile, output) {
   }
   await writeFile(path.join(output, 'comparison.md'), `${lines.join('\n')}\n`);
   assert.ok(matched, 'The before/after probe, workload, environment or source fixture differs');
-  assert.equal(baseline.source.sha, '543c8a2990239dec7c08458a902da3f5a97b49dd');
-  if (process.env.CANDIDATE_SHA) assert.equal(candidate.source.sha, process.env.CANDIDATE_SHA);
+  assert.equal(baseline.source.sha, expected.baseline);
+  if (expected.candidate) assert.equal(candidate.source.sha, expected.candidate);
   for (const report of [baseline, candidate]) {
+    assertStableSource(report.source, report.sourceAtEnd);
     assert.equal(report.failures.length, 0, `Evidence failures for ${report.source.sha}`);
     assert.equal(
       report.windows.length,
@@ -443,6 +574,7 @@ async function compare(baselineFile, candidateFile, output) {
     }
   }
   assert.ok(publicAcceptance.passed, publicAcceptance.message);
+  assert.ok(scopedThemeAcceptance.passed, scopedThemeAcceptance.message);
 }
 
 async function observe(output, rounds) {
@@ -455,15 +587,32 @@ async function observe(output, rounds) {
   const root = process.cwd();
   const git = (...args) =>
     execFileSync('git', args, { cwd: root, encoding: 'utf8', timeout: 5000 }).trim();
-  const report = {
-    schemaVersion: 1,
-    started: new Date().toISOString(),
-    source: {
+  const sourceSnapshot = async () => {
+    const materialDirectory = 'packages/adapters/base/src/material';
+    const files = [
+      ...new Set([
+        ...SOURCE_FILES,
+        ...(await readdir(path.join(root, materialDirectory)))
+          .filter((file) => file.endsWith('.ts'))
+          .map((file) => `${materialDirectory}/${file}`),
+      ]),
+    ].sort();
+    return {
       sha: git('rev-parse', 'HEAD'),
       tree: git('rev-parse', 'HEAD^{tree}'),
       changes: git('status', '--short'),
-      hashes: {},
-    },
+      diffSha256: sha256(git('diff', '--binary', 'HEAD')),
+      hashes: Object.fromEntries(
+        await Promise.all(
+          files.map(async (file) => [file, sha256(await readFile(path.join(root, file)))])
+        )
+      ),
+    };
+  };
+  const report = {
+    schemaVersion: 1,
+    started: new Date().toISOString(),
+    source: await sourceSnapshot(),
     probe: { sha256: sha256(await readFile(fileURLToPath(import.meta.url))) },
     environment: {
       node: process.version,
@@ -492,6 +641,8 @@ async function observe(output, rounds) {
       'Pointermove to next held commit is a many-to-one observation, not proof of the rendered coordinate. Superseded/missing inputs and distinct commits remain visible.',
       'Diagnostic background changes at its existing 120 ms cadence. Static/dynamic measurements are separate from the public preview visual changes.',
       'Existing source counters are document-wide cumulative totals, not GPU timer queries. Missing baseline stage timings remain absent rather than zero.',
+      'GPU source-preparation milliseconds measure application submission, not GPU execution. CPU/GPU path counts are retained when the revision exposes them.',
+      'Fresh-press resource snapshots split armed-to-listener and listener-to-held work. The first interval includes time before event creation: source activity there is association, not proof that it queued the input.',
       'Fixed 1000 px viewport naturally wraps the official fixture. Original 1440 px layout is separately retained, including any fallback and overlap geometry.',
       'Same-runner sequential baseline then candidate reduces environment differences but does not remove thermal, scheduling or warmup variance.',
     ],
@@ -500,10 +651,9 @@ async function observe(output, rounds) {
     freshPressLatency: { workload: FRESH_PRESS_WORKLOAD, samples: [], blocks: [], cleanup: null },
     windows: [],
     public: [],
+    scopedThemes: [],
     logs: [],
   };
-  for (const file of SOURCE_FILES)
-    report.source.hashes[file] = sha256(await readFile(path.join(root, file)));
   const save = () => writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
   const failure = (stage, error) => report.failures.push({ stage, message: String(error) });
   const { startServer, stopServer, launchBrowser } = await import(
@@ -1081,6 +1231,7 @@ async function observe(output, rounds) {
                     trusted: event.isTrusted,
                     pointerId: event.pointerId,
                     buttons: event.buttons,
+                    resources: window.liquidMaterialFixture.metrics(),
                   };
                   state.inputs.push(entry);
                   if (event.type === 'pointerdown') {
@@ -1145,6 +1296,7 @@ async function observe(output, rounds) {
                     time < state.deadline &&
                     !state.up
                   ) {
+                    entry.resources = window.liquidMaterialFixture.metrics();
                     entry.paint = observePaint(target);
                     finishHeld(matches(state, entry) ? 'resolved' : 'invalid-owned-paint', entry);
                   }
@@ -1273,6 +1425,7 @@ async function observe(output, rounds) {
             raw.outcomes ??= { held: 'unobserved', release: 'unobserved' };
             raw.inputs ??= [];
             raw.states ??= [];
+            raw.stages = freshPressStages(raw);
             for (const commit of [raw.held, raw.release, ...(raw.commits ?? [])]) {
               if (typeof commit?.paint?.image === 'string') {
                 const { image, ...facts } = commit.paint;
@@ -1370,6 +1523,45 @@ async function observe(output, rounds) {
         );
         await page.screenshot({ path: path.join(output, `${name}-viewport.png`), timeout: 5000 });
         assert.equal(capture.actualTheme, theme, 'Requested theme was not active');
+        if (viewport.width === 1440) {
+          const scene = preview.locator('[data-material-scene]').first();
+          const canvas = scene.locator(':scope > canvas[data-material-backdrop]');
+          const sampleCanvas = async () => {
+            const { data, ...facts } = await canvas.evaluate((element) => ({
+              pageTheme: document.documentElement.dataset.theme,
+              width: element.width,
+              height: element.height,
+              data: element.toDataURL('image/png'),
+            }));
+            return { ...facts, pngSha256: sha256(data) };
+          };
+          const localTheme = theme === 'light' ? 'dark' : 'light';
+          const scoped = { pageTheme: theme, localTheme, before: await sampleCanvas() };
+          report.scopedThemes.push(scoped);
+          const priorTheme = await scene.getAttribute('data-theme');
+          try {
+            await scene.evaluate(
+              (element, value) => element.setAttribute('data-theme', value),
+              localTheme
+            );
+            // Fixed untimed observation window: retain the baseline's wrong
+            // pixels rather than retrying until the candidate happens to pass.
+            await page.waitForTimeout(100);
+            scoped.overridden = await sampleCanvas();
+            scoped.screenshot = `scene-${localTheme}-on-${theme}.png`;
+            await scene.screenshot({ path: path.join(output, scoped.screenshot), timeout: 5000 });
+            scoped.controls = [];
+            for (let index = 0; index < (await controls.count()); index++)
+              scoped.controls.push(await paint(controls.nth(index)));
+          } finally {
+            await scene.evaluate((element, previous) => {
+              if (previous === null) element.removeAttribute('data-theme');
+              else element.setAttribute('data-theme', previous);
+            }, priorTheme);
+            await page.waitForTimeout(100);
+            scoped.restored = await sampleCanvas();
+          }
+        }
       } catch (error) {
         capture.failure = String(error);
         failure(name, error);
@@ -1427,6 +1619,12 @@ async function observe(output, rounds) {
     }
     process.removeListener('SIGTERM', interrupt);
     process.removeListener('SIGINT', interrupt);
+    try {
+      report.sourceAtEnd = await sourceSnapshot();
+      assertStableSource(report.source, report.sourceAtEnd);
+    } catch (error) {
+      failure('source-stability', error);
+    }
     report.ended = new Date().toISOString();
     await save();
   }

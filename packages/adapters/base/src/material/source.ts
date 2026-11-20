@@ -84,7 +84,11 @@ export function createCanvasBackdropLease(
         if (disposed || revision !== operation) return;
         paint(context, width, height);
         if (disposed || revision !== operation) return;
-        const pixels = new Uint8Array(context.getImageData(0, 0, width, height).data);
+        // getImageData already returns an independent pixel snapshot. Retype
+        // that owned byte range instead of copying the whole backdrop again
+        // for every source revision; subsequent canvas draws cannot mutate it.
+        const { data } = context.getImageData(0, 0, width, height);
+        const pixels = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
         if (disposed || revision !== operation) return;
         for (let i = 3; i < pixels.length; i += 4)
           if (pixels[i] !== 255) throw new Error('Backdrop must be opaque');

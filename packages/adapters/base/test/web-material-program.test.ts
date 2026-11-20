@@ -10,8 +10,10 @@ import {
 } from '../src/material/style-tint-profile';
 import { acquireWebOpticalProgram, inspectWebOpticalResources } from '../src/material/program-pool';
 import { colorContrast, type OpaqueRgba } from '../src/material/style';
+import * as prefilterModule from '../src/material/prefilter';
 function fixture(
-  control: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null
+  control: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null,
+  sourcePreparation: 'auto' | 'cpu' = 'auto'
 ) {
   const shaderSources: string[] = [],
     writes = new Map<string, unknown>();
@@ -89,7 +91,7 @@ function fixture(
   const canvas = document.createElement('canvas');
   vi.spyOn(canvas, 'getContext').mockReturnValue(gl);
   vi.spyOn(canvas, 'toDataURL').mockReturnValue('data:image/png;base64,AA==');
-  const program = createWebOpticalProgram(canvas, control);
+  const program = createWebOpticalProgram(canvas, control, sourcePreparation);
   const frame = {
     source: {
       revision: 1,
@@ -187,6 +189,251 @@ describe('fixed V2 optical ABI (spy, no GPU execution claim)', () => {
     ).toThrow('optical-geometry-budget');
     f.program.dispose();
   });
+});
+
+describe('GPU preparation integration (mock helper, original optical ABI)', () => {
+  function cachedGpuFixture() {
+    const outputs: { texture: WebGLTexture; release: ReturnType<typeof vi.fn> }[] = [];
+    const filter = vi.fn(() => {
+      const output = {
+        texture: { prepared: outputs.length } as unknown as WebGLTexture,
+        release: vi.fn(),
+      };
+      outputs.push(output);
+      return output;
+    });
+    const dispose = vi.fn();
+    const factory = vi
+      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
+      .mockReturnValue({ filter, dispose });
+    const f = fixture();
+    return {
+      ...f,
+      outputs,
+      filter,
+      dispose,
+      cleanup() {
+        f.program.dispose();
+        factory.mockRestore();
+      },
+    };
+  }
+
+  it('retires the old clear upload slot when GPU paint takes over, including without WeakRef', () => {
+    vi.stubGlobal('WeakRef', undefined);
+    const f = cachedGpuFixture();
+    const clear = cacheSource(),
+      regular = cacheSource();
+    try {
+      f.program.render({ ...f.frame, source: clear, variant: 'clear' });
+      f.program.render({ ...f.frame, source: regular });
+      f.program.render({ ...f.frame, source: clear, variant: 'clear' });
+      // Reupload means the previous strong clear slot was not retained as an
+      // inactive cache alongside GPU ownership. This does not time a real GC.
+      expect(f.program.inspect()).toMatchObject({ sourceUploads: 3, gpuSourcePreparations: 1 });
+      expect(f.gl.texImage2D).toHaveBeenCalledTimes(5);
+      expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toBe(clear.pixels);
+    } finally {
+      f.cleanup();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('retains independent A -> B -> A textures and releases LRU or changed source entries', () => {
+    const f = cachedGpuFixture();
+    const sources = Array.from({ length: 5 }, (_, index) => cacheSource(4, 4, index));
+    const render = (index: number) => f.program.render({ ...f.frame, source: sources[index] });
+    try {
+      render(0);
+      render(1);
+      render(0);
+      expect(f.filter).toHaveBeenCalledTimes(2);
+      expect(f.outputs[0].texture).not.toBe(f.outputs[1].texture);
+      expect(f.gl.bindTexture).toHaveBeenLastCalledWith(f.gl.TEXTURE_2D, f.outputs[0].texture);
+      expect(f.outputs[0].release).not.toHaveBeenCalled();
+      render(2);
+      render(3);
+      render(4);
+      expect(f.outputs[1].release).toHaveBeenCalledOnce();
+      expect(f.outputs[0].release).not.toHaveBeenCalled();
+      render(0);
+      expect(f.filter).toHaveBeenCalledTimes(5);
+      expect(f.program.inspect()).toMatchObject({
+        sourcePreparations: 5,
+        sourceUploads: 5,
+        sourcePreparationCacheHits: 2,
+        sourcePreparationCacheEntries: 4,
+        sourcePreparationCacheBytes: 256,
+        sourcePreparationGpuCacheBytes: 256,
+        sourcePreparationCpuCacheBytes: 0,
+      });
+      sources[0].revision++;
+      render(0);
+      expect(f.outputs[0].release).toHaveBeenCalledOnce();
+      expect(f.filter).toHaveBeenCalledTimes(6);
+      f.program.clear();
+      for (const output of f.outputs) expect(output.release).toHaveBeenCalledOnce();
+      expect(f.program.inspect()).toMatchObject({
+        gpuSourcePreparations: 6,
+        sourcePreparationCacheEntries: 0,
+        sourcePreparationCacheBytes: 0,
+        sourcePreparationGpuCacheBytes: 0,
+      });
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('applies the same 4 MiB output budget to GPU entries and releases them on context loss', () => {
+    const f = cachedGpuFixture();
+    const sources = [cacheSource(1024, 512), cacheSource(1024, 512, 1), cacheSource(1, 1, 2)];
+    const render = (index: number) => f.program.render({ ...f.frame, source: sources[index] });
+    try {
+      render(0);
+      render(1);
+      render(0);
+      expect(f.program.inspect()).toMatchObject({
+        sourcePreparationCacheEntries: 2,
+        sourcePreparationGpuCacheBytes: 4 * 1024 * 1024,
+      });
+      render(2);
+      expect(f.outputs[1].release).toHaveBeenCalledOnce();
+      expect(f.outputs[0].release).not.toHaveBeenCalled();
+      expect(f.program.inspect()).toMatchObject({
+        sourcePreparationCacheEntries: 2,
+        sourcePreparationCacheBytes: 2 * 1024 * 1024 + 4,
+      });
+      f.gl.isContextLost.mockReturnValue(true);
+      expect(() => render(0)).toThrow('webgl-unavailable');
+      for (const output of f.outputs) expect(output.release).toHaveBeenCalledOnce();
+      expect(f.dispose).toHaveBeenCalledOnce();
+      expect(f.program.inspect()).toMatchObject({
+        sourcePreparationCacheEntries: 0,
+        sourcePreparationGpuCacheBytes: 0,
+      });
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('reuses one prepared GPU source across profiles and still validates every rendered pixel', () => {
+    const outputs: { texture: WebGLTexture; release: ReturnType<typeof vi.fn> }[] = [];
+    const filter = vi.fn(() => {
+        const output = {
+          texture: { prepared: outputs.length } as unknown as WebGLTexture,
+          release: vi.fn(),
+        };
+        outputs.push(output);
+        return output;
+      }),
+      dispose = vi.fn();
+    const factory = vi
+      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
+      .mockReturnValue({ filter, dispose });
+    const f = fixture();
+    try {
+      for (let index = 0; index < 8; index++)
+        f.program.render({
+          ...f.frame,
+          pressed: index % 2 === 0,
+          ...(index % 2 ? { tint: 'style-fill' as const } : {}),
+        });
+      expect(factory).toHaveBeenCalledOnce();
+      expect(filter).toHaveBeenCalledOnce();
+      expect(f.gl.bindTexture).toHaveBeenLastCalledWith(f.gl.TEXTURE_2D, outputs[0].texture);
+      expect(f.program.inspect()).toMatchObject({
+        renders: 8,
+        sourcePreparations: 1,
+        gpuSourcePreparations: 1,
+        cpuSourcePreparations: 0,
+        sourceUploads: 1,
+        prefilterProgramBuilds: 1,
+      });
+      expect(f.gl.texImage2D).toHaveBeenCalledTimes(3);
+      expect(f.shaderSources).toEqual([vertex, fragment, vertex, styleTintFragment]);
+      f.program.render({ ...f.frame, variant: 'clear' });
+      expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toBe(f.frame.source.pixels);
+      f.program.render(f.frame);
+      expect(filter).toHaveBeenCalledOnce();
+      expect(f.gl.bindTexture).toHaveBeenLastCalledWith(f.gl.TEXTURE_2D, outputs[0].texture);
+      expect(f.program.inspect().sourceUploads).toBe(2);
+
+      f.frame.source.pixels[3] = 254;
+      expect(() => f.program.render(f.frame)).toThrow('nonopaque-optical-source');
+      expect(filter).toHaveBeenCalledOnce();
+      f.frame.source.pixels[3] = 255;
+      f.program.render({ ...f.frame, source: { ...f.frame.source, revision: 2 } });
+      expect(filter).toHaveBeenCalledTimes(2);
+      expect(f.program.inspect()).toMatchObject({
+        sourcePreparations: 2,
+        gpuSourcePreparations: 2,
+      });
+
+      const encoded = vi.mocked(f.canvas.toDataURL).mock.calls.length;
+      f.gl.readPixels = (...args: unknown[]) => (args[6] as Uint8Array).fill(0);
+      expect(() => f.program.render({ ...f.frame, tint: 'style-fill' })).toThrow(
+        'rendered-style-tint-empty'
+      );
+      expect(f.canvas.toDataURL).toHaveBeenCalledTimes(encoded);
+    } finally {
+      f.program.dispose();
+      expect(dispose).toHaveBeenCalledOnce();
+      for (const output of outputs) expect(output.release).toHaveBeenCalledOnce();
+      factory.mockRestore();
+    }
+  });
+
+  it('keeps the forced CPU comparison internal and retains the scalar-byte reference', () => {
+    const factory = vi.spyOn(prefilterModule, 'createWebOpticalPrefilter');
+    const f = fixture(null, 'cpu');
+    try {
+      f.program.render(f.frame);
+      expect(factory).not.toHaveBeenCalled();
+      expect(f.program.inspect()).toMatchObject({
+        cpuSourcePreparations: 1,
+        gpuSourcePreparations: 0,
+        prefilterProgramBuilds: 0,
+      });
+      expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toEqual(
+        referencePrefilter(f.frame.source.pixels, 4, 4)
+      );
+    } finally {
+      f.program.dispose();
+      factory.mockRestore();
+    }
+  });
+
+  it.each(['create', 'filter'])(
+    'retires the entire failed preparation and optical resource set after %s failure',
+    (phase) => {
+      const dispose = vi.fn();
+      const failure = new Error('gpu-prefilter-framebuffer-incomplete');
+      const factory = vi
+        .spyOn(prefilterModule, 'createWebOpticalPrefilter')
+        .mockImplementation(() => {
+          if (phase === 'create') throw failure;
+          return {
+            filter: () => {
+              throw failure;
+            },
+            dispose,
+          };
+        });
+      const f = fixture();
+      try {
+        expect(() => f.program.render(f.frame)).toThrow(failure);
+        expect(f.gl.deleteTexture).toHaveBeenCalledTimes(3);
+        expect(f.gl.deleteBuffer).toHaveBeenCalledOnce();
+        expect(f.gl.deleteProgram).toHaveBeenCalledOnce();
+        expect(f.canvas.toDataURL).not.toHaveBeenCalled();
+        expect(f.canvas.width).toBe(0);
+        expect(dispose).toHaveBeenCalledTimes(phase === 'filter' ? 1 : 0);
+      } finally {
+        f.program.dispose();
+        factory.mockRestore();
+      }
+    }
+  );
 });
 
 describe('finite first-party contact optical ABI (spy, not GPU evidence)', () => {
@@ -812,6 +1059,101 @@ describe('regular prefilter byte equivalence (CPU and GL spy only)', () => {
     try {
       expect(() => f.program.render(f.frame)).toThrow('nonopaque-optical-source');
       expect(f.gl.texImage2D).not.toHaveBeenCalled();
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it.each([
+    [1, 1],
+    [1, 13],
+    [2, 3],
+    [3, 2],
+    [3, 11],
+    [7, 5],
+    [16, 13],
+  ])('preserves the declared %ix%i byte view and independent channel lanes', (width, height) => {
+    const f = fixture();
+    let seed = 0x32fc17;
+    try {
+      for (const byteOffset of [0, 1, 2, 3, 4, 11]) {
+        // Prefix/suffix sentinels catch using the whole backing ArrayBuffer or
+        // accidentally aligning the start by rounding down to another pixel.
+        const backing = new Uint8Array(width * height * 4 + byteOffset + 17).fill(193);
+        const pixels = backing.subarray(byteOffset, byteOffset + width * height * 4);
+        for (let at = 0; at < pixels.length; at += 4) {
+          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+          // Unequal, changing lanes include all-ones in the most significant
+          // byte and contrasting extreme neighbors; no grayscale shortcut.
+          pixels[at] = at % 8 ? 255 : 0;
+          pixels[at + 1] = seed >>> 24;
+          pixels[at + 2] = at % 12 ? 0 : 255;
+          pixels[at + 3] = 255;
+        }
+        const before = backing.slice();
+        const expected = referencePrefilter(pixels, width, height);
+        f.program.render({ ...f.frame, source: { ...f.frame.source, width, height, pixels } });
+        expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toEqual(expected);
+        expect(backing).toEqual(before);
+      }
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('rounds half steps in each pass rather than rounding a fused convolution', () => {
+    const f = fixture();
+    const run = (width: number, height: number, pixels: Uint8Array) => {
+      f.program.render({ ...f.frame, source: { ...f.frame.source, width, height, pixels } });
+      const uploaded = f.gl.texImage2D.mock.calls.at(-1)![8] as Uint8Array;
+      expect(uploaded).toEqual(referencePrefilter(pixels, width, height));
+      return uploaded;
+    };
+    try {
+      const line = new Uint8Array(7 * 4);
+      for (let at = 3; at < line.length; at += 4) line[at] = 255;
+      line.set([32, 96, 160], 3 * 4);
+      // The radius-three tap contributes exactly 0.5, 1.5 and 2.5.
+      expect([...run(7, 1, line).slice(0, 4)]).toEqual([1, 2, 3, 255]);
+
+      const impulse = new Uint8Array(9 * 9 * 4);
+      for (let at = 3; at < impulse.length; at += 4) impulse[at] = 255;
+      impulse.set([1, 32, 255], (4 * 9 + 4) * 4);
+      const uploaded = run(9, 9, impulse);
+      // Horizontal: round(255 * 20 / 64) = 80; vertical: round(80 * 6 / 64) = 8.
+      // A single final rounding of 255 * 20 * 6 / 4096 would incorrectly be 7.
+      expect(uploaded[(2 * 9 + 4) * 4 + 2]).toBe(8);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('keeps retained CPU outputs independent across changing source strides', () => {
+    const f = fixture();
+    const run = (width: number, height: number, value: number) => {
+      const pixels = new Uint8Array(width * height * 4).fill(value);
+      for (let at = 3; at < pixels.length; at += 4) pixels[at] = 255;
+      f.program.render({ ...f.frame, source: { ...f.frame.source, width, height, pixels } });
+      const uploaded = f.gl.texImage2D.mock.calls.at(-1)![8] as Uint8Array;
+      expect(uploaded).toEqual(referencePrefilter(pixels, width, height));
+      return uploaded;
+    };
+    try {
+      const first = run(7, 5, 253);
+      const retained = first.slice();
+      const second = run(7, 5, 2);
+      expect(second).not.toBe(first);
+      // Equal byte length with different strides must rewrite every pixel.
+      expect(run(5, 7, 173)).not.toBe(second);
+      expect(first).toEqual(retained);
+      const resized = run(3, 2, 0);
+      expect(resized).not.toBe(second);
+      expect(run(3, 2, 255)).not.toBe(resized);
+      const restored = run(7, 5, 91);
+      expect(restored).not.toBe(first);
+      f.program.clear();
+      expect(run(7, 5, 32)).not.toBe(restored);
+      expect(f.program.inspect()).toMatchObject({ sourcePreparations: 7, sourceUploads: 7 });
     } finally {
       f.program.dispose();
     }
