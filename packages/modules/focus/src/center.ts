@@ -64,6 +64,7 @@ export type ScopeEntryIntent = { cancel(): void };
 
 export class FocusCenter {
   private readonly entries = new Map<FocusInstanceToken, FocusCenterEntry>();
+  private readonly detachedRovingProviders = new Map<FocusInstanceToken, FocusCenterEntry>();
   private readonly activeScopes: ActiveScopeRecord[] = [];
   private scopeRevision = 0;
   private readonly lastFocusedByScope = new Map<FocusInstanceToken, FocusInstanceToken>();
@@ -102,11 +103,13 @@ export class FocusCenter {
   }
 
   upsert(entry: FocusCenterEntry): void {
+    this.detachedRovingProviders.delete(entry.instance);
     this.entries.set(entry.instance, entry);
     this.fulfillPendingRovingEntries(entry.instance);
   }
 
   remove(instance: FocusInstanceToken): void {
+    this.detachedRovingProviders.delete(instance);
     this.entries.delete(instance);
     this.pendingRovingEntries.delete(instance);
     if (this.currentFocused === instance) {
@@ -127,6 +130,10 @@ export class FocusCenter {
   }
 
   detach(instance: FocusInstanceToken): void {
+    // Descendants can still be registered while this view is detached. Retain
+    // their logical roving boundary without making the provider a focus target.
+    const entry = this.entries.get(instance);
+    if (entry?.isRovingProvider()) this.detachedRovingProviders.set(instance, entry);
     this.entries.delete(instance);
     if (this.currentFocused === instance) {
       this.currentFocused = null;
@@ -147,7 +154,7 @@ export class FocusCenter {
   ): FocusInstanceToken | null {
     let cur: FocusInstanceToken | null = instance;
     while (cur) {
-      const entry = this.entries.get(cur);
+      const entry = this.entries.get(cur) ?? this.detachedRovingProviders.get(cur);
       if (entry?.getRovingConfig().key === groupKey) {
         return cur;
       }
@@ -162,7 +169,7 @@ export class FocusCenter {
   ): FocusInstanceToken | null {
     let cur = getParent(instance);
     while (cur) {
-      const entry = this.entries.get(cur);
+      const entry = this.entries.get(cur) ?? this.detachedRovingProviders.get(cur);
       if (entry?.isRovingProvider()) return cur;
       cur = getParent(cur);
     }

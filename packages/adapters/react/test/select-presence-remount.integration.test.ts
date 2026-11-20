@@ -6,11 +6,161 @@ import { describe, expect, it, vi } from 'vitest';
 import * as base from '../../../prototypes/base/src/select';
 import * as shadcn from '../../../prototypes/shadcn/src/select';
 import { createReactAdapter } from '../src';
+import type { ProtoReactEventProps, ReactAdapterHandle } from '../src';
+
+type SelectOpenChange = Parameters<
+  NonNullable<ProtoReactEventProps<typeof base.selectRoot>['onOpenChange']>
+>[0];
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 for (const [family, prototypes] of Object.entries({ base, shadcn })) {
   describe(`React ${family} Select retained presence`, () => {
+    it.each(['accepted', 'refused', 'superseded', 'failed'] as const)(
+      'bounds a focus handoff to its %s controlled opening with batched React props',
+      async (outcome) => {
+        // T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL
+        // Real React owns setOpen batching. No synchronous WC prop delivery or
+        // fake React renderer can establish this pending-before-commit ordering.
+        vi.useFakeTimers();
+        const adapt = createReactAdapter({ ...React, createPortal });
+        const Root = adapt(prototypes.selectRoot);
+        const Trigger = adapt(prototypes.selectTrigger);
+        const Value = adapt(prototypes.selectValue);
+        const Content = adapt(prototypes.selectContent);
+        const Surface = adapt(prototypes.selectSurface);
+        const Viewport = adapt(prototypes.selectViewport);
+        const Item = adapt(prototypes.selectItem);
+        const ItemText = adapt(prototypes.selectItemText);
+        const rootRef = React.createRef<ReactAdapterHandle<typeof prototypes.selectRoot>>();
+        const host = document.createElement('div');
+        const external = document.createElement('button');
+        document.body.append(host, external);
+        const root = createRoot(host);
+        let setOpen!: React.Dispatch<React.SetStateAction<boolean>>;
+        let setValue!: React.Dispatch<React.SetStateAction<string>>;
+        const failure = new Error('controlled openChange failure');
+        const callbackOpen: boolean[] = [];
+        const request = (reason: string) =>
+          rootRef.current!.getExposes().requestOpen({
+            open: true,
+            reason,
+            focusReason: 'programmatic',
+          });
+        const onOpenChange = vi.fn((next: SelectOpenChange) => {
+          if (next.reason !== 'pending-focus-first') {
+            setOpen(next.open);
+            return;
+          }
+          if (outcome === 'accepted') setOpen(true);
+          external.focus();
+          callbackOpen.push(rootRef.current!.getExposes().open.get());
+          if (outcome === 'superseded') request('pending-focus-successor');
+          if (outcome === 'failed') throw failure;
+        });
+        function App() {
+          const [open, updateOpen] = React.useState(false);
+          const [value, updateValue] = React.useState('alpha');
+          setOpen = updateOpen;
+          setValue = updateValue;
+          return React.createElement(
+            Root,
+            { ref: rootRef, open, value, onOpenChange },
+            React.createElement(Trigger, null, React.createElement(Value)),
+            React.createElement(
+              Content,
+              { position: 'popper', enterDuration: 0, leaveDuration: 0 },
+              React.createElement(
+                Surface,
+                null,
+                React.createElement(
+                  Viewport,
+                  null,
+                  ...['alpha', 'gamma'].map((entry) =>
+                    React.createElement(
+                      Item,
+                      {
+                        key: entry,
+                        value: entry,
+                        textValue: entry,
+                        hostClassName: `test-select-pending-${entry}`,
+                      },
+                      React.createElement(ItemText, null, entry)
+                    )
+                  )
+                )
+              )
+            )
+          );
+        }
+        const settle = async () => {
+          await act(async () => {
+            await vi.advanceTimersByTimeAsync(200);
+          });
+        };
+        const item = (value: string) => {
+          const element = document.querySelector<HTMLElement>(`.test-select-pending-${value}`);
+          expect(element).toBeInstanceOf(HTMLElement);
+          return element!;
+        };
+        try {
+          await act(async () => root.render(React.createElement(App)));
+          await settle();
+          await act(async () => {
+            expect(request('pending-focus-first')).toBe(true);
+          });
+          // Expose Event isolates host callback failures. The request was
+          // delivered even when the React callback threw after handing off focus.
+          expect(onOpenChange.mock.results[0]).toEqual(
+            outcome === 'failed'
+              ? { type: 'throw', value: failure }
+              : { type: 'return', value: undefined }
+          );
+          expect(callbackOpen).toEqual([false]);
+          expect(document.activeElement).toBe(external);
+          await settle();
+
+          if (outcome === 'refused' || outcome === 'failed') {
+            expect(rootRef.current!.getExposes().open.get()).toBe(false);
+            expect(document.activeElement).toBe(external);
+            await act(async () => {
+              if (outcome === 'refused') expect(request('pending-focus-retry')).toBe(true);
+              else setOpen(true);
+            });
+            await settle();
+          }
+
+          expect(rootRef.current!.getExposes().open.get()).toBe(true);
+          expect(rootRef.current!.getExposes().value.get()).toBe('alpha');
+          expect(document.activeElement).toBe(
+            outcome === 'accepted' || outcome === 'failed' ? external : item('alpha')
+          );
+          expect(onOpenChange).toHaveBeenCalledTimes(
+            outcome === 'refused' || outcome === 'superseded' ? 2 : 1
+          );
+
+          // A retained handoff does not prohibit the next genuine value or open epoch.
+          await act(async () => setValue('gamma'));
+          await settle();
+          expect(document.activeElement).toBe(item('gamma'));
+          external.focus();
+          await act(async () => setOpen(false));
+          await settle();
+          expect(rootRef.current!.getExposes().open.get()).toBe(false);
+          await act(async () => setOpen(true));
+          await settle();
+          expect(document.activeElement).toBe(item('gamma'));
+          expect(rootRef.current!.getExposes().value.get()).toBe('gamma');
+        } finally {
+          await act(async () => root.unmount());
+          host.remove();
+          external.remove();
+          vi.restoreAllMocks();
+          vi.useRealTimers();
+        }
+      }
+    );
+
     it.each(['popper', 'item-aligned'] as const)(
       'reopens retained %s Content after its prior portal view retires',
       async (position) => {

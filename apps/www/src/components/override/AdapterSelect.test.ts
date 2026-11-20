@@ -57,33 +57,36 @@ describe('documentation adapter selector', () => {
 });
 
 describe('family-independent adapter preference', () => {
-  it('synchronizes the actual Brutalist controls without changing the document family', async () => {
-    const { initSiteControls, registerSiteControls, selectValue } =
-      await import('../site-shadcn-controls');
-    registerSiteControls();
-    localStorage.clear();
-    document.documentElement.dataset.siteLibraryFamily = 'brutalist';
-    const control = (family: string) => `<div data-adapter-select>
-      <wc-${family}-select-root data-site-select-root data-adapter-select-root data-site-initial-value="wc">
-        <wc-${family}-select-trigger><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
-        <wc-${family}-select-content>
-          <wc-${family}-select-item data-value="wc">Web Components</wc-${family}-select-item>
-          <wc-${family}-select-item data-value="vue2">Vue 2</wc-${family}-select-item>
-        </wc-${family}-select-content>
-      </wc-${family}-select-root></div>`;
-    document.body.innerHTML = control('brutalist') + control('shadcn');
-    initSiteControls(document);
-    initAdapterSelects(document);
-    await Promise.resolve();
-    await Promise.resolve();
-    const controls = document.querySelectorAll<HTMLElement>('[data-adapter-select-root]');
-    controls[0].dispatchEvent(
-      new CustomEvent('valueChange', { detail: { value: 'vue2' }, bubbles: true })
-    );
-    await Promise.resolve();
-    await Promise.resolve();
-    expect([...controls].map(selectValue)).toEqual(['vue2', 'vue2']);
-    expect(document.documentElement.dataset.siteLibraryFamily).toBe('brutalist');
-    expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('vue2');
-  });
+  it.each(['brutalist', 'bootstrap-2-3-2'])(
+    'synchronizes actual %s controls without changing the document family',
+    async (family) => {
+      const { initSiteControls, registerSiteControls, selectValue } =
+        await import('../site-shadcn-controls');
+      registerSiteControls();
+      localStorage.clear();
+      document.documentElement.dataset.siteLibraryFamily = 'brutalist';
+      const control = (family: string) => `<div data-adapter-select>
+        <wc-${family}-select-root data-site-select-root data-adapter-select-root data-site-initial-value="wc">
+          <wc-${family}-select-trigger><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
+          <wc-${family}-select-content>
+            <wc-${family}-select-item data-value="wc">Web Components</wc-${family}-select-item>
+            <wc-${family}-select-item data-value="vue2">Vue 2</wc-${family}-select-item>
+          </wc-${family}-select-content>
+        </wc-${family}-select-root></div>`;
+      document.body.innerHTML = control(family) + control('shadcn');
+      initSiteControls(document);
+      initAdapterSelects(document);
+      await Promise.resolve();
+      await Promise.resolve();
+      const controls = document.querySelectorAll<HTMLElement>('[data-adapter-select-root]');
+      controls[0].dispatchEvent(
+        new CustomEvent('valueChange', { detail: { value: 'vue2' }, bubbles: true })
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+      expect([...controls].map(selectValue)).toEqual(['vue2', 'vue2']);
+      expect(document.documentElement.dataset.siteLibraryFamily).toBe('brutalist');
+      expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('vue2');
+    }
+  );
 });

@@ -86,7 +86,10 @@ for (const direction of ['ltr', 'rtl'] as const)
           await page.addStyleTag({
             content:
               css +
-              '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}',
+              '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}' +
+              // The item-aligned popup gives every row the Trigger's width. Leave room
+              // for Web Components even when the shorter React label is selected.
+              '\n[data-demo-ref="trigger"]{width:100%}',
           });
           await page.addScriptTag({ content: bundle });
           await page.evaluate((dir) => window.selectGroupProof.mount(dir), direction);
@@ -114,6 +117,7 @@ for (const direction of ['ltr', 'rtl'] as const)
                 y: rect.y,
                 width: rect.width,
                 height: rect.height,
+                layoutHeight: style.height,
                 paddingLeft: style.paddingLeft,
                 paddingRight: style.paddingRight,
                 paddingTop: style.paddingTop,
@@ -182,7 +186,7 @@ for (const direction of ['ltr', 'rtl'] as const)
             expect(label.tabIndex).toBe(-1);
           }
           const separator = geometry.parts.separator;
-          expect(separator.height).toBe(1);
+          expect(separator.layoutHeight).toBe('1px');
           expect(separator.marginLeft).toBe(`${rem * -0.25}px`);
           expect(separator.marginRight).toBe(`${rem * -0.25}px`);
           expect(separator.marginTop).toBe(`${rem * 0.25}px`);

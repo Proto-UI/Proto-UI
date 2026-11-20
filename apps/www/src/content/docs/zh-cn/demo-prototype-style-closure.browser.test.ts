@@ -318,9 +318,9 @@ describe.sequential('Prototype style closure without Website CSS', () => {
     expect(
       fixture.selectors.some(
         (selector) =>
-          selector.includes('[data-pui-style]') &&
-          selector.includes('[data-pui-style]::before') &&
-          selector.includes('[data-pui-style]::after')
+          selector.includes(':where([data-pui-style])') &&
+          selector.includes(':where([data-pui-style])::before') &&
+          selector.includes(':where([data-pui-style])::after')
       )
     ).toBe(true);
 

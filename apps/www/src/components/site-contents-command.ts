@@ -56,7 +56,7 @@ export function contentsCommandParticipant(header: HTMLElement) {
     },
     async materialize(request: ProjectionScopeMaterializeRequest, namespace = 'docs') {
       const { projectionFamilyId: family, runtimeId: runtime } = request.selection;
-      if (family !== 'shadcn' && family !== 'brutalist')
+      if (family !== 'shadcn' && family !== 'brutalist' && family !== 'bootstrap-2-3-2')
         throw new Error('Contents command family is unavailable');
       const origin = document.activeElement;
       rememberedFocus.clear();

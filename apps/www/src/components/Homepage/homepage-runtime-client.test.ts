@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { assertDemoSpec, type DemoSpec } from '../PrototypePreviewer/demo-types';
+import {
+  assertDemoSpec,
+  collectPrototypeIds,
+  type DemoSpec,
+} from '../PrototypePreviewer/demo-types';
 import { PROJECTION_FOCUS_KEYS } from '../PrototypePreviewer/projection-composition';
 const fakes = vi.hoisted(() => ({
   materialize: vi.fn(),
@@ -294,15 +298,28 @@ describe('Homepage page-owned runtime', () => {
     expect(fakes.materialize.mock.calls).toHaveLength(retiredCalls);
   });
 
-  it('runs the real Bootstrap homepage composition as a WIP family', async () => {
+  it('admits Bootstrap through the homepage WIP family option', async () => {
     const root = fixture(true);
     handle = initHomepageRuntime(root);
     await settle();
     const controls = fakes.materialize.mock.calls[0]![1].controls;
+    expect(controls.family.options).toContainEqual({
+      value: 'bootstrap-2-3-2',
+      label: 'Bootstrap 2.3.2 · WIP',
+    });
+    const calls = fakes.materialize.mock.calls.length;
     controls.family.onValueChange('bootstrap-2-3-2');
     await settle();
     expect(root.dataset.family).toBe('bootstrap-2-3-2');
     expect(root.dataset.runtimeState).toBe('ready');
+    const staged = fakes.materialize.mock.calls.slice(calls);
+    expect(staged.map(([request]) => request.selection)).toEqual(
+      Array(3).fill({ runtimeId: 'wc', projectionFamilyId: 'bootstrap-2-3-2' })
+    );
+    const ids = new Set<string>();
+    collectPrototypeIds(staged.at(-1)![1].content.demo.root, ids);
+    expect(ids.has('bootstrap-2-3-2-button')).toBe(true);
+    expect(ids.has('shadcn-button')).toBe(false);
   });
 
   it('a failed demo prevents the header and native action groups from committing', async () => {

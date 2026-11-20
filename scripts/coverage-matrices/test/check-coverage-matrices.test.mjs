@@ -17643,7 +17643,16 @@ for (const helper of ['browser-harness', 'site-search-evidence']) {
 for (const [source, specifiers] of [
   ['Homepage/homepage-text.ts', ['@proto.ui/prototypes-base/text']],
   ['InstallCommandCard.astro', ['@proto.ui/adapter-web-component']],
-  ['site-link-recipes.ts', ['@proto.ui/prototypes-base/surface', '@proto.ui/prototypes-base/text']],
+  [
+    'site-link-recipes.ts',
+    [
+      '@proto.ui/prototypes-base/surface',
+      '@proto.ui/prototypes-base/text',
+      '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-brutalist/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+    ],
+  ],
   [
     'site-native-controls.ts',
     [
@@ -17652,6 +17661,8 @@ for (const [source, specifiers] of [
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
     ],
   ],
   ['site-search-commands.ts', ['@proto.ui/module-expose-state']],
@@ -17679,7 +17690,12 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    const content = source.endsWith('.astro') ? `<script>${code}</script>` : code;
+    const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
+    const content = nativeLinkSource
+      ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
+      : source.endsWith('.astro')
+        ? `<script>${code}</script>`
+        : code;
     for (const file of [relative, copy]) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
@@ -17691,6 +17707,16 @@ for (const [source, specifiers] of [
         message
       );
       assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copy}\``), message);
+    }
+    if (nativeLinkSource) {
+      fs.writeFileSync(path.join(root, relative), `${content}\n// Unreviewed importer bytes.\n`);
+      const changed = validationMessage(root);
+      for (const specifier of specifiers) {
+        assert.ok(
+          changed.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``),
+          changed
+        );
+      }
     }
     fs.writeFileSync(
       path.join(root, relative),
@@ -18923,6 +18949,96 @@ for (const [relative, allowed] of [
     );
   });
 
+test('Calendar caption import and controller binding require reviewed source', () => {
+  const root = createRoot();
+  const relative = 'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts';
+  const foreign = relative.replace('.shared.ts', '-foreign.shared.ts');
+  const owner = 'www.demo.authored-controllers';
+  const target = path.join(root, relative);
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
+  const specifier = '@proto.ui/prototypes-base/calendar';
+  const raw = (file) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+  const missingBinding = `interactive website source \`${relative}\` is missing a reviewed Source-scan binding`;
+  const fingerprint = `source fingerprint for \`${relative}\` does not match`;
+  const wrongBinding = `grouped binding for \`${relative}\` must include direct matrix Path owner \`${owner}\``;
+  const row = {
+    ID: owner,
+    Path: `\`${relative}\``,
+  };
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, reviewed);
+
+  writeValidMatrices(root);
+  const missing = validationMessage(root);
+  assert.ok(missing.includes(missingBinding), missing);
+  assert.ok(
+    missing.includes(`interactive website source \`${relative}\` is not bound to a matrix row`),
+    missing
+  );
+
+  writeValidMatrices(root, row, {}, { websiteBindings: [[relative, ['www.demo.runtime-select']]] });
+  const wrongOwner = validationMessage(root);
+  assert.ok(wrongOwner.includes(wrongBinding), wrongOwner);
+
+  writeValidMatrices(root, row, {}, { websiteBindings: [[relative, [owner]]] });
+  const exact = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+  assert.ok(!exact.includes(raw(relative)), exact);
+  assert.ok(!exact.includes(missingBinding), exact);
+  assert.ok(!exact.includes(fingerprint), exact);
+  assert.ok(!exact.includes(wrongBinding), exact);
+
+  fs.writeFileSync(path.join(root, foreign), reviewed);
+  const copied = validationMessage(root);
+  assert.ok(copied.includes(raw(foreign)), copied);
+  assert.ok(!copied.includes(raw(relative)), copied);
+
+  fs.appendFileSync(target, '\n// Changed importer requires review.\n');
+  const changed = validationMessage(root);
+  assert.ok(changed.includes(raw(relative)), changed);
+  assert.ok(changed.includes(fingerprint), changed);
+
+  fs.writeFileSync(target, reviewed.toString('utf8').replace(/\n/gu, '\r\n'));
+  const crlf = validationMessage(root);
+  assert.ok(crlf.includes(raw(relative)), crlf);
+  assert.ok(!crlf.includes(fingerprint), crlf);
+});
+
+for (const [relative, specifier] of [
+  [
+    'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts',
+    '@proto.ui/prototypes-shadcn/checkbox',
+  ],
+  [
+    'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts',
+    '@proto.ui/prototypes-shadcn/input-shell',
+  ],
+]) {
+  test(`Shadcn public demo import requires the exact reviewed source: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const target = path.join(root, relative);
+    const foreign = relative.replace(/\.ts$/u, '-foreign.ts');
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
+    const raw = (file) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, reviewed);
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+
+    const copied = validationMessage(root);
+    assert.ok(!copied.includes(raw(relative)), copied);
+    assert.ok(copied.includes(raw(foreign)), copied);
+
+    for (const changed of [
+      Buffer.concat([reviewed, Buffer.from('\n// Changed importer requires review.\n')]),
+      Buffer.from(reviewed.toString('utf8').replace(/\n/gu, '\r\n')),
+    ]) {
+      fs.writeFileSync(target, changed);
+      const message = validationMessage(root);
+      assert.ok(message.includes(raw(relative)), message);
+    }
+  });
+}
+
 test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed resolver bytes', () => {
   const source = fs.readFileSync(
     new URL('../../../apps/www/astro.config.mjs', import.meta.url),
@@ -18945,3 +19061,48 @@ test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed res
       source.indexOf("slug: 'ui-libraries/shadcn/button'")
   );
 });
+
+for (const scenario of [
+  'exact',
+  'changed-importer',
+  'changed-companion',
+  'missing-companion',
+  'foreign-importer',
+  'obsolete-astro-importer',
+]) {
+  test(`Pagefind dynamic import boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const owner = 'apps/www/src/components/site-search-owner.ts';
+    const companion = 'apps/www/src/components/site-pagefind-resource.ts';
+    const sourcePath =
+      scenario === 'foreign-importer'
+        ? 'apps/www/src/components/ForeignPagefindOwner.ts'
+        : scenario === 'obsolete-astro-importer'
+          ? 'apps/www/src/components/override/Search.astro'
+          : owner;
+    const target = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    if (scenario === 'obsolete-astro-importer') {
+      fs.writeFileSync(
+        target,
+        '<script>export function load(bundlePath) { return import(/* @vite-ignore */ `${bundlePath}pagefind.js`); }</script>'
+      );
+    } else {
+      const ownerBytes = fs.readFileSync(new URL(`../../../${owner}`, import.meta.url));
+      fs.writeFileSync(target, ownerBytes);
+      if (scenario === 'changed-importer') fs.appendFileSync(target, '\n// changed importer');
+    }
+    if (scenario !== 'missing-companion') {
+      fs.copyFileSync(new URL(`../../../${companion}`, import.meta.url), path.join(root, companion));
+    }
+    if (scenario === 'changed-companion') {
+      fs.appendFileSync(path.join(root, companion), '\n// changed companion');
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    const rejected = message.includes(
+      `@vite-ignore dynamic import in \`${sourcePath}\` is not reviewed against an exact URL boundary`
+    );
+    assert.equal(rejected, scenario !== 'exact', message);
+  });
+}

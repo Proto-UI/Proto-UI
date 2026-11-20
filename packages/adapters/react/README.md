@@ -16,6 +16,8 @@ The default `colorScheme` reader follows root `class` / `data-theme` markers and
 
 The guarantee is limited to the default getter in same-document light DOM without intervening local theme markers. An explicit `getMeta` keeps sampled behavior; subtree, ShadowRoot and cross-document equivalence remain outside this slice. See [C-RULE-COLOR-SCHEME-0001](../../../spec/contracts/C-RULE-COLOR-SCHEME-0001.yaml) and [T-RULE-COLOR-SCHEME-0001](../../../spec/tests/T-RULE-COLOR-SCHEME-0001.yaml), both draft.
 
+The mounted view writes its `data-pui-style` tokens during the Effects transaction so native positioning can measure the current styles. View readiness still waits for React to acknowledge the corresponding style revision and template commit. On detach, the view removes the attribute if it still contains the value that view wrote.
+
 ## Text Control values
 
 For a statically declared Text Control root, the adapter mirrors the host lease's `defaultValue` patch into React's native `defaultValue` prop. Text Control remains the owner of the current editor value; this prevents React reconciliation from replacing an authored initial textarea value with an empty default while preserving dirty uncontrolled edits across later property updates. See [C-TEXT-CONTROL-0001](../../../spec/contracts/C-TEXT-CONTROL-0001.yaml), draft.

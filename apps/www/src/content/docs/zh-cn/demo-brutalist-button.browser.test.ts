@@ -314,6 +314,27 @@ describe.sequential('Brutalist Button consumer reflow', () => {
         await selectRuntime(page, previewer, runtime, BUTTON_SELECTOR, BUTTON_COUNT);
         await page.mouse.move(0, 0);
         const buttons = previewer.locator(BUTTON_SELECTOR);
+        const waitForSettledLayout = async () => {
+          // Observe layout before checking native transitions so viewport and
+          // root-font changes are sampled at their authored endpoint.
+          await expect
+            .poll(
+              () =>
+                buttons.evaluateAll((elements) => {
+                  for (const element of elements) element.getBoundingClientRect();
+                  return {
+                    count: elements.length,
+                    hasActiveAnimation: elements.some((element) =>
+                      element.getAnimations().some(
+                        (animation) => animation.pending || animation.playState === 'running'
+                      )
+                    ),
+                  };
+                }),
+              { timeout: 2000, interval: 20 }
+            )
+            .toEqual({ count: BUTTON_COUNT, hasActiveAnimation: false });
+        };
         const dimensions = () =>
           buttons.evaluateAll((elements) =>
             elements.map((element) => {
@@ -321,6 +342,8 @@ describe.sequential('Brutalist Button consumer reflow', () => {
               return { width: rect.width, height: rect.height };
             })
           );
+        await page.evaluate(() => document.fonts.ready);
+        await waitForSettledLayout();
         const desktop = await dimensions();
         const initialRootFont = await page.evaluate(
           () => getComputedStyle(document.documentElement).fontSize
@@ -335,6 +358,7 @@ describe.sequential('Brutalist Button consumer reflow', () => {
             `${parseFloat(initialRootFont) * fontScale}px`
           );
           await page.evaluate(() => document.fonts.ready);
+          await waitForSettledLayout();
           const facts = await buttons.evaluateAll((elements) =>
             elements.map((element) => {
               const button = element as HTMLElement;
@@ -435,6 +459,8 @@ describe.sequential('Brutalist Button consumer reflow', () => {
           document.documentElement.style.removeProperty('font-size');
         });
         await page.setViewportSize(VIEWPORT);
+        await page.evaluate(() => document.fonts.ready);
+        await waitForSettledLayout();
         const restored = await dimensions();
         expect(restored).toEqual(desktop);
       } finally {
