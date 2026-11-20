@@ -1327,13 +1327,13 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
             : {}),
           ...(id === 'www.search.input-results'
             ? {
-                'Current owner': '`@pagefind/default-ui` plus Website search orchestration',
-                'Proto UI chain': '`P-BASE-INPUT` draft target plus current Pagefind UI',
-                Lifecycle: '`P-BASE-INPUT=draft`; third-party UI remains current',
+                'Current owner': 'Public `Dialog`, `Command` and `InputShell` composition plus website query/session orchestration',
+                'Proto UI chain': '`P-BASE-INPUT` draft dependency plus public `Dialog`, `Command` and `InputShell`',
+                Lifecycle: '`P-BASE-INPUT=draft`; native consumer acceptance remains unverified',
                 State: 'blocked',
                 'Dependency and owner': '#1323; owner: website search',
                 Evidence:
-                  '`@pagefind/default-ui` constructs `new PagefindUI` for the Website search input and results',
+                  '`createSiteSearchComposition` renders `Dialog`, `Command` and `InputShell` for the Website search input and results',
               }
             : {}),
         });
@@ -6337,7 +6337,7 @@ test('rejects interaction drift inside an already mapped Website source', () => 
   );
 });
 
-test('requires Pagefind default UI ownership on the search interaction row', () => {
+test('requires public Search composition ownership on the search interaction row', () => {
   const root = createRoot();
   const searchPath = 'apps/www/src/components/override/Search.astro';
   fs.mkdirSync(path.dirname(path.join(root, searchPath)), { recursive: true });
@@ -6355,7 +6355,7 @@ test('requires Pagefind default UI ownership on the search interaction row', () 
 
   assert.match(
     validationMessage(root),
-    /matrix row `www\.search\.input-results` must bind `@pagefind\/default-ui` as interaction-owned UI/
+    /matrix row `www\.search\.input-results` must bind `Command` as interaction-owned UI/
   );
 });
 
@@ -7283,12 +7283,12 @@ test('detects computed Harness addEventListener calls', () => {
   );
 });
 
-function writePagefindUiOwnershipFixture(root, overrides = {}) {
+function writeSearchCompositionOwnershipFixture(root, overrides = {}) {
   const searchPath = 'apps/www/src/components/override/Search.astro';
   fs.mkdirSync(path.dirname(path.join(root, searchPath)), { recursive: true });
   fs.writeFileSync(
     path.join(root, searchPath),
-    "---\nconst { PagefindUI } = await import('@pagefind/default-ui');\nnew PagefindUI({ element: '#search' });\n---\n<div id=\"search\"></div>",
+    '<div id="search"></div>',
     'utf8'
   );
   writeValidMatrices(
@@ -7297,13 +7297,13 @@ function writePagefindUiOwnershipFixture(root, overrides = {}) {
       ID: 'www.search.input-results',
       Path: `\`${searchPath}\``,
       'Target class': 'site-composition',
-      'Current owner': '`@pagefind/default-ui` plus Website search orchestration',
+      'Current owner': 'Public `Dialog`, `Command` and `InputShell` composition plus website query/session orchestration',
       State: 'blocked',
-      'Proto UI chain': '`P-BASE-INPUT` draft target plus current Pagefind UI',
-      Lifecycle: '`P-BASE-INPUT=draft`; third-party UI remains current',
+      'Proto UI chain': '`P-BASE-INPUT` draft dependency plus public `Dialog`, `Command` and `InputShell`',
+      Lifecycle: '`P-BASE-INPUT=draft`; native consumer acceptance remains unverified',
       'Dependency and owner':
         '[#1323](https://github.com/Proto-UI/Proto-UI/issues/1323); owner: website search',
-      Evidence: '`@pagefind/default-ui` constructs `new PagefindUI`',
+      Evidence: '`createSiteSearchComposition` renders `Dialog`, `Command` and `InputShell`',
       ...overrides,
     },
     {},
@@ -7311,36 +7311,36 @@ function writePagefindUiOwnershipFixture(root, overrides = {}) {
   );
 }
 
-test('accepts Pagefind UI ownership under the current criterion tracker', () => {
+test('accepts Search composition ownership under the current criterion tracker', () => {
   const root = createRoot();
-  writePagefindUiOwnershipFixture(root, {
+  writeSearchCompositionOwnershipFixture(root, {
     Evidence:
-      '`@pagefind/default-ui` constructs `new PagefindUI`; original Issue #420 remains historical evidence',
+      '`createSiteSearchComposition` renders `Dialog`, `Command` and `InputShell`; original Issue #420 remains historical evidence',
   });
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
 for (const [criterion, overrides] of [
-  ['third-party UI owner', { 'Current owner': 'Website query engine' }],
+  ['public composition owner', { 'Current owner': 'Website query engine' }],
   ['Input owner', { 'Proto UI chain': 'P-ACTIVE-BUTTON' }],
-  ['constructor evidence', { Evidence: 'Reviewed interaction dependency `@pagefind/default-ui`' }],
+  ['composition evidence', { Evidence: 'Reviewed interaction dependencies `Dialog`, `Command`, `InputShell`' }],
   ['blocked state', { State: 'research' }],
   ['current tracker', { 'Dependency and owner': '#420; owner: website search' }],
 ]) {
-  test(`rejects Pagefind UI ownership missing ${criterion}`, () => {
+  test(`rejects Search composition ownership missing ${criterion}`, () => {
     const root = createRoot();
-    writePagefindUiOwnershipFixture(root, overrides);
+    writeSearchCompositionOwnershipFixture(root, overrides);
     assert.match(
       validationMessage(root),
-      /matrix row `www\.search\.input-results` must structurally own `new PagefindUI`/
+      /matrix row `www\.search\.input-results` must structurally own `createSiteSearchComposition`/
     );
   });
 }
 
-test('requires the current Pagefind criterion tracker to remain OPEN', () => {
+test('requires the current Search composition criterion tracker to remain OPEN', () => {
   const root = createRoot();
   writeGovernanceSnapshot(root, { 1323: { state: 'CLOSED', stateReason: 'COMPLETED' } });
-  writePagefindUiOwnershipFixture(root);
+  writeSearchCompositionOwnershipFixture(root);
   assert.match(
     validationMessage(root),
     /dependency issue #1323 must be OPEN for a blocked row; snapshot state is CLOSED\/COMPLETED/

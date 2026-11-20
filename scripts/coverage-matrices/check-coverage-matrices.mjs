@@ -1182,7 +1182,7 @@ export const MATRIX_CONFIGS = Object.freeze([
       ...WEBSITE_NON_INTERACTIVE_PATHS,
     }),
     requiredInlineCodeByRow: Object.freeze({
-      'www.search.input-results': Object.freeze(['@pagefind/default-ui']),
+      'www.search.input-results': Object.freeze(['Dialog', 'Command', 'InputShell']),
     }),
     closureBindingsByRow: Object.freeze({
       'www.content.document-semantics': WEBSITE_DOCUMENT_SEMANTICS_CLOSURE,
@@ -12173,15 +12173,17 @@ function validateMainRows(
     }
     const inlineCode = new Set(Object.values(record).flatMap(inlineCodeValues));
     if (id === 'www.search.input-results') {
-      const ownsPagefindUi =
-        record['Current owner'].includes('`@pagefind/default-ui`') &&
+      const ownsSearchComposition =
+        ['Dialog', 'Command', 'InputShell'].every((name) =>
+          record['Current owner'].includes(`\`${name}\``)
+        ) &&
         record['Proto UI chain'].includes('P-BASE-INPUT') &&
-        inlineCode.has('new PagefindUI') &&
+        inlineCode.has('createSiteSearchComposition') &&
         state === 'blocked' &&
         /(?:^|\D)#1323\b/u.test(record['Dependency and owner']);
-      if (!ownsPagefindUi) {
+      if (!ownsSearchComposition) {
         issues.push(
-          `${context}: matrix row \`www.search.input-results\` must structurally own \`new PagefindUI\` through \`@pagefind/default-ui\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #1323`
+          `${context}: matrix row \`www.search.input-results\` must structurally own \`createSiteSearchComposition\` through \`Dialog\`, \`Command\`, \`InputShell\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #1323`
         );
       }
     }
