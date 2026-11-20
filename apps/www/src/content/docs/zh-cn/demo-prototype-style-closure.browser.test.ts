@@ -198,7 +198,8 @@ describe.sequential('Prototype style closure without Website CSS', () => {
                   id,
                   {
                     box: getComputedStyle(element).boxSizing,
-                    pseudoBox: getComputedStyle(element, '::before').boxSizing,
+                    beforeBox: getComputedStyle(element, '::before').boxSizing,
+                    afterBox: getComputedStyle(element, '::after').boxSizing,
                     width: element.getBoundingClientRect().width,
                   },
                 ];
@@ -212,11 +213,22 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         }
       );
       for (const target of Object.values(facts)) {
-        expect(target.baseline).toEqual({ box: 'border-box', pseudoBox: 'border-box', width: 40 });
-        expect(target.authored).toEqual({ box: 'content-box', pseudoBox: 'border-box', width: 64 });
+        expect(target.baseline).toEqual({
+          box: 'border-box',
+          beforeBox: 'border-box',
+          afterBox: 'border-box',
+          width: 40,
+        });
+        expect(target.authored).toEqual({
+          box: 'content-box',
+          beforeBox: 'border-box',
+          afterBox: 'border-box',
+          width: 64,
+        });
         expect(target.unrelated).toEqual({
           box: 'content-box',
-          pseudoBox: 'content-box',
+          beforeBox: 'content-box',
+          afterBox: 'content-box',
           width: 64,
         });
       }
@@ -315,15 +327,6 @@ describe.sequential('Prototype style closure without Website CSS', () => {
     expect(fixture.selectors).toContain(
       ':where(button[data-pui-style], input[data-pui-style], select[data-pui-style], textarea[data-pui-style])'
     );
-    expect(
-      fixture.selectors.some(
-        (selector) =>
-          selector.includes(':where([data-pui-style])') &&
-          selector.includes(':where([data-pui-style])::before') &&
-          selector.includes(':where([data-pui-style])::after')
-      )
-    ).toBe(true);
-
     for (const runtime of RUNTIMES) {
       const facts = fixture.runtimeFacts[runtime] as {
         mounted: boolean;
