@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Run the full S2 browser module
+      - name: Run the full Demo Matrix browser module
         env:
           PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
         run: |
@@ -42,7 +42,7 @@ jobs:
           mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
           git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
           corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts
       - name: Retain candidate source identity
         if: always()
         uses: actions/upload-artifact@v4
