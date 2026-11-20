@@ -12,10 +12,238 @@ use proto_ui_gpui_native::gpui_native_owner::{
 };
 use serde_json::{json, Value as Json};
 use std::{
+    cell::{Cell, RefCell},
     panic::{catch_unwind, AssertUnwindSafe},
     rc::Rc,
     time::Duration,
 };
+
+use proto_ui_gpui_native::gpui_native_move::{
+    attach_move_gesture, MoveGestureBinding, MoveGestureCancelContext,
+    MoveGestureCancelReason, MoveGestureSample,
+};
+
+#[derive(Clone, Default)]
+struct MoveLog {
+    refuse: Rc<Cell<bool>>,
+    events: Rc<RefCell<Vec<&'static str>>>,
+    samples: Rc<RefCell<Vec<MoveGestureSample>>>,
+    cancels: Rc<RefCell<Vec<MoveGestureCancelReason>>>,
+}
+impl MoveGestureBinding for MoveLog {
+    fn should_start(&self, _: &MoveGestureSample, _: &mut Window, _: &mut gpui::App) -> bool {
+        !self.refuse.get()
+    }
+    fn on_start(&self, sample: &MoveGestureSample, _: &mut Window, _: &mut gpui::App) {
+        self.events.borrow_mut().push("start");
+        self.samples.borrow_mut().push(*sample);
+    }
+    fn on_move(&self, sample: &MoveGestureSample, _: &mut Window, _: &mut gpui::App) {
+        self.events.borrow_mut().push("move");
+        self.samples.borrow_mut().push(*sample);
+    }
+    fn on_end(&self, sample: &MoveGestureSample, _: &mut Window, _: &mut gpui::App) {
+        self.events.borrow_mut().push("end");
+        self.samples.borrow_mut().push(*sample);
+    }
+    fn on_cancel(&self, reason: MoveGestureCancelReason, _: Option<MoveGestureCancelContext<'_>>) {
+        self.events.borrow_mut().push("cancel");
+        self.cancels.borrow_mut().push(reason);
+    }
+}
+
+struct MoveHarness {
+    target: Entity<plain::CompiledComponent>,
+    stop_up: Rc<Cell<bool>>,
+    stopped: Rc<Cell<bool>>,
+}
+impl Render for MoveHarness {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let stop = self.stop_up.clone();
+        let stopped = self.stopped.clone();
+        gpui::div().size_full().child(self.target.clone()).child(
+            gpui::canvas(|_, _, _| (), move |_, _, window, _| {
+                window.on_mouse_event::<gpui::MouseUpEvent>(move |_, phase, _, cx| {
+                    if phase.bubble() && stop.get() {
+                        stopped.set(true);
+                        cx.stop_propagation();
+                    }
+                });
+            }).absolute().size_full()
+        )
+    }
+}
+fn move_frames(window: WindowHandle<MoveHarness>, cx: &mut TestAppContext) {
+    for _ in 0..3 {
+        cx.update_window(window.into(), |_, window, cx| {
+            window.refresh();
+            window.draw(cx).clear(cx);
+        }).unwrap();
+        cx.run_until_parked();
+    }
+}
+fn move_window(cx: &mut TestAppContext, log: Rc<MoveLog>) -> (WindowHandle<MoveHarness>, proto_ui_gpui_native::gpui_native_move::MoveGestureLease) {
+    let mut lease = None;
+    let window = cx.open_window(size(px(600.), px(400.)), |window, cx| {
+        let target = plain::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let owner = target.read(cx).owner.clone();
+        assert!(!owner.borrow().mounted, "attachment precedes first committed mount");
+        lease = Some(attach_move_gesture(Rc::downgrade(&owner), Box::new(log.as_ref().clone())).unwrap());
+        MoveHarness { target, stop_up: Rc::new(Cell::new(false)), stopped: Rc::new(Cell::new(false)) }
+    });
+    window.update(cx, |_, window, _| window.activate_window()).unwrap();
+    move_frames(window, cx);
+    (window, lease.unwrap())
+}
+fn move_down(window: WindowHandle<MoveHarness>, cx: &mut TestAppContext) -> gpui::Point<gpui::Pixels> {
+    window.update(cx, |host, window, cx| {
+        let bounds = host.target.read(cx).owner.borrow().bounds.unwrap();
+        let position = bounds.origin + gpui::point(px(2.), px(2.));
+        window.dispatch_event(gpui::PlatformInput::MouseDown(gpui::MouseDownEvent {
+            position, button: gpui::MouseButton::Left, ..Default::default()
+        }), cx);
+        position
+    }).unwrap()
+}
+
+#[gpui::test]
+fn move_gesture_retains_window_contact_and_release_precedes_child_bubble(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    let start = move_down(window, cx);
+    assert!(lease.is_active());
+    let outside = gpui::point(px(500.), px(300.));
+    window.update(cx, |host, window, cx| {
+        let bounds = host.target.read(cx).owner.borrow().bounds.unwrap();
+        assert!(!bounds.contains(&outside));
+        window.dispatch_event(gpui::PlatformInput::MouseMove(gpui::MouseMoveEvent {
+            position: outside, pressed_button: Some(gpui::MouseButton::Left),
+            modifiers: gpui::Modifiers { shift: true, alt: true, ..Default::default() },
+        }), cx);
+        host.stop_up.set(true);
+        window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
+            position: outside, button: gpui::MouseButton::Left, ..Default::default()
+        }), cx);
+        assert!(host.stopped.get(), "downstream native child stopped the bubble release");
+    }).unwrap();
+    assert!(!lease.is_active());
+    assert_eq!(*log.events.borrow(), ["start", "move", "end"]);
+    let samples = log.samples.borrow();
+    assert_eq!((samples[0].position.x, samples[0].position.y), (2., 2.));
+    assert_eq!(samples[1].total_delta.x, f64::from(f32::from(outside.x - start.x)));
+    assert!(samples[1].modifiers.shift && samples[1].modifiers.alt);
+    assert_eq!(samples[2].delta.x, 0.);
+    assert!(log.cancels.borrow().is_empty());
+}
+
+#[gpui::test]
+fn move_gesture_cancellation_is_terminal_and_lease_can_restart(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    move_down(window, cx);
+    window.update(cx, |_, window, cx| lease.cancel(MoveGestureCancelReason::HostCancel, window, cx)).unwrap();
+    assert!(!lease.is_active());
+    move_down(window, cx);
+    window.update(cx, |host, _, cx| {
+        detach_native_view(&host.target.read(cx).owner);
+        host.target.update(cx, |_, cx| cx.notify());
+    }).unwrap();
+    assert!(!lease.is_active());
+    move_frames(window, cx);
+    move_down(window, cx);
+    assert!(lease.is_active());
+    lease.dispose();
+    lease.dispose();
+    assert!(!lease.is_active());
+    assert_eq!(*log.events.borrow(), ["start", "cancel", "start", "cancel", "start", "cancel"]);
+    assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::HostCancel, MoveGestureCancelReason::TargetDetached, MoveGestureCancelReason::Disposed]);
+}
+
+#[gpui::test]
+fn move_gesture_ignores_foreign_window_samples_and_cancels_window_loss(cx: &mut TestAppContext) {
+    let first_log = Rc::new(MoveLog::default());
+    let (first, lease) = move_window(cx, first_log.clone());
+    let (second, other_lease) = move_window(cx, Rc::new(MoveLog::default()));
+    first.update(cx, |_, window, _| window.activate_window()).unwrap();
+    move_frames(first, cx);
+    move_down(first, cx);
+    assert!(lease.is_active());
+    second.update(cx, |_, window, cx| {
+        window.dispatch_event(gpui::PlatformInput::MouseMove(gpui::MouseMoveEvent {
+            position: gpui::point(px(10.), px(10.)), pressed_button: None, ..Default::default()
+        }), cx);
+        window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent::default()), cx);
+    }).unwrap();
+    assert!(lease.is_active(), "foreign hover and up cannot consume contact ownership");
+    assert!(!other_lease.is_active());
+    first.update(cx, |_, window, cx| {
+        window.dispatch_event(gpui::PlatformInput::MouseExited(gpui::MouseExitEvent::default()), cx);
+    }).unwrap();
+    assert!(!lease.is_active());
+    assert_eq!(*first_log.cancels.borrow(), [MoveGestureCancelReason::LostOwnership]);
+}
+
+#[gpui::test]
+fn move_gesture_plain_target_observes_deactivation_and_releases_subscription(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (first, lease) = move_window(cx, log.clone());
+    first.update(cx, |host, _, cx| {
+        assert_eq!(host.target.read(cx).native_resource_counts()["nativeSubscriptions"], json!(1));
+    }).unwrap();
+    move_down(first, cx);
+    assert!(lease.is_active());
+    let (_other, _other_lease) = move_window(cx, Rc::new(MoveLog::default()));
+    cx.run_until_parked();
+    assert!(!lease.is_active());
+    assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::LostOwnership]);
+    lease.dispose();
+    first.update(cx, |host, _, cx| host.target.update(cx, |_, cx| cx.notify())).unwrap();
+    move_frames(first, cx);
+    first.update(cx, |host, _, cx| {
+        assert_eq!(host.target.read(cx).native_resource_counts()["nativeSubscriptions"], json!(0));
+    }).unwrap();
+}
+
+#[gpui::test]
+fn move_gesture_refuses_duplicate_ownership_and_replacement_cancels_old_session(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    assert!(attach_move_gesture(lease.target(), Box::new(MoveLog::default())).is_err());
+    window.update(cx, |_, window, cx| {
+        window.dispatch_event(gpui::PlatformInput::MouseDown(gpui::MouseDownEvent {
+            position: gpui::point(px(2.), px(2.)), button: gpui::MouseButton::Right, ..Default::default()
+        }), cx);
+    }).unwrap();
+    assert!(!lease.is_active());
+    move_down(window, cx);
+    assert!(lease.is_active());
+    window.update(cx, |_, window, cx| {
+        let replacement = plain::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let owner = replacement.read(cx).owner.clone();
+        lease.update(Rc::downgrade(&owner), Box::new(MoveLog::default()), window, cx).unwrap();
+        assert!(!lease.is_active());
+    }).unwrap();
+    assert_eq!(*log.events.borrow(), ["start", "cancel"]);
+    assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::TargetReplaced]);
+}
+
+#[gpui::test]
+fn move_gesture_should_start_refusal_and_owner_disposal_are_bounded(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    log.refuse.set(true);
+    let (window, lease) = move_window(cx, log.clone());
+    move_down(window, cx);
+    assert!(!lease.is_active());
+    assert!(log.events.borrow().is_empty());
+    log.refuse.set(false);
+    move_down(window, cx);
+    assert!(lease.is_active());
+    window.update(cx, |host, _, cx| Owner::dispose(&host.target.read(cx).owner)).unwrap();
+    assert!(!lease.is_active());
+    lease.dispose();
+    assert_eq!(*log.events.borrow(), ["start", "cancel"]);
+    assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::Disposed]);
+}
 
 struct Harness {
     transition: Entity<CompiledComponent>,
