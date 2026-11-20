@@ -211,6 +211,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-lucide/icons/file-text',
     ]),
   }),
+  // Exact passive CSS endpoint inputs; Bootstrap remains WIP / Experimental.
+  'apps/www/src/pages/styles/site-library-theme.css.ts': Object.freeze({
+    sourceSha256: '6e97d6eaca3627a636340869e7c350e6596364640ffee004f3a99c5cde94e2f8',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-bootstrap-2-3-2/theme',
+      '@proto.ui/prototypes-brutalist/theme',
+      '@proto.ui/prototypes-shadcn/text',
+    ]),
+  }),
   // Exact passive Homepage theme source; the homepage demo owner remains blocked.
   'apps/www/src/components/Homepage/homepage-ghost-theme.ts': Object.freeze({
     sourceSha256: '106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4',
