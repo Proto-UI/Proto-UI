@@ -501,6 +501,42 @@ async function installOpenCounter(page: Page) {
       });
       if (timeline.length > 160) timeline.shift();
     };
+    // Diagnose the caller as well as the resulting focus event. A public
+    // focusSelf request can be retained until a later host frame, so retain
+    // that frame's scheduling stack without changing the keyboard action.
+    let schedulingStack: string | null = null;
+    const nativeFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = function (callback) {
+      const scheduledAt = new Error('Search focus frame scheduled').stack ?? null;
+      return nativeFrame.call(this, function (time) {
+        const previous = schedulingStack;
+        schedulingStack = scheduledAt;
+        try {
+          return callback(time);
+        } finally {
+          schedulingStack = previous;
+        }
+      });
+    };
+    const nativeFocus = HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus = function (options) {
+      const owner = currentOwner();
+      const scoped = this.closest('[data-projection-owner]');
+      const relevant =
+        !!this.closest('site-search') ||
+        !!(owner && scoped?.getAttribute('data-projection-owner') === owner);
+      if (relevant)
+        record('focus-call', this, {
+          stack: new Error('Search native focus caller').stack,
+          schedulingStack,
+          options,
+        });
+      try {
+        return nativeFocus.call(this, options);
+      } finally {
+        if (relevant) record('focus-return', this);
+      }
+    };
     const scan = () => {
       const owner = currentOwner();
       if (!owner) return;
@@ -792,10 +828,12 @@ describe.sequential('Search family Button commands', () => {
               .toBe(false);
             await expectSearchOpenerFocus(page, trigger, id, 'backdrop');
             for (const key of ['Control+k', 'Meta+k']) {
+              stage(page, id, `shortcut-${key}-open`);
               await page.keyboard.press(key);
               await expect
                 .poll(async () => (await page.evaluate(readSearchPublicState)).open)
                 .toBe(true);
+              stage(page, id, `shortcut-${key}-close`);
               await page.keyboard.press(key);
               await expect
                 .poll(async () => (await page.evaluate(readSearchPublicState)).open)
@@ -803,10 +841,12 @@ describe.sequential('Search family Button commands', () => {
               await expectSearchOpenerFocus(page, trigger, id, `shortcut-${key}`);
             }
             for (const closeKey of ['Enter', 'Space']) {
+              stage(page, id, `close-${closeKey}-open`);
               await trigger.click();
               await expect
                 .poll(async () => (await page.evaluate(readSearchPublicState)).open)
                 .toBe(true);
+              stage(page, id, `close-${closeKey}-activation`);
               await close.press(closeKey);
               await expect
                 .poll(async () => (await page.evaluate(readSearchPublicState)).open)
