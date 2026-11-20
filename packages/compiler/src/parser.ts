@@ -3375,7 +3375,10 @@ function lowerObjectPatterns(nodes: readonly ts.Statement[]): readonly ts.Statem
     );
     const lowered = ranged(factory.createVariableStatement(statement.modifiers, list), statement);
     (lowered as { parent: ts.Node }).parent = statement.parent;
-    ts.setParentRecursive(lowered, true);
+    // TypeScript exports this helper at runtime but omits it from its public declarations.
+    (ts as typeof ts & {
+      setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T;
+    }).setParentRecursive(lowered, true);
     loweredPatterns.set(node, lowered);
     return lowered;
   });
