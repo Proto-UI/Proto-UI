@@ -1268,6 +1268,35 @@ class Frontend {
       );
       if (constant && value.kind === 'literal')
         return { ...value, type: { kind: 'literal', value: value.value } };
+      if (asserted && value.type === 'unknown') {
+        // Only contiguous erased assertions can retain this operand's proof.
+        // Every inner assertion has already passed its ordinary checks above.
+        let operand = node.expression,
+          original = value;
+        for (;;) {
+          if (ts.isParenthesizedExpression(operand)) {
+            operand = operand.expression;
+            continue;
+          }
+          if (!ts.isAsExpression(operand) && !ts.isTypeAssertionExpression(operand)) break;
+          const span = sourceSpan(operand);
+          if (
+            original.kind === 'narrow' &&
+            original.span.file === span.file &&
+            original.span.start === span.start &&
+            original.span.end === span.end
+          )
+            original = original.value;
+          operand = operand.expression;
+        }
+        if (
+          original !== value &&
+          typeof original.type === 'string' &&
+          !isDataValueType(original.type) &&
+          sameType(original.type, asserted)
+        )
+          return original;
+      }
       if (asserted && canNarrowValue(value.type, asserted) && !sameType(value.type, asserted))
         return { kind: 'narrow', value, type: asserted, span: sourceSpan(node) };
       if (
