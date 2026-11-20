@@ -1184,6 +1184,7 @@ ${usesInteraction ? `        if (!('spec' in handle)) throw new Error('[Vue sour
         ${n('PublicStates')}.set(handle, projection);
       }
       ${n('Declare')}(key, projection);
+${hasAuthoredHooks ? `      ${n('Authored')}.introduceObserved(handle);` : ''}
     }
     function ${n('ExposeMethod')}<Args extends unknown[], Result>(key: string, callback: (...args: Args) => Result, project?: (value: Result) => Result): void {
 ${hasAuthoredHooks ? `      ${n('Authored')}.method(key, callback);` : ''}

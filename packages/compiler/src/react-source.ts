@@ -1153,6 +1153,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         const external = externalStates.get(state);
         if (!external) throw new Error('[Expose] state must belong to this instance.');
         registerExpose(key, external);
+${hasAuthoredHooks ? `        ${p}Authored.introduceObserved(state);` : ''}
       },
       event(key: string, _spec: { payload?: 'void' | 'any' | 'json'; options?: Readonly<Record<string, unknown>> } = {}) {
         if (!Object.hasOwn(eventSchemas, key)) throw new Error('[Expose] missing checked event schema: ' + key);

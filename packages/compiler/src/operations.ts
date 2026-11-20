@@ -2367,17 +2367,26 @@ export function privilegedCaptureType(id: string): ValueType | undefined {
   return lookup(id.split(':')[0])?.result;
 }
 
+/** Stable declaration names on the privileged Focus result, independent of expose aliases. */
+export function privilegedStateMembers(operation: string): HookCaptureIR['states'] {
+  return operation === 'hook.asFocusable'
+    ? Object.entries(capabilityMembers.focus).map(([name, type]) => ({ name, type }))
+    : [];
+}
+
+function projectedCaptureStateType(type: ValueType): ValueType {
+  return typeof type === 'string' && type.startsWith('observed:')
+    ? type
+    : (`borrowed:${stateValue(type)}` as ValueType);
+}
+
 export function captureStateHandlesType(capture: HookCaptureIR | undefined): ValueType {
-  const fields = (capture?.states ?? []).map((state) => {
-    const primitive = stateValue(state.type);
-    return {
-      name: state.name,
-      type: (typeof state.type === 'string' && state.type.startsWith('observed:')
-        ? state.type : `borrowed:${primitive}`) as ValueType,
-      readonly: true,
-      optional: !state.definite,
-    };
-  });
+  const fields = (capture?.states ?? []).map((state) => ({
+    name: state.name,
+    type: projectedCaptureStateType(state.type),
+    readonly: true,
+    optional: !state.definite,
+  }));
   const record: ValueType = { kind: 'object', fields };
   return fields.some((field) => !field.optional) ? record : joinValueTypes([record, 'void']);
 }
@@ -2392,8 +2401,9 @@ export function operationResultType(
   switch (contract.resultFrom) {
     case 'capture-state': {
       const state = bindings.capture?.states.find((state) => state.name === bindings.captureKey);
-      const primitive = stateValue(state?.type);
-      return primitive ? joinValueTypes([`borrowed:${primitive}`, 'void']) : 'void';
+      return state && stateValue(state.type)
+        ? joinValueTypes([projectedCaptureStateType(state.type), 'void'])
+        : 'void';
     }
     case 'capture-method': {
       const method = bindings.capture?.methods.find(

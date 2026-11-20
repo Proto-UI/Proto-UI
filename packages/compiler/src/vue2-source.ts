@@ -1567,7 +1567,7 @@ ${
       /** @param {string} key @param {unknown} value */
       value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
       /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
-      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; },
+      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
       /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn @param {(value: Result) => Result} [project] */
       method: (key, fn, project) => { setupOnly(); ${hasAuthoredHooks ? 'PUIAuthored.method(key, fn);' : ''} exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
       /** @param {string} key @param {unknown} [spec] */
