@@ -684,6 +684,7 @@ describe.sequential('Search family Button commands', () => {
           const id = `${family}-${theme}-${width}`;
           stage(page, id, 'navigate');
           try {
+            await installSuccessfulEmptySearchData(page);
             const response = await page.goto(`${baseUrl}${searchRoute(family)}`, {
               waitUntil: 'networkidle',
             });
