@@ -9,11 +9,18 @@ import {
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
+// Port the deferred-valid control from signed reconciliation candidate 8e4da4df.
+const cases = [
+  { mode: 'ordinary', invalid: true, deferred: false },
+  { mode: 'deferred-invalid', invalid: true, deferred: true },
+  { mode: 'deferred-valid', invalid: false, deferred: true },
+];
+
 // D1 pilot boundary + D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 C/K:
 // the actual asDialogMask -> asTransition closure requires an I1 hidden recipe.
 describe('composed Shadow prototype admission', () => {
-  it.each([false, true])('rejects an old companion before mounted publication (deferred sink: %s)', async (deferred) => {
-    const Parent = AdaptToWebComponent(dialogRoot, { registerAs: `x-split-mask-parent-${deferred}` });
+  it.each(cases)('admits the Dialog Mask ($mode)', async ({ mode, invalid, deferred }) => {
+    const Parent = AdaptToWebComponent(dialogRoot, { registerAs: `x-split-mask-parent-${mode}` });
     const parent = new Parent();
     setElementProps(parent, { open: true });
     document.body.append(parent);
@@ -44,12 +51,12 @@ describe('composed Shadow prototype admission', () => {
       finishDisposal = resolve;
     });
     const Mask = AdaptToWebComponent(dialogMask, {
-      registerAs: `x-split-mask-admission-${deferred}`,
+      registerAs: `x-split-mask-admission-${mode}`,
       ...(deferred ? { createVisualSink: () => null } : {}),
       shadow: {
         mode: 'open',
         presentation: 'split',
-        styleArtifact: oldArtifact,
+        styleArtifact: invalid ? oldArtifact : artifact,
         colorSchemeSource: {
           get: () => 'light',
           subscribe(listener) {
@@ -90,22 +97,31 @@ describe('composed Shadow prototype admission', () => {
       } catch (error) {
         errors.push(error);
       }
-      expect(errors).toHaveLength(1);
-      expect(errors[0]).toBeInstanceOf(Error);
-      expect(String(errors[0])).toMatch(/hidden.*I1 recipe/);
-      await disposed;
       expect(lifecycleEvents).toContain('mount.commit.done');
-      expect(lifecycleEvents).not.toContain('mounted');
-      expect(lifecycleEvents).not.toContain('mount.mounted');
-      expect(readyPublications).toBe(0);
+      if (invalid) {
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).toBeInstanceOf(Error);
+        expect(String(errors[0])).toMatch(/hidden.*I1 recipe/);
+        expect(lifecycleEvents).not.toContain('mounted');
+        expect(lifecycleEvents).not.toContain('mount.mounted');
+        expect(readyPublications).toBe(0);
+      } else {
+        expect(errors).toHaveLength(0);
+        expect(lifecycleEvents).toContain('mounted');
+        expect(lifecycleEvents).toContain('mount.mounted');
+        expect(environmentListeners.size).toBe(1);
+        host.remove();
+      }
+      await disposed;
       expect(environmentListeners.size).toBe(0);
       expect(host.getExposes?.() ?? {}).toEqual({});
       expect(host.hasAttribute('data-pui-color-scheme')).toBe(false);
       expect(host.hasAttribute('data-pui-split-root-style')).toBe(false);
       expect(host.shadowRoot?.childNodes.length).toBe(0);
-      expect(errors).toHaveLength(1);
+      expect(errors).toHaveLength(invalid ? 1 : 0);
     } finally {
       unsubscribeReady?.();
+      host.remove();
       parent.remove();
       await Promise.resolve();
       window.removeEventListener('error', capture);
