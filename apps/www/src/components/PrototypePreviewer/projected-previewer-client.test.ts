@@ -595,11 +595,13 @@ describe('PrototypePreviewer fixed-family projection', () => {
     const root = createRoot();
     init(root);
     await vi.waitFor(() => expect(projection.materialize).toHaveBeenCalledTimes(1));
+    const { signal } = projection.materialize.mock.calls[0]![1].backgroundPreparation;
     const destruction = previewerApi(root).destroy();
     const lateCandidate = createCandidate('late-after-destroy');
     mapSet.mockClear();
 
     try {
+      expect(signal.aborted).toBe(true);
       finishMaterialization(lateCandidate);
       await destruction;
 

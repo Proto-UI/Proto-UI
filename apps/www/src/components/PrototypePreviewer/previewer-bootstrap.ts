@@ -1,10 +1,15 @@
 import type { RuntimeId } from './runtimes/ids';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
+import { previewerStartupTask } from './previewer-startup-task';
 
 type PreviewerRoot = HTMLElement & { __previewer__?: { destroy(): unknown } };
 type Client = typeof import('./previewer-client');
-type PendingPreview = { active: boolean; ready: boolean; observer?: IntersectionObserver };
+type PendingPreview = {
+  ready: boolean;
+  owner: AbortController;
+  observer?: IntersectionObserver;
+};
 const documents = new WeakMap<Document, () => void>();
 
 /** One page bootstrap owns pending lazy/import work. The previewer continues
@@ -22,7 +27,7 @@ export function initPreviewerBootstrap(
   const release = (root: PreviewerRoot) => {
     const entry = pending.get(root);
     if (!entry) return;
-    entry.active = false;
+    entry.owner.abort();
     entry.observer?.disconnect();
     pending.delete(root);
     delete root.dataset.mounting;
@@ -42,7 +47,8 @@ export function initPreviewerBootstrap(
   const mount = async (root: PreviewerRoot) => {
     const entry = pending.get(root);
     if (
-      !entry?.active ||
+      !entry ||
+      entry.owner.signal.aborted ||
       !entry.ready ||
       !root.isConnected ||
       root.dataset.inited === '1' ||
@@ -53,9 +59,10 @@ export function initPreviewerBootstrap(
     root.dataset.mounting = '1';
     try {
       const { initPreviewer } = await loadClient();
+      if (root.dataset.lazy !== 'true') await previewerStartupTask(root, entry.owner.signal);
       if (
         disposed ||
-        !entry.active ||
+        entry.owner.signal.aborted ||
         pending.get(root) !== entry ||
         !root.isConnected ||
         !panelVisible(root)
@@ -83,7 +90,7 @@ export function initPreviewerBootstrap(
         projectionToolbar: root.dataset.projectionToolbar !== 'false',
       });
     } catch (error) {
-      if (disposed || !entry.active || !root.isConnected) return;
+      if (disposed || entry.owner.signal.aborted || !root.isConnected) return;
       const fallback = root.querySelector<HTMLElement>('.proto-previewer__skeleton');
       if (fallback)
         fallback.textContent =
@@ -106,7 +113,7 @@ export function initPreviewerBootstrap(
     )) {
       if (pending.has(root) || root.dataset.inited === '1') continue;
       const entry: PendingPreview = {
-        active: true,
+        owner: new AbortController(),
         ready: root.dataset.lazy !== 'true' || typeof view.IntersectionObserver === 'undefined',
       };
       pending.set(root, entry);
