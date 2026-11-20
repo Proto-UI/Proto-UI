@@ -1577,9 +1577,20 @@ class Frontend {
       const elements = node.elements.flatMap((element) => {
         if (!ts.isSpreadElement(element)) return [this.expression(module, element, scope, phase)];
         const spread = this.expression(module, element.expression, scope, phase);
-        if (spread.kind !== 'array')
+        const array = this.staticArray(spread);
+        // Inline arrays are evaluated here once. Replaying a shared initializer
+        // is safe only for primitive literals: records, nested arrays and reads
+        // would otherwise recreate identities or repeat evaluation.
+        if (
+          !array ||
+          (spread.kind !== 'array' &&
+            !array.elements.every((item) => {
+              while (item.kind === 'narrow') item = item.value;
+              return item.kind === 'literal';
+            }))
+        )
           rejectNode(element, 'PUI1004', 'Array spread currently requires a checked static array.');
-        return spread.elements;
+        return array.elements;
       });
       const elementTypes = elements.map((element) => element.type);
       if (!elementTypes.every(isDataValueType)) {
@@ -1996,17 +2007,23 @@ class Frontend {
         : undefined;
   }
 
-  /** The literal strings of a static array, following module data references. */
-  private staticStrings(value: ExpressionIR): string[] | undefined {
+  /** Follow checked module identities, never source names or type-only views. */
+  private staticArray(value: ExpressionIR): Extract<ExpressionIR, { kind: 'array' }> | undefined {
     while (value.kind === 'narrow') value = value.value;
     if (value.kind === 'reference') {
       const bound = this.moduleBindings.find((binding) => binding.name === value.name)?.value;
       if (!bound) return undefined;
-      return this.staticStrings(bound);
+      return this.staticArray(bound);
     }
-    if (value.kind !== 'array') return undefined;
+    return value.kind === 'array' ? value : undefined;
+  }
+
+  /** The literal strings of a static array, following module data references. */
+  private staticStrings(value: ExpressionIR): string[] | undefined {
+    const array = this.staticArray(value);
+    if (!array) return undefined;
     const out: string[] = [];
-    for (const element of value.elements) {
+    for (const element of array.elements) {
       let item = element;
       while (item.kind === 'narrow') item = item.value;
       if (item.kind !== 'literal' || typeof item.value !== 'string') return undefined;
