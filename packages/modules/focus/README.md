@@ -8,6 +8,8 @@ The draft `M-FOCUS-0001` catalogs the instance-owned Focus Module and shared Foc
 
 Current Adapter evidence covers Web hosts. Each navigation takes one total order from the host of the entry that owns it, which is document order on the Web, and keeps registration order for the whole navigation when the host cannot order the set. The implementation still exports one shared center; this is not a claim of independent cross-document focus domains.
 
+A retained roving provider continues to own its logical members when its view detaches. Members that remain registered stay out of ancestor roving sets during detachment. Removing the logical provider retires that boundary.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.

@@ -1,7 +1,19 @@
 import { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
 import { headerButtonProps, headerIconButtonLayout } from './site-header-control-recipes';
 import { bindSiteSelectDismissal } from './site-select-dismissal';
+import { siteControlTags, type SiteLibraryFamily } from './site-library-family';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import bootstrapButton from '@proto.ui/prototypes-bootstrap-2-3-2/button';
+import {
+  selectContent as bootstrapSelectContent,
+  selectSurface as bootstrapSelectSurface,
+  selectViewport as bootstrapSelectViewport,
+  selectItemText as bootstrapSelectItemText,
+  selectItem as bootstrapSelectItem,
+  selectRoot as bootstrapSelectRoot,
+  selectTrigger as bootstrapSelectTrigger,
+  selectValue as bootstrapSelectValue,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/select';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
 import {
   selectContent as brutalistSelectContent,
@@ -28,6 +40,15 @@ import {
  * accidentally defines a second constructor for a preview element.
  */
 const siteProjections = [
+  ['wc-bootstrap-2-3-2-button', bootstrapButton],
+  ['wc-bootstrap-2-3-2-select-root', bootstrapSelectRoot],
+  ['wc-bootstrap-2-3-2-select-trigger', bootstrapSelectTrigger],
+  ['wc-bootstrap-2-3-2-select-value', bootstrapSelectValue],
+  ['wc-bootstrap-2-3-2-select-content', bootstrapSelectContent],
+  ['wc-bootstrap-2-3-2-select-item', bootstrapSelectItem],
+  ['wc-bootstrap-2-3-2-select-surface', bootstrapSelectSurface],
+  ['wc-bootstrap-2-3-2-select-viewport', bootstrapSelectViewport],
+  ['wc-bootstrap-2-3-2-select-item-text', bootstrapSelectItemText],
   ['wc-brutalist-button', brutalistButton],
   ['wc-brutalist-select-root', brutalistSelectRoot],
   ['wc-brutalist-select-trigger', brutalistSelectTrigger],
@@ -59,6 +80,18 @@ export type SiteSelectRoot = HTMLElement & {
 const siteSelectProps = new WeakMap<SiteSelectRoot, Record<string, unknown>>();
 const pendingSelectReplays = new WeakSet<SiteSelectRoot>();
 
+function siteControlFamily(element: HTMLElement): SiteLibraryFamily {
+  if (element.localName.startsWith('wc-bootstrap-2-3-2-')) return 'bootstrap-2-3-2';
+  return element.localName.startsWith('wc-brutalist-') ? 'brutalist' : 'shadcn';
+}
+
+export function supportsSiteSelectValue(root: SiteSelectRoot, value: string): boolean {
+  const { SelectItem } = siteControlTags(siteControlFamily(root));
+  return [...root.querySelectorAll<HTMLElement>(SelectItem)].some(
+    (item) => item.dataset.value === value && item.closest('[data-site-select-root]') === root
+  );
+}
+
 /**
  * Projected Button hosts receive the browser's native `MouseEvent` and then
  * the Button protocol's outward `CustomEvent("click")`. Site consumers own
@@ -69,7 +102,7 @@ export function isSiteButtonActivation(event: Event): boolean {
   return (
     !(
       currentTarget instanceof HTMLElement &&
-      currentTarget.matches('wc-shadcn-button, wc-brutalist-button')
+      currentTarget.matches('wc-shadcn-button, wc-brutalist-button, wc-bootstrap-2-3-2-button')
     ) || event instanceof CustomEvent
   );
 }
@@ -195,9 +228,8 @@ function headerSurfaceStyle(element: HTMLElement, kind: 'button' | 'root' | 'tri
 }
 
 function initializeButton(button: HTMLElement): void {
-  button.dataset.siteControlFamily = button.localName.includes('brutalist')
-    ? 'brutalist'
-    : 'shadcn';
+  const family = siteControlFamily(button);
+  button.dataset.siteControlFamily = family;
   if (button.dataset.siteShadcnInitialized === '1') return;
   const props: Record<string, unknown> = {};
   if (button.dataset.variant) {
@@ -210,13 +242,7 @@ function initializeButton(button: HTMLElement): void {
   }
   if (button.dataset.size) props.size = button.dataset.size;
   if (button.closest('[data-site-header]'))
-    Object.assign(
-      props,
-      headerButtonProps(
-        button.localName === 'wc-brutalist-button' ? 'brutalist' : 'shadcn',
-        button.dataset.size ?? 'icon'
-      )
-    );
+    Object.assign(props, headerButtonProps(family, button.dataset.size ?? 'icon'));
   if (button.dataset.disabled === 'true') props.disabled = true;
   const surfaceStyle = headerSurfaceStyle(button, 'button');
   if (surfaceStyle) props.surfaceStyle = surfaceStyle;
@@ -283,8 +309,10 @@ function retainFocusedNativeSelectFallback(root: SiteSelectRoot): void {
 }
 
 function initializeSelect(root: SiteSelectRoot): void {
+  if (!customElements.get(root.localName)) return;
   retainFocusedNativeSelectFallback(root);
-  const family = root.localName.includes('brutalist') ? 'brutalist' : 'shadcn';
+  const family = siteControlFamily(root);
+  const { SelectTrigger, SelectValue, SelectContent, SelectItem } = siteControlTags(family);
   root.dataset.siteControlFamily = family;
   const initialized = root.dataset.siteShadcnInitialized === '1';
   bindSiteSelectDismissal(root, (reason) => {
@@ -300,19 +328,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     if (root.hasAttribute('data-adapter-select-root')) {
       try {
         const saved = root.ownerDocument.defaultView?.localStorage.getItem(PREFERRED_ADAPTER_KEY);
-        if (
-          saved &&
-          [
-            ...root.querySelectorAll(
-              'wc-shadcn-select-item[data-value], wc-brutalist-select-item[data-value]'
-            ),
-          ].some(
-            (item) =>
-              item.closest('[data-site-select-root]') === root &&
-              item.getAttribute('data-value') === saved
-          )
-        )
-          value = saved;
+        if (saved && supportsSiteSelectValue(root, saved)) value = saved;
       } catch {
         /* A blocked preference store retains the declared default. */
       }
@@ -330,9 +346,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   }
 
-  const trigger = root.querySelector<HTMLElement>(
-    'wc-shadcn-select-trigger, wc-brutalist-select-trigger'
-  );
+  const trigger = root.querySelector<HTMLElement>(SelectTrigger);
   if (trigger) {
     applyProps(trigger, {
       size: trigger.dataset.size ?? 'default',
@@ -354,9 +368,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   }
 
-  const valuePart = root.querySelector<HTMLElement>(
-    'wc-shadcn-select-value, wc-brutalist-select-value'
-  );
+  const valuePart = root.querySelector<HTMLElement>(SelectValue);
   if (valuePart) {
     applyProps(valuePart, {
       placeholder: valuePart.dataset.placeholder ?? '',
@@ -366,9 +378,7 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   }
 
-  const content = root.querySelector<HTMLElement>(
-    'wc-shadcn-select-content, wc-brutalist-select-content'
-  );
+  const content = root.querySelector<HTMLElement>(SelectContent);
   if (content) {
     // Portaled content needs its own family theme rather than root inheritance.
     content.dataset.siteControlFamily = family;
@@ -379,15 +389,13 @@ function initializeSelect(root: SiteSelectRoot): void {
     });
   }
 
-  root
-    .querySelectorAll<HTMLElement>('wc-shadcn-select-item, wc-brutalist-select-item')
-    .forEach((item) => {
-      applyProps(item, {
-        value: item.dataset.value ?? '',
-        textValue: item.dataset.textValue ?? item.textContent?.trim() ?? '',
-        disabled: item.dataset.disabled === 'true',
-      });
+  root.querySelectorAll<HTMLElement>(SelectItem).forEach((item) => {
+    applyProps(item, {
+      value: item.dataset.value ?? '',
+      textValue: item.dataset.textValue ?? item.textContent?.trim() ?? '',
+      disabled: item.dataset.disabled === 'true',
     });
+  });
 
   closeSelectAfterValueChange(root);
   root.dataset.siteShadcnInitialized = '1';

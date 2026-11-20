@@ -21,7 +21,7 @@ implementations:
     consumesCases: [T-SHADCN-DROPDOWN-MENU-LABEL-0001-CASE-INSET]
     exercises: [P-SHADCN-DROPDOWN-MENU-LABEL]
     notes:
-      - Planned exact-head Actions-only journey for the real public demo across WC, React, Vue and Vue 2 in light/dark, LTR/RTL and true-false-true inset changes. Definition and type checks do not establish executed browser paint, native GPUI/Qt, contrast or upstream pixel equivalence.
+      - Planned exact-head Actions-only journey for the public Rhea demo and a separate fixed New York consumer of the same authored recipe across WC, React, Vue and Vue 2 in light/dark, LTR/RTL and true-false-true inset changes. Definition and type checks do not establish executed browser paint, native GPUI/Qt, contrast or upstream pixel equivalence.
   - id: shadcn-dropdown-label-inset
     kind: module-test
     status: passing

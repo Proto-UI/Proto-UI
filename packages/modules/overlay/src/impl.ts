@@ -751,8 +751,10 @@ export class OverlayModuleImpl extends ModuleBase {
 
   private replaceRegistration(next: Partial<OverlayRegistration>) {
     const prev = this.registration;
-    if (next.content !== undefined && prev.content !== null && next.content !== prev.content)
-      this.reconciliationRequests.clear();
+    if (next.content !== undefined && prev.content !== null && next.content !== prev.content) {
+      for (const request of this.reconciliationRequests)
+        if (request.target !== null) this.reconciliationRequests.delete(request);
+    }
     this.registration = Object.freeze({
       trigger: typeof next.trigger === 'undefined' ? this.registration.trigger : next.trigger,
       anchor: typeof next.anchor === 'undefined' ? this.registration.anchor : next.anchor,

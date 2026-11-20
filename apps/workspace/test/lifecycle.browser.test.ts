@@ -194,6 +194,7 @@ describe.sequential('Workspace lifecycle review projection', () => {
       page.on('pageerror', (error) => errors.push(error.message));
       try {
         await page.goto(`${baseUrl}/#/entities/${testId}`);
+        await page.getByRole('combobox', { name: '目标版本', exact: true }).selectOption(version);
         const panel = page.locator('.lifecycle-panel');
         await panel.locator(`[data-lifecycle-entity="${testId}"]`).waitFor();
         expect(await panel.innerText()).toContain('未评审草案');
@@ -254,6 +255,7 @@ describe.sequential('Workspace lifecycle review projection', () => {
     const page = await context.newPage();
     try {
       await page.goto(`${baseUrl}/#/entities/${testId}`);
+      await page.getByRole('combobox', { name: '目标版本', exact: true }).selectOption(version);
       const panel = page.locator('.lifecycle-panel');
       await panel.waitFor();
       expect(await panel.innerText()).toContain('生命周期报告不可用');
@@ -443,6 +445,7 @@ describe.sequential('Workspace lifecycle review projection', () => {
       const page = await context.newPage();
       try {
         await page.goto(`${baseUrl}/#/entities/${testId}`);
+        await page.getByRole('combobox', { name: '目标版本', exact: true }).selectOption(version);
         const panel = page.locator('.lifecycle-panel');
         await panel.locator(`[data-lifecycle-entity="${testId}"]`).waitFor();
         expect(await panel.locator('dd').first().innerText()).toMatch(/^0 \/ \d+$/);
