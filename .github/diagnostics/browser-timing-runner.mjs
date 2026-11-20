@@ -10,17 +10,20 @@ import { spawn } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { corepackInvocation, createRuntimeTestPlan, READY_ROUTES } from './runtime-test-plan.mjs';
-import { runtimeSelection, assertVitestReport, writeJson, ciContext } from './browser-timing-evidence.mjs';
-import { waitForServerReadiness } from './server-readiness.mjs';
-import {
+import { pathToFileURL } from 'node:url';
+import { runtimeRoot as root, runtimeSelection, assertVitestReport, writeJson, ciContext } from './browser-timing-evidence.mjs';
+
+// Keep private orchestration in the carrier. Load unchanged product helpers from
+// the explicitly bound checkout so fixture membership guards see only source.
+const sourceHelper = (name) => pathToFileURL(path.join(root, 'scripts/test', name)).href;
+const { corepackInvocation, READY_ROUTES } = await import(sourceHelper('runtime-test-plan.mjs'));
+const { waitForServerReadiness } = await import(sourceHelper('server-readiness.mjs'));
+const {
   observeReadinessFailures,
   observeRuntimeServer,
   runtimeServerSnapshot,
-} from './runtime-server-diagnostics.mjs';
+} = await import(sourceHelper('runtime-server-diagnostics.mjs'));
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Astro dev compiles a route on first request, so a suite probing a cold route
 // can exceed its own hook timeout and fall back to spawning its own server.
 // Warm every route the suites wait on.

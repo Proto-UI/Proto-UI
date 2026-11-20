@@ -39,7 +39,7 @@ jobs:
           - group: 13
             shard: 13/13
     env:
-      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CANDIDATE_SHA: c471a65a8013130a944edd739eec20739f0801dd
       PROTO_UI_RUNTIME_PHASE: browser
       PROTO_UI_RUNTIME_SHARD: ${{ matrix.shard }}
       PROTO_UI_RUNTIME_SLOT: ${{ format('browser-{0}-of-13', matrix.group) }}
@@ -54,10 +54,10 @@ jobs:
         with:
           ref: c471a65a8013130a944edd739eec20739f0801dd
           path: source
-      - name: Bind exact source and stage private diagnostic helpers
+      - name: Bind exact source without adding diagnostic files
         run: |
-          test "$(git rev-parse HEAD)" = "c471a65a8013130a944edd739eec20739f0801dd"
-          cp ../carrier/.github/diagnostics/browser-timing-* scripts/test/
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -89,6 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
+          export PROTO_UI_TIMING_SOURCE_ROOT="$PWD"
           export PROTO_UI_TYPOGRAPHY_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/typography"
           export PROTO_UI_MATERIAL_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/material"
           mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
@@ -96,7 +97,7 @@ jobs:
           # Each matrix job owns an independent checkout, server and Astro cache.
           # Keep room within the job deadline for teardown and artifact retention.
           timeout --signal=TERM --kill-after=10s 900s \
-            node scripts/test/browser-timing-runner.mjs 2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
+            node ../carrier/.github/diagnostics/browser-timing-runner.mjs 2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
       - name: Record terminal producer outcome
         if: always()
         env:
