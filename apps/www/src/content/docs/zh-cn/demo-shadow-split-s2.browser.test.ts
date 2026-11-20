@@ -1,3 +1,4 @@
+/// <reference lib="es2024.promise" />
 // @vitest-environment node
 import type { Browser, Page } from 'playwright-core';
 import { appendFileSync, mkdirSync } from 'node:fs';
@@ -10,9 +11,16 @@ const profiles = ['light', 'split', 'mixed'];
 let browser: Browser;
 let baseUrl: string;
 const diagnosticDir = process.env.S2_DIAGNOSTIC_DIR;
+const previewStartup = process.env.S2_PREVIEW_STARTUP;
+const previewClientPath = '/src/components/PrototypePreviewer/previewer-client.ts';
+const previewWatchdogMs = 60_000;
 let diagnosticVisit = 0;
 const receipts = new WeakMap<Page, (phase: string, detail?: unknown) => void>();
 beforeAll(async () => {
+  if (previewStartup !== undefined && previewStartup !== 'control' && previewStartup !== 'treatment')
+    throw new Error('S2_PREVIEW_STARTUP must be control or treatment');
+  if (previewStartup && !diagnosticDir)
+    throw new Error('S2_PREVIEW_STARTUP requires S2_DIAGNOSTIC_DIR');
   if (diagnosticDir && (!process.env.DEBUG?.includes('pw:protocol') ||
     !process.env.DEBUG_FILE || !isAbsolute(process.env.DEBUG_FILE)))
     throw new Error('S2 diagnostics require DEBUG=pw:protocol,pw:api and an absolute DEBUG_FILE set before starting Vitest');
@@ -142,7 +150,11 @@ async function read(page: Page) {
     })
   );
 }
-async function visit(run: (page: Page) => Promise<void>, locale = 'zh-cn') {
+async function visit(
+  run: (page: Page, checkedAssertionsComplete: () => Promise<void>) => Promise<void>,
+  locale = 'zh-cn',
+  previewExperiment = false
+) {
   const context = await browser.newContext({
     colorScheme: 'light',
     viewport: { width: 1440, height: 1000 },
@@ -150,6 +162,11 @@ async function visit(run: (page: Page) => Promise<void>, locale = 'zh-cn') {
   const page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  let releaseGate: ((reason: string) => void) | undefined;
+  let watchdog: NodeJS.Timeout | undefined;
+  const mode = previewExperiment ? previewStartup : undefined;
+  const gateFailure = mode ? Promise.withResolvers<never>() : undefined;
+  let finishChecked: (() => Promise<void>) | undefined;
   try {
   if (diagnosticDir) {
     mkdirSync(diagnosticDir, { recursive: true });
@@ -208,23 +225,82 @@ async function visit(run: (page: Page) => Promise<void>, locale = 'zh-cn') {
         time: performance.now(), url: location.href }));
     });
   }
-    await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/`);
-    await page.waitForSelector(`${S2}[data-ready="true"]`);
-    await page.locator(S2).scrollIntoViewIfNeeded();
-    await settle(page);
-    await run(page);
-    expect(errors).toEqual([]);
+    if (mode && gateFailure) {
+      const record = receipts.get(page)!;
+      const origin = new URL(baseUrl).origin;
+      let released = false;
+      let intercepted = 0;
+      const gate = Promise.withResolvers<void>();
+      const firstContinuation = Promise.withResolvers<void>();
+      releaseGate = (reason) => {
+        if (released) return;
+        released = true;
+        clearTimeout(watchdog);
+        // Resolve even if writing the receipt fails; cleanup must never retain a route.
+        try {
+          if (mode === 'treatment') record('preview:release', { mode, reason, intercepted });
+        }
+        finally { gate.resolve(); }
+      };
+      finishChecked = async () => {
+        if (intercepted === 0) throw new Error('S2 preview client was not intercepted before checked assertions');
+        if (mode === 'treatment') releaseGate?.('checked-assertions-complete');
+        await firstContinuation.promise;
+      };
+      await page.route((url) => url.origin === origin && url.pathname === previewClientPath, async (route) => {
+        const requestId = ++intercepted;
+        try {
+          record('preview:intercept', { mode, requestId, url: route.request().url(), released });
+          if (mode === 'treatment' && !released) {
+            // The browser and dev server run on real clocks outside Vitest.
+            watchdog ??= setTimeout(() => {
+              gateFailure.reject(new Error(`S2 preview startup watchdog expired after ${previewWatchdogMs}ms`));
+              try { releaseGate?.('watchdog-expired'); } catch { /* Gate already resolved. */ }
+            }, previewWatchdogMs);
+            await gate.promise;
+          }
+          record('preview:continue:before', { mode, requestId });
+          await route.continue();
+          record('preview:continue:after', { mode, requestId });
+          if (requestId === 1) firstContinuation.resolve();
+        } catch (error) {
+          try { record('preview:continue:failed', { requestId, error: String(error) }); }
+          finally { gateFailure.reject(error); }
+        }
+      });
+      record('preview:route-installed', { mode, origin, pathname: previewClientPath, watchdogMs: previewWatchdogMs });
+    }
+    const scenario = async () => {
+      await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/`);
+      await page.waitForSelector(`${S2}[data-ready="true"]`);
+      receipts.get(page)?.('s2:ready');
+      await page.locator(S2).scrollIntoViewIfNeeded();
+      await settle(page);
+      await run(page, async () => {
+        receipts.get(page)?.('checked:assertions-complete');
+        await finishChecked?.();
+      });
+      expect(errors).toEqual([]);
+    };
+    if (gateFailure) await Promise.race([scenario(), gateFailure.promise]);
+    else await scenario();
   } catch (error) {
     receipts.get(page)?.('visit:failed', { error: String(error), errors });
     throw error;
   } finally {
-    receipts.get(page)?.('context-close:before', { errors });
     try {
-      await context.close();
-      receipts.get(page)?.('context-close:after');
-    } catch (error) {
-      receipts.get(page)?.('context-close:failed', String(error));
-      throw error;
+      releaseGate?.('cleanup');
+      receipts.get(page)?.('context-close:before', { errors });
+    } finally {
+      // Let resumed handlers issue route.continue before closing their context.
+      await Promise.resolve();
+      try {
+        await context.close();
+        receipts.get(page)?.('context-close:after');
+      } catch (error) {
+        receipts.get(page)?.('context-close:failed', String(error));
+        throw error;
+      }
     }
   }
 }
@@ -376,7 +452,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
   }, 90_000);
 
   it('retains mixed context, controlled state and slot ownership across move/reconnect without duplicate notifications', async () => {
-    await visit(async (page) => {
+    await visit(async (page, checkedAssertionsComplete) => {
       for (const name of ['checked', 'slot', 'tone', 'scheme', 'disabled'])
         await action(page, name);
       await page.mouse.move(0, 0);
@@ -409,6 +485,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
         expect(row.slotOwned).toBe(true);
         expect(row.badge.background).toBe('rgb(255, 147, 127)');
       }
+      await checkedAssertionsComplete();
       for (const profile of profiles)
         for (const kind of ['button', 'switch', 'checkbox'])
           await component(page, profile, kind).click();
@@ -423,6 +500,6 @@ describe.sequential('S2 public Shadow split settings paths', () => {
       await page.setViewportSize({ width: 320, height: 900 });
       await settle(page);
       expect(await page.locator(S2).evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(false);
-    });
+    }, 'zh-cn', true);
   }, 90_000);
 });

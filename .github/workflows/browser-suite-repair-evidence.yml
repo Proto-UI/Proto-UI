@@ -1,4 +1,4 @@
-name: Shadow Split S2 instrumented click
+name: Shadow Split S2 preview startup comparison
 on:
   workflow_dispatch:
 permissions:
@@ -7,6 +7,11 @@ jobs:
   s2-click:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        mode: [control, treatment]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,6 +25,7 @@ jobs:
       - name: Exercise S2 through the native checked click
         env:
           S2_DIAGNOSTIC_DIR: ${{ runner.temp }}/s2-click-evidence
+          S2_PREVIEW_STARTUP: ${{ matrix.mode }}
           DEBUG: pw:protocol,pw:api
           DEBUG_FILE: ${{ runner.temp }}/s2-click-evidence/playwright-protocol.log
         run: |
@@ -32,6 +38,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: shadow-s2-instrumented-${{ github.run_id }}-${{ github.run_attempt }}
+          name: shadow-s2-${{ matrix.mode }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/s2-click-evidence
           if-no-files-found: error
