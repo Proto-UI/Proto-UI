@@ -1,152 +1,41 @@
-name: Draft caller relocation native evidence
+name: PR1595 macOS Clippy
 on:
   workflow_dispatch:
-  workflow_call:
 permissions:
   contents: read
 jobs:
-  owned-caller-relocation-native:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+  rust-macos:
+    if: ${{ github.event_name != 'pull_request' }}
+    # Covers the GPUI translation layer on the platform the first fixture pins.
+    runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: b304eb6f61a3bdd71eadb3f5cdfe979528791322
           persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Install locked existing dependencies
-        run: |
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-      - name: Check bounded caller relocation
-        run: node node_modules/vitest/vitest.mjs run packages/adapters/web-component/test/owned-slot-relocation.test.ts packages/adapters/web-component/test/portal-owned-relocation.test.ts packages/adapters/web-component/test/commit.failure-atomicity.test.ts packages/adapters/web-component/test/commit.session-failure-atomicity.test.ts
-      - name: Capture exact-head native keyboard, pointer and accessibility evidence
-        env:
-          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: node --import tsx scripts/feedback/owned-caller-relocation-evidence.mjs /tmp/pui-owned-caller-relocation-evidence
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: owned-caller-relocation-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/pui-owned-caller-relocation-evidence/
-          if-no-files-found: warn
-          retention-days: 30
-  view-operation-contract:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Record exact source and install existing locked dependencies
+
+      - name: Install the pinned Rust toolchain
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/view-operation-contract"
-          git rev-parse HEAD > "$RUNNER_TEMP/view-operation-contract/source-sha.txt"
-          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/view-operation-contract/source-tree.txt"
-          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/view-operation-contract/lock-sha256.txt"
-          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/view-operation-contract/tracked-status.txt"
-          test ! -s "$RUNNER_TEMP/view-operation-contract/tracked-status.txt"
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          node --version > "$RUNNER_TEMP/view-operation-contract/node-environment.txt"
-          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/view-operation-contract/post-install-tracked-status.txt"
-          test ! -s "$RUNNER_TEMP/view-operation-contract/post-install-tracked-status.txt"
-      - name: Run view-operation and existing lifecycle regression contracts
-        timeout-minutes: 10
+          test "$(git rev-parse HEAD)" = b304eb6f61a3bdd71eadb3f5cdfe979528791322
+          rustup show active-toolchain
+          rustup component add rustfmt clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: cargo-macos-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: cargo-macos-
+
+      - name: Lint
+        working-directory: native/gpui
         run: |
           set -euo pipefail
-          # Supplementary unit evidence, not native Menubar conformance. Preserve
-          # the complete general preflight, original relocation job and failures.
-          files=(
-            packages/runtime/test/contract/lifecycle.view-operation.contract.test.ts
-            packages/adapters/base/test/view-operation-owner.test.ts
-            packages/adapters/web-component/test/view-operation-receipt.test.ts
-            packages/adapters/react/test/view-operation-withdrawal.test.ts
-            packages/adapters/vue/test/view-operation-withdrawal.test.ts
-            packages/adapters/vue2/test/view-operation-withdrawal.test.ts
-            packages/runtime/test/contract/lifecycle.view-intent.v1.contract.test.ts
-            packages/runtime/test/contract/lifecycle.session.transitions.v1.contract.test.ts
-            packages/adapters/base/test/view-epoch-owner.test.ts
-            packages/adapters/web-component/test/lifecycle-view-intent.test.ts
-            packages/adapters/web-component/test/owned-slot-relocation.test.ts
-            packages/adapters/web-component/test/portal-owned-relocation.test.ts
-            packages/adapters/react/test/lifecycle-strict-replay.test.ts
-            packages/adapters/react/test/lifecycle-repeatable-mount.test.ts
-            packages/adapters/vue/test/lifecycle-keep-alive.test.ts
-            packages/adapters/vue2/test/lifecycle.test.ts
-          )
-          for file in "${files[@]}"; do test -f "$file"; done
-          printf '%s\n' "${files[@]}" > "$RUNNER_TEMP/view-operation-contract/required-files.txt"
-          node node_modules/vitest/vitest.mjs run "${files[@]}" \
-            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
-            --outputFile="$RUNNER_TEMP/view-operation-contract/vitest.json" \
-            2>&1 | tee "$RUNNER_TEMP/view-operation-contract/tests.log"
-          node --input-type=module - "$RUNNER_TEMP/view-operation-contract" <<'JS'
-          import fs from 'node:fs';
-          import assert from 'node:assert/strict';
-          const dir = process.argv[2];
-          const report = JSON.parse(fs.readFileSync(`${dir}/vitest.json`, 'utf8'));
-          const required = fs.readFileSync(`${dir}/required-files.txt`, 'utf8').trim().split('\n');
-          assert.equal(report.numFailedTests, 0);
-          for (const path of required) {
-            const result = report.testResults.find((entry) => entry.name.endsWith('/' + path));
-            assert.ok(result, `Missing required suite: ${path}`);
-            assert.ok(result.assertionResults.length > 0, `Empty required suite: ${path}`);
-            assert.ok(result.assertionResults.every((entry) => entry.status === 'passed'), `Incomplete suite: ${path}`);
-          }
-          JS
-      - name: Record post-test source status
-        if: always()
-        run: |
-          mkdir -p "$RUNNER_TEMP/view-operation-contract"
-          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/view-operation-contract/post-test-tracked-status.txt"
-          test ! -s "$RUNNER_TEMP/view-operation-contract/post-test-tracked-status.txt"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: view-operation-contract-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/view-operation-contract/
-          if-no-files-found: error
-          retention-days: 30
-  view-operation-native:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Install original locked dependencies
-        run: |
-          set -euo pipefail
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-      - name: Observe eight native source-operation and custom-element reaction cases
-        timeout-minutes: 10
-        env:
-          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/view-operation-native"
-          node --version > "$RUNNER_TEMP/view-operation-native/node-version.txt"
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --version > "$RUNNER_TEMP/view-operation-native/chrome-version.txt"
-          node --import tsx scripts/feedback/view-operation-evidence.mjs "$RUNNER_TEMP/view-operation-native" \
-            2>&1 | tee "$RUNNER_TEMP/view-operation-native/native.log"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: view-operation-native-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/view-operation-native/
-          if-no-files-found: error
-          retention-days: 30
+          cargo clippy --workspace --all-targets -- -D warnings
+          # The real-window test is behind a feature; lint it too.
+          cargo clippy -p proto-ui-gpui --features macos-accessibility-test --all-targets -- -D warnings
