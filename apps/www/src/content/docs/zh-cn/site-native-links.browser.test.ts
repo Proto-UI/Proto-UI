@@ -1535,6 +1535,106 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
     }
   }, 60_000);
 
+  it.each([
+    ['Bootstrap', '/zh-cn/ui-libraries/bootstrap-2-3-2/button/', 390, 100],
+    ['Shadcn', '/zh-cn/ui-libraries/shadcn/button/', 390, 100],
+    ['Brutalist', '/zh-cn/ui-libraries/brutalist/components/button/', 390, 100],
+    ['Bootstrap desktop', '/en/ui-libraries/bootstrap-2-3-2/button/', 1280, 100],
+    ['Shadcn enlarged RTL', '/en/ui-libraries/shadcn/button/', 320, 200],
+    ['Brutalist enlarged RTL', '/zh-cn/ui-libraries/brutalist/components/button/', 320, 200],
+    ['Bootstrap enlarged RTL', '/en/ui-libraries/bootstrap-2-3-2/button/', 320, 200],
+  ] as const)(
+    'keeps %s pagination height stable through native link enhancement',
+    async (_family, route, width, textSize) => {
+      const context = await browser.newContext({ viewport: { width, height: 844 } });
+      try {
+        const page = await context.newPage();
+        await page.addInitScript((size) => {
+          document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+              const footer = document.querySelector<HTMLElement>('footer .pagination-links')!;
+              if (size !== 100) {
+                footer.dir = 'rtl';
+                document.documentElement.style.fontSize = `${size}%`;
+              }
+              const links = [...footer.querySelectorAll('a')];
+              const hrefs = links.map((link) => link.getAttribute('href'));
+              const samples: Array<{ height: number; enhanced: number; ownsLinks: boolean }> = [];
+              const capture = () => {
+                const current = [...footer.querySelectorAll('a')];
+                samples.push({
+                  height: footer.getBoundingClientRect().height,
+                  enhanced: current.filter((link) => link.hasAttribute('data-site-link-enhanced'))
+                    .length,
+                  ownsLinks: current.every(
+                    (link, index) =>
+                      link === links[index] && link.getAttribute('href') === hrefs[index]
+                  ),
+                });
+              };
+              capture();
+              new ResizeObserver(capture).observe(footer);
+              new MutationObserver(capture).observe(footer, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['data-site-link-enhanced'],
+              });
+              Object.assign(window, { __paginationLayout: samples });
+            },
+            { once: true }
+          );
+        }, textSize);
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded' });
+        expect(await page.locator('footer .pagination-links a').count()).toBe(2);
+        await page
+          .locator('footer .pagination-links a:not([data-site-link-enhanced])')
+          .first()
+          .waitFor({ state: 'detached' });
+        const samples = await page.evaluate(async () => {
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+          return (
+            window as unknown as {
+              __paginationLayout: Array<{ height: number; enhanced: number; ownsLinks: boolean }>;
+            }
+          ).__paginationLayout;
+        });
+        expect(samples[0]?.enhanced).toBe(0);
+        expect(samples.some(({ enhanced }) => enhanced === 2)).toBe(true);
+        expect(samples.every(({ ownsLinks }) => ownsLinks)).toBe(true);
+        expect(
+          Math.max(...samples.map(({ height }) => height)) -
+            Math.min(...samples.map(({ height }) => height))
+        ).toBeLessThanOrEqual(1);
+      } finally {
+        await context.close();
+      }
+    },
+    60_000
+  );
+
+  it('keeps native pagination focus visible with scripts disabled and forced colors', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 320, height: 844 },
+      javaScriptEnabled: false,
+      forcedColors: 'active',
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/button/`);
+      const next = page.locator('footer .pagination-links a[rel="next"]');
+      await next.focus();
+      expect(await next.evaluate((link) => link.matches(':focus-visible'))).toBe(true);
+      expect(await next.evaluate((link) => getComputedStyle(link).outlineStyle)).toBe('solid');
+      const destination = new URL((await next.getAttribute('href'))!, page.url()).href;
+      await Promise.all([page.waitForURL(destination), page.keyboard.press('Enter')]);
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
+
   it('preserves real pagination selection endpoints and arrow layout through family replacement', async () => {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();

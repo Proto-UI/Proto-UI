@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { Window } from 'happy-dom';
 import { describe, expect, it } from 'vitest';
 import {
   assertDemoSpec,
@@ -84,6 +85,12 @@ import demo65 from '../src/content/docs/demo-shadcn-live-region.demo';
 import demo66 from '../src/content/docs/demo-shadcn-table.demo';
 import demo67 from '../src/content/docs/demo-shadcn-transition.demo';
 import { codeMap as codeMap0 } from '../src/content/docs/demo_components/button/buttonCode';
+import { getButtonExampleFiles } from '../src/content/docs/demo_components/button/button-usage';
+import inputShellDemo from '../src/content/docs/demo-shadcn-input-shell.demo';
+import navigationPopoverDemo from '../src/content/docs/demo-shadcn-popover-navigation.demo';
+import novaTabsDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-nova.demo';
+import rheaTabsDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-rhea.demo';
+import newYorkTabsDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-new-york-v4.demo';
 import { codeMap as codeMap1 } from '../src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode';
 import { codeMap as codeMap2 } from '../src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode';
 import { codeMap as codeMap3 } from '../src/content/docs/demo_components/tabs/tabsCode';
@@ -159,10 +166,82 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-transition', demo67],
 ];
 
+const profileExamples = [
+  {
+    id: 'demo-shadcn-input-shell',
+    page: 'input-shell.mdx',
+    demo: inputShellDemo,
+    profiles: [],
+  },
+  {
+    id: 'demo-shadcn-popover-navigation',
+    page: 'popover.mdx',
+    demo: navigationPopoverDemo,
+    profiles: [['shadcn-popover-root', 'rhea']],
+  },
+  {
+    id: 'demo-shadcn-tabs-preset-nova',
+    page: 'tabs.mdx',
+    demo: novaTabsDemo,
+    profiles: [['shadcn-style-scope', 'nova']],
+  },
+  {
+    id: 'demo-shadcn-tabs-preset-rhea',
+    page: 'tabs.mdx',
+    demo: rheaTabsDemo,
+    profiles: [['shadcn-style-scope', 'rhea']],
+  },
+  {
+    id: 'demo-shadcn-tabs-preset-new-york-v4',
+    page: 'tabs.mdx',
+    demo: newYorkTabsDemo,
+    profiles: [['shadcn-style-scope', 'new-york-v4']],
+  },
+] as const;
+
 function visit(node: DemoChild, action: (node: Exclude<DemoChild, string>) => void): void {
   if (typeof node === 'string') return;
   action(node);
   if (node.kind !== 'text') for (const child of node.children ?? []) visit(child, action);
+}
+
+function expectWcButtonProfile(id: string) {
+  const html = getButtonExampleFiles(id).wc?.find((file) => file.name === 'index.html');
+  if (!html) throw new Error(`Missing displayed WC Button example for ${id}`);
+
+  const window = new Window({ settings: { disableJavaScriptEvaluation: true } });
+  try {
+    window.document.body.innerHTML = html.code;
+    const buttons = [...window.document.querySelectorAll('proto-ui-shadcn-button')];
+    expect(buttons.length, id).toBeGreaterThan(0);
+    const scripts = window.document.querySelectorAll('script[type="module"]:not([src])');
+    expect(scripts, id).toHaveLength(1);
+    const code = scripts[0]!.textContent.trimStart();
+    const adapterImport = "import { setElementProps } from '@proto.ui/adapter-web-component';";
+    expect(code.startsWith(adapterImport), id).toBe(true);
+    const calls: [unknown, { styleProfile?: unknown }][] = [];
+    // Execute the authored caller at the setter boundary in the isolated document.
+    new Function(
+      'document',
+      'HTMLElement',
+      'CustomEvent',
+      'setElementProps',
+      code.slice(adapterImport.length)
+    )(
+      window.document,
+      window.HTMLElement,
+      window.CustomEvent,
+      (button: unknown, props: { styleProfile?: unknown }) => calls.push([button, props])
+    );
+    expect(calls, id).toHaveLength(buttons.length);
+    for (const [i, button] of buttons.entries()) {
+      const [target, props] = calls[i]!;
+      expect(target, id).toBe(button);
+      expect(props.styleProfile, id).toBe('rhea');
+    }
+  } finally {
+    window.happyDOM.abort();
+  }
 }
 
 describe('ordinary Shadcn documentation demo policy', () => {
@@ -199,9 +278,12 @@ describe('ordinary Shadcn documentation demo policy', () => {
     expect('setup' in wrapped).toBe(false);
   });
 
-  it('covers every actual Shadcn page demo ID, not a selected subset', () => {
-    const found = new Set<string>();
+  it('covers every actual Shadcn page demo ID in each locale', () => {
+    const ordinaryIds = demos.map(([id]) => id);
+    const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
+    expect(expected).toHaveLength(73);
     for (const locale of ['en', 'zh-cn']) {
+      const found = new Set<string>();
       const directory = resolve(
         process.cwd(),
         'apps/www/src/content/docs',
@@ -210,13 +292,31 @@ describe('ordinary Shadcn documentation demo policy', () => {
       );
       for (const file of readdirSync(directory).filter((name) => name.endsWith('.mdx'))) {
         const content = readFileSync(resolve(directory, file), 'utf8');
-        for (const match of content.matchAll(/demoId=["']([^"']+)["']/g)) found.add(match[1]!);
-        expect(content, `${locale}/${file}`).toContain('Shadcn Rhea');
+        const pageIds = [...content.matchAll(/demoId=["']([^"']+)["']/g)].map((match) => match[1]!);
+        if (ordinaryIds.some((id) => pageIds.includes(id)))
+          expect(content, `${locale}/${file}`).toContain('Shadcn Rhea');
+        for (const id of pageIds) {
+          const example = profileExamples.find((entry) => entry.id === id);
+          if (example) expect(file, `${locale}/${id}`).toBe(example.page);
+          found.add(id);
+        }
       }
+      expect([...found].sort(), locale).toEqual(expected);
     }
-    expect([...found].sort()).toEqual(demos.map(([id]) => id).sort());
-    expect(found.size).toBe(68);
   });
+
+  for (const { id, demo, profiles } of profileExamples) {
+    it(`${id}: keeps its declared profile ownership`, () => {
+      assertDemoSpec(demo);
+      const declared: [string, unknown][] = [];
+      visit(demo.root, (node) => {
+        if (node.kind !== 'proto') return;
+        if (node.prototypeId === 'shadcn-style-scope' || node.props?.styleProfile !== undefined)
+          declared.push([node.prototypeId, node.props?.styleProfile]);
+      });
+      expect(declared).toEqual(profiles);
+    });
+  }
 
   for (const [id, demo] of demos) {
     it(`${id}: explicitly selects Rhea and exposes no conflicting leaf selection`, () => {
@@ -311,7 +411,12 @@ describe('ordinary Shadcn documentation demo policy', () => {
           demos.some(([demoId]) => demoId === id)
         );
         expect(snippets.length).toBeGreaterThan(0);
+        if (mapName === 'Button') expect(snippets).toHaveLength(9);
         for (const [id, snippet] of snippets) {
+          if (mapName === 'Button' && runtime === 'wc') {
+            expectWcButtonProfile(id);
+            continue;
+          }
           if (runtime === 'vue2') {
             expect(snippet, id).not.toMatch(/<script\s+setup/);
             expect(snippet, id).toContain("from '../proto-ui/components/vue2'");
