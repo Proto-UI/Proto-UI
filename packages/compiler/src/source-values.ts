@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import type { SourceModule } from './parser-module';
 import { rejectNode, propertyName } from './source-syntax';
-import { resolveSourceType, type TypeSource, type TypeDeclaration } from './source-type-resolution';
+import { resolveSourceType, resolveSourceValue, type TypeSource, type TypeDeclaration } from './source-type-resolution';
 import { isDataValueType, type ParameterIR, type ValueType } from './ir';
 import { joinValueTypes, objectFields, objectValueType } from './value-types';
 import { CORE_VALUE_TYPES } from './core-value-types';
@@ -77,6 +77,11 @@ class ValueTypeParser {
       return this.parse(node.type);
     if (ts.isFunctionTypeNode(node)) return this.signature(node);
     if (ts.isTypeLiteralNode(node)) return this.record(node.members);
+    if (ts.isIndexedAccessTypeNode(node) && node.indexType.kind === ts.SyntaxKind.NumberKeyword) {
+      let object = node.objectType;
+      while (ts.isParenthesizedTypeNode(object)) object = object.type;
+      if (ts.isTypeQueryNode(object)) return this.tupleElements(object);
+    }
     if (
       ts.isIndexedAccessTypeNode(node) &&
       ts.isTypeOperatorNode(node.indexType) &&
@@ -209,6 +214,88 @@ class ValueTypeParser {
       }
     }
     rejectNode(node, 'PUI1020', `Unsupported ordinary value type ${ts.SyntaxKind[node.kind]}.`);
+  }
+
+  private tupleElements(query: ts.TypeQueryNode): ValueType {
+    const fail = (): never => rejectNode(
+      query, 'PUI1020', 'Numeric value queries require an immutable module literal tuple declared as const.'
+    );
+    if (!ts.isIdentifier(query.exprName) || query.typeArguments?.length) return fail();
+    // Module resolution cannot stand in for a nearer lexical value declaration.
+    const name = query.exprName.text;
+    const binds = (binding: ts.BindingName): boolean => ts.isIdentifier(binding)
+      ? binding.text === name
+      : binding.elements.some((element) => !ts.isOmittedExpression(element) && binds(element.name));
+    for (let scope = query.parent; scope && !ts.isSourceFile(scope); scope = scope.parent) {
+      if (ts.isFunctionLike(scope) && scope.parameters.some((parameter) => binds(parameter.name)))
+        return fail();
+      if (ts.isFunctionLike(scope)) {
+        let shadowed = false;
+        const visit = (node: ts.Node): void => {
+          if (ts.isFunctionLike(node) && node !== scope) return;
+          if (ts.isVariableDeclarationList(node) && !(node.flags & ts.NodeFlags.BlockScoped) &&
+            node.declarations.some((declaration) => binds(declaration.name))) shadowed = true;
+          ts.forEachChild(node, visit);
+        };
+        visit(scope);
+        if (shadowed) return fail();
+      }
+      if (ts.isModuleBlock(scope) ||
+        ((ts.isClassDeclaration(scope) || ts.isClassExpression(scope)) && scope.name?.text === name))
+        return fail();
+      if (ts.isBlock(scope) && scope.statements.some((statement) =>
+        ts.isVariableStatement(statement)
+          ? statement.declarationList.declarations.some((declaration) => binds(declaration.name))
+          : (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) && statement.name?.text === name
+      )) return fail();
+      if (ts.isCatchClause(scope) && scope.variableDeclaration && binds(scope.variableDeclaration.name))
+        return fail();
+      if (
+        (ts.isForStatement(scope) || ts.isForInStatement(scope) || ts.isForOfStatement(scope)) &&
+        scope.initializer && ts.isVariableDeclarationList(scope.initializer) &&
+        scope.initializer.declarations.some((declaration) => binds(declaration.name))
+      ) return fail();
+      if (ts.isFunctionExpression(scope) && scope.name?.text === name) return fail();
+    }
+    const binding = resolveSourceValue(this.owner, query.exprName);
+    if (!binding) return fail();
+    const declaration = binding.declaration;
+    if (
+      declaration.type || !declaration.initializer ||
+      !ts.isVariableDeclarationList(declaration.parent) ||
+      !(declaration.parent.flags & ts.NodeFlags.Const)
+    ) return fail();
+    let initializer = declaration.initializer;
+    while (ts.isParenthesizedExpression(initializer) || ts.isSatisfiesExpression(initializer))
+      initializer = initializer.expression;
+    if (
+      !ts.isAsExpression(initializer) || !ts.isTypeReferenceNode(initializer.type) ||
+      !ts.isIdentifier(initializer.type.typeName) || initializer.type.typeName.text !== 'const' ||
+      initializer.type.typeArguments?.length
+    ) return fail();
+    initializer = initializer.expression;
+    while (ts.isParenthesizedExpression(initializer)) initializer = initializer.expression;
+    if (!ts.isArrayLiteralExpression(initializer)) return fail();
+    return joinValueTypes(initializer.elements.map((element): ValueType => {
+      if (ts.isStringLiteral(element)) return { kind: 'literal', value: element.text };
+      if (ts.isNumericLiteral(element)) {
+        const value = Number(element.text);
+        if (!Number.isFinite(value)) return fail();
+        return { kind: 'literal', value };
+      }
+      if (element.kind === ts.SyntaxKind.TrueKeyword || element.kind === ts.SyntaxKind.FalseKeyword)
+        return { kind: 'literal', value: element.kind === ts.SyntaxKind.TrueKeyword };
+      if (element.kind === ts.SyntaxKind.NullKeyword) return 'null';
+      if (
+        ts.isPrefixUnaryExpression(element) && ts.isNumericLiteral(element.operand) &&
+        (element.operator === ts.SyntaxKind.MinusToken || element.operator === ts.SyntaxKind.PlusToken)
+      ) {
+        const value = Number(element.operand.text) * (element.operator === ts.SyntaxKind.MinusToken ? -1 : 1);
+        if (!Number.isFinite(value)) return fail();
+        return { kind: 'literal', value };
+      }
+      return fail();
+    }));
   }
 
   private localType(node: ts.Node, name: string): TypeDeclaration | undefined {
