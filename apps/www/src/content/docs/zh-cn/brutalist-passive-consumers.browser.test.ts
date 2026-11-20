@@ -301,6 +301,15 @@ describe.sequential('Brutalist passive public consumer evidence', () => {
             await profile(page, value);
             await page.emulateMedia({ reducedMotion: 'no-preference' });
             await expect.poll(async () => (await paint(surfaces.nth(3))).transitionProperty).toBe('all');
+            // Root font changes can start a transition on the raised offset.
+            // Compare the motion policies at the same authored endpoint.
+            await expect
+              .poll(() => surfaces.nth(3).evaluate((element) =>
+                element.getAnimations().some((animation) =>
+                  animation.pending || animation.playState === 'running'
+                )
+              ))
+              .toBe(false);
             const before = await Promise.all(Array.from({ length: 4 }, (_, index) => paint(surfaces.nth(index))));
             await capture(previewer, 'surface', runtime, scheme, value, 'supplied-states', before);
             for (const item of before) {
@@ -320,9 +329,20 @@ describe.sequential('Brutalist passive public consumer evidence', () => {
             expect(before[3]!.transitionDuration).toBe('0.15s');
 
             const label = previewer.getByText('Outline · rest', { exact: true });
-            await label.hover();
-            expect(await paint(surfaces.nth(0))).toEqual(before[0]);
+            const outline = surfaces.nth(0);
             await label.scrollIntoViewIfNeeded();
+            await page.mouse.move(0, 0);
+            const waitForOutline = (hovered: boolean) => expect.poll(() => outline.evaluate((element, hovered) =>
+              element.matches(':hover') === hovered &&
+              element.getAnimations().every((animation) => !animation.pending && animation.playState !== 'running'), hovered
+            )).toBe(true);
+            await waitForOutline(false);
+            const outlineBeforeHover = await paint(outline);
+            await label.hover();
+            await waitForOutline(true);
+            const { parentHeight: _heightBefore, parentWidth: _widthBefore, ...ownBefore } = outlineBeforeHover;
+            const { parentHeight: _heightAfter, parentWidth: _widthAfter, ...ownAfter } = await paint(outline);
+            expect(ownAfter).toEqual(ownBefore);
             const point = await label.evaluate((element) => {
               const text = Array.from(element.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
               if (!text) throw new Error('The public Surface label has no native text node.');
