@@ -141,6 +141,7 @@ function createDocumentMaterialSink(
     return false;
   }
   let scheduled: number | null = null;
+  let pressQueued = false;
   let queued = false;
   let paintLease = '';
   let geometryLease = '';
@@ -166,6 +167,7 @@ function createDocumentMaterialSink(
       if (sample.active) {
         cancellationSession = null;
         cancelledPointerPhase = false;
+        if (sample.reason === 'down') schedulePress();
       }
       cancelPending();
       // A fresh down retires the old session's completion, not an already
@@ -186,6 +188,21 @@ function createDocumentMaterialSink(
     }
     schedule();
   });
+  function schedulePress() {
+    if (pressQueued) return;
+    pressQueued = true;
+    queueMicrotask(() => {
+      try {
+        // Leave the contact router callback before the first paint attempt; use
+        // latest same-turn sample through every ordinary admission/decode guard.
+        if (currentDocument() && contact.current()?.active) repaint();
+      } finally {
+        // Keep this latch through repaint: reentrant input converges at the
+        // already scheduled RAF instead of extending the microtask checkpoint.
+        pressQueued = false;
+      }
+    });
+  }
   function schedule() {
     if (!currentDocument() || scheduled !== null) return;
     scheduled = win!.requestAnimationFrame(() => {

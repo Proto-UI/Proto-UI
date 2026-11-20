@@ -1,14 +1,7 @@
 name: Liquid Glass matched frame-budget observations
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - '.github/workflows/liquid-glass-frame-budget.yml'
-      - 'scripts/analysis/liquid-glass-frame-budget*'
-      - 'packages/adapters/base/src/material/**'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'apps/www/src/content/docs/**/ui-libraries/liquid-glass/button.mdx'
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -20,12 +13,8 @@ env:
   ASTRO_TELEMETRY_DISABLED: '1'
 jobs:
   matched-browser:
-    # This bounded experiment has no pull_request_target, credentials or secrets.
-    # The PR event permits a new workflow to run before it exists on main.
-    if: >-
-      github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository &&
-       github.event.pull_request.head.ref == 'perf/liquid-glass-frame-budget')
-
+    # Heavy evidence is explicitly dispatched or called by the owned CI cycle.
+    # It never adds a separate automatic pull-request lane.
 
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -60,6 +49,14 @@ jobs:
       - name: Check measurement attribution
         working-directory: candidate
         run: node --test scripts/analysis/liquid-glass-frame-budget.test.mjs
+      - name: Install and record the same Chinese fonts for both revisions
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
+            > "$RUNNER_TEMP/liquid-frame-budget/font-environment.txt"
       - name: Baseline on the same runner
         id: baseline
         continue-on-error: true

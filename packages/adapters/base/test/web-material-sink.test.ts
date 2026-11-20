@@ -500,7 +500,7 @@ describe('V2 physical-view material ownership (mock GPU, not optical evidence)',
 });
 
 describe('continuous contact scheduler (mock GPU/decode, not optical evidence)', () => {
-  function setup() {
+  function setup(phase: 'rest' | 'pressed' = 'pressed') {
     const f = fixture();
     let callbacks: FrameRequestCallback[] = [];
     vi.mocked(window.requestAnimationFrame).mockImplementation((fn) => {
@@ -520,7 +520,7 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
         candidates: [
           {
             intent: 'liquid-glass',
-            deformation: { kind: 'press', phase: 'pressed', contact: 'pointer' },
+            deformation: { kind: 'press', phase, contact: 'pointer' },
           },
         ],
       },
@@ -543,6 +543,133 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
       });
     return { ...f, frame, send, flushFrame };
   }
+  describe('fresh-press microtask', () => {
+    it('renders the newest same-turn session before RAF and still waits for normal decode', async () => {
+      const f = setup('rest');
+      try {
+        const neutral = f.host.style.getPropertyValue('--pui-material-image');
+        const completions: Array<() => void> = [];
+        decoding.prepare.mockClear().mockImplementation((_doc, _source, ready) => {
+          completions.push(ready);
+          return () => {};
+        });
+        optical.render.mockClear();
+        f.send(0.2, 'down', 1);
+        f.send(0.4, 'move', 1);
+        f.send(0.6, 'down', 2);
+        f.send(0.8, 'move', 2);
+        expect(optical.render).not.toHaveBeenCalled();
+        expect(completions).toHaveLength(0);
+        await Promise.resolve();
+        expect(optical.render).toHaveBeenCalledOnce();
+        expect(optical.render.mock.calls[0][0]).toMatchObject({
+          pressed: false,
+          contact: { x: 0.8, y: 0.4, strength: 1 },
+        });
+        expect(decoding.prepare).toHaveBeenCalledOnce();
+        expect(f.host.dataset.materialContact).toBe('rest');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(neutral);
+        completions[0]();
+        expect(f.host.dataset.materialContact).toBe('held');
+        expect(f.host.dataset.materialContactSession).toBe('2');
+        // The original RAF remains, but an already admitted signature is a no-op.
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledOnce();
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it('keeps later moves coalesced until RAF after the early press render', async () => {
+      const f = setup('rest');
+      try {
+        f.send(0.2, 'down');
+        await Promise.resolve();
+        expect(f.host.dataset.materialContact).toBe('held');
+        optical.render.mockClear();
+        for (let i = 0; i < 50; i++) f.send(0.5 + i / 100);
+        await Promise.resolve();
+        expect(optical.render).not.toHaveBeenCalled();
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledOnce();
+        expect(optical.render.mock.calls[0][0]).toMatchObject({ contact: { x: 0.99 } });
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it.each([
+      'up',
+      'cancel',
+      'lostcapture',
+      'blur',
+      'view release',
+      'router replacement',
+      'source loss',
+      'source replacement',
+      'preference',
+    ] as const)('cannot publish queued held paint after %s', async (invalidation) => {
+      const f = setup('rest');
+      try {
+        optical.render.mockClear();
+        f.send(0.2, 'down');
+        if (invalidation === 'view release') f.sink.release(1);
+        else if (invalidation === 'router replacement') createWebPointerContactWriter(f.host);
+        else if (invalidation === 'source loss') f.source(false);
+        else if (invalidation === 'source replacement') f.rebindSource();
+        else if (invalidation === 'preference') f.transparency('reduce');
+        else f.send(0.2, invalidation);
+        const renders = optical.render.mock.calls.length;
+        await Promise.resolve();
+        expect(optical.render).toHaveBeenCalledTimes(renders);
+        expect(f.host.dataset.materialContact).not.toBe('held');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it('retires the queued binding after actual owner-document adoption', async () => {
+      const f = setup('rest');
+      const iframe = document.createElement('iframe');
+      document.body.append(iframe);
+      const destination = iframe.contentDocument!;
+      vi.spyOn(iframe.contentWindow!, 'requestAnimationFrame').mockReturnValue(99);
+      vi.spyOn(iframe.contentWindow!, 'cancelAnimationFrame').mockImplementation(() => {});
+      try {
+        optical.render.mockClear();
+        f.send(0.2, 'down');
+        destination.body.append(destination.adoptNode(f.host));
+        expect(f.host.ownerDocument).toBe(destination);
+        await Promise.resolve();
+        expect(optical.render).not.toHaveBeenCalled();
+        expect(f.host.dataset.materialContact).not.toBe('held');
+        // Even an already-delivered old RAF cannot paint the retired binding.
+        f.flushFrame();
+        expect(optical.render).not.toHaveBeenCalled();
+        expect(f.host.dataset.materialContact).not.toBe('held');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it('bounds reentrant fresh downs to the original RAF convergence', async () => {
+      const f = setup('rest');
+      try {
+        optical.render.mockClear().mockImplementationOnce(() => {
+          f.send(0.8, 'down', 2);
+          return 'data:image/png;base64,b2Jzb2xldGU=';
+        });
+        f.send(0.2, 'down', 1);
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(optical.render).toHaveBeenCalledOnce();
+        expect(f.host.dataset.materialContact).toBe('rest');
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledTimes(2);
+        expect(optical.render.mock.calls[1][0]).toMatchObject({ contact: { x: 0.8, strength: 1 } });
+        expect(f.host.dataset.materialContact).toBe('held');
+        expect(f.host.dataset.materialContactSession).toBe('2');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+  });
   it('coalesces many moves to the newest sample in one RAF', () => {
     const f = setup();
     f.send(0.5, 'down');

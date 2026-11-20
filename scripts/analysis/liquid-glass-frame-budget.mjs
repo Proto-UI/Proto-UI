@@ -30,6 +30,11 @@ const SOURCE_FILES = [
   'apps/www/src/pages/en/test/liquid-glass-material.astro',
   'apps/www/src/content/docs/zh-cn/browser-harness.ts',
   'apps/www/src/content/docs/zh-cn/material-paint-observation.ts',
+  // Public presentation intentionally changes between revisions. Bind these
+  // bytes to each report without requiring equality with the workload fixture.
+  'apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts',
+  'apps/www/src/content/docs/en/ui-libraries/liquid-glass/button.mdx',
+  'apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/button.mdx',
 ];
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 
@@ -58,6 +63,75 @@ function deltas(before, after) {
       .filter((key) => typeof before[key] === 'number' && typeof after[key] === 'number')
       .map((key) => [key, after[key] - before[key]])
   );
+}
+
+function publicButtons(capture) {
+  return (capture.paints ?? []).filter(
+    (entry) =>
+      entry.host?.role === 'button' &&
+      entry.host.dataset?.projectionPrototype === 'liquid-glass-button'
+  );
+}
+
+/** Candidate-only acceptance. The baseline's original fallback stays visible. */
+export function assertCandidatePublicCaptures(captures) {
+  assert.deepEqual(
+    captures.map((capture) => capture.name).sort(),
+    ['public-dark', 'public-light', 'public-small'],
+    'All three candidate public views must be captured exactly once'
+  );
+  for (const capture of captures) {
+    assert.ok(!capture.failure, `${capture.name}: ${capture.failure}`);
+    const buttons = publicButtons(capture);
+    assert.equal(
+      buttons.length,
+      3,
+      `${capture.name}: expected the three real Liquid Glass buttons`
+    );
+    const named = new Map(buttons.map((entry) => [entry.host.text.trim(), entry]));
+    assert.deepEqual([...named.keys()].sort(), ['Back', 'Continue', 'Unavailable']);
+    for (const name of ['Back', 'Continue']) {
+      const entry = named.get(name);
+      assert.ok(
+        !entry.host.disabled && entry.host.ariaDisabled !== 'true',
+        `${capture.name}: ${name} must be enabled`
+      );
+      assert.equal(entry.quality, 'self-optical', `${capture.name}: ${name} must be self-optical`);
+      assert.equal(entry.committed, true, `${capture.name}: ${name} needs committed owned paint`);
+      assert.equal(
+        entry.carrier,
+        'contact-v1',
+        `${capture.name}: ${name} needs its owned contact carrier`
+      );
+      assert.equal(entry.source, 'visible-app-canvas');
+      assert.equal(entry.geometryMatches, true);
+    }
+    const unavailable = named.get('Unavailable');
+    assert.ok(
+      unavailable.host.disabled || unavailable.host.ariaDisabled === 'true',
+      `${capture.name}: Unavailable must expose disabled semantics`
+    );
+    assert.equal(unavailable.quality, 'opaque-fallback');
+    assert.equal(unavailable.host.dataset.materialReason, 'no-active-material-candidate');
+    assert.equal(
+      unavailable.committed,
+      false,
+      `${capture.name}: disabled fallback must not retain optical paint`
+    );
+    // Invalid carrier geometry/opacity also makes committed false. Prove the
+    // owned marker and its sampled image have actually been withdrawn.
+    assert.equal(
+      unavailable.carrier,
+      null,
+      `${capture.name}: disabled fallback retained a carrier`
+    );
+    assert.equal(
+      unavailable.imageSha256,
+      sha256('none'),
+      `${capture.name}: disabled fallback retained a background image`
+    );
+    assert.equal(unavailable.imageCharacters, 4, `${capture.name}: disabled image must be none`);
+  }
 }
 
 export function summarizeWindow(window) {
@@ -140,6 +214,14 @@ async function compare(baselineFile, candidateFile, output) {
   await mkdir(output, { recursive: true });
   const baseline = JSON.parse(await readFile(baselineFile, 'utf8'));
   const candidate = JSON.parse(await readFile(candidateFile, 'utf8'));
+  let publicAcceptance;
+  try {
+    assertCandidatePublicCaptures(candidate.public);
+    publicAcceptance = { passed: true };
+  } catch (error) {
+    // Retain the rejected captures and comparison before returning a failure.
+    publicAcceptance = { passed: false, message: String(error) };
+  }
   const matched =
     baseline.probe.sha256 === candidate.probe.sha256 &&
     JSON.stringify(baseline.workload) === JSON.stringify(candidate.workload) &&
@@ -168,6 +250,7 @@ async function compare(baselineFile, candidateFile, output) {
       windows: candidate.windows.map(summarizeWindow),
       runtimeSmoke: candidate.runtimeSmoke,
       public: candidate.public,
+      publicAcceptance,
     },
   };
   await writeFile(path.join(output, 'comparison.json'), JSON.stringify(result, null, 2));
@@ -198,9 +281,15 @@ async function compare(baselineFile, candidateFile, output) {
     ['candidate', result.candidate],
   ]) {
     lines.push('', `## ${label} public captures and interaction smoke`, '');
-    for (const capture of report.public)
+    for (const capture of report.public) {
+      const buttons = publicButtons(capture);
       lines.push(
-        `- ${capture.name}: ${capture.optical}/${capture.controls} controls have committed self-optical paint; ${capture.failure ?? 'capture completed'}.`
+        `- ${capture.name}: ${buttons.filter((entry) => entry.committed && entry.quality === 'self-optical').length}/${buttons.length} Liquid Glass buttons have committed self-optical paint; ${capture.failure ?? 'capture completed'}.`
+      );
+    }
+    if (report.publicAcceptance)
+      lines.push(
+        `- Candidate public acceptance: ${report.publicAcceptance.passed ? 'passed for both enabled buttons and disabled fallback in every view' : report.publicAcceptance.message}.`
       );
     for (const smoke of report.runtimeSmoke ?? [])
       lines.push(
@@ -222,10 +311,7 @@ async function compare(baselineFile, candidateFile, output) {
     );
     assert.equal(report.runtimeSmoke.length, 4, 'Incomplete runtime interaction smoke');
   }
-  assert.ok(
-    candidate.public.some((capture) => capture.optical > 0),
-    'No candidate public capture proves committed optical paint'
-  );
+  assert.ok(publicAcceptance.passed, publicAcceptance.message);
 }
 
 async function observe(output, rounds) {
@@ -737,8 +823,10 @@ async function observe(output, rounds) {
         const controls = preview.locator('[data-material-quality]');
         for (let index = 0; index < (await controls.count()); index++)
           capture.paints.push(await paint(controls.nth(index)));
-        capture.controls = capture.paints.length;
-        capture.optical = capture.paints.filter(
+        capture.materialHosts = capture.paints.length;
+        const buttons = publicButtons(capture);
+        capture.controls = buttons.length;
+        capture.optical = buttons.filter(
           (entry) => entry.committed && entry.quality === 'self-optical'
         ).length;
         capture.screenshot = `${name}.png`;
