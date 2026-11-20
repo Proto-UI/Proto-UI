@@ -19,6 +19,7 @@ import {
   waitForPreviewRuntime,
 } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
+import { observeTextareaRuntimeAdmission } from './textarea-runtime-admission.mjs';
 
 const TEXTAREA_ROUTE = '/en/ui-libraries/shadcn/textarea/';
 const CHECKBOX_ROUTE = '/en/ui-libraries/shadcn/checkbox/';
@@ -48,7 +49,21 @@ async function selectToolbarlessRuntime(
     const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
     if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
   }
-  await waitForPreviewRuntime(page, runtime, readySelector, expectedCount);
+  try {
+    await waitForPreviewRuntime(page, runtime, readySelector, expectedCount);
+  } catch (error) {
+    const evidence = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+    if (evidence && readySelector === '[data-pui-root]' && expectedCount === 3) {
+      try {
+        const previewerId = await previewer.getAttribute('data-previewer-id', { timeout: 1_000 });
+        const observation = await observeTextareaRuntimeAdmission(page, { previewerId, runtime });
+        await writeFile(path.join(evidence, `textarea-${runtime}.json`), JSON.stringify(observation, null, 2));
+      } catch (observationError) {
+        console.error('Textarea runtime observation failed', observationError);
+      }
+    }
+    throw error;
+  }
 }
 
 /** The demo order: unchecked, checked, mixed, disabled, and a focus target. */
