@@ -11,6 +11,7 @@ it('uses actual React view replacement and unmount to invalidate captured source
   const previousActFlag = environment.IS_REACT_ACT_ENVIRONMENT;
   let run!: RunHandle<any>;
   let setups = 0;
+  let captured: ViewOperation | null = null;
   const proto = definePrototype({
     name: 'react-view-operation-source',
     setup(def) {
@@ -19,7 +20,7 @@ it('uses actual React view replacement and unmount to invalidate captured source
         run = value;
       });
       def.expose('view', {
-        capture: () => run.lifecycle.captureViewOperation(),
+        capture: () => (captured = run.lifecycle.captureViewOperation()),
         present: (value: boolean) => run.lifecycle.setPresent(value),
       });
       return (r) => r.el('span', 'Source');
@@ -47,11 +48,17 @@ it('uses actual React view replacement and unmount to invalidate captured source
     await settle(() => view.present(true));
     expect(setups).toBe(1);
     expect(first.isCurrent()).toBe(false);
-    const second = view.capture() as ViewOperation;
+    const exposedSecond = view.capture() as ViewOperation;
+    // Expose return values are callback-scoped; retain the producer's identity
+    // separately to query lifecycle invalidation after the owner is disposed.
+    const second = captured!;
     expect(second.isCurrent()).toBe(true);
     await settle(() => root.unmount());
     unmounted = true;
     expect(second.isCurrent()).toBe(false);
+    expect(() => exposedSecond.isCurrent()).toThrow(
+      '[AdapterHost] cannot invoke an exposed callable after terminal disposal'
+    );
   } finally {
     try {
       if (!unmounted) await settle(() => root.unmount());

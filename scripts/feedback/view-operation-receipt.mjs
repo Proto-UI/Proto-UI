@@ -36,6 +36,8 @@ export function expectedChecks(name) {
     Object.assign(checks, {
       'terminal-retired': 1,
       'old-invalid-without-intermediate-query': false,
+      'old-exposed-call-terminal-rejected':
+        '[AdapterHost] cannot invoke an exposed callable after terminal disposal',
       'new-owner-current': true,
     });
   else if (name === 'aborted-transport')
