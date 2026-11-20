@@ -69,19 +69,109 @@ export function createWebOpticalProgram(
     sourceUploads: 0,
     sourcePreparations: 0,
     sourcePreparationMilliseconds: 0,
+    sourcePreparationCacheHits: 0,
     readbackAllocations: 0,
     readbackMilliseconds: 0,
     contrastMilliseconds: 0,
     renderMilliseconds: 0,
     encodeMilliseconds: 0,
   };
-  let uploaded: { source: CanvasBackdropFrame; variant: string } | null = null;
-  let prepared: { source: CanvasBackdropFrame; pixels: Uint8Array } | null = null;
+  type SourceIdentity = {
+    frame: { deref(): CanvasBackdropFrame | undefined };
+    input: WeakSet<Uint8Array>;
+    canvas: WeakSet<HTMLCanvasElement>;
+    scope: WeakSet<HTMLElement>;
+    revision: number;
+    width: number;
+    height: number;
+    byteOffset: number;
+  };
+  type PreparedSource = { identity: SourceIdentity; pixels: Uint8Array };
+  const FrameReference = typeof WeakRef === 'function' ? WeakRef : null;
+  // Only retained filtered RGBA bytes are budgeted here, not input, scratch,
+  // readback or GPU memory. Tiny sources also need a finite metadata limit.
+  // Older hosts retain the existing single strong source slot.
+  const preparedEntryLimit = FrameReference ? 4 : 1,
+    preparedByteLimit = 4 * 1024 * 1024;
+  const prepared: PreparedSource[] = [];
+  let preparedBytes = 0;
+  let uploaded: {
+    source: CanvasBackdropFrame;
+    variant: string;
+    identity: SourceIdentity;
+  } | null = null;
   let readback: Uint8Array | null = null;
+  function sourceIdentity(source: CanvasBackdropFrame): SourceIdentity {
+    return {
+      frame: FrameReference ? new FrameReference(source) : { deref: () => source },
+      // Weak membership preserves identity without keeping old DOM nodes or
+      // input buffers alive if a caller replaces fields on the same frame.
+      input: new WeakSet([source.pixels]),
+      canvas: new WeakSet([source.canvas]),
+      scope: new WeakSet([source.scope]),
+      revision: source.revision,
+      width: source.width,
+      height: source.height,
+      byteOffset: source.pixels.byteOffset,
+    };
+  }
+  function sameSource(identity: SourceIdentity, source: CanvasBackdropFrame) {
+    return (
+      identity.frame.deref() === source &&
+      identity.revision === source.revision &&
+      identity.width === source.width &&
+      identity.height === source.height &&
+      identity.byteOffset === source.pixels.byteOffset &&
+      identity.input.has(source.pixels) &&
+      identity.canvas.has(source.canvas) &&
+      identity.scope.has(source.scope)
+    );
+  }
+  function retirePrepared(index: number) {
+    preparedBytes -= prepared[index].pixels.byteLength;
+    prepared.splice(index, 1);
+  }
+  function prunePrepared(source: CanvasBackdropFrame) {
+    for (let index = prepared.length - 1; index >= 0; index--) {
+      const { identity } = prepared[index],
+        previous = identity.frame.deref();
+      if (
+        !previous ||
+        !sameSource(identity, previous) ||
+        (identity.canvas.has(source.canvas) &&
+          identity.scope.has(source.scope) &&
+          identity.revision !== source.revision)
+      )
+        retirePrepared(index);
+    }
+  }
+  function prepareSource(source: CanvasBackdropFrame): PreparedSource {
+    const index = prepared.findIndex((entry) => sameSource(entry.identity, source));
+    if (index >= 0) {
+      const [entry] = prepared.splice(index, 1);
+      prepared.push(entry);
+      metrics.sourcePreparationCacheHits++;
+      return entry;
+    }
+    while (
+      prepared.length >= preparedEntryLimit ||
+      preparedBytes + source.pixels.byteLength > preparedByteLimit
+    )
+      retirePrepared(0);
+    const preparationStarted = performance.now();
+    const pixels = prefilter(source.pixels, source.width, source.height);
+    metrics.sourcePreparations++;
+    metrics.sourcePreparationMilliseconds += performance.now() - preparationStarted;
+    const entry = { identity: sourceIdentity(source), pixels };
+    prepared.push(entry);
+    preparedBytes += pixels.byteLength;
+    return entry;
+  }
   function clear() {
     canvas.width = 0;
     canvas.height = 0;
-    prepared = null;
+    prepared.length = 0;
+    preparedBytes = 0;
     uploaded = null;
     readback = null;
     if (!gl) return;
@@ -190,7 +280,11 @@ export function createWebOpticalProgram(
   }
   return {
     clear,
-    inspect: () => ({ ...metrics }),
+    inspect: () => ({
+      ...metrics,
+      sourcePreparationCacheEntries: prepared.length,
+      sourcePreparationCacheBytes: preparedBytes,
+    }),
     dispose() {
       clear();
       const previous = gl;
@@ -269,13 +363,15 @@ export function createWebOpticalProgram(
       g.activeTexture(g.TEXTURE0);
       g.bindTexture(g.TEXTURE_2D, textures[0]);
       g.pixelStorei(g.UNPACK_ALIGNMENT, 1);
-      if (variant === 'regular' && prepared?.source !== source) {
-        const preparationStarted = performance.now();
-        prepared = { source, pixels: prefilter(source.pixels, source.width, source.height) };
-        metrics.sourcePreparations++;
-        metrics.sourcePreparationMilliseconds += performance.now() - preparationStarted;
-      }
-      if (uploaded?.source !== source || uploaded.variant !== variant) {
+      // Run after every admission guard, including the full source alpha scan.
+      // Clear frames must also retire older revisions of their canvas/scope.
+      prunePrepared(source);
+      const currentPrepared = variant === 'regular' ? prepareSource(source) : null;
+      if (
+        uploaded?.source !== source ||
+        uploaded.variant !== variant ||
+        !sameSource(uploaded.identity, source)
+      ) {
         g.texImage2D(
           g.TEXTURE_2D,
           0,
@@ -285,9 +381,14 @@ export function createWebOpticalProgram(
           0,
           g.RGBA,
           g.UNSIGNED_BYTE,
-          variant === 'regular' ? prepared!.pixels : source.pixels
+          currentPrepared ? currentPrepared.pixels : source.pixels
         );
-        uploaded = { source, variant };
+        // This still tracks only the texture currently bound to the one context.
+        uploaded = {
+          source,
+          variant,
+          identity: currentPrepared?.identity ?? sourceIdentity(source),
+        };
         metrics.sourceUploads++;
       }
       const f = (name: string, value: number) => g.uniform1f(locations[name], value),
