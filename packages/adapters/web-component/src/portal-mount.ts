@@ -4,6 +4,8 @@ import {
   resolveWebPortalDestinationBinding,
   subscribeWebPortalDestinations,
   notifyWebPortalProjection,
+  PUI_VIEW_REVEALING_ATTR,
+  scheduleAfterWebLayout,
   type WebPortalDestinationBinding,
   type WebPortalMaterialEpoch,
 } from '@proto.ui/adapter-base';
@@ -191,6 +193,21 @@ export function createWebComponentPortalMount() {
       let binding: WebPortalDestinationBinding | null = null;
       let materialEpoch: WebPortalMaterialEpoch | null = null;
       const ownsProjection = () => projected && el.parentNode === projectionBody;
+      let revealGeneration = 0;
+      const beginReveal = () => {
+        const generation = ++revealGeneration;
+        // Reuse the host reveal barrier, allowing authored Presence keyframes.
+        // Descendant theme reconciliation must settle before transitions resume.
+        el.setAttribute(PUI_VIEW_REVEALING_ATTR, 'portal');
+        scheduleAfterWebLayout(
+          el,
+          () => {
+            if (isCurrent() && generation === revealGeneration && ownsProjection())
+              el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+          },
+          queueMicrotask
+        );
+      };
       let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;
       let observedDocument: Document | null = null;
@@ -243,6 +260,7 @@ export function createWebComponentPortalMount() {
         binding = resolveWebPortalDestinationBinding(marker, el);
         if (!isCurrent()) return false;
         projectionBody = binding.destination;
+        beginReveal();
         projectionBody.appendChild(el);
         if (isCurrent() && ownsProjection()) notifyWebPortalProjection(el);
         return isCurrent() && ownsProjection();
@@ -321,6 +339,8 @@ export function createWebComponentPortalMount() {
       }
       const restore = (restoreToOrigin = true) => {
         if (revoke !== restore) return;
+        revealGeneration++;
+        if (projectionEpochs.get(el) === epoch) el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
         revoke = null;
         offDestination();
         unbindAdoption?.();
@@ -399,6 +419,7 @@ export function createWebComponentPortalMount() {
           return;
         }
         materialEpoch = acquiredMaterial;
+        beginReveal();
         if (el.parentNode !== projectionBody)
           relocate(el, projectionBody!, () => projectionBody!.appendChild(el));
         if (isCurrent() && ownsProjection()) {

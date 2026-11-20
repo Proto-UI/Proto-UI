@@ -1,4 +1,8 @@
-import { installViewVisibilityRule, PUI_VIEW_DETACHED_ATTR } from '@proto.ui/adapter-base';
+import {
+  installViewVisibilityRule,
+  PUI_VIEW_DETACHED_ATTR,
+  PUI_VIEW_REVEALING_ATTR,
+} from '@proto.ui/adapter-base';
 
 const HOST_DISPLAY_STYLE_ID = 'proto-ui-wc-host-display';
 const HOST_DISPLAY_CLASS = 'pui-host-root';
@@ -72,7 +76,9 @@ function ensureDefaultHostDisplayRule(doc: Document) {
   installViewVisibilityRule(doc);
 
   const styleEl = getOrCreateStyleElement(doc);
-  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where(.${HOST_DISPLAY_CLASS}) { display: block; }\n`;
+  // A newly projected portal publishes its whole light-DOM subtree together.
+  // Root animation remains governed by the shared Presence reveal rule.
+  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where(.${HOST_DISPLAY_CLASS}) { display: block; }\n:where([${PUI_VIEW_REVEALING_ATTR}="portal"] *) { transition: none !important; }\n`;
   RULES_BY_DOCUMENT.set(doc, true);
 }
 
