@@ -313,6 +313,10 @@ export function emitJavaScriptValue(
           return `Object.hasOwn(${args.join(', ')})`;
         case 'array.every':
           return `(${args[0]}).every(${args.slice(1).join(', ')})`;
+        case 'array.includes':
+          return typed
+            ? `(${args[0]} as readonly unknown[]).includes(${args[1]})`
+            : `(/** @type {readonly unknown[]} */ (${args[0]})).includes(${args[1]})`;
         case 'typeof':
           return `(typeof ${args[0]})`;
         case 'error':
