@@ -234,11 +234,14 @@ for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
 let exitCode = 0;
 try {
   for (const phase of testPlan) {
+    console.log(`[timing] startup begin ${performance.now()}`);
     const baseUrl = phase.needsServer ? await startServer() : undefined;
     if (baseUrl) {
       console.log(`[test:runtime] sharing ${baseUrl} across the browser suites`);
     }
+    console.log(`[timing] tests begin ${performance.now()}`);
     exitCode = await runVitest(phase.args, baseUrl);
+    console.log(`[timing] tests end ${performance.now()} exit=${exitCode}`);
     if (exitCode !== 0) break;
     if (selection) {
       const report = JSON.parse(readFileSync(reportPath, 'utf8'));
@@ -254,6 +257,8 @@ try {
   reportServerSnapshot('runtime test runner failed');
   exitCode = 1;
 } finally {
+  console.log(`[timing] teardown begin ${performance.now()}`);
   await stopServer();
+  console.log(`[timing] teardown end ${performance.now()}`);
 }
 process.exit(exitCode);

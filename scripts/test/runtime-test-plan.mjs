@@ -456,7 +456,8 @@ export function createRuntimeTestPlan(rawArgs, { phase, shard } = {}) {
     throw new Error('A runtime shard requires the browser phase');
   if (args.length > 0) {
     if (phase) throw new Error('CI runtime phases cannot be combined with focused Vitest filters');
-    return [{ needsServer: false, args }];
+    // Evidence carrier only. Selected browser files share the scheduled runner's server.
+    return [{ needsServer: true, args }];
   }
   assertBrowserInventory();
   const plan = [

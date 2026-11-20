@@ -1,55 +1,101 @@
 name: Browser suite repair evidence
-
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
-concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  focused-browser:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+  browser-timing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - slot: source-shard-3
+            files: >-
+              apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts
+              apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts
+              apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts
+              apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts
+              apps/www/test/preferences.browser.test.ts
+              apps/www/test/radio-group-entry.browser.test.ts
+              packages/prototypes/shadcn/test/drawer-presence.browser.test.ts
+          - slot: source-shard-4
+            files: >-
+              apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+              apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts
+              apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts
+              apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
+              packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts
+          - slot: source-shard-5
+            files: >-
+              apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts
+              apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts
+              apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts
+              apps/www/test/evidence/brutalist-fonts.browser.test.ts
+              packages/adapters/web-component/test/native-text-width.browser.test.ts
+          - slot: source-shard-6
+            files: >-
+              apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts
+              apps/www/test/button-view-lifetime.browser.test.ts
+              packages/adapters/react/test/focus-entry-readiness.browser.test.ts
+          - slot: source-shard-7
+            files: >-
+              apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts
+              apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts
+              apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts
+              apps/www/test/template-style.browser.test.ts
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Prepare the scheduled browser configuration
         run: |
+          set -euo pipefail
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
-        run: |
-          set -euo pipefail
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+      - name: Restore the exact browser font package only
+        uses: actions/cache/restore@v4
+        timeout-minutes: 1
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: homepage-font-noto-cjk-20230817-repack1-3-all
+      - name: Install real CJK fallback
+        timeout-minutes: 3
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/browser-timing/font-preparation
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Measure selected browser files with the scheduled runner
+        env:
+          FILES: ${{ matrix.files }}
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/browser-timing
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          test "$(git rev-parse HEAD^)" = c471a65a8013130a944edd739eec20739f0801dd
+          evidence="$PROTO_UI_RUNTIME_EVIDENCE_DIR"
+          export PROTO_UI_TYPOGRAPHY_EVIDENCE_DIR="$evidence/typography"
+          export PROTO_UI_MATERIAL_EVIDENCE_DIR="$evidence/material"
+          mkdir -p "$evidence"
+          git rev-parse HEAD > "$evidence/source.txt"
+          "$CHROME_PATH" --version > "$evidence/browser.txt"
+          read -r -a files <<< "$FILES"
+          printf "%s\n" "${files[@]}" > "$evidence/selection.txt"
+          for file in "${files[@]}"; do test -f "$file"; done
+          timeout --signal=TERM --kill-after=10s 900s node scripts/test/run-runtime-tests.mjs -- \
+            --no-file-parallelism "${files[@]}" --reporter=default --reporter=json \
+            --outputFile.json="$evidence/vitest.json" 2>&1 | tee "$evidence/browser.log"
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
-          retention-days: 30
+          name: browser-timing-${{ matrix.slot }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/browser-timing
+          if-no-files-found: error
+          retention-days: 14
