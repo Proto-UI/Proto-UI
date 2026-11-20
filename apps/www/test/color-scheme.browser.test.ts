@@ -350,12 +350,25 @@ describe.sequential('default-document colorScheme browser contract', () => {
         await page.evaluate(() => (window as any).colorSchemeFixture.setDisabled(false));
 
         await theme(page, 'light');
-        const portalFrames = await page.evaluate(async () => {
+        const { samples: portalFrames, portalFlipAt } = await page.evaluate(async () => {
           const samples: Array<{ visible: boolean; background: string; pending: boolean }> = [];
+          const fixture = Reflect.get(window, 'colorSchemeFixture') as {
+            frame(id: string): (typeof samples)[number] | null;
+            portalFlipAt(): number | null;
+          };
           const collect = (left: number): Promise<void> =>
             new Promise((resolve) =>
-              requestAnimationFrame(async () => {
-                const sample = (window as any).colorSchemeFixture.frame('portalButton');
+              requestAnimationFrame(async (at) => {
+                const sample = fixture.frame('portalButton');
+                if (sample) {
+                  const target = document.querySelector('[data-demo-ref="portalButton"]');
+                  Object.assign(sample, {
+                    frame: 13 - left,
+                    at,
+                    targetTag: target?.localName ?? null,
+                    hovered: target?.matches(':hover') ?? null,
+                  });
+                }
                 if (sample) samples.push(sample);
                 if (left > 1) await collect(left - 1);
                 resolve();
@@ -364,10 +377,13 @@ describe.sequential('default-document colorScheme browser contract', () => {
           const collected = collect(12);
           await (window as any).colorSchemeFixture.openPortalWithLateTheme();
           await collected;
-          return samples;
+          return { samples, portalFlipAt: fixture.portalFlipAt() };
         });
         const portal = page.locator('[data-demo-ref="portalButton"]');
         const portalVisible = portalFrames.filter((sample) => sample.visible);
+        // The existing finally writer must retain frames even if either predicate fails.
+        observations.portalFrames = portalFrames;
+        observations.portalFlipAt = portalFlipAt;
         expect(portalVisible.length).toBeGreaterThan(0);
         expect(
           portalVisible.every((sample) => alpha(sample.background) === 0.2 && !sample.pending)
@@ -375,7 +391,6 @@ describe.sequential('default-document colorScheme browser contract', () => {
         expect(
           await page.evaluate(() => (window as any).colorSchemeFixture.portalFlipAt())
         ).not.toBeNull();
-        observations.portalFrames = portalFrames;
         expect(
           await portal.evaluate((element) => !document.querySelector('#app')!.contains(element))
         ).toBe(true);
@@ -431,6 +446,16 @@ describe.sequential('default-document colorScheme browser contract', () => {
 
         await theme(page, 'light');
         await expect.poll(async () => alpha((await paint(button)).background)).toBe(0.1);
+        observations.customEditorAfterLight = await customEditor.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            tokens: element.getAttribute('data-pui-style'),
+            background: style.backgroundColor,
+            puiInput: style.getPropertyValue('--pui-input').trim(),
+            input: style.getPropertyValue('--input').trim(),
+            documentTheme: document.documentElement.dataset.theme ?? null,
+          };
+        });
         expect(alpha((await paint(customEditor)).background)).toBe(0);
         const localTheme = page.locator('[data-case="textarea"] > div');
         await localTheme.evaluate((element) => element.classList.add('dark'));

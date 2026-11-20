@@ -4,11 +4,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: shadcn-oracle-native-evidence-${{ github.ref }}
+  group: color-lifetime-diagnostic-evidence-${{ github.ref }}
   cancel-in-progress: false
-
-env:
-  CANDIDATE_SHA: d45b73b22321773256ef3b68563be9b0b127a396
 
 jobs:
   shadcn-oracles:
@@ -17,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -29,15 +26,15 @@ jobs:
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/shadcn-oracle-native"
-          "$CHROME" --version | tee "$RUNNER_TEMP/shadcn-oracle-native/browser.txt"
+          mkdir -p "$RUNNER_TEMP/color-lifetime-diagnostic"
+          "$CHROME" --version | tee "$RUNNER_TEMP/color-lifetime-diagnostic/browser.txt"
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Exercise the complete color scheme browser suite
+      - name: Record physical color scheme lifetime samples
         env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/shadcn-oracle-native
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/color-lifetime-diagnostic
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse HEAD^)" = c5aa7bbb183a40f775198bc965187127aa9dde38
           git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             apps/www/test/color-scheme.browser.test.ts \
@@ -46,7 +43,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: shadcn-oracle-native-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/shadcn-oracle-native
+          name: color-lifetime-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/color-lifetime-diagnostic
           if-no-files-found: warn
           retention-days: 30
