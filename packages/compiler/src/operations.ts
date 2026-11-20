@@ -2367,6 +2367,21 @@ export function privilegedCaptureType(id: string): ValueType | undefined {
   return lookup(id.split(':')[0])?.result;
 }
 
+export function captureStateHandlesType(capture: HookCaptureIR | undefined): ValueType {
+  const fields = (capture?.states ?? []).map((state) => {
+    const primitive = stateValue(state.type);
+    return {
+      name: state.name,
+      type: (typeof state.type === 'string' && state.type.startsWith('observed:')
+        ? state.type : `borrowed:${primitive}`) as ValueType,
+      readonly: true,
+      optional: !state.definite,
+    };
+  });
+  const record: ValueType = { kind: 'object', fields };
+  return fields.some((field) => !field.optional) ? record : joinValueTypes([record, 'void']);
+}
+
 export function operationResultType(
   operation: string,
   receiver?: ValueType,

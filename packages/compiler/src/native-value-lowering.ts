@@ -121,7 +121,7 @@ export function formatJavaScriptValueType(
   if (typeof type === 'string') return atom(type);
   switch (type.kind) {
     case 'capture':
-      return '{ readonly getState?: (name: string) => unknown; readonly getMethod?: (name: string) => unknown; readonly getAsHook?: (name: string) => unknown; readonly getAsHookHandle?: (name: string) => unknown }';
+      return '{ readonly stateHandles?: Readonly<Record<string, unknown>>; readonly getState?: (name: string) => unknown; readonly getMethod?: (name: string) => unknown; readonly getAsHook?: (name: string) => unknown; readonly getAsHookHandle?: (name: string) => unknown }';
     case 'cell':
       return formatJavaScriptValueType(type.value, atom);
     case 'value-union':
@@ -170,6 +170,10 @@ export function emitJavaScriptMember(
   const type = value.object.type;
   const refinement = type === 'exception' ? '{readonly [key: string]: unknown}' : undefined;
   const object = emit(value.object);
+  if (typeof type !== 'string' && type.kind === 'capture' && value.property === 'stateHandles') {
+    const code = `(${object})${value.optional ? '?.' : ''}["stateHandles"]`;
+    return read(value, typed ? `(${code} as ${typeName(value.type)})` : `/** @type {${typeName(value.type)}} */ (${code})`);
+  }
   const narrowed = !refinement
     ? object
     : typed

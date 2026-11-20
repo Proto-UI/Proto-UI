@@ -15,6 +15,7 @@ import {
   validateOperationPhase,
   isTemplateChildType,
   capabilityMemberType,
+  captureStateHandlesType,
   capabilityBinaryType,
   stateValue,
   stateDeclarationData,
@@ -624,6 +625,8 @@ class Frontend {
           if (optional) return 'void';
           throw new TypeError(`Cannot read ${property} on a nullish value.`);
         }
+        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'stateHandles')
+          return captureStateHandlesType(this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture);
         const capability = capabilityMemberType(owner, property, optional);
         if (capability !== undefined) return capability;
         if (owner === 'props') {

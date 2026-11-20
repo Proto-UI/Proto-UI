@@ -41,6 +41,26 @@ export function deriveHookCapture(
     hooks
   );
   if (issue) reject('PUI1007', issue.message, issue.span);
+  const definite = new Set<string>();
+  for (const statement of setup.body) {
+    if (statement.kind === 'return' || statement.kind === 'throw') break;
+    if (statement.kind === 'if' || statement.kind === 'try') {
+      // A reachable return in either branch can bypass later declarations.
+      const returns = (body: readonly StatementIR[]): boolean => body.some((item) =>
+        item.kind === 'return' || (item.kind === 'if' &&
+          (returns(item.then) || returns(item.otherwise))) || (item.kind === 'try' &&
+          (returns(item.body) || returns(item.catch?.body ?? []) || returns(item.finally ?? []))));
+      if (returns([statement])) break;
+      continue;
+    }
+    const value = statement.kind === 'const' ? statement.value : statement.expression;
+    if (value.kind !== 'operation' || !value.operation.startsWith('state.')) continue;
+    const key = value.arguments[0];
+    if (key?.kind === 'literal' && typeof key.value === 'string' && stateValue(value.type))
+      definite.add(key.value);
+  }
+  for (const [name, state] of states)
+    if (definite.has(name)) states.set(name, { ...state, definite: true });
   return {
     states: [...states.values()],
     methods: [...methods.values()],
@@ -145,6 +165,12 @@ export function derivePrototypeCaptures(
     },
   });
   if (issue) reject('PUI1007', issue.message, issue.span);
+  // Presence belongs to a unique declaration, including multiple-mode hooks.
+  for (const hook of ir.hooks)
+    if (ir.hooks.filter((other) => other.name === hook.name).length > 1) {
+      const capture = captures.get(hook.id)!;
+      capture.states = capture.states.map(({ definite, ...state }) => state);
+    }
   // Non-multiple definitions with the same public registration name share a
   // first-winner result. Their static views must not disagree about its fields.
   const families = new Map<string, AuthoredHookIR[]>();
