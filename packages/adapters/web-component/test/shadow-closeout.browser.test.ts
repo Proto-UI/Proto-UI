@@ -832,7 +832,16 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
-  it.each(['unchanged', 'remove second', 'replace second', 'reverse', 'clear'] as const)(
+  // Preserve HyacinthHaru's in-place DataTransfer case from PR #1484
+  // (8d4abf48a82756a8a7c1d85684a3dcc06df1149b), alongside replacement-list coverage.
+  it.each([
+    'unchanged',
+    'remove second',
+    'mutate the assigned list',
+    'replace second',
+    'reverse',
+    'clear',
+  ] as const)(
     'validates caller file membership through late split publication (%s)',
     async (mutation) => {
       const page = await browser.newPage();
@@ -870,6 +879,7 @@ describe('Shadow closeout native boundaries', () => {
                 connectedCallback() {
                   reaction = true;
                   if (mutation === 'clear') input.value = '';
+                  else if (mutation === 'mutate the assigned list') initial.items.remove(1);
                   else {
                     const changed = new DataTransfer();
                     changed.items.add(original[mutation === 'reverse' ? 1 : 0]);
@@ -937,6 +947,7 @@ describe('Shadow closeout native boundaries', () => {
         const expectedReactionFiles = {
           unchanged: [0, 1],
           'remove second': [0],
+          'mutate the assigned list': [0],
           'replace second': [0, -1],
           reverse: [1, 0],
           clear: [],
@@ -945,6 +956,7 @@ describe('Shadow closeout native boundaries', () => {
         if (
           mutation === 'unchanged' ||
           mutation === 'remove second' ||
+          mutation === 'mutate the assigned list' ||
           mutation === 'replace second'
         )
           expect(result.reactionValue).toBe(result.beforeValue);
