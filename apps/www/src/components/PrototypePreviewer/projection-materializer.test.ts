@@ -195,7 +195,7 @@ describe('Website projection materializer', () => {
           expect(fakes.watchTheme).toHaveBeenCalledOnce();
         }
         expect(postTask).toHaveBeenLastCalledWith(expect.any(Function), {
-          priority: 'background',
+          priority: 'user-visible',
           signal: owner.signal,
         });
         owner.abort();

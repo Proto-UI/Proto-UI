@@ -7,13 +7,13 @@ export function previewerStartupTask(element: Element, signal: AbortSignal): Pro
         scheduler?: {
           postTask(
             callback: () => void,
-            options: { priority: 'background'; signal: AbortSignal }
+            options: { priority: 'user-visible'; signal: AbortSignal }
           ): Promise<void>;
         };
       })
     | null;
   if (view?.scheduler?.postTask)
-    return view.scheduler.postTask(() => undefined, { priority: 'background', signal });
+    return view.scheduler.postTask(() => undefined, { priority: 'user-visible', signal });
   // Promise.withResolvers is unavailable in some browsers that need this fallback.
   return new Promise<void>((resolve, reject) => {
     const abort = () => {
