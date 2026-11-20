@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { definePrototype } from '@proto.ui/core';
 import { AdaptToWebComponent } from '../src';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
@@ -8,7 +8,14 @@ let id = 0;
 // The original native18 remains the selected-text oracle. These cases cover
 // recovery admission and the shell slot's lifetime after owner retirement.
 describe('failed initial split caller projection recovery', () => {
-  it.each(['restore', 'adopt', 'remove nested', 'replace nested', 'redistribute text'] as const)(
+  it.each([
+    'restore',
+    'adopt',
+    'remove nested',
+    'replace nested',
+    'redistribute text',
+    'staging failure',
+  ] as const)(
     'retains a caller-only slot only after a complete rollback (%s)',
     async (mutation) => {
       const suffix = ++id;
@@ -26,7 +33,9 @@ describe('failed initial split caller projection recovery', () => {
       secondSpan.append(secondText);
       if (mutation === 'redistribute text') container.append(firstSpan, secondSpan);
       else container.append(button);
-      const caller = mutation === 'restore' || mutation === 'adopt' ? input : container;
+      const stagingFailure = mutation === 'staging failure';
+      const caller =
+        mutation === 'restore' || mutation === 'adopt' || stagingFailure ? input : container;
       const foreign = document.implementation.createHTMLDocument();
       let reacted = false;
       customElements.define(
@@ -89,6 +98,19 @@ describe('failed initial split caller projection recovery', () => {
         event.preventDefault();
       };
       window.addEventListener('error', capture);
+      const createElement = document.createElement.bind(document);
+      // Model the synchronous reaction of a custom element constructed in detached staging.
+      const stagingReaction = stagingFailure
+        ? vi.spyOn(document, 'createElement').mockImplementation((tag, options) => {
+            const element = createElement(tag, options);
+            if (tag === reactionTag && !reacted) {
+              reacted = true;
+              input.value = 'Reset';
+              throw new Error('detached staging failed');
+            }
+            return element;
+          })
+        : undefined;
       try {
         try {
           document.body.append(host);
@@ -100,7 +122,9 @@ describe('failed initial split caller projection recovery', () => {
         await disposed;
         expect(errors[0]).toBeInstanceOf(Error);
         expect((errors[0] as Error).name).toBe('Error');
-        expect((errors[0] as Error).message).toContain('decoration caller projection changed');
+        expect((errors[0] as Error).message).toContain(
+          stagingFailure ? 'detached staging failed' : 'decoration caller projection changed'
+        );
         expect(environmentListeners.size).toBe(0);
         expect(host.getExposes?.() ?? {}).toEqual({});
         expect(host.hasAttribute('data-pui-color-scheme')).toBe(false);
@@ -150,6 +174,7 @@ describe('failed initial split caller projection recovery', () => {
         if (typeof exposes.ping !== 'function') throw new Error('Missing public ping method.');
         expect(exposes.ping()).toBe('live');
       } finally {
+        stagingReaction?.mockRestore();
         host.remove();
         await Promise.resolve();
         window.removeEventListener('error', capture);

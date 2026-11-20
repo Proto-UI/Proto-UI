@@ -12,7 +12,7 @@ import {
   planLiquidHoverEvidence,
   selectLiquidHoverRuntimes,
   writeLiquidHoverJsonAtomic,
-} from './liquid-hover-plan';
+} from '../../../../test/helpers/liquid-hover-plan';
 
 const runtimes = ['wc', 'react', 'vue', 'vue2'] as const;
 const source = {

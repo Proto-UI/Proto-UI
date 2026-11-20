@@ -604,9 +604,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
             currentFeedback() === feedback
         )
       : undefined;
-    const assertCallerProjection = () => {
+    const restoreCallerProjection = (error: unknown) => {
       if (!callerProjection || callerProjection.isCurrent()) return;
-      const error = new Error('[WC Adapter] decoration caller projection changed');
       if (turn === commitTurn && ownsDecorationRoot()) {
         try {
           callerProjection.restore();
@@ -618,9 +617,17 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           )
             args.onCallerProjectionRestored?.();
         } catch (rollbackError) {
-          throw new AggregateError([error, rollbackError], error.message);
+          throw new AggregateError(
+            [error, rollbackError],
+            error instanceof Error ? error.message : '[WC Adapter] decoration caller projection changed'
+          );
         }
       }
+    };
+    const assertCallerProjection = () => {
+      if (!callerProjection || callerProjection.isCurrent()) return;
+      const error = new Error('[WC Adapter] decoration caller projection changed');
+      restoreCallerProjection(error);
       throw error;
     };
     const stagedChildren = splitRoot ? new Map<Node, ChildNode[]>() : undefined;
@@ -686,6 +693,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           throw error;
         }
       },
+      restoreCallerProjection,
       captureSplitTree(staging: DocumentFragment): DecorationTreeRecord | undefined {
         if (!boundLease || !splitRoot || !stagedChildren) return;
         const staged = {
@@ -761,12 +769,17 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       }
     } else if (shadow) {
       const decorations = shadowCommitRoot ? stageOwnedDecorations(children, turn) : null;
-      commitChildren(shadowCommitRoot ?? root, children, {
-        mode: 'shadow',
-        owned: decorations?.owned,
-        bindDecorations: decorations?.bindDecorations,
-        recordStagedNode: decorations?.recordStagedNode,
-      });
+      try {
+        commitChildren(shadowCommitRoot ?? root, children, {
+          mode: 'shadow',
+          owned: decorations?.owned,
+          bindDecorations: decorations?.bindDecorations,
+          recordStagedNode: decorations?.recordStagedNode,
+        });
+      } catch (error) {
+        decorations?.restoreCallerProjection(error);
+        throw error;
+      }
       if (shadowCommitRoot && decorations) {
         const staged = decorations.captureSplitTree(shadowCommitRoot);
         shadowViewTarget!.replaceRenderedChildren(shadowCommitRoot.childNodes);
