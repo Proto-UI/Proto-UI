@@ -207,6 +207,8 @@ The 2026-11-19 Finf registry admission reviews `apps/www/src/components/Prototyp
 | `apps/www/src/components/Homepage/HomepageRuntime.astro` | `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `907729ef5fed83479c0e9ac4daa01e0f52c3657445fa0974bd0a71b9e3ee0705` |
 | `apps/www/src/components/Homepage/home-action-icons.ts` | `www.shell.hero-actions` | `f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c` |
 | `apps/www/src/components/Homepage/homepage-demo-participant.ts` | `www.demo.home-demo-select` | `3bd20a467e5921228ac529ce295ac65df9caf593176a9fb8d07ea15a060b1c41` |
+| `apps/www/src/components/Homepage/homepage-ghost-theme.ts` | `www.demo.home-demo-select` | `106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4` |
+| `apps/www/src/components/Homepage/HomepageGhostCard.astro` | `www.demo.home-demo-select` | `aa0aefbf186d33d73257078cc3ee870172f81cc942f66852e7d4a4642860a515` |
 | `apps/www/src/components/Homepage/homepage-gallery-icons.ts` | `www.demo.home-demo-select` | `ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7` |
 | `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `1e9535ee22abb05f75f4fc1f0a422abc553128aee238588fe1809a0983f69cbb` |
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
