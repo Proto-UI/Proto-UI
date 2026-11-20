@@ -3,9 +3,10 @@ import { join } from 'node:path';
 import type { CDPSession, Page, Request, Response } from 'playwright-core';
 
 const PROFILE_WINDOW_MS = 45_000;
+const PARTIAL_PROFILE_WINDOW_MS = 5_000;
 const COMMAND_LIMIT_MS = 2_000;
 const ROW_LIMIT = 200;
-const inert = { finish: async () => {} };
+const inert = { finish: async () => {}, checkpoint: () => {} };
 
 async function bounded<T>(pending: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -48,6 +49,10 @@ export async function startMatrixStartupDiagnostic(
   let finished = false;
   let finishPromise: Promise<void> | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let partialTimer: ReturnType<typeof setTimeout> | undefined;
+  let partialCapture: Promise<void> = Promise.resolve();
+  let partialProfileState = 'pending';
+  let partialProfileError: string | null = null;
   let heartbeat: ReturnType<typeof setInterval> | undefined;
   let writes: Promise<void> = Promise.resolve();
   const tracked = new WeakMap<Request, { path: string; type: string; elapsedMs: number }>();
@@ -55,10 +60,26 @@ export async function startMatrixStartupDiagnostic(
   const counts = { requested: 0, responses: 0, finished: 0, failed: 0, ignoredOtherOrigins: 0 };
   const statuses: Record<string, number> = {};
   const failures: Array<{ path: string; elapsedMs: number; error: string | null }> = [];
+  const slowestResources: Array<{
+    path: string;
+    type: string;
+    elapsedMs: number;
+    durationMs: number;
+  }> = [];
+  const timeline: Array<{
+    elapsedMs: number;
+    phase: string;
+    requested: number;
+    finished: number;
+    failed: number;
+    outstanding: number;
+  }> = [];
+  let lastNetworkEventMs: number | null = null;
   let truncated = false;
   const header = () => ({
     startedAt: new Date(startedAt).toISOString(),
     requestedProfileWindowMs: PROFILE_WINDOW_MS,
+    requestedPartialProfileWindowMs: PARTIAL_PROFILE_WINDOW_MS,
     sourceSha: options.sourceSha,
     caseName: options.caseName,
     diagnosticOnly: true,
@@ -77,20 +98,36 @@ export async function startMatrixStartupDiagnostic(
       })
       .catch((error) => console.error('[demo-matrix-startup-diagnostic-write]', String(error)));
   };
-  const snapshot = () =>
+  const snapshot = () => {
+    if (timeline.length < ROW_LIMIT)
+      timeline.push({
+        elapsedMs: Date.now() - startedAt,
+        phase: options.phase(),
+        requested: counts.requested,
+        finished: counts.finished,
+        failed: counts.failed,
+        outstanding: counts.requested - counts.finished - counts.failed,
+      });
     persist('status.json', {
       ...header(),
       finished,
       profileState,
       profileError,
+      partialProfileState,
+      partialProfileError,
+      timeline: [...timeline],
       network: {
         ...counts,
         statuses: { ...statuses },
         pending: [...pending.values()],
         failures: [...failures],
+        outstanding: counts.requested - counts.finished - counts.failed,
+        lastEventElapsedMs: lastNetworkEventMs,
+        slowestResources: [...slowestResources],
         truncated,
       },
     });
+  };
   const request = (entry: Request) => {
     let url: URL;
     try {
@@ -109,6 +146,7 @@ export async function startMatrixStartupDiagnostic(
       elapsedMs: Date.now() - startedAt,
     };
     tracked.set(entry, row);
+    lastNetworkEventMs = row.elapsedMs;
     counts.requested++;
     if (pending.size < ROW_LIMIT) pending.set(entry, row);
     else truncated = true;
@@ -116,18 +154,25 @@ export async function startMatrixStartupDiagnostic(
   const response = (entry: Response) => {
     if (!tracked.has(entry.request())) return;
     counts.responses++;
+    lastNetworkEventMs = Date.now() - startedAt;
     const status = String(entry.status());
     statuses[status] = (statuses[status] ?? 0) + 1;
   };
   const requestFinished = (entry: Request) => {
-    if (!tracked.has(entry)) return;
+    const row = tracked.get(entry);
+    if (!row) return;
     counts.finished++;
+    lastNetworkEventMs = Date.now() - startedAt;
+    slowestResources.push({ ...row, durationMs: lastNetworkEventMs - row.elapsedMs });
+    slowestResources.sort((a, b) => b.durationMs - a.durationMs);
+    if (slowestResources.length > ROW_LIMIT) slowestResources.pop();
     pending.delete(entry);
   };
   const requestFailed = (entry: Request) => {
     const row = tracked.get(entry);
     if (!row) return;
     counts.failed++;
+    lastNetworkEventMs = Date.now() - startedAt;
     pending.delete(entry);
     if (failures.length < ROW_LIMIT)
       failures.push({
@@ -164,35 +209,48 @@ export async function startMatrixStartupDiagnostic(
     void detach();
   });
   snapshot();
+  const capture = async (name: string) => {
+    if (!profileStarted || !session) return;
+    // A timed-out stop is never retried on the same recording.
+    profileStarted = false;
+    const requestedAt = Date.now() - startedAt;
+    const result = await bounded(session.send('Profiler.stop'), 'Profiler stop');
+    // Retain only public script URLs, with no credentials, query, fragment,
+    // relative sourceURL text or non-HTTP source payload.
+    for (const node of result.profile.nodes) {
+      try {
+        const url = new URL(node.callFrame.url);
+        node.callFrame.url = /^https?:$/.test(url.protocol)
+          ? `${url.origin}${url.pathname}`
+          : '[non-http script]';
+      } catch {
+        node.callFrame.url = '[unresolved script]';
+      }
+    }
+    persist(name, {
+      ...header(),
+      stopRequestedElapsedMs: requestedAt,
+      stopCompletedElapsedMs: Date.now() - startedAt,
+      profile: result.profile,
+    });
+  };
   const finish = () =>
     (finishPromise ??= (async () => {
       finished = true;
+      if (partialProfileState === 'pending') partialProfileState = 'not-requested';
       setupRetired = true;
       clearTimeout(timer);
+      clearTimeout(partialTimer);
       clearInterval(heartbeat);
       page.off('request', request);
       page.off('response', response);
       page.off('requestfinished', requestFinished);
       page.off('requestfailed', requestFailed);
+      await partialCapture;
       if (profileStarted && session) {
         try {
-          const result = await bounded(session.send('Profiler.stop'), 'Profiler stop');
-          // A fresh test context owns this session. Strip URL query/fragment even
-          // from public script frames; the profile contains no source/body payload.
-          for (const node of result.profile.nodes) {
-            try {
-              const url = new URL(node.callFrame.url);
-              node.callFrame.url = /^https?:$/.test(url.protocol)
-                ? `${url.origin}${url.pathname}`
-                : '[non-http script]';
-            } catch {
-              // Relative, protocol-relative and malformed sourceURL values are
-              // not verified public resource URLs. Never retain their raw text.
-              node.callFrame.url = '[unresolved script]';
-            }
-          }
+          await capture('profile.json');
           profileState = 'captured';
-          persist('profile.json', { ...header(), profile: result.profile });
         } catch (error) {
           profileState = 'unavailable';
           profileError = String(error);
@@ -209,6 +267,35 @@ export async function startMatrixStartupDiagnostic(
   timer = setTimeout(() => {
     void finish();
   }, PROFILE_WINDOW_MS);
+  partialTimer = setTimeout(() => {
+    if (!profileStarted || !session) return;
+    partialProfileState = 'capturing';
+    partialCapture = (async () => {
+      try {
+        await capture('partial-profile.json');
+        partialProfileState = 'captured';
+        profileState = 'captured-partial';
+        // Persist before requesting more renderer work. A later renderer stall
+        // must not discard the already returned early recording.
+        snapshot();
+        await bounded(writes, 'Partial diagnostic writes');
+        if (finished) return;
+        await bounded(session.send('Profiler.start'), 'Profiler restart');
+        profileStarted = true;
+        profileState = 'recording';
+      } catch (error) {
+        if (partialProfileState !== 'captured') {
+          partialProfileState = 'unavailable';
+          partialProfileError = String(error);
+        }
+        profileState = 'unavailable';
+        profileError = String(error);
+      }
+      snapshot();
+    })();
+  }, PARTIAL_PROFILE_WINDOW_MS);
+  // Runner-clock observations remain available when DOM/CDP commands stall.
+  // Durations are request-event timings, not proof of module evaluation or paint.
   heartbeat = setInterval(snapshot, 5_000);
-  return { finish };
+  return { finish, checkpoint: snapshot };
 }

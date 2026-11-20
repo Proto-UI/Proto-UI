@@ -73,6 +73,7 @@ async function persistReadinessDiagnostic(
   const state = matrixDiagnostics.get(page);
   if (!state) return;
   state.phase = phase;
+  state.startupDiagnostic?.checkpoint();
   const sequence = ++state.sequence;
   const header = {
     sourceSha: diagnosticSourceSha,

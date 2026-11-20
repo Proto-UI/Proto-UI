@@ -194,13 +194,19 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     vi.useFakeTimers();
     const { page, session } = fixture();
     const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
-    await vi.advanceTimersByTimeAsync(44_999);
+    const startedAt = Date.now();
+    await vi.advanceTimersByTimeAsync(4_999);
     expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
     await vi.advanceTimersByTimeAsync(1);
+    await vi.waitFor(() =>
+      expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.start')).toHaveLength(2)
+    );
+    expect((await result('partial-profile.json')).stopRequestedElapsedMs).toBe(5_000);
+    await vi.advanceTimersByTimeAsync(45_000 - (Date.now() - startedAt));
     await handle.finish();
     await handle.finish();
     expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
-      1
+      2
     );
     expect((await result()).elapsedMs).toBe(45_000);
     expect(vi.getTimerCount()).toBe(0);
@@ -227,6 +233,76 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
       expect(page.eventNames()).toEqual([]);
     }
   );
+  it('retains the early profile when the later renderer stop hangs without replacing acceptance failure', async () => {
+    vi.useFakeTimers();
+    const { page, session } = fixture();
+    const send = session.send.getMockImplementation()!;
+    let stops = 0;
+    session.send.mockImplementation(async (method) => {
+      if (method === 'Profiler.stop' && ++stops === 2) return new Promise<never>(() => {});
+      return send(method);
+    });
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
+    await vi.advanceTimersByTimeAsync(5_000);
+    await vi.waitFor(() =>
+      expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.start')).toHaveLength(2)
+    );
+    const partial = await result('partial-profile.json');
+    expect(partial.stopRequestedElapsedMs).toBe(5_000);
+    expect(JSON.stringify(partial)).not.toContain('secret');
+    const original = new Error('original committed-host-readiness timeout');
+    const finishing = handle.finish();
+    await vi.advanceTimersByTimeAsync(2_000);
+    await finishing;
+    const journey = async () => {
+      try {
+        throw original;
+      } finally {
+        await handle.finish();
+      }
+    };
+    await expect(journey()).rejects.toBe(original);
+    expect(await result()).toMatchObject({
+      finished: true,
+      partialProfileState: 'captured',
+      profileState: 'unavailable',
+      profileError: expect.stringContaining('unavailable within 2000ms'),
+    });
+    expect(await result('partial-profile.json')).toEqual(partial);
+    expect(page.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('records resource durations and exact runner phase checkpoints without renderer evaluation', async () => {
+    vi.useFakeTimers();
+    const { page } = fixture();
+    let phase = 'route-open';
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, {
+      ...options(),
+      phase: () => phase,
+    });
+    const dependency = request('http://127.0.0.1:4321/runtime.ts?secret=omit');
+    page.emit('request', dependency);
+    await vi.advanceTimersByTimeAsync(100);
+    page.emit('requestfinished', dependency);
+    phase = 'committed-host-readiness';
+    handle.checkpoint();
+    await handle.finish();
+    const facts = await result();
+    expect(facts.network).toMatchObject({
+      outstanding: 0,
+      lastEventElapsedMs: 100,
+      slowestResources: [{ path: '/runtime.ts', type: 'script', elapsedMs: 0, durationMs: 100 }],
+    });
+    expect(facts.timeline).toContainEqual({
+      phase,
+      elapsedMs: 100,
+      requested: 1,
+      finished: 1,
+      failed: 0,
+      outstanding: 0,
+    });
+    expect(page.evaluate).not.toHaveBeenCalled();
+  });
   it.each(['Profiler.enable', 'Profiler.stop'])(
     'bounds an unresponsive %s and retains an unavailable receipt',
     async (method) => {
