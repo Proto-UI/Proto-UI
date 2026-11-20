@@ -502,13 +502,13 @@ impl InputRouter {
     fn key_up(&mut self, target: &Target, fields: &PortableKeyFields, routing: &mut Routing) {
         let key_up = EventType::Core(CoreEvent::KeyUp);
         let payload = Payload::Key(fields.clone());
-        for index in 0..self.sessions.len() {
-            let scopes: &[EventScope] = if routes_to(target, &self.sessions[index].route) {
+        for session in &self.sessions {
+            let scopes: &[EventScope] = if routes_to(target, &session.route) {
                 &[EventScope::Global, EventScope::Root]
             } else {
                 &[EventScope::Global]
             };
-            routing.emit(&self.sessions[index].route, &key_up, scopes, &payload);
+            routing.emit(&session.route, &key_up, scopes, &payload);
         }
     }
 
