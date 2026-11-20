@@ -510,7 +510,22 @@ fn expose_key(owner:&OwnerRef,key:Value)->String{
     let key=key.text();if key.is_empty(){throw_error("EXPOSE_KEY_INVALID","Expose key must be nonempty")}
     let owner=owner.borrow();if owner.exposes.contains_key(&key)||owner.declared_events.contains(&key){throw_error("EXPOSE_DUPLICATE",&format!("duplicate Expose key: {key}"))}key
 }
-pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,state);Value::Undefined}
+pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{
+    let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);
+    let mut owner=owner_ref.borrow_mut();
+    if let Value::Observed(_,observation)=&state {
+        let name=match *observation {
+            "focus.focused"=>Some("focused"),
+            "focus.visible"=>Some("focusVisible"),
+            "focus.ready"=>Some("focusable"),
+            _=>None,
+        };
+        if let (Some(name),Some(frame))=(name,owner.authored.frames.last_mut()) {
+            frame.states.insert(name.into(),state.clone());
+        }
+    }
+    owner.exposes.insert(key,state);Value::Undefined
+}
 pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,value);Value::Undefined}
 pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);capture_method(&owner_ref,key.clone(),callback.clone());owner_ref.borrow_mut().exposes.insert(key,callback);Value::Undefined}
 pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().declared_events.insert(key);Value::Undefined}

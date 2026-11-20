@@ -1,4 +1,5 @@
 import type { AuthoredHookIR, FunctionIR, GeneratedModule, ValueType, ExpressionIR } from './ir';
+import { privilegedStateMembers } from './operations';
 
 /** Owner-local capture and installation. Authored behavior remains emitted native functions. */
 export const nativeAuthoredHooksArtifact: NonNullable<GeneratedModule['supportingFiles']>[number] =
@@ -30,13 +31,14 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
   type Frame = { names: Set<string>; states: Map<string, unknown>; methods: Map<string, unknown>; children: NativeHookChild[] };
   type Entry = { order: number; mode: NativeHookChild['mode']; api: NativeHookApi; result?: unknown; handle?: unknown; installing: boolean; privileged: boolean };
   const entries = new Map<string, Entry>(), frames: Frame[] = [], rootNames = new Set<string>();
+  const observedNames = new WeakMap<object, string>();
   let order = 0;
   function record(definition: Definition, entry: Entry, result = entry.result, handle = entry.handle): void {
     const parent = frames.at(-1);
     if (parent) parent.children.push(Object.freeze({name: definition.name, order: entry.order, privileged: false, mode: definition.mode, result, handle}));
   }
   return {
-    privileged<T>(name: string, acquire: () => T): T {
+    privileged<T>(name: string, acquire: () => T, observedMembers?: readonly (keyof T & string)[]): T {
       options.setup();
       let entry = entries.get(name);
       if (entry && !entry.privileged) throw new Error('[Hook] registration kind conflict: ' + name);
@@ -45,7 +47,9 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
         const api = Object.freeze({name, order: order++, store: Object.create(null) as Record<string, unknown>});
         entry = {order:api.order, mode:'once', api, installing:true, privileged:true};
         entries.set(name, entry);
-        entry.handle = entry.result = acquire();
+        const handle = acquire();
+        for (const member of observedMembers ?? []) observedNames.set(handle[member] as object, member);
+        entry.handle = entry.result = handle;
         entry.installing = false;
       }
       frames.at(-1)?.children.push(Object.freeze({name, order:entry.order, privileged:true, mode:'once', result:entry.result, handle:entry.handle}));
@@ -58,6 +62,10 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
       names.add(name);
     },
     state(name: string, state: unknown): void { options.setup(); frames.at(-1)?.states.set(name, state); },
+    introduceObserved(state: object): void {
+      const name = observedNames.get(state);
+      if (name !== undefined) frames.at(-1)?.states.set(name, state);
+    },
     method(name: string, method: unknown): void { options.setup(); frames.at(-1)?.methods.set(name, method); },
     install(definition: Definition, input?: unknown): unknown {
       options.setup();
@@ -83,7 +91,7 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
       try {
         const render = definition.setup(input, api);
         frames.pop(); captureOpen = false;
-        const states = new Map([...frame.states].map(([name, value]) => [name, options.borrow(value)]));
+        const states = new Map([...frame.states].map(([name, value]) => [name, observedNames.has(value as object) ? value : options.borrow(value)]));
         const stateHandles = states.size ? Object.freeze(Object.fromEntries(states)) : undefined;
         const children = Object.freeze(frame.children.slice());
         const capture: NativeHookCapture = Object.freeze({
@@ -124,7 +132,8 @@ export function emitPrivilegedHookCall(options: {
       options.typed === false ? role : `${role}: ${options.typeName(value.arguments[0].type)}`;
     return `((${parameter}) => ${manager}.privileged('asTableStructure:' + ${role}, () => ${callee}(${role})))(${emit(value.arguments[0])})`;
   }
-  return `${manager}.privileged(${JSON.stringify(name)}, () => ${callee}(${value.arguments.map(emit).join(', ')}))`;
+  const observed = privilegedStateMembers(value.operation).map((state) => state.name);
+  return `${manager}.privileged(${JSON.stringify(name)}, () => ${callee}(${value.arguments.map(emit).join(', ')})${observed.length ? `, ${JSON.stringify(observed)}` : ''})`;
 }
 
 export function emitAuthoredHookDefinition(options: {

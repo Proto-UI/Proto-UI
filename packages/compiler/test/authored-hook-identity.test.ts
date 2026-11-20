@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { it, expect } from 'vitest';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
@@ -185,6 +186,22 @@ export default definePrototype({name:'first-winner',setup(def){
  def.expose.value('same',first===second);return r=>r.el('div',[]);
 }});`;
 }
+const observedCaptureSource = `import {definePrototype,defineAsHook} from '@proto.ui/core';
+import {asFocusable} from '@proto.ui/hooks';
+const focusFacts=defineAsHook({name:'focus-facts',setup(def){
+  const focus=asFocusable();
+  const visible=focus.focusVisible;
+  def.expose.state('publicVisibility',visible);
+}});
+export default definePrototype({name:'observed-capture',setup(def){
+  const first=focusFacts();
+  const {focusVisible}=first.stateHandles;
+  def.expose.value('same',first===focusFacts());
+  def.expose.value('sameHandle',focusVisible===asFocusable().focusVisible);
+  def.expose.value('sameLookup',focusVisible===first.getState('focusVisible'));
+  def.expose.method('read',()=>focusVisible.get());
+  return r=>r.el('button',[]);
+}});`;
 function generatedModules(
   input: string,
   emit:
@@ -217,6 +234,7 @@ function generatedModules(
     new Function('exports', 'require', js)(exports, (id: string) => {
       if (id === 'vue') return emit === emitVue2Source ? Vue2 : Vue;
       if (id === 'react') return React;
+      if (id === 'react-dom') return ReactDOM;
       if (id === '@floating-ui/dom') return floatingUi;
       if (!id.startsWith('.')) throw new Error('Unexpected ' + id);
       const next = path.posix.normalize(path.posix.join(path.posix.dirname(name), id));
@@ -227,6 +245,24 @@ function generatedModules(
   return load(entry);
 }
 let tagIndex = 0;
+it('React retains the original Focus handle in an explicitly introduced capture', async () => {
+  const mod = generatedModules(observedCaptureSource, emitReactSource);
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const ref = React.createRef<any>();
+  try {
+    await React.act(async () => root.render(React.createElement(mod.CompiledComponent, { ref })));
+    const exposes = ref.current.getExposes();
+    expect(exposes).toMatchObject({ same: true, sameHandle: true, sameLookup: true });
+    expect(exposes.read()).toBe(false);
+    expect(exposes.publicVisibility.get()).toBe(false);
+  } finally {
+    await React.act(async () => root.unmount());
+    host.remove();
+  }
+});
+
 for (const [label, input, expected] of [
   ['identity', source, { same: false, repeat: true, winner: true, alias: true, truthy: true }],
   ['first-a', winnerSource('a'), { same: true, aInstalled: true }],

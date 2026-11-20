@@ -1,4 +1,4 @@
-import type { AuthoredHookIR, FunctionIR, HookCaptureIR, StatementIR } from './ir';
+import type { AuthoredHookIR, ExpressionIR, FunctionIR, HookCaptureIR, StatementIR } from './ir';
 import { reject } from './diagnostics';
 import { traceSetupOperations, traceHookContributions } from './callable-effects';
 import { functionValueType, valueAssignable } from './value-types';
@@ -14,11 +14,14 @@ export function deriveHookCapture(
   const states = new Map<string, HookCaptureIR['states'][number]>();
   const methods = new Map<string, HookCaptureIR['methods'][number]>();
   const children = new Map<string, HookCaptureIR['children'][number]>();
+  const definiteIntroductions = new Map<ExpressionIR, string>();
   const issue = traceSetupOperations(
     setup,
     moduleBindings,
     {
-      operation(value) {
+      operation(value, introduced, definite) {
+        for (const state of introduced) states.set(state.name, state);
+        if (definite) definiteIntroductions.set(value, introduced[0].name);
         for (const child of privilegedHookCaptures(value)) children.set(child.id, child);
         const key = value.arguments[0];
         if (key?.kind !== 'literal' || typeof key.value !== 'string') return;
@@ -54,6 +57,8 @@ export function deriveHookCapture(
       continue;
     }
     const value = statement.kind === 'const' ? statement.value : statement.expression;
+    const introduced = definiteIntroductions.get(value);
+    if (introduced !== undefined) definite.add(introduced);
     if (value.kind !== 'operation' || !value.operation.startsWith('state.')) continue;
     const key = value.arguments[0];
     if (key?.kind === 'literal' && typeof key.value === 'string' && stateValue(value.type))
@@ -130,9 +135,9 @@ export function derivePrototypeCaptures(
     ])
   );
   const issue = traceHookContributions(ir, {
-    operation(id, value) {
+    operation(id, value, introduced) {
       const contribution: HookCaptureIR = {
-        states: [],
+        states: [...introduced],
         methods: [],
         children: privilegedHookCaptures(value),
       };
