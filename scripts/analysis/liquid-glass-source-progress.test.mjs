@@ -7,11 +7,64 @@ import {
   RUNTIMES,
   assertNoProgressResurrection,
   assertProgressCleanup,
+  assertProgressIdentityStable,
   assertProgressWindow,
   installProgressCollector,
   observeAfterTwoRaf,
   summarizeProgressWindow,
 } from './liquid-glass-source-progress.mjs';
+
+test('source-progress requires stable final source and instrument identities, including absent optional files', () => {
+  const source = {
+    sha: '1'.repeat(40),
+    tree: '2'.repeat(40),
+    changes: '',
+    hashes: { 'required.ts': '3'.repeat(64), 'historically-absent.ts': null },
+  };
+  const probe = { sha256: '4'.repeat(64), latencyProbeSha256: '5'.repeat(64) };
+  assert.doesNotThrow(() =>
+    assertProgressIdentityStable(source, structuredClone(source), probe, structuredClone(probe))
+  );
+  for (const change of [
+    (end) => {
+      end.source = null;
+    },
+    (end) => {
+      end.probe = null;
+    },
+    (end) => {
+      end.source.sha = '6'.repeat(40);
+    },
+    (end) => {
+      end.source.tree = '7'.repeat(40);
+    },
+    (end) => {
+      end.source.changes = ' M required.ts';
+    },
+    (end) => {
+      end.source.hashes['required.ts'] = '8'.repeat(64);
+    },
+    (end) => {
+      delete end.source.hashes['required.ts'];
+    },
+    (end) => {
+      end.source.hashes['historically-absent.ts'] = '9'.repeat(64);
+    },
+    (end) => {
+      delete end.source.hashes['historically-absent.ts'];
+    },
+    (end) => {
+      end.probe.sha256 = 'a'.repeat(64);
+    },
+    (end) => {
+      end.probe.latencyProbeSha256 = 'b'.repeat(64);
+    },
+  ]) {
+    const end = { source: structuredClone(source), probe: structuredClone(probe) };
+    change(end);
+    assert.throws(() => assertProgressIdentityStable(source, end.source, probe, end.probe));
+  }
+});
 
 // Artificial delivery controls exercise the actual serialized collector.
 // They are not browser paint, scheduler timing or cross-adapter acceptance.

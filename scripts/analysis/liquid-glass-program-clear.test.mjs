@@ -9,6 +9,7 @@ function validEvidence() {
   const first = {
     success: true,
     gpuPreparations: 1,
+    cpuPreparations: 0,
     imageSize: { width: 64, height: 32 },
     imageSha256: 'a'.repeat(64),
   };
@@ -17,11 +18,13 @@ function validEvidence() {
     afterClear: { sourcePreparationCacheEntries: 0 },
     afterDispose: { sourcePreparationCacheEntries: 0, sourcePreparationGpuCacheBytes: 0 },
     disposalError: null,
+    experimentalGpuControl: true,
   };
   return [
     {
       ...structuredClone(shared),
       label: 'before',
+      prefilterSelection: 'historical-auto',
       second: { success: false, error: 'Error: gpu-prefilter-failed' },
       errors: [{ phase: 'second', code: 1281 }],
       reboundRetiredProgram: true,
@@ -30,6 +33,7 @@ function validEvidence() {
     {
       ...structuredClone(shared),
       label: 'after',
+      prefilterSelection: 'injected-gpu-factory',
       second: { ...structuredClone(first), gpuPreparations: 2 },
       errors: [],
       reboundRetiredProgram: false,
@@ -41,6 +45,21 @@ function validEvidence() {
 test('program lifecycle evidence requires the exact old failure and valid optical first renders', () => {
   assert.doesNotThrow(() => assertProgramClearEvidence(validEvidence()));
   const invalidators = [
+    (rows) => {
+      rows[0].prefilterSelection = 'injected-gpu-factory';
+    },
+    (rows) => {
+      rows[1].prefilterSelection = 'default-cpu';
+    },
+    (rows) => {
+      rows[1].experimentalGpuControl = false;
+    },
+    (rows) => {
+      rows[1].first.cpuPreparations = 1;
+    },
+    (rows) => {
+      rows[1].second.cpuPreparations = 1;
+    },
     (rows) => {
       rows[0].first.success = false;
     },

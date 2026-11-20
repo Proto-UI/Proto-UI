@@ -191,13 +191,14 @@ function completeProgramEvidence() {
     ['after-second-clear-c', 2, 1, 'source-c-tint', false],
   ];
   const evidence = {
+    backendSelections: { gpu: 'injected-gpu-factory', cpu: 'production-default' },
     steps: [],
     clearBoundaries: [],
     cleanup: {},
     errors: [],
     sourceCanvasesRetired: true,
   };
-  for (const backend of ['auto', 'cpu']) {
+  for (const backend of ['gpu', 'cpu']) {
     let metrics = {
       renders: 0,
       sourcePreparations: 0,
@@ -229,7 +230,7 @@ function completeProgramEvidence() {
       if (cacheHit) metrics.sourcePreparationCacheHits++;
       else {
         metrics.sourcePreparations++;
-        metrics[backend === 'auto' ? 'gpuSourcePreparations' : 'cpuSourcePreparations']++;
+        metrics[backend === 'gpu' ? 'gpuSourcePreparations' : 'cpuSourcePreparations']++;
       }
       evidence.steps[index] ??= {
         name,
@@ -271,15 +272,15 @@ function completeProgramEvidence() {
 test('program integration rejects a delete-pending clear, rebuild error and incomplete sequence', () => {
   assert.doesNotThrow(() => assertProgramIntegration(completeProgramEvidence()));
   for (const invalidate of [
-    (e) => e.errors.push({ stage: 'after-clear-a/auto/render', message: 'gpu-prefilter-failed' }),
+    (e) => e.errors.push({ stage: 'after-clear-a/gpu/render', message: 'gpu-prefilter-failed' }),
     (e) => {
-      e.clearBoundaries[0].backends.auto.currentProgramNull = false;
+      e.clearBoundaries[0].backends.gpu.currentProgramNull = false;
     },
     (e) => {
-      e.steps[1].backends.auto.error = 'gpu-frame-failed';
+      e.steps[1].backends.gpu.error = 'gpu-frame-failed';
     },
     (e) => {
-      e.steps[1].backends.auto.glError = 1282;
+      e.steps[1].backends.gpu.glError = 1282;
     },
     (e) => e.steps.splice(1, 1),
     (e) => e.clearBoundaries.pop(),
@@ -293,34 +294,40 @@ test('program integration rejects a delete-pending clear, rebuild error and inco
 test('program integration retains backend identity, exact output, cache retirement and cleanup', () => {
   for (const invalidate of [
     (e) => {
-      e.steps[0].backends.auto.pngSha256 = 'f'.repeat(64);
+      e.backendSelections.gpu = 'production-default';
     },
     (e) => {
-      e.steps[0].backends.auto.after.gpuSourcePreparations = 0;
+      e.backendSelections.cpu = 'forced-cpu';
+    },
+    (e) => {
+      e.steps[0].backends.gpu.pngSha256 = 'f'.repeat(64);
+    },
+    (e) => {
+      e.steps[0].backends.gpu.after.gpuSourcePreparations = 0;
     },
     (e) => {
       e.steps[3].backends.cpu.png = false;
     },
     (e) => {
-      e.steps[4].backends.auto.width++;
+      e.steps[4].backends.gpu.width++;
     },
     (e) => {
-      e.steps[5].backends.auto.after.sourcePreparationCacheHits--;
+      e.steps[5].backends.gpu.after.sourcePreparationCacheHits--;
     },
     (e) => {
-      e.steps[6].backends.auto.after.sourcePreparationCacheEntries = 5;
+      e.steps[6].backends.gpu.after.sourcePreparationCacheEntries = 5;
     },
     (e) => {
       e.steps[6].backends.cpu.after.sourcePreparations--;
     },
     (e) => {
-      e.cleanup.auto.resources.Texture.deleted--;
+      e.cleanup.gpu.resources.Texture.deleted--;
     },
     (e) => {
       e.cleanup.cpu.resources = {};
     },
     (e) => {
-      e.cleanup.auto.resources.VertexArray.doubleDeletes++;
+      e.cleanup.gpu.resources.VertexArray.doubleDeletes++;
     },
     (e) => {
       e.cleanup.cpu.contextLost = false;

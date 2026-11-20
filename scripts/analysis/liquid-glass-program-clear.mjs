@@ -7,6 +7,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 
 const PROGRAM = 'packages/adapters/base/src/material/program.ts';
+const HELPER = 'packages/adapters/base/src/material/prefilter.ts';
+const ENTRY_NAME = '__liquid_program_clear_entry__.ts';
+const ENTRY_CONTENTS = `export { createWebOpticalProgram } from './${PROGRAM}';
+export { createWebOpticalPrefilter } from './${HELPER}';
+`;
 const REGRESSION_SHA = '19d175f454468fa27364c8283e084f3bb7a1016b';
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
@@ -16,9 +21,16 @@ export function assertProgramClearEvidence(evidence) {
     ['before', 'after']
   );
   const [before, after] = evidence;
+  assert.deepEqual(
+    evidence.map(({ prefilterSelection }) => prefilterSelection),
+    ['historical-auto', 'injected-gpu-factory'],
+    'Lifecycle controls must explicitly select their real GPU paths'
+  );
   for (const row of evidence) {
+    assert.equal(row.experimentalGpuControl, true);
     assert.equal(row.first.success, true, `${row.label}: first render is not a valid control`);
     assert.equal(row.first.gpuPreparations, 1);
+    assert.equal(row.first.cpuPreparations, 0);
     assert.deepEqual(row.first.imageSize, { width: 64, height: 32 });
     assert.match(row.first.imageSha256, /^[a-f0-9]{64}$/);
     assert.equal(row.afterClear.sourcePreparationCacheEntries, 0);
@@ -37,6 +49,7 @@ export function assertProgramClearEvidence(evidence) {
   assert.equal(after.second.success, true, after.second.error);
   assert.deepEqual(after.second.imageSize, { width: 64, height: 32 });
   assert.equal(after.second.gpuPreparations, 2);
+  assert.equal(after.second.cpuPreparations, 0);
   assert.equal(after.second.imageSha256, after.first.imageSha256);
   assert.equal(after.first.imageSha256, before.first.imageSha256);
   assert.equal(after.reboundRetiredProgram, false);
@@ -53,8 +66,12 @@ export async function collectProgramClearRegression(modules) {
       new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))),
       (byte) => byte.toString(16).padStart(2, '0')
     ).join('');
-  for (const { label, moduleUrl } of modules) {
-    const { createWebOpticalProgram } = await import(moduleUrl);
+  for (const { label, moduleUrl, prefilterSelection } of modules) {
+    const { createWebOpticalProgram, createWebOpticalPrefilter } = await import(moduleUrl);
+    if (!['historical-auto', 'injected-gpu-factory'].includes(prefilterSelection))
+      throw new Error(`Unknown GPU lifecycle selection: ${prefilterSelection}`);
+    if (typeof createWebOpticalPrefilter !== 'function')
+      throw new Error('Real prefilter module export unavailable');
     const scope = document.createElement('div');
     const sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = 416;
@@ -73,7 +90,16 @@ export async function collectProgramClearRegression(modules) {
       antialias: false,
     });
     if (!gl) throw new Error('Real program WebGL context unavailable');
-    const row = { label, first: {}, second: {}, trace: [], errors: [], disposalError: null };
+    const row = {
+      label,
+      prefilterSelection,
+      experimentalGpuControl: true,
+      first: {},
+      second: {},
+      trace: [],
+      errors: [],
+      disposalError: null,
+    };
     results.push(row);
     let phase = 'first',
       nextId = 0,
@@ -101,7 +127,11 @@ export async function collectProgramClearRegression(modules) {
       if (code !== gl.NO_ERROR) row.errors.push({ phase, code, afterCall: row.trace.length });
       return code;
     };
-    const program = createWebOpticalProgram(canvas);
+    const program = createWebOpticalProgram(
+      canvas,
+      null,
+      prefilterSelection === 'historical-auto' ? 'auto' : createWebOpticalPrefilter
+    );
     const frame = {
       source: {
         canvas: sourceCanvas,
@@ -140,6 +170,7 @@ export async function collectProgramClearRegression(modules) {
           imageSha256: await digest(image),
           imageSize: { width: decoded.naturalWidth, height: decoded.naturalHeight },
           gpuPreparations: program.inspect().gpuSourcePreparations,
+          cpuPreparations: program.inspect().cpuSourcePreparations,
         };
       } catch (error) {
         return { success: false, error: String(error), resources: program.inspect() };
@@ -176,7 +207,7 @@ async function observe(output, regressionRoot) {
   const root = process.cwd();
   await mkdir(output, { recursive: true });
   const report = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     started: new Date().toISOString(),
     probeSha256: sha256(await readFile(fileURLToPath(import.meta.url))),
     sources: [],
@@ -185,6 +216,7 @@ async function observe(output, regressionRoot) {
     limitations: [
       'Untimed program-lifetime control on one real browser/renderer, not a performance or physical display claim.',
       'Only application getError calls are observed; no extra call consumes the GL error.',
+      'Both controls deliberately execute GPU preparation: the old source receives historical auto; the candidate receives its actual prefilter factory. This does not exercise or benchmark the candidate default CPU policy.',
     ],
   };
   let browser;
@@ -203,7 +235,12 @@ async function observe(output, regressionRoot) {
       );
       const bundle = await build({
         absWorkingDir: sourceRoot,
-        entryPoints: [PROGRAM],
+        stdin: {
+          contents: ENTRY_CONTENTS,
+          sourcefile: ENTRY_NAME,
+          resolveDir: sourceRoot,
+          loader: 'ts',
+        },
         bundle: true,
         write: false,
         platform: 'browser',
@@ -215,12 +252,20 @@ async function observe(output, regressionRoot) {
       const bytes = bundle.outputFiles[0].contents;
       const source = {
         label,
+        prefilterSelection: label === 'before' ? 'historical-auto' : 'injected-gpu-factory',
         sha: git(sourceRoot, ['rev-parse', 'HEAD']),
         tree: git(sourceRoot, ['rev-parse', 'HEAD^{tree}']),
         bundleSha256: sha256(bytes),
+        syntheticEntry: {
+          path: ENTRY_NAME,
+          contents: ENTRY_CONTENTS,
+          sha256: sha256(ENTRY_CONTENTS),
+          purpose: 'Re-export actual unchanged program and helper modules from this checkout.',
+        },
         inputs: {},
       };
       for (const input of Object.keys(bundle.metafile.inputs)) {
+        if (input === ENTRY_NAME) continue;
         assert.ok(
           !path.isAbsolute(input) && !input.startsWith('../'),
           'Bundle escaped its source checkout'
@@ -230,9 +275,11 @@ async function observe(output, regressionRoot) {
           blob: git(sourceRoot, ['rev-parse', `HEAD:${input}`]),
         };
       }
+      assert.ok(source.inputs[PROGRAM] && source.inputs[HELPER], 'Missing real module inputs');
       report.sources.push(source);
       modules.push({
         label,
+        prefilterSelection: source.prefilterSelection,
         moduleUrl: `data:text/javascript;base64,${Buffer.from(bytes).toString('base64')}`,
       });
     }
@@ -281,14 +328,22 @@ async function observe(output, regressionRoot) {
   assert.deepEqual(report.failures, []);
   console.log(
     JSON.stringify({
-      sources: report.sources.map(({ label, sha, bundleSha256 }) => ({ label, sha, bundleSha256 })),
-      evidence: report.evidence.map(({ label, first, second, errors, reboundRetiredProgram }) => ({
+      sources: report.sources.map(({ label, sha, bundleSha256, prefilterSelection }) => ({
         label,
-        first,
-        second,
-        errors,
-        reboundRetiredProgram,
+        sha,
+        bundleSha256,
+        prefilterSelection,
       })),
+      evidence: report.evidence.map(
+        ({ label, prefilterSelection, first, second, errors, reboundRetiredProgram }) => ({
+          label,
+          prefilterSelection,
+          first,
+          second,
+          errors,
+          reboundRetiredProgram,
+        })
+      ),
     })
   );
 }

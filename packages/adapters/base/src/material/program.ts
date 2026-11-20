@@ -4,7 +4,7 @@ import { validateOpticalFrameInputs } from './program-inputs';
 import { vertex, fragment, uniformNames } from './liquidgl-kernel.generated';
 import type { OpaqueRgba } from './style';
 import type { CanvasBackdropFrame } from './source';
-import { createWebOpticalPrefilter, type WebOpticalPrefilter } from './prefilter';
+import type { WebOpticalPrefilter } from './prefilter';
 
 const decodeSrgb = (channel: number) =>
   channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
@@ -48,8 +48,8 @@ export type OpticalFrame = {
 export function createWebOpticalProgram(
   canvas: HTMLCanvasElement,
   diagnostic: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null,
-  /** Internal comparison control; the provider always uses auto. */
-  sourcePreparation: 'auto' | 'cpu' = 'auto'
+  /** Internal experiment opt-in; ordinary providers use the CPU prefilter. */
+  prefilterFactory: ((gl: WebGLRenderingContext) => WebOpticalPrefilter | null) | null = null
 ) {
   type PipelineKey = `${'static' | 'contact'}:${'neutral' | 'style-tint'}`;
   type Pipeline = {
@@ -172,7 +172,7 @@ export function createWebOpticalProgram(
     const preparationStarted = performance.now();
     try {
       if (gpuPrefilter === undefined) {
-        gpuPrefilter = sourcePreparation === 'cpu' ? null : createWebOpticalPrefilter(gl!);
+        gpuPrefilter = prefilterFactory?.(gl!) ?? null;
         if (gpuPrefilter) metrics.prefilterProgramBuilds++;
       }
       let entry: PreparedSource;

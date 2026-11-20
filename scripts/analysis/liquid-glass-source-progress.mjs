@@ -65,6 +65,44 @@ const ownedPaint = (paint) =>
   paint.source === 'visible-app-canvas' &&
   paint.geometryMatches === true;
 
+async function progressSourceIdentity(root) {
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+  const identity = {
+    sha: git('rev-parse', 'HEAD'),
+    tree: git('rev-parse', 'HEAD^{tree}'),
+    changes: git('status', '--porcelain'),
+    hashes: {},
+  };
+  for (const file of [...SOURCE_FILES, ...OPTIONAL_SOURCE_FILES]) {
+    try {
+      identity.hashes[file] = sha256(await readFile(path.join(root, file)));
+    } catch (error) {
+      if (error.code === 'ENOENT' && OPTIONAL_SOURCE_FILES.includes(file))
+        identity.hashes[file] = null;
+      else throw error;
+    }
+  }
+  return identity;
+}
+
+async function progressProbeIdentity() {
+  return {
+    sha256: sha256(await readFile(fileURLToPath(import.meta.url))),
+    latencyProbeSha256: sha256(
+      await readFile(new URL('./liquid-glass-frame-budget.mjs', import.meta.url))
+    ),
+  };
+}
+
+export function assertProgressIdentityStable(source, sourceAtEnd, probe, probeAtEnd) {
+  assert.ok(sourceAtEnd, 'Missing final source identity');
+  assert.ok(probeAtEnd, 'Missing final instrument identity');
+  assert.equal(source.changes, '', 'Progress source started with changes');
+  assert.equal(sourceAtEnd.changes, '', 'Progress source ended with changes');
+  assert.deepEqual(sourceAtEnd, source, 'Source changed during progress observation');
+  assert.deepEqual(probeAtEnd, probe, 'Instrument changed during progress observation');
+}
+
 /** Browser callback: self-contained, with all configuration passed explicitly. */
 export function installProgressCollector({
   targets,
@@ -591,25 +629,16 @@ async function observe(output) {
   );
   const root = process.cwd();
   await mkdir(output, { recursive: true });
-  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
-  const changes = git('status', '--porcelain');
-  assert.equal(changes, '', 'Source-bound diagnostic requires a clean checkout');
-  const mainProbeHash = sha256(
-    await readFile(new URL('./liquid-glass-frame-budget.mjs', import.meta.url))
-  );
+  const source = await progressSourceIdentity(root);
+  assert.equal(source.changes, '', 'Source-bound diagnostic requires a clean checkout');
   const report = {
     started: new Date().toISOString(),
     kind: 'independent-four-host-source-progress',
-    source: {
-      sha: git('rev-parse', 'HEAD'),
-      tree: git('rev-parse', 'HEAD^{tree}'),
-      changes,
-      hashes: {},
-    },
-    probe: {
-      sha256: sha256(await readFile(fileURLToPath(import.meta.url))),
-      latencyProbeSha256: mainProbeHash,
-    },
+    source,
+    probe: await progressProbeIdentity(),
+    sourceAtEnd: null,
+    probeAtEnd: null,
+    sourceAndProbeStable: false,
     workload: WORKLOAD,
     environment: {
       node: process.version,
@@ -634,15 +663,6 @@ async function observe(output) {
     failures: [],
     cleanup: null,
   };
-  for (const file of [...SOURCE_FILES, ...OPTIONAL_SOURCE_FILES]) {
-    try {
-      report.source.hashes[file] = sha256(await readFile(path.join(root, file)));
-    } catch (error) {
-      if (error.code === 'ENOENT' && OPTIONAL_SOURCE_FILES.includes(file))
-        report.source.hashes[file] = null;
-      else throw error;
-    }
-  }
   report.taskMetricsRequired = report.source.hashes[OPTIONAL_SOURCE_FILES[0]] !== null;
   const save = () => writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
   const failure = (stage, error) => report.failures.push({ stage, message: String(error) });
@@ -852,6 +872,19 @@ async function observe(output) {
     await stopServer().catch((error) => failure('server-cleanup', error));
     process.removeListener('SIGTERM', interrupt);
     process.removeListener('SIGINT', interrupt);
+    try {
+      report.sourceAtEnd = await progressSourceIdentity(root);
+      report.probeAtEnd = await progressProbeIdentity();
+      assertProgressIdentityStable(
+        report.source,
+        report.sourceAtEnd,
+        report.probe,
+        report.probeAtEnd
+      );
+      report.sourceAndProbeStable = true;
+    } catch (error) {
+      failure('source-or-instrument-stability', error);
+    }
     report.ended = new Date().toISOString();
     await save();
   }

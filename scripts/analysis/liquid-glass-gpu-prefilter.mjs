@@ -10,6 +10,10 @@ import { build } from 'esbuild';
 // frame-budget timed windows, changes their cadence, or claims display FPS.
 const HELPER = 'packages/adapters/base/src/material/prefilter.ts';
 const PROGRAM = 'packages/adapters/base/src/material/program.ts';
+const PROGRAM_ENTRY_NAME = '__liquid_program_integration_entry__.ts';
+const PROGRAM_ENTRY_CONTENTS = `export { createWebOpticalProgram } from './${PROGRAM}';
+export { createWebOpticalPrefilter } from './${HELPER}';
+`;
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 
 /** Independent historical oracle: the original two rounded seven-tap passes.
@@ -541,15 +545,17 @@ export async function collectGpuPrefilter({ moduleUrl, referenceSource, pixelsSo
 
 /** Real program/helper composition, separate from the timed application probe. */
 export async function collectProgramIntegration({ moduleUrl }) {
-  const { createWebOpticalProgram } = await import(moduleUrl);
+  const { createWebOpticalProgram, createWebOpticalPrefilter } = await import(moduleUrl);
   const evidence = {
+    backendSelections: { gpu: 'injected-gpu-factory', cpu: 'production-default' },
     steps: [],
     clearBoundaries: [],
     cleanup: {},
     errors: [],
     limitations: [
       'Actual program and helper on one browser/renderer, with controlled opaque source pixels; this is not a source-lease, DOM carrier, decode or physical display benchmark.',
-      'Auto and CPU use the same unchanged optical shader and safety checks. Exact PNG equality checks the complete rendered result on this renderer.',
+      'Injected GPU and default CPU use the same unchanged optical shader and safety checks. Exact PNG equality checks the complete rendered result on this renderer.',
+      'GPU is explicitly injected for this untimed experiment. The CPU arm calls the production constructor with only the canvas, exercising its actual default policy.',
       'Resource counts observe real create/delete API calls, not total browser or GPU memory.',
     ],
   };
@@ -562,7 +568,9 @@ export async function collectProgramIntegration({ moduleUrl }) {
   const sources = [];
   const recordError = (stage, error) => evidence.errors.push({ stage, message: String(error) });
   try {
-    for (const backend of ['auto', 'cpu']) {
+    if (typeof createWebOpticalPrefilter !== 'function')
+      throw new Error('Real prefilter module export unavailable');
+    for (const backend of ['gpu', 'cpu']) {
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl', {
         alpha: true,
@@ -600,7 +608,10 @@ export async function collectProgramIntegration({ moduleUrl }) {
         track(gl, kind, `create${kind}`, `delete${kind}`);
       const arrays = gl.getExtension('OES_vertex_array_object');
       if (arrays) track(arrays, 'VertexArray', 'createVertexArrayOES', 'deleteVertexArrayOES');
-      const program = createWebOpticalProgram(canvas, null, backend);
+      const program =
+        backend === 'gpu'
+          ? createWebOpticalProgram(canvas, null, createWebOpticalPrefilter)
+          : createWebOpticalProgram(canvas);
       programs.set(backend, { canvas, gl, program, resources });
     }
     for (let index = 0; index < 4; index++) {
@@ -746,6 +757,10 @@ export async function collectProgramIntegration({ moduleUrl }) {
 
 export function assertProgramIntegration(evidence) {
   assert.deepEqual(evidence.errors, [], 'Real program/helper integration errors');
+  assert.deepEqual(evidence.backendSelections, {
+    gpu: 'injected-gpu-factory',
+    cpu: 'production-default',
+  });
   assert.deepEqual(
     evidence.steps.map((row) => row.name),
     [
@@ -761,7 +776,7 @@ export function assertProgramIntegration(evidence) {
     ]
   );
   for (const row of evidence.steps) {
-    assert.deepEqual(Object.keys(row.backends).sort(), ['auto', 'cpu']);
+    assert.deepEqual(Object.keys(row.backends).sort(), ['cpu', 'gpu']);
     for (const [backend, result] of Object.entries(row.backends)) {
       assert.equal(result.error, undefined, `${row.name}/${backend}`);
       assert.equal(result.png, true);
@@ -780,11 +795,11 @@ export function assertProgramIntegration(evidence) {
           result.after.sourcePreparationCacheBytes <= 4 * 1024 * 1024
       );
       assert.equal(
-        result.after[backend === 'auto' ? 'cpuSourcePreparations' : 'gpuSourcePreparations'],
+        result.after[backend === 'gpu' ? 'cpuSourcePreparations' : 'gpuSourcePreparations'],
         0
       );
       assert.ok(
-        result.after[backend === 'auto' ? 'gpuSourcePreparations' : 'cpuSourcePreparations'] > 0
+        result.after[backend === 'gpu' ? 'gpuSourcePreparations' : 'cpuSourcePreparations'] > 0
       );
       if (row.cacheHit) {
         assert.equal(
@@ -800,9 +815,9 @@ export function assertProgramIntegration(evidence) {
         );
     }
     assert.equal(
-      row.backends.auto.pngSha256,
+      row.backends.gpu.pngSha256,
       row.backends.cpu.pngSha256,
-      `${row.name}: auto/CPU output differs`
+      `${row.name}: injected GPU/default CPU output differs`
     );
   }
   const revised = evidence.steps.find((row) => row.name === 'revised-a');
@@ -821,7 +836,7 @@ export function assertProgramIntegration(evidence) {
     ['after-clear-a', 'after-second-clear-c']
   );
   for (const boundary of evidence.clearBoundaries)
-    for (const backend of ['auto', 'cpu']) {
+    for (const backend of ['gpu', 'cpu']) {
       const result = boundary.backends[backend];
       assert.equal(result.width, 0);
       assert.equal(result.height, 0);
@@ -833,7 +848,7 @@ export function assertProgramIntegration(evidence) {
       assert.equal(result.metrics.sourcePreparationCacheEntries, 0);
       assert.equal(result.metrics.sourcePreparationCacheBytes, 0);
     }
-  for (const backend of ['auto', 'cpu']) {
+  for (const backend of ['gpu', 'cpu']) {
     const result = evidence.cleanup[backend];
     assert.equal(result.width, 0);
     assert.equal(result.height, 0);
@@ -850,7 +865,7 @@ export function assertProgramIntegration(evidence) {
     ]);
     for (const [kind, resource] of Object.entries(result.resources)) {
       assert.ok(Number.isSafeInteger(resource.created) && resource.created >= 0);
-      if (backend === 'auto' || !['Framebuffer', 'VertexArray'].includes(kind))
+      if (backend === 'gpu' || !['Framebuffer', 'VertexArray'].includes(kind))
         assert.ok(resource.created > 0);
       assert.equal(resource.created, resource.deleted);
       assert.equal(resource.live, 0);
@@ -895,7 +910,13 @@ async function observe(output) {
     report.source.bundleSha256 = sha256(code);
     report.source.bundleInputs = compiled.metafile.inputs;
     const programCompiled = await build({
-      entryPoints: [path.join(root, PROGRAM)],
+      absWorkingDir: root,
+      stdin: {
+        contents: PROGRAM_ENTRY_CONTENTS,
+        sourcefile: PROGRAM_ENTRY_NAME,
+        resolveDir: root,
+        loader: 'ts',
+      },
       bundle: true,
       write: false,
       platform: 'browser',
@@ -905,14 +926,28 @@ async function observe(output) {
     });
     const programCode = programCompiled.outputFiles[0].contents;
     report.source.programBundleSha256 = sha256(programCode);
+    report.source.programSyntheticEntry = {
+      path: PROGRAM_ENTRY_NAME,
+      contents: PROGRAM_ENTRY_CONTENTS,
+      sha256: sha256(PROGRAM_ENTRY_CONTENTS),
+      purpose: 'Re-export the actual unchanged program and helper from this checkout.',
+    };
     report.source.programBundleInputs = programCompiled.metafile.inputs;
     report.source.programInputHashes = Object.fromEntries(
       await Promise.all(
-        Object.keys(programCompiled.metafile.inputs).map(async (file) => [
-          file,
-          sha256(await readFile(path.resolve(root, file))),
-        ])
+        Object.keys(programCompiled.metafile.inputs)
+          .filter((file) => file !== PROGRAM_ENTRY_NAME)
+          .map(async (file) => {
+            assert.ok(
+              !path.isAbsolute(file) && !file.startsWith('../'),
+              'Program integration bundle escaped its source checkout'
+            );
+            return [file, sha256(await readFile(path.resolve(root, file)))];
+          })
       )
+    );
+    assert.ok(
+      report.source.programInputHashes[PROGRAM] && report.source.programInputHashes[HELPER]
     );
     const { launchBrowser } = await import(
       pathToFileURL(path.join(root, 'apps/www/src/content/docs/zh-cn/browser-harness.ts')).href

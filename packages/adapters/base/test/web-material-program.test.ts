@@ -11,10 +11,10 @@ import {
 } from '../src/material/style-tint-profile';
 import { acquireWebOpticalProgram, inspectWebOpticalResources } from '../src/material/program-pool';
 import { colorContrast, type OpaqueRgba } from '../src/material/style';
-import * as prefilterModule from '../src/material/prefilter';
+type PrefilterFactory = NonNullable<Parameters<typeof createWebOpticalProgram>[2]>;
 function fixture(
   control: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null,
-  sourcePreparation: 'auto' | 'cpu' = 'auto'
+  prefilterFactory?: PrefilterFactory | null
 ) {
   const shaderSources: string[] = [],
     writes = new Map<string, unknown>();
@@ -92,7 +92,7 @@ function fixture(
   const canvas = document.createElement('canvas');
   vi.spyOn(canvas, 'getContext').mockReturnValue(gl);
   vi.spyOn(canvas, 'toDataURL').mockReturnValue('data:image/png;base64,AA==');
-  const program = createWebOpticalProgram(canvas, control, sourcePreparation);
+  const program = createWebOpticalProgram(canvas, control, prefilterFactory);
   const frame = {
     source: {
       revision: 1,
@@ -295,7 +295,8 @@ describe('shared pure optical input admission (no GPU capability substitution)',
 
 describe('GPU preparation integration (mock helper, original optical ABI)', () => {
   it('rebuilds after clear without restoring a program already marked for deletion', () => {
-    const f = fixture();
+    const factory = vi.fn<PrefilterFactory>();
+    const f = fixture(null, factory);
     const originalUse = f.gl.useProgram.getMockImplementation()!;
     const marked = new Set<unknown>();
     let current: unknown = null;
@@ -316,24 +317,22 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       error = 0;
       return observed;
     };
-    const factory = vi
-      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
-      .mockImplementation(() => {
-        // The real helper preserves its caller's GL state both while building
-        // and while drawing. This models binding lifetime, not GPU pixel output.
-        const saved = current;
-        f.gl.useProgram(saved);
-        return {
-          filter() {
-            const previous = current;
-            f.gl.useProgram({ helper: true });
-            f.gl.useProgram(previous);
-            if (f.gl.getError() !== f.gl.NO_ERROR) throw new Error('gpu-prefilter-failed');
-            return { texture: {} as WebGLTexture, release() {} };
-          },
-          dispose() {},
-        };
-      });
+    factory.mockImplementation(() => {
+      // The real helper preserves its caller's GL state both while building
+      // and while drawing. This models binding lifetime, not GPU pixel output.
+      const saved = current;
+      f.gl.useProgram(saved);
+      return {
+        filter() {
+          const previous = current;
+          f.gl.useProgram({ helper: true });
+          f.gl.useProgram(previous);
+          if (f.gl.getError() !== f.gl.NO_ERROR) throw new Error('gpu-prefilter-failed');
+          return { texture: {} as WebGLTexture, release() {} };
+        },
+        dispose() {},
+      };
+    });
     try {
       for (let cycle = 0; cycle < 3; cycle++) {
         expect(f.program.render(f.frame)).toMatch(/^data:image\/png;base64,/);
@@ -343,7 +342,6 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       expect(f.program.inspect()).toMatchObject({ renders: 3, gpuSourcePreparations: 3 });
     } finally {
       f.program.dispose();
-      factory.mockRestore();
     }
   });
 
@@ -358,10 +356,8 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       return output;
     });
     const dispose = vi.fn();
-    const factory = vi
-      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
-      .mockReturnValue({ filter, dispose });
-    const f = fixture();
+    const factory = vi.fn(() => ({ filter, dispose }));
+    const f = fixture(null, factory);
     return {
       ...f,
       outputs,
@@ -369,13 +365,13 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       dispose,
       cleanup() {
         f.program.dispose();
-        factory.mockRestore();
       },
     };
   }
 
   it('renders after repeated clear without restoring a retired current program', () => {
-    const f = fixture();
+    const factory = vi.fn<PrefilterFactory>();
+    const f = fixture(null, factory);
     type Program = (typeof f.programs)[number];
     let current: Program | null = null,
       error = f.gl.NO_ERROR;
@@ -404,27 +400,25 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       error = f.gl.NO_ERROR;
       return result;
     });
-    const factory = vi
-      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
-      .mockImplementation(() => {
-        const helperProgram = f.gl.createProgram();
-        let disposed = false;
-        return {
-          filter() {
-            // Model the helper's state-preserving program switch. Actual GL
-            // render -> clear -> render coverage lives in the native probe.
-            const previous = current;
-            f.gl.useProgram(helperProgram);
-            f.gl.useProgram(previous);
-            if (f.gl.getError() !== f.gl.NO_ERROR) throw new Error('gpu-prefilter-failed');
-            return { texture: {} as WebGLTexture, release() {} };
-          },
-          dispose() {
-            if (!disposed) f.gl.deleteProgram(helperProgram);
-            disposed = true;
-          },
-        };
-      });
+    factory.mockImplementation(() => {
+      const helperProgram = f.gl.createProgram();
+      let disposed = false;
+      return {
+        filter() {
+          // Model the helper's state-preserving program switch. Actual GL
+          // render -> clear -> render coverage lives in the native probe.
+          const previous = current;
+          f.gl.useProgram(helperProgram);
+          f.gl.useProgram(previous);
+          if (f.gl.getError() !== f.gl.NO_ERROR) throw new Error('gpu-prefilter-failed');
+          return { texture: {} as WebGLTexture, release() {} };
+        },
+        dispose() {
+          if (!disposed) f.gl.deleteProgram(helperProgram);
+          disposed = true;
+        },
+      };
+    });
     try {
       for (let cycle = 0; cycle < 3; cycle++) {
         expect(f.program.render(f.frame)).toBe('data:image/png;base64,AA==');
@@ -439,7 +433,6 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       });
     } finally {
       f.program.dispose();
-      factory.mockRestore();
     }
   });
 
@@ -551,10 +544,8 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
         return output;
       }),
       dispose = vi.fn();
-    const factory = vi
-      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
-      .mockReturnValue({ filter, dispose });
-    const f = fixture();
+    const factory = vi.fn(() => ({ filter, dispose }));
+    const f = fixture(null, factory);
     try {
       for (let index = 0; index < 8; index++)
         f.program.render({
@@ -603,27 +594,80 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
       f.program.dispose();
       expect(dispose).toHaveBeenCalledOnce();
       for (const output of outputs) expect(output.release).toHaveBeenCalledOnce();
-      factory.mockRestore();
     }
   });
 
-  it('keeps the forced CPU comparison internal and retains the scalar-byte reference', () => {
-    const factory = vi.spyOn(prefilterModule, 'createWebOpticalPrefilter');
-    const f = fixture(null, 'cpu');
+  it.each(['default', 'explicit-null'])(
+    'uses the scalar-equivalent CPU cache with %s selection even when GPU capabilities are advertised',
+    (selection) => {
+      const f = selection === 'default' ? fixture() : fixture(null, null);
+      const arrays = { createVertexArrayOES: vi.fn(() => ({})) };
+      f.gl.getShaderPrecisionFormat = vi.fn(() => ({
+        precision: 23,
+        rangeMin: 127,
+        rangeMax: 127,
+      }));
+      f.gl.getExtension.mockImplementation((name: string) =>
+        name === 'OES_vertex_array_object' ? arrays : null
+      );
+      f.gl.createFramebuffer = vi.fn(() => ({}));
+      const first = cacheSource(7, 5, 1),
+        second = cacheSource(7, 5, 2);
+      try {
+        f.program.render({ ...f.frame, source: first });
+        const firstUpload = f.gl.texImage2D.mock.calls.at(-1)![8];
+        expect(firstUpload).toEqual(referencePrefilter(first.pixels, 7, 5));
+        f.program.render({ ...f.frame, source: second });
+        expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toEqual(
+          referencePrefilter(second.pixels, 7, 5)
+        );
+        f.program.render({ ...f.frame, source: first });
+        expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toBe(firstUpload);
+        expect(firstUpload).toEqual(referencePrefilter(first.pixels, 7, 5));
+        expect(f.program.inspect()).toMatchObject({
+          cpuSourcePreparations: 2,
+          gpuSourcePreparations: 0,
+          prefilterProgramBuilds: 0,
+          sourcePreparationCacheHits: 1,
+          sourcePreparationCacheEntries: 2,
+          sourcePreparationCacheBytes: 280,
+          sourcePreparationCpuCacheBytes: 280,
+          sourcePreparationGpuCacheBytes: 0,
+        });
+        // Default CPU is a deliberate provider choice, not a missing-capability
+        // fallback. It never probes or allocates the optional GPU prefilter.
+        expect(f.gl.getShaderPrecisionFormat).not.toHaveBeenCalled();
+        expect(f.gl.getExtension).not.toHaveBeenCalled();
+        expect(f.gl.createFramebuffer).not.toHaveBeenCalled();
+        expect(arrays.createVertexArrayOES).not.toHaveBeenCalled();
+        expect(f.gl.createTexture).toHaveBeenCalledTimes(3);
+        expect(f.shaderSources).toEqual([vertex, fragment]);
+        first.pixels[3] = 254;
+        expect(() => f.program.render({ ...f.frame, source: first })).toThrow(
+          'nonopaque-optical-source'
+        );
+        expect(f.program.inspect().cpuSourcePreparations).toBe(2);
+      } finally {
+        f.program.dispose();
+      }
+    }
+  );
+
+  it('keeps CPU eligibility when an explicitly injected experiment declines the context', () => {
+    const factory = vi.fn(() => null);
+    const f = fixture(null, factory);
     try {
       f.program.render(f.frame);
-      expect(factory).not.toHaveBeenCalled();
+      f.program.render({ ...f.frame, source: cacheSource() });
+      expect(factory).toHaveBeenCalledOnce();
+      expect(factory).toHaveBeenCalledWith(f.gl);
       expect(f.program.inspect()).toMatchObject({
-        cpuSourcePreparations: 1,
+        cpuSourcePreparations: 2,
         gpuSourcePreparations: 0,
         prefilterProgramBuilds: 0,
       });
-      expect(f.gl.texImage2D.mock.calls.at(-1)![8]).toEqual(
-        referencePrefilter(f.frame.source.pixels, 4, 4)
-      );
     } finally {
       f.program.dispose();
-      factory.mockRestore();
     }
   });
 
@@ -632,18 +676,16 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
     (phase) => {
       const dispose = vi.fn();
       const failure = new Error('gpu-prefilter-framebuffer-incomplete');
-      const factory = vi
-        .spyOn(prefilterModule, 'createWebOpticalPrefilter')
-        .mockImplementation(() => {
-          if (phase === 'create') throw failure;
-          return {
-            filter: () => {
-              throw failure;
-            },
-            dispose,
-          };
-        });
-      const f = fixture();
+      const factory = vi.fn(() => {
+        if (phase === 'create') throw failure;
+        return {
+          filter: () => {
+            throw failure;
+          },
+          dispose,
+        };
+      });
+      const f = fixture(null, factory);
       try {
         expect(() => f.program.render(f.frame)).toThrow(failure);
         expect(f.gl.deleteTexture).toHaveBeenCalledTimes(3);
@@ -654,7 +696,6 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
         expect(dispose).toHaveBeenCalledTimes(phase === 'filter' ? 1 : 0);
       } finally {
         f.program.dispose();
-        factory.mockRestore();
       }
     }
   );
