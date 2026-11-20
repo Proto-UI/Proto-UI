@@ -7,6 +7,7 @@ export const nativeAuthoredHooksArtifact: NonNullable<GeneratedModule['supportin
     kind: 'source',
     contents: `export interface NativeHookCapture {
   readonly asHooks?: readonly NativeHookChild[];
+  readonly stateHandles?: Readonly<Record<string, unknown>>;
   readonly getState?: (name: string) => unknown;
   readonly getMethod?: (name: string) => unknown;
   readonly getAsHook?: (name: string) => NativeHookChild | undefined;
@@ -83,10 +84,11 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
         const render = definition.setup(input, api);
         frames.pop(); captureOpen = false;
         const states = new Map([...frame.states].map(([name, value]) => [name, options.borrow(value)]));
+        const stateHandles = states.size ? Object.freeze(Object.fromEntries(states)) : undefined;
         const children = Object.freeze(frame.children.slice());
         const capture: NativeHookCapture = Object.freeze({
           asHooks: children,
-          ...(states.size ? {getState: (name: string) => states.get(name)} : {}),
+          ...(stateHandles ? {stateHandles, getState: (name: string) => Object.prototype.hasOwnProperty.call(stateHandles, name) ? stateHandles[name] : undefined} : {}),
           ...(frame.methods.size ? {getMethod: (name: string) => frame.methods.get(name)} : {}),
           ...(children.length ? {getAsHook: (name: string) => children.find(child => child.name === name), getAsHookHandle: (name: string) => children.find(child => child.name === name)?.handle} : {}),
           ...(typeof render === 'function' ? {render} : {}),

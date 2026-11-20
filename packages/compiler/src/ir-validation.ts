@@ -17,6 +17,7 @@ import {
   type FunctionContext,
   type ExpressionIR,
   type FunctionIR,
+  type HookCaptureIR,
   type ModuleDeclarationIR,
   type Phase,
   type PrototypeIR,
@@ -35,6 +36,7 @@ import {
   validateOperationPhase,
   isTemplateChildType,
   capabilityMemberType,
+  captureStateHandlesType,
   capabilityBinaryType,
   stateValue,
   stateDeclarationData,
@@ -901,7 +903,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (hook.capture !== undefined) {
         const capture = object(hook.capture, ['states', 'methods', 'children']);
         for (const item of array(capture.states)) {
-          const state = object(item, ['name', 'type', 'valueType']);
+          const state = object(item, ['name', 'type', 'valueType', 'definite']);
+          if (state.definite !== undefined && typeof state.definite !== 'boolean')
+            bad('Capture state presence must be boolean.');
           text(state.name);
           if (!stateValue(valueType(state.type)))
             bad('Capture State metadata requires a State capability.');
@@ -1444,6 +1448,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                       if (node.optional) return 'void';
                       throw new TypeError('Nullish member receiver.');
                     }
+                    if (typeof member !== 'string' && member.kind === 'capture' && key === 'stateHandles')
+                      return captureStateHandlesType(hooks.find((hook) => hook.id === member.hookId)?.capture as HookCaptureIR | undefined);
                     const capability = capabilityMemberType(member, key, node.optional as boolean);
                     if (capability !== undefined) return capability;
                     if (member === 'props' && props.has(key)) return props.get(key)!;
@@ -1452,6 +1458,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                   })
                 )
               );
+              break;
+            }
+            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'stateHandles') {
+              type = captureStateHandlesType(hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined);
               break;
             }
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);

@@ -48,7 +48,7 @@ pub fn native_builtin_hook(owner:&OwnerWeak,name:&str,install:impl FnOnce()->Val
 }
 fn finish_capture(frame:AuthoredFrame,render:Value)->Value {
     let mut fields=BTreeMap::new();
-    if !frame.states.is_empty(){let states=frame.states;fields.insert("getState".into(),Value::Function(Rc::new(move|args|states.get(&arg(&args,0).text()).cloned().unwrap_or_default())));}
+    if !frame.states.is_empty(){let states=freeze(record_map(frame.states));fields.insert("stateHandles".into(),states.clone());fields.insert("getState".into(),Value::Function(Rc::new(move|args|states.member(&arg(&args,0).text(),false))));}
     if !frame.methods.is_empty(){let methods=frame.methods;fields.insert("getMethod".into(),Value::Function(Rc::new(move|args|methods.get(&arg(&args,0).text()).cloned().unwrap_or_default())));}
     if !frame.children.is_empty(){
         let children=Rc::new(frame.children);let raw=children.clone();

@@ -16,6 +16,26 @@ function checked(source: string): PrototypeIR {
 }
 
 describe('ordinary functions and authored hook lifecycles', () => {
+  it('reads definite named states through a readonly borrowed capture record', () => {
+    const ir = checked(`${core}
+      const install=defineAsHook({name:'named-state',setup(def){const flag=def.state.bool('flag',true);}});
+      export default definePrototype({name:'owner',setup(def){const {flag}=install().stateHandles;def.expose.method('read',()=>flag.get());}});`);
+    expect(ir.hooks[0].capture?.states).toEqual([{name:'flag',type:'state:boolean',definite:true}]);
+    const forged=JSON.parse(JSON.stringify(ir));
+    delete forged.hooks[0].capture.states[0].definite;
+    expect(validateIR(forged)).toMatchObject({ok:false});
+  });
+
+  it.each([
+    `if(true){def.state.bool('flag',true);}`,
+    `try{def.state.bool('flag',true);}finally{}`,
+    `const declare=()=>def.state.bool('flag',true);declare();`,
+  ])('keeps non-definite named states optional: %s', (body) => {
+    const ir=checked(`${core}const install=defineAsHook({name:'optional-state',setup(def){${body}}});
+      export default definePrototype({name:'owner',setup(def){const handles=install().stateHandles;if(handles){const flag=handles.flag;if(flag){def.expose.method('read',()=>flag.get());}}}});`);
+    expect(ir.hooks[0].capture?.states.every((state)=>!state.definite)).toBe(true);
+  });
+
   it.each(['once', 'multiple', 'configurable'] as const)(
     'checks %s setup/options/API/configuration without creating a component protocol',
     (mode) => {
@@ -32,7 +52,7 @@ describe('ordinary functions and authored hook lifecycles', () => {
         setup: { phase: 'setup', context: 'helper' },
         configure: { phase: 'setup', context: 'helper', returnType: 'void' },
       });
-      expect(ir.hooks[0].capture?.states).toEqual([{ name: 'count', type: 'state:number' }]);
+      expect(ir.hooks[0].capture?.states).toEqual([{ name: 'count', type: 'state:number', definite: true }]);
     }
   );
 

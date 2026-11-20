@@ -416,7 +416,7 @@ export interface AuthoredHookIR {
   span: SourceSpan;
 }
 export interface HookCaptureIR {
-  states: { name: string; type: ValueType; valueType?: DataType }[];
+  states: { name: string; type: ValueType; valueType?: DataType; definite?: boolean }[];
   methods: { name: string; type: Extract<ValueType, { kind: 'callable' }> }[];
   children: { id: string; name: string }[];
 }

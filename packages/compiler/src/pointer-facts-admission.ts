@@ -102,6 +102,9 @@ export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnost
   return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) => {
     if (value.kind === 'operation' && value.operation.startsWith('capture.'))
       return 'Authored hook capture lookup';
+    if (value.kind === 'member' && value.property === 'stateHandles' &&
+      typeof value.object.type !== 'string' && value.object.type.kind === 'capture')
+      return 'Authored hook named state capture';
     if (value.kind === 'authored-hook') {
       const hook = ir.hooks.find((entry) => entry.id === value.hookId);
       if (hook?.projectHandle) return 'Authored hook handle projection';
