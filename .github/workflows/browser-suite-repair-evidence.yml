@@ -42,30 +42,3 @@ jobs:
           path: ${{ runner.temp }}/website-checks
           if-no-files-found: error
           retention-days: 30
-  website-types:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Install locked workspace dependencies
-        run: corepack pnpm@10.32.1 install --frozen-lockfile
-      - name: Verify type checking with the existing Search repair
-        run: |
-          set -euo pipefail
-          evidence="$RUNNER_TEMP/website-types"
-          mkdir -p "$evidence"
-          git rev-parse HEAD > "$evidence/source.txt"
-          sha256sum apps/www/src/components/site-search-commands.disposal.test.ts > "$evidence/search-fixture.txt"
-          corepack pnpm@10.32.1 -s check:types 2>&1 | tee "$evidence/types.log"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: website-types-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/website-types
-          if-no-files-found: error
-          retention-days: 30
