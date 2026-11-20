@@ -1064,7 +1064,9 @@ describe.sequential('Independent Label public documentation', () => {
           await expect.poll(() => checked(push)).toBe('true');
           await expect.poll(() => checked(email)).toBe('false');
 
-          const input = content.locator('input');
+          // The demo also publishes a read-only input and textarea. Select the
+          // editable controls by their accessible names.
+          const input = content.getByRole('textbox', { name: 'Project name', exact: true });
           await label('input').click();
           await expect
             .poll(() => input.evaluate((element) => document.activeElement === element))
@@ -1072,7 +1074,7 @@ describe.sequential('Independent Label public documentation', () => {
           await page.keyboard.press('ControlOrMeta+A');
           await page.keyboard.insertText('Named native editor');
           expect(await input.inputValue()).toBe('Named native editor');
-          const textarea = content.locator('textarea');
+          const textarea = content.getByRole('textbox', { name: 'Project notes', exact: true });
           await label('textarea').click();
           await expect
             .poll(() => textarea.evaluate((element) => document.activeElement === element))
