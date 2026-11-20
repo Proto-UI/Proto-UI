@@ -203,6 +203,47 @@ it('an initial detached request canceled by close does not attach to a later reo
   expect(old).not.toHaveBeenCalled();
   expect(fresh).toHaveBeenCalledTimes(1);
 });
+it('a detached reopen request survives old content replacement until its first active mounted target', () => {
+  const f = fixture();
+  f.module.registerContent(f.host);
+  f.flush();
+  f.module.close('close');
+  f.module.setViewActive(false);
+  f.module.onMountPhase('detached', 1);
+  expect(f.provider.unmount).toHaveBeenCalledWith(f.host);
+  f.host.remove();
+  const replacement = document.createElement('div');
+  document.body.append(replacement);
+  f.provider.mount.mockClear();
+  const callback = vi.fn(() => {
+    expect(f.getPhase()).toBe('callback');
+    expect(f.provider.mount).toHaveBeenCalledTimes(1);
+    expect(f.provider.mount).toHaveBeenCalledWith(replacement);
+  });
+  const capsEpoch = f.caps.epoch;
+
+  f.module.open('reopen');
+  f.module.afterViewReconciled(callback);
+  expect(callback).not.toHaveBeenCalled();
+  // Mount first while presence is inactive: the retained old registration must
+  // not bind this request before the replacement content is registered.
+  f.module.onMountPhase('mounted', 2);
+  f.module.registerContent(replacement);
+  f.flush();
+  expect(f.caps.epoch).toBe(capsEpoch);
+  expect(f.provider.mount).not.toHaveBeenCalled();
+  expect(callback).not.toHaveBeenCalled();
+
+  f.module.setViewActive(true);
+  expect(callback).not.toHaveBeenCalled();
+  f.flush();
+  expect(f.provider.mount).toHaveBeenCalledTimes(1);
+  expect(f.provider.mount).toHaveBeenCalledWith(replacement);
+  expect(callback).toHaveBeenCalledTimes(1);
+  f.module.registerAnchor(null);
+  f.flush();
+  expect(callback).toHaveBeenCalledTimes(1);
+});
 it('provider replacement reentered during acquisition cannot fulfill the old bound request', () => {
   const f = fixture(false),
     callback = vi.fn();
