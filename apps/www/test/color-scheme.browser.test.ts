@@ -431,26 +431,22 @@ describe.sequential('default-document colorScheme browser contract', () => {
 
         await theme(page, 'light');
         await expect.poll(async () => alpha((await paint(button)).background)).toBe(0.1);
-        if (runtime === 'wc') {
-          expect(alpha((await paint(customEditor)).background)).toBe(0);
-        } else {
-          const customUnderLight = await customEditor.evaluate((element) => {
-            const editorStyle = getComputedStyle(element);
-            const documentStyle = getComputedStyle(element.ownerDocument.documentElement);
-            return {
-              tokens: element.getAttribute('data-pui-style')?.split(/\s+/) ?? [],
-              input: editorStyle.getPropertyValue('--pui-input').trim(),
-              documentInput: documentStyle.getPropertyValue('--pui-input').trim(),
-              background: editorStyle.backgroundColor,
-            };
-          });
-          observations.customEditorAfterLight = customUnderLight;
-          expect(customUnderLight.tokens).toContain('bg-input/30');
-          expect(customUnderLight.documentInput).not.toBe('');
-          expect(alpha(customUnderLight.documentInput)).toBe(1);
-          expect(customUnderLight.input).toBe(customUnderLight.documentInput);
-          expect(alpha(customUnderLight.background)).toBe(0.3);
-        }
+        const customUnderLight = await customEditor.evaluate((element) => {
+          const editorStyle = getComputedStyle(element);
+          const documentStyle = getComputedStyle(element.ownerDocument.documentElement);
+          return {
+            tokens: element.getAttribute('data-pui-style')?.split(/\s+/) ?? [],
+            input: editorStyle.getPropertyValue('--pui-input').trim(),
+            documentInput: documentStyle.getPropertyValue('--pui-input').trim(),
+            background: editorStyle.backgroundColor,
+          };
+        });
+        observations.customEditorAfterLight = customUnderLight;
+        expect(customUnderLight.tokens).toContain('bg-input/30');
+        expect(customUnderLight.documentInput).not.toBe('');
+        expect(alpha(customUnderLight.documentInput)).toBe(1);
+        expect(customUnderLight.input).toBe(customUnderLight.documentInput);
+        expect(alpha(customUnderLight.background)).toBe(0.3);
         const localTheme = page.locator('[data-case="textarea"] > div');
         await localTheme.evaluate((element) => element.classList.add('dark'));
         const localDark = await paint(textarea);
