@@ -276,7 +276,12 @@ describe.sequential('shadcn control documentation browser regressions', () => {
           const control = element as HTMLElement & {
             setProps(props: Record<string, unknown>): void;
           };
-          control.setProps(next ? { appearance: next } : {});
+          // The ghost appearance belongs to the New York compatibility profile.
+          control.setProps(
+            next
+              ? { styleProfile: 'new-york-v4', appearance: next }
+              : { styleProfile: 'new-york-v4' }
+          );
         }, appearance);
       };
       const paint = async () =>
@@ -552,8 +557,8 @@ describe.sequential('shadcn control documentation browser regressions', () => {
 
         await applyColorScheme(page, 'light');
         const light = await boxPaints(page);
-        // The resting box declares no fill of its own in either scheme.
-        expect(light[UNCHECKED].alpha, `${runtime}/light-resting`).toBe(0);
+        // The Rhea resting box keeps the upstream translucent input fill.
+        expect(light[UNCHECKED].alpha, `${runtime}/light-resting`).toBeCloseTo(0.9, 2);
         expect(light[CHECKED].alpha, `${runtime}/light-checked`).toBeGreaterThan(0);
         expect(light[MIXED].background, `${runtime}/light-mixed`).toBe(light[CHECKED].background);
 
@@ -570,7 +575,10 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         expect(dark[MIXED].alpha, `${runtime}/dark-mixed-alpha`).toBe(dark[CHECKED].alpha);
 
         await applyColorScheme(page, 'light');
-        expect((await boxPaints(page))[UNCHECKED].alpha, `${runtime}/light-after`).toBe(0);
+        expect((await boxPaints(page))[UNCHECKED].alpha, `${runtime}/light-after`).toBeCloseTo(
+          0.9,
+          2
+        );
       }
     } finally {
       await context.close();
