@@ -247,7 +247,7 @@ async function waitForMatrix(page: Page): Promise<void> {
   // A connected skeleton or laid-out staging generation is not a completed
   // projection. Observe the existing commit boundary, never signature parity.
   await observeMatrixWait(page, 'committed-host-readiness', () =>
-    page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 })
+    page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000, polling: 250 })
   );
 }
 
