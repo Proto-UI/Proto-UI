@@ -749,6 +749,38 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-brutalist/text',
     ]),
   }),
+  // Exact experimental component demos; authored commands remain blocked.
+  // No direct optical program, shader or diagnostic-probe imports are admitted.
+  'apps/www/src/pages/en/test/liquid-glass-hover.astro': Object.freeze({
+    sourceSha256: '738e2d05464f4b51d30327faebbadfe940b6a4eb186ec0fab8d705decc4e61ba',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-liquid-glass/theme',
+      '@proto.ui/prototypes-liquid-glass/button',
+      '@proto.ui/prototypes-liquid-glass/toggle',
+      '@proto.ui/prototypes-liquid-glass/form',
+      '@proto.ui/prototypes-liquid-glass/accordion',
+      '@proto.ui/prototypes-liquid-glass/collapsible',
+      '@proto.ui/prototypes-liquid-glass/select',
+      '@proto.ui/prototypes-liquid-glass/dropdown',
+    ]),
+  }),
+  'apps/www/src/pages/en/test/liquid-glass-portal.astro': Object.freeze({
+    sourceSha256: '9cafbcd71e386beba26c7f95caf34b8a9d3cf67a23dad2d7626324912f3ebff7',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-liquid-glass/theme',
+      '@proto.ui/prototypes-liquid-glass/dropdown',
+      '@proto.ui/adapter-base/web-material',
+      '@proto.ui/adapter-base',
+    ]),
+  }),
+  'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro': Object.freeze({
+    sourceSha256: '11bb4deca9f9553b6f8a713a51170668698d35fb4caa0dbc7b1dbaccf307b68a',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-liquid-glass/theme',
+      '@proto.ui/prototypes-liquid-glass/button',
+      '@proto.ui/prototypes-liquid-glass/form',
+    ]),
+  }),
   'apps/www/src/pages/en/test/liquid-glass-material.astro': Object.freeze({
     specifiers: Object.freeze([
       '@proto.ui/prototypes-liquid-glass/button',
