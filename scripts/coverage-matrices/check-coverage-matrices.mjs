@@ -324,6 +324,44 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
+  // Exact demo compositions delegating geometry/materialization to the public Web
+  // attachment. Their authored-controller owner remains blocked. Bootstrap and
+  // Liquid Glass remain WIP/Experimental; these ten edges grant no family support.
+  'apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: '97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: '8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
   // The recipe projects serializable intent into the render-local association scope.
   'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts': Object.freeze({
     sourceSha256: '249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86',
@@ -336,7 +374,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
-  // and they do not certify the admitted source body (see the note above).
+  // and unpinned entries do not certify the source body (see the note above).
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
   }),
@@ -366,11 +404,18 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/module-expose-state']),
-    resolvedPaths: Object.freeze([
-      'packages/prototypes/lucide/src/icons/search',
-      'packages/prototypes/lucide/src/icons/x',
+    sourceSha256: '7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3',
+    specifiers: Object.freeze([
+      '@proto.ui/module-expose-state',
+      '../../../../packages/prototypes/lucide/src/icons/search',
+      '../../../../packages/prototypes/lucide/src/icons/arrow-right',
+      '../../../../packages/prototypes/lucide/src/icons/x',
     ]),
+  }),
+  // Public InputShell binding only; neither Search source gains UI acceptance.
+  'apps/www/src/components/site-search-composition.ts': Object.freeze({
+    sourceSha256: '2ae76ee72be64dcec48ae013d16d880a8e8b8f92fc4dbb315e550b00315c801e',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
@@ -798,6 +843,7 @@ const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.gallery.prototype-library-cards': Object.freeze([
     'apps/www/astro.config.mjs',
     'apps/www/src/components/site-navigation.ts',
+    'apps/www/src/components/PrototypeDocumentationIndex.astro',
     'packages/prototypes/base/package.json',
     'packages/prototypes/shadcn/package.json',
     'packages/prototypes/brutalist/package.json',

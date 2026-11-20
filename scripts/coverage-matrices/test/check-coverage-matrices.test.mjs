@@ -17713,12 +17713,14 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
+    // Search and native-link sources now admit exact reviewed importer bytes rather than a synthetic body.
     const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
-    const content = nativeLinkSource
-      ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
-      : source.endsWith('.astro')
-        ? `<script>${code}</script>`
-        : code;
+    const content =
+      source === 'site-search-commands.ts' || nativeLinkSource
+        ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
+        : source.endsWith('.astro')
+          ? `<script>${code}</script>`
+          : code;
     for (const file of [relative, copy]) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
@@ -17753,6 +17755,50 @@ for (const [source, specifiers] of [
       )
     );
   });
+
+for (const [source, allowed, foreign] of [
+  [
+    'site-search-commands.ts',
+    [
+      '@proto.ui/module-expose-state',
+      '../../../../packages/prototypes/lucide/src/icons/search',
+      '../../../../packages/prototypes/lucide/src/icons/arrow-right',
+      '../../../../packages/prototypes/lucide/src/icons/x',
+    ],
+    '../../../../packages/prototypes/lucide/src/icons/arrow-left',
+  ],
+  [
+    'site-search-composition.ts',
+    ['@proto.ui/prototypes-shadcn/input-shell'],
+    '@proto.ui/prototypes-shadcn/input',
+  ],
+]) {
+  test(`Search static import boundary remains literal, content-bound and owner-bound: ${source}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const relative = `apps/www/src/components/${source}`;
+    const copy = `apps/www/src/components/Copied${source}`;
+    const target = path.join(root, relative);
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, reviewed);
+    fs.writeFileSync(path.join(root, copy), reviewed);
+    const raw = (file, specifier) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const exact = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    for (const specifier of allowed) {
+      assert.ok(!exact.includes(raw(relative, specifier)), exact);
+      assert.ok(exact.includes(raw(copy, specifier)), exact);
+    }
+    fs.writeFileSync(target, reviewed + '\n// Changed importer bytes require review.\n');
+    const changed = validationMessage(root);
+    for (const specifier of allowed) {
+      assert.ok(changed.includes(raw(relative, specifier)), changed);
+    }
+    fs.writeFileSync(target, reviewed + `\nimport '${foreign}';\n`);
+    const adjacent = validationMessage(root);
+    assert.ok(adjacent.includes(raw(relative, foreign)), adjacent);
+  });
+}
 
 for (const kind of ['website', 'harness']) {
   for (const [name, source, reject] of [
@@ -19244,6 +19290,63 @@ for (const [relative, specifier] of [
       fs.writeFileSync(target, changed);
       const message = validationMessage(root);
       assert.ok(message.includes(raw(relative)), message);
+    }
+  });
+}
+
+
+for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+  test(`virtual-list demo import boundary: ${family} exact bytes, foreign importer and adjacent imports`, () => {
+    const root = createRoot();
+    const relative = `apps/www/src/content/docs/zh-cn/demo-${family}-virtual-list.demo.ts`;
+    const target = path.join(root, relative);
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, reviewed);
+    writeValidMatrices(root, {}, {}, {
+      websiteBindings: [[relative, ['www.demo.authored-controllers']]],
+    });
+    const allowed = [
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ];
+    const raw = (file, specifier) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const exact = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    for (const specifier of allowed) {
+      assert.ok(!exact.includes(raw(relative, specifier)), exact);
+    }
+    assert.ok(!exact.includes(`source fingerprint for \`${relative}\``), exact);
+
+    const foreign = relative.replace('.demo.ts', '-foreign.demo.ts');
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+    const copied = validationMessage(root);
+    for (const specifier of allowed) {
+      assert.ok(copied.includes(raw(foreign, specifier)), copied);
+      assert.ok(!copied.includes(raw(relative, specifier)), copied);
+    }
+
+    for (const changed of [
+      Buffer.concat([reviewed, Buffer.from('\n// Changed importer requires review.\n')]),
+      Buffer.from(reviewed.toString('utf8').replace(/\n/gu, '\r\n')),
+    ]) {
+      fs.writeFileSync(target, changed);
+      const message = validationMessage(root);
+      for (const specifier of allowed) {
+        assert.ok(message.includes(raw(relative, specifier)), message);
+      }
+    }
+
+    for (const adjacent of [
+      '@proto.ui/prototypes-base/virtual-list/web/adjacent',
+      '@proto.ui/prototypes-base/virtual-list/adjacent',
+      '@proto.ui/prototypes-base/tree',
+    ]) {
+      fs.writeFileSync(target, Buffer.concat([reviewed, Buffer.from(`\nimport '${adjacent}';\n`)]));
+      const message = validationMessage(root);
+      assert.ok(message.includes(raw(relative, adjacent)), message);
+      for (const specifier of allowed) {
+        assert.ok(message.includes(raw(relative, specifier)), message);
+      }
     }
   });
 }
