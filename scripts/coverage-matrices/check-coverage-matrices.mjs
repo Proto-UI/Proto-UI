@@ -720,8 +720,11 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
+    sourceSha256: 'a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-bootstrap-2-3-2/button',
+      '@proto.ui/prototypes-bootstrap-2-3-2/select',
       '@proto.ui/prototypes-shadcn/button',
       '@proto.ui/prototypes-shadcn/select',
       '@proto.ui/prototypes-brutalist/button',
