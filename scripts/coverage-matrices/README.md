@@ -4,6 +4,8 @@ The independent prototype/projection portfolio is [documented here](../../intern
 
 `node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
 
+The [#834 browser study](https://github.com/Proto-UI/Proto-UI/issues/834) uses the [current source reference](test/fixtures/website-markup-provenance-current.json) for its sampled routes. The [original reference](test/fixtures/website-markup-provenance-source.json) preserves the earlier review baseline. The suite rejects changed bytes before launching the Website. Review any changes to the sampled inputs and their ownership before updating the current reference. Both references record unverified source admission. The served build and transitive source closure require separate evidence.
+
 Explicit repository source paths are literal identities, including bracketed Astro route names such as `[runtime].astro`; they are never glob-expanded. Wildcard operators (`*`, `?`, `{`, `}`) and parent traversal remain inadmissible. A Source-scan binding for a literal route still requires an existing file, its reviewed SHA-256 and a unique binding; brackets do not waive those checks.
 
 ## Verified GPUI rows and portable native source proofs

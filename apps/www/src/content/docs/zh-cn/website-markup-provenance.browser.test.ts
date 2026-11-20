@@ -35,7 +35,9 @@ let profile: SourceBinding;
 let binding: SourceBinding;
 
 beforeAll(async () => {
-  profile = JSON.parse(await readFile('scripts/coverage-matrices/test/fixtures/website-markup-provenance-source.json', 'utf8'));
+  profile = JSON.parse(
+    await readFile('scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json', 'utf8')
+  );
   binding = {
     revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     sources: await Promise.all(profile.sources.map(async ({ path }) => ({
