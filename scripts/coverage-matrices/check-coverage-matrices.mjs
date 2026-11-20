@@ -324,6 +324,20 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
+  // Exact public-fact demo compositions under the blocked authored-controller
+  // owner (#420). Core is type-only; the Bootstrap helper supplies passive
+  // appearance, while Drawer/Dialog retain input, focus and dismissal ownership.
+  'apps/www/src/content/docs/drawer-command-disabled.shared.ts': Object.freeze({
+    sourceSha256: 'bdbf1708e7a961aec3085222c0d1faaea49cc674aa10e06c9921f926ccac59d3',
+    specifiers: Object.freeze(['@proto.ui/core']),
+  }),
+  'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({
+    sourceSha256: '02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee',
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+    ]),
+  }),
   // Exact demo compositions delegating geometry/materialization to the public Web
   // attachment. Their authored-controller owner remains blocked. Bootstrap and
   // Liquid Glass remain WIP/Experimental; these ten edges grant no family support.
