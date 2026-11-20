@@ -9,6 +9,12 @@ import { protoShadowStyleArtifact } from '../../styles/proto-ui-shadow-style.gen
 export function mountShadowSplitS2(section: HTMLElement) {
   if (section.dataset.ready) return;
   section.dataset.ready = 'mounting';
+  // Private diagnostic hook, installed before navigation by the focused browser case.
+  const checkpoint = (phase: string, detail: Record<string, unknown> = {}) => {
+    (window as Window & { __s2Checkpoint?: (value: unknown) => void }).__s2Checkpoint?.({
+      phase, ...detail, time: performance.now(), url: location.href,
+    });
+  };
   let serial = 0;
   while (customElements.get(`pui-s2-light-button-${serial}`)) serial++;
   let variant = 'default',
@@ -103,6 +109,7 @@ export function mountShadowSplitS2(section: HTMLElement) {
       const home = column.querySelector<HTMLElement>('[data-home]')!;
       const destination = column.querySelector<HTMLElement>('[data-destination]')!;
       const report = () => {
+        checkpoint('report:before', { profile });
         column.dataset.buttonClicks = String(clicks);
         column.dataset.switchChanges = String(switchChanges);
         column.dataset.checkboxChanges = String(checkboxChanges);
@@ -113,14 +120,29 @@ export function mountShadowSplitS2(section: HTMLElement) {
           )
             .map(([k, v]) => `${k}=${v}`)
             .join(' ')}\nvariant/size: ${variant}/${size} · tone: ${tones[tone]}`;
+        checkpoint('report:after', { profile });
       };
       const sync = () => {
+        checkpoint('row-sync:before', { profile });
+        checkpoint('props:before', { profile, component: 'button' });
         setElementProps(elements.button, { variant, size, disabled });
+        checkpoint('props:after', { profile, component: 'button' });
+        checkpoint('props:before', { profile, component: 'switch' });
         setElementProps(elements.switch, { checked, disabled });
+        checkpoint('props:after', { profile, component: 'switch' });
+        checkpoint('props:before', { profile, component: 'checkbox' });
         setElementProps(elements.checkbox, { checked: checkboxChecked, disabled });
+        checkpoint('props:after', { profile, component: 'checkbox' });
+        checkpoint('props:before', { profile, component: 'badge' });
         setElementProps(elements.badge, { tone: tones[tone] });
-        for (const el of [elements.button, elements.switch, elements.checkbox, elements.badge])
+        checkpoint('props:after', { profile, component: 'badge' });
+        for (const kind of ['button', 'switch', 'checkbox', 'badge'] as const) {
+          const el = elements[kind];
+          checkpoint('update:before', { profile, component: kind });
           el.update?.();
+          checkpoint('update:after', { profile, component: kind });
+        }
+        checkpoint('row-sync:after', { profile });
       };
       elements.button.addEventListener('click', (event) => {
         if (event instanceof CustomEvent) {
@@ -154,10 +176,12 @@ export function mountShadowSplitS2(section: HTMLElement) {
         report,
         replaceButtonSlot,
         toggle() {
+          checkpoint('toggle:before', { profile });
           checked = !checked;
           checkboxChecked = checked;
           sync();
           requestAnimationFrame(report);
+          checkpoint('toggle:after', { profile });
         },
         reverse() {
           checked = !checked;
@@ -168,8 +192,10 @@ export function mountShadowSplitS2(section: HTMLElement) {
     }
   );
   const sync = () => {
+    checkpoint('outer-sync:before');
     rows.forEach((r) => r.sync());
     requestAnimationFrame(() => rows.forEach((r) => r.report()));
+    checkpoint('outer-sync:after');
   };
   section.querySelectorAll<HTMLSelectElement>('[data-option]').forEach((select) =>
     select.addEventListener('change', () => {
@@ -183,6 +209,7 @@ export function mountShadowSplitS2(section: HTMLElement) {
   );
   section.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((control) =>
     control.addEventListener('click', () => {
+      checkpoint('handler:before', { action: control.dataset.action });
       cancel();
       const action = control.dataset.action;
       switch (action) {
@@ -234,6 +261,7 @@ export function mountShadowSplitS2(section: HTMLElement) {
           control.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'
         );
       sync();
+      checkpoint('handler:after', { action });
     })
   );
   requestAnimationFrame(() => {

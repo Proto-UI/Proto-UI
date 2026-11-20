@@ -1,5 +1,7 @@
 // @vitest-environment node
 import type { Browser, Page } from 'playwright-core';
+import { appendFileSync, mkdirSync } from 'node:fs';
+import { isAbsolute, join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 
@@ -7,7 +9,13 @@ const S2 = '[data-shadow-s2]';
 const profiles = ['light', 'split', 'mixed'];
 let browser: Browser;
 let baseUrl: string;
+const diagnosticDir = process.env.S2_DIAGNOSTIC_DIR;
+let diagnosticVisit = 0;
+const receipts = new WeakMap<Page, (phase: string, detail?: unknown) => void>();
 beforeAll(async () => {
+  if (diagnosticDir && (!process.env.DEBUG?.includes('pw:protocol') ||
+    !process.env.DEBUG_FILE || !isAbsolute(process.env.DEBUG_FILE)))
+    throw new Error('S2 diagnostics require DEBUG=pw:protocol,pw:api and an absolute DEBUG_FILE set before starting Vitest');
   baseUrl = await startServer('/zh-cn/internal/demo-matrix/');
   browser = await launchBrowser();
 }, 150_000);
@@ -21,7 +29,31 @@ const component = (page: Page, profile: string, kind: string) =>
 // Intermediate-frame/reversal geometry is covered by shadow-s2-motion-browser.mjs.
 const settle = (page: Page) => page.waitForTimeout(300);
 async function action(page: Page, name: string) {
-  await page.locator(`${S2} [data-action="${name}"]`).click();
+  const record = receipts.get(page);
+  const target = page.locator(`${S2} [data-action="${name}"]`);
+  if (record && name === 'checked') {
+    record('checked:identity', await target.evaluate((button: HTMLButtonElement) => {
+      const formIdentity = (form: HTMLFormElement | null) => form && ({
+        outerHTML: form.outerHTML, id: form.id, name: form.name,
+        action: form.action, method: form.method, target: form.target,
+      });
+      const ancestors: string[] = [];
+      for (let node = button.parentElement; node; node = node.parentElement)
+        ancestors.push(`${node.tagName}#${node.id}`);
+      return { outerHTML: button.outerHTML, type: button.type,
+        form: formIdentity(button.form), closestForm: formIdentity(button.closest('form')),
+        formIsClosest: button.form === button.closest('form'), ancestors, url: location.href };
+    }));
+    record('checked:frames', page.frames().map((frame) => ({ name: frame.name(), url: frame.url() })));
+  }
+  record?.('click:before', { name });
+  try {
+    await target.click();
+    record?.('click:after', { name });
+  } catch (error) {
+    record?.('click:failed', { name, error: String(error) });
+    throw error;
+  }
   await settle(page);
 }
 async function expectedPaint(page: Page, variant: string, dark: boolean) {
@@ -119,14 +151,81 @@ async function visit(run: (page: Page) => Promise<void>, locale = 'zh-cn') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   try {
+  if (diagnosticDir) {
+    mkdirSync(diagnosticDir, { recursive: true });
+    const file = join(diagnosticDir, `s2-${process.pid}-${++diagnosticVisit}-${locale}.jsonl`);
+    let sequence = 0;
+    const record = (phase: string, detail?: unknown) => appendFileSync(file,
+      `${JSON.stringify({ sequence: ++sequence, hostTime: new Date().toISOString(),
+        hostMonotonicNs: process.hrtime.bigint().toString(), phase, detail })}\n`);
+    receipts.set(page, record);
+    record('visit:start', { locale, debugFile: process.env.DEBUG_FILE });
+    page.on('console', (message) => {
+      if (message.text().startsWith('S2_DIAGNOSTIC '))
+        record('page:checkpoint', message.text().slice('S2_DIAGNOSTIC '.length));
+    });
+    page.on('pageerror', (error) => record('page:error', String(error)));
+    page.on('request', (request) => {
+      if (request.isNavigationRequest()) record('navigation:request', {
+        url: request.url(), method: request.method(), frameUrl: request.frame().url(),
+      });
+    });
+    page.on('requestfailed', (request) => {
+      if (request.isNavigationRequest()) record('navigation:failed', {
+        url: request.url(), failure: request.failure(),
+      });
+    });
+    page.on('requestfinished', (request) => {
+      if (request.isNavigationRequest()) record('navigation:finished', { url: request.url() });
+    });
+    page.on('framenavigated', (frame) => record('navigation:frame', { url: frame.url() }));
+    const session = await context.newCDPSession(page);
+    for (const event of ['Page.frameRequestedNavigation', 'Page.frameScheduledNavigation',
+      'Page.frameClearedScheduledNavigation', 'Page.frameStartedLoading',
+      'Page.frameStoppedLoading', 'Page.frameNavigated'] as const)
+      session.on(event, (payload) => record(`cdp:${event}`, payload));
+    await session.send('Page.enable');
+    record('diagnostic-session:Page.enable:complete');
+    await context.addInitScript(() => {
+      const checkpoint = (value: unknown) => console.debug(`S2_DIAGNOSTIC ${JSON.stringify(value)}`);
+      (window as Window & { __s2Checkpoint?: typeof checkpoint }).__s2Checkpoint = checkpoint;
+      const identify = (element: Element | null) => element && ({
+        tag: element.tagName, id: element.id, action: element.getAttribute('data-action'),
+      });
+      const click = (event: MouseEvent, phase: string) => {
+        const target = event.composedPath().find((item) =>
+          item instanceof Element && item.matches('[data-shadow-s2] [data-action="checked"]'));
+        if (target instanceof Element) checkpoint({ phase, target: identify(target),
+          defaultPrevented: event.defaultPrevented, trusted: event.isTrusted,
+          time: performance.now(), url: location.href });
+      };
+      document.addEventListener('click', (event) => click(event, 'click:capture'), true);
+      document.addEventListener('click', (event) => click(event, 'click:document-bubble'));
+      document.addEventListener('submit', (event) => checkpoint({ phase: 'submit:capture',
+        form: identify(event.target as Element), submitter: identify(event.submitter),
+        defaultPrevented: event.defaultPrevented, time: performance.now(), url: location.href }), true);
+      window.addEventListener('beforeunload', () => checkpoint({ phase: 'beforeunload',
+        time: performance.now(), url: location.href }));
+    });
+  }
     await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/`);
     await page.waitForSelector(`${S2}[data-ready="true"]`);
     await page.locator(S2).scrollIntoViewIfNeeded();
     await settle(page);
     await run(page);
     expect(errors).toEqual([]);
+  } catch (error) {
+    receipts.get(page)?.('visit:failed', { error: String(error), errors });
+    throw error;
   } finally {
-    await context.close();
+    receipts.get(page)?.('context-close:before', { errors });
+    try {
+      await context.close();
+      receipts.get(page)?.('context-close:after');
+    } catch (error) {
+      receipts.get(page)?.('context-close:failed', String(error));
+      throw error;
+    }
   }
 }
 function parity(rows: Awaited<ReturnType<typeof read>>) {

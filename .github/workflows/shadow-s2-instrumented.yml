@@ -1,0 +1,37 @@
+name: Shadow Split S2 instrumented click
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  s2-click:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Exercise S2 through the native checked click
+        env:
+          S2_DIAGNOSTIC_DIR: ${{ runner.temp }}/s2-click-evidence
+          DEBUG: pw:protocol,pw:api
+          DEBUG_FILE: ${{ runner.temp }}/s2-click-evidence/playwright-protocol.log
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p "$S2_DIAGNOSTIC_DIR"
+          git rev-parse HEAD > "$S2_DIAGNOSTIC_DIR/source.txt"
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          timeout --signal=TERM --kill-after=10s 720s corepack pnpm@10.32.1 exec vitest run --minWorkers=1 --maxWorkers=1 apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts -t 'retains mixed context, controlled state and slot ownership across move/reconnect'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shadow-s2-instrumented-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/s2-click-evidence
+          if-no-files-found: error
