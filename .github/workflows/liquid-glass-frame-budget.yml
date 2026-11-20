@@ -78,6 +78,7 @@ jobs:
         run: |
           node --test scripts/analysis/liquid-glass-frame-budget.test.mjs \
             scripts/analysis/liquid-glass-gpu-prefilter.test.mjs \
+            scripts/analysis/liquid-glass-source-progress.test.mjs \
             scripts/analysis/liquid-glass-program-clear.test.mjs
       - name: Install and record the same Chinese fonts for both revisions
         timeout-minutes: 3
@@ -109,6 +110,28 @@ jobs:
             node --import tsx scripts/analysis/liquid-glass-frame-budget.mjs \
             "$RUNNER_TEMP/liquid-frame-budget/candidate" 3 \
             2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/candidate.log"
+      - name: Baseline four-host source progress
+        id: baseline-progress
+        continue-on-error: true
+        working-directory: baseline
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 4m \
+            node --import tsx "$GITHUB_WORKSPACE/candidate/scripts/analysis/liquid-glass-source-progress.mjs" \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline-progress" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/baseline-progress.log"
+      - name: Candidate four-host source progress
+        id: candidate-progress
+        continue-on-error: true
+        working-directory: candidate
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 4m \
+            node --import tsx scripts/analysis/liquid-glass-source-progress.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate-progress" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/candidate-progress.log"
       - name: Verify GPU prefilter bytes outside timing windows
         working-directory: candidate
         timeout-minutes: 3
@@ -138,6 +161,13 @@ jobs:
             "$RUNNER_TEMP/liquid-frame-budget/candidate/report.json" \
             "$RUNNER_TEMP/liquid-frame-budget"
           cat "$RUNNER_TEMP/liquid-frame-budget/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Propagate four-host progress evidence failures
+        if: always()
+        run: |
+          if [ '${{ steps.baseline-progress.outcome }}' != 'success' ] || \
+             [ '${{ steps.candidate-progress.outcome }}' != 'success' ]; then
+            exit 1
+          fi
       - name: Retain raw timing, GPU, failures and screenshots
         if: always()
         uses: actions/upload-artifact@v4

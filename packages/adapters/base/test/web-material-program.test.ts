@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createWebOpticalProgram, type OpticalFrame } from '../src/material/program';
+import { validateOpticalFrameInputs } from '../src/material/program-inputs';
 import { vertex, fragment } from '../src/material/liquidgl-kernel.generated';
 import { contactFragment } from '../src/material/contact-profile';
 import {
@@ -191,7 +192,161 @@ describe('fixed V2 optical ABI (spy, no GPU execution claim)', () => {
   });
 });
 
+describe('shared pure optical input admission (no GPU capability substitution)', () => {
+  it('derives the original integer output and tint envelope without allocating GL resources', () => {
+    const f = fixture();
+    const frame: OpticalFrame = {
+      ...f.frame,
+      geometry: { ...f.frame.geometry, width: 2.25, height: 3.5, paintOutset: 2, dpr: 1.5 },
+      tint: 'style-fill',
+    };
+    try {
+      expect(validateOpticalFrameInputs(frame)).toEqual({
+        width: 10,
+        height: 12,
+        outset: 2,
+        tintEnvelope: styleTintEnvelope(frame.fill, frame.foreground),
+      });
+      expect(f.canvas.getContext).not.toHaveBeenCalled();
+      f.program.render(frame);
+      expect(f.canvas.width).toBe(10);
+      expect(f.canvas.height).toBe(12);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  const refusals: Array<[string, (frame: OpticalFrame) => void]> = [
+    [
+      'style-tint-profile-unavailable',
+      (frame) => {
+        frame.tint = 'style-fill';
+        frame.variant = 'clear';
+      },
+    ],
+    [
+      'invalid-style-tint-palette',
+      (frame) => {
+        frame.tint = 'style-fill';
+        frame.foreground = frame.fill;
+      },
+    ],
+    [
+      'optical-geometry-budget',
+      (frame) => {
+        frame.geometry.dpr = NaN;
+      },
+    ],
+    [
+      'optical-source-bounds',
+      (frame) => {
+        frame.geometry.bounds[0] = 0.8;
+      },
+    ],
+    [
+      'invalid-optical-source',
+      (frame) => {
+        Object.assign(frame.source, { pixels: new Uint8Array(4) });
+      },
+    ],
+    [
+      'nonopaque-optical-source',
+      (frame) => {
+        frame.source.pixels[3] = 254;
+      },
+    ],
+    [
+      'invalid-optical-contact',
+      (frame) => {
+        frame.contact = { x: 0, y: 0, deltaX: Infinity, deltaY: 0, strength: 0 };
+      },
+    ],
+  ];
+  it.each(refusals)('shares %s refusal before any GL allocation', (reason, change) => {
+    const f = fixture();
+    try {
+      change(f.frame);
+      expect(() => validateOpticalFrameInputs(f.frame)).toThrow(reason);
+      expect(() => f.program.render(f.frame)).toThrow(reason);
+      expect(f.canvas.getContext).not.toHaveBeenCalled();
+      expect(f.shaderSources).toHaveLength(0);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('revalidates at actual render after a previously valid admission and cached preparation', () => {
+    const f = fixture();
+    try {
+      f.program.render(f.frame);
+      validateOpticalFrameInputs(f.frame);
+      f.frame.source.pixels[3] = 0;
+      expect(() => f.program.render(f.frame)).toThrow('nonopaque-optical-source');
+      expect(f.program.inspect()).toMatchObject({
+        renders: 1,
+        sourcePreparations: 1,
+        sourceUploads: 1,
+      });
+    } finally {
+      f.program.dispose();
+    }
+  });
+});
+
 describe('GPU preparation integration (mock helper, original optical ABI)', () => {
+  it('rebuilds after clear without restoring a program already marked for deletion', () => {
+    const f = fixture();
+    const originalUse = f.gl.useProgram.getMockImplementation()!;
+    const marked = new Set<unknown>();
+    let current: unknown = null;
+    let error = 0;
+    // WebGL retains a deleted current program until it is unbound, but
+    // useProgram must reject the marked object even while it remains current.
+    f.gl.useProgram.mockImplementation((program: unknown) => {
+      if (program !== null && marked.has(program)) {
+        error = 0x0502;
+        return;
+      }
+      current = program;
+      originalUse(program);
+    });
+    f.gl.deleteProgram.mockImplementation((program: unknown) => marked.add(program));
+    f.gl.getError = () => {
+      const observed = error;
+      error = 0;
+      return observed;
+    };
+    const factory = vi
+      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
+      .mockImplementation(() => {
+        // The real helper preserves its caller's GL state both while building
+        // and while drawing. This models binding lifetime, not GPU pixel output.
+        const saved = current;
+        f.gl.useProgram(saved);
+        return {
+          filter() {
+            const previous = current;
+            f.gl.useProgram({ helper: true });
+            f.gl.useProgram(previous);
+            if (f.gl.getError() !== f.gl.NO_ERROR) throw new Error('gpu-prefilter-failed');
+            return { texture: {} as WebGLTexture, release() {} };
+          },
+          dispose() {},
+        };
+      });
+    try {
+      for (let cycle = 0; cycle < 3; cycle++) {
+        expect(f.program.render(f.frame)).toMatch(/^data:image\/png;base64,/);
+        expect(f.gl.getError()).toBe(f.gl.NO_ERROR);
+        f.program.clear();
+      }
+      expect(f.program.inspect()).toMatchObject({ renders: 3, gpuSourcePreparations: 3 });
+    } finally {
+      f.program.dispose();
+      factory.mockRestore();
+    }
+  });
+
   function cachedGpuFixture() {
     const outputs: { texture: WebGLTexture; release: ReturnType<typeof vi.fn> }[] = [];
     const filter = vi.fn(() => {

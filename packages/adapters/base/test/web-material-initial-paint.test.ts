@@ -468,6 +468,38 @@ describe('actual internal family producer boundary', () => {
 });
 
 describe('internal server plane adoption (mock GPU, not native first-frame evidence)', () => {
+  it('never treats a claimed SSR image awaiting decode as permission to queue source rendering', async () => {
+    const postTask = vi.fn();
+    vi.stubGlobal('scheduler', { postTask });
+    const f = fixture(),
+      a = await f.show();
+    const prepared = await prepareExperimentalInitialPaint(
+      f.host,
+      a.serialized,
+      a.binding,
+      f.options
+    );
+    decode.delayed = true;
+    const sink = f.sink();
+    try {
+      sink.commit(f.visual);
+      expect(gpu.render).toHaveBeenCalledOnce();
+      expect(f.host.style.backgroundImage).toContain(a.receipt.image.dataUrl);
+      expect(f.host.hasAttribute('data-pui-initial-seed')).toBe(false);
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      f.source.revision = 2;
+      f.invalidate('source');
+      expect(gpu.render).toHaveBeenCalledTimes(2);
+      expect(postTask).not.toHaveBeenCalled();
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      decode.ready!();
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      expect(f.host.dataset.materialSourceRevision).toBe('2');
+    } finally {
+      sink.release(1);
+      prepared.dispose();
+    }
+  });
   it('retains existing SSR pixels through verification and delayed decode; publishes live quality only after decode', async () => {
     const f = fixture(),
       a = await f.show(),

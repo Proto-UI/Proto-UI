@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import { createWebMaterialSink } from '../src/material/sink';
 import type { CanvasBackdropFrame, CanvasBackdropLease } from '../src/material/source';
+import { inspectWebOpticalResources } from '../src/material/program-pool';
 const optical = vi.hoisted(() => ({
   render: vi.fn((_frame: unknown) => 'data:image/png;base64,AA=='),
   clear: vi.fn(),
@@ -152,6 +153,7 @@ function fixture(delayed = false) {
     frame,
     flush,
     sourceListeners,
+    sourceFrame: () => source,
     onSourceRead(fn: () => void) {
       onSourceRead = fn;
     },
@@ -1808,6 +1810,397 @@ describe('style-fill tint ownership (mock GPU/decode, not pixel evidence)', () =
     expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
     expect(f.host.style.backgroundImage).toBe('none');
     f.sink.release(1);
+  });
+});
+
+describe('warm rest source task admission (mock GPU/decode, not performance evidence)', () => {
+  function taskQueue() {
+    const tasks: Array<{ run(): void; signal: AbortSignal }> = [];
+    const postTask = vi.fn((run: () => void, options: { signal: AbortSignal }) => {
+      tasks.push({ run, signal: options.signal });
+      return new Promise<void>(() => {});
+    });
+    vi.stubGlobal('scheduler', { postTask });
+    return { tasks, postTask };
+  }
+  function warm() {
+    const f = fixture();
+    const base = f.frame(1);
+    const frame: VisualFeedbackFrame = {
+      ...base,
+      material: {
+        ...base.material,
+        candidates: [
+          {
+            intent: 'liquid-glass',
+            deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+          },
+        ],
+      },
+    };
+    f.sink.commit(frame);
+    return { ...f, rest: frame };
+  }
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('admits compatible updates synchronously, keeps decoded paint and coalesces one latest-state task', () => {
+    const q = taskQueue();
+    const f = warm();
+    try {
+      const previous = f.host.style.getPropertyValue('--pui-material-image');
+      f.source(true, 2);
+      expect(optical.render).toHaveBeenCalledOnce();
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      expect(f.host.dataset.materialSourceRevision).toBe('1');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(previous);
+      expect(q.postTask).toHaveBeenCalledOnce();
+      expect(q.postTask.mock.calls[0][1]).toMatchObject({ priority: 'user-visible' });
+      const first = q.tasks[0];
+      for (let revision = 3; revision <= 20; revision++) f.source(true, revision);
+      expect(q.postTask).toHaveBeenCalledOnce();
+      expect(first.signal.aborted).toBe(false);
+      expect(optical.render).toHaveBeenCalledOnce();
+      first.run();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(optical.render.mock.calls[1][0]).toMatchObject({ source: { revision: 20 } });
+      expect(f.host.dataset.materialSourceRevision).toBe('20');
+      first.run();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('gives each of four warm bindings one independently progressing source task', () => {
+    const q = taskQueue();
+    const bindings = Array.from({ length: 4 }, () => warm());
+    try {
+      bindings.forEach((f) => f.source(true, 2));
+      expect(optical.render).toHaveBeenCalledTimes(4);
+      expect(q.tasks).toHaveLength(4);
+      q.tasks.forEach((task, index) => {
+        task.run();
+        expect(optical.render).toHaveBeenCalledTimes(5 + index);
+        expect(bindings[index].host.dataset.materialSourceRevision).toBe('2');
+      });
+    } finally {
+      bindings.forEach((f) => f.sink.release(1));
+    }
+  });
+
+  it('rejects changed source alpha synchronously even when the admitted frame identity and revision match', () => {
+    const q = taskQueue();
+    const f = warm();
+    try {
+      const rendered = optical.render.mock.calls[0][0] as { source: CanvasBackdropFrame };
+      rendered.source.pixels[3] = 0;
+      f.invalidate();
+      expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+      expect(f.host.dataset.materialReason).toBe('nonopaque-optical-source');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+      expect(q.postTask).not.toHaveBeenCalled();
+      expect(optical.render).toHaveBeenCalledOnce();
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('cancels a queued source task on fresh down and keeps the existing early press path immediate', async () => {
+    const q = taskQueue();
+    const f = warm();
+    try {
+      f.source(true, 2);
+      expect(q.tasks).toHaveLength(1);
+      const task = q.tasks[0];
+      createWebPointerContactWriter(f.host).publish({
+        active: true,
+        session: 1,
+        x: 0.8,
+        y: 0.4,
+        deltaX: 0.3,
+        deltaY: 0,
+        reason: 'down',
+      });
+      expect(task.signal.aborted).toBe(true);
+      expect(optical.render).toHaveBeenCalledOnce();
+      await Promise.resolve();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(optical.render.mock.calls[1][0]).toMatchObject({
+        source: { revision: 2 },
+        contact: { x: 0.8, strength: 1 },
+      });
+      task.run();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(f.host.dataset.materialContact).toBe('held');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it.each(['alpha', 'pixel length', 'geometry', 'tint'] as const)(
+    'withdraws queued warm paint synchronously when %s becomes invalid',
+    (invalid) => {
+      const q = taskQueue(),
+        f = warm();
+      try {
+        f.source(true, 2);
+        expect(q.tasks).toHaveLength(1);
+        if (invalid === 'alpha') f.sourceFrame()!.pixels[7] = 254;
+        else if (invalid === 'pixel length')
+          Object.assign(f.sourceFrame()!, { pixels: new Uint8Array(4) });
+        else if (invalid === 'geometry')
+          Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 4 });
+        else Object.assign(f.rest.material.candidates[0], { tint: 'style-fill', variant: 'clear' });
+        f.invalidate();
+        expect(q.tasks[0].signal.aborted).toBe(true);
+        expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        expect(inspectWebOpticalResources(document).pendingSourceRefreshTasks).toBe(0);
+        const rendered = optical.render.mock.calls.length;
+        q.tasks[0].run();
+        expect(optical.render).toHaveBeenCalledTimes(rendered);
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
+
+  it.each([
+    'source',
+    'owner',
+    'palette',
+    'preference',
+    'carrier',
+    'external paint',
+    'release',
+  ] as const)('cancels queued work synchronously on %s revocation', (invalidation) => {
+    let carrierValid = true;
+    carrierControl.create = () => ({ valid: () => carrierValid, release() {} });
+    const q = taskQueue(),
+      f = warm();
+    try {
+      f.source(true, 2);
+      expect(q.tasks).toHaveLength(1);
+      if (invalidation === 'source') f.source(false);
+      else if (invalidation === 'owner') f.rebindSource();
+      else if (invalidation === 'palette') f.palette();
+      else if (invalidation === 'preference') f.transparency('reduce');
+      else if (invalidation === 'carrier') {
+        carrierValid = false;
+        f.invalidate();
+      } else if (invalidation === 'external paint') {
+        f.host.style.backgroundImage = 'linear-gradient(red, blue)';
+        f.invalidate();
+      } else f.sink.release(1);
+      expect(q.tasks[0].signal.aborted).toBe(true);
+      expect(inspectWebOpticalResources(document).pendingSourceRefreshTasks).toBe(0);
+      const rendered = optical.render.mock.calls.length;
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledTimes(rendered);
+      if (invalidation === 'external paint')
+        expect(f.host.style.backgroundImage).toBe('linear-gradient(red, blue)');
+      if (invalidation === 'source' || invalidation === 'carrier' || invalidation === 'preference')
+        expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('re-reads and rejects a silent source replacement when the task executes', () => {
+    const q = taskQueue(),
+      f = warm();
+    try {
+      f.source(true, 2);
+      f.source(false, 3, false);
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledOnce();
+      expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+      expect(inspectWebOpticalResources(document).pendingSourceRefreshTasks).toBe(0);
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('cancels queued tasks across context loss and reads a restored source immediately', () => {
+    const canvases: HTMLCanvasElement[] = [];
+    const nativeCreate = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tag: string, options?: ElementCreationOptions) => {
+        const element = nativeCreate(tag, options);
+        if (tag === 'canvas') canvases.push(element as HTMLCanvasElement);
+        return element;
+      }
+    );
+    const q = taskQueue(),
+      f = warm();
+    try {
+      f.source(true, 2);
+      expect(q.tasks).toHaveLength(1);
+      expect(canvases).toHaveLength(2);
+      canvases[1].dispatchEvent(new Event('webglcontextlost'));
+      expect(q.tasks[0].signal.aborted).toBe(true);
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      const rendered = optical.render.mock.calls.length;
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledTimes(rendered);
+      canvases[1].dispatchEvent(new Event('webglcontextrestored'));
+      expect(optical.render).toHaveBeenCalledTimes(rendered + 1);
+      expect(f.host.dataset.materialSourceRevision).toBe('2');
+      expect(inspectWebOpticalResources(document).pendingSourceRefreshTasks).toBe(0);
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('retires the queued document binding before replaying intent after adoption', () => {
+    const q = taskQueue(),
+      f = warm();
+    const iframe = document.createElement('iframe');
+    document.body.append(iframe);
+    const destination = iframe.contentDocument!;
+    vi.spyOn(iframe.contentWindow!, 'requestAnimationFrame').mockReturnValue(99);
+    vi.spyOn(iframe.contentWindow!, 'cancelAnimationFrame').mockImplementation(() => {});
+    try {
+      f.source(true, 2);
+      destination.body.append(destination.adoptNode(f.host));
+      f.sink.commit({ ...f.rest, revision: 2 });
+      expect(q.tasks[0].signal.aborted).toBe(true);
+      expect(inspectWebOpticalResources(document).pendingSourceRefreshTasks).toBe(0);
+      expect(inspectWebOpticalResources(destination).pendingSourceRefreshTasks).toBe(0);
+      const rendered = optical.render.mock.calls.length;
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledTimes(rendered);
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('keeps cold and keyboard-pressed source refresh on the immediate path', () => {
+    const q = taskQueue();
+    const callbacks: Array<() => void> = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      callbacks.push(ready);
+      return () => {};
+    });
+    const f = warm();
+    try {
+      expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+      f.source(true, 2);
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(q.tasks).toHaveLength(0);
+      callbacks[1]();
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      const pressed: VisualFeedbackFrame = {
+        ...f.rest,
+        revision: 2,
+        material: {
+          ...f.rest.material,
+          candidates: [
+            {
+              intent: 'liquid-glass',
+              deformation: { kind: 'press', phase: 'pressed', contact: 'pointer' },
+            },
+          ],
+        },
+      };
+      f.sink.commit(pressed);
+      callbacks[2]();
+      f.source(true, 3);
+      expect(optical.render).toHaveBeenCalledTimes(4);
+      expect(optical.render.mock.calls[3][0]).toMatchObject({
+        pressed: true,
+        contact: { strength: 1 },
+      });
+      expect(q.tasks).toHaveLength(0);
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('does not defer held contact, its finite release, or pointer cancellation', async () => {
+    const q = taskQueue(),
+      f = warm();
+    const writer = createWebPointerContactWriter(f.host);
+    const publish = (active: boolean, reason: 'down' | 'up' | 'cancel') =>
+      writer.publish({ active, session: 1, x: 0.7, y: 0.4, deltaX: 0.2, deltaY: 0, reason });
+    try {
+      publish(true, 'down');
+      await Promise.resolve();
+      f.source(true, 2);
+      expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+        source: { revision: 2 },
+        contact: { strength: 1 },
+      });
+      publish(false, 'up');
+      f.source(true, 3);
+      const released = optical.render.mock.calls.at(-1)?.[0] as {
+        source: CanvasBackdropFrame;
+        contact: { strength: number };
+      };
+      expect(released.source.revision).toBe(3);
+      expect(released.contact.strength).toBeGreaterThan(0);
+      expect(f.host.dataset.materialContact).toBe('release');
+      publish(false, 'cancel');
+      expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+        source: { revision: 3 },
+        contact: { strength: 0 },
+      });
+      expect(q.tasks).toHaveLength(0);
+      // The cancellation repaint itself is immediate. A later source update
+      // may queue again after that neutral image has actually decoded.
+      f.source(true, 4);
+      expect(q.tasks).toHaveLength(1);
+      q.tasks[0].run();
+      expect(f.host.dataset.materialSourceRevision).toBe('4');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('cancels source work on a non-source commit and renders the new intent immediately', () => {
+    const q = taskQueue(),
+      f = warm();
+    try {
+      f.source(true, 2);
+      f.sink.commit({ ...f.rest, revision: 2 });
+      expect(q.tasks[0].signal.aborted).toBe(true);
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(f.host.dataset.materialSourceRevision).toBe('2');
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+    } finally {
+      f.sink.release(1);
+    }
+  });
+
+  it('retains one task across reentrant source reads and rechecks revocation during its render', () => {
+    const q = taskQueue(),
+      f = warm();
+    try {
+      f.onSourceRead(() => {
+        f.onSourceRead(() => {});
+        f.source(true, 3);
+      });
+      f.source(true, 2);
+      expect(q.tasks).toHaveLength(1);
+      expect(optical.render).toHaveBeenCalledOnce();
+      optical.render.mockImplementationOnce(() => {
+        f.source(false);
+        return 'data:image/png;base64,bGF0ZQ==';
+      });
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(optical.render.mock.calls[1][0]).toMatchObject({ source: { revision: 3 } });
+      expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+      expect(inspectWebOpticalResources(document).pendingSourceRefreshTasks).toBe(0);
+      q.tasks[0].run();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+    } finally {
+      f.sink.release(1);
+    }
   });
 });
 

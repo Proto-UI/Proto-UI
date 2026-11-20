@@ -111,6 +111,48 @@ The discriminating A→B→A regression fails on the previous implementation bec
 
 The reviewed program SHA-256 is `c084788bfc4974d09274ab832ab98c81ef4fd33f218b45eb5ea2f4ce476e2a29`; its test SHA-256 is `bc07c1010d50995271ea78c31a29658859f4b8622cc3cc5d680240f6da2a8391`. The next native run retains the exact sixty-press probe and its earlier failure distributions. No latency improvement is assigned to this cache before that run, and comparisons with the third run alone cannot isolate its effect across different runners.
 
+## Fourth browser results: bounded cache
+
+[GitHub Actions 44811618004](https://github.com/Proto-UI/Proto-UI/actions/runs/44811618004) measures candidate `1d860891a59aca6ed71ac251e08977cde303b81c` against the original fixed baseline. Artifact `14668326440` is 2,488,964 bytes with ZIP SHA-256 `6d188b9c718f004b7cce92299ce0e33b605aa8c468d2936d59dee657f2b7d53f`. Both source checkouts are clean and use the same unchanged probe `62fb8587b9f64ada31135e83d3a5ff287edc8e946be6d18ab973d2f5d853c6a9`; candidate program bytes match the reviewed cache hash above. The software-GPU environment is again Chrome 157 / Node 24 / four CPUs with the same CJK fonts. Its Linux runner is `7.0.0-1014-aws`, whereas the preceding run used `7.0.0-1017-azure`; cross-run timing changes cannot isolate the LRU effect.
+
+**The larger-sample 10 ms target remains unmet.** All sixty presses per revision and mode are attempted and resolve with the exact session, trusted pointer identity, owned held image and corresponding release. There are no missing samples, retries, timeouts, invalid event timestamps or non-optical trials. Event time includes browser delivery before the capture listener and still excludes physical device transport. The endpoint remains owned image installation observed at MutationObserver entry, before compositor presentation.
+
+| Revision  | Backdrop | Event → commit p50 | p95       | p99       | Maximum   | Above 10 ms |
+| --------- | -------- | ------------------ | --------- | --------- | --------- | ----------- |
+| Baseline  | Static   | 14.050 ms          | 15.210 ms | 21.604 ms | 30.100 ms | 36/60       |
+| Candidate | Static   | 6.950 ms           | 12.215 ms | 13.087 ms | 13.500 ms | 25/60       |
+| Baseline  | Dynamic  | 20.100 ms          | 72.545 ms | 74.082 ms | 74.200 ms | 60/60       |
+| Candidate | Dynamic  | 11.200 ms          | 40.720 ms | 42.166 ms | 43.700 ms | 37/60       |
+
+Candidate listener-origin p95 is 11.910/13.520 ms, but its dynamic p99/max remains 40.505/40.800 ms. The four slow dynamic event-origin samples show why the two origins must remain separate:
+
+| Trial, zero-based | Event → listener | Listener → held | Event → held | Source revision |
+| ----------------- | ---------------- | --------------- | ------------ | --------------- |
+| 24                | 29.8 ms          | 13.9 ms         | 43.7 ms      | 105 → 106       |
+| 1                 | 27.6 ms          | 13.5 ms         | 41.1 ms      | 19 → 20         |
+| 2                 | 0.3 ms           | 40.8 ms         | 41.1 ms      | 23 → 24         |
+| 25                | 0.4 ms           | 40.3 ms         | 40.7 ms      | 109 → 110       |
+
+Selecting the smaller listener p95 would hide substantial waiting before the event handler. These four samples all span a source revision, with two mostly delayed before the listener and two mostly delayed afterward. They support investigating source-update batches, without assigning all remaining time to PNG decoding. Static phase-dependent tails also remain. The five ordinary phase bins are populated unevenly; candidate static has five late samples and dynamic twenty. No sample is replaced to obtain a preferred phase distribution.
+
+| Matched workload | Mean render, before → after | Reduction | Target material commits/s, before → after |
+| --- | --- | --- | --- |
+| Static backdrop, held drag | 5.894 → 2.472 ms | 58.06% | 32.08 → 59.55 |
+| Dynamic backdrop, idle | 11.149 → 4.642 ms | 58.36% | 7.49 → 7.49 |
+| Dynamic backdrop, held drag | 10.289 → 3.537 ms | 65.62% | 23.28 → 45.28 |
+
+Candidate dynamic material-commit interval p95 is 41.265 ms; static/dynamic RAF p95 is approximately 16.8 ms. Static idle still generates no new renders and warm readback-buffer allocations remain zero. Baseline dynamic windows record 197 long tasks and candidate windows zero, with unequal contact-window durations. This remains an approximately 60 Hz headless run, not evidence of 120 displayed frames per second.
+
+Cache observations now confirm reuse. Static-contact windows contain 411 renders, zero preparations, 411 cache hits and one upload. Dynamic-contact windows contain 616 renders, 272 preparations, 344 hits and 342 uploads; preparations match the aggregate 88/92/92 source-revision advances. Dynamic idle contains 180 renders and preparations with no hits. Hits include the already-current-source reuse that existed before this cache, so they cannot all be presented as newly eliminated work. A cache hit can still require texture upload. The 276 retained boundary snapshots each show four entries and 1,071,616 filtered-RGBA bytes, about 1.022 MiB; this is neither a continuous peak nor total process/GPU memory. After pool disposal, cache gauges are unavailable, while the four independent lifecycle counters are explicitly zero in both documents.
+
+All twelve workload windows, four adapter pointer journeys and public captures pass, with no page errors. Both enabled public buttons remain genuinely optical and the disabled button has no carrier or image. The three candidate public crop PNGs are byte-identical to their third-run counterparts, and were inspected again. Same-head ordinary CI [44811573841](https://github.com/Proto-UI/Proto-UI/actions/runs/44811573841) passes its scheduled lightweight checks. The full reconstruction, including all latency samples and cache-gauge boundaries, is retained in [44811618004-summary.json](evidence/2026-11-21-liquid-frame-budget/44811618004-summary.json).
+
+The next bounded hypothesis is to separate expensive, compatible source-refresh work into browser tasks only for an already-decoded, owned neutral image at rest. Synchronous source/style/geometry/preference revocation and pure input validation must remain in the source notification, and task execution must re-read the latest state. Cold, claimed-but-not-decoded, active pointer, keyboard pressed and release-animation paths are excluded. This is an implementation candidate under independent review, not a measured scheduling improvement. Four-host progress must be observed so a lower target latency cannot conceal starvation elsewhere.
+
+## Subsequent GPU candidate and scheduling continuation
+
+The branch later advances to `19d175f454468fa27364c8283e084f3bb7a1016b`. Its native run `44814656275` fails in the multi-runtime consumer, despite passing its independent GPU byte matrix and public captures. The complete failure, bounded GL lifecycle repair, merged source-task candidate and four-host progress method are recorded in [source refresh scheduling and GPU recovery](2026-11-21-liquid-glass-source-refresh-tasks.md). That run compares against `1d86089`, not the original fixed baseline used in the four sections above, and its expanded measurement instrument has a different hash. No candidate latency can be derived from its unattempted trials.
+
 ## Follow-up and remaining acceptance
 
 The first timing results motivated the bounded fresh-press microtask through the existing sink admission/render/decode path. Pointer moves retain RAF coalescing, and the original RAF still settles the latest state. The second and third runs measure the resulting candidates; the larger sample demonstrates why the six fast observations cannot establish the requested latency target.
@@ -125,4 +167,4 @@ The initial experimental workflow incorrectly declared an automatic PR trigger. 
 
 The first combined material/prototype/scene test run passed 473 tests. The reviewed source/scene fixes and adjacent consumers passed 75 tests; final website type checking reported 1,243 files, zero errors and zero warnings (31 hints). After official style generation, the whole-workspace type check still reports the two unchanged Compiler diagnostics in `gpui-data-methods.ts` and `parser.ts`. A coverage inventory attempt reported 131 findings before the latest bounded fingerprint reconciliation; this record does not claim that broader gate is green.
 
-Final acceptance still needs the bounded-cache follow-up and genuine 120 Hz hardware observations. The current sixty-press distributions do not meet 10 ms in this environment. A mean render time below 8.33 ms alone does not prove a complete 120 fps pipeline; neither a material commit nor an artificial rAF clock measures physical input-to-photon latency. Independent platform review and the responsible author's DCO certification also remain required before integration. Vercel separately reports a deployment rate limit with a 24-hour retry message; no preview deployment success is inferred from the browser CI.
+Final acceptance still needs the source-scheduling investigation and genuine 120 Hz hardware observations. The current sixty-press distributions do not meet 10 ms in this environment. A mean render time below 8.33 ms alone does not prove a complete 120 fps pipeline; neither a material commit nor an artificial rAF clock measures physical input-to-photon latency. Independent platform review and the responsible author's DCO certification also remain required before integration. Vercel separately reports a deployment rate limit with a 24-hour retry message; no preview deployment success is inferred from the browser CI.

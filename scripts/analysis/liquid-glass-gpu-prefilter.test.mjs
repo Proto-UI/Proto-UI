@@ -5,6 +5,8 @@ import {
   prefilterPixels,
   assertGpuPrefilterEvidence,
   collectGpuPrefilter,
+  assertProgramIntegration,
+  collectProgramIntegration,
 } from './liquid-glass-gpu-prefilter.mjs';
 
 test('independent oracle retains edge clamping and round-to-nearest bytes', () => {
@@ -167,6 +169,168 @@ test('evidence acceptance rejects missing/duplicated bytes, leaks and capability
 
 test('browser collector and independent oracle can be serialized as executable functions', () => {
   // This checks transport syntax only; it does not claim a real GPU observation.
-  for (const fn of [collectGpuPrefilter, referencePrefilter, prefilterPixels])
+  for (const fn of [
+    collectGpuPrefilter,
+    collectProgramIntegration,
+    referencePrefilter,
+    prefilterPixels,
+  ])
     assert.equal(typeof Function(`return (${fn.toString()})`)(), 'function');
+});
+
+function completeProgramEvidence() {
+  const plan = [
+    ['initial-a', 0, 1, null, false],
+    ['after-clear-a', 0, 1, 'initial-a', false],
+    ['source-b-contact', 1, 2, null, false],
+    ['source-c-tint', 2, 3, null, false],
+    ['source-d-contact-tint', 3, 4, null, false],
+    ['cached-a', 0, 4, 'initial-a', true],
+    ['revised-a', 0, 4, null, false],
+    ['cached-b', 1, 4, 'source-b-contact', true],
+    ['after-second-clear-c', 2, 1, 'source-c-tint', false],
+  ];
+  const evidence = {
+    steps: [],
+    clearBoundaries: [],
+    cleanup: {},
+    errors: [],
+    sourceCanvasesRetired: true,
+  };
+  for (const backend of ['auto', 'cpu']) {
+    let metrics = {
+      renders: 0,
+      sourcePreparations: 0,
+      sourcePreparationCacheHits: 0,
+      sourcePreparationCacheEntries: 0,
+      sourcePreparationCacheBytes: 0,
+      cpuSourcePreparations: 0,
+      gpuSourcePreparations: 0,
+    };
+    for (const [index, [name, sourceIndex, entries, sameAs, cacheHit]] of plan.entries()) {
+      if (index === 1 || index === 8) {
+        metrics = { ...metrics, sourcePreparationCacheEntries: 0, sourcePreparationCacheBytes: 0 };
+        let boundary = evidence.clearBoundaries.find((item) => item.beforeCase === name);
+        if (!boundary) {
+          boundary = { beforeCase: name, backends: {} };
+          evidence.clearBoundaries.push(boundary);
+        }
+        boundary.backends[backend] = {
+          width: 0,
+          height: 0,
+          currentProgramNull: true,
+          metrics: { ...metrics },
+        };
+      }
+      const before = { ...metrics };
+      metrics.renders++;
+      metrics.sourcePreparationCacheEntries = entries;
+      metrics.sourcePreparationCacheBytes = entries * 8192;
+      if (cacheHit) metrics.sourcePreparationCacheHits++;
+      else {
+        metrics.sourcePreparations++;
+        metrics[backend === 'auto' ? 'gpuSourcePreparations' : 'cpuSourcePreparations']++;
+      }
+      evidence.steps[index] ??= {
+        name,
+        sourceIndex,
+        sameAs,
+        cacheHit,
+        revision: name === 'revised-a' ? 2 : 1,
+        geometry: { width: 80 + sourceIndex * 8, height: 38 + sourceIndex * 2, paintOutset: 8 },
+        backends: {},
+      };
+      const geometry = evidence.steps[index].geometry;
+      evidence.steps[index].backends[backend] = {
+        before,
+        after: { ...metrics },
+        width: geometry.width + 16,
+        height: geometry.height + 16,
+        png: true,
+        imageCharacters: 4096,
+        pngSha256: (name === 'revised-a' ? 'e' : String(sourceIndex + 1)).repeat(64),
+        glError: 0,
+      };
+    }
+    evidence.cleanup[backend] = {
+      width: 0,
+      height: 0,
+      contextLost: true,
+      metrics: { ...metrics, sourcePreparationCacheEntries: 0, sourcePreparationCacheBytes: 0 },
+      resources: Object.fromEntries(
+        ['Buffer', 'Framebuffer', 'Program', 'Shader', 'Texture', 'VertexArray'].map((kind) => [
+          kind,
+          { created: 1, deleted: 1, live: 0, doubleDeletes: 0 },
+        ])
+      ),
+    };
+  }
+  return evidence;
+}
+
+test('program integration rejects a delete-pending clear, rebuild error and incomplete sequence', () => {
+  assert.doesNotThrow(() => assertProgramIntegration(completeProgramEvidence()));
+  for (const invalidate of [
+    (e) => e.errors.push({ stage: 'after-clear-a/auto/render', message: 'gpu-prefilter-failed' }),
+    (e) => {
+      e.clearBoundaries[0].backends.auto.currentProgramNull = false;
+    },
+    (e) => {
+      e.steps[1].backends.auto.error = 'gpu-frame-failed';
+    },
+    (e) => {
+      e.steps[1].backends.auto.glError = 1282;
+    },
+    (e) => e.steps.splice(1, 1),
+    (e) => e.clearBoundaries.pop(),
+  ]) {
+    const evidence = completeProgramEvidence();
+    invalidate(evidence);
+    assert.throws(() => assertProgramIntegration(evidence));
+  }
+});
+
+test('program integration retains backend identity, exact output, cache retirement and cleanup', () => {
+  for (const invalidate of [
+    (e) => {
+      e.steps[0].backends.auto.pngSha256 = 'f'.repeat(64);
+    },
+    (e) => {
+      e.steps[0].backends.auto.after.gpuSourcePreparations = 0;
+    },
+    (e) => {
+      e.steps[3].backends.cpu.png = false;
+    },
+    (e) => {
+      e.steps[4].backends.auto.width++;
+    },
+    (e) => {
+      e.steps[5].backends.auto.after.sourcePreparationCacheHits--;
+    },
+    (e) => {
+      e.steps[6].backends.auto.after.sourcePreparationCacheEntries = 5;
+    },
+    (e) => {
+      e.steps[6].backends.cpu.after.sourcePreparations--;
+    },
+    (e) => {
+      e.cleanup.auto.resources.Texture.deleted--;
+    },
+    (e) => {
+      e.cleanup.cpu.resources = {};
+    },
+    (e) => {
+      e.cleanup.auto.resources.VertexArray.doubleDeletes++;
+    },
+    (e) => {
+      e.cleanup.cpu.contextLost = false;
+    },
+    (e) => {
+      e.sourceCanvasesRetired = false;
+    },
+  ]) {
+    const evidence = completeProgramEvidence();
+    invalidate(evidence);
+    assert.throws(() => assertProgramIntegration(evidence));
+  }
 });

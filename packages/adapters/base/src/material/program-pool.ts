@@ -1,5 +1,6 @@
 import { inspectOpticalImageResources } from './image-prepare';
 import { createWebOpticalProgram, type OpticalFrame } from './program';
+import { inspectSourceRefreshTasks } from './source-refresh-task';
 /** One rendering context per document. Each surface receives its own immutable
  * paint image; source/view revocation still removes that image synchronously.
  * A gallery must not silently exhaust the browser's per-page WebGL contexts. */
@@ -103,5 +104,6 @@ export function inspectWebOpticalResources(document: Document) {
     lost: pool?.lost ?? false,
     ...(pool?.program.inspect?.() ?? {}),
     ...inspectOpticalImageResources(document),
+    ...inspectSourceRefreshTasks(document),
   };
 }
