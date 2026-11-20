@@ -253,6 +253,7 @@ export function createSiteSearchComposition(options: {
       let seedingQuery = false;
       let seededCommand: DemoPublicInstance | undefined;
       let focusedFailureAction: DemoPublicInstance | undefined;
+      let failureFocusOpening: { epoch: number } | undefined;
       // A generation swap replaces the focused control with an equivalent one in
       // the new generation.  The Dialog content's own automatic entry focus
       // must not win that race, so this generation's content runs with
@@ -544,6 +545,8 @@ export function createSiteSearchComposition(options: {
         // rollback. Its native editor and selection still belong to this view.
         if (!active && open && options.retainsOpenWhileLocked?.()) return;
         if (!active || !open) {
+          failureFocusOpening = undefined;
+          focusedFailureAction = undefined;
           // Late author-slot completions from a closed generation cannot certify
           // a later reopen, even if its retained DOM box identity is unchanged.
           pendingHint = undefined;
@@ -566,6 +569,10 @@ export function createSiteSearchComposition(options: {
           return;
         }
         cancelOpenerReturn?.();
+        // Capture before automatic Dialog entry, not when a late error arrives.
+        // Keep this opening's identity across both author-slot commits below.
+        if (!failureFocusOpening) failureFocusOpening = { epoch: options.focusEpoch() };
+        const failureFocus = failureFocusOpening;
         // Opening is independent of whether a closed host has instantiated its
         // Command subtree. Otherwise a lazy Dialog could wait forever for the
         // very identity that opening must create. Latest authored default is
@@ -802,7 +809,19 @@ export function createSiteSearchComposition(options: {
         }
         const currentAction = api.getPublicInstance?.('search-page-action');
         if (action === 'retry' && !retrying && !snapshot.query.trim()) {
-          if (currentAction && currentAction !== focusedFailureAction) {
+          const focusEpoch = options.focusEpoch();
+          // Only the first automatic editor entry may advance this opening's
+          // epoch. Any later focus choice wins, even if it subsequently blurs.
+          const entryFocusUnchanged =
+            focusEpoch === failureFocus.epoch ||
+            (focusEpoch === failureFocus.epoch + 1 && targetHoldsFocus('query'));
+          if (
+            failureFocusOpening === failureFocus &&
+            !entryPolicyManual &&
+            entryFocusUnchanged &&
+            currentAction &&
+            currentAction !== focusedFailureAction
+          ) {
             focusedFailureAction = currentAction;
             api.call('search-page-action', 'focusSelf');
           }
@@ -961,6 +980,7 @@ export function createSiteSearchComposition(options: {
         committedHint = undefined;
         clearPublications();
         dialogProjection = undefined;
+        failureFocusOpening = undefined;
         pendingFocusRestore = null;
         const errors: unknown[] = [];
         for (const stop of [
