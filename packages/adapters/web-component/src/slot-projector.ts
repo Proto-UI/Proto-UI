@@ -1,4 +1,4 @@
-import { withWebComponentOwnedRelocation } from './owned-relocation';
+import { withWebComponentCallerDomMove, withWebComponentOwnedRelocation } from './owned-relocation';
 // packages/adapters/web-component/src/slot-projector.ts
 
 import { isOwnedVisualNode } from './visual-surface';
@@ -114,7 +114,7 @@ export class SlotProjector {
           if (this.slotEnd !== end || end.parentNode !== parent) break;
           if (n.parentNode !== this.el || !this.shouldMoveToSlot(n)) continue;
           withWebComponentOwnedRelocation([n], parent, () => {
-            parent.insertBefore(n, end);
+            withWebComponentCallerDomMove([n], () => parent.insertBefore(n, end));
           });
           if (n.parentNode === parent && !this.projected.includes(n)) this.projected.push(n);
         }
