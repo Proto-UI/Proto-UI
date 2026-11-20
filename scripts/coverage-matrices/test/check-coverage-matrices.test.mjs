@@ -19223,7 +19223,7 @@ test('Calendar caption import and controller binding require reviewed source', (
   const wrongBinding = `grouped binding for \`${relative}\` must include direct matrix Path owner \`${owner}\``;
   const row = {
     ID: owner,
-    Path: relative,
+    Path: `\`${relative}\``,
   };
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, reviewed);
