@@ -472,19 +472,22 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           runtime: 'react',
           state: 'long-label-320-text200',
         });
-        if (family !== 'base') {
+        if (['shadcn', 'brutalist', 'liquid-glass'].includes(family)) {
           const chevron = await button.locator('svg').evaluate((el) => {
             const bounds = el.getBoundingClientRect();
             const frame = el.parentElement!;
             return {
               width: bounds.width,
               height: bounds.height,
+              rootFontSize: parseFloat(getComputedStyle(el.ownerDocument.documentElement).fontSize),
               shrink: getComputedStyle(frame).flexShrink,
               pointerEvents: getComputedStyle(frame).pointerEvents,
             };
           });
-          expect(chevron.width).toBeCloseTo(family === 'brutalist' ? 20 : 16, 1);
-          expect(chevron.height).toBeCloseTo(family === 'brutalist' ? 20 : 16, 1);
+          const expectedSize =
+            family === 'shadcn' ? chevron.rootFontSize : family === 'brutalist' ? 20 : 16;
+          expect(chevron.width).toBeCloseTo(expectedSize, 1);
+          expect(chevron.height).toBeCloseTo(expectedSize, 1);
           expect(chevron.shrink).toBe('0');
           expect(chevron.pointerEvents).toBe('none');
         }

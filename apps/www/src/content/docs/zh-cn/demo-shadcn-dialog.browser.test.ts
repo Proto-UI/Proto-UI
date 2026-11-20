@@ -161,6 +161,41 @@ describe('Shadcn Dialog native lifecycle', () => {
     }
   });
 
+  for (const runtime of ['react', 'vue'] as const) {
+    it(`starts public Dialog entry on the first visible ${runtime} frame`, async () => {
+      const { context, page, previewer } = await openRoute(browser, baseUrl, ROUTE, {
+        width: 1100,
+        height: 900,
+      });
+      try {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await selectRuntime(page, previewer, runtime, '[aria-haspopup="dialog"]', 1);
+        const trigger = previewer.locator('[aria-haspopup="dialog"]');
+        const contentId = await trigger.getAttribute('aria-controls');
+        if (!contentId) throw new Error('Dialog Trigger has no Content identity.');
+
+        const [frame] = await Promise.all([
+          page.waitForFunction(
+            (id) => {
+              const content = document.getElementById(id);
+              if (!content || !content.getClientRects().length) return false;
+              const style = getComputedStyle(content);
+              return style.visibility === 'visible' && { animation: style.animationName };
+            },
+            contentId,
+            { polling: 'raf', timeout: 15_000 }
+          ),
+          trigger.click(),
+        ]);
+        const sample = await frame.jsonValue();
+        await frame.dispose();
+        expect(sample).toEqual({ animation: 'pui-enter' });
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+
   // T-BASE-DIALOG-CONTENT-0001: the ordinary public recipe must agree with
   // the shared DOM journey under actual host focus, Tab and pointer defaults.
   // Reduced motion is a host condition, not a claim that motion was reviewed.

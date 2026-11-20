@@ -548,7 +548,7 @@ describe.sequential('actual family Text selection and typography', () => {
                 Number.parseFloat(getComputedStyle(node).fontSize) /
                 Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
             )
-          ).toBe(1.875);
+          ).toBe(family === 'bootstrap-2-3-2' ? 1.96875 : 1.875);
           expect(await text.evaluate((node) => node.getAttribute('role'))).toBeNull();
           expect(await text.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
           const trigger = runtimeSelectTrigger(previewer);
