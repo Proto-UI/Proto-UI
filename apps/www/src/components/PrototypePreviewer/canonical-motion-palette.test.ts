@@ -301,12 +301,36 @@ function realSwitchFixture(shadow: boolean) {
     )
     .join('\n');
   document.head.append(style);
+  // The public Switch uses source CSS transitions. Opt these private subjects
+  // into resident motion to exercise the real Adapter's palette lifecycle.
   const Root = AdaptToWebComponent(
-    { ...switchRoot, name: 'palette-lifecycle-root-' + id },
+    {
+      ...switchRoot,
+      name: 'palette-lifecycle-root-' + id,
+      setup(def) {
+        def.feedback.style.transition({
+          properties: ['background-color'],
+          durationMs: 150,
+          easing: [0.4, 0, 0.2, 1],
+        });
+        return switchRoot.setup(def);
+      },
+    },
     options
   );
   const Thumb = AdaptToWebComponent(
-    { ...switchThumb, name: 'palette-lifecycle-thumb-' + id },
+    {
+      ...switchThumb,
+      name: 'palette-lifecycle-thumb-' + id,
+      setup(def) {
+        def.feedback.style.transition({
+          properties: ['translate'],
+          durationMs: 150,
+          easing: [0.4, 0, 0.2, 1],
+        });
+        return switchThumb.setup(def);
+      },
+    },
     options
   );
   const root = new Root() as HTMLElement & { getExposes(): any };

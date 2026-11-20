@@ -4,8 +4,8 @@ afterEach(() => { document.dispatchEvent(new Event('astro:before-swap')); docume
 function fixture() {
   document.body.innerHTML = `<section data-standalone-file-browser data-code-file-browser><nav data-code-file-tabs aria-label="Files">
     <span data-code-directory-path="proto-ui"></span><span data-code-directory-path="proto-ui/empty"></span>
-    <a href="#config" id="config-link" data-code-file-tab data-code-file-path="proto-ui/config.json" data-code-file-selected="true">config.json</a>
-    <a href="#css" id="css-link" data-code-file-tab data-code-file-path="src/style.css">style.css</a>
+    <a href="#config" id="config-link" aria-controls="config" data-code-file-tab data-code-file-path="proto-ui/config.json" data-code-file-selected="true">config.json</a>
+    <a href="#css" id="css-link" aria-controls="css" data-code-file-tab data-code-file-path="src/style.css">style.css</a>
     </nav><figure id="config" data-code-file-panel aria-labelledby="config-link"><pre>config exact</pre></figure>
     <figure id="css" data-code-file-panel aria-labelledby="css-link" hidden><pre>css exact</pre></figure></section>`;
 }
@@ -24,6 +24,18 @@ it('selects real files without host preference coupling or source replacement, a
   expect(document.querySelector<HTMLElement>('nav')!.hidden).toBe(false);
   expect([...document.querySelectorAll<HTMLElement>('figure')].every((panel) => !panel.hidden)).toBe(true);
 });
+it('selects the declared source when file links are reordered independently of panels', () => {
+  fixture();
+  const list = document.querySelector('nav')!;
+  list.prepend(document.querySelector('#css-link')!);
+  initStandaloneCodeFileBrowsers();
+  const tree = document.querySelector('[role="tree"]')!;
+  tree.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'src/style.css' } }));
+  expect(document.querySelector<HTMLElement>('#css')!.hidden).toBe(false);
+  expect(document.querySelector<HTMLElement>('#config')!.hidden).toBe(true);
+  expect(document.querySelector('#css')!.getAttribute('aria-labelledby')).toBe('css-link-tree');
+});
+
 it('keeps every source reachable if real Tree admission fails', () => {
   fixture(); const get = Element.prototype.getAttribute;
   vi.spyOn(Element.prototype, 'getAttribute').mockImplementation(function(this: Element, name: string) {

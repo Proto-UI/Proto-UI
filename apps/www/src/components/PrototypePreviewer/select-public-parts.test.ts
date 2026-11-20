@@ -249,15 +249,25 @@ describe('website public Shadcn Select compositions', () => {
     }
   );
   it.each(['AdapterSelect', 'LanguageSelect'])(
-    'declares complete static %s parts without a Shadcn positioning override',
+    'declares complete framed %s parts and keeps only the Brutalist positioning override',
     (name) => {
       const source = readFileSync(`apps/www/src/components/override/${name}.astro`, 'utf8');
-      expect(source).toMatch(
-        /family === 'shadcn' \? \(\s*<wc-shadcn-select-surface>\s*<wc-shadcn-select-viewport>/
+      expect(source).toContain('} = siteControlTags(family);');
+      const content = source.match(/<SelectContent\b[\s\S]*?<\/SelectContent>/)?.[0] ?? '';
+      const [, framed = '', flat = ''] =
+        content.match(
+          /family !== 'brutalist'\s*\?\s*\(\s*(<SelectSurface>[\s\S]*?<\/SelectSurface>)\s*\)\s*:\s*\(([\s\S]*)\)\s*\}/
+        ) ?? [];
+      expect(framed).toMatch(
+        /^<SelectSurface>\s*<SelectViewport>[\s\S]*?<SelectItem\b[^>]*>\s*<SelectItemText>[\s\S]*?<\/SelectItemText>\s*<\/SelectItem>[\s\S]*?<\/SelectViewport>\s*<\/SelectSurface>$/
       );
-      expect(source).toMatch(/<SelectItem[^>]+>\s*<wc-shadcn-select-item-text>/);
-      expect(source).toContain("data-position={family === 'brutalist' ? 'popper' : undefined}");
-      expect(source).toContain('aria-labelledby={labelId}');
+      expect(flat).toMatch(/<SelectItem\b[^>]*>[\s\S]*?<\/SelectItem>/);
+      expect(flat).not.toMatch(/<Select(?:Surface|Viewport|ItemText)\b/);
+      const attributes = content.match(/^<SelectContent\b[^>]*>/)?.[0] ?? '';
+      expect(attributes).toContain("data-position={family === 'brutalist' ? 'popper' : undefined}");
+      expect(attributes).toContain("data-align={family === 'brutalist' ? 'end' : undefined}");
+      expect(attributes).not.toMatch(/\s(?:position|align)\s*=/);
+      expect(source).toMatch(/<SelectTrigger\b[^>]*\saria-labelledby=\{labelId\}/);
     }
   );
 });

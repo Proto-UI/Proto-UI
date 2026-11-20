@@ -60,23 +60,17 @@ it.each(['ltr', 'rtl'] as const)(
           if (!window.alignmentObserve) return;
           const row = document.querySelector<HTMLElement>('[data-demo-ref="item-1"]');
           const trigger = document.querySelector<HTMLElement>('[data-demo-ref="trigger"]');
-          const value = document.querySelector<HTMLElement>('[data-demo-ref="value"]');
-          const text = document.querySelector<HTMLElement>('[data-demo-ref="text-1"]');
           if (
             row &&
             trigger &&
-            value &&
-            text &&
             row.getClientRects().length &&
             getComputedStyle(row).visibility === 'visible'
           ) {
             const r = row.getBoundingClientRect(),
               t = trigger.getBoundingClientRect();
-            const v = value.getBoundingClientRect(),
-              x = text.getBoundingClientRect();
             window.alignmentFrames.push({
               blockDelta: Math.abs(r.top + r.height / 2 - t.top - t.height / 2),
-              inlineDelta: Math.abs(direction === 'rtl' ? v.right - x.right : v.left - x.left),
+              inlineDelta: Math.abs(direction === 'rtl' ? t.right - r.right : t.left - r.left),
             });
           }
           requestAnimationFrame(sample);
@@ -117,7 +111,7 @@ it.each(['ltr', 'rtl'] as const)(
         )
       ).toBeLessThanOrEqual(1);
       const edge = direction === 'rtl' ? 'right' : 'left';
-      expect(Math.abs(result.value[edge] - result.text[edge])).toBeLessThanOrEqual(1);
+      expect(Math.abs(result.trigger[edge] - result.row[edge])).toBeLessThanOrEqual(1);
       expect(result.focused).toBe(true);
       await page.evaluate(
         () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))

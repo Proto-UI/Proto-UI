@@ -42,6 +42,33 @@ function createEntry(options: {
 }
 
 describe('FocusCenter retained owner entry', () => {
+  it('keeps retained members out of the ancestor roving set while their provider view is detached', () => {
+    const center = new FocusCenter();
+    const root = { id: 'root' };
+    const submenu = { id: 'submenu' };
+    const focused: string[] = [];
+    const outer = createEntry({ instance: root, roving: true });
+    const inner = createEntry({ instance: submenu, parent: root, roving: true });
+    const current = createEntry({ instance: { id: 'current' }, parent: root, focused });
+    const currentFacts = current.getFacts();
+    current.getFacts = () => ({ ...currentFacts, focused: true });
+    const item = createEntry({ instance: { id: 'inside' }, parent: submenu, focused });
+    const next = createEntry({ instance: { id: 'next' }, parent: root, focused });
+    for (const entry of [outer, current, inner, item, next]) center.upsert(entry);
+
+    center.detach(submenu);
+    center.focusInRoving(outer, 'next', { requireFocusedMember: true });
+    expect(focused).toEqual(['next']);
+
+    center.upsert(item);
+    center.focusInRoving(outer, 'next', { requireFocusedMember: true });
+    expect(focused).toEqual(['next', 'next']);
+
+    center.upsert(inner);
+    center.focusInRoving(inner, 'first');
+    expect(focused).toEqual(['next', 'next', 'inside']);
+  });
+
   it('skips programmatic-only members for scope traversal without removing roving access', () => {
     const center = new FocusCenter(),
       token = { id: 'scope' },

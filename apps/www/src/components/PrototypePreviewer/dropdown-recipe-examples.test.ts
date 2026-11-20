@@ -49,19 +49,33 @@ describe('bounded public Shadcn Dropdown recipes', () => {
     it(`${id}: keeps a static literal recipe without simulated menu parts or Web behavior`, async () => {
       const demo = await recipe(id);
       const source = readFileSync(getDemoSourcePath(id), 'utf8');
+      const scopeImport = "import { withShadcnRheaDemo } from './shadcn-demo-style';\n";
+      expect(source.startsWith(scopeImport)).toBe(true);
+      const authoredSource = source.slice(scopeImport.length);
       if (id === 'demo-shadcn-dropdown-inset') {
-        // The inset recipe is interactive: a bounded setup toggles the real
-        // `inset` prop through existing prototype APIs. Only the type-only
-        // DemoSpec import is allowed.
-        expect(source).toMatch(/^import type \{ DemoSpec \}/);
-        expect(source).not.toMatch(/^import (?!type)/m);
+        // The inset recipe toggles the real prop through the existing APIs.
+        expect(authoredSource).toMatch(/^import type \{ DemoSpec \}/);
+        expect(authoredSource).not.toMatch(/^import (?!type)/m);
+        expect(authoredSource).toMatch(/^export default withShadcnRheaDemo\(\{/m);
         expect(demo.setup).toBeDefined();
       } else {
-        expect(source).toMatch(/^export default \{/);
-        expect(source).not.toMatch(/\bimport\b|\bfunction\b|=>|\bsetup\b/);
+        expect(authoredSource).toMatch(/^export default withShadcnRheaDemo\(\{/);
+        expect(authoredSource).not.toMatch(/\bimport\b|\bfunction\b|=>|\bsetup\b/);
         expect(demo.setup).toBeUndefined();
       }
-      const all = nodes(demo.root);
+      if (demo.root.kind !== 'proto')
+        throw new Error('Dropdown recipe lacks its Shadcn style scope');
+      const child = demo.root.children?.[0];
+      if (!child || typeof child === 'string')
+        throw new Error('Dropdown recipe lacks its authored root');
+      expect(demo.root).toEqual({
+        kind: 'proto',
+        prototypeId: 'shadcn-style-scope',
+        className: 'contents',
+        props: { styleProfile: 'rhea' },
+        children: [child],
+      });
+      const all = nodes(child);
       expect(all.map((node) => node.prototypeId)).not.toContain('lucide-icon');
       for (const node of all) {
         expect(node.prototypeId).toMatch(
@@ -256,9 +270,11 @@ describe('Dropdown recipe WC source-host rendering', () => {
         // Shadcn-only inset recipe; naming still comes from actual Base Label.
         const plain = refs['actions-label'];
         const inset = refs['more-label'];
-        // Default new-york-v4 recipe: inset Label/Item gets physical-left pl-8.
-        expect(plain.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('pl-8');
-        expect(inset.getAttribute('data-pui-style')?.split(/\s+/)).toContain('pl-8');
+        // The explicit Rhea scope projects its bounded physical-left inset.
+        expect(plain.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('pl-7');
+        const insetTokens = inset.getAttribute('data-pui-style')?.split(/\s+/);
+        expect(insetTokens).toContain('pl-7');
+        expect(insetTokens).not.toContain('pl-8');
         for (const [groupRef, label] of [
           ['actions-group', plain],
           ['more-group', inset],
