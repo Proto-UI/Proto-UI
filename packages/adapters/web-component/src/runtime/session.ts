@@ -133,8 +133,6 @@ function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean 
 
 type CallerSnapshot = { isCurrent(): boolean; restore(): void };
 
-export class RestoredSplitCallerProjectionError extends Error {}
-
 function captureCallerControlState(node: Element): CallerSnapshot {
   const document = node.ownerDocument;
   if (node.localName === 'select') {
@@ -169,36 +167,40 @@ function captureCallerControlState(node: Element): CallerSnapshot {
   const { value, selectionStart, selectionEnd, selectionDirection } = control;
   const checked = input?.checked;
   const indeterminate = input?.indeterminate;
-  const assignedFiles = input?.files;
-  // A DataTransfer-backed FileList can change without changing input.value.
-  const files = assignedFiles ? Array.from(assignedFiles) : null;
-  const hasSameFiles = () => {
-    if (!files) return true;
-    const current = input?.files;
-    return (
-      current?.length === files.length && files.every((file, index) => current[index] === file)
-    );
-  };
+  const fileList = input?.files;
+  // FileList can change in place, and value names only the first selected file.
+  const files: readonly File[] | undefined = fileList ? Array.from(fileList) : undefined;
   return {
-    isCurrent: () =>
-      hasSameFiles() &&
-      control.value === value &&
-      control.selectionStart === selectionStart &&
-      control.selectionEnd === selectionEnd &&
-      control.selectionDirection === selectionDirection &&
-      input?.checked === checked &&
-      input?.indeterminate === indeterminate,
+    isCurrent() {
+      const currentFiles = input?.files;
+      return (
+        control.value === value &&
+        control.selectionStart === selectionStart &&
+        control.selectionEnd === selectionEnd &&
+        control.selectionDirection === selectionDirection &&
+        input?.checked === checked &&
+        input?.indeterminate === indeterminate &&
+        (!files ||
+          (!!currentFiles &&
+            currentFiles.length === files.length &&
+            files.every((file, index) => currentFiles[index] === file)))
+      );
+    },
     restore() {
       if (control.ownerDocument !== document) return;
-      if (input?.type === 'file' && files) {
-        if (!hasSameFiles()) {
+      if (input?.type === 'file') {
+        const currentFiles = input.files;
+        if (
+          files &&
+          (!currentFiles ||
+            currentFiles.length !== files.length ||
+            files.some((file, index) => currentFiles[index] !== file))
+        ) {
           const transfer = new (document.defaultView?.DataTransfer ?? DataTransfer)();
           for (const file of files) transfer.items.add(file);
           input.files = transfer.files;
         }
-      } else if (control.value !== value) {
-        control.value = value;
-      }
+      } else if (control.value !== value) control.value = value;
       if (input && checked !== undefined && input.checked !== checked) input.checked = checked;
       if (input && indeterminate !== undefined && input.indeterminate !== indeterminate)
         input.indeterminate = indeterminate;
@@ -223,13 +225,7 @@ function activeWithinOpenTree(root: Document | ShadowRoot): Element | null {
 function captureSplitCallerSelection(
   host: HTMLElement,
   root: Document | ShadowRoot
-):
-  | (CallerSnapshot & {
-      anchorNode: Node | null;
-      focusNode: Node | null;
-      boundaries: readonly { startContainer: Node; endContainer: Node }[];
-    })
-  | undefined {
+): CallerSnapshot | undefined {
   const document = host.ownerDocument;
   const ownsNode = (node: Node | null) => node === document || node?.ownerDocument === document;
   const selectionRoot = root as (Document | ShadowRoot) & { getSelection?(): Selection | null };
@@ -248,9 +244,6 @@ function captureSplitCallerSelection(
     endOffset,
   }));
   return {
-    anchorNode,
-    focusNode,
-    boundaries,
     isCurrent() {
       const current = read();
       return (
@@ -318,56 +311,28 @@ function captureSplitCallerProjection(
     text: node.textContent,
     slot: node.nodeType === 1 ? (node as Element).getAttribute('slot') : null,
   }));
-  // Keep captured text, controls, choices and selection containers parent first.
-  const parents = new Map<ParentNode, ChildNode[]>();
-  const captureParents = (node: Node): void => {
-    const parent = node.parentNode;
-    if (!parent || parent === host || parents.has(parent)) return;
-    captureParents(parent);
-    parents.set(parent, Array.from(parent.childNodes));
-  };
+  // Snapshot light DOM edges parent first, including empty elements that can gain children.
+  const parents: [Element, readonly ChildNode[]][] = [];
+  const emptyChildren: readonly ChildNode[] = [];
   const textNodes: { node: Text; data: string }[] = [];
-  const walker = document.createTreeWalker(host);
-  while (walker.nextNode()) {
-    if (walker.currentNode.nodeType !== 3) continue;
-    const node = walker.currentNode as Text;
-    captureParents(node);
-    textNodes.push({ node, data: node.data });
-  }
-  const selector = 'input, textarea, select';
-  const controls = children
-    .flatMap((node) => {
-      if (node.nodeType !== 1) return [];
+  const controls: { node: Element; state: CallerSnapshot }[] = [];
+  let node: Node | null = host.firstChild;
+  while (node && node !== host) {
+    if (node.nodeType === 3) {
+      const text = node as Text;
+      textNodes.push({ node: text, data: text.data });
+    } else if (node.nodeType === 1) {
       const element = node as Element;
-      const descendants = Array.from(element.querySelectorAll(selector));
-      return element.matches(selector) ? [element, ...descendants] : descendants;
-    })
-    .map((node) => {
-      captureParents(node);
-      if (node.localName === 'select') {
-        if (!parents.has(node)) parents.set(node, Array.from(node.childNodes));
-        for (const child of node.querySelectorAll('optgroup, option')) {
-          captureParents(child);
-          if (!parents.has(child)) parents.set(child, Array.from(child.childNodes));
-        }
-      }
-      return { node, state: captureCallerControlState(node) };
-    });
-  if (selection) {
-    const captureContainer = (node: Node | null) => {
-      if (!node || node === host || !host.contains(node)) return;
-      captureParents(node);
-      if (node.nodeType === 1) {
-        const element = node as Element;
-        if (!parents.has(element)) parents.set(element, Array.from(element.childNodes));
-      }
-    };
-    captureContainer(selection.anchorNode);
-    captureContainer(selection.focusNode);
-    for (const { startContainer, endContainer } of selection.boundaries) {
-      captureContainer(startContainer);
-      captureContainer(endContainer);
+      parents.push([element, element.firstChild ? Array.from(element.childNodes) : emptyChildren]);
+      if (element.matches('input, textarea, select'))
+        controls.push({ node: element, state: captureCallerControlState(element) });
     }
+    if (node.firstChild) {
+      node = node.firstChild;
+      continue;
+    }
+    while (node && node !== host && !node.nextSibling) node = node.parentNode;
+    node = node && node !== host ? node.nextSibling : null;
   }
   return {
     isCurrent() {
@@ -385,6 +350,7 @@ function captureSplitCallerProjection(
             (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
               content[index].slot
         ) &&
+        textNodes.every(({ node, data }) => node.data === data) &&
         controls.every(({ node, state }) => host.contains(node) && state.isCurrent())
       );
     },
@@ -492,6 +458,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   getSlotProjector: () => SlotProjector | null;
   ensureSlotProjector: () => SlotProjector;
   clearSlotProjector: () => void;
+  /** Internal restoration notification. Must not throw; rejection preserves the original error. */
+  onCallerProjectionRestored?: () => void;
   onAfterUnmount?: () => void;
   initialMount?: 'eager' | 'manual';
 }): ReturnType<typeof createAdapterHost<Props>> & { host: HTMLElement } {
@@ -636,18 +604,30 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
             currentFeedback() === feedback
         )
       : undefined;
-    const assertCallerProjection = () => {
+    const restoreCallerProjection = (error: unknown) => {
       if (!callerProjection || callerProjection.isCurrent()) return;
-      const error = new Error('[WC Adapter] decoration caller projection changed');
       if (turn === commitTurn && ownsDecorationRoot()) {
         try {
           callerProjection.restore();
+          if (
+            turn === commitTurn &&
+            ownsDecorationRoot() &&
+            currentFeedback() === feedback &&
+            callerProjection.isCurrent()
+          )
+            args.onCallerProjectionRestored?.();
         } catch (rollbackError) {
-          throw new AggregateError([error, rollbackError], error.message);
+          throw new AggregateError(
+            [error, rollbackError],
+            error instanceof Error ? error.message : '[WC Adapter] decoration caller projection changed'
+          );
         }
-        if (turn === commitTurn && ownsDecorationRoot() && callerProjection.isCurrent())
-          throw new RestoredSplitCallerProjectionError(error.message);
       }
+    };
+    const assertCallerProjection = () => {
+      if (!callerProjection || callerProjection.isCurrent()) return;
+      const error = new Error('[WC Adapter] decoration caller projection changed');
+      restoreCallerProjection(error);
       throw error;
     };
     const stagedChildren = splitRoot ? new Map<Node, ChildNode[]>() : undefined;
@@ -713,6 +693,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           throw error;
         }
       },
+      restoreCallerProjection,
       captureSplitTree(staging: DocumentFragment): DecorationTreeRecord | undefined {
         if (!boundLease || !splitRoot || !stagedChildren) return;
         const staged = {
@@ -788,12 +769,17 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       }
     } else if (shadow) {
       const decorations = shadowCommitRoot ? stageOwnedDecorations(children, turn) : null;
-      commitChildren(shadowCommitRoot ?? root, children, {
-        mode: 'shadow',
-        owned: decorations?.owned,
-        bindDecorations: decorations?.bindDecorations,
-        recordStagedNode: decorations?.recordStagedNode,
-      });
+      try {
+        commitChildren(shadowCommitRoot ?? root, children, {
+          mode: 'shadow',
+          owned: decorations?.owned,
+          bindDecorations: decorations?.bindDecorations,
+          recordStagedNode: decorations?.recordStagedNode,
+        });
+      } catch (error) {
+        decorations?.restoreCallerProjection(error);
+        throw error;
+      }
       if (shadowCommitRoot && decorations) {
         const staged = decorations.captureSplitTree(shadowCommitRoot);
         shadowViewTarget!.replaceRenderedChildren(shadowCommitRoot.childNodes);

@@ -153,15 +153,16 @@ function mount(
     if (state === 'pending') await dialogGate.promise;
     return prepared.candidate;
   });
-  const onOpen = owner.onOpen!.bind(owner);
+  const onOpen = owner.onOpen?.bind(owner);
+  if (!onOpen) throw new Error('The Search command participant must provide an open subscription');
   const offOpen = vi.fn();
-  vi.spyOn(owner, 'onOpen').mockImplementation((listener) => {
+  owner.onOpen = (listener) => {
     const off = onOpen(listener);
     return () => {
       offOpen();
       off();
     };
-  });
+  };
   // Start observing after the participant installs its separate owner listener.
   const added = vi.spyOn(document, 'addEventListener');
   const removed = vi.spyOn(document, 'removeEventListener');

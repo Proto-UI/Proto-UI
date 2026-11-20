@@ -1,8 +1,9 @@
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
+import { defineAsHook, definePrototype, type DefHandle, type ExposeMethod } from '@proto.ui/core';
+import { asAccessible, asCollectionItem, asFocusable } from '@proto.ui/hooks';
 import { setupSelectCommand } from './command';
 import {
   notifySelectItemSnapshotChanged,
+  recordSelectFocusHandoff,
   requestSelectOpen,
   requestSelectValue,
   SELECT_CONTEXT,
@@ -15,6 +16,7 @@ import type { SelectItemAsHookContract, SelectItemExposes, SelectItemProps } fro
 function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): void {
   const accessible = asAccessible();
   const command = setupSelectCommand(def, 'select item');
+  const focusable = asFocusable<SelectItemProps>();
   const active = def.state.bool('active', false);
   const selected = def.state.fromAccessibility('selected');
   const collectionItem = asCollectionItem();
@@ -60,7 +62,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     const ownValue = run.props.get().value ?? '';
     const nextDisabled = !!run.props.get().disabled || ctx.disabled;
     command.syncDisabled(nextDisabled);
-    if (!ctx.open) {
+    if (!ctx.open && !ctx.pendingOpen) {
       command.resetInteraction('reason: select popup close => reset item interaction', {
         blur: true,
       });
@@ -96,15 +98,16 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     if (!nextOwnDisabled && !disposed) notifySelectItemSnapshotChanged(run);
   });
 
-  const updateActiveValue = (run: any) => {
+  const updateActiveValue = (run: any, focused = false) => {
     if (command.disabled.get()) return;
     const ownValue = run.props.get().value ?? '';
     if (!ownValue) return;
     active.set(true, 'reason: select item interaction => active');
     command.setRovingStatus({ active: true, selected: selected.get() });
-    run.context.update(SELECT_CONTEXT, (prev: SelectContextValue) =>
-      prev.activeValue === ownValue ? prev : { ...prev, activeValue: ownValue }
-    );
+    run.context.update(SELECT_CONTEXT, (prev: SelectContextValue) => {
+      const next = prev.activeValue === ownValue ? prev : { ...prev, activeValue: ownValue };
+      return focused ? recordSelectFocusHandoff(next) : next;
+    });
   };
 
   const clearTransientActive = (run: any, reason: string) => {
@@ -117,6 +120,15 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
       prev.activeValue === ownValue ? { ...prev, activeValue: '' } : prev
     );
   };
+
+  // This private port shares the Item's expose registry without adding public API.
+  const entryFocusDef = def as DefHandle<
+    SelectItemProps,
+    SelectItemExposes & { __cancelPendingEntryFocus: ExposeMethod<() => void> }
+  >;
+  entryFocusDef.expose.method('__cancelPendingEntryFocus', () => {
+    focusable.blur();
+  });
 
   def.event.on('key.down', (run, ev) => {
     if (ev.key !== 'Tab' || command.disabled.get() || !command.focused.get()) return;
@@ -146,7 +158,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
   command.focused.watch((run, event) => {
     if (event.type !== 'next') return;
     if (event.next) {
-      updateActiveValue(run);
+      updateActiveValue(run, true);
       return;
     }
     if (!command.hovered.get()) {

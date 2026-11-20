@@ -15,8 +15,8 @@ afterEach(() => {
 });
 function fixture() {
   document.body.innerHTML = `<section data-code-example><nav aria-label="Files">
-    <a id="main-file" aria-selected="true" data-code-file-path="src/main.ts">src/main.ts</a>
-    <a id="html-file" aria-selected="false" data-code-file-path="index.html">index.html</a>
+    <a id="main-file" aria-controls="main" aria-selected="true" data-code-file-path="src/main.ts">src/main.ts</a>
+    <a id="html-file" aria-controls="html" aria-selected="false" data-code-file-path="index.html">index.html</a>
   </nav><figure id="main" role="region" aria-labelledby="main-file"><pre>main exact</pre></figure>
   <figure id="html" role="region" aria-labelledby="html-file"><pre>html exact</pre></figure></section>`;
   const list = document.querySelector('nav')!;
@@ -78,6 +78,42 @@ describe('CodeExample real file Tree', () => {
       'html-file',
     ]);
   });
+  it('preserves file relationships when the native links and panels have different orders', async () => {
+    const { list, tabs, panels } = fixture();
+    list.prepend(tabs[1]);
+    const onSelect = vi.fn();
+    projections.push(enhanceCodeExampleTree({
+      list,
+      tabs: [...list.querySelectorAll<HTMLElement>('a')],
+      panels,
+      onSelect,
+    }));
+    await Promise.resolve();
+    const tree = document.querySelector('[data-code-example-tree]')!;
+    const html = tree.querySelector('[data-code-tree-path="index.html"]')!;
+    const main = tree.querySelector('[data-code-tree-path="src/main.ts"]')!;
+    expect(html.getAttribute('aria-controls')).toBe('html');
+    expect(main.getAttribute('aria-controls')).toBe('main');
+    expect(panels[0].getAttribute('aria-labelledby')).toBe(main.id);
+    expect(panels[1].getAttribute('aria-labelledby')).toBe(html.id);
+    tree.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'index.html' } }));
+    expect(onSelect).toHaveBeenCalledWith(0, panels[1]);
+  });
+
+  it('retains native controls when more than one file link names the same panel', () => {
+    const { list, tabs, panels } = fixture();
+    tabs[1].setAttribute('aria-controls', 'main');
+    expect(() => enhanceCodeExampleTree({ list, tabs, panels, onSelect() {} })).toThrow(
+      'File controls and source panels must match.'
+    );
+    expect(list.hidden).toBe(false);
+    expect(document.querySelector('[data-code-example-tree]')).toBeNull();
+    expect(panels.map((panel) => panel.getAttribute('aria-labelledby'))).toEqual([
+      'main-file',
+      'html-file',
+    ]);
+  });
+
   it('routes folder activation to expansion, keeps leaf selection, and ignores nested requests', async () => {
     const { list, tabs, panels } = fixture();
     const onSelect = vi.fn();
@@ -99,7 +135,7 @@ describe('CodeExample real file Tree', () => {
     request('index.html');
     await Promise.resolve();
     expect(onSelect).toHaveBeenCalledTimes(1);
-    expect(onSelect).toHaveBeenCalledWith(1);
+    expect(onSelect).toHaveBeenCalledWith(1, panels[1]);
     expect(
       tree.querySelector('[data-code-tree-path="index.html"]')?.getAttribute('aria-selected')
     ).toBe('true');

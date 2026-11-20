@@ -73,10 +73,14 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
               document.head.append(style);
               (window as any).themeSheet = style.sheet;
               const diagnostics: unknown[] = [];
+              let paletteBindings = 0;
               (window as any).motionDiagnostics = diagnostics;
               const options: any = {
                 residentMotion: {
-                  palette: p.palette,
+                  palette(surface: HTMLElement) {
+                    paletteBindings++;
+                    return p.palette(surface);
+                  },
                   diagnostics: (reasons: readonly string[]) => {
                     if (reasons.length) diagnostics.push({ now: performance.now(), reasons });
                   },
@@ -87,7 +91,7 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
               const Root = p.adapt(p.switchRoot, options),
                 Thumb = p.adapt(p.switchThumb, options);
               const root = new Root(),
-                thumb = new Thumb();
+                thumb = new Thumb() as HTMLElement;
               p.setElementProps(root, { size });
               root.id = 'subject';
               thumb.id = 'thumb';
@@ -121,6 +125,28 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
                   transform: s.transform,
                   radius: s.borderRadius,
                   inlineColor: surface.style.getPropertyValue('background-color'),
+                  rootTransitions: surface
+                    .getAnimations()
+                    .flatMap((animation) =>
+                      animation instanceof CSSTransition ? [animation.transitionProperty] : []
+                    ),
+                  thumbTransitions: [thumb, thumbSurface].flatMap((element) =>
+                    element
+                      .getAnimations()
+                      .flatMap((animation) =>
+                        animation instanceof CSSTransition ? [animation.transitionProperty] : []
+                      )
+                  ),
+                  reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+                  transitionStyles: [root, surface, thumb, thumbSurface].map((element) => {
+                    const style = getComputedStyle(element);
+                    return {
+                      property: style.transitionProperty,
+                      duration: style.transitionDuration,
+                      inline: element.style.transitionProperty,
+                    };
+                  }),
+                  paletteBindings,
                   tokens: surface.getAttribute('data-pui-style'),
                   diagnostics: [...diagnostics],
                 };
@@ -474,7 +500,10 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
           expect(middle.thumb.x - initial.thumb.x).toBeGreaterThan(0);
           expect(middle.thumb.x - initial.thumb.x).toBeLessThan(travel);
           expect(middle.color).not.toBe(initial.color);
-          expect(middle.inlineColor).not.toBe('');
+          expect(middle.inlineColor).toBe('');
+          expect(middle.rootTransitions).toContain('background-color');
+          expect(middle.thumbTransitions).toContain('transform');
+          expect(middle.paletteBindings).toBe(0);
           const reverse = await page.evaluate(() => {
             const before = (window as any).sampleSwitch();
             (window as any).subject.click();
@@ -612,6 +641,9 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
           expect(reduced.thumb.x - initial.thumb.x).toBeCloseTo(travel, 1);
           expect(reduced.color).toBe(end.color);
           expect(reduced.inlineColor).toBe('');
+          expect(reduced.reducedMotion).toBe(true);
+          expect(reduced.rootTransitions).toEqual([]);
+          expect(reduced.thumbTransitions).toEqual([]);
           await setProps({ checked: true, disabled: true });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + initial.root.height / 2);
           expect((await sample('disabled-outside')).checked).toBe(true);
@@ -654,11 +686,17 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
           const mismatched = await sample('next-target-source-mismatch');
           expect(mismatched.color).toBe('rgb(10, 20, 30)');
           expect(mismatched.inlineColor).toBe('');
-          expect(
-            mismatched.diagnostics.some((record: any) =>
-              record.reasons.includes('theme-source-mismatch:primary')
-            )
-          ).toBe(true);
+          expect(mismatched.paletteBindings).toBe(0);
+          expect(mismatched.diagnostics).toEqual([]);
+          // Sample the canonical authority separately from the public CSS writer.
+          const palette = await page.evaluate(() => {
+            const w = window as any;
+            const root = w.subject as HTMLElement;
+            const surface = root.shadowRoot?.querySelector('[part="surface"]') ?? root;
+            return w.SwitchConsumer.palette(surface).current();
+          });
+          expect(palette.colors.primary).toBeUndefined();
+          expect(palette.diagnostics).toContain('theme-source-mismatch:primary');
         } finally {
           try {
             const nativeInput = await page

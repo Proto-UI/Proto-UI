@@ -11,6 +11,7 @@ import {
 } from '../platform/web-preference-source';
 const zeroOpacityOwners = new WeakMap<Element, () => boolean>();
 
+/** True only while this live presentation lease still owns its zero-opacity write. */
 export function hasOwnedWebPresenceZeroOpacity(element: Element): boolean {
   return zeroOpacityOwners.get(element)?.() ?? false;
 }
