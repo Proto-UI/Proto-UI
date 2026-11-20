@@ -12,9 +12,9 @@ export default withShadcnRheaDemo({
         children: [
           {
             kind: 'proto',
-            prototypeId: 'lucide-icon',
+            prototypeId: 'lucide-bold-icon',
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
-            props: { name: 'bold', size: 16 },
+            props: { size: 16 },
           },
           { kind: 'box', className: 'sr-only', children: ['Bold'] },
         ],
@@ -27,9 +27,9 @@ export default withShadcnRheaDemo({
         children: [
           {
             kind: 'proto',
-            prototypeId: 'lucide-icon',
+            prototypeId: 'lucide-italic-icon',
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
-            props: { name: 'italic', size: 16 },
+            props: { size: 16 },
           },
           { kind: 'box', className: 'sr-only', children: ['Italic'] },
         ],
@@ -42,9 +42,9 @@ export default withShadcnRheaDemo({
         children: [
           {
             kind: 'proto',
-            prototypeId: 'lucide-icon',
+            prototypeId: 'lucide-underline-icon',
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
-            props: { name: 'underline', size: 16 },
+            props: { size: 16 },
           },
           { kind: 'box', className: 'sr-only', children: ['Underline'] },
         ],
@@ -57,9 +57,9 @@ export default withShadcnRheaDemo({
         children: [
           {
             kind: 'proto',
-            prototypeId: 'lucide-icon',
+            prototypeId: 'lucide-strikethrough-icon',
             className: 'inline-flex size-4 shrink-0 pointer-events-none',
-            props: { name: 'strikethrough', size: 16 },
+            props: { size: 16 },
           },
           { kind: 'box', className: 'sr-only', children: ['Strikethrough'] },
         ],

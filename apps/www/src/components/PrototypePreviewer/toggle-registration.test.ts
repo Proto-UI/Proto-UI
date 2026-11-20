@@ -38,7 +38,14 @@ const TOGGLE_FAMILIES = [
     runtimes: [],
     sidebarSlug: 'ui-libraries/shadcn/toggle',
     manifestBound: true,
-    expectedIds: null,
+    expectedIds: [
+      'lucide-bold-icon',
+      'lucide-italic-icon',
+      'lucide-strikethrough-icon',
+      'lucide-underline-icon',
+      'shadcn-style-scope',
+      'shadcn-toggle',
+    ],
   },
   {
     family: 'brutalist',
@@ -93,7 +100,8 @@ describe('Toggle actual DemoSpec registration', () => {
         expect(
           [...PROJECTION_FAMILY_MANIFESTS[family].families.toggle.recipePrototypeIds].sort()
         ).toEqual(ids);
-      } else {
+      }
+      if (expectedIds) {
         expect(ids).toEqual([...expectedIds].sort());
       }
       for (const id of ids) {

@@ -46,13 +46,13 @@ async function expectedPaint(page: Page, variant: string, dark: boolean) {
                 ? mix('destructive', dark ? 20 : 10)
                 : variant === 'outline'
                   ? dark
-                    ? mix('input', 30)
+                    ? 'transparent'
                     : 'var(--pui-background)'
                   : variant === 'secondary'
                     ? 'var(--pui-secondary)'
                     : 'transparent'
           ),
-          switch: color(mix('input', dark ? 50 : 80)),
+          switch: color(dark ? mix('input', 80) : 'var(--pui-input)'),
         };
       } finally {
         ref.remove();
@@ -164,6 +164,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
             'link',
           ]) {
             await page.locator(`${S2} [data-option="variant"]`).selectOption(variant);
+            const paint = await expectedPaint(page, variant, dark);
             for (const [size, height] of [
               ['default', 32],
               ['sm', 28],
@@ -175,13 +176,14 @@ describe.sequential('S2 public Shadow split settings paths', () => {
               await settle(page);
               const rows = await read(page);
               parity(rows);
-              const paint = await expectedPaint(page, variant, dark);
               for (const row of rows) {
                 expect(row.button.size[1]).toBe(height);
                 if (size === 'icon') expect(row.button.size[0]).toBe(32);
-                expect(row.switch.size).toEqual([44, 24]);
-                expect(row.thumb.size).toEqual([20, 20]);
-                expect(row.thumbX).toBe(3);
+                expect(row.switch.size[0]).toBe(32);
+                // The 1.15rem track height is quantized to browser layout units.
+                expect(row.switch.size[1]).toBeCloseTo(18.4, 1);
+                expect(row.thumb.size).toEqual([16, 16]);
+                expect(row.thumbX).toBe(1);
                 expect(row.checkbox.size).toEqual([16, 16]);
                 expect(row.slotOwned).toBe(true);
                 expect(row.counts).toEqual([0, 0, 0]);
@@ -197,7 +199,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
         await page.waitForTimeout(450);
         for (const row of await read(page)) {
           expect(row.switch.checked).toBe('true');
-          expect(row.thumbX).toBe(21);
+          expect(row.thumbX).toBe(15);
           expect(row.glyphs).toEqual(['m20 6-11 11-5-5']);
           expect(row.counts).toEqual([0, 0, 0]);
         }
@@ -237,7 +239,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
             await page.mouse.down();
             await settle(page);
             const held = (await read(page)).find((r) => r.profile === profile)!;
-            expect(held.switch.size[0]).toBeCloseTo(44 * 0.98, 2);
+            expect(held.switch.size[0]).toBe(32);
             expect(held.counts[1]).toBe(0);
             await page.mouse.up();
           } else await component(page, profile, kind).click();
@@ -256,7 +258,17 @@ describe.sequential('S2 public Shadow split settings paths', () => {
       for (const profile of profiles)
         for (const kind of ['button', 'switch', 'checkbox']) {
           const el = component(page, profile, kind);
-          await el.click({ force: true });
+          await el.scrollIntoViewIfNeeded();
+          const box = await el.boundingBox();
+          const viewport = page.viewportSize();
+          if (!box || !viewport) throw new Error(`Missing pointer geometry for ${profile} ${kind}`);
+          const x = box.x + box.width / 2;
+          const y = box.y + box.height / 2;
+          expect(x).toBeGreaterThanOrEqual(0);
+          expect(x).toBeLessThan(viewport.width);
+          expect(y).toBeGreaterThanOrEqual(0);
+          expect(y).toBeLessThan(viewport.height);
+          await page.mouse.click(x, y);
           await el.focus();
           await page.keyboard.press('Space');
           await page.keyboard.press('Enter');
@@ -303,7 +315,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
         expect(Object.values(row.generations)).toEqual([2, 2, 2, 2, 2, 2]);
         expect(row.counts).toEqual([0, 0, 0]);
         expect(row.switch.checked).toBe('true');
-        expect(row.thumbX).toBe(21);
+        expect(row.thumbX).toBe(15);
         expect(row.checkbox.checked).toBe('true');
         expect(row.glyphs).toEqual(['m20 6-11 11-5-5']);
         expect(row.slot).toBe('Save preferences');
@@ -316,7 +328,7 @@ describe.sequential('S2 public Shadow split settings paths', () => {
       await settle(page);
       for (const row of await read(page)) {
         expect(row.counts).toEqual([1, 1, 1]);
-        expect(row.thumbX).toBe(3);
+        expect(row.thumbX).toBe(1);
         expect(row.glyphs).toEqual([]);
       }
       await action(page, 'tone');
