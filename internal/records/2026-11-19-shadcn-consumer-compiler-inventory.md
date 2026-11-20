@@ -50,3 +50,13 @@ Core types an as-hook result's `stateHandles` as the borrowed handles of its nam
 Writing the definition is the next delivery unit.
 
 The `scroll-reveal-consumers` React case failed intermittently in full-suite runs. It fails in about half of the runs on this branch, and passes when run alone and when run on `origin/main`. The family's generated output (`compilation.json`, `writer.json` and `output/`) is byte-identical between `origin/main` and this branch, so the failure is timing in the test harness, not a change in lowering.
+
+## Update 2026-11-20: `stateHandles` defined
+
+The `stateHandles` lowering is now defined in `source-language.md` ("As-hook `stateHandles`"), but not implemented. Implementing it touches three places:
+
+1. the parser: definite-declaration analysis over the winning as-hook setup, and the `capture.stateHandles` member read;
+2. the operation result typing;
+3. native support: the JS support object and the GPUI Rust support each gain the frozen record.
+
+It then unblocks button, toggle and separator as far as their next diagnostic.
