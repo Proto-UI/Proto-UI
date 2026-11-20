@@ -626,7 +626,9 @@ class Frontend {
           throw new TypeError(`Cannot read ${property} on a nullish value.`);
         }
         if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'stateHandles')
-          return captureStateHandlesType(this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture);
+          return captureStateHandlesType(
+            this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture
+          );
         const capability = capabilityMemberType(owner, property, optional);
         if (capability !== undefined) return capability;
         if (owner === 'props') {
@@ -1003,8 +1005,13 @@ class Frontend {
               OPERATION_RULES[value.operation].receiver === 'def' &&
               value.arguments[0]?.kind === 'literal'
                 ? String(value.arguments[0].value)
-                : stateValue(value.type) && value.kind === 'member'
-                  ? `#observed:${value.span.file}:${value.span.start}`
+                : stateValue(value.type) &&
+                    (value.kind === 'member' ||
+                      value.kind === 'call' ||
+                      value.kind === 'helper-call')
+                  ? // A handle read from a capture or returned by a helper is observed
+                    // through this binding; its identity is the binding site.
+                    `#observed:${value.span.file}:${value.span.start}`
                   : alias?.stateId;
             Object.assign(pending, {
               type: value.type,
@@ -1268,8 +1275,14 @@ class Frontend {
       );
       if (constant && value.kind === 'literal')
         return { ...value, type: { kind: 'literal', value: value.value } };
-      if (constant && value.kind === 'array' && value.elements.length > 0 &&
-        value.elements.every((element) => element.kind === 'literal' && typeof element.value === 'string')) {
+      if (
+        constant &&
+        value.kind === 'array' &&
+        value.elements.length > 0 &&
+        value.elements.every(
+          (element) => element.kind === 'literal' && typeof element.value === 'string'
+        )
+      ) {
         const elements = value.elements.map((element) => {
           if (element.kind !== 'literal') return element;
           return { ...element, type: { kind: 'literal' as const, value: element.value } };
@@ -1279,7 +1292,10 @@ class Frontend {
           elements,
           type: {
             kind: 'array',
-            element: parseDataType({ kind: 'union', members: elements.map((element) => element.type) }),
+            element: parseDataType({
+              kind: 'union',
+              members: elements.map((element) => element.type),
+            }),
           },
         };
       }
@@ -2058,13 +2074,17 @@ class Frontend {
     // Discovery unwraps declarations for dispatch. Recover only parentheses and
     // a verified const assertion around an array, not arbitrary erased views.
     let initializer = value;
-    while (ts.isArrayLiteralExpression(value) && initializer.parent &&
+    while (
+      ts.isArrayLiteralExpression(value) &&
+      initializer.parent &&
       (ts.isParenthesizedExpression(initializer.parent) ||
-        ((ts.isAsExpression(initializer.parent) || ts.isTypeAssertionExpression(initializer.parent)) &&
+        ((ts.isAsExpression(initializer.parent) ||
+          ts.isTypeAssertionExpression(initializer.parent)) &&
           ts.isTypeReferenceNode(initializer.parent.type) &&
           ts.isIdentifier(initializer.parent.type.typeName) &&
           initializer.parent.type.typeName.text === 'const')) &&
-      initializer.parent.expression === initializer)
+      initializer.parent.expression === initializer
+    )
       initializer = initializer.parent;
     const initial = this.expression(module, initializer, new Map(), 'setup');
     const scalar =
@@ -2073,7 +2093,9 @@ class Frontend {
     // finite data written as a literal (finiteness is checked below).
     if (!scalar && (module.mutableBindings.has(name) || scalarInitializer(value)))
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
-    const annotation = ts.isVariableDeclaration(initializer.parent) ? initializer.parent.type : undefined;
+    const annotation = ts.isVariableDeclaration(initializer.parent)
+      ? initializer.parent.type
+      : undefined;
     const declared = annotation
       ? parseSourceValueType(module, annotation, this.substitutions)
       : initial.type;
@@ -2469,22 +2491,41 @@ class Frontend {
       if (property === 'includes') {
         const array = this.expression(module, owner, scope, phase);
         if (typeof array.type !== 'string' && array.type.kind === 'array') {
-          if (node.arguments.length !== 1 || node.questionDotToken || node.expression.questionDotToken)
-            rejectNode(node, 'PUI1006', 'Finite string includes requires one search argument and no optional call.');
+          if (
+            node.arguments.length !== 1 ||
+            node.questionDotToken ||
+            node.expression.questionDotToken
+          )
+            rejectNode(
+              node,
+              'PUI1006',
+              'Finite string includes requires one search argument and no optional call.'
+            );
           let search = node.arguments[0];
           // An erased comparison view grants no provenance. Retain the actual operand in IR.
           while (ts.isParenthesizedExpression(search)) search = search.expression;
           if (ts.isAsExpression(search) || ts.isTypeAssertionExpression(search)) {
             const asserted = parseSourceValueType(module, search.type, this.substitutions);
             const members = valueAlternatives(asserted);
-            if (members.length && members.every((type) =>
-              typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
-            )) search = search.expression;
+            if (
+              members.length &&
+              members.every(
+                (type) =>
+                  typeof type !== 'string' &&
+                  type.kind === 'literal' &&
+                  typeof type.value === 'string'
+              )
+            )
+              search = search.expression;
           }
           const value = this.expression(module, search, scope, phase);
           return {
-            kind: 'intrinsic', name: 'array.includes', arguments: [array, value],
-            type: this.checkedValue(node, () => intrinsicResult('array.includes', [array.type, value.type])),
+            kind: 'intrinsic',
+            name: 'array.includes',
+            arguments: [array, value],
+            type: this.checkedValue(node, () =>
+              intrinsicResult('array.includes', [array.type, value.type])
+            ),
             span,
           };
         }
@@ -2561,6 +2602,25 @@ class Frontend {
           phase,
           binding.parsing || binding.lexical ? undefined : binding.helper
         );
+      }
+      if (name === 'String' && !module.imports.has(name) && !module.declarations.has(name)) {
+        // The global String conversion, as authored source uses it in
+        // diagnostics: one argument, no `new`, a string result.
+        if (node.arguments.length !== 1)
+          rejectNode(node, 'PUI1004', 'String() is admitted with exactly one argument.');
+        const args = [this.expression(module, node.arguments[0], scope, phase)];
+        return {
+          kind: 'intrinsic',
+          name: 'string',
+          arguments: args,
+          type: this.checkedValue(node, () =>
+            intrinsicResult(
+              'string',
+              args.map((arg) => arg.type)
+            )
+          ),
+          span,
+        };
       }
       if (!module.imports.has(name) && !module.declarations.has(name))
         rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
@@ -3471,9 +3531,11 @@ function lowerObjectPatterns(nodes: readonly ts.Statement[]): readonly ts.Statem
     const lowered = ranged(factory.createVariableStatement(statement.modifiers, list), statement);
     (lowered as { parent: ts.Node }).parent = statement.parent;
     // TypeScript exports this helper at runtime but omits it from its public declarations.
-    (ts as typeof ts & {
-      setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T;
-    }).setParentRecursive(lowered, true);
+    (
+      ts as typeof ts & {
+        setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T;
+      }
+    ).setParentRecursive(lowered, true);
     loweredPatterns.set(node, lowered);
     return lowered;
   });

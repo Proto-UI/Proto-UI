@@ -330,13 +330,17 @@ export function intrinsicResult(name: string, args: readonly ValueType[]): Value
     args[0].kind === 'array' &&
     valueAlternatives(args[0].element).length > 0 &&
     valueAlternatives(args[0].element).every(
-      (type) => typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
+      (type) =>
+        typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
     )
-  ) return 'boolean';
+  )
+    return 'boolean';
   if (name === 'typeof' && args.length === 1) return 'string';
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
     return 'exception';
   if (name === 'number.isFinite' && args.length === 1 && isDataValueType(args[0])) return 'boolean';
+  if (name === 'string' && args.length === 1 && (isDataValueType(args[0]) || args[0] === 'unknown'))
+    return 'string';
   if (name === 'object.freeze' && args.length === 1 && objectFields(args[0])) return args[0];
   if (
     name === 'object.hasOwn' &&

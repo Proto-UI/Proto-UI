@@ -19,6 +19,7 @@ import {
 } from './template-shape';
 import { isDataValueType, isPublicValueType, lexicalStoredType, statementsTerminate } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
+import { valueAlternatives } from './value-types';
 import {
   GPUI_MISSING_FOCUS_TREE,
   GPUI_UNAVAILABLE_OPERATIONS,
@@ -1521,6 +1522,22 @@ impl __PuiNativeRecordValue {
         switch (node.name) {
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
+          case 'string': {
+            // GPUI values coerce scalars exactly as ECMAScript does; a
+            // structured or unknown argument has no admitted native coercion.
+            const type = node.arguments[0].type;
+            const scalar = valueAlternatives(type).every(
+              (member) =>
+                member === 'string' ||
+                member === 'number' ||
+                member === 'boolean' ||
+                member === 'null' ||
+                member === 'void' ||
+                (typeof member !== 'string' && member.kind === 'literal')
+            );
+            if (!scalar) throw new Error('GPUI supports String() only for scalar data arguments.');
+            return `Value::string(&(${args[0]}).scalar_text())`;
+          }
           case 'object.freeze':
             return `freeze(${args[0]})`;
           case 'object.hasOwn':

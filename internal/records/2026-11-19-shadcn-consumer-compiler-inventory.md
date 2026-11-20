@@ -60,3 +60,18 @@ The `stateHandles` lowering is now defined in `source-language.md` ("As-hook `st
 3. native support: the JS support object and the GPUI Rust support each gain the frozen record.
 
 It then unblocks button, toggle and separator as far as their next diagnostic.
+
+## Update 2026-11-21: String(), joined tokens, helper-returned rule states
+
+Upstream main now implements `stateHandles`. This patch admits three more forms:
+
+- `String(value)`;
+- joined style-token constants;
+- helper-returned state handles in rules.
+
+| Family | Next diagnostic |
+| --- | --- |
+| separator | Clears the frontend. It now stops at the target: `react-dom-source-v1` does not implement `props.watchAll` or `props.watchRaw`. |
+| button, toggle | `for...of` statements |
+
+The other families are unchanged.
