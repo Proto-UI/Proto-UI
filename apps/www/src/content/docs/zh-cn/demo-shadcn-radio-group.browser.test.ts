@@ -258,7 +258,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         observations.light = initial;
         expect(initial.map((item) => item.checked)).toEqual(['false', 'true', 'false']);
         expect(initial.map((item) => item.dotOpacity)).toEqual(['0', '1', '0']);
-        expect(await density.evaluate((element) => getComputedStyle(element).rowGap)).toBe('8px');
+        // The Rhea profile projects gap-3, so the density rows keep a 12px gap.
+        expect(await density.evaluate((element) => getComputedStyle(element).rowGap)).toBe('12px');
         for (const item of initial) {
           expect(item.width).toBeCloseTo(16, 1);
           expect(item.height).toBeCloseTo(16, 1);
@@ -272,7 +273,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           expect(item.indicatorRole).toBeNull();
           expect(item.indicatorTabIndex).toBeNull();
           expect(item.indicatorControls).toBe(0);
-          expect(alpha(item.background)).toBe(item.checked === 'true' ? 1 : 0);
+          // The Rhea profile paints an unchecked item with bg-input/90.
+          expect(alpha(item.background)).toBe(item.checked === 'true' ? 1 : 0.9);
           expect(item.duration).toBe('0s');
         }
         expect(initial[2]).toMatchObject({
@@ -384,7 +386,9 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
 
         await applyColorScheme(page, 'dark');
         await expect.poll(async () => alpha((await itemState(first)).background)).toBe(1);
-        expect(alpha((await itemState(selected)).background)).toBeCloseTo(0.045, 3);
+        // The Rhea profile keeps bg-input/90 in both color schemes; the dark
+        // input color carries a 0.15 alpha, so the unchecked surface is 0.135.
+        expect(alpha((await itemState(selected)).background)).toBeCloseTo(0.135, 3);
         expect(await value.textContent()).toBe('Value: default');
         observations.dark = await Promise.all([first, selected, compact].map(itemState));
         expect(
@@ -408,7 +412,7 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}-narrow.png`) });
         await applyColorScheme(page, 'light');
         await expect.poll(async () => alpha((await itemState(first)).background)).toBe(1);
-        await expect.poll(async () => alpha((await itemState(selected)).background)).toBe(0);
+        await expect.poll(async () => alpha((await itemState(selected)).background)).toBe(0.9);
         expect(await value.textContent()).toBe('Value: default');
         expect(errors).toEqual([]);
         observations.errors = errors;

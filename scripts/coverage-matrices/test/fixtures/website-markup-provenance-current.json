@@ -75,7 +75,7 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "837e4b19f374198255b670c2098a3b65b3713b1fbc8afd2d688ff6cb3c8d3b14"
+      "sha256": "5b1ab89970f5a4aed6880f1c8fea6ad853521041058b00fd506c1db18755875a"
     },
     {
       "path": "apps/www/astro.config.mjs",

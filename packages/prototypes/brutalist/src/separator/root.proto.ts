@@ -21,11 +21,11 @@ export const BrutalistSeparatorRoot = definePrototype<
     // P-BRUTALIST-SEPARATOR-DYNAMIC-GEOMETRY
     def.rule({
       when: (w) => w.state(orientation).eq('horizontal'),
-      intent: (i) => i.feedback.style.use(tw('h-0.5 w-full')),
+      intent: (i) => i.feedback.style.use(tw('h-[2px] w-full')),
     });
     def.rule({
       when: (w) => w.state(orientation).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('h-full w-0.5')),
+      intent: (i) => i.feedback.style.use(tw('h-full w-[2px]')),
     });
     // P-BASE-SEPARATOR-CONTENTLESS: hook composition does not install the
     // caller's renderer, so this projection must discard authored descendants.

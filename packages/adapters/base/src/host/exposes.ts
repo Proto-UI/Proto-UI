@@ -40,7 +40,8 @@ export function createScopedExposesReader(
   const wrapCallable = (
     value: (...args: unknown[]) => unknown,
     receiver: object,
-    currentReceiver: () => object = () => receiver
+    currentReceiver: () => object = () => receiver,
+    stateSubscribe = false
   ): ((...args: unknown[]) => unknown) => {
     // Cancelling an issued State subscription revokes a resource without entering
     // its retired owner. Authored callbacks and ordinary return values stay scoped.
@@ -63,7 +64,18 @@ export function createScopedExposesReader(
 
       let result: unknown;
       invoke(() => {
-        result = projectValue(Reflect.apply(value, currentReceiver(), args));
+        const projected = projectValue(Reflect.apply(value, currentReceiver(), args));
+        // An issued State cancellation can be called during terminal
+        // notification. Expose State owns teardown once this scope retires.
+        if (stateSubscribe && typeof projected === 'function') {
+          const cancel = () => {
+            if (live) projected();
+          };
+          projectedCallables.add(cancel);
+          result = cancel;
+        } else {
+          result = projected;
+        }
       });
       return result;
     };
@@ -196,7 +208,12 @@ export function createScopedExposesReader(
                   rootReceiver,
                   () => lastRaw ?? rootReceiver
                 )
-              : wrapCallable(entry as (...args: unknown[]) => unknown, node.source)
+              : wrapCallable(
+                  entry as (...args: unknown[]) => unknown,
+                  node.source,
+                  undefined,
+                  key === 'subscribe' && isExposeStateExternalHandle(node.source)
+                )
             : entry !== null && typeof entry === 'object'
               ? (graph.get(entry)?.target ?? entry)
               : entry;
