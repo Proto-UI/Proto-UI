@@ -1,0 +1,184 @@
+{
+  "source": "c471a65a8013130a944edd739eec20739f0801dd",
+  "sizingSha256": "308bd1f1a4591445c41ad8a71206fb2674c78840dc376f8c54fa3a2f5ddd2488",
+  "provisional": true,
+  "groups": [
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts",
+        "apps/www/test/virtual-list-resize.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts"
+      ],
+      "score": 739.678
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts",
+        "apps/www/test/button-view-lifetime.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts",
+        "packages/prototypes/base/test/async-region.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+        "packages/compiler/test/vue2-native-editor.browser.test.ts"
+      ],
+      "score": 736.2589999999999
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+        "apps/www/test/color-scheme.browser.test.ts",
+        "apps/www/test/radio-group-entry.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts",
+        "apps/www/test/tree-navigation.browser.test.ts"
+      ],
+      "score": 733.9140000000001
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+        "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+        "apps/www/test/component-consumer-repairs.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts",
+        "apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts",
+        "apps/www/test/template-style.browser.test.ts"
+      ],
+      "score": 733.982
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts"
+      ],
+      "score": 732.7459999999999
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts",
+        "apps/www/test/preferences.browser.test.ts",
+        "packages/adapters/vue/test/focus-request-readiness.browser.test.ts"
+      ],
+      "score": 731.015
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts",
+        "packages/adapters/react/test/focus-entry-readiness.browser.test.ts"
+      ],
+      "score": 731.838
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/contrast-tooltip-warm-handoff.browser.test.ts",
+        "packages/compiler/test/control-label-native.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts"
+      ],
+      "score": 728.41
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+        "apps/www/src/components/documentation-image-preview.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts",
+        "apps/www/test/evidence/brutalist-fonts.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts"
+      ],
+      "score": 727.8620000000001
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts",
+        "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts",
+        "apps/www/test/message-composition.browser.test.ts"
+      ],
+      "score": 725.592
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+        "packages/adapters/web-component/test/native-text-width.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts",
+        "packages/compiler/test/focus-scope-native.browser.test.ts",
+        "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts"
+      ],
+      "score": 730.2289999999999
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+        "packages/adapters/base/test/focus-intent-retries.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts"
+      ],
+      "score": 728.407
+    },
+    {
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts",
+        "apps/workspace/test/lifecycle.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts"
+      ],
+      "score": 726.7479999999999
+    }
+  ],
+  "suiteCount": 99,
+  "missingTiming": [
+    "apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts",
+    "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts"
+  ],
+  "predictedTestMaxSeconds": 739.678,
+  "predictedWithObservedStartupSeconds": 846.902,
+  "observedEnvelopeMaxSeconds": 862,
+  "actualObservedStartupMaxSeconds": 107.224,
+  "predictedWithActualStartupSeconds": 846.902,
+  "predictionLimitation": "Provisional observed group weights from mixed revisions, failed/skipped executions, and three 52s placeholders; excludes teardown, collection/process overhead beyond suite weights. Not an accepted conservative production estimate.",
+  "sizingArtifactStartupSeconds": 106.58
+}

@@ -1,55 +1,150 @@
-name: Browser suite repair evidence
-
+name: Private full browser timing
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
-concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  focused-browser:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+  timing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - group: 1
+            shard: 1/13
+          - group: 2
+            shard: 2/13
+          - group: 3
+            shard: 3/13
+          - group: 4
+            shard: 4/13
+          - group: 5
+            shard: 5/13
+          - group: 6
+            shard: 6/13
+          - group: 7
+            shard: 7/13
+          - group: 8
+            shard: 8/13
+          - group: 9
+            shard: 9/13
+          - group: 10
+            shard: 10/13
+          - group: 11
+            shard: 11/13
+          - group: 12
+            shard: 12/13
+          - group: 13
+            shard: 13/13
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PROTO_UI_RUNTIME_PHASE: browser
+      PROTO_UI_RUNTIME_SHARD: ${{ matrix.shard }}
+      PROTO_UI_RUNTIME_SLOT: ${{ format('browser-{0}-of-13', matrix.group) }}
+    defaults:
+      run:
+        working-directory: source
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
+          path: carrier
+      - uses: actions/checkout@v4
+        with:
+          ref: c471a65a8013130a944edd739eec20739f0801dd
+          path: source
+      - name: Bind exact source and stage private diagnostic helpers
+        run: |
+          test "$(git rev-parse HEAD)" = "c471a65a8013130a944edd739eec20739f0801dd"
+          cp ../carrier/.github/diagnostics/browser-timing-* scripts/test/
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Install locked dependencies and locate Chromium
         run: |
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
+      - name: Restore the exact browser font package only
+        id: browser-font-cache
+        timeout-minutes: 1
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
+      - name: Install real CJK fallback for typography glyph evidence
+        # Fail setup before a slow mirror consumes the browser execution budget.
+        id: prepare-browser-fonts
+        timeout-minutes: 3
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/runtime-ci/font-preparation
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Disable the development toolbar before public-page browser tests
         run: |
-          set -euo pipefail
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
-        env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+      - name: Run the bounded shard with its own documentation server
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
+          export PROTO_UI_TYPOGRAPHY_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/typography"
+          export PROTO_UI_MATERIAL_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/material"
+          mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
+          git rev-parse HEAD | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
+          # Each matrix job owns an independent checkout, server and Astro cache.
+          # Keep room within the job deadline for teardown and artifact retention.
+          timeout --signal=TERM --kill-after=10s 900s \
+            node scripts/test/browser-timing-runner.mjs 2>&1 | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.log"
+      - name: Record terminal producer outcome
+        if: always()
+        env:
+          RUNTIME_CI_OUTCOME: ${{ job.status }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/runtime-ci"
+          node -e 'require("fs").writeFileSync(process.env.RUNNER_TEMP+"/runtime-ci/terminal.json",JSON.stringify({source:"c471a65a8013130a944edd739eec20739f0801dd",shard:process.env.PROTO_UI_RUNTIME_SHARD,outcome:process.env.RUNTIME_CI_OUTCOME,runId:process.env.GITHUB_RUN_ID,attempt:process.env.GITHUB_RUN_ATTEMPT}))'
+      - name: Preserve source-bound shard selection, results and failure output
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
-          retention-days: 30
+          name: runtime-ci-${{ github.run_id }}-${{ env.PROTO_UI_RUNTIME_SLOT }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/runtime-ci
+          if-no-files-found: error
+          retention-days: 14
+      - name: Save the verified browser font package
+        # Later browser failures still leave a verified package available.
+        if: ${{ !cancelled() && steps.prepare-browser-fonts.outcome == 'success' && steps.browser-font-cache.outputs.cache-hit != 'true' }}
+        timeout-minutes: 1
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ${{ steps.browser-font-cache.outputs.cache-primary-key }}
+
+  verify:
+    if: always()
+    needs: timing
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: runtime-ci-${{ github.run_id }}-*-attempt-${{ github.run_attempt }}
+          merge-multiple: false
+          path: evidence
+      - name: Require all 99 suite identities exactly once
+        env:
+          TIMING_NEEDS: ${{ toJSON(needs) }}
+        run: node .github/diagnostics/browser-timing-verify.mjs evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-timing-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: evidence/verification.json
+          if-no-files-found: error
+          retention-days: 14
