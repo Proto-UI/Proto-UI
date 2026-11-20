@@ -170,9 +170,10 @@ async function selectPublicPanel(page: Page, runtime: (typeof RUNTIMES)[number])
     const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
     if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
   }
-  const previewer = page.locator(
-    `[data-adapter-panel="${runtime}"] [data-previewer-id][data-demo-id="${demoId}"]`
-  );
+  // The public Shadcn Button page renders one previewer per demo and follows the
+  // page-wide Header Adapter preference; it publishes no [data-adapter-panel]
+  // wrappers, so a panel-scoped locator can never resolve the public panel.
+  const previewer = page.locator(`[data-previewer-id][data-demo-id="${demoId}"]`);
   expect(await previewer.count()).toBe(1);
   await previewer.scrollIntoViewIfNeeded();
   const previewerId = await previewer.getAttribute('data-previewer-id');
