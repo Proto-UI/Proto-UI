@@ -429,7 +429,13 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             await applyColorScheme(page, 'light');
             await page.emulateMedia({ reducedMotion: 'reduce' });
             await capture('end-reduced-motion', await checkCorner());
-            await page.emulateMedia({ reducedMotion: 'no-preference', forcedColors: 'active' });
+            for (const colorScheme of ['light', 'dark'] as const) {
+              await applyColorScheme(page, colorScheme);
+              await page.emulateMedia({ colorScheme, reducedMotion: 'no-preference', forcedColors: 'active' });
+              await capture(`end-forced-colors-${colorScheme}`, await checkCorner());
+            }
+            await applyColorScheme(page, 'light');
+            await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference', forcedColors: 'active' });
             await capture('end-forced-colors-before-assertions', {
               viewport: await rect(viewport),
             });
