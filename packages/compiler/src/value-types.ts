@@ -323,6 +323,16 @@ export function arrayEveryCallbackParameters(
 }
 
 export function intrinsicResult(name: string, args: readonly ValueType[]): ValueType {
+  if (
+    name === 'array.includes' &&
+    args.length === 2 &&
+    typeof args[0] !== 'string' &&
+    args[0].kind === 'array' &&
+    valueAlternatives(args[0].element).length > 0 &&
+    valueAlternatives(args[0].element).every(
+      (type) => typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
+    )
+  ) return 'boolean';
   if (name === 'typeof' && args.length === 1) return 'string';
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
     return 'exception';

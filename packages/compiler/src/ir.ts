@@ -302,6 +302,7 @@ export type ExpressionIR = ExpressionBase &
           | 'object.freeze'
           | 'object.hasOwn'
           | 'array.every'
+          | 'array.includes'
           | 'typeof'
           | 'error';
         arguments: ExpressionIR[];

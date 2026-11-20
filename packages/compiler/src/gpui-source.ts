@@ -1527,6 +1527,8 @@ impl __PuiNativeRecordValue {
             return `has_own(&(${args[0]}), &(${args[1]}))`;
           case 'array.every':
             return `array_every(${args[0]}, ${args[1]})`;
+          case 'array.includes':
+            throw new Error('GPUI does not yet support finite string array.includes.');
           case 'typeof':
             return `typeof_value(&(${args[0]}))`;
           case 'error':

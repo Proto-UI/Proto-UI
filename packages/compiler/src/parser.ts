@@ -1268,6 +1268,21 @@ class Frontend {
       );
       if (constant && value.kind === 'literal')
         return { ...value, type: { kind: 'literal', value: value.value } };
+      if (constant && value.kind === 'array' && value.elements.length > 0 &&
+        value.elements.every((element) => element.kind === 'literal' && typeof element.value === 'string')) {
+        const elements = value.elements.map((element) => {
+          if (element.kind !== 'literal') return element;
+          return { ...element, type: { kind: 'literal' as const, value: element.value } };
+        });
+        return {
+          ...value,
+          elements,
+          type: {
+            kind: 'array',
+            element: parseDataType({ kind: 'union', members: elements.map((element) => element.type) }),
+          },
+        };
+      }
       if (asserted && value.type === 'unknown') {
         // Only contiguous erased assertions can retain this operand's proof.
         // Every inner assertion has already passed its ordinary checks above.
@@ -2040,14 +2055,25 @@ class Frontend {
     const id = `${module.file.fileName}#${name}`;
     const previous = this.moduleValues.get(id);
     if (previous) return previous;
-    const initial = this.expression(module, value, new Map(), 'setup');
+    // Discovery unwraps declarations for dispatch. Recover only parentheses and
+    // a verified const assertion around an array, not arbitrary erased views.
+    let initializer = value;
+    while (ts.isArrayLiteralExpression(value) && initializer.parent &&
+      (ts.isParenthesizedExpression(initializer.parent) ||
+        ((ts.isAsExpression(initializer.parent) || ts.isTypeAssertionExpression(initializer.parent)) &&
+          ts.isTypeReferenceNode(initializer.parent.type) &&
+          ts.isIdentifier(initializer.parent.type.typeName) &&
+          initializer.parent.type.typeName.text === 'const')) &&
+      initializer.parent.expression === initializer)
+      initializer = initializer.parent;
+    const initial = this.expression(module, initializer, new Map(), 'setup');
     const scalar =
       initial.type === 'boolean' || initial.type === 'number' || initial.type === 'string';
     // Shared mutable storage stays scalar; an immutable binding may hold any
     // finite data written as a literal (finiteness is checked below).
     if (!scalar && (module.mutableBindings.has(name) || scalarInitializer(value)))
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
-    const annotation = ts.isVariableDeclaration(value.parent) ? value.parent.type : undefined;
+    const annotation = ts.isVariableDeclaration(initializer.parent) ? initializer.parent.type : undefined;
     const declared = annotation
       ? parseSourceValueType(module, annotation, this.substitutions)
       : initial.type;
@@ -2436,6 +2462,29 @@ class Frontend {
                 args.map((arg) => arg.type)
               )
             ),
+            span,
+          };
+        }
+      }
+      if (property === 'includes') {
+        const array = this.expression(module, owner, scope, phase);
+        if (typeof array.type !== 'string' && array.type.kind === 'array') {
+          if (node.arguments.length !== 1 || node.questionDotToken || node.expression.questionDotToken)
+            rejectNode(node, 'PUI1006', 'Finite string includes requires one search argument and no optional call.');
+          let search = node.arguments[0];
+          // An erased comparison view grants no provenance. Retain the actual operand in IR.
+          while (ts.isParenthesizedExpression(search)) search = search.expression;
+          if (ts.isAsExpression(search) || ts.isTypeAssertionExpression(search)) {
+            const asserted = parseSourceValueType(module, search.type, this.substitutions);
+            const members = valueAlternatives(asserted);
+            if (members.length && members.every((type) =>
+              typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
+            )) search = search.expression;
+          }
+          const value = this.expression(module, search, scope, phase);
+          return {
+            kind: 'intrinsic', name: 'array.includes', arguments: [array, value],
+            type: this.checkedValue(node, () => intrinsicResult('array.includes', [array.type, value.type])),
             span,
           };
         }
