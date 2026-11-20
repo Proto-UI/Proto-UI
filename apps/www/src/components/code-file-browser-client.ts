@@ -10,10 +10,10 @@ export function initStandaloneCodeFileBrowsers(scope: ParentNode = document): vo
     const tabs = [...list.querySelectorAll<HTMLElement>('[data-code-file-tab]')];
     const panels = [...root.querySelectorAll<HTMLElement>('[data-code-file-panel]')];
     const directories = [...list.querySelectorAll<HTMLElement>('[data-code-directory-path]')].map((node) => node.dataset.codeDirectoryPath!);
-    const select = (index: number) => {
-      for (const [i, panel] of panels.entries()) panel.hidden = i !== index;
+    const select = (index: number, selectedPanel: HTMLElement) => {
+      for (const panel of panels) panel.hidden = panel !== selectedPanel;
       for (const [i, tab] of tabs.entries()) tab.dataset.codeFileSelected = String(i === index);
-      refreshCodePanel(panels[index]);
+      refreshCodePanel(selectedPanel);
     };
     // Initial state is authored in SSR. Real Tree reads this state before admission.
     tabs.forEach((tab) => tab.setAttribute('aria-selected', String(tab.dataset.codeFileSelected === 'true')));

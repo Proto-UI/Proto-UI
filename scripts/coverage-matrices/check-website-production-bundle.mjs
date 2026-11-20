@@ -28,8 +28,10 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   // projection across hosts.
   'apps/www/src/pages/en/test/style-isolation.astro?astro&type=script&index=0&lang.ts',
   // Exact native test entries retain the existing lazy renderer owner.
+  'apps/www/src/pages/en/test/button-boundaries/[runtime].astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/button-ghost/[runtime].astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/command-no-addon.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/command-width.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-hover.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',
@@ -104,6 +106,9 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/events/web-event-router.ts',
   // The existing router owns this finite sample cell; it imports no optical renderer.
   'packages/adapters/base/src/events/pointer-contact.ts',
+  // Exact input helpers reached by the existing router, instance tree and move gesture host.
+  'packages/adapters/base/src/events/keyboard-press-owner.ts',
+  'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/gate/event-gate.ts',
   'packages/adapters/base/src/gestures/web-move-gesture-host.ts',
   'packages/adapters/base/src/host/adapter-host.ts',

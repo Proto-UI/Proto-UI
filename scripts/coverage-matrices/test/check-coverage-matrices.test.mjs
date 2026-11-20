@@ -792,7 +792,10 @@ function writeGovernanceSnapshot(root, issueOverrides = {}) {
 
 function writeReviewedPromotionConfig(
   root,
-  config = fs.readFileSync(new URL('../../../apps/www/astro.config.mjs', import.meta.url), 'utf8')
+  config = fs.readFileSync(
+    new URL('./fixtures/promotion-resolver-shadcn-card-retry-audit.txt', import.meta.url),
+    'utf8'
+  )
 ) {
   fs.mkdirSync(path.join(root, 'apps/www/scripts'), { recursive: true });
   fs.writeFileSync(path.join(root, 'apps/www/astro.config.mjs'), config);
@@ -804,6 +807,26 @@ function writeReviewedPromotionConfig(
     new URL('../../../apps/www/scripts/runtime-retry-urls.mjs', import.meta.url),
     path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs')
   );
+}
+
+function writeCurrentRetryConfig(root) {
+  const config = fs.readFileSync(
+    new URL('../../../apps/www/astro.config.mjs', import.meta.url),
+    'utf8'
+  );
+  assert.equal(
+    createHash('sha256').update(config).digest('hex'),
+    'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7'
+  );
+  writeReviewedPromotionConfig(root, config);
+  for (const relative of [
+    'apps/www/src/utils/proto-ui-source.mjs',
+    'apps/www/scripts/accordion-activation-probe.mjs',
+  ]) {
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(new URL(`../../../${relative}`, import.meta.url), target);
+  }
 }
 
 function commitFixtureRoot(root) {
@@ -11220,7 +11243,7 @@ test('fresh review: promotion follows transitive wildcard workspace exports usin
   );
   fs.writeFileSync(path.join(root, leaf), "export const label='captured';");
   const configuration = fs.readFileSync(
-    new URL('../../../apps/www/astro.config.mjs', import.meta.url),
+    new URL('./fixtures/promotion-resolver-shadcn-card-retry-audit.txt', import.meta.url),
     'utf8'
   );
   const resolver = configuration.slice(
@@ -11255,7 +11278,7 @@ test('fresh review: promotion follows transitive wildcard workspace exports usin
 test('fresh review: package source resolver parity covers condition order, directory mapping and wildcard precedence', () => {
   const root = createRoot();
   const config = fs.readFileSync(
-    new URL('../../../apps/www/astro.config.mjs', import.meta.url),
+    new URL('./fixtures/promotion-resolver-shadcn-card-retry-audit.txt', import.meta.url),
     'utf8'
   );
   fs.mkdirSync(path.join(root, 'apps/www'), { recursive: true });
@@ -17643,7 +17666,16 @@ for (const helper of ['browser-harness', 'site-search-evidence']) {
 for (const [source, specifiers] of [
   ['Homepage/homepage-text.ts', ['@proto.ui/prototypes-base/text']],
   ['InstallCommandCard.astro', ['@proto.ui/adapter-web-component']],
-  ['site-link-recipes.ts', ['@proto.ui/prototypes-base/surface', '@proto.ui/prototypes-base/text']],
+  [
+    'site-link-recipes.ts',
+    [
+      '@proto.ui/prototypes-base/surface',
+      '@proto.ui/prototypes-base/text',
+      '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-brutalist/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+    ],
+  ],
   [
     'site-native-controls.ts',
     [
@@ -17652,6 +17684,8 @@ for (const [source, specifiers] of [
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
     ],
   ],
   ['site-search-commands.ts', ['@proto.ui/module-expose-state']],
@@ -17679,7 +17713,12 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    const content = source.endsWith('.astro') ? `<script>${code}</script>` : code;
+    const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
+    const content = nativeLinkSource
+      ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
+      : source.endsWith('.astro')
+        ? `<script>${code}</script>`
+        : code;
     for (const file of [relative, copy]) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
@@ -17691,6 +17730,16 @@ for (const [source, specifiers] of [
         message
       );
       assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copy}\``), message);
+    }
+    if (nativeLinkSource) {
+      fs.writeFileSync(path.join(root, relative), `${content}\n// Unreviewed importer bytes.\n`);
+      const changed = validationMessage(root);
+      for (const specifier of specifiers) {
+        assert.ok(
+          changed.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``),
+          changed
+        );
+      }
     }
     fs.writeFileSync(
       path.join(root, relative),
@@ -18427,26 +18476,42 @@ for (const scenario of [
   'vue2',
   'foreign-owner',
   'unknown-virtual',
+  'internal-probe',
+  'near-match',
+  'public-owner',
+  'html-owner',
   'missing-plugin',
   'changed-config',
 ]) {
-  test(`Finf retry virtual boundary: ${scenario}`, () => {
+  test(`current retry virtual boundary: ${scenario}`, () => {
     const root = createRoot();
     writeValidMatrices(root);
-    writeReviewedPromotionConfig(root);
+    writeCurrentRetryConfig(root);
     const owner =
       scenario === 'foreign-owner'
         ? 'apps/www/src/components/ForeignRuntime.ts'
-        : ['react', 'vue', 'vue2'].includes(scenario)
-          ? `apps/www/src/components/PrototypePreviewer/runtimes/${scenario}-runtime.ts`
-          : 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
+        : scenario === 'public-owner'
+          ? 'apps/www/public/runtime.ts'
+          : scenario === 'html-owner'
+            ? 'apps/www/src/components/PrototypePreviewer/runtime.html'
+            : ['react', 'vue', 'vue2'].includes(scenario)
+              ? `apps/www/src/components/PrototypePreviewer/runtimes/${scenario}-runtime.ts`
+              : 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
     const specifier =
       scenario === 'unknown-virtual'
         ? 'virtual:proto-ui/foreign'
-        : 'virtual:proto-ui/runtime-retry-urls';
+        : scenario === 'internal-probe'
+          ? 'virtual:proto-ui/runtime-retry-imports'
+          : scenario === 'near-match'
+            ? 'virtual:proto-ui/runtime-retry-urls-extra'
+            : 'virtual:proto-ui/runtime-retry-urls';
     const absolute = path.join(root, owner);
     fs.mkdirSync(path.dirname(absolute), { recursive: true });
-    fs.writeFileSync(absolute, `import urls from '${specifier}'; export const observed=urls;`);
+    const source = `import urls from '${specifier}'; export const observed=urls;`;
+    fs.writeFileSync(
+      absolute,
+      scenario === 'html-owner' ? `<script type="module">${source}</script>` : source
+    );
     if (scenario === 'missing-plugin')
       fs.unlinkSync(path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs'));
     if (scenario === 'changed-config')
@@ -18459,10 +18524,156 @@ for (const scenario of [
       message.includes(
         `external executable script \`${specifier}\` in \`${owner}\` is not reviewed`
       ),
-      ['foreign-owner', 'unknown-virtual', 'missing-plugin', 'changed-config'].includes(scenario)
+      [
+        'foreign-owner',
+        'unknown-virtual',
+        'internal-probe',
+        'near-match',
+        'public-owner',
+        'html-owner',
+        'missing-plugin',
+        'changed-config',
+      ].includes(scenario)
     );
   });
 }
+
+for (const [fixture, expectedSha] of [
+  [
+    'promotion-resolver-finf-retry-audit.txt',
+    '428f9cbe0c5fe19f4d24a74afeebddcfcad0f00c929144df205a94c45e87f8ac',
+  ],
+  [
+    'promotion-resolver-shadcn-card-retry-audit.txt',
+    '4ac9f16ef4933248e1707ab179e5ea8aa94469033001dc945837e82156d3225a',
+  ],
+]) {
+  test(`retry resolver profile: historical exact inputs remain independent ${fixture}`, () => {
+    const { root, config, plugin, target } = auditResolverFixture();
+    const historical = fs.readFileSync(new URL(`./fixtures/${fixture}`, import.meta.url));
+    assert.equal(createHash('sha256').update(historical).digest('hex'), expectedSha);
+    fs.writeFileSync(config, historical);
+    const metadata = new Set();
+    assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+    assert.ok(metadata.has(config));
+    assert.ok(metadata.has(plugin));
+    assert.ok(metadata.has(path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs')));
+    for (const relative of [
+      'apps/www/src/utils/proto-ui-source.mjs',
+      'apps/www/scripts/accordion-activation-probe.mjs',
+    ]) {
+      assert.ok(!fs.existsSync(path.join(root, relative)));
+      assert.ok(!metadata.has(path.join(root, relative)));
+    }
+    writeValidMatrices(root);
+    const owner = 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
+    fs.mkdirSync(path.dirname(path.join(root, owner)), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, owner),
+      "import urls from 'virtual:proto-ui/runtime-retry-urls'; export const observed=urls;"
+    );
+    assert.ok(
+      !collectCoverageMatrixIssues({ rootDir: root }).some((issue) =>
+        issue.includes(
+          `external executable script \`virtual:proto-ui/runtime-retry-urls\` in \`${owner}\` is not reviewed`
+        )
+      )
+    );
+  });
+}
+
+test('current retry virtual boundary: exact profile does not admit general package promotion', () => {
+  const { root } = auditResolverFixture();
+  writeCurrentRetryConfig(root);
+  const metadata = new Set();
+  assert.throws(
+    () => promotionBarePackageTargets(root, '@proto.ui/core', metadata),
+    /resolver configuration is unrecognized.*unverified/
+  );
+  assert.equal(metadata.size, 0);
+});
+
+for (const relative of [
+  'apps/www/astro.config.mjs',
+  'apps/www/scripts/runtime-retry-urls.mjs',
+  'apps/www/scripts/contrast-provenance.mjs',
+  'apps/www/src/utils/proto-ui-source.mjs',
+  'apps/www/scripts/accordion-activation-probe.mjs',
+]) {
+  for (const defect of ['missing', 'changed', 'symlink', 'parent-symlink', 'directory']) {
+    test(`current retry virtual boundary: rejects ${defect} ${relative}`, () => {
+      const root = createRoot();
+      writeValidMatrices(root);
+      writeCurrentRetryConfig(root);
+      const owner = 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
+      const source = path.join(root, owner);
+      fs.mkdirSync(path.dirname(source), { recursive: true });
+      fs.writeFileSync(source, "import urls from 'virtual:proto-ui/runtime-retry-urls';");
+      const target = path.join(root, relative);
+      if (defect === 'missing') fs.unlinkSync(target);
+      if (defect === 'changed') fs.appendFileSync(target, '\n');
+      if (defect === 'symlink') {
+        fs.renameSync(target, `${target}.copy`);
+        fs.symlinkSync(`${target}.copy`, target);
+      }
+      if (defect === 'parent-symlink') {
+        const parent = path.dirname(target);
+        fs.renameSync(parent, `${parent}.copy`);
+        fs.symlinkSync(`${parent}.copy`, parent, 'dir');
+      }
+      if (defect === 'directory') {
+        fs.unlinkSync(target);
+        fs.mkdirSync(target);
+        if (relative === 'apps/www/astro.config.mjs') {
+          // Alias discovery reads the Astro config before virtual import admission.
+          assert.throws(() => collectCoverageMatrixIssues({ rootDir: root }), { code: 'EISDIR' });
+          return;
+        }
+      }
+      assert.ok(
+        collectCoverageMatrixIssues({ rootDir: root }).some((issue) =>
+          issue.includes(
+            `external executable script \`virtual:proto-ui/runtime-retry-urls\` in \`${owner}\` is not reviewed`
+          )
+        )
+      );
+    });
+  }
+
+  test(`current retry virtual boundary: historical bytes bind metadata ${relative}`, () => {
+    const root = createRoot();
+    writeCurrentRetryConfig(root);
+    const implementationPath = 'apps/www/src/components/override/Search.astro';
+    const owner = 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
+    for (const file of [implementationPath, owner])
+      fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, implementationPath),
+      "---\nimport { observed } from '../PrototypePreviewer/demo-renderer';\n---\n<main>{observed}</main>"
+    );
+    fs.writeFileSync(
+      path.join(root, owner),
+      "import urls from 'virtual:proto-ui/runtime-retry-urls'; export const observed=urls;"
+    );
+    const websiteBindings = [
+      [implementationPath, ['www.shell.search']],
+      [owner, ['www.demo.raw-adapter-runtimes']],
+    ];
+    writeValidMatrices(root, {}, {}, { websiteBindings });
+    const target = path.join(root, relative);
+    const exact = fs.readFileSync(target);
+    fs.appendFileSync(target, '\n');
+    const revision = commitFixtureRoot(root);
+    fs.writeFileSync(target, exact);
+    writeSelfHostedPromotion(root, revision, { websiteBindings });
+    assert.ok(
+      collectCoverageMatrixIssues({ rootDir: root, ...promotionOptions(revision) }).some(
+        (issue) => issue.includes(`promoted dependency \`${relative}\` differs from evidence Commit`)
+      )
+    );
+  });
+}
+
 for (const scenario of ['exact', 'changed-source', 'foreign-owner']) {
   test(`Finf retry dynamic import boundary: ${scenario}`, () => {
     const root = createRoot();
@@ -18858,6 +19069,30 @@ test('Hero fixed-icon import remains exact, content-bound and owner-bound', () =
   );
 });
 
+test('Homepage gallery glyph imports require the reviewed file and bytes', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/components/Homepage/homepage-gallery-icons.ts';
+  const target = path.join(root, relative);
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, reviewed);
+  const rawImport = (specifier, file) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+  const bell = '@proto.ui/prototypes-lucide/icons/bell';
+  const foreign = 'apps/www/src/components/copied-homepage-gallery-icons.ts';
+  const exact = collectCoverageMatrixIssues({ rootDir: root });
+  assert.ok(
+    !exact.some((issue) => issue.includes(`in \`${relative}\` escapes the website consumer-wall allowlist`))
+  );
+  fs.writeFileSync(path.join(root, foreign), reviewed);
+  assert.ok(validationMessage(root).includes(rawImport(bell, foreign)));
+  const otherIcon = '@proto.ui/prototypes-lucide/icons/arrow-left';
+  fs.writeFileSync(target, `${reviewed}\nimport '${otherIcon}';\n`);
+  const message = validationMessage(root);
+  assert.ok(message.includes(rawImport(bell, relative)));
+  assert.ok(message.includes(rawImport(otherIcon, relative)));
+});
+
 for (const source of [
   'packages/adapters/base/src/material/geometry-watch.ts',
   'packages/adapters/base/src/material/initial-paint-experiment.ts',
@@ -18923,9 +19158,99 @@ for (const [relative, allowed] of [
     );
   });
 
+test('Calendar caption import and controller binding require reviewed source', () => {
+  const root = createRoot();
+  const relative = 'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts';
+  const foreign = relative.replace('.shared.ts', '-foreign.shared.ts');
+  const owner = 'www.demo.authored-controllers';
+  const target = path.join(root, relative);
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
+  const specifier = '@proto.ui/prototypes-base/calendar';
+  const raw = (file) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+  const missingBinding = `interactive website source \`${relative}\` is missing a reviewed Source-scan binding`;
+  const fingerprint = `source fingerprint for \`${relative}\` does not match`;
+  const wrongBinding = `grouped binding for \`${relative}\` must include direct matrix Path owner \`${owner}\``;
+  const row = {
+    ID: owner,
+    Path: `\`${relative}\``,
+  };
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, reviewed);
+
+  writeValidMatrices(root);
+  const missing = validationMessage(root);
+  assert.ok(missing.includes(missingBinding), missing);
+  assert.ok(
+    missing.includes(`interactive website source \`${relative}\` is not bound to a matrix row`),
+    missing
+  );
+
+  writeValidMatrices(root, row, {}, { websiteBindings: [[relative, ['www.demo.runtime-select']]] });
+  const wrongOwner = validationMessage(root);
+  assert.ok(wrongOwner.includes(wrongBinding), wrongOwner);
+
+  writeValidMatrices(root, row, {}, { websiteBindings: [[relative, [owner]]] });
+  const exact = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+  assert.ok(!exact.includes(raw(relative)), exact);
+  assert.ok(!exact.includes(missingBinding), exact);
+  assert.ok(!exact.includes(fingerprint), exact);
+  assert.ok(!exact.includes(wrongBinding), exact);
+
+  fs.writeFileSync(path.join(root, foreign), reviewed);
+  const copied = validationMessage(root);
+  assert.ok(copied.includes(raw(foreign)), copied);
+  assert.ok(!copied.includes(raw(relative)), copied);
+
+  fs.appendFileSync(target, '\n// Changed importer requires review.\n');
+  const changed = validationMessage(root);
+  assert.ok(changed.includes(raw(relative)), changed);
+  assert.ok(changed.includes(fingerprint), changed);
+
+  fs.writeFileSync(target, reviewed.toString('utf8').replace(/\n/gu, '\r\n'));
+  const crlf = validationMessage(root);
+  assert.ok(crlf.includes(raw(relative)), crlf);
+  assert.ok(!crlf.includes(fingerprint), crlf);
+});
+
+for (const [relative, specifier] of [
+  [
+    'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts',
+    '@proto.ui/prototypes-shadcn/checkbox',
+  ],
+  [
+    'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts',
+    '@proto.ui/prototypes-shadcn/input-shell',
+  ],
+]) {
+  test(`Shadcn public demo import requires the exact reviewed source: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const target = path.join(root, relative);
+    const foreign = relative.replace(/\.ts$/u, '-foreign.ts');
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
+    const raw = (file) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, reviewed);
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+
+    const copied = validationMessage(root);
+    assert.ok(!copied.includes(raw(relative)), copied);
+    assert.ok(copied.includes(raw(foreign)), copied);
+
+    for (const changed of [
+      Buffer.concat([reviewed, Buffer.from('\n// Changed importer requires review.\n')]),
+      Buffer.from(reviewed.toString('utf8').replace(/\n/gu, '\r\n')),
+    ]) {
+      fs.writeFileSync(target, changed);
+      const message = validationMessage(root);
+      assert.ok(message.includes(raw(relative)), message);
+    }
+  });
+}
+
 test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed resolver bytes', () => {
   const source = fs.readFileSync(
-    new URL('../../../apps/www/astro.config.mjs', import.meta.url),
+    new URL('./fixtures/promotion-resolver-shadcn-card-retry-audit.txt', import.meta.url),
     'utf8'
   );
   const entry = `                {
@@ -18945,3 +19270,48 @@ test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed res
       source.indexOf("slug: 'ui-libraries/shadcn/button'")
   );
 });
+
+for (const scenario of [
+  'exact',
+  'changed-importer',
+  'changed-companion',
+  'missing-companion',
+  'foreign-importer',
+  'obsolete-astro-importer',
+]) {
+  test(`Pagefind dynamic import boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const owner = 'apps/www/src/components/site-search-owner.ts';
+    const companion = 'apps/www/src/components/site-pagefind-resource.ts';
+    const sourcePath =
+      scenario === 'foreign-importer'
+        ? 'apps/www/src/components/ForeignPagefindOwner.ts'
+        : scenario === 'obsolete-astro-importer'
+          ? 'apps/www/src/components/override/Search.astro'
+          : owner;
+    const target = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    if (scenario === 'obsolete-astro-importer') {
+      fs.writeFileSync(
+        target,
+        '<script>export function load(bundlePath) { return import(/* @vite-ignore */ `${bundlePath}pagefind.js`); }</script>'
+      );
+    } else {
+      const ownerBytes = fs.readFileSync(new URL(`../../../${owner}`, import.meta.url));
+      fs.writeFileSync(target, ownerBytes);
+      if (scenario === 'changed-importer') fs.appendFileSync(target, '\n// changed importer');
+    }
+    if (scenario !== 'missing-companion') {
+      fs.copyFileSync(new URL(`../../../${companion}`, import.meta.url), path.join(root, companion));
+    }
+    if (scenario === 'changed-companion') {
+      fs.appendFileSync(path.join(root, companion), '\n// changed companion');
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    const rejected = message.includes(
+      `@vite-ignore dynamic import in \`${sourcePath}\` is not reviewed against an exact URL boundary`
+    );
+    assert.equal(rejected, scenario !== 'exact', message);
+  });
+}

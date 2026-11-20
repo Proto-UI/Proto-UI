@@ -1,4 +1,5 @@
 import { defineAsHook, definePrototype, delay, tw, type DefHandle } from '@proto.ui/core';
+import type { AnatomyPartView, AsHookResult, RunHandle } from '@proto.ui/core';
 import { asAccessible, asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { useTypeaheadNavigation } from '../behaviors';
 import { createSelectAlignmentController } from './alignment-controller';
@@ -6,6 +7,7 @@ import { asTransition } from '../tools';
 import {
   createSelectContentId,
   requestSelectOpen,
+  retireSelectFocusHandoff,
   SELECT_CONTEXT,
   SELECT_FAMILY,
   type SelectContextValue,
@@ -18,7 +20,7 @@ import type {
 } from './types';
 
 function projectSelectContentHandle(
-  result: import('@proto.ui/core').AsHookResult<SelectContentProps, SelectContentAsHookContract>
+  result: AsHookResult<SelectContentProps, SelectContentAsHookContract>
 ): SelectContentHandles {
   const open = result.getState?.('open');
   const asTransition = result.getAsHookHandle?.('asTransition');
@@ -127,11 +129,27 @@ function setupSelectContent(
   let ownerDisposed = false;
   let entryTask: { cancel(): void } | null = null;
   let entryCancelled = false;
+  let presentationAborted = false;
+  type EntryFocusAttempt = {
+    target: AnatomyPartView;
+    opening: SelectContextValue;
+    handoff: number;
+    applying: boolean;
+  };
+  let entryFocus: EntryFocusAttempt | null = null;
+  const cancelEntryFocus = () => {
+    const attempt = entryFocus;
+    if (!attempt) return;
+    entryFocus = null;
+    const cancel = attempt.target.getExpose('__cancelPendingEntryFocus') as (() => void) | null;
+    cancel?.();
+  };
   const cancelPendingEntry = () => {
     if (ownerDisposed || !open.get()) return;
     entryCancelled = true;
     entryTask?.cancel();
     entryTask = null;
+    cancelEntryFocus();
   };
   def.expose.method('__cancelPendingEntry', cancelPendingEntry);
 
@@ -149,6 +167,7 @@ function setupSelectContent(
     run.anatomy.order
       .partsOf(SELECT_FAMILY, 'item')
       .map((item: any) => ({
+        part: item as AnatomyPartView,
         snapshot: item.getExpose('getCollectionItem')?.() as Record<string, unknown> | undefined,
         focusSelf: item.getExpose('focusSelf') as
           | ((options?: {
@@ -182,24 +201,31 @@ function setupSelectContent(
   });
 
   const focusValue = (
-    run: any,
+    run: RunHandle<SelectContentProps>,
     candidateValue: string,
     options: {
       reason: 'keyboard' | 'pointer' | 'programmatic';
       preventScroll: boolean;
       defer: boolean;
-    }
+    },
+    current: () => boolean
   ) => {
-    if (!candidateValue) return false;
+    if (!candidateValue) return null;
     const entry = getNavigationEntries(run).find(
       (candidate: any) => String(candidate.snapshot?.value ?? '') === candidateValue
     );
-    if (!entry?.focusSelf) return false;
-    entry.focusSelf(options);
-    return true;
+    if (!entry?.focusSelf) return null;
+    if (options.defer) entry.focusSelf(options);
+    else applyEntryFocus(run, entry.part, () => entry.focusSelf(options), current);
+    return entry.part;
   };
 
-  const resolveOpenFocusAction = (run: any, ctx: SelectContextValue, defer = true) => {
+  const resolveOpenFocusAction = (
+    run: RunHandle<SelectContentProps>,
+    ctx: SelectContextValue,
+    defer: boolean,
+    current: () => boolean
+  ) => {
     const options = {
       defer,
       // Popper has no alignment-owned scroll request. Let the host reveal its
@@ -208,12 +234,69 @@ function setupSelectContent(
       preventScroll: run.props.get().position === 'item-aligned',
       reason: ctx.requestFocusReason ?? ('programmatic' as const),
     };
-    if (focusValue(run, ctx.value, options)) return;
+    const selected = focusValue(run, ctx.value, options, current);
+    if (selected) return selected;
+    const entries = getNavigationEntries(run);
     if (ctx.requestEntry === 'selected-or-last') {
-      focusRoving.focusLast(options);
-      return;
+      const target = entries.at(-1)?.part ?? null;
+      if (defer || !target) focusRoving.focusLast(options);
+      else applyEntryFocus(run, target, () => focusRoving.focusLast(options), current);
+      return entries.at(-1)?.part ?? null;
     }
-    focusRoving.focusFirst(options);
+    const target = entries[0]?.part ?? null;
+    if (defer || !target) focusRoving.focusFirst(options);
+    else applyEntryFocus(run, target, () => focusRoving.focusFirst(options), current);
+    return entries[0]?.part ?? null;
+  };
+
+  const retireFocusHandoff = (
+    run: RunHandle<SelectContentProps>,
+    ctx: SelectContextValue,
+    handoff = ctx.focusHandoff ?? 0
+  ) => {
+    if (handoff <= (ctx.focusHandoffBaseline ?? 0)) return;
+    run.context.update(SELECT_CONTEXT, (latest: SelectContextValue) =>
+      latest.rootId === ctx.rootId && latest.open === ctx.open && latest.value === ctx.value
+        ? retireSelectFocusHandoff(latest, handoff)
+        : latest
+    );
+  };
+
+  const finishEntryFocus = (run: RunHandle<SelectContentProps>, attempt: EntryFocusAttempt) => {
+    if (entryFocus !== attempt) return;
+    entryFocus = null;
+    const { opening, handoff } = attempt;
+    if (!ownerDisposed && handoff > (opening.focusHandoff ?? 0))
+      retireFocusHandoff(run, opening, handoff);
+  };
+
+  const applyEntryFocus = (
+    run: RunHandle<SelectContentProps>,
+    target: AnatomyPartView,
+    focus: () => void,
+    current: () => boolean
+  ) => {
+    if (!current()) return;
+    if (entryFocus && !entryFocus.applying) cancelEntryFocus();
+    const opening = readContext(run);
+    if (!opening || !current()) return;
+    const attempt = { target, opening, handoff: opening.focusHandoff ?? 0, applying: true };
+    entryFocus = attempt;
+    try {
+      focus();
+    } catch (error) {
+      if (entryFocus === attempt) entryFocus = null;
+      throw error;
+    } finally {
+      attempt.applying = false;
+    }
+    if (
+      attempt.handoff > (opening.focusHandoff ?? 0) ||
+      (target.getExpose('focused') as { get?: () => boolean } | null)?.get?.()
+    )
+      finishEntryFocus(run, attempt);
+    // Focus can retain this target for a host-readiness retry. Keep its
+    // identity until the focus fact or a newer owner arrives.
   };
 
   const scheduleOpenFocusAction = (run: any) => {
@@ -230,7 +313,7 @@ function setupSelectContent(
       entryTask = null;
       const ctx = readContext(run);
       if (entryCancelled || !ctx?.open || !open.get()) return;
-      resolveOpenFocusAction(run, ctx);
+      resolveOpenFocusAction(run, ctx, true, () => !ownerDisposed && open.get());
     });
   };
 
@@ -275,13 +358,23 @@ function setupSelectContent(
   };
   const applyPresentation = (run: any, ctx: SelectContextValue, reason: string) => {
     if (!isCurrentPresentation(run, ctx)) return;
+    if (!blocked()) presentationAborted = false;
+    else if (!presentationAborted) {
+      presentationAborted = true;
+      cancelEntryFocus();
+      if (!isCurrentPresentation(run, ctx)) return;
+      // Root owns retirement so replacement Content cannot revive this token.
+      // Retire only the observed token, preserving any newer reentrant handoff.
+      retireFocusHandoff(run, ctx);
+      if (!isCurrentPresentation(run, ctx)) return;
+    }
     const ownedEntry = entryActive || transition.isPresent.get();
     const focusedEntry =
       blocked() &&
       run.anatomy
         .partsOf(SELECT_FAMILY, 'item')
         .some(
-          (item: import('@proto.ui/core').AnatomyPartView) =>
+          (item: AnatomyPartView) =>
             (item.getExpose('focused') as { get?: () => boolean } | null)?.get?.() === true
         );
     if (ctx.open && !blocked()) {
@@ -406,18 +499,27 @@ function setupSelectContent(
       // not replace a newer Item or external Focus owner after entry completed.
       if (entryCancelled || admission.preserveFocus) return true;
       if (!row) {
-        // Popper preserves its own selected-or-boundary entry policy. The
-        // current size request admitted readiness; no deferred stale task.
-        const ctx = readContext(_run);
-        if (!ctx || !current()) return false;
-        resolveOpenFocusAction(_run, ctx, false);
+        entryTask?.cancel();
+        entryTask = delay(0, () => {
+          entryTask = null;
+          if (entryCancelled || !current()) return;
+          const ctx = readContext(_run);
+          if (!ctx || (ctx.focusHandoff ?? 0) > (ctx.focusHandoffBaseline ?? 0)) return;
+          if (!current()) return;
+          resolveOpenFocusAction(_run, ctx, false, current);
+        });
         return true;
       }
       const focus = row.getExpose('focusSelf') as
         | ((options: { preventScroll: boolean; defer: boolean; reason: 'programmatic' }) => void)
         | null;
       if (!current()) return false;
-      focus?.({ preventScroll: true, defer: false, reason: 'programmatic' });
+      applyEntryFocus(
+        _run,
+        row,
+        () => focus?.({ preventScroll: true, defer: false, reason: 'programmatic' }),
+        current
+      );
       return true;
     },
   });
@@ -438,11 +540,31 @@ function setupSelectContent(
   def.lifecycle.onUpdated((run) => alignment?.updated(run));
   def.lifecycle.onBeforeDispose(() => {
     ownerDisposed = true;
+    cancelEntryFocus();
     alignment?.dispose();
   });
 
   def.context.subscribe(SELECT_CONTEXT, (run, next) => {
-    updateOpen(run, next, 'reason: select context sync => content open');
+    const attempt = entryFocus;
+    if (attempt) {
+      if (
+        !next.open ||
+        next.rootId !== attempt.opening.rootId ||
+        next.value !== attempt.opening.value
+      ) {
+        cancelEntryFocus();
+      } else if ((next.focusHandoff ?? 0) > attempt.handoff) {
+        if ((attempt.target.getExpose('focused') as { get?: () => boolean } | null)?.get?.()) {
+          attempt.handoff = next.focusHandoff ?? 0;
+          // Synchronous host callbacks can still change the collection. A
+          // readiness replay completes via this observation instead.
+          if (!attempt.applying) finishEntryFocus(run, attempt);
+        } else {
+          cancelEntryFocus();
+        }
+      }
+    }
+    updateOpen(run, readContext(run) ?? next, 'reason: select context sync => content open');
   });
   def.lifecycle.onCreated((run) => {
     const ctx = readContext(run);
@@ -490,6 +612,7 @@ function setupSelectContent(
 
   def.lifecycle.onUnmounted(() => {
     alignment?.unmounted();
+    cancelEntryFocus();
     entryTask?.cancel();
     entryTask = null;
     store.run = null;

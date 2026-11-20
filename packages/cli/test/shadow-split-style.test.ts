@@ -39,15 +39,21 @@ describe('private generated Shadow split sizing', () => {
     }
   });
 
-  it('uses the selected split surface in generated reduced-motion overrides', () => {
+  it('settles both split transform owners in generated reduced-motion overrides', () => {
     const token = 'dark:transition-transform';
     const css = renderProtoShadowSplitStyleArtifact([token], {
       rootTokens: [token],
       templateTokens: [],
     }).cssText;
     const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
-    const selector = `:where(:host([data-pui-color-scheme='dark'])):host([data-pui-split-root-style~="${token}"]) > [data-pui-split-surface][data-pui-style~="${token}"]`;
-    expect(reduced).toContain(`${selector} {\n      transition-property: none;`);
+    const host = `:where(:host([data-pui-color-scheme='dark'])):host([data-pui-split-root-style~="${token}"])`;
+    const surface = `${host} > [data-pui-split-surface][data-pui-style~="${token}"]`;
+    expect(reduced).toContain(`${surface} {\n      transition-property: none;`);
+    const hostOverride = `@media (prefers-reduced-motion: reduce) {\n  ${host} {\n    transition-property: none;`;
+    const hostTransition = `${host} {\n    transition-property: transform, translate, scale, rotate;`;
+    expect(css).toContain(hostTransition);
+    expect(css).toContain(hostOverride);
+    expect(css.indexOf(hostOverride)).toBeGreaterThan(css.indexOf(hostTransition));
     expect(reduced).toContain('--pui-split-compiled-receipt:');
     expect(reduced).not.toContain(':where(.dark)');
     expect(reduced).not.toContain('data-theme');
