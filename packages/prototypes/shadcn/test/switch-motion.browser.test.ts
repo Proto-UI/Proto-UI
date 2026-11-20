@@ -55,6 +55,7 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
         const page = await browser.newPage({ hasTouch: true });
         const samples: unknown[] = [];
         const errors: string[] = [];
+        let testcaseFailed = false;
         page.on('pageerror', (error) => errors.push(String(error)));
         try {
           await page.route('**/*', (route) => route.abort());
@@ -697,6 +698,9 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
           });
           expect(palette.colors.primary).toBeUndefined();
           expect(palette.diagnostics).toContain('theme-source-mismatch:primary');
+        } catch (error) {
+          testcaseFailed = true;
+          throw error;
         } finally {
           try {
             const nativeInput = await page
@@ -719,8 +723,19 @@ describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
             expect(nativeInput).not.toBeNull();
             expect(nativeInput).not.toHaveProperty('collectionError');
             expect((nativeInput as any).cleanupErrors).toEqual([]);
+          } catch (error) {
+            console.error('[switch-motion evidence]', error);
+            if (!testcaseFailed) {
+              testcaseFailed = true;
+              throw error;
+            }
           } finally {
-            await page.close();
+            try {
+              await page.close();
+            } catch (error) {
+              console.error('[switch-motion page close]', error);
+              if (!testcaseFailed) throw error;
+            }
           }
         }
       }, 30000);

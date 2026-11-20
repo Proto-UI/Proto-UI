@@ -29,7 +29,12 @@ const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
-type Projection = { root: string; surface: string[]; borderWidths: string };
+type Projection = {
+  root: string;
+  surface: string[];
+  borderWidths: string;
+  entries: readonly RootStyleEntry[];
+};
 type CompiledStyleRule = { selector: string; declarations: string };
 
 function splitCompiledReceipt(selector: string, declarations: string): string {
@@ -661,10 +666,16 @@ export function createShadowSplitEffectsPort({
       (widths.some((values) => values.length > 1) ||
         (applied && applied.borderWidths !== borderWidths))
     ) {
-      fail(animated, 'used-value-rounding');
+      fail(animated, `used-value-rounding; observation=${JSON.stringify({
+        current: { widths, entries },
+        prior: applied ? { widths: JSON.parse(applied.borderWidths), entries: applied.entries } : null,
+        overlappingWidths: widths.some((values) => values.length > 1),
+        changedWidths: !!applied && applied.borderWidths !== borderWidths,
+      })}`);
     }
     return {
       borderWidths,
+      entries: entries.map((entry) => ({ ...entry })),
       root: entries.map((e) => e.token).join(' '),
       surface: entries
         .filter(
