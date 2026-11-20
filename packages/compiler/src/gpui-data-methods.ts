@@ -23,7 +23,7 @@ function countMethodRegistrations(value: unknown, counts: Map<string, number>): 
       countMethodRegistrations(child, counts);
 }
 
-/** Prove an owner-independent entry against checked IR before demand pruning. */
+/** Prove data-only eligibility against checked IR before demand pruning; invocation still belongs to a live owner. */
 export function gpuiDataMethods(ir: PrototypeIR): ReadonlyMap<string, ModuleBinding> {
   const modules = new Map((ir.moduleBindings ?? []).map((binding) => [binding.name, binding]));
   const proven = new Map<FunctionIR, boolean>();
@@ -149,30 +149,38 @@ export function gpuiDataMethods(ir: PrototypeIR): ReadonlyMap<string, ModuleBind
   const setupLocals = new Map<string, undefined>(
     ir.setup.parameters.map((parameter) => [parameter.name, undefined])
   );
-  for (const statement of ir.setup.body)
-    if (statement.kind === 'const') setupLocals.set(statement.name, undefined);
 
-  // Select a direct registration in the straight-line setup prefix. A method
-  // selected or registered through control flow may depend on an instance.
-  for (const statement of ir.setup.body) {
-    if (statement.kind !== 'const' && statement.kind !== 'effect') break;
-    if (statement.kind !== 'effect') continue;
-    const site = statement.expression;
-    if (site.kind !== 'operation' || site.operation !== 'expose.method' || site.optional) continue;
-    const [key, callback] = site.arguments;
-    if (key?.kind !== 'literal' || typeof key.value !== 'string') continue;
-    const exposure = exposures.get(key.value);
-    if (
-      registrations.get(key.value) !== 1 ||
-      exposure?.kind !== 'method' ||
-      exposure.span.file !== site.span.file ||
-      exposure.span.start !== site.span.start ||
-      exposure.span.end !== site.span.end
-    )
-      continue;
-    if (callback?.kind !== 'reference') continue;
-    const binding = moduleFunction(callback, setupLocals);
-    if (binding && portableFunction(binding)) result.set(key.value, binding);
+  // Eligibility proves the callback's data behavior, not that setup registered
+  // it. The instance registry remains authoritative, including conditional setup.
+  function select(body: readonly StatementIR[], parent: Locals): void {
+    const locals = new Map(parent);
+    for (const statement of body)
+      if (statement.kind === 'const') locals.set(statement.name, undefined);
+    for (const statement of body) {
+      if (statement.kind === 'if') {
+        select(statement.then, locals);
+        select(statement.otherwise, locals);
+        continue;
+      }
+      if (statement.kind !== 'effect') continue;
+      const site = statement.expression;
+      if (site.kind !== 'operation' || site.operation !== 'expose.method' || site.optional) continue;
+      const [key, callback] = site.arguments;
+      if (key?.kind !== 'literal' || typeof key.value !== 'string') continue;
+      const exposure = exposures.get(key.value);
+      if (
+        registrations.get(key.value) !== 1 ||
+        exposure?.kind !== 'method' ||
+        exposure.span.file !== site.span.file ||
+        exposure.span.start !== site.span.start ||
+        exposure.span.end !== site.span.end
+      )
+        continue;
+      if (callback?.kind !== 'reference') continue;
+      const binding = moduleFunction(callback, locals);
+      if (binding && portableFunction(binding)) result.set(key.value, binding);
+    }
   }
+  select(ir.setup.body, setupLocals);
   return result;
 }

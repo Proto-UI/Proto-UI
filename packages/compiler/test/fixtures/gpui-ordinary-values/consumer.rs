@@ -674,6 +674,46 @@ fn generated_scroll_request_outcomes_and_retired_end_work(cx: &mut TestAppContex
 }
 
 #[gpui::test]
+fn data_methods_preserve_argument_presence_registration_and_terminal_lifetime(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    frames(window, cx);
+    window.update(cx, |host, native_window, cx| {
+        let one = host.ordinary.read(cx).handle();
+        let two = host.other.read(cx).handle();
+        for handle in [&one, &two] {
+            assert_eq!(handle.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(10.0));
+            assert_eq!(handle.call_data_method("decide", vec![Some(json!(2)), Some(json!(3))]).unwrap(), json!(5.0));
+            assert!(handle.call_data_method("decide", vec![Some(Json::Null), Some(json!(3))]).is_err());
+            assert!(handle.call_data_method("decide", vec![Some(json!(2))]).is_err());
+            assert!(handle.call_data_method("decide", vec![None, Some(json!(3)), Some(json!(4))]).is_err());
+            assert!(handle.call_data_method("unknown", vec![]).is_err());
+            let registered = exposed(&handle.owner, "dataRegistered").data().as_bool().unwrap();
+            let conditional = handle.call_data_method("conditionalDecide", vec![None, Some(json!(3))]);
+            if registered {
+                assert_eq!(conditional.unwrap(), json!(10.0));
+            } else {
+                assert!(conditional.is_err());
+            }
+        }
+        assert_ne!(exposed(&one.owner, "dataRegistered").data(), exposed(&two.owner, "dataRegistered").data());
+        // A registry substitution distinguishes the actual callback from its
+        // statically eligible module function. Restore it before lifecycle work.
+        let original = one.owner.borrow_mut().exposes.insert(
+            "decide".into(), Value::Function(Rc::new(|_| Value::json(json!(99)))),
+        ).unwrap();
+        assert_eq!(one.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(99));
+        one.owner.borrow_mut().exposes.insert("decide".into(), original);
+        detach_native_view(&one.owner);
+        assert_eq!(one.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(10.0));
+        one.dispose(native_window, cx).unwrap();
+        assert!(one.call_data_method("decide", vec![None, Some(json!(3))]).is_err());
+        assert!(one.call_data_method("unknown", vec![]).is_err());
+        // Retirement of one owner cannot retire another instance's registration.
+        assert_eq!(two.call_data_method("decide", vec![None, Some(json!(3))]).unwrap(), json!(10.0));
+    }).unwrap();
+}
+
+#[gpui::test]
 fn ordinary_source_aliases_captures_defaults_exceptions_and_public_values(cx: &mut TestAppContext) {
     let window = open(cx, json!({}));
     frames(window, cx);
@@ -1392,6 +1432,11 @@ fn throwing_before_dispose_retires_resources_and_preserves_falsy_failure(cx: &mu
             let failure = handle.dispose(window, cx).unwrap_err();
             assert_eq!(failure.num(), 0.);
             assert!(handle.owner.borrow().disposed);
+            assert_eq!(
+                handle.call_data_method("decide", vec![None, Some(json!(3))])
+                    .unwrap_err().member("code", false).text(),
+                "OWNER_DISPOSED"
+            );
             assert_eq!(observations.member("first", false).num(), 1.);
             assert_eq!(observations.member("second", false).num(), 0.);
             let resources = host.ordinary.read(cx).native_resource_counts();

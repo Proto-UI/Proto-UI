@@ -2368,9 +2368,10 @@ impl __PuiNativeRecordValue {
     )
       continue;
     dataMethods.push(`        ${string(exposure.name, exposure.span)} => {
-            let arguments: Vec<Value> = arguments.into_iter().map(Value::json).collect();
+            let arguments: Vec<Value> = arguments.into_iter().map(|value| value.map(Value::json).unwrap_or(Value::Undefined)).collect();
             check_method(name, &arguments);
-            let result = ${local(binding.name)}.with(|function| function.call_authored(arguments));
+            let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
+            let result = invoke(&self.owner, "expose-method", &callback, arguments);
             ${checkedPortableResult}
             result
         },`);
@@ -2454,12 +2455,12 @@ impl __PuiNativeRecordValue {
   ${typedMethods.join('\n')}${
     dataMethods.length
       ? `
-      /// Calls a compiled data-only module function without accessing an instance.
-      pub fn call_data_method(name: &str, arguments: Vec<Json>) -> Result<Json, Value> {
-          catch_authored(|| match name {
+      /// Calls this live instance's registered data-only method. None preserves an undefined argument slot.
+      pub fn call_data_method(&self, name: &str, arguments: Vec<Option<Json>>) -> Result<Json, Value> {
+          catch_authored(|| { ensure(&self.owner()); match name {
   ${dataMethods.join('\n')}
               _ => value_error("unknown or ineligible data method"),
-          })
+          } })
       }`
       : ''
   }

@@ -16,7 +16,7 @@ function checked(source: string): PrototypeIR {
 }
 
 describe('shared module storage and owner closures', () => {
-  it('emits checked detached data dispatch only for direct portable module functions', () => {
+  it('invokes eligible data methods through the live owner registration', () => {
     const ir = checked(`${core}
       type Input = { held: boolean };
       type Decision = { consumed: boolean; effects: string[] };
@@ -40,18 +40,22 @@ describe('shared module storage and owner closures', () => {
     const result = emitGpuiSource(ir, { componentName: 'DataEntry' });
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     const { code } = result.value;
-    const detached = code.slice(
+    const dataMethod = code.slice(
       code.indexOf('pub fn call_data_method('),
       code.indexOf('pub fn owner(&self)')
     );
-    expect(detached).toMatch(
-      /"decide" => \{[\s\S]*\.with\(\|function\| function\.call_authored\(arguments\)\)/
+    expect(dataMethod).toContain(
+      'pub fn call_data_method(&self, name: &str, arguments: Vec<Option<Json>>)'
     );
-    expect(detached).toContain('check_method(name, &arguments)');
-    expect(detached).toContain('exposed method returned invalid portable data');
-    expect(detached).toContain('unknown or ineligible data method');
-    expect(detached).not.toContain('"readIndirect"');
-    expect(detached).not.toContain('"readFlag"');
+    expect(dataMethod).toContain('ensure(&self.owner())');
+    expect(dataMethod).toContain('self.owner.borrow().exposes.get(name).cloned()');
+    expect(dataMethod).toContain('invoke(&self.owner, "expose-method", &callback, arguments)');
+    expect(dataMethod).not.toContain('function.call_authored');
+    expect(dataMethod).toContain('check_method(name, &arguments)');
+    expect(dataMethod).toContain('exposed method returned invalid portable data');
+    expect(dataMethod).toContain('unknown or ineligible data method');
+    expect(dataMethod).not.toContain('"readIndirect"');
+    expect(dataMethod).not.toContain('"readFlag"');
     expect(code).toContain(
       'pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App)'
     );
@@ -61,7 +65,7 @@ describe('shared module storage and owner closures', () => {
   it.each([
     "def.expose.method('decide', () => flag.get());",
     "if (true) { def.expose.method('decide', () => flag.get()); }",
-  ])('rejects ambiguous detached registration when setup also contains %s', (registration) => {
+  ])('rejects ambiguous data registration when setup also contains %s', (registration) => {
     const ir = checked(`${core}
       function decide(): boolean { return true; }
       export default definePrototype({ name: 'ambiguous-entry', setup(def) {
@@ -73,6 +77,37 @@ describe('shared module storage and owner closures', () => {
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     expect(result.value.code).not.toContain('pub fn call_data_method(');
     expect(result.value.code).toContain('expose_method(&owner, Value::string("decide")');
+  });
+
+  it('preserves undefined argument holes for a conditionally registered data method', () => {
+    const ir = checked(`${core}
+      function decide(first: number = 7, last: number): number { return first + last; }
+      let enabled = false;
+      export default definePrototype({ name: 'conditional-data-entry', setup(def) {
+        enabled = !enabled;
+        if (enabled) { def.expose.method('decide', decide); }
+      }});`);
+    const result = emitGpuiSource(ir);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).toContain('pub fn call_data_method(&self');
+    expect(result.value.code).toContain(
+      'value.map(Value::json).unwrap_or(Value::Undefined)'
+    );
+    expect(result.value.code).toContain('self.owner.borrow().exposes.get(name).cloned()');
+  });
+
+  it('does not promote a conditional callback shadowed by a setup-local function', () => {
+    const ir = checked(`${core}
+      function decide(): number { return 7; }
+      export default definePrototype({ name: 'shadowed-data-entry', setup(def) {
+        if (true) {
+          const decide = () => 9;
+          def.expose.method('decide', decide);
+        }
+      }});`);
+    const result = emitGpuiSource(ir);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).not.toContain('pub fn call_data_method(');
   });
 
   it('retains owner dependencies in defaults without promoting scalar-only module helpers', () => {
