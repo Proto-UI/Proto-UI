@@ -1,5 +1,5 @@
 import type { RuntimeHost } from '@proto.ui/runtime';
-import { withWebComponentOwnedRelocation } from '../owned-relocation';
+import { withWebComponentCallerDomMove, withWebComponentOwnedRelocation } from '../owned-relocation';
 import {
   createWebOwnedDecorationPortalGate,
   hasOwnedWebPresenceZeroOpacity,
@@ -360,7 +360,9 @@ function captureSplitCallerProjection(
         !hasSameChildren(host, children) &&
         children.every((node) => node.ownerDocument === document)
       ) {
-        withWebComponentOwnedRelocation(children, host, () => host.replaceChildren(...children));
+        withWebComponentOwnedRelocation(children, host, () =>
+          withWebComponentCallerDomMove(children, () => host.replaceChildren(...children))
+        );
       }
       for (const [parent, children] of parents) {
         if (!canRestore()) return;
@@ -371,7 +373,7 @@ function captureSplitCallerProjection(
           !hasSameChildren(parent, children)
         )
           withWebComponentOwnedRelocation(children, parent, () =>
-            parent.replaceChildren(...children)
+            withWebComponentCallerDomMove(children, () => parent.replaceChildren(...children))
           );
       }
       children.forEach((node, index) => {
@@ -791,7 +793,9 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         // Preserve caller nodes before dropping the previous owned-node boundary.
         // An initial slot-only view has no projector and leaves its children alone.
         const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
-        withWebComponentOwnedRelocation(slotPool, root, () => root.replaceChildren(...slotPool));
+        withWebComponentOwnedRelocation(slotPool, root, () =>
+          withWebComponentCallerDomMove(slotPool, () => root.replaceChildren(...slotPool))
+        );
       }
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();

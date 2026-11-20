@@ -11,6 +11,17 @@ type Window = {
   revoked?: boolean;
 };
 const windows = new WeakMap<Node, Window>();
+let movingRoots: readonly Node[] = [];
+/** Scope focus-loss admission to the actual adapter DOM operation, not its caller callback. */
+export function withWebComponentCallerDomMove<T>(roots: readonly Node[], move: () => T): T {
+  const previous = movingRoots;
+  movingRoots = roots;
+  try {
+    return move();
+  } finally {
+    movingRoots = previous;
+  }
+}
 const parentOf = (node: Node): Node | null =>
   node.parentNode ?? (node.nodeType === 11 && 'host' in node ? (node as ShadowRoot).host : null);
 function pathToRoot(node: Node): Node[] {
@@ -56,8 +67,13 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
     if (!restoring && !event.composedPath().includes(target!)) blocked = true;
   };
   const onBlur = (event: Event) => {
-    // A deliberate blur while still attached is not transport-induced loss.
-    if (!restoring && target?.isConnected && event.composedPath().includes(target)) blocked = true;
+    // Chromium blurs before disconnecting a removed subtree. Admit that loss
+    // only inside the exact DOM move of a captured root containing this target.
+    const transported = movingRoots.some(
+      (root) => roots.includes(root) && !!target && pathToRoot(target).includes(root)
+    );
+    if (!restoring && !transported && target?.isConnected && event.composedPath().includes(target))
+      blocked = true;
   };
   if (owned) {
     doc!.addEventListener('focusin', onFocus, true);

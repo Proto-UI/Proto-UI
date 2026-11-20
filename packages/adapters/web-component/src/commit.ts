@@ -1,5 +1,6 @@
 import {
   captureWebComponentCallerFocus,
+  withWebComponentCallerDomMove,
   isWebComponentOwnedRelocating,
   withWebComponentOwnedRelocation,
 } from './owned-relocation';
@@ -262,13 +263,16 @@ export function commitChildren(
   try {
     if (cfg.mode === 'light' && ctx.slotEnd) {
       const slotParent = ctx.slotEnd.parentNode!;
-      for (const node of cfg.slotPool) slotParent.insertBefore(node, ctx.slotEnd);
+      for (const node of cfg.slotPool)
+        withWebComponentCallerDomMove([node], () => slotParent.insertBefore(node, ctx.slotEnd!));
     }
     withWebComponentOwnedRelocation(
       cfg.slotPool,
       hostRoot,
       () => {
-        (hostRoot as any).replaceChildren(...Array.from(container.childNodes));
+        withWebComponentCallerDomMove(cfg.slotPool, () =>
+          hostRoot.replaceChildren(...Array.from(container.childNodes))
+        );
         focus.restore(isWebComponentOwnedRelocating);
       },
       container

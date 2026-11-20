@@ -20,9 +20,11 @@ import {
  * and let normal Custom Element disconnection settle the owner lifetime.
  */
 export { isWebComponentOwnedRelocating as isWebComponentPortalRelocating } from './owned-relocation';
-import { withWebComponentOwnedRelocation } from './owned-relocation';
+import { withWebComponentCallerDomMove, withWebComponentOwnedRelocation } from './owned-relocation';
 function relocate(el: HTMLElement, destination: Node, move: () => void): void {
-  withWebComponentOwnedRelocation([el], destination, move);
+  withWebComponentOwnedRelocation([el], destination, () =>
+    withWebComponentCallerDomMove([el], move)
+  );
 }
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {
