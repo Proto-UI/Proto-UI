@@ -173,6 +173,33 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Post-admission body drift is invisible to this gate and stays source-review
   // debt under #420; the affected sources and their owning rows are enumerated
   // in internal/website/self-hosting-coverage-matrix.md.
+  // Exact progressive CodeExample WC bridges. Their site-composition owners
+  // remain blocked; import admission does not resolve native fallback disposition
+  // or provide host, keyboard, SSR/no-JS, or remount acceptance evidence.
+  'apps/www/src/components/code-example-tabs.ts': Object.freeze({
+    sourceSha256: '88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/tabs',
+      '@proto.ui/prototypes-brutalist/tabs',
+    ]),
+  }),
+  'apps/www/src/components/code-example-tree.ts': Object.freeze({
+    sourceSha256: '1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/tree',
+      '@proto.ui/prototypes-brutalist/tree',
+      '@proto.ui/prototypes-lucide/icons/chevron-down',
+      '@proto.ui/prototypes-lucide/icons/chevron-right',
+      '@proto.ui/prototypes-lucide/icons/folder',
+      '@proto.ui/prototypes-lucide/icons/file',
+      '@proto.ui/prototypes-lucide/icons/file-code',
+      '@proto.ui/prototypes-lucide/icons/file-braces',
+      '@proto.ui/prototypes-lucide/icons/file-cog',
+      '@proto.ui/prototypes-lucide/icons/file-text',
+    ]),
+  }),
   // Exact #652 acceptance compositions. Their App controls remain blocked
   // consumers, not an infrastructure or stable-prototype exemption.
   'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
