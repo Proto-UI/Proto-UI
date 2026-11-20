@@ -182,6 +182,68 @@ export default definePrototype({name:'types',setup(def){def.expose.method('label
     );
   });
 
+  it.each<{ name: string; binding: string; barrels: Record<string, string> }>([
+    {
+      name: 'named alias',
+      binding: 'Renamed',
+      barrels: { 'barrel.ts': `export {IDs as Renamed} from './values';` },
+    },
+    {
+      name: 'star',
+      binding: 'IDs as Renamed',
+      barrels: { 'barrel.ts': `export * from './values';` },
+    },
+    {
+      name: 'transitive diamond',
+      binding: 'Renamed',
+      barrels: {
+        'barrel.ts': `export * from './left'; export * from './right';`,
+        'left.ts': `export {IDs as Renamed} from './values';`,
+        'right.ts': `export {IDs as Renamed} from './values';`,
+      },
+    },
+  ])('loads erased tuple queries through $name value re-exports', async ({ binding, barrels }) => {
+    const root = await directory();
+    await put(root, {
+      'entry.proto.ts': `import {definePrototype} from '@proto.ui/core';
+import type {${binding}} from './barrel';
+export default definePrototype({name:'types',setup(def){def.expose.method('label',(value:(typeof Renamed)[number])=>value);}});`,
+      ...barrels,
+      'values.ts': `import './missing-executable';
+export const IDs=['first','second'] as const;
+globalThis.__protoErasedTupleExecuted=true;
+throw new Error('erased initializer');`,
+    });
+    const graph = new FileSourceGraph(root);
+    const snapshot = await graph.load(await graph.entry('entry.proto.ts'));
+    expect(snapshot.failures).toEqual([]);
+    expect(Object.keys(snapshot.files).sort()).toEqual(
+      ['entry.proto.ts', ...Object.keys(barrels), 'values.ts'].sort()
+    );
+    const result = ok(await compileFile('entry.proto.ts', { root, sourceSnapshot: snapshot }));
+    expect(result.ir.exposes).toMatchObject([
+      {
+        name: 'label',
+        kind: 'method',
+        parameters: [
+          {
+            type: {
+              kind: 'union',
+              members: [
+                { kind: 'literal', value: 'first' },
+                { kind: 'literal', value: 'second' },
+              ],
+            },
+          },
+        ],
+      },
+    ]);
+    expect(result.ir.sourceFiles.map((file) => file.file)).toEqual(
+      expect.arrayContaining([...Object.keys(barrels), 'values.ts'])
+    );
+    expect((globalThis as Record<string, unknown>).__protoErasedTupleExecuted).toBeUndefined();
+  });
+
   it('keeps source effects under normal admission and never executes either runtime or source modules', async () => {
     const root = await directory();
     await put(root, { 'entry.proto.ts': use('effectful-package') });

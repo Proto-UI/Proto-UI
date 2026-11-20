@@ -254,7 +254,7 @@ export function sourceTypeIdentity(
   }
 }
 
-/** Only syntactically referenced type imports/re-exports need source bytes. */
+/** Referenced type imports need source bytes, including their exported value surfaces. */
 export function requiredTypeSourceSpecifiers(
   file: ts.SourceFile,
   includeExports = true
@@ -278,15 +278,14 @@ export function requiredTypeSourceSpecifiers(
       includeExports &&
       ts.isExportDeclaration(statement) &&
       statement.moduleSpecifier &&
-      ts.isStringLiteral(statement.moduleSpecifier)
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      (statement.isTypeOnly ||
+        !statement.exportClause ||
+        (ts.isNamedExports(statement.exportClause) && statement.exportClause.elements.length > 0))
     ) {
-      if (
-        statement.isTypeOnly ||
-        (statement.exportClause &&
-          ts.isNamedExports(statement.exportClause) &&
-          statement.exportClause.elements.some((element) => element.isTypeOnly))
-      )
-        result.add(statement.moduleSpecifier.text);
+      // An erased typeof query may select a value through a named or star
+      // re-export. Discover that source without turning it into a runtime edge.
+      result.add(statement.moduleSpecifier.text);
     }
     if (
       !ts.isImportDeclaration(statement) ||
