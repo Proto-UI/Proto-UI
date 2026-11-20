@@ -14,6 +14,7 @@ export interface CompileProjectOptions {
   exportName?: string;
   componentName?: string;
   nativeSdkPath?: string;
+  gpuiDependency?: 'workspace';
   /** Explicit identity/watch inputs; the project compiler does not interpret configuration files. */
   configFiles?: readonly string[];
 }
@@ -142,7 +143,7 @@ export class CompilerProject {
     const configIdentity = hash(JSON.stringify({
       schema: PROJECT_CACHE_SCHEMA, ir: IR_VERSION, profile: options.profile ?? 'react-runtime-v1',
       exportName: options.exportName ?? 'default', componentName: options.componentName ?? null,
-      nativeSdkPath: options.nativeSdkPath ?? null,
+      nativeSdkPath: options.nativeSdkPath ?? null, gpuiDependency: options.gpuiDependency ?? null,
       configuration,
     }));
 
@@ -162,7 +163,7 @@ export class CompilerProject {
           } else {
             result = await compileFile(location.file, {
               root: this.root, profile: options.profile, exportName: options.exportName,
-              componentName: options.componentName, nativeSdkPath: options.nativeSdkPath, sourceSnapshot: closure,
+              componentName: options.componentName, nativeSdkPath: options.nativeSdkPath, gpuiDependency: options.gpuiDependency, sourceSnapshot: closure,
             });
           }
           if (!result.ok) { diagnostics.push(...result.diagnostics); continue; }

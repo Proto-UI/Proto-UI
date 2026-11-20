@@ -8,6 +8,7 @@ import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import {
   GPUI_NATIVE_SDK_PATH,
   GPUI_NATIVE_SDK_VERSION,
+  gpuiCargoDependency,
   gpuiNativeSdkFiles,
 } from './gpui-native-sdk';
 import type { DataType } from './data-types';
@@ -43,7 +44,7 @@ import type {
 /** Ordinary Rust functions, closures and GPUI elements. No serialized IR ships. */
 export function emitGpuiSource(
   input: PrototypeIR,
-  options: { componentName?: string; nativeSdkPath?: string } = {}
+  options: { componentName?: string; nativeSdkPath?: string; gpuiDependency?: 'workspace' } = {}
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
@@ -2489,7 +2490,7 @@ impl __PuiNativeRecordValue {
           })
       }
   }
-  pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: Vec<Subscription>, _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription>, _entry_readiness: Option<(gpui::WindowId, Subscription)> }
+  pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: Vec<Subscription>, _window_activation: Option<(gpui::WindowId, Subscription)>, _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription>, _entry_readiness: Option<(gpui::WindowId, Subscription)> }
   impl ${componentName} {
       pub fn create_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> { Self::create(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
       pub fn create(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> {
@@ -2501,7 +2502,7 @@ impl __PuiNativeRecordValue {
               // below; it is never published or mounted as a native component.
               let owner = Owner::new(Json::Object(Default::default()), Default::default(), accepts_context, accepts_props, prop_valid, style_vocabulary());
               { let mut owner = owner.borrow_mut(); owner.disposed = true; owner.present = false; }
-              Self { owner, focus: cx.focus_handle(), window_input: None, _focus_subscriptions: Vec::new(), _focus_lost: None, _global_key_capture: None, _entry_readiness: None }
+              Self { owner, focus: cx.focus_handle(), window_input: None, _focus_subscriptions: Vec::new(), _window_activation: None, _focus_lost: None, _global_key_capture: None, _entry_readiness: None }
           }));
           match failure { Some(error) => Err(error), None => Ok(entity) }
       }
@@ -2569,22 +2570,38 @@ impl __PuiNativeRecordValue {
               if ready(&blur_owner) && blur_owner.borrow().epoch == epoch { view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); }
               });
           });
-          let activation_owner = owner_ref.clone();
-          let on_activation = cx.observe_window_activation(window, move |view, window, cx| { native_host_callback(&activation_owner, "window-activation", || { if activation_owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active() { native_window_blur(&activation_owner); view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); } }); });
-          vec![on_focus, on_blur, on_activation]
+          vec![on_focus, on_blur]
           } else { Vec::new() };
           let global_key_capture = subscribe_global_key_capture(&owner_ref, cx);
           let window_input = window_input_needed(&owner_ref).then(|| cx.focus_handle().tab_stop(false));
           let focus_lost = window_input.as_ref().map(|_| cx.on_focus_lost(window, |view, window, cx| { let owner=view.owner.clone(); native_host_callback(&owner, "focus-lost", || { if view.owner.borrow().window_id == Some(window.window_handle().window_id()) { if let Some(focus) = &view.window_input { restore_window_input(&view.owner, focus, window, cx); } } }); }));
-          Self { owner: owner_ref, focus, window_input, _focus_subscriptions: focus_subscriptions, _focus_lost: focus_lost, _global_key_capture: global_key_capture, _entry_readiness: None }
+          let mut view = Self { owner: owner_ref, focus, window_input, _focus_subscriptions: focus_subscriptions, _window_activation: None, _focus_lost: focus_lost, _global_key_capture: global_key_capture, _entry_readiness: None };
+          view.bind_window_activation(window, cx);
+          view
           })
       }
       #[cfg(feature="test-support")]
-      pub fn native_resource_counts(&self) -> Json { let mut counts=native::gpui_native_owner::native_resource_counts(&self.owner); counts["nativeSubscriptions"] = Json::from(self._focus_subscriptions.len() + usize::from(self._focus_lost.is_some()) + usize::from(self._global_key_capture.is_some()) + usize::from(self._entry_readiness.is_some())); counts }
+      pub fn native_resource_counts(&self) -> Json { let mut counts=native::gpui_native_owner::native_resource_counts(&self.owner); counts["nativeSubscriptions"] = Json::from(self._focus_subscriptions.len() + usize::from(self._window_activation.is_some()) + usize::from(self._focus_lost.is_some()) + usize::from(self._global_key_capture.is_some()) + usize::from(self._entry_readiness.is_some())); counts }
       pub fn handle(&self) -> ${componentName}Handle { ${componentName}Handle { owner: self.owner.clone() } }
       pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_props(&self.owner, raw))?; self.drive(window, cx) }
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
+      fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+          if !native_focus_observation_needed(&self.owner) && !native::gpui_native_move::move_owner_has_binding(&self.owner) { self._window_activation.take(); return; }
+          let id = window.window_handle().window_id();
+          if self._window_activation.as_ref().is_some_and(|(bound, _)| *bound == id) { return; }
+          self._window_activation.take();
+          let owner = self.owner.clone();
+          let subscription = cx.observe_window_activation(window, move |view, window, cx| {
+              native_host_callback(&owner, "window-activation", || {
+                  if owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active() {
+                      native_window_blur(&owner);
+                      view.drive(window, cx).unwrap_or_else(|error| throw_value(error));
+                  }
+              });
+          });
+          self._window_activation = Some((id, subscription));
+      }
       #[cfg(feature = "experimental-focus-tree")]
       fn bind_entry_readiness(&mut self, window: &mut Window, cx: &mut Context<Self>) {
           if !self.owner.borrow().modules.hooks.contains("focus-entry") { return; }
@@ -2601,9 +2618,9 @@ impl __PuiNativeRecordValue {
       }
       pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
           catch_authored(|| {
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
           modules_drive(&self.owner, &self.focus, window, cx);
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           drive_queued_focus(&self.owner, window, cx);
           let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty); if dirty { cx.notify(); }
@@ -2618,9 +2635,10 @@ impl __PuiNativeRecordValue {
           native_host_callback(&report_owner, "render", || {
           refresh_native_atoms(&self.owner, window, cx);
           Owner::project(&self.owner);
-          if self.owner.borrow().disposed { self._entry_readiness.take(); return gpui::div().into_any_element(); }
-          if !self.owner.borrow().present { detach_native_view(&self.owner); return gpui::div().into_any_element(); }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); return gpui::div().into_any_element(); }
+          if !self.owner.borrow().present { self._window_activation.take(); detach_native_view(&self.owner); return gpui::div().into_any_element(); }
           bind_native_focus_window(&self.owner, window);
+          self.bind_window_activation(window, cx);
           #[cfg(feature = "experimental-focus-tree")] self.bind_entry_readiness(window, cx);
           let drive = self.owner.borrow().native_drive.as_ref().expect("live native owner drive").clone();
           self.owner.borrow_mut().dirty = false;
@@ -2641,6 +2659,8 @@ impl __PuiNativeRecordValue {
     .update(styleFixture.contents);
   for (const artifact of staticArtifacts)
     packageDigest.update('\0').update(artifact.path).update('\0').update(artifact.contents);
+  const useWorkspace = options.gpuiDependency === 'workspace';
+  const dependency = gpuiCargoDependency(useWorkspace);
   const manifest = `[package]
   name = "generated-gpui-${packageDigest.digest('hex').slice(0, 32)}"
   version = "0.1.0"
@@ -2656,13 +2676,13 @@ impl __PuiNativeRecordValue {
   path = "Component.rs"
   
   [dependencies]
-  proto-ui-gpui-native = { version = "=${GPUI_NATIVE_SDK_VERSION}", path = ${JSON.stringify(options.nativeSdkPath ?? GPUI_NATIVE_SDK_PATH)} }
-  gpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8" }
+  proto-ui-gpui-native = { version = "=${GPUI_NATIVE_SDK_VERSION}", path = ${JSON.stringify(options.nativeSdkPath ?? GPUI_NATIVE_SDK_PATH)}${useWorkspace ? ', features = ["gpui-modern-element-api"]' : ''} }
+  gpui = { ${dependency} }
   serde = { version = "1.0", features = ["derive"] }
   serde_json = "1.0"
   
   [dev-dependencies]
-  gpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8", features = ["test-support"] }
+  gpui = { ${dependency}${useWorkspace ? '' : ', features = ["test-support"]'} }
   `;
   if (diagnostics.length) return { ok: false, diagnostics };
   return {
@@ -2672,11 +2692,13 @@ impl __PuiNativeRecordValue {
       profile: 'gpui-source-v1',
       supportingFiles: [
         { path: 'Cargo.toml', kind: 'source', contents: manifest },
-        ...(options.nativeSdkPath === undefined ? gpuiNativeSdkFiles() : []),
+        ...(options.nativeSdkPath === undefined ? gpuiNativeSdkFiles(useWorkspace) : []),
         styleFixture,
         ...staticArtifacts.map(({ path, kind, contents }) => ({ path, kind, contents })),
       ],
-      dependencies: [...TARGET_PROFILES['gpui-source-v1'].dependencies],
+      dependencies: TARGET_PROFILES['gpui-source-v1'].dependencies.map((entry) =>
+        useWorkspace && entry.name === 'gpui' ? { ...entry, version: 'workspace' } : entry
+      ),
       provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: 'gpui-source-v1' },
     },
   };

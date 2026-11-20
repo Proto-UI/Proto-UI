@@ -25,6 +25,8 @@ export interface CompileOptions extends ParseOptions {
   profile?: string | TargetSelection;
   /** GPUI source dependency shared by composed prototypes; omission bundles the editable SDK. */
   nativeSdkPath?: string;
+  /** Inherit the embedding Cargo workspace's gpui dependency. Defaults to the profile pin. */
+  gpuiDependency?: 'workspace';
 }
 export interface FileCompileOptions {
   root?: string;
@@ -32,6 +34,7 @@ export interface FileCompileOptions {
   componentName?: string;
   profile?: string | TargetSelection;
   nativeSdkPath?: string;
+  gpuiDependency?: 'workspace';
   /** Closed, already-read source input used by project compilation; no second filesystem read. */
   sourceSnapshot?: FileSourceSnapshot;
 }
@@ -51,7 +54,7 @@ export function compilePrototype(source: string, options: CompileOptions = {}): 
     case 'vue-source-v1': emitted = emitVueSource(parsed.value, emitOptions); break;
     case 'vue2-source-v1': emitted = emitVue2Source(parsed.value, emitOptions); break;
     case 'web-component-source-v1': emitted = emitWebComponentSource(parsed.value, { className: options.componentName, propsUpdatePolicy: emitOptions.propsUpdatePolicy }); break;
-    case 'gpui-source-v1': emitted = emitGpuiSource(parsed.value, { componentName: options.componentName, nativeSdkPath: options.nativeSdkPath }); break;
+    case 'gpui-source-v1': emitted = emitGpuiSource(parsed.value, { componentName: options.componentName, nativeSdkPath: options.nativeSdkPath, gpuiDependency: options.gpuiDependency }); break;
     case 'qt-source-v1': emitted = emitQtSource(parsed.value, { componentName: options.componentName }); break;
     case 'flutter-source-v1': emitted = emitFlutterSource(parsed.value, { componentName: options.componentName }); break;
     case 'react-dom-ssr-v1': emitted = emitReactSource(parsed.value, {...emitOptions,ssr:true}); break;
@@ -83,7 +86,7 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
     const fileName = sourceName(snapshot.entry);
     const source = snapshot.files[fileName];
     if (typeof source !== 'string') throw new Error(`Closed source snapshot has no entry ${fileName}.`);
-    const result = compilePrototype(source, {fileName,files:snapshot.files,sourceImports:snapshot.sourceImports,exportName:options.exportName,componentName:options.componentName,profile:options.profile,nativeSdkPath:options.nativeSdkPath});
+    const result = compilePrototype(source, {fileName,files:snapshot.files,sourceImports:snapshot.sourceImports,exportName:options.exportName,componentName:options.componentName,profile:options.profile,nativeSdkPath:options.nativeSdkPath,gpuiDependency:options.gpuiDependency});
     if (result.ok && snapshot.sourceResolution) result.value.output.provenance.sourceResolution = snapshot.sourceResolution;
     return result;
   } catch (error) {

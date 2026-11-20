@@ -360,6 +360,7 @@ impl Owner {
         // The first authored failure stops its callback list, but cannot skip
         // terminal private cleanup. Keep the original payload, including 0/false.
         let mut failure=None;
+        attempt_native_cleanup(&mut failure,||crate::gpui_native_move::move_dispose(owner));
         attempt_native_cleanup(&mut failure,||detach_native_view(owner));
         attempt_native_cleanup(&mut failure,||life(owner,"before-dispose"));
         attempt_native_cleanup(&mut failure,||clear_lexicals(owner));
@@ -412,12 +413,12 @@ fn attempt_native_cleanup<T>(failure:&mut Option<Box<dyn std::any::Any+Send>>,op
         if failure.is_none(){*failure=Some(next);}else{attempt_failed_created_cleanup(||drop(next));}
     }
 }
-const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);5]=[text_detach,image_detach,positioning_detach,overlay_detach,atoms_detach];
+const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);6]=[text_detach,image_detach,positioning_detach,overlay_detach,atoms_detach,crate::gpui_native_move::move_detach];
 fn begin_native_detach(owner:&OwnerRef)->bool{
     withdraw_entry_view(owner);
     let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
 }
-pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
+pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}crate::gpui_native_move::move_blur(owner);withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
 pub fn detach_native_view(owner:&OwnerRef){
     let mounted=begin_native_detach(owner);
     let mut failure=None;
@@ -646,6 +647,7 @@ pub type Drive=Rc<dyn Fn(&mut Window,&mut App)>;
 pub struct NativeTranslation{x:crate::gpui_native_style::Dimension,y:crate::gpui_native_style::Dimension}
 impl NativeTranslation{const ZERO:Self=Self{x:crate::gpui_native_style::Dimension::ZERO,y:crate::gpui_native_style::Dimension::ZERO};fn is_zero(self)->bool{self.x==Self::ZERO.x&&self.y==Self::ZERO.y}}
 struct TranslatedElement{element:AnyElement,translation:NativeTranslation,owner:Option<OwnerWeak>}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for TranslatedElement{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for TranslatedElement{
     type RequestLayoutState=();type PrepaintState=();
@@ -702,6 +704,7 @@ let on_key=owner.clone();element=element.on_key_up(move|event,window,cx|{let mut
 let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();
 element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);},move|_,_,window,cx|{
     if native_pointer_input_needed(&committed){register_pointer_input(window,Some(Rc::downgrade(&committed)));}
+    if crate::gpui_native_move::move_owner_has_binding(&committed){crate::gpui_native_move::register_move_input(window,Rc::downgrade(&committed));}
     if native_boundary_input_needed(&committed){window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);}
     if committed.borrow().modules.hooks.contains("overlay"){window.on_mouse_event::<gpui::ScrollWheelEvent>(overlay_modal_wheel);}
     let owner=committed.clone();let drive=commit_drive.clone();let focus=commit_focus.clone();let epoch=owner.borrow().epoch;
@@ -884,6 +887,7 @@ pub fn restore_window_input(owner:&OwnerRef,focus:&FocusHandle,window:&mut Windo
 // A non-tab-stop dispatch carrier, not the component's authored Focus or Root.
 // Its listeners run only while no actual control owns native keyboard focus.
 struct WindowInput{element:AnyElement,focus:FocusHandle,owner:OwnerWeak}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl IntoElement for WindowInput{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for WindowInput{
     type RequestLayoutState=();type PrepaintState=();
@@ -916,6 +920,7 @@ fn pointer_intent(owner:&OwnerRef,kind:&str,fields:Map<String,Json>)->bool{
 }
 pub fn native_press_blur(owner:&OwnerRef)->bool{let held=owner.borrow_mut().press.key.take().is_some();held&&dispatch_root_route(owner,"press.cancel",event_fields("press.cancel"))}
 pub fn native_window_blur(owner:&OwnerRef)->bool{
+    crate::gpui_native_move::move_blur(owner);
     let(root,global)={let mut o=owner.borrow_mut();let root=o.press.key.take().is_some()||o.press.pointer;let global=o.press.global_key.take().is_some()||o.press.global_pointer;let keyboard_click=o.press.global_keyboard_click;let pointer_cancelled=o.press.cancelled||o.press.pointer;let global_pointer_cancelled=o.press.global_pointer_cancelled||o.press.global_pointer;o.press=NativePress::default();o.press.global_keyboard_click=keyboard_click;o.press.cancelled=pointer_cancelled;o.press.global_pointer_cancelled=global_pointer_cancelled;(root,global)};
     let mut prevented=false;if root{prevented|=dispatch_root_route(owner,"press.cancel",event_fields("press.cancel"));}if global{prevented|=dispatch(owner,"press.cancel",true,event_fields("press.cancel"));}prevented
 }
