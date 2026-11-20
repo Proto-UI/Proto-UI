@@ -1040,8 +1040,15 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           const effectsPort: EffectsPort = splitEffects
             ? {
                 queueStyle: (handle) => project(() => splitEffects.queueStyle(handle)),
-                requestFlush: () => project(() => splitEffects.requestFlush()),
-                flushNow: () => project(() => splitEffects.flushNow?.()),
+                // Validate every acquisition snapshot, but publish only the
+                // completed initial Rules projection. Intermediate setup paint
+                // is not an animated predecessor of the first admitted frame.
+                requestFlush: () => {
+                  if (!acquiringProjection) project(() => splitEffects.requestFlush());
+                },
+                flushNow: () => {
+                  if (!acquiringProjection) project(() => splitEffects.flushNow?.());
+                },
               }
             : this._textControlTarget
               ? {
@@ -1108,10 +1115,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               }
             : undefined;
           const admitProjection = () => {
+            if (!acquiringProjection) return;
             // Retire before committing the sink, which can reenter host code.
             admitViewProjection = null;
             acquiringProjection = false;
             if (acquisitionFailed) throw acquisitionError;
+            splitEffects?.requestFlush();
             if (pendingVisualFrame) {
               const frame = pendingVisualFrame;
               pendingVisualFrame = null;

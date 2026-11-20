@@ -4,6 +4,8 @@ import { test } from 'node:test';
 import {
   assertCandidatePublicCaptures,
   distribution,
+  isFreshPressCommit,
+  summarizeFreshPressLatency,
   summarizeWindow,
 } from './liquid-glass-frame-budget.mjs';
 
@@ -161,4 +163,98 @@ test('disabled committed=false does not excuse a non-none background image', () 
     () => assertCandidatePublicCaptures(captures),
     /public-small: disabled fallback retained a background image/
   );
+});
+
+function freshTrial() {
+  const down = {
+    time: 2,
+    timestamp: 1,
+    frame: '10',
+    pointerId: 1,
+    trusted: true,
+    buttons: 1,
+    phaseBin: '0',
+  };
+  const up = { time: 100, timestamp: 99, pointerId: 1, trusted: true, buttons: 0 };
+  return {
+    mode: 'static',
+    attempted: true,
+    priorSession: 1,
+    expectedSession: 2,
+    downCount: 1,
+    upCount: 1,
+    down,
+    up,
+    inputs: [down, up],
+    states: [{ quality: 'self-optical' }],
+    deadline: 2002,
+    outcomes: { held: 'resolved', release: 'resolved' },
+    held: {
+      time: 5,
+      frame: '11',
+      session: '2',
+      quality: 'self-optical',
+      contact: 'held',
+      paint: {
+        committed: true,
+        carrier: 'contact-v1',
+        source: 'visible-app-canvas',
+        geometryMatches: true,
+        quality: 'self-optical',
+      },
+    },
+  };
+}
+
+test('repeated presses accept only their exact session and new owned frame', () => {
+  const trial = freshTrial();
+  const serialized = Function(`return (${isFreshPressCommit.toString()})`)();
+  assert.equal(serialized(trial, trial.held), true);
+  assert.equal(
+    isFreshPressCommit(trial, { ...trial.held, session: '3' }),
+    false,
+    'A later session cannot fill a missing earlier press'
+  );
+  assert.equal(
+    isFreshPressCommit(trial, { ...trial.held, frame: '10' }),
+    false,
+    'An old frame is not a response'
+  );
+  assert.equal(
+    isFreshPressCommit(trial, { ...trial.held, paint: { ...trial.held.paint, committed: false } }),
+    false
+  );
+  assert.equal(isFreshPressCommit({ ...trial, priorSession: '' }, trial.held), false);
+});
+
+test('fresh press commit must precede release, next down and the fixed deadline', () => {
+  const trial = freshTrial();
+  assert.equal(isFreshPressCommit({ ...trial, up: { ...trial.up, time: 5 } }, trial.held), false);
+  assert.equal(isFreshPressCommit({ ...trial, nextDownTime: 5 }, trial.held), false);
+  assert.equal(isFreshPressCommit({ ...trial, deadline: 5 }, trial.held), false);
+  assert.equal(isFreshPressCommit(trial, { ...trial.held, time: 1 }), false);
+});
+
+test('fresh press summary retains slow, missing and unattempted denominators', () => {
+  const slow = freshTrial();
+  slow.held.time = 17;
+  const missing = freshTrial();
+  missing.held = null;
+  missing.outcomes.held = 'timeout';
+  const summary = summarizeFreshPressLatency({
+    workload: { plannedPerMode: 60 },
+    samples: [slow, missing],
+  });
+  assert.equal(summary.static.planned, 60);
+  assert.equal(summary.static.attempted, 2);
+  assert.equal(summary.static.resolved, 1);
+  assert.equal(summary.static.unresolvedAttempted, 1);
+  assert.equal(summary.static.notAttempted, 58);
+  assert.equal(summary.static.listenerToHeldCommitMs.p95, 15);
+  assert.equal(
+    summary.static.listenerOver10Ms,
+    1,
+    'Slow samples remain resolved, not filtered or retried'
+  );
+  assert.equal(summary.dynamic.notAttempted, 60);
 });

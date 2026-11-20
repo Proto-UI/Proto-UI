@@ -13,6 +13,20 @@ const PUBLIC = '/zh-cn/ui-libraries/liquid-glass/button/';
 const TARGET = '[data-material-host="wc"] [data-demo-ref="regular"]';
 const MODES = ['static-idle', 'static-contact', 'dynamic-idle', 'dynamic-contact'];
 const VIEWPORT = { width: 1000, height: 1050 };
+const FRESH_PRESS_WORKLOAD = {
+  target: TARGET,
+  viewport: VIEWPORT,
+  dpr: 1,
+  plannedPerMode: 60,
+  trialsPerBlock: 20,
+  blocks: ['static', 'dynamic', 'dynamic', 'static', 'static', 'dynamic'],
+  heldTimeoutMs: 2000,
+  releaseTimeoutMs: 2000,
+  rafWarmupCallbacks: 8,
+  requestedPhaseFractions: [0, 0.2, 0.4, 0.6, 0.8],
+  requestedPhaseIndex: '(trialIndex * 3) % 5',
+  dynamicIdleJitterMs: '(trialIndex * 37) % 121',
+};
 const SOURCE_FILES = [
   'pnpm-lock.yaml',
   'packages/adapters/base/src/material/program.ts',
@@ -25,6 +39,7 @@ const SOURCE_FILES = [
   'packages/adapters/base/src/material/style-tint-profile.ts',
   'packages/adapters/base/src/material/liquidgl-kernel.generated.ts',
   'packages/adapters/base/src/material/image-prepare.ts',
+  'packages/adapters/web-component/src/adapt.ts',
   'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
   'apps/www/src/components/PrototypePreviewer/demo-renderer.ts',
   'apps/www/src/pages/en/test/liquid-glass-material.astro',
@@ -134,6 +149,97 @@ export function assertCandidatePublicCaptures(captures) {
   }
 }
 
+// Self-contained so the browser collector uses the same ownership predicate.
+export function isFreshPressCommit(trial, commit) {
+  const integer = (value) => {
+    if (typeof value !== 'number' && (typeof value !== 'string' || !/^(0|[1-9]\d*)$/.test(value)))
+      return null;
+    const number = Number(value);
+    return Number.isSafeInteger(number) && number >= 0 ? number : null;
+  };
+  const prior = integer(trial.priorSession),
+    expected = integer(trial.expectedSession);
+  const beforeFrame = integer(trial.down?.frame),
+    frame = integer(commit.frame);
+  return (
+    prior !== null &&
+    expected === prior + 1 &&
+    beforeFrame !== null &&
+    frame !== null &&
+    trial.downCount === 1 &&
+    trial.down?.trusted === true &&
+    trial.down.buttons === 1 &&
+    Number.isFinite(trial.down.time) &&
+    Number.isFinite(trial.deadline) &&
+    Number.isFinite(commit.time) &&
+    commit.time >= trial.down.time &&
+    commit.time < trial.deadline &&
+    (!trial.up || commit.time < trial.up.time) &&
+    (trial.nextDownTime == null || commit.time < trial.nextDownTime) &&
+    integer(commit.session) === expected &&
+    frame > beforeFrame &&
+    commit.quality === 'self-optical' &&
+    commit.contact === 'held' &&
+    commit.paint?.committed === true &&
+    commit.paint.carrier === 'contact-v1' &&
+    commit.paint.source === 'visible-app-canvas' &&
+    commit.paint.geometryMatches === true &&
+    commit.paint.quality === 'self-optical'
+  );
+}
+
+export function summarizeFreshPressLatency(evidence) {
+  return Object.fromEntries(
+    ['static', 'dynamic'].map((mode) => {
+      const samples = evidence.samples.filter((trial) => trial.mode === mode);
+      const attempted = samples.filter((trial) => trial.attempted);
+      const resolved = attempted.filter(
+        (trial) =>
+          trial.outcomes.held === 'resolved' && trial.held && isFreshPressCommit(trial, trial.held)
+      );
+      const listener = resolved.map((trial) => trial.held.time - trial.down.time);
+      const eventTime = resolved
+        .filter((trial) => trial.down.timestamp >= 0 && trial.down.timestamp <= trial.down.time)
+        .map((trial) => trial.held.time - trial.down.timestamp);
+      const phaseBins = {};
+      for (const trial of attempted) {
+        const bin = trial.down?.phaseBin ?? 'unknown';
+        phaseBins[bin] = (phaseBins[bin] ?? 0) + 1;
+      }
+      return [
+        mode,
+        {
+          planned: evidence.workload.plannedPerMode,
+          attempted: attempted.length,
+          resolved: resolved.length,
+          unresolvedAttempted: attempted.length - resolved.length,
+          notAttempted: evidence.workload.plannedPerMode - attempted.length,
+          listenerToHeldCommitMs: distribution(listener),
+          eventTimestampToHeldCommitMs: distribution(eventTime),
+          listenerOver10Ms: listener.filter((value) => value > 10).length,
+          eventTimestampOver10Ms: eventTime.filter((value) => value > 10).length,
+          invalidEventTimestamps: resolved.length - eventTime.length,
+          releaseFailures: attempted.filter((trial) => trial.outcomes.release !== 'resolved')
+            .length,
+          untrustedInputTrials: attempted.filter((trial) =>
+            trial.inputs.some((input) => !input.trusted)
+          ).length,
+          pointerIdentityFailures: attempted.filter(
+            (trial) =>
+              trial.downCount !== 1 ||
+              trial.upCount !== 1 ||
+              trial.down?.pointerId !== trial.up?.pointerId
+          ).length,
+          nonOpticalTrials: attempted.filter((trial) =>
+            trial.states.some((entry) => entry.quality !== 'self-optical')
+          ).length,
+          phaseBins,
+        },
+      ];
+    })
+  );
+}
+
 export function summarizeWindow(window) {
   const { sample, before, after } = window;
   const elapsed = sample.end - sample.start;
@@ -225,6 +331,8 @@ async function compare(baselineFile, candidateFile, output) {
   const matched =
     baseline.probe.sha256 === candidate.probe.sha256 &&
     JSON.stringify(baseline.workload) === JSON.stringify(candidate.workload) &&
+    JSON.stringify(baseline.freshPressLatency?.workload) ===
+      JSON.stringify(candidate.freshPressLatency?.workload) &&
     baseline.environment.browser === candidate.environment.browser &&
     baseline.environment.node === candidate.environment.node &&
     baseline.source.hashes['pnpm-lock.yaml'] === candidate.source.hashes['pnpm-lock.yaml'] &&
@@ -241,6 +349,7 @@ async function compare(baselineFile, candidateFile, output) {
       failures: baseline.failures,
       windows: baseline.windows.map(summarizeWindow),
       runtimeSmoke: baseline.runtimeSmoke,
+      freshPressLatency: summarizeFreshPressLatency(baseline.freshPressLatency),
       public: baseline.public,
     },
     candidate: {
@@ -249,6 +358,7 @@ async function compare(baselineFile, candidateFile, output) {
       failures: candidate.failures,
       windows: candidate.windows.map(summarizeWindow),
       runtimeSmoke: candidate.runtimeSmoke,
+      freshPressLatency: summarizeFreshPressLatency(candidate.freshPressLatency),
       public: candidate.public,
       publicAcceptance,
     },
@@ -280,6 +390,11 @@ async function compare(baselineFile, candidateFile, output) {
     ['baseline', result.baseline],
     ['candidate', result.candidate],
   ]) {
+    lines.push('', `## ${label} repeated fresh presses`, '');
+    for (const [mode, row] of Object.entries(report.freshPressLatency))
+      lines.push(
+        `- ${mode}: ${row.resolved}/${row.planned} resolved; handler p50/p95/p99/max ${number(row.listenerToHeldCommitMs?.p50)}/${number(row.listenerToHeldCommitMs?.p95)}/${number(row.listenerToHeldCommitMs?.p99)}/${number(row.listenerToHeldCommitMs?.max)} ms; >10 ms: ${row.listenerOver10Ms}; missing ${row.unresolvedAttempted}, unattempted ${row.notAttempted}. Event-timestamp p95 ${number(row.eventTimestampToHeldCommitMs?.p95)} ms, >10 ms: ${row.eventTimestampOver10Ms}. These observations are not physical presentation or a latency guarantee.`
+      );
     lines.push('', `## ${label} public captures and interaction smoke`, '');
     for (const capture of report.public) {
       const buttons = publicButtons(capture);
@@ -310,6 +425,22 @@ async function compare(baselineFile, candidateFile, output) {
       'Incomplete workload'
     );
     assert.equal(report.runtimeSmoke.length, 4, 'Incomplete runtime interaction smoke');
+    for (const row of Object.values(summarizeFreshPressLatency(report.freshPressLatency))) {
+      assert.equal(row.attempted, 60, 'Every planned fresh press must remain accounted for');
+      assert.equal(
+        row.resolved,
+        60,
+        'A missing fresh press cannot be satisfied by a later session'
+      );
+      for (const key of [
+        'releaseFailures',
+        'untrustedInputTrials',
+        'pointerIdentityFailures',
+        'nonOpticalTrials',
+        'invalidEventTimestamps',
+      ])
+        assert.equal(row[key], 0, `Fresh-press evidence violation: ${key}`);
+    }
   }
   assert.ok(publicAcceptance.passed, publicAcceptance.message);
 }
@@ -366,6 +497,7 @@ async function observe(output, rounds) {
     ],
     failures: [],
     runtimeSmoke: [],
+    freshPressLatency: { workload: FRESH_PRESS_WORKLOAD, samples: [], blocks: [], cleanup: null },
     windows: [],
     public: [],
     logs: [],
@@ -799,6 +931,409 @@ async function observe(output, rounds) {
     }
   }
 
+  async function freshPressLatency() {
+    const evidence = report.freshPressLatency;
+    const { context, page } = await pageFor(VIEWPORT, 'light', FIXTURE);
+    let pressed = false;
+    let ready = false;
+    try {
+      await fixtureReady(page);
+      ready = true;
+      const target = page.locator(TARGET);
+      await target.scrollIntoViewIfNeeded();
+      const bounds = await target.boundingBox();
+      assert.ok(bounds);
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      const indices = { static: 0, dynamic: 0 };
+      let previousMode;
+      for (const [blockIndex, mode] of FRESH_PRESS_WORKLOAD.blocks.entries()) {
+        if (mode !== previousMode) {
+          await page.evaluate(
+            (dynamic) => window.liquidMaterialFixture.pause(!dynamic),
+            mode === 'dynamic'
+          );
+          previousMode = mode;
+        }
+        const block = { blockIndex, mode, before: await snapshot(page) };
+        evidence.blocks.push(block);
+        for (let inBlock = 0; inBlock < FRESH_PRESS_WORKLOAD.trialsPerBlock; inBlock++) {
+          const trialIndex = indices[mode]++;
+          let armed = false,
+            installed = false,
+            trialError,
+            raw;
+          try {
+            // Do not wait for document-wide pendingImages=0 in dynamic mode:
+            // that would select only the quiet part of each source cycle.
+            await page.waitForFunction(
+              (selector) => {
+                const node = document.querySelector(selector);
+                return (
+                  node?.dataset.materialQuality === 'self-optical' &&
+                  node.dataset.materialContact === 'rest'
+                );
+              },
+              TARGET,
+              { timeout: FRESH_PRESS_WORKLOAD.releaseTimeoutMs }
+            );
+            const before = await paint(target);
+            assert.ok(before.committed);
+            const session = before.host.dataset.materialContactSession;
+            assert.match(session ?? '', /^(0|[1-9]\d*)$/, 'Missing settled contact session');
+            const priorSession = Number(session);
+            assert.ok(Number.isSafeInteger(priorSession) && Number.isSafeInteger(priorSession + 1));
+            await page.evaluate(
+              ({ selector, plan, priorSession, before, observeSource, matchSource, config }) => {
+                const target = document.querySelector(selector);
+                // These are the source-bound, self-contained functions already
+                // used by this probe, not fixture-authored code or a native shim.
+                const observePaint = Function(`return (${observeSource})`)();
+                const matches = Function(`return (${matchSource})`)();
+                const state = {
+                  ...plan,
+                  priorSession,
+                  expectedSession: priorSession + 1,
+                  before,
+                  attempted: false,
+                  downCount: 0,
+                  upCount: 0,
+                  inputs: [],
+                  commits: [],
+                  states: [],
+                  raf: [],
+                  outcomes: { held: 'pending', release: 'pending' },
+                  down: null,
+                  up: null,
+                  nextDownTime: null,
+                  deadline: null,
+                  held: null,
+                  release: null,
+                };
+                let active = true,
+                  raf,
+                  heldTimer,
+                  releaseTimer,
+                  warmupTimer;
+                let resolveReady, resolveHeld, resolveRelease;
+                const ready = new Promise((resolve) => {
+                  resolveReady = resolve;
+                });
+                const held = new Promise((resolve) => {
+                  resolveHeld = resolve;
+                });
+                const release = new Promise((resolve) => {
+                  resolveRelease = resolve;
+                });
+                const status = (time = performance.now()) => ({
+                  time,
+                  quality: target.dataset.materialQuality,
+                  reason: target.dataset.materialReason,
+                  frame: target.dataset.materialFrame,
+                  session: target.dataset.materialContactSession,
+                  contact: target.dataset.materialContact,
+                  sourceRevision: target.dataset.materialSourceRevision,
+                });
+                const finishHeld = (outcome, commit = null) => {
+                  if (state.outcomes.held !== 'pending') return;
+                  state.outcomes.held = outcome;
+                  state.held = commit;
+                  state.heldOutcomeAt = performance.now();
+                  clearTimeout(heldTimer);
+                  resolveHeld(outcome);
+                };
+                const finishRelease = (outcome, commit = null) => {
+                  if (state.outcomes.release !== 'pending') return;
+                  state.outcomes.release = outcome;
+                  state.release = commit;
+                  state.releaseOutcomeAt = performance.now();
+                  clearTimeout(releaseTimer);
+                  resolveRelease(outcome);
+                };
+                state.states.push(status());
+                const tick = (timestamp) => {
+                  if (!active) return;
+                  state.raf.push({ timestamp, observedAt: performance.now() });
+                  if (state.raf.length === config.rafWarmupCallbacks) {
+                    const intervals = state.raf
+                      .slice(1)
+                      .map((entry, i) => entry.timestamp - state.raf[i].timestamp)
+                      .sort((a, b) => a - b);
+                    state.measuredRafPeriodMs = intervals[Math.floor(intervals.length / 2)];
+                    clearTimeout(warmupTimer);
+                    resolveReady({
+                      periodMs: state.measuredRafPeriodMs,
+                      callbacks: state.raf.length,
+                    });
+                  }
+                  raf = requestAnimationFrame(tick);
+                };
+                raf = requestAnimationFrame(tick);
+                warmupTimer = setTimeout(
+                  () => resolveReady({ failure: 'RAF warmup deadline' }),
+                  config.heldTimeoutMs
+                );
+                const input = (event) => {
+                  const time = performance.now();
+                  const entry = {
+                    ...status(time),
+                    type: event.type,
+                    timestamp: event.timeStamp,
+                    trusted: event.isTrusted,
+                    pointerId: event.pointerId,
+                    buttons: event.buttons,
+                  };
+                  state.inputs.push(entry);
+                  if (event.type === 'pointerdown') {
+                    state.downCount++;
+                    if (state.downCount !== 1 || !state.attempted) {
+                      state.nextDownTime = time;
+                      finishHeld('unexpected-down');
+                      return;
+                    }
+                    state.down = entry;
+                    entry.lastRaf = state.raf.at(-1) ?? null;
+                    entry.phaseAgeMs = entry.lastRaf ? time - entry.lastRaf.timestamp : null;
+                    entry.phaseFraction =
+                      entry.phaseAgeMs === null
+                        ? null
+                        : entry.phaseAgeMs / state.measuredRafPeriodMs;
+                    entry.phaseBin =
+                      entry.phaseFraction === null
+                        ? 'unknown'
+                        : entry.phaseFraction < 0 || entry.phaseFraction >= 1
+                          ? 'late'
+                          : String(Math.floor(entry.phaseFraction * 5));
+                    state.deadline = time + config.heldTimeoutMs;
+                    clearTimeout(heldTimer);
+                    heldTimer = setTimeout(() => finishHeld('timeout'), config.heldTimeoutMs);
+                  } else {
+                    state.upCount++;
+                    state.up ??= entry;
+                    finishHeld('released-before-held');
+                    state.releaseDeadline = time + config.releaseTimeoutMs;
+                    clearTimeout(releaseTimer);
+                    releaseTimer = setTimeout(
+                      () => finishRelease('timeout'),
+                      config.releaseTimeoutMs
+                    );
+                  }
+                };
+                target.addEventListener('pointerdown', input, true);
+                target.addEventListener('pointerup', input, true);
+                let lastFrame = target.dataset.materialFrame;
+                const observer = new MutationObserver(() => {
+                  // The endpoint is this callback's entry, before style/geometry
+                  // observation. A later Playwright wait is never the endpoint.
+                  const time = performance.now();
+                  const entry = status(time);
+                  if (
+                    entry.quality !== state.states.at(-1)?.quality ||
+                    entry.reason !== state.states.at(-1)?.reason
+                  )
+                    state.states.push(entry);
+                  if (entry.frame === lastFrame) return;
+                  lastFrame = entry.frame;
+                  state.commits.push(entry);
+                  if (
+                    state.down &&
+                    state.outcomes.held === 'pending' &&
+                    entry.contact === 'held' &&
+                    entry.quality === 'self-optical' &&
+                    Number(entry.session) === state.expectedSession &&
+                    Number(entry.frame) > Number(state.down.frame) &&
+                    time >= state.down.time &&
+                    time < state.deadline &&
+                    !state.up
+                  ) {
+                    entry.paint = observePaint(target);
+                    finishHeld(matches(state, entry) ? 'resolved' : 'invalid-owned-paint', entry);
+                  }
+                  if (
+                    state.up &&
+                    state.outcomes.release === 'pending' &&
+                    time >= state.up.time &&
+                    time < state.releaseDeadline &&
+                    entry.contact === 'rest' &&
+                    entry.quality === 'self-optical' &&
+                    Number(entry.session) === state.expectedSession &&
+                    Number(entry.frame) > Number(state.held?.frame ?? state.down?.frame)
+                  ) {
+                    entry.paint = observePaint(target);
+                    const valid =
+                      entry.paint.committed &&
+                      entry.paint.carrier === 'contact-v1' &&
+                      entry.paint.source === 'visible-app-canvas' &&
+                      entry.paint.geometryMatches &&
+                      state.down?.pointerId === state.up.pointerId &&
+                      state.up.trusted;
+                    finishRelease(valid ? 'resolved' : 'invalid-owned-paint', entry);
+                  }
+                });
+                observer.observe(target, {
+                  attributes: true,
+                  attributeFilter: [
+                    'data-material-frame',
+                    'data-material-quality',
+                    'data-material-reason',
+                  ],
+                });
+                window.__liquidFreshTrial = {
+                  ready,
+                  held,
+                  release,
+                  arm(requestedDelayMs) {
+                    state.requestedDelayMs = requestedDelayMs;
+                    state.attempted = true;
+                    state.armedAt = performance.now();
+                    state.resourcesBefore = window.liquidMaterialFixture.metrics();
+                    heldTimer = setTimeout(
+                      () => finishHeld('no-pointerdown'),
+                      config.heldTimeoutMs
+                    );
+                  },
+                  expectRelease() {
+                    releaseTimer = setTimeout(
+                      () => finishRelease('no-pointerup'),
+                      config.releaseTimeoutMs
+                    );
+                  },
+                  stop() {
+                    active = false;
+                    cancelAnimationFrame(raf);
+                    clearTimeout(heldTimer);
+                    clearTimeout(releaseTimer);
+                    clearTimeout(warmupTimer);
+                    observer.disconnect();
+                    target.removeEventListener('pointerdown', input, true);
+                    target.removeEventListener('pointerup', input, true);
+                    state.stoppedAt = performance.now();
+                    state.resourcesAfter = window.liquidMaterialFixture.metrics();
+                    delete window.__liquidFreshTrial;
+                    return state;
+                  },
+                };
+              },
+              {
+                selector: TARGET,
+                plan: {
+                  mode,
+                  blockIndex,
+                  trialIndex,
+                  requestedPhaseFraction:
+                    FRESH_PRESS_WORKLOAD.requestedPhaseFractions[(trialIndex * 3) % 5],
+                  requestedSourceJitterMs: mode === 'dynamic' ? (trialIndex * 37) % 121 : 0,
+                },
+                priorSession,
+                before,
+                observeSource: observeOwnedMaterialPaint.toString(),
+                matchSource: isFreshPressCommit.toString(),
+                config: FRESH_PRESS_WORKLOAD,
+              }
+            );
+            installed = true;
+            const warm = await page.evaluate(() => window.__liquidFreshTrial.ready);
+            assert.ok(
+              !warm.failure && warm.periodMs > 0 && Number.isFinite(warm.periodMs),
+              warm.failure ?? 'Missing observed RAF period'
+            );
+            const phase = FRESH_PRESS_WORKLOAD.requestedPhaseFractions[(trialIndex * 3) % 5];
+            const sourceJitter = mode === 'dynamic' ? (trialIndex * 37) % 121 : 0;
+            const delay = phase * warm.periodMs + sourceJitter;
+            await page.waitForTimeout(delay);
+            await page.evaluate((delay) => window.__liquidFreshTrial.arm(delay), delay);
+            armed = true;
+            pressed = true;
+            await page.mouse.down();
+            await page.evaluate(() => window.__liquidFreshTrial.held);
+          } catch (error) {
+            trialError = String(error);
+          } finally {
+            if (armed) {
+              try {
+                await page.evaluate(() => window.__liquidFreshTrial.expectRelease());
+                await page.mouse.up();
+                pressed = false;
+                await page.evaluate(() => window.__liquidFreshTrial.release);
+              } catch (error) {
+                trialError ??= String(error);
+              }
+            }
+            raw = installed
+              ? await page
+                  .evaluate(() => window.__liquidFreshTrial.stop())
+                  .catch((error) => ({
+                    mode,
+                    blockIndex,
+                    trialIndex,
+                    attempted: armed,
+                    failure: String(error),
+                  }))
+              : { mode, blockIndex, trialIndex, attempted: false };
+            raw.failure ??= trialError;
+            raw.outcomes ??= { held: 'unobserved', release: 'unobserved' };
+            raw.inputs ??= [];
+            raw.states ??= [];
+            for (const commit of [raw.held, raw.release, ...(raw.commits ?? [])]) {
+              if (typeof commit?.paint?.image === 'string') {
+                const { image, ...facts } = commit.paint;
+                commit.paint = {
+                  ...facts,
+                  imageSha256: sha256(image),
+                  imageCharacters: image.length,
+                };
+              }
+            }
+            evidence.samples.push(raw);
+            await save();
+          }
+          if (trialError || raw.outcomes.release !== 'resolved')
+            throw new Error(
+              `Fresh press ${mode}/${trialIndex}: ${trialError ?? raw.outcomes.release}; remaining trials are unattempted`
+            );
+        }
+        block.after = await snapshot(page);
+        if (mode === 'dynamic')
+          assert.ok(
+            Number(block.after.target.dataset.materialSourceRevision) >
+              Number(block.before.target.dataset.materialSourceRevision),
+            'Repeated-press dynamic source did not advance'
+          );
+        await save();
+      }
+    } finally {
+      if (pressed)
+        await page.mouse.up().catch((error) => failure('fresh-press-pointer-cleanup', error));
+      if (ready) {
+        try {
+          await page.evaluate(() => window.liquidMaterialFixture.dispose());
+          evidence.cleanup = await page.evaluate(() => window.liquidMaterialFixture.metrics());
+          for (const key of ['contexts', 'consumers', 'pendingImages', 'decodedImages'])
+            assert.equal(evidence.cleanup[key], 0, `Fresh-press document leaked ${key}`);
+        } catch (error) {
+          failure('fresh-press-document-cleanup', error);
+        }
+      }
+      evidence.summary = summarizeFreshPressLatency(evidence);
+      await save();
+      await context.close();
+    }
+    // Only evidence completeness/ownership gates; >10 ms samples stay in the
+    // distribution and exceedance counts, never trigger filtering or retries.
+    for (const row of Object.values(evidence.summary)) {
+      assert.equal(row.attempted, 60);
+      assert.equal(row.resolved, 60);
+      for (const key of [
+        'releaseFailures',
+        'untrustedInputTrials',
+        'pointerIdentityFailures',
+        'nonOpticalTrials',
+        'invalidEventTimestamps',
+      ])
+        assert.equal(row[key], 0, key);
+    }
+    console.log(JSON.stringify({ freshPressLatency: evidence.summary }));
+  }
+
   async function publicCaptures() {
     for (const [name, theme, viewport] of [
       ['public-light', 'light', { width: 1440, height: 1050 }],
@@ -865,6 +1400,7 @@ async function observe(output, rounds) {
           ['original-layout', layoutControl],
           ['runtime-smoke', runtimeSmoke],
           ['matched-workload', workload],
+          ['repeated-fresh-presses', freshPressLatency],
           ['public-captures', publicCaptures],
         ]) {
           try {

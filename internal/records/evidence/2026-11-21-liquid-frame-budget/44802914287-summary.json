@@ -1,0 +1,1211 @@
+{
+  "runId": 44802914287,
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44802914287",
+  "artifactId": 14662003158,
+  "artifactZipSha256": "a358aa2fd402fa84fc1ef1a73c1dfccd97f98c53364aad737f44832db04d8d36",
+  "baselineSha": "543c8a2990239dec7c08458a902da3f5a97b49dd",
+  "candidateSha": "85b55f2f520e39c61c0236e41a8533d242674244",
+  "environment": {
+    "node": "v24.22.3",
+    "browser": "157.0.8103.78",
+    "platform": "linux",
+    "arch": "x64",
+    "osRelease": "7.0.0-1017-azure",
+    "cpus": 4,
+    "headless": true,
+    "gpuClassification": "software"
+  },
+  "gpu": [
+    {
+      "vendorId": 65535,
+      "deviceId": 65535,
+      "vendorString": "Google Inc. (Google)",
+      "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driverVendor": "SwANGLE",
+      "driverVersion": "5.0.0"
+    }
+  ],
+  "fonts": "fontconfig 2.15.0-1.1ubuntu2\nfonts-noto-cjk 1:20230817+repack1-3\n",
+  "metrics": [
+    {
+      "mode": "static-idle",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 6003.099999999977,
+        "rafIntervalMs": {
+          "n": 358,
+          "mean": 16.665921787709497,
+          "p50": 16.69999999999891,
+          "p95": 16.799999999999272,
+          "p99": 16.800000000000182,
+          "maximum": 16.80000000000109
+        },
+        "materialCommitIntervalMs": null,
+        "materialCommits": 0,
+        "materialCommitsPerSecond": 0.0,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": null,
+        "meanEncodeMs": null
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 6003.699999999953,
+        "rafIntervalMs": {
+          "n": 358,
+          "mean": 16.665363128491624,
+          "p50": 16.699999999999818,
+          "p95": 16.799999999999272,
+          "p99": 16.80000000000109,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": null,
+        "materialCommits": 0,
+        "materialCommitsPerSecond": 0.0,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": null,
+        "meanEncodeMs": null
+      },
+      "meanRenderReductionPercent": null
+    },
+    {
+      "mode": "static-contact",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 7808.0999999999185,
+        "rafIntervalMs": {
+          "n": 467,
+          "mean": 16.666167023554603,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728,
+          "p99": 16.80000000000291,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": {
+          "n": 408,
+          "mean": 18.941911764705853,
+          "p50": 16.70000000001164,
+          "p95": 33.20000000004948,
+          "p99": 34.292999999985916,
+          "maximum": 38.70000000006985
+        },
+        "materialCommits": 411,
+        "materialCommitsPerSecond": 52.63764552195852,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 14.200000000011642,
+          "p50": 12.900000000023283,
+          "p95": 17.309999999991852,
+          "p99": 17.701999999989056,
+          "maximum": 17.79999999998836
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 14.533333333344975,
+          "p50": 13.20000000006985,
+          "p95": 17.699999999965076,
+          "p99": 18.099999999955763,
+          "maximum": 18.199999999953434
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 6.798333333331781,
+          "p50": 6.600000000034925,
+          "p95": 8.099999999976717,
+          "p99": 8.881999999993136,
+          "maximum": 13.5
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 411,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "renderMilliseconds": 2042.4000000011292,
+          "encodeMilliseconds": 195.2999999995227,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 411,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 4.969343065696179,
+        "meanEncodeMs": 0.4751824817506635
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 6926.100000000093,
+        "rafIntervalMs": {
+          "n": 414,
+          "mean": 16.66610628019324,
+          "p50": 16.69999999999891,
+          "p95": 16.700000000000728,
+          "p99": 16.800000000000065,
+          "maximum": 16.80000000000109
+        },
+        "materialCommitIntervalMs": {
+          "n": 410,
+          "mean": 16.7348780487806,
+          "p50": 16.600000000093132,
+          "p95": 17.55499999998719,
+          "p99": 30.5279999999725,
+          "maximum": 35.20000000006985
+        },
+        "materialCommits": 413,
+        "materialCommitsPerSecond": 59.62951733298602,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 6.199999999992239,
+          "p50": 6.0,
+          "p95": 6.989999999979045,
+          "p99": 7.077999999977182,
+          "maximum": 7.099999999976717
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 6.399999999945673,
+          "p50": 6.199999999953434,
+          "p95": 7.189999999932479,
+          "p99": 7.277999999930616,
+          "maximum": 7.299999999930151
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 3.8913888888934807,
+          "p50": 3.700000000069849,
+          "p95": 5.099999999982538,
+          "p99": 6.445999999991633,
+          "maximum": 7.799999999930151
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 413,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "sourcePreparationMilliseconds": 1.5,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 546.5999999991618,
+          "contrastMilliseconds": 16.300000000512227,
+          "renderMilliseconds": 867.3000000000466,
+          "encodeMilliseconds": 178.9999999993015,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 413,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 2.100000000000113,
+        "meanEncodeMs": 0.4334140435818438
+      },
+      "meanRenderReductionPercent": 57.74089306700112
+    },
+    {
+      "mode": "dynamic-idle",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 6003.499999999884,
+        "rafIntervalMs": {
+          "n": 309,
+          "mean": 19.255016181229767,
+          "p50": 16.699999999999818,
+          "p95": 33.39999999999782,
+          "p99": 33.400000000001455,
+          "maximum": 50.0
+        },
+        "materialCommitIntervalMs": {
+          "n": 42,
+          "mean": 133.34047619047593,
+          "p50": 133.60000000003492,
+          "p95": 141.0100000000879,
+          "p99": 142.96199999999254,
+          "maximum": 143.70000000001164
+        },
+        "materialCommits": 45,
+        "materialCommitsPerSecond": 7.495627550595631,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": {
+          "n": 3,
+          "mean": 51.333333333333336,
+          "p50": 51.0,
+          "p95": 52.8,
+          "p99": 52.96,
+          "maximum": 53
+        },
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 180,
+          "programBuilds": 0,
+          "sourceUploads": 180,
+          "sourcePreparations": 180,
+          "renderMilliseconds": 1626.4999999999418,
+          "encodeMilliseconds": 70.9000000001979,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 180,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 9.036111111110788,
+        "meanEncodeMs": 0.39388888888998835
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 6003.099999999977,
+        "rafIntervalMs": {
+          "n": 357,
+          "mean": 16.66554621848738,
+          "p50": 16.699999999999818,
+          "p95": 16.799999999999272,
+          "p99": 16.80000000000291,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": {
+          "n": 42,
+          "mean": 133.31904761904818,
+          "p50": 133.04999999998836,
+          "p95": 136.0849999999802,
+          "p99": 138.0569999999809,
+          "maximum": 139.0
+        },
+        "materialCommits": 45,
+        "materialCommitsPerSecond": 7.496127001049487,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 180,
+          "programBuilds": 0,
+          "sourceUploads": 180,
+          "sourcePreparations": 180,
+          "sourcePreparationMilliseconds": 271.4000000002561,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 231.9000000001397,
+          "contrastMilliseconds": 7.000000000232831,
+          "renderMilliseconds": 648.6999999997206,
+          "encodeMilliseconds": 80.19999999995343,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 180,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 3.6038888888873366,
+        "meanEncodeMs": 0.44555555555529686
+      },
+      "meanRenderReductionPercent": 60.11681524747963
+    },
+    {
+      "mode": "dynamic-contact",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 14219.900000000081,
+        "rafIntervalMs": {
+          "n": 739,
+          "mean": 19.191745602165085,
+          "p50": 16.69999999999891,
+          "p95": 33.31000000000204,
+          "p99": 33.46200000000055,
+          "maximum": 50.0
+        },
+        "materialCommitIntervalMs": {
+          "n": 419,
+          "mean": 33.742004773269606,
+          "p50": 29.599999999976717,
+          "p95": 70.50999999999767,
+          "p99": 72.59999999997672,
+          "maximum": 82.19999999995343
+        },
+        "materialCommits": 422,
+        "materialCommitsPerSecond": 29.676720652043798,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 17.266666666662786,
+          "p50": 17.29999999993015,
+          "p95": 18.020000000024446,
+          "p99": 18.08400000003283,
+          "maximum": 18.100000000034925
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 17.566666666651145,
+          "p50": 17.699999999953434,
+          "p95": 18.239999999984867,
+          "p99": 18.28799999998766,
+          "maximum": 18.29999999998836
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 17.309722222224647,
+          "p50": 10.549999999988358,
+          "p95": 46.12500000003784,
+          "p99": 50.888999999997395,
+          "maximum": 62.300000000046566
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": {
+          "n": 6,
+          "mean": 55.333333333333336,
+          "p50": 53.5,
+          "p95": 61.0,
+          "p99": 61.0,
+          "maximum": 61
+        },
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 740,
+          "programBuilds": 0,
+          "sourceUploads": 533,
+          "sourcePreparations": 533,
+          "renderMilliseconds": 5952.399999999732,
+          "encodeMilliseconds": 312.39999999984866,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 740,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 8.043783783783422,
+        "meanEncodeMs": 0.4221621621619576
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 8509.599999999977,
+        "rafIntervalMs": {
+          "n": 508,
+          "mean": 16.665748031496065,
+          "p50": 16.69999999999891,
+          "p95": 16.700000000000728,
+          "p99": 16.799999999999272,
+          "maximum": 16.80000000000109
+        },
+        "materialCommitIntervalMs": {
+          "n": 410,
+          "mean": 20.679268292682927,
+          "p50": 16.70000000006985,
+          "p95": 35.59999999997672,
+          "p99": 38.86400000002117,
+          "maximum": 45.39999999990687
+        },
+        "materialCommits": 413,
+        "materialCommitsPerSecond": 48.53342107737157,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 6.93333333331005,
+          "p50": 6.699999999953434,
+          "p95": 7.509999999974388,
+          "p99": 7.581999999976251,
+          "maximum": 7.599999999976717
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 7.266666666643384,
+          "p50": 7.0,
+          "p95": 7.810000000020954,
+          "p99": 7.882000000022817,
+          "maximum": 7.900000000023283
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 7.360833333335662,
+          "p50": 4.299999999930151,
+          "p95": 22.804999999928988,
+          "p99": 26.046000000037036,
+          "maximum": 32.5
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 607,
+          "programBuilds": 0,
+          "sourceUploads": 321,
+          "sourcePreparations": 321,
+          "sourcePreparationMilliseconds": 486.20000000076834,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 805.9000000006054,
+          "contrastMilliseconds": 25.299999998882413,
+          "renderMilliseconds": 1761.1000000000931,
+          "encodeMilliseconds": 253.10000000114087,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 607,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 2.9013179571665457,
+        "meanEncodeMs": 0.4169686985191777
+      },
+      "meanRenderReductionPercent": 63.930930577526034
+    }
+  ],
+  "freshPressObservations": [
+    {
+      "round": 1,
+      "mode": "static-contact",
+      "listenerToCommitMs": 5.5,
+      "eventTimestampToCommitMs": 5.699999999953434,
+      "firstProbeAfterInputMs": 6.400000000023283,
+      "commitBeforeIndependentRafProbe": true,
+      "input": {
+        "time": 4510.899999999907,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "29",
+        "sourceRevision": "14",
+        "contact": "rest",
+        "session": "1",
+        "timestamp": 4510.699999999953,
+        "type": "pointerdown",
+        "trusted": true,
+        "x": 155.625,
+        "y": 427.65625,
+        "buttons": 1,
+        "pointerId": 1
+      },
+      "commit": {
+        "time": 4516.399999999907,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "30",
+        "sourceRevision": "14",
+        "contact": "held",
+        "session": "2"
+      },
+      "probe": {
+        "timestamp": 4516.9,
+        "observedAt": 4517.29999999993
+      }
+    },
+    {
+      "round": 1,
+      "mode": "dynamic-contact",
+      "listenerToCommitMs": 7.599999999976717,
+      "eventTimestampToCommitMs": 7.900000000023283,
+      "firstProbeAfterInputMs": 12.399999999906868,
+      "commitBeforeIndependentRafProbe": true,
+      "input": {
+        "time": 9038,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "183",
+        "sourceRevision": "31",
+        "contact": "rest",
+        "session": "2",
+        "timestamp": 9037.699999999953,
+        "type": "pointerdown",
+        "trusted": true,
+        "x": 155.625,
+        "y": 427.65625,
+        "buttons": 1,
+        "pointerId": 1
+      },
+      "commit": {
+        "time": 9045.599999999977,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "184",
+        "sourceRevision": "31",
+        "contact": "held",
+        "session": "3"
+      },
+      "probe": {
+        "timestamp": 9050,
+        "observedAt": 9050.399999999907
+      }
+    },
+    {
+      "round": 2,
+      "mode": "static-contact",
+      "listenerToCommitMs": 7.099999999976717,
+      "eventTimestampToCommitMs": 7.299999999930151,
+      "firstProbeAfterInputMs": 7.699999999953434,
+      "commitBeforeIndependentRafProbe": true,
+      "input": {
+        "time": 14175.699999999953,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "321",
+        "sourceRevision": "54",
+        "contact": "rest",
+        "session": "3",
+        "timestamp": 14175.5,
+        "type": "pointerdown",
+        "trusted": true,
+        "x": 155.625,
+        "y": 427.65625,
+        "buttons": 1,
+        "pointerId": 1
+      },
+      "commit": {
+        "time": 14182.79999999993,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "322",
+        "sourceRevision": "54",
+        "contact": "held",
+        "session": "4"
+      },
+      "probe": {
+        "timestamp": 14183.2,
+        "observedAt": 14183.399999999907
+      }
+    },
+    {
+      "round": 2,
+      "mode": "dynamic-contact",
+      "listenerToCommitMs": 6.699999999953434,
+      "eventTimestampToCommitMs": 7.0,
+      "firstProbeAfterInputMs": 15.699999999953434,
+      "commitBeforeIndependentRafProbe": true,
+      "input": {
+        "time": 18634.199999999953,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "476",
+        "sourceRevision": "71",
+        "contact": "rest",
+        "session": "4",
+        "timestamp": 18633.899999999907,
+        "type": "pointerdown",
+        "trusted": true,
+        "x": 155.625,
+        "y": 427.65625,
+        "buttons": 1,
+        "pointerId": 1
+      },
+      "commit": {
+        "time": 18640.899999999907,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "477",
+        "sourceRevision": "71",
+        "contact": "held",
+        "session": "5"
+      },
+      "probe": {
+        "timestamp": 18649.7,
+        "observedAt": 18649.899999999907
+      }
+    },
+    {
+      "round": 3,
+      "mode": "static-contact",
+      "listenerToCommitMs": 6.0,
+      "eventTimestampToCommitMs": 6.199999999953434,
+      "firstProbeAfterInputMs": 7.599999999976717,
+      "commitBeforeIndependentRafProbe": true,
+      "input": {
+        "time": 23442.199999999953,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "613",
+        "sourceRevision": "91",
+        "contact": "rest",
+        "session": "5",
+        "timestamp": 23442,
+        "type": "pointerdown",
+        "trusted": true,
+        "x": 155.625,
+        "y": 427.65625,
+        "buttons": 1,
+        "pointerId": 1
+      },
+      "commit": {
+        "time": 23448.199999999953,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "614",
+        "sourceRevision": "91",
+        "contact": "held",
+        "session": "6"
+      },
+      "probe": {
+        "timestamp": 23449.432,
+        "observedAt": 23449.79999999993
+      }
+    },
+    {
+      "round": 3,
+      "mode": "dynamic-contact",
+      "listenerToCommitMs": 6.5,
+      "eventTimestampToCommitMs": 6.899999999906868,
+      "firstProbeAfterInputMs": 16.5,
+      "commitBeforeIndependentRafProbe": true,
+      "input": {
+        "time": 27916.399999999907,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "768",
+        "sourceRevision": "108",
+        "contact": "rest",
+        "session": "6",
+        "timestamp": 27916,
+        "type": "pointerdown",
+        "trusted": true,
+        "x": 155.625,
+        "y": 427.65625,
+        "buttons": 1,
+        "pointerId": 1
+      },
+      "commit": {
+        "time": 27922.899999999907,
+        "quality": "self-optical",
+        "reason": "rendered",
+        "frame": "769",
+        "sourceRevision": "108",
+        "contact": "held",
+        "session": "7"
+      },
+      "probe": {
+        "timestamp": 27932.6,
+        "observedAt": 27932.899999999907
+      }
+    }
+  ],
+  "public": [
+    {
+      "name": "public-light",
+      "optical": 2,
+      "controls": 3,
+      "paints": [
+        {
+          "quality": "unavailable",
+          "committed": false,
+          "host": {
+            "text": "Web Components",
+            "dataset": {
+              "puiRoot": "",
+              "puiStyle": "flex w-full min-w-0 h-auto flex-nowrap items-center justify-start gap-6 overflow-x-auto border-0 rounded-none bg-transparent p-0 text-muted-foreground shadow-none",
+              "demoOwner": "demo-8",
+              "projectionOwner": "pp-1kk9duna55v",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-tabs-list",
+              "materialQuality": "unavailable",
+              "materialReason": "unresolved-owned-opaque-fallback"
+            },
+            "role": "tablist",
+            "disabled": false,
+            "ariaDisabled": null
+          }
+        },
+        {
+          "quality": "unavailable",
+          "committed": false,
+          "host": {
+            "text": "BackContinueUnavailable0 activations",
+            "dataset": {
+              "demoRef": "__website_runtime_preview_surface__",
+              "puiRoot": "",
+              "puiStyle": "rounded-none border border-border bg-transparent text-foreground",
+              "demoOwner": "demo-12",
+              "projectionPrototype": "liquid-glass-surface-root",
+              "projectionRuntime": "wc",
+              "projectionFamily": "liquid-glass",
+              "projectionGeneration": "1",
+              "materialQuality": "unavailable",
+              "materialReason": "unresolved-owned-opaque-fallback"
+            },
+            "role": null,
+            "disabled": false,
+            "ariaDisabled": null
+          }
+        },
+        {
+          "quality": "self-optical",
+          "committed": true,
+          "host": {
+            "text": "Back",
+            "dataset": {
+              "demoRef": "action",
+              "puiRoot": "",
+              "demoOwner": "demo-8",
+              "projectionOwner": "pp-1kk9duna55v",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-sm bg-secondary text-secondary-foreground",
+              "puiA11yActions": "activate",
+              "materialQuality": "self-optical",
+              "materialReason": "rendered",
+              "materialIntent": "liquid-glass",
+              "materialMotion": "press",
+              "puiMaterialCarrier": "contact-v1",
+              "materialBackend": "self-optical",
+              "materialProfile": "liquidgl-v2-contact-canvas-1",
+              "materialSource": "visible-app-canvas",
+              "materialFrame": "1",
+              "materialSourceRevision": "4",
+              "materialContact": "rest",
+              "materialContactSession": "0",
+              "materialPhase": "rest"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "false"
+          }
+        },
+        {
+          "quality": "self-optical",
+          "committed": true,
+          "host": {
+            "text": "Continue",
+            "dataset": {
+              "puiRoot": "",
+              "demoOwner": "demo-8",
+              "projectionOwner": "pp-1kk9duna55v",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-sm bg-primary text-primary-foreground",
+              "puiA11yActions": "activate",
+              "materialQuality": "self-optical",
+              "materialReason": "rendered",
+              "materialIntent": "liquid-glass",
+              "materialMotion": "press",
+              "puiMaterialCarrier": "contact-v1",
+              "materialBackend": "self-optical",
+              "materialProfile": "pui-regular-style-tint-contact-5",
+              "materialSource": "visible-app-canvas",
+              "materialFrame": "1",
+              "materialSourceRevision": "4",
+              "materialContact": "rest",
+              "materialContactSession": "0",
+              "materialPhase": "rest"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "false"
+          }
+        },
+        {
+          "quality": "opaque-fallback",
+          "committed": false,
+          "host": {
+            "text": "Unavailable",
+            "dataset": {
+              "puiRoot": "",
+              "disabled": "",
+              "demoOwner": "demo-8",
+              "projectionOwner": "pp-1kk9duna55v",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-none bg-secondary text-secondary-foreground pointer-events-none cursor-default",
+              "puiA11yActions": "activate",
+              "materialQuality": "opaque-fallback",
+              "materialReason": "no-active-material-candidate"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "true"
+          }
+        }
+      ],
+      "failure": null
+    },
+    {
+      "name": "public-dark",
+      "optical": 2,
+      "controls": 3,
+      "paints": [
+        {
+          "quality": "unavailable",
+          "committed": false,
+          "host": {
+            "text": "Web Components",
+            "dataset": {
+              "puiRoot": "",
+              "puiStyle": "flex w-full min-w-0 h-auto flex-nowrap items-center justify-start gap-6 overflow-x-auto border-0 rounded-none bg-transparent p-0 text-muted-foreground shadow-none",
+              "demoOwner": "demo-11",
+              "projectionOwner": "pp-av0fnohxl3k",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-tabs-list",
+              "materialQuality": "unavailable",
+              "materialReason": "unresolved-owned-opaque-fallback"
+            },
+            "role": "tablist",
+            "disabled": false,
+            "ariaDisabled": null
+          }
+        },
+        {
+          "quality": "unavailable",
+          "committed": false,
+          "host": {
+            "text": "BackContinueUnavailable0 activations",
+            "dataset": {
+              "demoRef": "__website_runtime_preview_surface__",
+              "puiRoot": "",
+              "puiStyle": "rounded-none border border-border bg-transparent text-foreground",
+              "demoOwner": "demo-15",
+              "projectionPrototype": "liquid-glass-surface-root",
+              "projectionRuntime": "wc",
+              "projectionFamily": "liquid-glass",
+              "projectionGeneration": "1",
+              "materialQuality": "unavailable",
+              "materialReason": "unresolved-owned-opaque-fallback"
+            },
+            "role": null,
+            "disabled": false,
+            "ariaDisabled": null
+          }
+        },
+        {
+          "quality": "self-optical",
+          "committed": true,
+          "host": {
+            "text": "Back",
+            "dataset": {
+              "demoRef": "action",
+              "puiRoot": "",
+              "demoOwner": "demo-11",
+              "projectionOwner": "pp-av0fnohxl3k",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-sm bg-secondary text-secondary-foreground",
+              "puiA11yActions": "activate",
+              "materialQuality": "self-optical",
+              "materialReason": "rendered",
+              "materialIntent": "liquid-glass",
+              "materialMotion": "press",
+              "puiMaterialCarrier": "contact-v1",
+              "materialBackend": "self-optical",
+              "materialProfile": "liquidgl-v2-contact-canvas-1",
+              "materialSource": "visible-app-canvas",
+              "materialFrame": "1",
+              "materialSourceRevision": "4",
+              "materialContact": "rest",
+              "materialContactSession": "0",
+              "materialPhase": "rest"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "false"
+          }
+        },
+        {
+          "quality": "self-optical",
+          "committed": true,
+          "host": {
+            "text": "Continue",
+            "dataset": {
+              "puiRoot": "",
+              "demoOwner": "demo-11",
+              "projectionOwner": "pp-av0fnohxl3k",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-sm bg-primary text-primary-foreground",
+              "puiA11yActions": "activate",
+              "materialQuality": "self-optical",
+              "materialReason": "rendered",
+              "materialIntent": "liquid-glass",
+              "materialMotion": "press",
+              "puiMaterialCarrier": "contact-v1",
+              "materialBackend": "self-optical",
+              "materialProfile": "pui-regular-style-tint-contact-5",
+              "materialSource": "visible-app-canvas",
+              "materialFrame": "1",
+              "materialSourceRevision": "4",
+              "materialContact": "rest",
+              "materialContactSession": "0",
+              "materialPhase": "rest"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "false"
+          }
+        },
+        {
+          "quality": "opaque-fallback",
+          "committed": false,
+          "host": {
+            "text": "Unavailable",
+            "dataset": {
+              "puiRoot": "",
+              "disabled": "",
+              "demoOwner": "demo-11",
+              "projectionOwner": "pp-av0fnohxl3k",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-none bg-secondary text-secondary-foreground pointer-events-none cursor-default",
+              "puiA11yActions": "activate",
+              "materialQuality": "opaque-fallback",
+              "materialReason": "no-active-material-candidate"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "true"
+          }
+        }
+      ],
+      "failure": null
+    },
+    {
+      "name": "public-small",
+      "optical": 2,
+      "controls": 3,
+      "paints": [
+        {
+          "quality": "unavailable",
+          "committed": false,
+          "host": {
+            "text": "Web Components",
+            "dataset": {
+              "puiRoot": "",
+              "puiStyle": "flex w-full min-w-0 h-auto flex-nowrap items-center justify-start gap-6 overflow-x-auto border-0 rounded-none bg-transparent p-0 text-muted-foreground shadow-none",
+              "demoOwner": "demo-10",
+              "projectionOwner": "pp-6clxhanagng",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-tabs-list",
+              "materialQuality": "unavailable",
+              "materialReason": "unresolved-owned-opaque-fallback"
+            },
+            "role": "tablist",
+            "disabled": false,
+            "ariaDisabled": null
+          }
+        },
+        {
+          "quality": "unavailable",
+          "committed": false,
+          "host": {
+            "text": "BackContinueUnavailable0 activations",
+            "dataset": {
+              "demoRef": "__website_runtime_preview_surface__",
+              "puiRoot": "",
+              "puiStyle": "rounded-none border border-border bg-transparent text-foreground",
+              "demoOwner": "demo-14",
+              "projectionPrototype": "liquid-glass-surface-root",
+              "projectionRuntime": "wc",
+              "projectionFamily": "liquid-glass",
+              "projectionGeneration": "1",
+              "materialQuality": "unavailable",
+              "materialReason": "unresolved-owned-opaque-fallback"
+            },
+            "role": null,
+            "disabled": false,
+            "ariaDisabled": null
+          }
+        },
+        {
+          "quality": "self-optical",
+          "committed": true,
+          "host": {
+            "text": "Back",
+            "dataset": {
+              "demoRef": "action",
+              "puiRoot": "",
+              "demoOwner": "demo-10",
+              "projectionOwner": "pp-6clxhanagng",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-sm bg-secondary text-secondary-foreground",
+              "puiA11yActions": "activate",
+              "materialQuality": "self-optical",
+              "materialReason": "rendered",
+              "materialIntent": "liquid-glass",
+              "materialMotion": "press",
+              "puiMaterialCarrier": "contact-v1",
+              "materialBackend": "self-optical",
+              "materialProfile": "liquidgl-v2-contact-canvas-1",
+              "materialSource": "visible-app-canvas",
+              "materialFrame": "1",
+              "materialSourceRevision": "4",
+              "materialContact": "rest",
+              "materialContactSession": "0",
+              "materialPhase": "rest"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "false"
+          }
+        },
+        {
+          "quality": "self-optical",
+          "committed": true,
+          "host": {
+            "text": "Continue",
+            "dataset": {
+              "puiRoot": "",
+              "demoOwner": "demo-10",
+              "projectionOwner": "pp-6clxhanagng",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-sm bg-primary text-primary-foreground",
+              "puiA11yActions": "activate",
+              "materialQuality": "self-optical",
+              "materialReason": "rendered",
+              "materialIntent": "liquid-glass",
+              "materialMotion": "press",
+              "puiMaterialCarrier": "contact-v1",
+              "materialBackend": "self-optical",
+              "materialProfile": "pui-regular-style-tint-contact-5",
+              "materialSource": "visible-app-canvas",
+              "materialFrame": "1",
+              "materialSourceRevision": "4",
+              "materialContact": "rest",
+              "materialContactSession": "0",
+              "materialPhase": "rest"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "false"
+          }
+        },
+        {
+          "quality": "opaque-fallback",
+          "committed": false,
+          "host": {
+            "text": "Unavailable",
+            "dataset": {
+              "puiRoot": "",
+              "disabled": "",
+              "demoOwner": "demo-10",
+              "projectionOwner": "pp-6clxhanagng",
+              "projectionFamily": "liquid-glass",
+              "projectionRuntime": "wc",
+              "projectionGeneration": "1",
+              "projectionPrototype": "liquid-glass-button",
+              "puiStyle": "select-none inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap cursor-pointer shadow-none bg-secondary text-secondary-foreground pointer-events-none cursor-default",
+              "puiA11yActions": "activate",
+              "materialQuality": "opaque-fallback",
+              "materialReason": "no-active-material-candidate"
+            },
+            "role": "button",
+            "disabled": false,
+            "ariaDisabled": "true"
+          }
+        }
+      ],
+      "failure": null
+    }
+  ],
+  "runtimeSmoke": [
+    {
+      "runtime": "wc",
+      "failure": null,
+      "activation": "1 activations",
+      "held": true,
+      "after": "self-optical"
+    },
+    {
+      "runtime": "react",
+      "failure": null,
+      "activation": "1 activations",
+      "held": true,
+      "after": "self-optical"
+    },
+    {
+      "runtime": "vue",
+      "failure": null,
+      "activation": "1 activations",
+      "held": true,
+      "after": "self-optical"
+    },
+    {
+      "runtime": "vue2",
+      "failure": null,
+      "activation": "1 activations",
+      "held": true,
+      "after": "self-optical"
+    }
+  ],
+  "cleanup": {
+    "contexts": 0,
+    "consumers": 0,
+    "lost": false,
+    "pendingImages": 0,
+    "decodedImages": 0,
+    "imagePreparations": 1280,
+    "peakPendingImages": 4
+  },
+  "limitations": [
+    "Only three presses per mode; all six event-to-commit samples under 10 ms do not establish a production tail guarantee.",
+    "Headless SwiftShader and approximately 60 Hz RAF; no physical 120 Hz or input-to-photon acceptance.",
+    "Requested 8.33 ms input spacing is not actual delivered rate; retain raw measured input interval distributions.",
+    "Cross-run absolute timings vary even for the exact same baseline. Use within-run pairs, not first-run candidate versus second-run candidate as an isolated microtask benchmark.",
+    "RAF probe is independent from sink renderer entry. Early commit is observed, but exact renderer/decode partition remains unavailable."
+  ],
+  "fieldPaths": {
+    "renderAverage": "sum(summary.resourceDelta.renderMilliseconds)/sum(summary.resourceDelta.renders), grouped by mode",
+    "latency": "per-window first held self-optical material commit after pointerdown with session > prior; subtract input.time or input.timestamp; one down per window",
+    "percentiles": "linear interpolation of pooled raw values within each mode; no intervals synthesized across windows"
+  }
+}
