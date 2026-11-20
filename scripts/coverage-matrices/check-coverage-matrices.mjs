@@ -745,8 +745,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/prototypes/liquid-glass/src/theme',
     ]),
   }),
-  'apps/www/src/components/override/Search.astro': Object.freeze({
-    viteIgnoredDynamicImports: Object.freeze(['`${bundlePath}pagefind.js`']),
+  // The resource supplies `url` only after same-origin HTTP(S) validation.
+  // Neither the importer nor its URL-construction companion may drift alone.
+  'apps/www/src/components/site-search-owner.ts': Object.freeze({
+    viteIgnoredDynamicImports: Object.freeze(['url']),
+    sourceSha256: 'aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580',
+    companionSource: Object.freeze({
+      path: 'apps/www/src/components/site-pagefind-resource.ts',
+      sha256: '1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a',
+    }),
   }),
 });
 
@@ -9557,24 +9564,31 @@ function isReviewedPrototypePackageDependency(sourcePath, guardedImport) {
   );
 }
 
+function reviewedWebsiteImportSourceMatches(rootDir, sourcePath, sourceSha256) {
+  const target = path.join(rootDir, sourcePath);
+  try {
+    assertPromotionModulePath(rootDir, target);
+    return (
+      fs.lstatSync(target).isFile() &&
+      createHash('sha256').update(fs.readFileSync(target)).digest('hex') === sourceSha256
+    );
+  } catch {
+    return false;
+  }
+}
+
 function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir) {
   if (isReviewedPrototypePackageDependency(sourcePath, guardedImport)) return true;
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
-  if (allowance.sourceSha256) {
-    const target = path.join(rootDir, sourcePath);
-    try {
-      assertPromotionModulePath(rootDir, target);
-      if (
-        !fs.lstatSync(target).isFile() ||
-        createHash('sha256').update(fs.readFileSync(target)).digest('hex') !==
-          allowance.sourceSha256
-      )
-        return false;
-    } catch {
-      return false;
-    }
-  }
+  if (
+    allowance.sourceSha256 &&
+    !reviewedWebsiteImportSourceMatches(rootDir, sourcePath, allowance.sourceSha256)
+  )
+    return false;
+  const companion = allowance.companionSource;
+  if (companion && !reviewedWebsiteImportSourceMatches(rootDir, companion.path, companion.sha256))
+    return false;
 
   if (
     guardedImport.category === 'vite-ignored-dynamic-import' &&
