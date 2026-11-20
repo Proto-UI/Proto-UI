@@ -317,10 +317,20 @@ const SHADCN_MANIFEST = {
     toggle: {
       baseFamilyId: 'P-BASE-TOGGLE',
       recipeId: 'demo-shadcn-toggle',
-      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-toggle', 'lucide-icon'],
+      recipePrototypeIds: [
+        'shadcn-style-scope',
+        'shadcn-toggle',
+        'lucide-bold-icon',
+        'lucide-italic-icon',
+        'lucide-underline-icon',
+        'lucide-strikethrough-icon',
+      ],
       auxiliaryPrototypes: [
         { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
-        { basePrototypeId: null, prototypeId: 'lucide-icon' },
+        { basePrototypeId: null, prototypeId: 'lucide-bold-icon' },
+        { basePrototypeId: null, prototypeId: 'lucide-italic-icon' },
+        { basePrototypeId: null, prototypeId: 'lucide-underline-icon' },
+        { basePrototypeId: null, prototypeId: 'lucide-strikethrough-icon' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'shadcn-toggle' },
