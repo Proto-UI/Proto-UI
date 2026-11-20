@@ -1,3 +1,5 @@
+import { recordPreviewerQueue } from './previewer-readiness-diagnostics';
+
 type InitialRenderTicket = {
   admit(): void;
   promote(): void;
@@ -26,6 +28,7 @@ function documentQueue(document: Document): DocumentQueue {
     observer: null,
     scheduled: false,
     drain() {
+      recordPreviewerQueue(document, queue.active, queue.pending.size);
       if (queue.scheduled || !queue.pending.size) return;
       queue.scheduled = true;
       // Admission continues without idle callbacks or a visible animation frame.
@@ -95,6 +98,7 @@ export function createInitialRenderAdmission(root: HTMLElement, signal: AbortSig
       queue!.pending.delete(ticket);
       queue!.active += 1;
       state = 'active';
+      recordPreviewerQueue(root.ownerDocument, queue!.active, queue!.pending.size);
       resolve!();
     },
   };

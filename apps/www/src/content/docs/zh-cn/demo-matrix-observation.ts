@@ -157,6 +157,7 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
     runtimeCount,
     unavailable,
     expectedPreviewers: demos * runtimeCount - unavailable,
+    completionCounters: window.__puiMatrixReadinessDiagnostics ?? null,
     previewers: roots.length,
     initialized: roots.filter((root) => root.dataset.inited === '1').length,
     hostCount: document.querySelectorAll('[data-previewer-id] .host').length,

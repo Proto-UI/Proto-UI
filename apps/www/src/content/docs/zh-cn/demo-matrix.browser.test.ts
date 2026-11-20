@@ -171,6 +171,14 @@ async function observeMatrixWait(
 async function openMatrixRoute(viewport: { width: number; height: number }) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
+  if (process.env.PROTO_UI_MATRIX_READINESS_COUNTERS === '1') {
+    await page.addInitScript(() => {
+      window.__puiMatrixReadinessDiagnostics = {
+        runtimes: {},
+        queue: { active: 0, pending: 0, peakActive: 0, peakPending: 0, samples: 0 },
+      };
+    });
+  }
   const state: MatrixDiagnosticState = {
     caseName: expect.getState().currentTestName ?? 'unknown-case',
     phase: 'route-open',

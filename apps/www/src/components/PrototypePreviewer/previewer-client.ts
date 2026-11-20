@@ -5,6 +5,7 @@ import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
 import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { createInitialRenderAdmission } from './previewer-initial-render';
+import { recordPreviewerCompletion } from './previewer-readiness-diagnostics';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import { createRuntimePreviewSurface, runtimePreviewFamily } from './runtime-preview-surface';
 import {
@@ -373,11 +374,13 @@ export function initPreviewer(options: PreviewerOptions) {
       // custom loader. Only newly composed parts require this module table.
       if (!demoId && prototypeId) ids.delete(prototypeId);
       await Promise.all([loadPrototypes(Array.from(ids)), prepareDemoRuntime(runtime)]);
+      recordPreviewerCompletion(root.ownerDocument, runtime, 'dependenciesCompleted');
       if (destroyed || myVersion !== version) return;
       if (options.initial && root.dataset.lazy !== 'true') {
         await initialRenderAdmission.acquire();
       }
       if (destroyed || myVersion !== version) return;
+      recordPreviewerCompletion(root.ownerDocument, runtime, 'admissionsCompleted');
       const result = await renderDemo({
         runtime,
         demo: surface.demo,
@@ -429,6 +432,7 @@ export function initPreviewer(options: PreviewerOptions) {
       stopFamilyObserver = () => familyObserver.disconnect();
       updateCodePanel(runtime);
       committed = true;
+      recordPreviewerCompletion(root.ownerDocument, runtime, 'rendersCompleted');
     } catch (err) {
       if (destroyed || myVersion !== version) return;
       // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）

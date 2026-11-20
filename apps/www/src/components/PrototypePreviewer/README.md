@@ -120,6 +120,8 @@ MDX 页面
 
 ### Registry 环境感知
 
+Matrix readiness 的私有诊断可通过 `PROTO_UI_MATRIX_READINESS_COUNTERS=1` 在导航前启用；既有 readiness JSON 的 `snapshot.completionCounters` 记录每个 runtime 的依赖完成、准入完成和发布完成次数，以及文档后台队列的当前值、峰值和采样次数。未启用时该字段为 `null`，页面不会创建计数器。存储固定为四个 runtime 和一个队列汇总，不保留 root、事件或时间序列。准入次数包括 foreground/lazy 绕过；发布次数不是原生绘制证明，重载会累计，嵌套 shell 的依赖/准入也会累计，因此这些次数不是 root 数断言。诊断不修改 root、调度策略、readiness predicate 或 deadline。
+
 普通与 fixed-family 预览器共享每个文档最多 4 个屏外首次渲染名额。依赖模块仍并行加载；名额在依赖准备完成后获取，并由最外层预览器持有至首次发布或失败、过期清理完成。被组合的 Surface shell 复用其父预览器名额，避免嵌套等待。队列通过浏览器任务自动推进，不依赖滚动、空闲回调或可见帧。
 
 首屏可见预览器、滚动进入视口的预览器和显式 runtime/reload 请求绕过后台队列。排队请求在移除或 Astro 页面切换时撤销；已经开始的渲染仍完成既有所有权清理。此调度不改变 lazy 策略、Matrix root 数量、原生绘制与 reveal 顺序或 readiness deadline。4 是待匹配浏览器观测的候选上限，不代表已验证的最佳值或超时修复结论。

@@ -1,4 +1,5 @@
 import { loadDemo } from './demo-modules';
+import { recordPreviewerCompletion } from './previewer-readiness-diagnostics';
 import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import {
@@ -377,6 +378,7 @@ async function prepareProjectionCandidate(
   const prototypeIds = new Set<string>();
   collectPrototypeIds(composition.demo.root, prototypeIds);
   await Promise.all([loadPrototypes(Array.from(prototypeIds)), prepareDemoRuntime(runtimeId)]);
+  recordPreviewerCompletion(options.mount.ownerDocument, runtimeId, 'dependenciesCompleted');
   // Shared dependency completion can otherwise start every independent
   // framework render in the same foreground turn.
   const renderPreparation = backgroundPreparationTask(options);
@@ -384,6 +386,7 @@ async function prepareProjectionCandidate(
   options.backgroundPreparation?.signal.throwIfAborted();
   if (options.acquireInitialRender) await options.acquireInitialRender();
   options.backgroundPreparation?.signal.throwIfAborted();
+  recordPreviewerCompletion(options.mount.ownerDocument, runtimeId, 'admissionsCompleted');
 
   const host = options.mount.ownerDocument.createElement('div');
   host.className = 'pui-projection-generation';

@@ -14,6 +14,7 @@ import {
 } from './projection-families';
 import { loadDemo } from './demo-modules';
 import { createInitialRenderAdmission } from './previewer-initial-render';
+import { recordPreviewerCompletion } from './previewer-readiness-diagnostics';
 import { createRuntimePreviewSurface, runtimePreviewRecipe } from './runtime-preview-surface';
 import {
   materializeProjectionCandidate,
@@ -420,6 +421,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
           initialErrorSurface?.remove();
           initialErrorSurface = null;
           mounted = true;
+          recordPreviewerCompletion(root.ownerDocument, committedRuntimeId, 'rendersCompleted');
 
           queueMicrotask(() => {
             if (
