@@ -30,29 +30,79 @@ const routeFor = (family: 'shadcn' | 'brutalist') =>
   `/zh-cn/ui-libraries/${family}/${family === 'brutalist' ? 'components/' : ''}button/`;
 const emptySearchQuery = 'qzxvjkphnwmrgqztvxknqjpl';
 
+/** The browser-side runtime publication deadline. The request epoch is the
+ * anchor and the page's own observer timestamp decides readiness, exactly
+ * like the initial-ready acceptance: a late IPC reply is transport evidence,
+ * it is not a late publication. */
+const RUNTIME_PUBLICATION_BUDGET_MS = 1000;
+/** Bounded host allowance for one in-flight read to settle after the
+ * browser-side deadline. It bounds transport only; it never extends the
+ * publication deadline and never supplies acceptance. */
+const RUNTIME_OBSERVATION_ALLOWANCE_MS = 1000;
+/** Bound for retrieving the recorded receipt over the transport. */
+const RUNTIME_RECEIPT_TIMEOUT_MS = 10_000;
+
+type RuntimeTransitionState = {
+  at: number;
+  runtime: string | undefined;
+  view: string | undefined;
+  preparation: string | undefined;
+  generation: string | undefined;
+};
+
+type RuntimeTransition = {
+  runtime: string;
+  timeOrigin: number;
+  requestAt: number | null;
+  requestAtEpochMs: number | null;
+  readyAt: number | null;
+  readyAtEpochMs: number | null;
+  previousRuntime: string | null;
+  previousGeneration: string | null;
+  states: RuntimeTransitionState[];
+};
+
+type SearchProductionWindow = Window & {
+  __searchProductionRuntimeTransitions?: RuntimeTransition[];
+};
+
+type RuntimePublicationReceipt = {
+  retrievedAtEpochMs: number;
+  published: boolean;
+  trace: RuntimeTransition | null;
+};
+
+type RuntimePublicationVerdict = {
+  ok: boolean;
+  reason: string;
+  detail: string;
+  publishedInMs: number | null;
+};
+
+type RuntimeRequest = {
+  index: number;
+  requestAtEpochMs: number;
+};
+
 /** Same page clock and original dispatch; this observer does not alter a wait budget. */
 function requestProductionRuntime(runtime: string) {
   const root = document.querySelector<HTMLElement>('site-search');
   if (!root) throw new Error('Missing Search owner for runtime observation');
-  const traces = ((window as any).__searchProductionRuntimeTransitions ??= []);
-  const trace: {
-    runtime: string;
-    timeOrigin: number;
-    requestAt: number | null;
-    requestAtEpochMs: number | null;
-    readyAt: number | null;
-    readyAtEpochMs: number | null;
-    states: unknown[];
-  } = {
+  const traces = ((window as SearchProductionWindow).__searchProductionRuntimeTransitions ??= []);
+  const trace: RuntimeTransition = {
     runtime,
     timeOrigin: performance.timeOrigin,
     requestAt: null,
     requestAtEpochMs: null,
     readyAt: null,
     readyAtEpochMs: null,
+    // The runtime and generation this request replaces. A publication that
+    // does not advance them cannot belong to this request.
+    previousRuntime: root.dataset.searchRuntime ?? null,
+    previousGeneration: root.dataset.searchGeneration ?? null,
     states: [],
   };
-  traces.push(trace);
+  const index = traces.push(trace) - 1;
   const observer = new MutationObserver(() => {
     const state = {
       at: performance.now(),
@@ -61,6 +111,8 @@ function requestProductionRuntime(runtime: string) {
       preparation: root.dataset.searchPreparation,
       generation: root.dataset.searchGeneration,
     };
+    // A state observed before this request cannot publish this request.
+    if (trace.requestAt === null || state.at < trace.requestAt) return;
     if (trace.states.length < 32) trace.states.push(state);
     if (state.runtime === runtime && state.view === 'ready' && trace.readyAt === null) {
       trace.readyAt = state.at;
@@ -78,46 +130,190 @@ function requestProductionRuntime(runtime: string) {
     ],
   });
   trace.requestAt = performance.now();
-  trace.requestAtEpochMs = Date.now();
+  const requestAtEpochMs = Date.now();
+  trace.requestAtEpochMs = requestAtEpochMs;
   document.dispatchEvent(new CustomEvent('proto-adapter:change', { detail: { adapter: runtime } }));
+  // The host binds its acceptance to this request's own recorded transition.
+  return { index, requestAtEpochMs };
 }
 
-async function expectProductionRuntime(page: Page, family: string, runtime: string) {
+/** Bounds one transport read. An abandoned read is never awaited again and
+ * an unreadable receipt is a rejected publication, never a passing one. */
+async function withTransportBound<T>(work: Promise<T>, timeoutMs: number): Promise<T | null> {
+  const { promise, resolve } = Promise.withResolvers<null>();
+  const timer = setTimeout(() => resolve(null), timeoutMs);
+  try {
+    return await Promise.race([
+      work.then(
+        (value) => value,
+        () => null
+      ),
+      promise,
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Serialized into the page. Reads the recorded publication of one request.
+ * The page clock decides the deadline and the page's own event loop delivers
+ * the observer record, so a read that follows the observed attribute always
+ * sees the recorded publication. */
+function readRuntimePublicationReceipt({ index }: { index: number }): RuntimePublicationReceipt {
+  const traces = (window as SearchProductionWindow).__searchProductionRuntimeTransitions ?? [];
+  const trace = traces[index] ?? null;
+  return {
+    retrievedAtEpochMs: Date.now(),
+    published: !!trace && trace.readyAtEpochMs !== null && trace.readyAtEpochMs !== undefined,
+    trace,
+  };
+}
+
+/** The browser-side verdict for one requested runtime publication. A late,
+ * absent or foreign transition is rejected; the host transport never
+ * supplies acceptance. */
+function judgeRuntimePublication(
+  request: RuntimeRequest,
+  receipt: RuntimePublicationReceipt | null,
+  runtime: string
+): RuntimePublicationVerdict {
+  if (!receipt)
+    return {
+      ok: false,
+      reason: 'receipt-unavailable',
+      detail: `The recorded transition for request ${request.index} could not be retrieved`,
+      publishedInMs: null,
+    };
+  const trace = receipt.trace;
+  if (!trace)
+    return {
+      ok: false,
+      reason: 'absent-request',
+      detail: `No transition was recorded for request ${request.index}`,
+      publishedInMs: null,
+    };
+  if (trace.runtime !== runtime)
+    return {
+      ok: false,
+      reason: 'wrong-runtime',
+      detail: `The recorded transition requested ${trace.runtime}`,
+      publishedInMs: null,
+    };
+  if (trace.readyAtEpochMs === null || trace.readyAtEpochMs === undefined)
+    return {
+      ok: false,
+      reason: 'absent-publication',
+      detail: `Request ${request.index} recorded no ready publication`,
+      publishedInMs: null,
+    };
+  const publishedInMs = trace.readyAtEpochMs - request.requestAtEpochMs;
+  if (publishedInMs > RUNTIME_PUBLICATION_BUDGET_MS)
+    return {
+      ok: false,
+      reason: 'late',
+      detail: `Published ${publishedInMs} ms after the request; budget ${RUNTIME_PUBLICATION_BUDGET_MS} ms`,
+      publishedInMs,
+    };
+  const ready = trace.states.find((state) => state.runtime === runtime && state.view === 'ready');
+  if (!ready)
+    return {
+      ok: false,
+      reason: 'absent-publication',
+      detail: `No ready ${runtime} state was recorded for request ${request.index}`,
+      publishedInMs,
+    };
+  if (!ready.generation || ready.generation === trace.previousGeneration)
+    return {
+      ok: false,
+      reason: 'wrong-generation',
+      detail: `The publication generation ${ready.generation} does not advance the request's ${trace.previousGeneration}`,
+      publishedInMs,
+    };
+  return {
+    ok: true,
+    reason: 'published-on-time',
+    detail: `Published ${publishedInMs} ms after the request in generation ${ready.generation}`,
+    publishedInMs,
+  };
+}
+
+async function expectProductionRuntime(
+  page: Page,
+  family: string,
+  runtime: string,
+  request: RuntimeRequest
+) {
   const samples: SearchGetterSample[] = [];
+  const deadlineEpochMs = request.requestAtEpochMs + RUNTIME_PUBLICATION_BUDGET_MS;
   const poll = {
     runtime,
+    requestIndex: request.index,
+    requestAtEpochMs: request.requestAtEpochMs,
+    deadlineEpochMs,
     startedAtEpochMs: Date.now(),
     endedAtEpochMs: null as number | null,
     passed: false,
-    budgetMs: 1000,
+    budgetMs: RUNTIME_PUBLICATION_BUDGET_MS,
+    observationAllowanceMs: RUNTIME_OBSERVATION_ALLOWANCE_MS,
+    observationFailure: null as { name?: string; message: string; stack?: string } | null,
     samples,
+    receipt: null as RuntimePublicationReceipt | null,
+    verdict: null as RuntimePublicationVerdict | null,
   };
   try {
-    // Keep the original locator and Vitest poll budget; record transport without
-    // starting a new readiness wait or substituting a later page observation.
+    // The publication deadline belongs to the browser clock and is anchored at
+    // the request epoch, not at the host poll start. The host keeps the
+    // original locator and records the transport; its window covers the
+    // browser deadline plus one bounded in-flight read, because a read that
+    // started before the deadline can settle after it.
+    const observationBudget =
+      Math.max(1, deadlineEpochMs - Date.now()) + RUNTIME_OBSERVATION_ALLOWANCE_MS;
     await expect
-      .poll(() =>
-        traceSearchGetter(samples, () =>
-          page.locator('site-search').getAttribute('data-search-runtime')
-        )
+      .poll(
+        () =>
+          traceSearchGetter(samples, () =>
+            page.locator('site-search').getAttribute('data-search-runtime')
+          ),
+        { timeout: observationBudget }
       )
       .toBe(runtime);
     poll.passed = true;
-  } finally {
-    poll.endedAtEpochMs = Date.now();
-    await (async () => {
-      const transitions = await page.evaluate(
-        () => (window as any).__searchProductionRuntimeTransitions ?? []
-      );
-      await mkdir(evidenceDirectory, { recursive: true });
-      await writeFile(
-        path.join(evidenceDirectory, `${family}-runtime-${runtime}-poll.json`),
-        JSON.stringify({ source, poll, transitions }, null, 2)
-      );
-    })().catch((error) =>
-      console.warn('[Search production] Runtime observation unavailable', error)
-    );
+  } catch (error) {
+    // A late IPC reply is transport evidence, not a late publication. The
+    // recorded publication decides readiness and the failed observation stays
+    // in the evidence.
+    poll.observationFailure =
+      error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : { message: String(error) };
   }
+  const receipt = await withTransportBound(
+    page.evaluate(readRuntimePublicationReceipt, { index: request.index }),
+    RUNTIME_RECEIPT_TIMEOUT_MS
+  );
+  poll.receipt = receipt;
+  const verdict = judgeRuntimePublication(request, receipt, runtime);
+  poll.verdict = verdict;
+  poll.endedAtEpochMs = Date.now();
+  const transitions = await withTransportBound(
+    page.evaluate(() => (window as SearchProductionWindow).__searchProductionRuntimeTransitions ?? []),
+    RUNTIME_RECEIPT_TIMEOUT_MS
+  );
+  // Persist the receipt and the transport samples; a failed write must not
+  // replace the publication verdict.
+  await (async () => {
+    await mkdir(evidenceDirectory, { recursive: true });
+    await writeFile(
+      path.join(evidenceDirectory, `${family}-runtime-${runtime}-poll.json`),
+      JSON.stringify({ source, poll, transitions: transitions ?? [] }, null, 2)
+    );
+  })().catch((error) =>
+    console.warn('[Search production] Runtime observation unavailable', error)
+  );
+  if (!verdict.ok)
+    throw new Error(
+      `[Search production] ${family} runtime ${runtime} publication rejected (${verdict.reason}): ${verdict.detail}`
+    );
 }
 
 /** Opt-in diagnosis only; ordinary acceptance does not start a profiler. */
@@ -526,8 +722,8 @@ describe.sequential('Required production Search recovery with generated Pagefind
         expect(await current.retry.getAttribute('data-pui-style')).toContain(variantToken);
         const pendingOldInput = await current.input.elementHandle();
         if (!pendingOldInput) throw new Error('Expected committed Search element: pendingOldInput');
-        await page.evaluate(requestProductionRuntime, 'vue');
-        await expectProductionRuntime(page, family, 'vue');
+        const vueRequest = await page.evaluate(requestProductionRuntime, 'vue');
+        await expectProductionRuntime(page, family, 'vue', vueRequest);
         current = await parts(page);
         await expect.poll(() => current.retry.getAttribute('aria-disabled')).toBe('true');
         expect(await current.retry.getAttribute('data-pui-style')).toContain(variantToken);
@@ -614,8 +810,8 @@ describe.sequential('Required production Search recovery with generated Pagefind
               ? await startRuntimeDiagnostic(page, family, runtime)
               : null;
           try {
-            await page.evaluate(requestProductionRuntime, runtime);
-            await expectProductionRuntime(page, family, runtime);
+            const runtimeRequest = await page.evaluate(requestProductionRuntime, runtime);
+            await expectProductionRuntime(page, family, runtime, runtimeRequest);
           } finally {
             await finishDiagnostic?.().catch((error) =>
               console.warn('[Search production] Runtime diagnostic unavailable', error)
