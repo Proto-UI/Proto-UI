@@ -262,9 +262,24 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2',
   }),
 
+  // Exact public caption binding consumed by the blocked application controller.
+  'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts': Object.freeze({
+    sourceSha256: '57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894',
+    specifiers: Object.freeze(['@proto.ui/prototypes-base/calendar']),
+  }),
   // Reviewed Field validation request type consumed by the blocked demo controller.
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
+  }),
+  // The recipe projects serializable intent into the render-local association scope.
+  'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts': Object.freeze({
+    sourceSha256: '249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/checkbox']),
+  }),
+  // The application demo supplies view lifetime and disposes the public binding.
+  'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts': Object.freeze({
+    sourceSha256: '64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
