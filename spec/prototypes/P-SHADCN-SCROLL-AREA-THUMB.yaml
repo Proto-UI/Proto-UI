@@ -36,7 +36,11 @@ inherits:
   prototypes:
     - id: P-BASE-SCROLL-AREA-THUMB
 dependsOn:
-  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-RULE-PREFERENCES-0001]
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - id: C-RULE-PREFERENCES-0001
+      since: 0.3.0-alpha.1
   decisions: [D-SCROLL-PROJECTION-0001]
 relates:
   prototypes: [P-SHADCN-SCROLL-AREA]
