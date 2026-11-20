@@ -103,7 +103,11 @@ describe('Website projection-family admission boundaries', () => {
         ...manifest.families,
         toggle: {
           ...manifest.families.toggle,
-          auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'lucide-icon' }],
+          auxiliaryPrototypes: manifest.families.toggle.auxiliaryPrototypes!.map((prototype) =>
+            prototype.prototypeId === 'lucide-bold-icon'
+              ? { ...prototype, basePrototypeId: 'P-BASE-TOGGLE' }
+              : prototype
+          ),
         },
       },
     };
