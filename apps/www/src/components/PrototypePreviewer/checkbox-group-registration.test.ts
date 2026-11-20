@@ -60,7 +60,9 @@ describe('Checkbox Group actual DemoSpec registration', () => {
       const demo = await loadDemo(recipeId);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       const ids = [...new Set(prototypes(demo.root))].sort();
-      expect(ids).toEqual(CHECKBOX_GROUP_ROLES.map((role) => `${family}-${role}`).sort());
+      const expected = CHECKBOX_GROUP_ROLES.map((role) => `${family}-${role}`);
+      if (family === 'shadcn') expected.push('shadcn-style-scope');
+      expect(ids).toEqual(expected.sort());
       for (const id of ids) {
         await loadPrototype(id);
         expect(getPrototype(id)?.name).toBe(id);
