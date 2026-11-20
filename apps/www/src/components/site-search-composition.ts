@@ -253,6 +253,19 @@ export function createSiteSearchComposition(options: {
       let seedingQuery = false;
       let seededCommand: DemoPublicInstance | undefined;
       let focusedFailureAction: DemoPublicInstance | undefined;
+      // Private observation hook installed only by the diagnostic fixture.
+      const probeIds = new WeakMap<object, number>();
+      let probeSerial = 0;
+      const probeIdentity = (value: object | undefined) => {
+        if (!value) return null;
+        if (!probeIds.has(value)) probeIds.set(value, ++probeSerial);
+        return probeIds.get(value);
+      };
+      const focusProbe = (kind: string, detail: object) => {
+        const probe = (refs.dialog?.ownerDocument.defaultView as any)?.__puiSearchCloseFocusProbe;
+        if (probe) probe.mark(kind, { paintEpoch, focusEpoch: options.focusEpoch(),
+          open: session.read().open, ...detail });
+      };
       // A generation swap replaces the focused control with an equivalent one in
       // the new generation.  The Dialog content's own automatic entry focus
       // must not win that race, so this generation's content runs with
@@ -469,6 +482,7 @@ export function createSiteSearchComposition(options: {
         // The public focus request is only complete once the control itself
         // reports that it holds focus.  A request the active scope refuses
         // leaves the request pending, so it is retried rather than lost.
+        focusProbe('restore-focus-request', { ref: request.ref, requestEpoch: request.epoch });
         api.call(request.ref, 'focusSelf');
         if (!targetHoldsFocus(request.ref)) return;
         pendingFocusRestore = null;
@@ -804,7 +818,11 @@ export function createSiteSearchComposition(options: {
         if (action === 'retry' && !retrying && !snapshot.query.trim()) {
           if (currentAction && currentAction !== focusedFailureAction) {
             focusedFailureAction = currentAction;
+            focusProbe('retry-focus-before', { epoch, action: probeIdentity(currentAction),
+              publication: probeIdentity(actionsPublication), actionCommit,
+              phase: snapshot.phase, query: snapshot.query, retrying });
             api.call('search-page-action', 'focusSelf');
+            focusProbe('retry-focus-after', { epoch, action: probeIdentity(currentAction) });
           }
         }
         if (
@@ -833,12 +851,16 @@ export function createSiteSearchComposition(options: {
                 api.getPublicInstance?.('search-page-action') !== actionRequest.owner
               )
                 return;
+              focusProbe('action-activate', { action, owner: probeIdentity(actionRequest.owner) });
               if (action === 'retry') session.retry();
               else session.loadMore();
               // The invoked action may disappear after a successful retry/final page.
               // Return editing focus through the real public control, not DOM queries.
               queueMicrotask(() => {
-                if (current() && session.read().open) api.call('query', 'focusSelf');
+                if (current() && session.read().open) {
+                  focusProbe('action-query-focus-request', { action });
+                  api.call('query', 'focusSelf');
+                }
               });
             },
           });

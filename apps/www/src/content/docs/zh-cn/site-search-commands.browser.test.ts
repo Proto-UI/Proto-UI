@@ -663,6 +663,40 @@ async function expectSearchOpenerFocus(page: Page, trigger: Locator, id: string,
 // development warning instead of Pagefind. These cases prove actual command
 // projection, responsive layout, modal activation and focus restoration; they
 // do not claim a live production index or retry has been exercised.
+// Private bounded diagnostic: no corrective focus or additional waits.
+function installSearchCloseFocusProbe() {
+  const records: unknown[] = [];
+  const ids = new WeakMap<object, number>();
+  let serial = 0, dropped = 0;
+  const identity = (value: unknown) => {
+    if (!(value instanceof Element)) return null;
+    if (!ids.has(value)) ids.set(value, ++serial);
+    return { id: ids.get(value), tag: value.localName,
+      ref: value.getAttribute('data-demo-ref'), owner: value.getAttribute('data-projection-owner'),
+      generation: value.getAttribute('data-projection-generation'),
+      connected: value.isConnected, inert: !!value.closest('[inert]') };
+  };
+  const record = (kind: string, detail: unknown) => {
+    if (records.length >= 4000) { dropped++; return; }
+    records.push({ sequence: records.length, at: performance.now(), kind,
+      active: identity(document.activeElement), detail });
+  };
+  const original = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function (...args) {
+    record('focus-before', { target: identity(this), stack: new Error().stack });
+    try { return Reflect.apply(original, this, args); }
+    finally { record('focus-after', { target: identity(this) }); }
+  };
+  for (const type of ['focusin', 'focusout', 'keydown', 'keyup', 'click'])
+    document.addEventListener(type, (event) => record(type, {
+      target: identity(event.target), key: event instanceof KeyboardEvent ? event.key : null,
+      trusted: event.isTrusted, defaultPrevented: event.defaultPrevented,
+    }), true);
+  (window as any).__puiSearchCloseFocusProbe = {
+    mark: record, read: () => ({ records: records.slice(), dropped }),
+  };
+}
+
 describe.sequential('Search family Button commands', () => {
   for (const family of ['shadcn', 'brutalist'] as const) {
     for (const theme of ['light', 'dark'] as const) {
@@ -679,6 +713,8 @@ describe.sequential('Search family Button commands', () => {
             (theme) => localStorage.setItem('starlight-theme', theme),
             theme
           );
+          if (process.env.PROTO_UI_SEARCH_CLOSE_FOCUS_PROBE === '1')
+            await page.addInitScript(installSearchCloseFocusProbe);
           await installOpenCounter(page);
           await page.addInitScript(installSearchStartupTrace);
           const id = `${family}-${theme}-${width}`;
@@ -880,7 +916,19 @@ describe.sequential('Search family Button commands', () => {
             await captureFailure(page, error);
             throw error;
           } finally {
-            await context.close();
+            try {
+              if (process.env.PROTO_UI_SEARCH_CLOSE_FOCUS_PROBE === '1') {
+                const probe = await page.evaluate(() =>
+                  (window as any).__puiSearchCloseFocusProbe?.read());
+                await mkdir(evidenceDirectory, { recursive: true });
+                await writeFile(path.join(evidenceDirectory, `${id}-close-focus-probe.json`),
+                  JSON.stringify({ source, id, probe }, null, 2));
+              }
+            } catch (probeError) {
+              console.error('[Search close focus probe] capture failed', probeError);
+            } finally {
+              await context.close();
+            }
           }
         }, 60_000);
       }
