@@ -175,7 +175,7 @@ The 2026-11-19 Finf registry admission reviews `apps/www/src/components/Prototyp
 | `apps/www/src/components/code-file-browser-client.ts` | `www.docs.code-example-file-tabs` | `590e58f4611323f741a870cbe4fd237ee620645f885fa3faba77f56bcfc4f0d0` |
 | `apps/www/src/components/CliInitOutput.astro` | `www.content.native-disclosures`, `www.docs.code-example-file-tabs`, `www.docs.code-panel-copy`, `www.docs.code-surface` | `6b17d95499e4442265d74cec71bab184266e7abe7d40396b0bd80bc956c8bdcf` |
 | `apps/www/src/components/override/Sidebar.astro` | `www.shell.sidebar-navigation` | `9cf7486a4a86e8512c9f75215cff83f0ffb0b1a3f3753c802782c08f0fb0ece5` |
-| `apps/www/src/components/site-contents-panel.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `88303cc8bdbff2d58b06ca9c67a63879c7223d18ca5c65ffd2158c7745fbadf9` |
+| `apps/www/src/components/site-contents-panel.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `85e968cb5abb1be2a7d3645a241143578c407730a650e5c152cf522346668d2a` |
 | `apps/www/src/components/site-sidebar-disclosure-bootstrap.js` | `www.shell.sidebar-navigation` | `288fea49c1e048164274439f1d25b65cd51a19a06a09ed5672981478f4811edd` |
 | `apps/www/src/components/StaticFamilyIcon.astro` | `www.gallery.ui-library-cards` | `8bc794693641b340a84154400a7e9386958c49528e58ffac81c49f9174dec6e6` |
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro` | `www.demo.authored-controllers` | `3c9c12659926d2a3cc8a531783c1f448b8cbe8e32d3aab44429de11424265684` |
@@ -206,10 +206,10 @@ The 2026-11-19 Finf registry admission reviews `apps/www/src/components/Prototyp
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts` | `www.demo.authored-controllers` | `4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts` | `www.demo.authored-controllers` | `fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf` |
-| `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `e84850cd3dd0dcf0fd1b1afdbdc7989bfb3bf253f7db760ad4b9b26d8f426d94` |
+| `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `e92b1f802f1b53ca66177fc11f36eb2698ab78ee4c51c602dd7e2c0a75c25ec8` |
 | `apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts` | `www.demo.authored-controllers` | `9336b90719ba80d87528c415f313df94a0431dc091f1b5980ebec20168ec2c80` |
 | `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `f8cc88455432b7e3c758f292ef3143dcb821868ade017739c37c530b08f837cf` |
-| `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `cea7363876a91fd4548dd5e41738ff200f2dc5ca3bcd2c6e819617be57be9798` |
+| `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `bd8d2918449a7712d0c24223185bf5a6a042d7bdbf8672b2b5047b4e7bf5c32b` |
 | `apps/www/src/content/docs/transition-demo.shared.ts` | `www.demo.authored-controllers` | `8c6d04cd8474c649decfae175c956beff9dccfe3c7adcf57b8ce48bef4d1a3dc` |
 | `apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts` | `www.demo.authored-controllers` | `57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894` |
 | `apps/www/src/content/docs/demo-bootstrap-2-3-2-collapsible.demo.ts` | `www.demo.authored-controllers` | `9c4fc0147e888f965014696d2f8284d6c11710805cdc04847172de987e6de64a` |
