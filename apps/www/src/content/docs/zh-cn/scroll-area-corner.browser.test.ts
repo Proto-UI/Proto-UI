@@ -590,8 +590,9 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               rect(hThumb),
             ]);
             try {
-              close(vt.y + vt.height, v.y + v.height - 2);
-              close(ht.x + ht.width, h.x + h.width - 2);
+              // Shadcn's p-px recipe has one pixel of padding at each long-axis end.
+              close(vt.y + vt.height, v.y + v.height - 1);
+              close(ht.x + ht.width, h.x + h.width - 1);
             } catch (error) {
               // These are the exact original assertion inputs, not a new layout read.
               // Any further observation is post-failure and cannot repair acceptance.
