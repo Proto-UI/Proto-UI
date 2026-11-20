@@ -291,18 +291,25 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
+    sourceSha256: '9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
+      '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-brutalist/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
     ]),
   }),
   'apps/www/src/components/site-native-controls.ts': Object.freeze({
+    sourceSha256: '3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/surface',
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({

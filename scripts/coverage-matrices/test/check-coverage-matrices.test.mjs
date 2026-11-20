@@ -17643,7 +17643,16 @@ for (const helper of ['browser-harness', 'site-search-evidence']) {
 for (const [source, specifiers] of [
   ['Homepage/homepage-text.ts', ['@proto.ui/prototypes-base/text']],
   ['InstallCommandCard.astro', ['@proto.ui/adapter-web-component']],
-  ['site-link-recipes.ts', ['@proto.ui/prototypes-base/surface', '@proto.ui/prototypes-base/text']],
+  [
+    'site-link-recipes.ts',
+    [
+      '@proto.ui/prototypes-base/surface',
+      '@proto.ui/prototypes-base/text',
+      '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-brutalist/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+    ],
+  ],
   [
     'site-native-controls.ts',
     [
@@ -17652,6 +17661,8 @@ for (const [source, specifiers] of [
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
     ],
   ],
   ['site-search-commands.ts', ['@proto.ui/module-expose-state']],
@@ -17679,7 +17690,12 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    const content = source.endsWith('.astro') ? `<script>${code}</script>` : code;
+    const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
+    const content = nativeLinkSource
+      ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
+      : source.endsWith('.astro')
+        ? `<script>${code}</script>`
+        : code;
     for (const file of [relative, copy]) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
@@ -17691,6 +17707,16 @@ for (const [source, specifiers] of [
         message
       );
       assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copy}\``), message);
+    }
+    if (nativeLinkSource) {
+      fs.writeFileSync(path.join(root, relative), `${content}\n// Unreviewed importer bytes.\n`);
+      const changed = validationMessage(root);
+      for (const specifier of specifiers) {
+        assert.ok(
+          changed.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``),
+          changed
+        );
+      }
     }
     fs.writeFileSync(
       path.join(root, relative),
