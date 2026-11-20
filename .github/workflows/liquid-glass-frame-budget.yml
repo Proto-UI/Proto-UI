@@ -1,0 +1,102 @@
+name: Liquid Glass matched frame-budget observations
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/liquid-glass-frame-budget.yml'
+      - 'scripts/analysis/liquid-glass-frame-budget*'
+      - 'packages/adapters/base/src/material/**'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'apps/www/src/content/docs/**/ui-libraries/liquid-glass/button.mdx'
+permissions:
+  contents: read
+concurrency:
+  group: liquid-glass-frame-budget-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+env:
+  BASELINE_SHA: 543c8a2990239dec7c08458a902da3f5a97b49dd
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  ASTRO_TELEMETRY_DISABLED: '1'
+jobs:
+  matched-browser:
+    # This bounded experiment has no pull_request_target, credentials or secrets.
+    # The PR event permits a new workflow to run before it exists on main.
+    if: >-
+      github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.ref == 'perf/liquid-glass-frame-budget')
+
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASELINE_SHA }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install separate source-bound workspaces
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 --dir candidate install --frozen-lockfile
+          corepack pnpm@10.32.1 --dir baseline install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/liquid-frame-budget"
+          "$CHROME" --version > "$RUNNER_TEMP/liquid-frame-budget/browser.txt"
+          node --version > "$RUNNER_TEMP/liquid-frame-budget/node.txt"
+          corepack pnpm@10.32.1 --dir candidate --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --dir baseline --filter apps-www exec astro preferences disable devToolbar
+      - name: Check measurement attribution
+        working-directory: candidate
+        run: node --test scripts/analysis/liquid-glass-frame-budget.test.mjs
+      - name: Baseline on the same runner
+        id: baseline
+        continue-on-error: true
+        working-directory: baseline
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 9m \
+            node --import tsx "$GITHUB_WORKSPACE/candidate/scripts/analysis/liquid-glass-frame-budget.mjs" \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline" 3 \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/baseline.log"
+      - name: Candidate on the same runner
+        id: candidate
+        continue-on-error: true
+        working-directory: candidate
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 9m \
+            node --import tsx scripts/analysis/liquid-glass-frame-budget.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate" 3 \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/candidate.log"
+      - name: Retain comparison and propagate evidence failures
+        if: always()
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          node scripts/analysis/liquid-glass-frame-budget.mjs --compare \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline/report.json" \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate/report.json" \
+            "$RUNNER_TEMP/liquid-frame-budget"
+          cat "$RUNNER_TEMP/liquid-frame-budget/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain raw timing, GPU, failures and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-frame-budget-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/liquid-frame-budget
+          if-no-files-found: error
+          retention-days: 30

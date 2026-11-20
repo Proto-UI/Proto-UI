@@ -172,6 +172,8 @@ The 2026-11-21 bounded PrototypePreviewer source reconciliation at `543c8a299023
 
 The same review binds committed association-key retirement to `www.demo.prototype-previewer` and the renderer's generic keyed child commits, public-instance subscriptions, callback carriers, missing-prop withdrawal, style projection, ref observation, material-stage attachment and resident-motion palette injection to the existing runtime integration boundary. `www.demo.raw-adapter-runtimes` already names `demo-renderer.ts` in its Evidence cell; its direct Path and grouped binding now also name that source, alongside `www.demo.demo-matrix`, because the shared renderer mounts ordinary website compositions as well as demonstration fixtures. This does not exempt their commands or application state. It supersedes the historical source-body review debt for this exact `demo-renderer.ts` blob only; the import-edge allowlist, other named debt, draft lifecycles and consumer acceptance gates remain unchanged. Newly reached helper bodies require their own source bindings and review; this six-file reconciliation does not fingerprint them.
 
+The 2026-11-21 Liquid Glass performance change starts from main `24a442dba96252f2cd041140243837bf69385e6b`. Its one-line `demo-renderer.ts` delta selects the internal `preview` presentation for the already-owned material scene. The current source fingerprint below binds that complete renderer with the existing owners; no imports, input owner, row state or lifecycle change. The separate historical `preview-material-scene.ts` source-review debt remains explicit; the performance and presentation tests do not silently replace that old fingerprint or certify browser/display acceptance.
+
 | Interactive or integration source | Owning matrix row | Source SHA-256 |
 | --- | --- | --- |
 | `apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts` | `www.demo.authored-controllers` | `f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4` |
@@ -265,7 +267,7 @@ The same review binds committed association-key retirement to `www.demo.prototyp
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2611501cb59055d0bf428559f0e86be6050bdc09ac1255d84d967e4f11e4428a` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel`, `www.docs.code-panel-expand` | `a313d5a363ec493b3ccd8284a5b3533367de344374148e781896b8916477411f` |
-| `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` | `www.demo.demo-matrix`, `www.demo.raw-adapter-runtimes` | `4df442ee2d0db4db61fbc2aee0a7fadbb2cbe359b2ab23760eb7cb9772376e54` |
+| `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` | `www.demo.demo-matrix`, `www.demo.raw-adapter-runtimes` | `47e8678bee11d9ce281419fc9acb16e0e285847ed3277bad2f8294fcba259af5` |
 | `apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts` | `www.demo.prototype-previewer` | `b078e1e9e43782d87e5966b88ec6fe01b31d43ab70357c17e2f1e3baa30b6f06` |
 | `apps/www/src/components/PrototypePreviewer/preview-material-scene.ts` | `www.demo.raw-adapter-runtimes` | `d6c67d3aee7d6adb2bdb17dc72f9637f4a9ecf8ebe3e3d40a580d3a0747d5838` |
 | `packages/adapters/base/src/material/program-pool.ts` | `www.demo.raw-adapter-runtimes` | `9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658` |

@@ -13,11 +13,17 @@ import {
   findPreviewMaterialProvider,
 } from './preview-material-provider';
 const attachedScopes = new WeakSet<HTMLElement>();
+type ScenePresentation = 'preview' | 'diagnostic';
 /** This canvas is the visible preview background and the ONLY sampled plane.
  * Ordinary DOM is never captured. Intervening paint and cross-scope portals
  * deliberately lose optical admission rather than sampling invented pixels. */
-export function createPreviewMaterialScene(parent: HTMLElement) {
-  return createScene(parent);
+export function createPreviewMaterialScene(
+  parent: HTMLElement,
+  options: { presentation?: ScenePresentation } = {}
+) {
+  // Existing optical fixtures retain their diagnostic pixels and cadence. Real
+  // documentation consumers explicitly choose the quiet presentation below.
+  return createScene(parent, options.presentation ?? 'diagnostic');
 }
 
 /** Borrow framework boxes; never move/remove them or their existing children. */
@@ -39,11 +45,12 @@ export function attachPreviewMaterialScene(
     overlayMount.childNodes.length
   )
     throw new Error('[PrototypePreviewer] invalid borrowed material scene targets.');
-  return createScene(scope, { scope, mount, overlayMount });
+  return createScene(scope, 'preview', { scope, mount, overlayMount });
 }
 
 function createScene(
   parent: HTMLElement,
+  presentation: ScenePresentation,
   borrowed?: { scope: HTMLElement; mount: HTMLElement; overlayMount: HTMLElement }
 ) {
   const doc = parent.ownerDocument,
@@ -167,13 +174,16 @@ function createScene(
     const lease = createCanvasBackdropLease(scope, canvas);
     releases.push(() => lease.dispose());
     const preferences = createWebMaterialPreferences(win);
-    let paused = false,
+    // Content stays still while controls react to input. Dynamic background
+    // evidence can explicitly opt in with pause(false); it is a separate load.
+    let paused = presentation === 'preview',
       available = true,
       phase = 0,
       raf: number | null = null,
       previousTime = -Infinity,
       dark = false,
-      intersecting = true;
+      intersecting = true,
+      renderable = true;
     let layoutRaf: number | null = null;
     let lastSourceSignature = '';
     const originalMinHeight = scope.style.getPropertyValue('min-height');
@@ -250,6 +260,7 @@ function createScene(
     }
     function draw(force = false) {
       if (retired || !available) return;
+      if (presentation === 'preview' && (!intersecting || doc.visibilityState === 'hidden')) return;
       const nextDark = isDark();
       if (nextDark !== dark || palette.revision === 0) {
         lease.revoke();
@@ -271,6 +282,10 @@ function createScene(
       if (!force && signature === lastSourceSignature && lease.current()) return;
       lastSourceSignature = signature;
       lease.draw((ctx, width, height) => {
+        if (presentation === 'preview') {
+          paintPreviewBackdrop(ctx, width, height, dark, phase);
+          return;
+        }
         ctx.fillStyle = dark ? '#182238' : '#e9eef8';
         ctx.fillRect(0, 0, width, height);
         const colors = dark ? ['#243b58', '#254b4c', '#493654'] : ['#a9c9f4', '#c9dfe8', '#f0bdca'];
@@ -301,29 +316,44 @@ function createScene(
         intersecting &&
         doc.visibilityState !== 'hidden' &&
         preferences.current().reducedMotion === 'no-preference' &&
-        scope.getBoundingClientRect().height > 0 &&
-        win.getComputedStyle(scope).visibility !== 'hidden'
+        renderable
       );
     }
     function refresh() {
       if (retired) return;
+      renderable =
+        scope.getBoundingClientRect().height > 0 &&
+        win.getComputedStyle(scope).visibility !== 'hidden';
       draw();
       if (animate()) {
         if (raf === null) raf = win.requestAnimationFrame(tick);
-      } else if (raf !== null) {
-        win.cancelAnimationFrame(raf);
+      } else {
+        if (raf !== null) win.cancelAnimationFrame(raf);
         raf = null;
+        previousTime = -Infinity;
       }
     }
     function tick(time: number) {
       raf = null;
-      if (!animate()) return;
-      if (time - previousTime >= 120) {
+      if (!animate()) {
+        previousTime = -Infinity;
+        return;
+      }
+      if (presentation === 'preview') {
+        const elapsed = Number.isFinite(previousTime) ? Math.max(0, time - previousTime) : 0;
+        previousTime = time;
+        if (elapsed > 0) {
+          // Time-based motion follows the display's real cadence, including
+          // 120Hz; resuming does not replay time spent hidden or paused.
+          phase = (phase + Math.min(elapsed, 100) * 0.00016) % (Math.PI * 2);
+          draw();
+        }
+      } else if (time - previousTime >= 120) {
         previousTime = time;
         phase = (phase + 1.5 * win.devicePixelRatio) % 80;
         draw();
       }
-      if (animate()) raf = win.requestAnimationFrame(tick);
+      if (animate() && raf === null) raf = win.requestAnimationFrame(tick);
     }
     const unregister = registerPreviewMaterialProvider(scope, (host, effects) =>
       createWebMaterialSink(host, effects, {
@@ -382,7 +412,9 @@ function createScene(
     visibility?.observe(scope);
     const appearance = new win.MutationObserver(refresh);
     releases.push(() => appearance.disconnect());
-    for (let node: Element | null = parent; node; node = node.parentElement)
+    // The owned scope can be hidden independently of its parent. Include it
+    // when refreshing cached renderability, as well as all original ancestors.
+    for (let node: Element | null = scope; node; node = node.parentElement)
       appearance.observe(node, {
         attributes: true,
         attributeFilter: ['class', 'data-theme', 'hidden', 'style'],
@@ -441,4 +473,69 @@ function createScene(
     }
     throw primary;
   }
+}
+
+/** Low-frequency landscape-like layers give refraction a real spatial signal
+ * without diagnostic text competing with button labels. These are the visible
+ * application pixels, never a replacement for an intervening DOM surface. */
+function paintPreviewBackdrop(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  dark: boolean,
+  phase: number
+) {
+  const drift = Math.sin(phase) * width * 0.035;
+  const sky = ctx.createLinearGradient(0, 0, width, height);
+  sky.addColorStop(0, dark ? '#182c42' : '#dbeaf5');
+  sky.addColorStop(0.52, dark ? '#28394e' : '#e4e7f3');
+  sky.addColorStop(1, dark ? '#3b3049' : '#f1dce4');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height);
+
+  const light = ctx.createRadialGradient(
+    width * 0.22 + drift,
+    height * 0.08,
+    0,
+    width * 0.22 + drift,
+    height * 0.08,
+    Math.max(width * 0.7, height)
+  );
+  light.addColorStop(0, dark ? '#ffffff0c' : '#ffffffb3');
+  light.addColorStop(1, '#ffffff00');
+  ctx.fillStyle = light;
+  ctx.fillRect(0, 0, width, height);
+
+  const layers = dark
+    ? [
+        ['#3a5366', '#283c50'],
+        ['#29495a', '#1d3044'],
+        ['#253b4e', '#172b3f'],
+      ]
+    : [
+        ['#c8dce9', '#b5cbdc'],
+        ['#bfd8de', '#a9c5d4'],
+        ['#b1cdd9', '#98b7cd'],
+      ];
+  layers.forEach(([top, bottom], index) => {
+    const y = height * (0.38 + index * 0.18);
+    const gradient = ctx.createLinearGradient(0, y, 0, height);
+    gradient.addColorStop(0, top);
+    gradient.addColorStop(1, bottom);
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(0, y + height * 0.08);
+    ctx.bezierCurveTo(
+      width * 0.25 + drift * (index + 1),
+      y - height * 0.32,
+      width * 0.62 - drift,
+      y + height * 0.28,
+      width,
+      y - height * 0.08
+    );
+    ctx.lineTo(width, height);
+    ctx.lineTo(0, height);
+    ctx.closePath();
+    ctx.fill();
+  });
 }

@@ -73,8 +73,15 @@ export function createCanvasBackdropLease(
         const context = canvas.getContext('2d', { willReadFrequently: true });
         if (disposed || revision !== operation) return;
         if (!context) throw new Error('Backdrop 2D context unavailable');
-        canvas.width = width;
-        canvas.height = height;
+        // One dimension reset is enough to clear pixels, drawing state and
+        // origin-clean status, including after a failed or external producer.
+        // Avoid the old redundant second reset when the size has not changed.
+        // context.reset() alone does not guarantee origin-clean recovery.
+        const resized = canvas.width !== width || canvas.height !== height;
+        if (canvas.width !== width) canvas.width = width;
+        if (canvas.height !== height) canvas.height = height;
+        if (!resized) canvas.width = width;
+        if (disposed || revision !== operation) return;
         paint(context, width, height);
         if (disposed || revision !== operation) return;
         const pixels = new Uint8Array(context.getImageData(0, 0, width, height).data);

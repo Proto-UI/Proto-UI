@@ -6,8 +6,10 @@ import {
   styleTintFragment,
   styleTintContactFragment,
   styleTintEnvelope,
+  styleTintLightForeground,
 } from '../src/material/style-tint-profile';
 import { acquireWebOpticalProgram, inspectWebOpticalResources } from '../src/material/program-pool';
+import { colorContrast, type OpaqueRgba } from '../src/material/style';
 function fixture(
   control: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null
 ) {
@@ -843,6 +845,173 @@ describe('same-frame profile 4 proof inputs (GL spy, no precision certification)
       ).toThrow('style-tint-empty-budget');
       expect(f.shaderSources).toEqual([]);
       expect(f.canvas.toDataURL).not.toHaveBeenCalled();
+    } finally {
+      f.program.dispose();
+    }
+  });
+});
+
+// Frozen pre-optimization readback predicate. Keep scalar colorContrast and
+// styleTintLightForeground as the independent reference for the RGBA8 lookup
+// path; a passing spy says nothing about actual GPU precision or screen paint.
+function referenceReadback(pixels: Uint8Array, frame: OpticalFrame): string | null {
+  const envelope = frame.tint ? styleTintEnvelope(frame.fill, frame.foreground) : null;
+  let opaque = 0;
+  for (let at = 0; at < pixels.length; at += 4) {
+    const alpha = pixels[at + 3];
+    if (alpha === 255) opaque++;
+    if (envelope && alpha >= 250) {
+      for (const backdrop of alpha === 255 ? [0] : [0, 1]) {
+        const composite: OpaqueRgba = [
+          pixels[at] / 255 + (1 - alpha / 255) * backdrop,
+          pixels[at + 1] / 255 + (1 - alpha / 255) * backdrop,
+          pixels[at + 2] / 255 + (1 - alpha / 255) * backdrop,
+          1,
+        ];
+        if (
+          composite.slice(0, 3).some((channel) => channel > 1) ||
+          colorContrast(composite, envelope.worstForeground) < 4.5 ||
+          styleTintLightForeground(composite, envelope.worstForeground) !== envelope.lightForeground
+        )
+          return 'rendered-contrast-unsafe';
+      }
+    } else if (
+      alpha >= 250 &&
+      colorContrast(
+        [pixels[at] / 255, pixels[at + 1] / 255, pixels[at + 2] / 255, 1],
+        frame.foreground
+      ) < 4.5
+    )
+      return 'rendered-contrast-unsafe';
+  }
+  return frame.tint && opaque === 0 ? 'rendered-style-tint-empty' : null;
+}
+
+describe('readback CPU optimization equivalence and lifetime (no GPU evidence)', () => {
+  it('retains the scalar predicate across RGBA8 boundaries, palettes and consecutive frames', () => {
+    const f = fixture();
+    const palettes: [OpaqueRgba, OpaqueRgba][] = [
+      [
+        [0, 97 / 255, 204 / 255, 1],
+        [1, 1, 1, 1],
+      ],
+      [
+        [0.08, 0.12, 0.18, 1],
+        [0.75, 0.8, 0.85, 1],
+      ],
+      [
+        [1, 1, 1, 1],
+        [0, 0, 0, 1],
+      ],
+      [
+        [0.85, 0.7, 0.95, 1],
+        [0.05, 0.05, 0.05, 1],
+      ],
+    ];
+    // Uniform ownership is tested above; avoid storing thousands of unrelated
+    // uniform-spy records in this numerical differential test.
+    for (const name of ['uniform1f', 'uniform1i', 'uniform2fv', 'uniform4fv'])
+      f.gl[name] = () => {};
+    let sample = new Uint8Array(8);
+    f.gl.readPixels = (...args: unknown[]) => (args[6] as Uint8Array).set(sample);
+    const mismatches: unknown[] = [];
+    let seed = 0x6149af;
+    try {
+      for (const [fill, foreground] of palettes) {
+        const light = styleTintLightForeground(fill, foreground);
+        for (const tint of [undefined, 'style-fill'] as const) {
+          const frame: OpticalFrame = {
+            ...f.frame,
+            geometry: { ...f.frame.geometry, width: 2, height: 1 },
+            fill,
+            foreground,
+            ...(tint ? { tint } : {}),
+          };
+          for (const alpha of [0, 249, 250, 251, 252, 253, 254, 255]) {
+            const colors: number[][] = [];
+            // Include every grayscale transition of the old admission predicate,
+            // both adjacent bytes, premultiplication boundaries and sRGB's join.
+            let previous: string | null | undefined;
+            for (let code = 0; code < 256; code++) {
+              const candidate = new Uint8Array([
+                code,
+                code,
+                code,
+                alpha,
+                ...(light ? [0, 0, 0, 255] : [255, 255, 255, 255]),
+              ]);
+              const result = referenceReadback(candidate, frame);
+              if (result !== previous || [0, 10, 11, alpha, 255].includes(code))
+                for (const neighbor of [code - 1, code, code + 1])
+                  if (neighbor >= 0 && neighbor <= 255) colors.push([neighbor, neighbor, neighbor]);
+              previous = result;
+            }
+            for (let i = 0; i < 24; i++)
+              colors.push(
+                Array.from({ length: 3 }, () => {
+                  seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+                  return seed >>> 24;
+                })
+              );
+            for (const rgb of colors) {
+              sample = new Uint8Array([
+                ...rgb,
+                alpha,
+                ...(light ? [0, 0, 0, 255] : [255, 255, 255, 255]),
+              ]);
+              const expected = referenceReadback(sample, frame);
+              let actual: string | null = null;
+              try {
+                f.program.render(frame);
+              } catch (error) {
+                actual = (error as Error).message;
+              }
+              if (actual !== expected)
+                mismatches.push({ fill, foreground, tint, sample: [...sample], expected, actual });
+            }
+          }
+        }
+      }
+      expect(mismatches).toEqual([]);
+      expect(f.program.inspect().readbackAllocations).toBe(1);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('reuses only one current-size readback buffer and releases it on clear', () => {
+    const f = fixture();
+    const buffers: Uint8Array[] = [];
+    f.gl.readPixels = (...args: unknown[]) => {
+      const pixels = args[6] as Uint8Array;
+      buffers.push(pixels);
+      pixels.fill(255);
+    };
+    try {
+      f.program.render(f.frame);
+      f.program.render({ ...f.frame, pressed: true });
+      expect(buffers[0]).toBe(buffers[1]);
+      const larger = { ...f.frame, geometry: { ...f.frame.geometry, width: 3 } };
+      f.program.render(larger);
+      expect(buffers[2]).not.toBe(buffers[1]);
+      f.program.render(larger);
+      expect(buffers[3]).toBe(buffers[2]);
+      f.program.clear();
+      f.program.render(larger);
+      expect(buffers[4]).not.toBe(buffers[3]);
+      expect(f.program.inspect().readbackAllocations).toBe(3);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('still scans current source opacity even when the same frame was uploaded before', () => {
+    const f = fixture();
+    try {
+      f.program.render(f.frame);
+      f.frame.source.pixels[3] = 254;
+      expect(() => f.program.render(f.frame)).toThrow('nonopaque-optical-source');
+      expect(f.canvas.toDataURL).toHaveBeenCalledTimes(1);
     } finally {
       f.program.dispose();
     }

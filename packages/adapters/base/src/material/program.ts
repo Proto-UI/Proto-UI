@@ -2,12 +2,28 @@ import { contactFragment } from './contact-profile';
 import {
   styleTintFragment,
   styleTintContactFragment,
-  styleTintLightForeground,
   styleTintEnvelope,
 } from './style-tint-profile';
 import { vertex, fragment, uniformNames } from './liquidgl-kernel.generated';
-import { colorContrast, type OpaqueRgba } from './style';
+import type { OpaqueRgba } from './style';
 import type { CanvasBackdropFrame } from './source';
+
+const decodeSrgb = (channel: number) =>
+  channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+// Readback is RGBA8. Keep the original floating-point expressions, including
+// premultiplied near-opaque composition, while decoding each possible byte once.
+// These tables contain only color arithmetic, never source or rendered pixels.
+const linearBytes = Float64Array.from({ length: 256 }, (_, code) => decodeSrgb(code / 255));
+const linearOverWhite = Array.from({ length: 5 }, (_, index) => {
+  const alpha = index + 250;
+  return Float64Array.from({ length: 256 }, (_, code) => {
+    const composite = code / 255 + (1 - alpha / 255);
+    return composite > 1 ? NaN : decodeSrgb(composite);
+  });
+});
+const luminance = (color: OpaqueRgba) =>
+  decodeSrgb(color[0]) * 0.2126 + decodeSrgb(color[1]) * 0.7152 + decodeSrgb(color[2]) * 0.0722;
+const contrast = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
 export type OpticalGeometry = {
   width: number;
@@ -52,16 +68,22 @@ export function createWebOpticalProgram(
     programBuilds: 0,
     sourceUploads: 0,
     sourcePreparations: 0,
+    sourcePreparationMilliseconds: 0,
+    readbackAllocations: 0,
+    readbackMilliseconds: 0,
+    contrastMilliseconds: 0,
     renderMilliseconds: 0,
     encodeMilliseconds: 0,
   };
   let uploaded: { source: CanvasBackdropFrame; variant: string } | null = null;
   let prepared: { source: CanvasBackdropFrame; pixels: Uint8Array } | null = null;
+  let readback: Uint8Array | null = null;
   function clear() {
     canvas.width = 0;
     canvas.height = 0;
     prepared = null;
     uploaded = null;
+    readback = null;
     if (!gl) return;
     for (const texture of textures) gl.deleteTexture(texture);
     if (buffer) gl.deleteBuffer(buffer);
@@ -248,8 +270,10 @@ export function createWebOpticalProgram(
       g.bindTexture(g.TEXTURE_2D, textures[0]);
       g.pixelStorei(g.UNPACK_ALIGNMENT, 1);
       if (variant === 'regular' && prepared?.source !== source) {
+        const preparationStarted = performance.now();
         prepared = { source, pixels: prefilter(source.pixels, source.width, source.height) };
         metrics.sourcePreparations++;
+        metrics.sourcePreparationMilliseconds += performance.now() - preparationStarted;
       }
       if (uploaded?.source !== source || uploaded.variant !== variant) {
         g.texImage2D(
@@ -342,46 +366,53 @@ export function createWebOpticalProgram(
         clear();
         throw new Error('gpu-frame-failed');
       }
-      const pixels = new Uint8Array(width * height * 4);
+      const readbackStarted = performance.now();
+      if (readback?.length !== width * height * 4) {
+        readback = new Uint8Array(width * height * 4);
+        metrics.readbackAllocations++;
+      }
+      const pixels = readback;
       g.readPixels(0, 0, width, height, g.RGBA, g.UNSIGNED_BYTE, pixels);
+      metrics.readbackMilliseconds += performance.now() - readbackStarted;
       if (g.getError() !== g.NO_ERROR || g.isContextLost()) {
         clear();
         throw new Error('gpu-readback-failed');
       }
+      const contrastStarted = performance.now();
+      const foregroundLuminance = luminance(tintEnvelope?.worstForeground ?? frame.foreground);
       let opaqueSamples = 0;
       for (let at = 0; at < pixels.length; at += 4) {
         const alpha = pixels[at + 3];
         if (alpha === 255) opaqueSamples++;
-        if (tintEnvelope && alpha >= 250) {
+        if (alpha < 250) continue;
+        const red = pixels[at],
+          green = pixels[at + 1],
+          blue = pixels[at + 2];
+        const blackLuminance =
+          linearBytes[red] * 0.2126 + linearBytes[green] * 0.7152 + linearBytes[blue] * 0.0722;
+        if (contrast(blackLuminance, foregroundLuminance) < 4.5)
+          throw new Error('rendered-contrast-unsafe');
+        if (tintEnvelope) {
           // The shader writes premultiplied RGB. Near-opaque AA must be safe
           // after composition, not merely when its raw channels look darker.
           // Black/white bound every backdrop, including alpha 255. Use the
           // same worst semantic foreground as the current frame's bound uniform.
-          for (const backdrop of alpha === 255 ? [0] : [0, 1]) {
-            const composite: OpaqueRgba = [
-              pixels[at] / 255 + (1 - alpha / 255) * backdrop,
-              pixels[at + 1] / 255 + (1 - alpha / 255) * backdrop,
-              pixels[at + 2] / 255 + (1 - alpha / 255) * backdrop,
-              1,
-            ];
+          if (foregroundLuminance > blackLuminance !== tintEnvelope.lightForeground)
+            throw new Error('rendered-contrast-unsafe');
+          if (alpha < 255) {
+            const table = linearOverWhite[alpha - 250];
+            const whiteLuminance =
+              table[red] * 0.2126 + table[green] * 0.7152 + table[blue] * 0.0722;
             if (
-              composite.slice(0, 3).some((channel) => channel > 1) ||
-              colorContrast(composite, tintEnvelope.worstForeground) < 4.5 ||
-              styleTintLightForeground(composite, tintEnvelope.worstForeground) !==
-                tintEnvelope.lightForeground
+              !Number.isFinite(whiteLuminance) ||
+              contrast(whiteLuminance, foregroundLuminance) < 4.5 ||
+              foregroundLuminance > whiteLuminance !== tintEnvelope.lightForeground
             )
               throw new Error('rendered-contrast-unsafe');
           }
-        } else if (alpha >= 250) {
-          if (
-            colorContrast(
-              [pixels[at] / 255, pixels[at + 1] / 255, pixels[at + 2] / 255, 1],
-              frame.foreground
-            ) < 4.5
-          )
-            throw new Error('rendered-contrast-unsafe');
         }
       }
+      metrics.contrastMilliseconds += performance.now() - contrastStarted;
       if (frame.tint && opaqueSamples === 0) throw new Error('rendered-style-tint-empty');
       const encoding = performance.now();
       const result = canvas.toDataURL('image/png');
@@ -395,35 +426,65 @@ export function createWebOpticalProgram(
   };
 }
 function prefilter(pixels: Uint8Array, width: number, height: number): Uint8Array {
-  const weights = [1, 6, 15, 20, 15, 6, 1],
-    scratch = new Uint8Array(pixels.length),
-    output = new Uint8Array(pixels.length);
-  for (let pass = 0; pass < 2; pass++) {
-    const input = pass ? scratch : pixels,
-      target = pass ? output : scratch;
-    for (let y = 0; y < height; y++)
-      for (let x = 0; x < width; x++) {
-        const at = (y * width + x) * 4;
-        // All RGB channels sample the same seven pixels. Compute each clamped
-        // offset once, preserving each channel's tap order and per-pass rounding.
-        let red = 0,
-          green = 0,
-          blue = 0;
-        for (let k = -3; k <= 3; k++) {
-          const sample =
-            (Math.max(0, Math.min(height - 1, y + (pass ? k : 0))) * width +
-              Math.max(0, Math.min(width - 1, x + (pass ? 0 : k)))) *
-            4;
-          const weight = weights[k + 3];
-          red += input[sample] * weight;
-          green += input[sample + 1] * weight;
-          blue += input[sample + 2] * weight;
-        }
-        target[at] = Math.round(red / 64);
-        target[at + 1] = Math.round(green / 64);
-        target[at + 2] = Math.round(blue / 64);
-        target[at + 3] = 255;
+  const scratch = new Uint8Array(pixels.length),
+    output = new Uint8Array(pixels.length),
+    row = width * 4;
+  // Clamp horizontal neighbors once per column, rather than for every tap and
+  // row. Integer sums are at most 255 * 64, so regrouping symmetric taps and
+  // rounding with +32 >> 6 preserves both original rounded passes exactly.
+  const offsets = new Int32Array(width * 6);
+  for (let x = 0; x < width; x++) {
+    let at = x * 6;
+    for (let k = -3; k < 0; k++) offsets[at++] = Math.max(0, x + k) * 4;
+    for (let k = 1; k <= 3; k++) offsets[at++] = Math.min(width - 1, x + k) * 4;
+  }
+  for (let y = 0; y < height; y++) {
+    const base = y * row;
+    for (let x = 0; x < width; x++) {
+      const at = base + x * 4,
+        offset = x * 6,
+        a = base + offsets[offset],
+        b = base + offsets[offset + 1],
+        c = base + offsets[offset + 2],
+        d = base + offsets[offset + 3],
+        e = base + offsets[offset + 4],
+        f = base + offsets[offset + 5];
+      for (let channel = 0; channel < 3; channel++) {
+        scratch[at + channel] =
+          (pixels[a + channel] +
+            pixels[f + channel] +
+            6 * (pixels[b + channel] + pixels[e + channel]) +
+            15 * (pixels[c + channel] + pixels[d + channel]) +
+            20 * pixels[at + channel] +
+            32) >>>
+          6;
       }
+      scratch[at + 3] = 255;
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    const base = y * row,
+      a = Math.max(0, y - 3) * row,
+      b = Math.max(0, y - 2) * row,
+      c = Math.max(0, y - 1) * row,
+      d = Math.min(height - 1, y + 1) * row,
+      e = Math.min(height - 1, y + 2) * row,
+      f = Math.min(height - 1, y + 3) * row;
+    for (let x = 0; x < row; x += 4) {
+      const at = base + x;
+      for (let channel = 0; channel < 3; channel++) {
+        const offset = x + channel;
+        output[at + channel] =
+          (scratch[a + offset] +
+            scratch[f + offset] +
+            6 * (scratch[b + offset] + scratch[e + offset]) +
+            15 * (scratch[c + offset] + scratch[d + offset]) +
+            20 * scratch[at + channel] +
+            32) >>>
+          6;
+      }
+      output[at + 3] = 255;
+    }
   }
   return output;
 }

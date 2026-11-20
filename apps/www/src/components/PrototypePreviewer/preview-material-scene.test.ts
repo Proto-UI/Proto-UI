@@ -15,6 +15,7 @@ let originY = 0;
 let frames: Map<number, FrameRequestCallback>;
 let resizeCallbacks: ResizeObserverCallback[];
 let rects: WeakMap<Element, DOMRect>;
+let paintedLabels: string[];
 const rect = (x: number, y: number, w: number, h: number) => new DOMRect(x, y, w, h);
 const viewportRect = (x: number, y: number, w: number, h: number) =>
   rect(originX + x * layoutScale, originY + y * layoutScale, w * layoutScale, h * layoutScale);
@@ -27,6 +28,7 @@ beforeEach(() => {
   frames = new Map();
   resizeCallbacks = [];
   rects = new WeakMap();
+  paintedLabels = [];
   let id = 0;
   vi.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
     frames.set(++id, fn);
@@ -73,13 +75,20 @@ beforeEach(() => {
       moveTo() {},
       lineTo() {},
       fill() {},
-      fillText() {},
+      fillText(text: string) {
+        paintedLabels.push(text);
+      },
+      createLinearGradient: () => ({ addColorStop() {} }),
+      createRadialGradient: () => ({ addColorStop() {} }),
+      bezierCurveTo() {},
+      closePath() {},
       getImageData: (_x: number, _y: number, w: number, h: number) => ({
         data: new Uint8ClampedArray(w * h * 4).fill(255),
       }),
     } as any;
   });
 });
+
 afterEach(() => {
   for (const fn of cleanups.splice(0).reverse()) fn();
   document.body.replaceChildren();
@@ -325,6 +334,177 @@ describe('framework-owned static stage attachments', () => {
     expect(resolveWebPortalDestination(button, document.createElement('div'))).toBe(document.body);
     expect(scope.outerHTML).toBe(before);
     expect(findPreviewMaterialProvider(button)).toBeNull();
+    expect(frames.size).toBe(0);
+  });
+});
+
+describe('public material scene presentation', () => {
+  let reducedMotion: boolean;
+  let media: Map<string, EventTarget>;
+  let intersection: IntersectionObserverCallback;
+  beforeEach(() => {
+    reducedMotion = false;
+    media = new Map();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+      if (!media.has(query)) {
+        const target = new EventTarget();
+        Object.defineProperties(target, {
+          media: { value: query },
+          matches: {
+            get: () => {
+              if (query === '(prefers-reduced-motion: no-preference)') return !reducedMotion;
+              if (query === '(prefers-reduced-motion: reduce)') return reducedMotion;
+              return /: no-preference\)|forced-colors: none\)|resolution:/.test(query);
+            },
+          },
+        });
+        media.set(query, target);
+      }
+      return media.get(query) as MediaQueryList;
+    });
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: IntersectionObserverCallback) {
+          intersection = callback;
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+  });
+
+  function preview() {
+    const s = createPreviewMaterialScene(document.body, { presentation: 'preview' });
+    cleanups.push(() => s.dispose());
+    return s;
+  }
+  function frame(time: number) {
+    for (const [id, fn] of [...frames]) {
+      frames.delete(id);
+      fn(time);
+    }
+  }
+
+  it('paints a quiet background once, retaining real source pixels without an idle RAF', () => {
+    const s = preview();
+    const initial = s.lease.current();
+    expect(initial).not.toBeNull();
+    expect(paintedLabels).toEqual([]);
+    expect(frames.size).toBe(0);
+    frame(1000);
+    expect(s.lease.current() === initial).toBe(true);
+    width = 460;
+    resize();
+    expect(s.lease.current()?.width).toBe(460);
+    expect(s.lease.current()?.revision).toBeGreaterThan(initial!.revision);
+    expect(frames.size).toBe(0);
+  });
+
+  it('retains the historical diagnostic pattern and cadence for unchanged optical fixtures', () => {
+    const s = createPreviewMaterialScene(document.body);
+    cleanups.push(() => s.dispose());
+    expect(paintedLabels.some((text) => text.includes('VISIBLE APP BACKDROP'))).toBe(true);
+    frame(0);
+    const initial = s.lease.current();
+    frame(8.33);
+    expect(s.lease.current() === initial).toBe(true);
+    frame(120);
+    expect(s.lease.current()?.revision).toBeGreaterThan(initial!.revision);
+    s.pause(true);
+    expect(frames.size).toBe(0);
+  });
+
+  it('explicit dynamic preview updates at supplied frame times and stops on pause', () => {
+    const s = preview();
+    const initial = s.lease.current()!.revision;
+    s.pause(false);
+    expect(frames.size).toBe(1);
+    frame(0);
+    frame(8.33);
+    const next = s.lease.current()!.revision;
+    expect(next).toBeGreaterThan(initial);
+    frame(16.66);
+    expect(s.lease.current()!.revision).toBeGreaterThan(next);
+    expect(frames.size).toBe(1);
+    s.pause(true);
+    const paused = s.lease.current();
+    expect(frames.size).toBe(0);
+    frame(1000);
+    expect(s.lease.current() === paused).toBe(true);
+  });
+
+  it('observes owned-scope visibility changes and resumes without replaying hidden time', async () => {
+    const s = preview();
+    s.pause(false);
+    frame(0);
+    frame(8.33);
+    const frozen = s.lease.current();
+    expect(frames.size).toBe(1);
+
+    // Keep MutationObserver delivery real: only canvas pixels, layout and the
+    // frame clock are stubs. The observer registered by the scene must see
+    // this same authored scope mutation without an injected refresh callback.
+    async function visibility(value: string) {
+      await new Promise<void>((resolve) => {
+        const delivery = new MutationObserver(() => {
+          delivery.disconnect();
+          resolve();
+        });
+        delivery.observe(s.scope, { attributes: true, attributeFilter: ['style'] });
+        s.scope.style.visibility = value;
+      });
+    }
+
+    await visibility('hidden');
+    expect(frames.size).toBe(0);
+    frame(1000);
+    expect(s.lease.current() === frozen).toBe(true);
+    await visibility('visible');
+    expect(frames.size).toBe(1);
+    frame(2000);
+    expect(s.lease.current() === frozen).toBe(true);
+    frame(2008.33);
+    expect(s.lease.current()!.revision).toBeGreaterThan(frozen!.revision);
+    s.dispose();
+    expect(frames.size).toBe(0);
+  });
+
+  it('cancels dynamic work when reduced, hidden or offscreen and resumes without catch-up', () => {
+    const s = preview();
+    s.pause(false);
+    frame(0);
+    frame(8.33);
+    const frozen = s.lease.current();
+    reducedMotion = true;
+    media.get('(prefers-reduced-motion: reduce)')!.dispatchEvent(new Event('change'));
+    expect(frames.size).toBe(0);
+    frame(1000);
+    expect(s.lease.current() === frozen).toBe(true);
+    reducedMotion = false;
+    media.get('(prefers-reduced-motion: reduce)')!.dispatchEvent(new Event('change'));
+    expect(frames.size).toBe(1);
+    frame(2000);
+    expect(s.lease.current() === frozen).toBe(true);
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(frames.size).toBe(0);
+    visibility.mockReturnValue('visible');
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(frames.size).toBe(1);
+    intersection(
+      [{ isIntersecting: false } as IntersectionObserverEntry],
+      {} as IntersectionObserver
+    );
+    expect(frames.size).toBe(0);
+    s.redraw();
+    expect(s.lease.current() === frozen).toBe(true);
+    intersection(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver
+    );
+    expect(frames.size).toBe(1);
+    s.dispose();
     expect(frames.size).toBe(0);
   });
 });
