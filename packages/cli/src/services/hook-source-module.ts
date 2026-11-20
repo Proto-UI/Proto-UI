@@ -19,6 +19,8 @@ export type HookSourceModuleContext = {
   resolveLocal(module: HookSourceModule, name: string): HookSourceSymbol | null;
   /** Resolve a public value export (never an unexported local declaration). */
   resolveExport(module: HookSourceModule, name: string): HookSourceSymbol | null;
+  /** Collect value exports, including those forwarded by ordinary star exports. */
+  resolveExports(module: HookSourceModule): HookSourceSymbol[];
   /** Resolve the actual lexical binding represented by an expression. */
   resolveReference(node: ts.Node, module: HookSourceModule): HookSourceSymbol | null;
   /** Prove that an expression denotes the canonical Core defineAsHook value. */
@@ -267,7 +269,9 @@ function hasConflictingWrite(
             (unwrap(receiver).kind === ts.SyntaxKind.ThisKeyword &&
               hasHolderThis(node) &&
               member !== name) ||
-            (receiverBinding && aliases.has(receiverBinding) && (member === null || member !== name))
+            (receiverBinding &&
+              aliases.has(receiverBinding) &&
+              (member === null || member !== name))
           )
             conflict = true;
         }
@@ -476,17 +480,14 @@ function sourceSyntax(source: ts.SourceFile): SourceSyntax {
       continue;
     }
     if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) {
-      if (statement.name && !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) {
-        if (
-          hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
-          !hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
-        )
-          explicit(statement.name.text, { kind: 'declaration', declaration: statement });
-        if (
-          hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
-          hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
-        )
-          explicit('default', { kind: 'declaration', declaration: statement });
+      if (
+        hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
+        !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)
+      ) {
+        const name = hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+          ? 'default'
+          : statement.name?.text;
+        if (name) explicit(name, { kind: 'declaration', declaration: statement });
       }
       continue;
     }
@@ -501,7 +502,8 @@ function sourceSyntax(source: ts.SourceFile): SourceSyntax {
     if (ts.isExportAssignment(statement)) {
       if (!statement.isExportEquals) {
         const expression = unwrap(statement.expression);
-        if (ts.isIdentifier(expression)) explicit('default', { kind: 'local', name: expression.text });
+        if (ts.isIdentifier(expression))
+          explicit('default', { kind: 'local', name: expression.text });
         else explicit('default', { kind: 'declaration', declaration: expression });
       }
       continue;
@@ -584,8 +586,11 @@ function directVariableBindings(
             first(name, ts.isIdentifier(declaration.name) ? declaration : binding);
         }
       } else if (
-        (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) ||
-          ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) && statement.name
+        (ts.isFunctionDeclaration(statement) ||
+          ts.isClassDeclaration(statement) ||
+          ts.isEnumDeclaration(statement) ||
+          ts.isModuleDeclaration(statement)) &&
+        statement.name
       ) {
         first(statement.name.text, statement);
       }
@@ -1011,12 +1016,19 @@ function findLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Identifier): ts
   return result;
 }
 
-function findUncachedLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Identifier): ts.Node | null {
+function findUncachedLexicalBinding(
+  lexicalIndex: LexicalIndex,
+  node: ts.Identifier
+): ts.Node | null {
   const name = node.text;
   let current: ts.Node | undefined = node;
   while (current) {
     if (ts.isSourceFile(current)) {
-      const imported = importBinding(lexicalIndex, { file: current.fileName, source: current }, name);
+      const imported = importBinding(
+        lexicalIndex,
+        { file: current.fileName, source: current },
+        name
+      );
       if (imported) return imported.declaration;
       return directVariableBindings(lexicalIndex, current.statements, name);
     }
@@ -1478,6 +1490,27 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   const resolveExport = (module: HookSourceModule, name: string): HookSourceSymbol | null =>
     resolveExportInternal(module, name, new Set());
 
+  function resolveExports(module: HookSourceModule): HookSourceSymbol[] {
+    const names = new Set<string>();
+    const visited = new Set<string>();
+    function collect(target: HookSourceModule) {
+      if (visited.has(target.file)) return;
+      visited.add(target.file);
+      const { exports, stars } = syntaxFor(lexicalIndex, target.source);
+      for (const name of exports.keys()) {
+        if (name !== 'default' || target.file === module.file) names.add(name);
+      }
+      for (const { specifier } of stars) {
+        const forwarded = resolveModule(target.file, specifier);
+        if (forwarded) collect(forwarded);
+      }
+    }
+    collect(module);
+    return Array.from(names, (name) => resolveExport(module, name)).filter(
+      (symbol) => symbol !== null
+    );
+  }
+
   function namespaceDescriptor(
     symbol: HookSourceSymbol,
     seen = new Set<string>()
@@ -1881,7 +1914,10 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     seen.add(key);
     const declaration = symbol.declaration;
     if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
-      if (!isConstantDeclaration(declaration) || hasConflictingWrite(lexicalIndex, declaration, name)) {
+      if (
+        !isConstantDeclaration(declaration) ||
+        hasConflictingWrite(lexicalIndex, declaration, name)
+      ) {
         objectMemberCache.set(cacheKey, null);
         return null;
       }
@@ -2037,14 +2073,18 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     isDefineReference(node, module, new Set(), 'defineHook');
 
   return {
-    registerSource: source => inCanonicalQuery(() => registerSource(source)),
-    moduleForSource: source => inCanonicalQuery(() => moduleForSource(source)),
+    registerSource: (source) => inCanonicalQuery(() => registerSource(source)),
+    moduleForSource: (source) => inCanonicalQuery(() => moduleForSource(source)),
     resolveModule: (from, specifier) => inCanonicalQuery(() => resolveModule(from, specifier)),
     resolveLocal: (module, name) => inCanonicalQuery(() => resolveLocal(module, name)),
     resolveExport: (module, name) => inCanonicalQuery(() => resolveExport(module, name)),
+    resolveExports: (module) => inCanonicalQuery(() => resolveExports(module)),
     resolveReference: (node, module) => inCanonicalQuery(() => resolveReference(node, module)),
-    isDefineAsHookReference: (node, module) => inCanonicalQuery(() => isDefineAsHookReference(node, module)),
-    isDefinePrototypeReference: (node, module) => inCanonicalQuery(() => isDefinePrototypeReference(node, module)),
-    isDefineHookReference: (node, module) => inCanonicalQuery(() => isDefineHookReference(node, module)),
+    isDefineAsHookReference: (node, module) =>
+      inCanonicalQuery(() => isDefineAsHookReference(node, module)),
+    isDefinePrototypeReference: (node, module) =>
+      inCanonicalQuery(() => isDefinePrototypeReference(node, module)),
+    isDefineHookReference: (node, module) =>
+      inCanonicalQuery(() => isDefineHookReference(node, module)),
   };
 }

@@ -802,6 +802,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         facade,
         port: {
           supportsOwnedDecoration: true,
+          hasDecorationTargets: () => impl.hasDecorationTargets(),
           captureDecorationLease: () => impl.captureDecorationLease(),
           bindDecorations: (bindings, lease) => impl.bindDecorations(bindings, lease),
           replaceVisualRuntime: (previous, handles, candidates, decorations) =>

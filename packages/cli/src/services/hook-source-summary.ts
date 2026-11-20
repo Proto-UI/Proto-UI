@@ -54,6 +54,7 @@ export type HookSourceResolution = {
 export type HookSourceSummaryContext = {
   /** Register an already-read source, preserving caller-provided text exactly. */
   registerSource(source: ts.SourceFile): void;
+  resolveRegisteredSourceImport(source: ts.SourceFile, specifier: string): string | null;
   /** Resolve a source expression without executing it. */
   resolve(
     node: ts.Node,
@@ -63,10 +64,18 @@ export type HookSourceSummaryContext = {
   /** Resolve an authored producer call and its captured result. */
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
   /** Resolve a stable synchronous authored function without executing it. */
-  resolveSourceFunction(
-    node: ts.Node,
-    source: ts.SourceFile
-  ): ts.FunctionLikeDeclaration | null;
+  resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
+  /** Whether an opaque dynamic import can expose the authored function. */
+  hasDynamicImportOfFunction(source: ts.SourceFile, helper: ts.FunctionLikeDeclaration): boolean;
+  resolveStableSourceBinding(
+    node: ts.Identifier
+  ): ts.VariableDeclaration | ts.ParameterDeclaration | null;
+  dynamicImportVariableInitializers(source: ts.SourceFile): readonly ts.Expression[];
+  isSelectedSourceProperty(property: ts.ObjectLiteralElementLike, name: string): boolean;
+  isSourceMemberReference(
+    expression: ts.PropertyAccessExpression | ts.ElementAccessExpression,
+    property: ts.PropertyAssignment | ts.ShorthandPropertyAssignment
+  ): boolean;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
   /**
@@ -78,6 +87,7 @@ export type HookSourceSummaryContext = {
    * does not.
    */
   isAuthoredSetup(node: ts.Node, source: ts.SourceFile): boolean;
+  isCanonicalPrototypeSetupProperty(property: ts.ObjectLiteralElementLike): boolean;
   /** Verify the actual lexical producer declaration, not a same-named shadow. */
   isSameSourceBinding(
     node: ts.CallExpression,
@@ -580,11 +590,14 @@ function isStringValue(
 export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   const moduleContext = createHookSourceModuleContext();
   const registeredSources = new Map<string, ts.SourceFile>();
+  const authoredSourcePaths = new Set<string>();
   const producerCache = new Map<string, Producer | null>();
   const summaryCache = new Map<string, HookSourceValue>();
   const summaryStack = new Set<string>();
   const providerStateCache = new Map<string, ReadonlyMap<string, ProviderStateProof> | null>();
   const canonicalFocusableCache = new Map<string, SymbolRef | null>();
+  const dynamicImports = new WeakMap<ts.SourceFile, string[]>();
+  const exportedFunctionKeys = new Map<string, Set<string>>();
   const moduleForSource = (source: ts.SourceFile): Module => {
     const module = moduleContext.moduleForSource(source);
     const previous = registeredSources.get(module.file);
@@ -594,13 +607,22 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       summaryStack.clear();
       providerStateCache.clear();
       canonicalFocusableCache.clear();
+      exportedFunctionKeys.clear();
     }
     registeredSources.set(module.file, source);
     return module;
   };
 
   const registerSource = (source: ts.SourceFile): void => {
-    moduleForSource(source);
+    authoredSourcePaths.add(moduleForSource(source).file);
+  };
+
+  const resolveRegisteredSourceImport = (
+    source: ts.SourceFile,
+    specifier: string
+  ): string | null => {
+    const target = moduleContext.resolveModule(moduleForSource(source).file, specifier);
+    return target && authoredSourcePaths.has(target.file) ? target.file : null;
   };
 
   const resolveSymbol = (module: Module, name: string): SymbolRef | null =>
@@ -629,14 +651,17 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         (ts.isBinaryExpression(node) &&
           node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
           node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
-        ts.isForOfStatement(node) || ts.isForInStatement(node) ||
-        (ts.isVariableDeclaration(node) && node.initializer &&
+        ts.isForOfStatement(node) ||
+        ts.isForInStatement(node) ||
+        (ts.isVariableDeclaration(node) &&
+          node.initializer &&
           ts.isVariableDeclarationList(node.parent) &&
           (node.parent.flags & ts.NodeFlags.BlockScoped) === 0) ||
         ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
           (node.operator === ts.SyntaxKind.PlusPlusToken ||
             node.operator === ts.SyntaxKind.MinusMinusToken))
-      ) candidates.push(node);
+      )
+        candidates.push(node);
       ts.forEachChild(node, visit);
     };
     visit(source);
@@ -4240,8 +4265,149 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   const resolveCall = (node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution =>
     evaluate(node, source, new Map());
 
+  function dynamicImportTargets(source: ts.SourceFile): Module[] {
+    let imports = dynamicImports.get(source);
+    if (!imports) {
+      imports = [];
+      const specifiers = imports;
+      const module = moduleForSource(source);
+      function visit(node: ts.Node) {
+        if (ts.isTypeNode(node)) return;
+        if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+          const specifier = literalString(node.arguments[0], module, new Map());
+          if (
+            specifier &&
+            (specifier.startsWith('.') || resolveRegisteredSourceImport(source, specifier))
+          )
+            specifiers.push(specifier);
+        }
+        ts.forEachChild(node, visit);
+      }
+      visit(source);
+      dynamicImports.set(source, imports);
+    }
+    if (!imports.length) return [];
+    const importer = moduleForSource(source);
+    return imports.flatMap((specifier) => {
+      const target = moduleContext.resolveModule(importer.file, specifier);
+      return target ? [target] : [];
+    });
+  }
+
+  function dynamicImportVariableInitializers(source: ts.SourceFile): ts.Expression[] {
+    const values: ts.Expression[] = [];
+    for (const target of dynamicImportTargets(source)) {
+      for (const symbol of moduleContext.resolveExports(target)) {
+        let current: SymbolRef | null = symbol;
+        const seen = new Set<string>();
+        while (current) {
+          const { declaration, module } = current;
+          if (
+            !ts.isVariableDeclaration(declaration) ||
+            !declaration.initializer ||
+            !stableVariable(declaration, module)
+          )
+            break;
+          const key = symbolKey(current);
+          if (seen.has(key)) break;
+          seen.add(key);
+          const value = unwrap(declaration.initializer) as ts.Expression;
+          values.push(value);
+          if (!ts.isIdentifier(value)) break;
+          current = moduleContext.resolveReference(value, module);
+        }
+      }
+    }
+    return values;
+  }
+
+  function hasDynamicImportOfFunction(
+    source: ts.SourceFile,
+    helper: ts.FunctionLikeDeclaration
+  ): boolean {
+    const targets = dynamicImportTargets(source);
+    if (!targets.length) return false;
+    const helperModule = moduleForSource(helper.getSourceFile());
+    const helperKey = symbolKey({ module: helperModule, declaration: helper });
+    return targets.some((target) => {
+      let keys = exportedFunctionKeys.get(target.file);
+      if (!keys) {
+        keys = new Set();
+        for (const symbol of moduleContext.resolveExports(target)) {
+          const { declaration, module } = symbol;
+          const value = ts.isVariableDeclaration(declaration) ? declaration.name : declaration;
+          const resolved = functionFor(value, module);
+          if (resolved) keys.add(symbolKey({ module: resolved.module, declaration: resolved.fn }));
+        }
+        exportedFunctionKeys.set(target.file, keys);
+      }
+      return keys.has(helperKey);
+    });
+  }
+
+  const canonicalPrototypeConfigs = new WeakMap<ts.ObjectLiteralExpression, boolean>();
+  function isCanonicalPrototypeConfig(config: ts.ObjectLiteralExpression): boolean {
+    const cached = canonicalPrototypeConfigs.get(config);
+    if (cached !== undefined) return cached;
+    const module = moduleForSource(config.getSourceFile());
+    const outerExpression = (node: ts.Node): ts.Node => {
+      let outer = node;
+      while (outer.parent && unwrap(outer.parent) === node) outer = outer.parent;
+      return outer;
+    };
+    const isFactoryArgument = (node: ts.Node): boolean => {
+      const value = outerExpression(node);
+      const call = value.parent;
+      return (
+        ts.isCallExpression(call) &&
+        call.arguments[0] === value &&
+        !ts.findAncestor(call.parent, ts.isFunctionLike) &&
+        moduleContext.isDefinePrototypeReference(call.expression, module)
+      );
+    };
+    const value = outerExpression(config);
+    const declaration = value.parent;
+    let canonical = isFactoryArgument(config);
+    if (
+      !canonical &&
+      ts.isVariableDeclaration(declaration) &&
+      declaration.initializer === value &&
+      ts.isIdentifier(declaration.name) &&
+      ts.isVariableStatement(declaration.parent.parent) &&
+      !declaration.parent.parent.modifiers?.some(
+        (item) => item.kind === ts.SyntaxKind.ExportKeyword
+      ) &&
+      stableVariable(declaration, module)
+    ) {
+      const name = declaration.name;
+      let called = false;
+      let escaped = false;
+      function visit(node: ts.Node): void {
+        if (escaped || ts.isTypeNode(node)) return;
+        if (
+          ts.isIdentifier(node) &&
+          node !== name &&
+          node.text === name.text &&
+          ((node.parent as ts.NamedDeclaration).name !== node ||
+            ts.isShorthandPropertyAssignment(node.parent) ||
+            ts.isExportSpecifier(node.parent)) &&
+          moduleContext.resolveReference(node, module)?.declaration === declaration
+        ) {
+          if (!isFactoryArgument(node)) escaped = true;
+          else called = true;
+        }
+        ts.forEachChild(node, visit);
+      }
+      visit(module.source);
+      canonical = called && !escaped;
+    }
+    canonicalPrototypeConfigs.set(config, canonical);
+    return canonical;
+  }
+
   return {
     registerSource,
+    resolveRegisteredSourceImport,
     resolve: evaluate,
     resolveCall,
     resolveSourceFunction: (node, source) => {
@@ -4254,8 +4420,39 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         return null;
       return resolved.fn;
     },
+    hasDynamicImportOfFunction,
+    dynamicImportVariableInitializers,
+    resolveStableSourceBinding: (node) => {
+      const binding = moduleContext.resolveReference(node, moduleForSource(node.getSourceFile()));
+      if (!binding) return null;
+      const { declaration, module } = binding;
+      if (ts.isVariableDeclaration(declaration) && stableVariable(declaration, module))
+        return declaration;
+      const parameter = ts.isParameter(declaration)
+        ? declaration
+        : ts.isIdentifier(declaration) && ts.isParameter(declaration.parent)
+          ? declaration.parent
+          : null;
+      return parameter &&
+        ts.isIdentifier(parameter.name) &&
+        !parameter.initializer &&
+        !parameter.dotDotDotToken &&
+        !hasBindingWrite(parameter.name, module)
+        ? parameter
+        : null;
+    },
+    isSelectedSourceProperty: (property, name) =>
+      ts.isObjectLiteralExpression(property.parent) &&
+      configProperty(property.parent, name) === property,
+    isSourceMemberReference: (expression, property) =>
+      moduleContext.resolveReference(expression, moduleForSource(expression.getSourceFile()))
+        ?.declaration === property,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
+    isCanonicalPrototypeSetupProperty: (property) =>
+      ts.isObjectLiteralExpression(property.parent) &&
+      configProperty(property.parent, 'setup') === property &&
+      isCanonicalPrototypeConfig(property.parent),
     isSameSourceBinding,
   };
 }

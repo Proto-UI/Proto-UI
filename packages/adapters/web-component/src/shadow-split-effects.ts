@@ -6,12 +6,25 @@ import {
   resolveRootStyleEntry,
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
-import { createOwnedTwTokenApplier } from './feedback-style';
+import { createOwnedTwTokenApplier, PUI_STYLE_ATTR } from './feedback-style';
 import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-style-artifact';
 
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
 const activeBindings = new WeakSet<HTMLElement>();
+const splitPaintOwners = new WeakMap<
+  Element,
+  { containsCurrentTokens(): boolean; ownsZeroOpacity(): boolean }
+>();
+
+export function hasCurrentSplitSurfacePaint(surface: Element): boolean {
+  return splitPaintOwners.get(surface)?.containsCurrentTokens() ?? false;
+}
+
+export function hasOwnedSplitZeroOpacity(surface: Element): boolean {
+  return splitPaintOwners.get(surface)?.ownsZeroOpacity() ?? false;
+}
+
 const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
@@ -207,7 +220,10 @@ function splitReceiptVariants(token: string): string[] {
   return parts.filter(Boolean);
 }
 
-function compiledReceiptSelector(token: string): string | null {
+function compiledReceiptSelector(
+  token: string,
+  target: 'host' | 'element' = 'host'
+): string | null {
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   let selector = `[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
   let dark = false;
@@ -247,6 +263,7 @@ function compiledReceiptSelector(token: string): string | null {
       } else return null;
     }
   }
+  if (target === 'element') return dark ? `[data-pui-color-scheme='dark']${selector}` : selector;
   return `${dark ? ":where(:host([data-pui-color-scheme='dark']))" : ''}:host(${selector})`;
 }
 
@@ -388,6 +405,161 @@ export function createShadowSplitEffectsPort({
   let disposed = false;
   let flushing = false;
   let flushRequested = false;
+  let zeroOpacityTransition: { animation: CSSTransition; target: string | null } | null = null;
+  let hoveredZero: { projection: Projection; tokens: string[] } | null = null;
+  const isLiveSurfaceToken = (token: string) => {
+    const selector = compiledReceiptSelector(token, 'element');
+    return (
+      selector !== null &&
+      host.matches(selector) &&
+      surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/).includes(token)
+    );
+  };
+  const ownsZeroOpacity = () =>
+    applied?.surface.some(
+      (token) =>
+        (token === 'opacity-0' || token.endsWith(':opacity-0')) && isLiveSurfaceToken(token)
+    ) ?? false;
+  const isCurrentOpacityTarget = (target: string | null) =>
+    target !== null
+      ? isLiveSurfaceToken(target) === true
+      : !!applied &&
+        !applied.surface.some(
+          (token) => /(?:^|:)opacity-/.test(token) && isLiveSurfaceToken(token)
+        ) &&
+        applied.surface.some(
+          (token) =>
+            /(?:^|:)transition-(?:opacity|all)$/.test(token) && isLiveSurfaceToken(token)
+        );
+  const ownsZeroOpacityAnimation = (direction: 'in' | 'out') => {
+    const hasPaint = (name: string) =>
+      applied?.surface.some(
+        (token) => (token === name || token.endsWith(`:${name}`)) && isLiveSurfaceToken(token)
+      );
+    if (!hasPaint(`animate-${direction}`) || !hasPaint(`fade-${direction}-0`)) return false;
+    const view = surface.ownerDocument.defaultView;
+    if (!view?.CSSAnimation || !view.KeyframeEffect || !surface.getAnimations) return false;
+    return surface.getAnimations().some((animation) => {
+      const effect = animation.effect;
+      return (
+        animation instanceof view.CSSAnimation &&
+        animation.animationName ===
+          (direction === 'in' ? 'pui-split-paint-enter' : 'pui-split-paint-exit') &&
+        effect instanceof view.KeyframeEffect &&
+        effect.target === surface &&
+        !effect.pseudoElement &&
+        effect.getTiming().fill === 'both' &&
+        effect.getComputedTiming().progress === (direction === 'in' ? 0 : 1) &&
+        effect.getKeyframes().at(direction === 'in' ? 0 : -1)?.opacity === '0'
+      );
+    });
+  };
+  splitPaintOwners.set(surface, {
+    containsCurrentTokens() {
+      if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) !== applied.root) return false;
+      const owned = applier.getOwned();
+      if (owned.size === 0) return true;
+      const live = new Set(surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/));
+      return [...owned].every((token) => live.has(token));
+    },
+    ownsZeroOpacity() {
+      if (surface.parentNode !== host.shadowRoot) return false;
+      if (ownsZeroOpacity() || ownsZeroOpacityAnimation('in') || ownsZeroOpacityAnimation('out'))
+        return true;
+      if (zeroOpacityTransition && !surface.getAnimations().includes(zeroOpacityTransition.animation))
+        zeroOpacityTransition = null;
+      const transition = zeroOpacityTransition;
+      return (
+        !!transition &&
+        isCurrentOpacityTarget(transition.target) &&
+        (transition.animation.pending || transition.animation.playState === 'running') &&
+        captureZeroOpacityTransition([transition.target], [])?.animation === transition.animation &&
+        !surface.getAnimations().some((animation) => {
+          if (animation === transition.animation) return false;
+          const effect = animation.effect;
+          const view = surface.ownerDocument.defaultView;
+          return (
+            !!view?.KeyframeEffect &&
+            effect instanceof view.KeyframeEffect &&
+            effect.target === surface &&
+            !effect.pseudoElement &&
+            effect.getComputedTiming().progress !== null &&
+            effect.getKeyframes().some((frame) => frame.opacity !== undefined)
+          );
+        })
+      );
+    },
+  });
+
+  const captureZeroOpacityTransition = (
+    eligible: readonly (string | null)[],
+    before: readonly Animation[]
+  ): { animation: CSSTransition; target: string | null } | null => {
+    const view = surface.ownerDocument.defaultView;
+    if (!view?.CSSTransition || !view.KeyframeEffect) return null;
+    for (const animation of surface.getAnimations()) {
+      if (
+        !(animation instanceof view.CSSTransition) ||
+        animation.transitionProperty !== 'opacity' ||
+        before.includes(animation)
+      )
+        continue;
+      const effect = animation.effect;
+      if (
+        !(effect instanceof view.KeyframeEffect) ||
+        effect.target !== surface ||
+        effect.pseudoElement
+      )
+        continue;
+      const keyframes = effect.getKeyframes();
+      if (keyframes[0]?.opacity !== '0') continue;
+      const finalOpacity = Number(keyframes.at(-1)?.opacity);
+      const target = eligible.find(
+        (token) =>
+          (token === null
+            ? finalOpacity === 1
+            : Number(/(?:^|:)opacity-(\d+)$/.exec(token)?.[1]) / 100 === finalOpacity) &&
+          isCurrentOpacityTarget(token)
+      );
+      if (target !== undefined) return { animation, target };
+    }
+    return null;
+  };
+
+  const observeHoveredZero = (event: PointerEvent) => {
+    if (!event.isTrusted || event.target !== host) return;
+    const tokens = applied?.surface.filter(
+      (token) =>
+        token.endsWith(':opacity-0') &&
+        splitReceiptVariants(token).includes('hover') &&
+        isLiveSurfaceToken(token)
+    );
+    hoveredZero = applied && tokens?.length ? { projection: applied, tokens } : null;
+  };
+  const observeHoverExit = (event: PointerEvent) => {
+    const witness = hoveredZero;
+    // Consume this input edge even when it produces no eligible transition.
+    // A later foreign stylesheet withdrawal cannot reuse old hover history.
+    hoveredZero = null;
+    if (
+      !event.isTrusted ||
+      event.target !== host ||
+      !witness ||
+      witness.projection !== applied ||
+      disposed ||
+      surface.parentNode !== host.shadowRoot ||
+      host.matches(':hover') ||
+      !witness.tokens.some((token) => !isLiveSurfaceToken(token)) ||
+      !isCurrentOpacityTarget(null)
+    )
+      return;
+    const candidate = captureZeroOpacityTransition([null], []);
+    zeroOpacityTransition =
+      candidate?.animation.effect?.getComputedTiming().progress === 0 ? candidate : null;
+  };
+  host.addEventListener('pointerenter', observeHoveredZero);
+  host.addEventListener('pointermove', observeHoveredZero);
+  host.addEventListener('pointerleave', observeHoverExit);
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw invalid(
@@ -482,14 +654,10 @@ export function createShadowSplitEffectsPort({
     const widths = borderWidthCandidates(entries);
     const borderWidths = JSON.stringify(widths);
     const animated = entries.find((e) => e.authorToken === 'transition-all');
-    // The H1 base recipe already owns the compensating surface margins for
-    // border widths. Rest state, checked-state and invalid-state updates move
-    // those compensations continuously even while CSS rounds the animated
-    // border to device pixels, so a changing width set with that companion is
-    // not an unimplemented transition.
+    // H1 coordinates timing but does not reconcile animated border used-value
+    // rounding with continuously interpolated surface margins.
     if (
       animated &&
-      !hasRecipe('motion', 'h1') &&
       (widths.some((values) => values.length > 1) ||
         (applied && applied.borderWidths !== borderWidths))
     ) {
@@ -522,11 +690,26 @@ export function createShadowSplitEffectsPort({
     const previous = applied;
     const next = latest;
     try {
+      // Removing the final owned opacity token also transitions to default 1.
+      // Capture only the native transition created by this owned write.
+      // Subsequent equal projections must not acquire a different animation.
+      const eligible =
+        ownsZeroOpacity() &&
+        next.surface.some((token) => /(?:^|:)transition-(?:opacity|all)$/.test(token))
+          ? next.surface.some((token) => /(?:^|:)opacity-/.test(token))
+            ? next.surface.filter((token) => /(?:^|:)opacity-[1-9]\d*$/.test(token))
+            : [null]
+          : [];
+      const before = eligible.length && surface.getAnimations ? surface.getAnimations() : null;
+      hoveredZero = null;
       host.setAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR, next.root);
       if (nativeText) host.setAttribute(NATIVE_TEXT_ATTR, '');
       surface.setAttribute(SHADOW_SPLIT_SURFACE_ATTR, '');
       applier.apply(next.surface);
       applied = next;
+      if (before) zeroOpacityTransition = captureZeroOpacityTransition(eligible, before);
+      else if (zeroOpacityTransition && !isCurrentOpacityTarget(zeroOpacityTransition.target))
+        zeroOpacityTransition = null;
     } catch (error) {
       // Restore both owned projections even when the failing target mutated before throwing.
       // DOM rollback itself may fail on a broken host; retain the original failure.
@@ -541,7 +724,8 @@ export function createShadowSplitEffectsPort({
         if (!previous) surface.removeAttribute(SHADOW_SPLIT_SURFACE_ATTR);
         if (!previous && nativeText) host.removeAttribute(NATIVE_TEXT_ATTR);
       } catch {}
-      latest = previous;
+      applied = latest = previous;
+      zeroOpacityTransition = null;
       flushRequested = false;
       throw error;
     } finally {
@@ -563,7 +747,12 @@ export function createShadowSplitEffectsPort({
     dispose() {
       if (disposed) return;
       disposed = true;
+      hoveredZero = null;
+      host.removeEventListener('pointerenter', observeHoveredZero);
+      host.removeEventListener('pointermove', observeHoveredZero);
+      host.removeEventListener('pointerleave', observeHoverExit);
       activeBindings.delete(host);
+      splitPaintOwners.delete(surface);
       const errors: unknown[] = [];
       const cleanup = (action: () => void) => {
         try {
@@ -585,6 +774,7 @@ export function createShadowSplitEffectsPort({
         if (nativeText && applied && host.getAttribute(NATIVE_TEXT_ATTR) === '')
           host.removeAttribute(NATIVE_TEXT_ATTR);
       });
+      zeroOpacityTransition = null;
       applied = latest = null;
       if (errors.length) throw errors[0];
     },
