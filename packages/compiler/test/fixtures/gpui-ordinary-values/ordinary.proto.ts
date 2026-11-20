@@ -23,6 +23,10 @@ const asWatched = defineAsHook<
 });
 
 let sharedCount = 0;
+let registerData = false;
+function decide(first: number = 7, last: number): number {
+  return first + last;
+}
 function makeCounter(seed: number) {
   const value = { count: seed };
   const alias = value;
@@ -192,6 +196,10 @@ export default definePrototype({
     def.expose.method('returnControls', () => returned);
     def.expose.method('returnFunction', () => returned.increment);
     def.expose.method('returnPure', () => returned.pure);
+    def.expose.method('decide', decide);
+    registerData = !registerData;
+    def.expose.value('dataRegistered', registerData);
+    if (registerData) def.expose.method('conditionalDecide', decide);
     return (renderer) => renderer.el('div', 'ordinary');
   },
 });
