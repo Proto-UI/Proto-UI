@@ -41,7 +41,7 @@ const TEXT_FAMILIES = [
     runtimes: ["runtimes={['wc', 'react', 'vue', 'vue2']}"],
     sidebarSlug: null,
     manifestBound: false,
-    expectedIds: ['shadcn-text-root'],
+    expectedIds: ['shadcn-style-scope', 'shadcn-text-root'],
   },
   {
     family: 'brutalist',
