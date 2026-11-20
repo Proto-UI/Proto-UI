@@ -90,11 +90,15 @@ function normalizeTokens(tokens: readonly string[]) {
 }
 
 function setStyleAttribute(el: HTMLElement, tokens: readonly string[]) {
+  const trace = el.ownerDocument.defaultView &&
+    Reflect.get(el.ownerDocument.defaultView, '__puiPortalRevealTrace');
+  if (typeof trace === 'function') trace('tokens:before', el, { tokens: [...tokens] });
   if (tokens.length > 0) {
     el.setAttribute(PUI_STYLE_ATTR, tokens.join(' '));
   } else {
     el.removeAttribute(PUI_STYLE_ATTR);
   }
+  if (typeof trace === 'function') trace('tokens:after', el, { tokens: [...tokens] });
 }
 
 function applyOwnedStyleTokens(el: HTMLElement, source: unknown, tokens: readonly string[]) {

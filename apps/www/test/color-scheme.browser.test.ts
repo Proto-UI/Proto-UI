@@ -350,15 +350,62 @@ describe.sequential('default-document colorScheme browser contract', () => {
         await page.evaluate(() => (window as any).colorSchemeFixture.setDisabled(false));
 
         await theme(page, 'light');
-        const { samples: portalFrames, portalFlipAt } = await page.evaluate(async () => {
+        const { samples: portalFrames, portalFlipAt, revealTrace } = await page.evaluate(async () => {
           const samples: Array<{ visible: boolean; background: string; pending: boolean }> = [];
+          // Private diagnostic only. Synchronous computed-style/animation reads can
+          // resolve a baseline themselves; compare with the retained uninstrumented run.
+          const revealTrace: unknown[] = [];
+          const snapshot = (element: Element) => {
+            const style = getComputedStyle(element);
+            return {
+              tag: element.localName,
+              ref: element.getAttribute('data-demo-ref'),
+              tokens: element.getAttribute('data-pui-style'),
+              pending: element.getAttribute('data-pui-view-pending'),
+              revealing: element.getAttribute('data-pui-view-revealing'),
+              detached: element.getAttribute('data-pui-view-detached'),
+              hidden: element.hasAttribute('hidden'),
+              display: style.display,
+              visibility: style.visibility,
+              opacity: style.opacity,
+              inlineOpacity: (element as HTMLElement).style?.opacity ?? null,
+              background: style.backgroundColor,
+              transitionProperty: style.transitionProperty,
+              transitionDuration: style.transitionDuration,
+              animations: element.getAnimations().map((animation) => ({
+                kind: animation.constructor.name,
+                transitionProperty: Reflect.get(animation, 'transitionProperty') ?? null,
+                startTime: animation.startTime,
+                currentTime: animation.currentTime,
+                playState: animation.playState,
+                keyframes: animation.effect instanceof KeyframeEffect
+                  ? animation.effect.getKeyframes() : [],
+              })),
+            };
+          };
+          const trace = (phase: string, source?: Element, detail?: unknown) => {
+            const button = document.querySelector('[data-demo-ref="portalButton"]');
+            if (!button) return;
+            if (source && source !== button && !source.contains(button)) return;
+            const at = performance.now();
+            const chain = [];
+            for (let node: Element | null = button; node; ) {
+              chain.push(snapshot(node));
+              const root = node.getRootNode();
+              node = node.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+            }
+            revealTrace.push({ phase, at, detail, source: source?.getAttribute('data-demo-ref'), chain });
+          };
+          Reflect.set(window, '__puiPortalRevealTrace', trace);
           const fixture = Reflect.get(window, 'colorSchemeFixture') as {
             frame(id: string): (typeof samples)[number] | null;
             portalFlipAt(): number | null;
+            openPortalWithLateTheme(): Promise<void>;
           };
           const collect = (left: number): Promise<void> =>
             new Promise((resolve) =>
               requestAnimationFrame(async (at) => {
+                trace('frame');
                 const sample = fixture.frame('portalButton');
                 if (sample) {
                   const target = document.querySelector('[data-demo-ref="portalButton"]');
@@ -375,15 +422,20 @@ describe.sequential('default-document colorScheme browser contract', () => {
               })
             );
           const collected = collect(12);
-          await (window as any).colorSchemeFixture.openPortalWithLateTheme();
-          await collected;
-          return { samples, portalFlipAt: fixture.portalFlipAt() };
+          try {
+            await fixture.openPortalWithLateTheme();
+            await collected;
+            return { samples, portalFlipAt: fixture.portalFlipAt(), revealTrace };
+          } finally {
+            Reflect.deleteProperty(window, '__puiPortalRevealTrace');
+          }
         });
         const portal = page.locator('[data-demo-ref="portalButton"]');
         const portalVisible = portalFrames.filter((sample) => sample.visible);
         // The existing finally writer must retain frames even if either predicate fails.
         observations.portalFrames = portalFrames;
         observations.portalFlipAt = portalFlipAt;
+        observations.portalRevealTrace = revealTrace;
         expect(portalVisible.length).toBeGreaterThan(0);
         expect(
           portalVisible.every((sample) => alpha(sample.background) === 0.2 && !sample.pending)

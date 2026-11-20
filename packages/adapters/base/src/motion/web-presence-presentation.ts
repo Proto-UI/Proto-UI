@@ -333,7 +333,12 @@ function createDocumentPresenceSink(
       )
         return false;
       if (!current() || !live()) return false;
+      const trace = win && Reflect.get(win, '__puiPortalRevealTrace');
+      if (sample.opacity !== undefined && typeof trace === 'function')
+        trace('presence-opacity:before', el, { opacity: sample.opacity });
       if (sample.opacity !== undefined && !write('opacity', String(sample.opacity))) return false;
+      if (sample.opacity !== undefined && typeof trace === 'function')
+        trace('presence-opacity:after', el, { opacity: sample.opacity });
       return current() && live();
     },
     release: clear,

@@ -34,7 +34,7 @@ jobs:
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/color-lifetime-diagnostic
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = c5aa7bbb183a40f775198bc965187127aa9dde38
+          test "$(git rev-parse HEAD^)" = c27b048380a7e9b8a2b395c1b1e5e5ad4e0565cd
           git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             apps/www/test/color-scheme.browser.test.ts \
