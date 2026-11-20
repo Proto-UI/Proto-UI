@@ -219,6 +219,75 @@ describe('GPU preparation integration (mock helper, original optical ABI)', () =
     };
   }
 
+  it('renders after repeated clear without restoring a retired current program', () => {
+    const f = fixture();
+    type Program = (typeof f.programs)[number];
+    let current: Program | null = null,
+      error = f.gl.NO_ERROR;
+    const pending = new Set<Program>(),
+      deleted = new Set<Program>(),
+      invalidRestores: Program[] = [];
+    const useProgram = f.gl.useProgram.getMockImplementation()!;
+    // Model the GL lifetime that a no-op deleteProgram spy misses: deleting
+    // the current program defers destruction until another program is used.
+    f.gl.deleteProgram.mockImplementation((program: Program) => {
+      pending.add(program);
+      if (program !== current) deleted.add(program);
+    });
+    f.gl.useProgram.mockImplementation((program: Program | null) => {
+      if (program && deleted.has(program)) {
+        invalidRestores.push(program);
+        error = 0x0501; // INVALID_VALUE: the program name no longer exists.
+        return;
+      }
+      if (current && current !== program && pending.has(current)) deleted.add(current);
+      current = program;
+      useProgram(program);
+    });
+    f.gl.getError = vi.fn(() => {
+      const result = error;
+      error = f.gl.NO_ERROR;
+      return result;
+    });
+    const factory = vi
+      .spyOn(prefilterModule, 'createWebOpticalPrefilter')
+      .mockImplementation(() => {
+        const helperProgram = f.gl.createProgram();
+        let disposed = false;
+        return {
+          filter() {
+            // Model the helper's state-preserving program switch. Actual GL
+            // render -> clear -> render coverage lives in the native probe.
+            const previous = current;
+            f.gl.useProgram(helperProgram);
+            f.gl.useProgram(previous);
+            if (f.gl.getError() !== f.gl.NO_ERROR) throw new Error('gpu-prefilter-failed');
+            return { texture: {} as WebGLTexture, release() {} };
+          },
+          dispose() {
+            if (!disposed) f.gl.deleteProgram(helperProgram);
+            disposed = true;
+          },
+        };
+      });
+    try {
+      for (let cycle = 0; cycle < 3; cycle++) {
+        expect(f.program.render(f.frame)).toBe('data:image/png;base64,AA==');
+        expect(invalidRestores).toEqual([]);
+        f.program.clear();
+      }
+      expect(f.program.inspect()).toMatchObject({
+        renders: 3,
+        programBuilds: 3,
+        prefilterProgramBuilds: 3,
+        sourcePreparationCacheEntries: 0,
+      });
+    } finally {
+      f.program.dispose();
+      factory.mockRestore();
+    }
+  });
+
   it('retires the old clear upload slot when GPU paint takes over, including without WeakRef', () => {
     vi.stubGlobal('WeakRef', undefined);
     const f = cachedGpuFixture();

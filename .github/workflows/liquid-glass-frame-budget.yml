@@ -22,6 +22,7 @@ concurrency:
 env:
   BASELINE_SHA: ${{ inputs.baseline_sha || '543c8a2990239dec7c08458a902da3f5a97b49dd' }}
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PROGRAM_REGRESSION_SHA: 19d175f454468fa27364c8283e084f3bb7a1016b
   ASTRO_TELEMETRY_DISABLED: '1'
 jobs:
   matched-browser:
@@ -41,6 +42,11 @@ jobs:
           ref: ${{ env.BASELINE_SHA }}
           path: baseline
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PROGRAM_REGRESSION_SHA }}
+          path: regression-source
+          persist-credentials: false
       - name: Verify exact source revisions
         shell: bash
         run: |
@@ -49,6 +55,7 @@ jobs:
           [[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git -C baseline rev-parse HEAD)" = "$BASELINE_SHA"
           test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git -C regression-source rev-parse HEAD)" = "$PROGRAM_REGRESSION_SHA"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -70,7 +77,8 @@ jobs:
         working-directory: candidate
         run: |
           node --test scripts/analysis/liquid-glass-frame-budget.test.mjs \
-            scripts/analysis/liquid-glass-gpu-prefilter.test.mjs
+            scripts/analysis/liquid-glass-gpu-prefilter.test.mjs \
+            scripts/analysis/liquid-glass-program-clear.test.mjs
       - name: Install and record the same Chinese fonts for both revisions
         timeout-minutes: 3
         run: |
@@ -110,6 +118,16 @@ jobs:
             node --import tsx scripts/analysis/liquid-glass-gpu-prefilter.mjs \
             "$RUNNER_TEMP/liquid-frame-budget/gpu-prefilter" \
             2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/gpu-prefilter.log"
+      - name: Verify program clear against the exact old source
+        working-directory: candidate
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 2m \
+            node --import tsx scripts/analysis/liquid-glass-program-clear.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/program-clear" \
+            "$GITHUB_WORKSPACE/regression-source" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/program-clear.log"
       - name: Retain comparison and propagate evidence failures
         if: always()
         working-directory: candidate

@@ -221,6 +221,10 @@ export function createWebOpticalProgram(
   function clear() {
     canvas.width = 0;
     canvas.height = 0;
+    // GL defers deletion of its current program until it is no longer used.
+    // Unbind before retiring any pipeline/helper so the next preparation cannot
+    // capture, switch away from, then try to restore a now-deleted program.
+    gl?.useProgram(null);
     while (prepared.length) retirePrepared(prepared.length - 1);
     gpuPrefilter?.dispose();
     gpuPrefilter = undefined;
