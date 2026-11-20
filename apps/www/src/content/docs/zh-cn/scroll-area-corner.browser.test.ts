@@ -346,7 +346,13 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
                   `Unsupported computed Thumb color format: ${paint.background}`
                 ).not.toBeNull();
                 expect(alpha, `Ordinary Thumb fill alpha: ${paint.background}`).toBeGreaterThan(0);
-                close(axis === 'vertical' ? geometry.width : geometry.height, 6);
+                // The 10px border-box track has one 1px inward border and
+                // p-px on both sides; the borderless Thumb fills the remaining 7px.
+                // Keep this source-derived so observed track drift cannot mask it.
+                close(
+                  axis === 'vertical' ? geometry.width : geometry.height,
+                  family.thickness - 1 - 2
+                );
               };
               checkOrdinaryPaint(style, box);
               // Counterfactual observations must not erase paint/geometry checks.
