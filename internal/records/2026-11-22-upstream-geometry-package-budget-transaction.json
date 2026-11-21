@@ -1,0 +1,1128 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-22",
+  "kind": "separately reviewable two-entry numeric package-budget continuation",
+  "state": "numeric-only candidate applied; final clean-source and native validation pending",
+  "sourceCheckpoint": "f245fd339e481e682a381ab5c84ef9ccfacf1c10",
+  "sourceTree": "30ff0a0324af56dfad1b41e202f5ff9418b38a4c",
+  "reviewedUpstream": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+  "authority": {
+    "mode": "human-assisted",
+    "modeSource": "current-user",
+    "scope": "Current user requests package-budget governance based on real growth. Root coordinated this exact2-entry candidate; the local independent review supports its arithmetic and evidence. No user acceptance of these exact numbers or GitHub approval is claimed.",
+    "capability": "Already integrated upstream Axis Input contact-basis and Drawer/AlertDialog overlay-role corrections; numeric accounting does not introduce or certify product behavior.",
+    "semanticAnchors": [
+      {
+        "id": "C-AXIS-INPUT-CONTACT-BASIS-0001",
+        "status": "draft"
+      },
+      {
+        "id": "C-AXIS-INPUT-DELTA-BASIS-0001",
+        "status": "draft"
+      },
+      {
+        "id": "C-AXIS-INPUT-DIRECTIONAL-0001",
+        "status": "draft"
+      }
+    ],
+    "lifecycleBoundary": "Existing lifecycle and conformance obligations, including extent observation and composed span behavior, remain unchanged. GPUI touch work is not an input to these probe costs."
+  },
+  "changes": [
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 164500,
+      "newCeiling": 164750,
+      "baselineGzipBytes": 164349,
+      "measuredCandidateGzipBytes": 164569,
+      "observedGrowthBytes": 220,
+      "oldStrictExcessBytes": 69,
+      "previousAbsoluteHeadroomBytes": 151,
+      "newHeadroomBytes": 181,
+      "roundingBytes": 30,
+      "headroomPercentOfMeasurement": 0.109984
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 197500,
+      "newCeiling": 197800,
+      "baselineGzipBytes": 197465,
+      "measuredCandidateGzipBytes": 197732,
+      "observedGrowthBytes": 267,
+      "oldStrictExcessBytes": 232,
+      "previousAbsoluteHeadroomBytes": 35,
+      "newHeadroomBytes": 68,
+      "roundingBytes": 33,
+      "headroomPercentOfMeasurement": 0.03439
+    }
+  ],
+  "unchangedSevenStrictEntries": [
+    {
+      "name": "lucide/icons/x",
+      "ceiling": 3000,
+      "measuredGzip": 2879,
+      "headroom": 121
+    },
+    {
+      "name": "lucide root",
+      "ceiling": 700000,
+      "measuredGzip": 637306,
+      "headroom": 62694
+    },
+    {
+      "name": "core root",
+      "ceiling": 11500,
+      "measuredGzip": 11378,
+      "headroom": 122
+    },
+    {
+      "name": "runtime root",
+      "ceiling": 101500,
+      "measuredGzip": 101402,
+      "headroom": 98
+    },
+    {
+      "name": "adapter-vue root",
+      "ceiling": 163500,
+      "measuredGzip": 163383,
+      "headroom": 117
+    },
+    {
+      "name": "prototypes-base/button",
+      "ceiling": 6000,
+      "measuredGzip": 5274,
+      "headroom": 726
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "ceiling": 7900,
+      "measuredGzip": 7812,
+      "headroom": 88
+    }
+  ],
+  "headroomRationale": "Retain old absolute headroom and round old ceiling plus actual integrated gzip growth up to the next50bytes. React164720→164750 adds30rounding bytes; WC197767→197800 adds33. This is no future-capability allowance. WC198000 would be unnecessary additional reserve.",
+  "historicalBaseline": {
+    "path": "/workspace/scratch/fbd6f62bb640/package-budgets-final-e775cd544.json",
+    "bytes": 1539210,
+    "sha256": "fce7efbf8a5ed1e1ff4d52c34944dff6de8977dc83d73f946dfe746c01430a9a",
+    "source": {
+      "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+      "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7547,
+      "fingerprintSha256": "8708e94c0ebe2633ce73a221f76b935471332bf34f7967b83384811bbf690769",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9"
+    },
+    "canonicalNativeMatch": {
+      "runId": 44945602403,
+      "jobId": 136972171580,
+      "artifactId": 14723137403,
+      "rawReportSha256": "fce7efbf8a5ed1e1ff4d52c34944dff6de8977dc83d73f946dfe746c01430a9a",
+      "meaning": "Canonical native budget artifact was byte-identical to this local baseline report."
+    }
+  },
+  "originalStrictCandidate": {
+    "path": "/workspace/scratch/fbd6f62bb640/final-integrated-strict-budgets/f245fd339e48-20261121T214257157415Z/package-budgets.json",
+    "bytes": 1539215,
+    "sha256": "3707a0ca50cebcc3820d562ce99fb8d408a58d4371d22eecbcb60674c447a7e8",
+    "source": {
+      "head": "f245fd339e481e682a381ab5c84ef9ccfacf1c10",
+      "tree": "30ff0a0324af56dfad1b41e202f5ff9418b38a4c",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7547,
+      "fingerprintSha256": "09c46aeb07c07171e0ed32a4edca6325da08900a22db940deb5f7bf37b874c62",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "f245fd339e481e682a381ab5c84ef9ccfacf1c10"
+    },
+    "actualExitCode": 1,
+    "strictPassed": 7,
+    "strictFailed": 2,
+    "diagnostics": 2,
+    "canonicalStatus": "Local clean strict candidate measurement using the unchanged pinned toolchain; not a GitHub-native f245 run."
+  },
+  "measurementEnvironment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurementParameters": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "strictPolicy": {
+    "mode": "strict",
+    "scope": "whole-entry package budgets"
+  },
+  "originalExecution": {
+    "schemaVersion": 1,
+    "command": [
+      "node",
+      "scripts/analysis/package-budgets.mjs",
+      "--json",
+      "--require-clean",
+      "--expected-sha",
+      "f245fd339e481e682a381ab5c84ef9ccfacf1c10"
+    ],
+    "cwd": "/workspace/scratch/fbd6f62bb640/proto-ui",
+    "expectedSha": "f245fd339e481e682a381ab5c84ef9ccfacf1c10",
+    "reviewedUpstream": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+    "baseline": {
+      "path": "/workspace/scratch/fbd6f62bb640/package-budgets-final-e775cd544.json",
+      "bytes": 1539210,
+      "sha256": "fce7efbf8a5ed1e1ff4d52c34944dff6de8977dc83d73f946dfe746c01430a9a"
+    },
+    "before": {
+      "observedAt": "2026-11-21T21:42:57.184235+00:00",
+      "head": "f245fd339e481e682a381ab5c84ef9ccfacf1c10",
+      "tree": "30ff0a0324af56dfad1b41e202f5ff9418b38a4c",
+      "workingTreeClean": true,
+      "statusPorcelainNul": "",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "startedAt": "2026-11-21T21:42:57.188212+00:00",
+    "finishedAt": "2026-11-21T21:42:59.883076+00:00",
+    "actualExitCode": 1,
+    "after": {
+      "observedAt": "2026-11-21T21:42:59.905673+00:00",
+      "head": "f245fd339e481e682a381ab5c84ef9ccfacf1c10",
+      "tree": "30ff0a0324af56dfad1b41e202f5ff9418b38a4c",
+      "workingTreeClean": true,
+      "statusPorcelainNul": "",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "report": {
+      "path": "/workspace/scratch/fbd6f62bb640/final-integrated-strict-budgets/f245fd339e48-20261121T214257157415Z/package-budgets.json",
+      "bytes": 1539215,
+      "sha256": "3707a0ca50cebcc3820d562ce99fb8d408a58d4371d22eecbcb60674c447a7e8"
+    },
+    "stderr": {
+      "path": "/workspace/scratch/fbd6f62bb640/final-integrated-strict-budgets/f245fd339e48-20261121T214257157415Z/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "wholeElevenMeasuredVectors": [
+    {
+      "kind": "strict",
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 8695,
+      "minifiedAfter": 8695,
+      "minifiedDelta": 0,
+      "gzipBefore": 2879,
+      "gzipAfter": 2879,
+      "gzipDelta": 0,
+      "outputSha256Before": "da30ebe409a83a09d2569fe2a47880a133fcbe4d554d93ea305795356c4fccdb",
+      "outputSha256After": "da30ebe409a83a09d2569fe2a47880a133fcbe4d554d93ea305795356c4fccdb",
+      "outputHashIdentical": true,
+      "closureFingerprintBefore": "6d040b0de14353d51a35e2c195bc5298fc92d8542a7725a844f18057bc9475be",
+      "closureFingerprintAfter": "6d040b0de14353d51a35e2c195bc5298fc92d8542a7725a844f18057bc9475be",
+      "closureInputCountBefore": 50,
+      "closureInputCountAfter": 50,
+      "completeClosureIdentical": true,
+      "completeVectorIdentical": true,
+      "budgetBefore": 3000,
+      "budgetAfter": 3000,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [],
+      "retainedByteChanges": [],
+      "contributionChanges": [],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 4087403,
+      "minifiedAfter": 4087403,
+      "minifiedDelta": 0,
+      "gzipBefore": 637306,
+      "gzipAfter": 637306,
+      "gzipDelta": 0,
+      "outputSha256Before": "eadc64d34ea6f16b5390348d0e237be4bff80fc2450410640f0eb2bc60f2f30c",
+      "outputSha256After": "eadc64d34ea6f16b5390348d0e237be4bff80fc2450410640f0eb2bc60f2f30c",
+      "outputHashIdentical": true,
+      "closureFingerprintBefore": "f644527c0d7c3900a5d9ae6df1cc12542135f6881031da97bb88510262526197",
+      "closureFingerprintAfter": "f644527c0d7c3900a5d9ae6df1cc12542135f6881031da97bb88510262526197",
+      "closureInputCountBefore": 3450,
+      "closureInputCountAfter": 3450,
+      "completeClosureIdentical": true,
+      "completeVectorIdentical": true,
+      "budgetBefore": 700000,
+      "budgetAfter": 700000,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [],
+      "retainedByteChanges": [],
+      "contributionChanges": [],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 35782,
+      "minifiedAfter": 35782,
+      "minifiedDelta": 0,
+      "gzipBefore": 11378,
+      "gzipAfter": 11378,
+      "gzipDelta": 0,
+      "outputSha256Before": "0e3c868d3ef719af46085b83881b15787a94acbaf893566ceae4047ceff72b44",
+      "outputSha256After": "0e3c868d3ef719af46085b83881b15787a94acbaf893566ceae4047ceff72b44",
+      "outputHashIdentical": true,
+      "closureFingerprintBefore": "13271316d5e3ab4e00d14e9b3905bbceda903f7f08cc4b8276fefb8406a7f64d",
+      "closureFingerprintAfter": "13271316d5e3ab4e00d14e9b3905bbceda903f7f08cc4b8276fefb8406a7f64d",
+      "closureInputCountBefore": 46,
+      "closureInputCountAfter": 46,
+      "completeClosureIdentical": true,
+      "completeVectorIdentical": true,
+      "budgetBefore": 11500,
+      "budgetAfter": 11500,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [],
+      "retainedByteChanges": [],
+      "contributionChanges": [],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 391189,
+      "minifiedAfter": 391279,
+      "minifiedDelta": 90,
+      "gzipBefore": 101378,
+      "gzipAfter": 101402,
+      "gzipDelta": 24,
+      "outputSha256Before": "511709be747399faae219deb7d6820b987b08d3a207d8d0b131c11cf7e5027a5",
+      "outputSha256After": "6f28e056c01e19433dee41a03397ee0e682b71e5fc81aaa309327b4778b15e0a",
+      "outputHashIdentical": false,
+      "closureFingerprintBefore": "c292f0743815e0f84f14beb55de28b07f9ef6d45ae4fd4c769db9f4e62af68b5",
+      "closureFingerprintAfter": "388040620d8e5d495b5cf63e647b81f1f89b794b030c3166c9d2adcbb06aaa89",
+      "closureInputCountBefore": 290,
+      "closureInputCountAfter": 290,
+      "completeClosureIdentical": false,
+      "completeVectorIdentical": false,
+      "budgetBefore": 101500,
+      "budgetAfter": 101500,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 1916,
+            "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554",
+            "retainedBytes": 74
+          },
+          "after": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 2318,
+            "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+            "retainedBytes": 164
+          }
+        }
+      ],
+      "retainedByteChanges": [
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": 74,
+          "after": 164,
+          "delta": 90
+        }
+      ],
+      "contributionChanges": [
+        {
+          "path": "packages/modules/overlay",
+          "before": 27378,
+          "after": 27468,
+          "delta": 90
+        }
+      ],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 579574,
+      "minifiedAfter": 580410,
+      "minifiedDelta": 836,
+      "gzipBefore": 164349,
+      "gzipAfter": 164569,
+      "gzipDelta": 220,
+      "outputSha256Before": "7f3c25458c94090be7ea562238297d1dc9051b5bad055dcacc936c34ae3cb928",
+      "outputSha256After": "1c7341a51e2947060e82a5b6e31ad1005e8ceb68df290c92a98340ba04464a92",
+      "outputHashIdentical": false,
+      "closureFingerprintBefore": "f16d892b67dfc42e43556c27b734d5be8e1d6beb689f51bff0d96bcd9cec4776",
+      "closureFingerprintAfter": "ff493669a062e7b9e93a51c72359a14b0c69e9b07d6f6e75aff4546ea4fb973c",
+      "closureInputCountBefore": 337,
+      "closureInputCountAfter": 337,
+      "completeClosureIdentical": false,
+      "completeVectorIdentical": false,
+      "budgetBefore": 164500,
+      "budgetAfter": 164500,
+      "ceilingUnchanged": true,
+      "pass": false,
+      "blocking": true,
+      "overBudgetBytes": 69,
+      "sourceChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 14797,
+            "sourceSha256": "550debfc542caf471535f823cb0985ba7d982a9590d1e623f34cb1d9a25c6ec5",
+            "retainedBytes": 5711
+          },
+          "after": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 17297,
+            "sourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+            "retainedBytes": 6457
+          }
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 1916,
+            "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554",
+            "retainedBytes": 664
+          },
+          "after": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 2318,
+            "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+            "retainedBytes": 754
+          }
+        }
+      ],
+      "retainedByteChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": 5711,
+          "after": 6457,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": 664,
+          "after": 754,
+          "delta": 90
+        }
+      ],
+      "contributionChanges": [
+        {
+          "path": "packages/adapters/base",
+          "before": 69952,
+          "after": 70698,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay",
+          "before": 29191,
+          "after": 29281,
+          "delta": 90
+        }
+      ],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 574954,
+      "minifiedAfter": 575790,
+      "minifiedDelta": 836,
+      "gzipBefore": 163153,
+      "gzipAfter": 163383,
+      "gzipDelta": 230,
+      "outputSha256Before": "90233ad973b25e38f5b5b8fcd47509c9825cafcc90aac2442a6b43eee1a83661",
+      "outputSha256After": "f3464acd23100263e2c0a53c6348eba7f3e5796b6e1089273f49a87b42aa013a",
+      "outputHashIdentical": false,
+      "closureFingerprintBefore": "13c4cffe9955a3cea5e6e826c53da3fd4906ea61c5c360783d505e4153392a06",
+      "closureFingerprintAfter": "fe29d04aa0e6e3bad841eb9cc7472f8c3274ae3cec9a4826f2f6586bf8162a64",
+      "closureInputCountBefore": 336,
+      "closureInputCountAfter": 336,
+      "completeClosureIdentical": false,
+      "completeVectorIdentical": false,
+      "budgetBefore": 163500,
+      "budgetAfter": 163500,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 14797,
+            "sourceSha256": "550debfc542caf471535f823cb0985ba7d982a9590d1e623f34cb1d9a25c6ec5",
+            "retainedBytes": 5711
+          },
+          "after": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 17297,
+            "sourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+            "retainedBytes": 6457
+          }
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 1916,
+            "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554",
+            "retainedBytes": 664
+          },
+          "after": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 2318,
+            "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+            "retainedBytes": 754
+          }
+        }
+      ],
+      "retainedByteChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": 5711,
+          "after": 6457,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": 664,
+          "after": 754,
+          "delta": 90
+        }
+      ],
+      "contributionChanges": [
+        {
+          "path": "packages/adapters/base",
+          "before": 69859,
+          "after": 70605,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay",
+          "before": 29191,
+          "after": 29281,
+          "delta": 90
+        }
+      ],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 678213,
+      "minifiedAfter": 679049,
+      "minifiedDelta": 836,
+      "gzipBefore": 197465,
+      "gzipAfter": 197732,
+      "gzipDelta": 267,
+      "outputSha256Before": "ba333f5cd1b0ce5c45d5e90e18d6cdc4482a5954fbc90067c1ea55d05adf057c",
+      "outputSha256After": "e10c50ec9dccc0ebbc33ab2dc02100be97790d7170fac79bb7ee4291b3c4da51",
+      "outputHashIdentical": false,
+      "closureFingerprintBefore": "bf0140b048bd74fbd691c62e821b44a03bf955861e44e977daeb78af7f2a32db",
+      "closureFingerprintAfter": "90a6e8302348228a4df546879c89fc0dcaf5e1c85479640e9d63ee2578d304d7",
+      "closureInputCountBefore": 364,
+      "closureInputCountAfter": 364,
+      "completeClosureIdentical": false,
+      "completeVectorIdentical": false,
+      "budgetBefore": 197500,
+      "budgetAfter": 197500,
+      "ceilingUnchanged": true,
+      "pass": false,
+      "blocking": true,
+      "overBudgetBytes": 232,
+      "sourceChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 14797,
+            "sourceSha256": "550debfc542caf471535f823cb0985ba7d982a9590d1e623f34cb1d9a25c6ec5",
+            "retainedBytes": 5709
+          },
+          "after": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 17297,
+            "sourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+            "retainedBytes": 6455
+          }
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 1916,
+            "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554",
+            "retainedBytes": 664
+          },
+          "after": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 2318,
+            "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+            "retainedBytes": 754
+          }
+        }
+      ],
+      "retainedByteChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": 5709,
+          "after": 6455,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": 664,
+          "after": 754,
+          "delta": 90
+        }
+      ],
+      "contributionChanges": [
+        {
+          "path": "packages/adapters/base",
+          "before": 66010,
+          "after": 66756,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay",
+          "before": 29195,
+          "after": 29285,
+          "delta": 90
+        }
+      ],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 18158,
+      "minifiedAfter": 18158,
+      "minifiedDelta": 0,
+      "gzipBefore": 5274,
+      "gzipAfter": 5274,
+      "gzipDelta": 0,
+      "outputSha256Before": "6c1567b5fbd8bff9277c6ab5c482b43b1d2bca138593ea6e12d9a82390114e67",
+      "outputSha256After": "6c1567b5fbd8bff9277c6ab5c482b43b1d2bca138593ea6e12d9a82390114e67",
+      "outputHashIdentical": true,
+      "closureFingerprintBefore": "4b0080c3d7258090ad05b486da8a7356f8d70290d0966220646d597f38d61c41",
+      "closureFingerprintAfter": "4b0080c3d7258090ad05b486da8a7356f8d70290d0966220646d597f38d61c41",
+      "closureInputCountBefore": 71,
+      "closureInputCountAfter": 71,
+      "completeClosureIdentical": true,
+      "completeVectorIdentical": true,
+      "budgetBefore": 6000,
+      "budgetAfter": 6000,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [],
+      "retainedByteChanges": [],
+      "contributionChanges": [],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "strict",
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 34533,
+      "minifiedAfter": 34533,
+      "minifiedDelta": 0,
+      "gzipBefore": 7812,
+      "gzipAfter": 7812,
+      "gzipDelta": 0,
+      "outputSha256Before": "14c8420ae3b34a6371ad380a685153b92d89bcdc23fc1ab734581eeddd7ae301",
+      "outputSha256After": "14c8420ae3b34a6371ad380a685153b92d89bcdc23fc1ab734581eeddd7ae301",
+      "outputHashIdentical": true,
+      "closureFingerprintBefore": "ed41ca33b71ef845fcd18fb386322c625bc92c4ad553dacc6a9b32a8dcc26e42",
+      "closureFingerprintAfter": "ed41ca33b71ef845fcd18fb386322c625bc92c4ad553dacc6a9b32a8dcc26e42",
+      "closureInputCountBefore": 80,
+      "closureInputCountAfter": 80,
+      "completeClosureIdentical": true,
+      "completeVectorIdentical": true,
+      "budgetBefore": 7900,
+      "budgetAfter": 7900,
+      "ceilingUnchanged": true,
+      "pass": true,
+      "blocking": false,
+      "overBudgetBytes": 0,
+      "sourceChanges": [],
+      "retainedByteChanges": [],
+      "contributionChanges": [],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "diagnostic",
+      "name": "consumer light-dom button",
+      "entry": "scripts/analysis/fixtures/consumer-light-button.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 708266,
+      "minifiedAfter": 709102,
+      "minifiedDelta": 836,
+      "gzipBefore": 203664,
+      "gzipAfter": 203898,
+      "gzipDelta": 234,
+      "outputSha256Before": "3c8d6f6987a5bb5301b2092634a757b2578151f1d461b243be7844d1feee5041",
+      "outputSha256After": "0cbd8517e818d22fdbb065e2bab9501ed312b3a9e7bde14bc101ec6a6d1a68a4",
+      "outputHashIdentical": false,
+      "closureFingerprintBefore": "b3acc5108fab4d8ccaec9d5f58521841c5c5caba77bb6481c7800d27e11c27d6",
+      "closureFingerprintAfter": "c2a497c0a2138a5f32dfe3982d4b68db0ad0d2b6b8f94c70019d4189cfff1afd",
+      "closureInputCountBefore": 399,
+      "closureInputCountAfter": 399,
+      "completeClosureIdentical": false,
+      "completeVectorIdentical": false,
+      "budgetBefore": null,
+      "budgetAfter": null,
+      "ceilingUnchanged": true,
+      "pass": null,
+      "blocking": null,
+      "overBudgetBytes": null,
+      "sourceChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 14797,
+            "sourceSha256": "550debfc542caf471535f823cb0985ba7d982a9590d1e623f34cb1d9a25c6ec5",
+            "retainedBytes": 5709
+          },
+          "after": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 17297,
+            "sourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+            "retainedBytes": 6455
+          }
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 1916,
+            "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554",
+            "retainedBytes": 664
+          },
+          "after": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 2318,
+            "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+            "retainedBytes": 754
+          }
+        }
+      ],
+      "retainedByteChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": 5709,
+          "after": 6455,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": 664,
+          "after": 754,
+          "delta": 90
+        }
+      ],
+      "contributionChanges": [
+        {
+          "path": "packages/adapters/base",
+          "before": 66010,
+          "after": 66756,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay",
+          "before": 29195,
+          "after": 29285,
+          "delta": 90
+        }
+      ],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    },
+    {
+      "kind": "diagnostic",
+      "name": "consumer direct-shadow button",
+      "entry": "scripts/analysis/fixtures/consumer-shadow-button.ts",
+      "entryUnchanged": true,
+      "minifiedBefore": 708277,
+      "minifiedAfter": 709113,
+      "minifiedDelta": 836,
+      "gzipBefore": 203668,
+      "gzipAfter": 203902,
+      "gzipDelta": 234,
+      "outputSha256Before": "30696970979c760268702a1d8a4ba1d5b83796cc27c4d7d6cb024a5a701e911d",
+      "outputSha256After": "e22bd582c9daf1f2e8f880c0da30465edeb3419a61715e21529ec481e0ae8a73",
+      "outputHashIdentical": false,
+      "closureFingerprintBefore": "63c86e0c65f79b2b0d3b47ce3a0a66305ddc32faf4814fa392fe7fef8f7c1e93",
+      "closureFingerprintAfter": "1ff9b1c9a4f221d74bbae5e9c269454a30633396285f98e88ea1c82d4d99f61f",
+      "closureInputCountBefore": 399,
+      "closureInputCountAfter": 399,
+      "completeClosureIdentical": false,
+      "completeVectorIdentical": false,
+      "budgetBefore": null,
+      "budgetAfter": null,
+      "ceilingUnchanged": true,
+      "pass": null,
+      "blocking": null,
+      "overBudgetBytes": null,
+      "sourceChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 14797,
+            "sourceSha256": "550debfc542caf471535f823cb0985ba7d982a9590d1e623f34cb1d9a25c6ec5",
+            "retainedBytes": 5709
+          },
+          "after": {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sourceBytes": 17297,
+            "sourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+            "retainedBytes": 6455
+          }
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 1916,
+            "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554",
+            "retainedBytes": 664
+          },
+          "after": {
+            "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+            "sourceBytes": 2318,
+            "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+            "retainedBytes": 754
+          }
+        }
+      ],
+      "retainedByteChanges": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "before": 5709,
+          "after": 6455,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "before": 664,
+          "after": 754,
+          "delta": 90
+        }
+      ],
+      "contributionChanges": [
+        {
+          "path": "packages/adapters/base",
+          "before": 66010,
+          "after": 66756,
+          "delta": 746
+        },
+        {
+          "path": "packages/modules/overlay",
+          "before": 29195,
+          "after": 29285,
+          "delta": 90
+        }
+      ],
+      "attributionUnit": "minified bytes before gzip; gzip contributions are not additive"
+    }
+  ],
+  "attribution": {
+    "onlyChangedInputs": [
+      {
+        "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+        "before": {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "sourceBytes": 14797,
+          "sourceSha256": "550debfc542caf471535f823cb0985ba7d982a9590d1e623f34cb1d9a25c6ec5"
+        },
+        "after": {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "sourceBytes": 17297,
+          "sourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+        },
+        "reviewedUpstream": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+        "upstreamSourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+        "candidateGitObjectSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+        "candidateInputMatchesGitObject": true,
+        "provenance": "matches-reviewed-upstream",
+        "relevantUpstreamCommits": [
+          "258a922b6c75897cbd97486323363a381b33cfc2\tfix(adapter): mirror span composition in untransformed contact basis",
+          "9a86fcfa1f752f4a55699fe83fc180a59b5d70d5\tfix(adapter): compute layout basis only for cancel-on-extent-change",
+          "c3345e82f7204201dda7663ca692654e4f1a4eac\tfix(adapter): compare untransformed layout extents for cancel-on-extent-change"
+        ]
+      },
+      {
+        "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+        "before": {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "sourceBytes": 1916,
+          "sourceSha256": "a1876270f11c6ab900162fce5c4a42bb6b252b5810d97a6ec0af277bfaf00554"
+        },
+        "after": {
+          "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+          "sourceBytes": 2318,
+          "sourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd"
+        },
+        "reviewedUpstream": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+        "upstreamSourceSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+        "candidateGitObjectSha256": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+        "candidateInputMatchesGitObject": true,
+        "provenance": "matches-reviewed-upstream",
+        "relevantUpstreamCommits": [
+          "7a1a95f4164b3dc3964e0f3ea77c4090b70d3a8f\tfix(overlay): give drawer and alert-dialog masks the dialog's below-content layer offset"
+        ]
+      }
+    ],
+    "adapterRetainedMinifiedGrowthBytes": {
+      "axisInputHost": 746,
+      "overlayRoleOffsets": 90,
+      "total": 836
+    },
+    "runtimeRetainedMinifiedGrowthBytes": 90,
+    "gzipBoundary": "Only minified746+90 is additive; all gzip deltas are actually measured whole-entry combined artifacts.",
+    "inputSetsUnchangedForAllEleven": true,
+    "uniqueInputCount": 3824,
+    "fullGitObjectProof": {
+      "file": "complete-closure-git-equivalence.json",
+      "bytes": 2068443,
+      "sha256": "753d43a21c6c9ae79a30c457f2cc3a8d356d3f3841ef42b11b4468c77a841609",
+      "candidateInputMatches": 3824,
+      "candidateMismatches": 0,
+      "upstreamInputMatches": 3824,
+      "upstreamMismatches": 0,
+      "method": "Read every unique measured source input from both immutable Git revisions with git cat-file --batch; compare byte length and SHA256. Not a separate upstream build or native f245 execution."
+    },
+    "sourcePurpose": [
+      {
+        "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+        "purpose": "Use transform-independent border-box layout extents for cancel-on-extent-change while preserving composed target/handle/border/padding and summed delta-basis extents. Ordinary transformed repaint noise must not cancel a drag; real extent changes still cancel.",
+        "upstreamCommits": [
+          "c3345e82f7204201dda7663ca692654e4f1a4eac",
+          "9a86fcfa1f752f4a55699fe83fc180a59b5d70d5",
+          "258a922b6c75897cbd97486323363a381b33cfc2"
+        ]
+      },
+      {
+        "path": "packages/modules/overlay/src/web/z-index-layer-scheduler.ts",
+        "purpose": "Give Drawer and AlertDialog mask/content pairs the existing Dialog1000/1010 offsets so a later-attached mask cannot paint above and intercept the intended panel/handle.",
+        "upstreamCommits": ["7a1a95f4164b3dc3964e0f3ea77c4090b70d3a8f"]
+      }
+    ],
+    "investigatedCauses": [
+      "No added or removed closure input path in any of11 probes.",
+      "All3824 unique closure hashes match the already merged reviewedmain6042; none are candidate-specific.",
+      "All non-axis/overlay retained-byte contributions are unchanged, including runtime package contributions.",
+      "No new Runtime copy, import closure, generated-token set, icon/font/binary asset or material sink input.",
+      "Node/zlib/esbuild/platform/arch, external dependencies, ES2020 target, minification and gzip9 parameters are identical to baseline."
+    ],
+    "alternatives": [
+      {
+        "option": "Retain caps unchanged",
+        "result": "Actual strict failure remains React69B and WC232B over; cannot claim restored strict green."
+      },
+      {
+        "option": "Remove or revert new axis/overlay semantics",
+        "result": "Would discard already integrated upstream drag and layer corrections; not justified as size cleanup."
+      },
+      {
+        "option": "Remove accidental import/Runtime/token/binary growth",
+        "result": "Complete closure and retained-byte comparison finds no such added cause."
+      },
+      {
+        "option": "Further geometry factoring or role-map encoding",
+        "result": "No measured semantics-preserving saving is established. These would be source changes requiring their own conformance and integrated/native verification; do not change product behavior to chase gzip."
+      },
+      {
+        "option": "WC198000 suggested round cap",
+        "result": "Would leave268B headroom;197800 suffices with68B and preserves the old35B margin plus33B rounding, so propose197800."
+      },
+      {
+        "option": "Exact-fit ceilings",
+        "result": "Would leave zero headroom and discard the prior bounded margin; proposed rule preserves that absolute margin and adds less than50B of rounding."
+      }
+    ]
+  },
+  "validation": {
+    "originalStrictResult": {
+      "actualExitCode": 1,
+      "strictPassed": 7,
+      "strictFailed": 2,
+      "diagnostics": 2
+    },
+    "policyEvidenceControls": {
+      "argv": [
+        "node",
+        "--test",
+        "scripts/analysis/test/package-budget-policy.test.mjs",
+        "scripts/analysis/test/package-budget-evidence.test.mjs"
+      ],
+      "cwd": "/workspace/scratch/fbd6f62bb640/proto-ui",
+      "startedAt": "2026-11-21T21:47:41.244238+00:00",
+      "finishedAt": "2026-11-21T21:47:44.966480+00:00",
+      "actualExitCode": 0,
+      "sourceState": "Working tree with only2numeric edits before root transaction commit; not a clean budget measurement.",
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/final-integrated-strict-budgets/f245fd339e48-20261121T214257157415Z/numeric-policy-evidence-controls.log",
+        "bytes": 1619,
+        "sha256": "c008464f6b8e4a1d8cb74e336b2ec0695145771410706d00ad4dc192258b859b"
+      },
+      "tests": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0
+    },
+    "localIndependentProposalReview": {
+      "file": "independent-numeric-review.json",
+      "bytes": 8694,
+      "sha256": "2ca06ec3415cade62052ec0fc626dd59f4e27fc86b6d85fa28600af3209f705d",
+      "verdict": "Numeric-only164750/197800 is supported for implementation subject to fresh clean-source and final native strict validation; old failed receipt must remain unchanged.",
+      "kind": "independent local numeric proposal review, not implementation or GitHub approval",
+      "noUnexpectedSourceOrRetainedChanges": true
+    },
+    "postEditExactDiffReview": "pending readback of the frozen two-literal patch and records",
+    "postEditCleanMeasurement": "pending root numeric transaction commit; do not execute --require-clean while dirty",
+    "canonicalFinalCandidate": "pending final integrated GitHub-native strict gate. e775 baseline is native-byte-matched; f245 red is local exact-clean evidence, not canonical f245 CI."
+  },
+  "retainedEvidence": {
+    "directory": "final-integrated-strict-budgets/f245fd339e48-20261121T214257157415Z",
+    "files": [
+      {
+        "file": "package-budgets.json",
+        "bytes": 1539215,
+        "sha256": "3707a0ca50cebcc3820d562ce99fb8d408a58d4371d22eecbcb60674c447a7e8"
+      },
+      {
+        "file": "execution.json",
+        "bytes": 1884,
+        "sha256": "9e24b1c08c57c340885fdbda521b0fb12a3955140dc27d2d67d1bf84635fef1c"
+      },
+      {
+        "file": "comparison-to-e775.json",
+        "bytes": 32394,
+        "sha256": "7913b201e1a63363e2055a7de95545625d5705b285fa8a4764183e7c7f152fab"
+      },
+      {
+        "file": "complete-closure-git-equivalence.json",
+        "bytes": 2068443,
+        "sha256": "753d43a21c6c9ae79a30c457f2cc3a8d356d3f3841ef42b11b4468c77a841609"
+      },
+      {
+        "file": "bounded-budget-transaction-proposal.json",
+        "bytes": 15614,
+        "sha256": "323daf0e2a16fe082881a9cbe381f8e6f3639396e12a103dde1f2a4b2c1964c5"
+      },
+      {
+        "file": "independent-numeric-review.json",
+        "bytes": 8694,
+        "sha256": "2ca06ec3415cade62052ec0fc626dd59f4e27fc86b6d85fa28600af3209f705d"
+      },
+      {
+        "file": "numeric-policy-evidence-controls.log",
+        "bytes": 1619,
+        "sha256": "c008464f6b8e4a1d8cb74e336b2ec0695145771410706d00ad4dc192258b859b"
+      },
+      {
+        "file": "numeric-policy-evidence-controls-receipt.json",
+        "bytes": 735,
+        "sha256": "c1031f7fad03a68fcc3e3344e35803de28ebe80a25170972cc12827538f9f707"
+      }
+    ]
+  },
+  "numericSourceAfter": {
+    "path": "scripts/analysis/package-budgets.mjs",
+    "file": "package-budgets.mjs",
+    "bytes": 10782,
+    "sha256": "02265a4c522550ae22b5915860710756da74c11224a4499b241238e3b26d3e23"
+  },
+  "boundaries": [
+    "Exactlytwo numeric literals change; seven other caps, nine whole-entry probes, two diagnostic profiles, schema, externals, minifier, gzip, failure policy and require-clean/expected-sha source binding remain.",
+    "Originalf245 strict exit1, old ceilings, artifacts and source receipts remain unchanged.",
+    "A new final clean measurement must reproduce all11 minified/gzip/outputhash/closure objects while allowing only these2 budget/pass classifications and new source metadata to change.",
+    "No native green, release acceptance, lifecycle promotion, GitHub approval or future cost waiver is implied."
+  ],
+  "rollbackBoundary": "Revert only these two numeric literals and this transaction record to restore164500/197500; actual f245 overages remain failures. Do not revert the independent upstream geometry/overlay corrections or regression governance."
+}
