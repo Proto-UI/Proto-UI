@@ -175,6 +175,57 @@ function createHarness(
 }
 
 describe('module-scroll: fake host contract', () => {
+  it('synchronizes only axes in a live callback and leaves observed facts to the host', () => {
+    const h = createHarness();
+    expect(() => h.surface.sync({ axes: 'horizontal' })).toThrow(/illegal phase/);
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    expect(() => h.surface.configure({ axes: 'horizontal' })).toThrow(/illegal phase/);
+    h.surface.sync({ axes: 'horizontal' });
+    expect(h.connections).toHaveLength(2);
+    expect(h.connections[1].config).toEqual({
+      axes: 'horizontal',
+      projection: 'system',
+      requireProjection: undefined,
+      endFollow: { mode: 'while-at-end', axis: 'vertical' },
+    });
+    expect(h.surface.axes.get()).toBe('vertical');
+    h.connections[1].onFacts({ ...snapshot('off', 'idle'), axes: 'horizontal' });
+    expect(h.surface.axes.get()).toBe('horizontal');
+    h.surface.sync({});
+    h.surface.sync({ axes: 'horizontal' });
+    expect(h.connections).toHaveLength(2);
+    expect(() => h.surface.sync({ axes: 'diagonal' as any })).toThrow(/sync axes/);
+  });
+
+  it('records detached axis changes without updating retired leases or accepting stale facts', () => {
+    const h = createHarness();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    h.module.hooks.onMountPhase?.('detached', 1);
+    h.surface.sync({ axes: 'horizontal' });
+    expect(h.connections).toHaveLength(1);
+    h.connections[0].onFacts(snapshot('following', 'applied'));
+    expect(h.surface.projection.get()).toBe('unresolved');
+    h.module.hooks.onMountPhase?.('mounted', 2);
+    expect(h.connections[1].config.axes).toBe('horizontal');
+    expect(h.getDisposed()).toBe(1);
+  });
+
+  it('retains an axis change made synchronously while initial host facts are delivered', () => {
+    const h = createHarness(true, snapshot('following', 'applied'));
+    h.surface.vertical.position.watch((_run, event) => {
+      if (event.type === 'next') h.surface.sync({ axes: 'horizontal' });
+    });
+    h.sys.phase = 'callback';
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    expect(h.connections.map((connection) => connection.config.axes)).toEqual([
+      'vertical',
+      'horizontal',
+    ]);
+    expect(h.getDisposed()).toBe(0);
+  });
+
   it('projects fake-host facts and routes the semantic request without host geometry', () => {
     const harness = createHarness();
     harness.module.hooks.onMountPhase?.('mounted', 1);

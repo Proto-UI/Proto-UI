@@ -3,6 +3,27 @@ import { createA11ySemanticObjectRef } from '@proto.ui/core';
 import { createWebA11yProjector } from '../src/web';
 
 describe('module-a11y web projector', () => {
+  it('projects boolean multiple selection and retires only its owned attribute', () => {
+    const target = document.createElement('div');
+    target.setAttribute('aria-multiselectable', 'false');
+    const project = createWebA11yProjector(target);
+    const snapshot = {
+      objectRef: createA11ySemanticObjectRef(),
+      role: 'grid',
+      states: { multiSelectable: true as unknown },
+      actions: {},
+      relations: {},
+    };
+    project(snapshot);
+    expect(target.getAttribute('aria-multiselectable')).toBe('true');
+    project({ ...snapshot, states: { multiSelectable: false } });
+    expect(target.getAttribute('aria-multiselectable')).toBe('false');
+    project({ ...snapshot, states: { multiSelectable: 'yes' } });
+    expect(target.hasAttribute('aria-multiselectable')).toBe(false);
+    project(snapshot);
+    project.dispose?.();
+    expect(target.getAttribute('aria-multiselectable')).toBe('false');
+  });
   it('rebinds heading role and level without leaving stale attributes', () => {
     const first = document.createElement('div');
     const second = document.createElement('div');

@@ -17,6 +17,17 @@ import {
 import { asButton } from '../button';
 import { callOwner, readPartState } from '../collection-controls/shared';
 import {
+  isCalendarValues,
+  isCalendarRange,
+  normalizeCalendarValues,
+  normalizeCalendarRange,
+  calendarValuesAvailable,
+  calendarRangeAvailable,
+  calendarRangeNights,
+  calendarSelectionKey,
+  calendarDaySelection,
+} from './selection';
+import {
   addDays,
   addMonths,
   dateAvailable,
@@ -50,6 +61,9 @@ import type {
   CalendarPreviousProps,
   CalendarPreviousExposes,
   CalendarNavigationAsHookContract,
+  CalendarSelectionMode,
+  CalendarSelectionReason,
+  CalendarRange,
 } from './types';
 export * from './model';
 export * from './caption-composition';
@@ -77,7 +91,12 @@ export const CALENDAR_FAMILY = createAnatomyFamily('base-calendar', {
   ],
 });
 type CalendarContext = {
+  mode: CalendarSelectionMode;
   value: string;
+  values: string[];
+  range: CalendarRange;
+  selectionRequestId: number;
+  selectionCommit: { id: number; complete: boolean; reason: CalendarSelectionReason } | null;
   month: string;
   min: string;
   max: string;
@@ -95,7 +114,12 @@ type CalendarContext = {
 };
 export const CALENDAR_CONTEXT = createContextKey<CalendarContext>('base-calendar');
 const initial: CalendarContext = {
+  mode: 'single',
   value: '',
+  values: [],
+  range: {},
+  selectionRequestId: 0,
+  selectionCommit: null,
   month: '1970-01',
   min: '',
   max: '',
@@ -115,8 +139,17 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'root' });
   asCollection().configure({ family: CALENDAR_FAMILY, itemRole: 'day' });
   def.props.define({
+    mode: { type: 'enum', options: ['single', 'multiple', 'range'] },
     value: { type: 'string' },
     defaultValue: { type: 'string' },
+    values: { type: 'object', validator: isCalendarValues },
+    defaultValues: { type: 'object', validator: isCalendarValues },
+    range: { type: 'object', validator: isCalendarRange },
+    defaultRange: { type: 'object', validator: isCalendarRange },
+    minSelected: { type: 'number', validator: (n) => Number.isSafeInteger(n) && n >= 0 },
+    maxSelected: { type: 'number', validator: (n) => Number.isSafeInteger(n) && n >= 0 },
+    minNights: { type: 'number', validator: (n) => Number.isSafeInteger(n) && n >= 0 },
+    maxNights: { type: 'number', validator: (n) => Number.isSafeInteger(n) && n >= 0 },
     month: { type: 'string' },
     defaultMonth: { type: 'string' },
     min: { type: 'string' },
@@ -135,7 +168,12 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     direction: { type: 'enum', options: ['ltr', 'rtl'] },
   });
   def.props.setDefaults({
+    mode: 'single',
     defaultValue: '',
+    defaultValues: [],
+    defaultRange: {},
+    minSelected: 0,
+    minNights: 0,
     min: '',
     max: '',
     unavailable: [],
@@ -149,6 +187,9 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     direction: 'ltr',
   });
   const value = def.state.string('value', ''),
+    mode = def.state.string('mode', 'single'),
+    selectedCount = def.state.numberDiscrete('selectedCount', 0),
+    rangeComplete = def.state.bool('rangeComplete', false),
     month = def.state.string('month', '1970-01'),
     label = def.state.string('a11yLabel', 'Calendar'),
     disabled = def.state.bool('disabled', false),
@@ -160,22 +201,48 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.context.provide(CALENDAR_CONTEXT, initial);
   def.context.subscribe(CALENDAR_CONTEXT);
   def.expose.state('value', value);
+  def.expose.state('mode', mode);
+  def.expose.state('selectedCount', selectedCount);
+  def.expose.state('rangeComplete', rangeComplete);
   def.expose.state('month', month);
   def.expose.state('disabled', disabled);
   def.expose.state('direction', direction);
   def.expose.state('weekCount', weekCount);
   def.expose.event('valueChange', { payload: 'json' });
+  def.expose.event('valuesChange', { payload: 'json' });
+  def.expose.event('rangeChange', { payload: 'json' });
   def.expose.event('monthChange', { payload: 'json' });
   let owner: RunHandle<CalendarRootProps> | null = null;
   let viewEpoch = 0;
   let pendingNavigation: { month: string; date: string; fromMonth: string } | null = null;
   let focusRequestId = 0;
+  let values: string[] = [];
+  let range: CalendarRange = {};
+  let selectionId = 0;
+  let publicationId = 0;
+  let pendingSelection: {
+    id: number;
+    mode: CalendarSelectionMode;
+    expected: string;
+    previous: string;
+    complete: boolean;
+    reason: CalendarSelectionReason;
+    allowMinimumProgress: boolean;
+  } | null = null;
+  def.expose.method('getValues', () => [...values]);
+  def.expose.method('getRange', () => ({ ...range }));
   const publish = (run: RunHandle<CalendarRootProps>, active?: string) => {
     const epoch = viewEpoch;
+    const publication = ++publicationId;
     const p = run.props.get(),
       old = run.context.read(CALENDAR_CONTEXT);
     const next: CalendarContext = {
+      mode: p.mode ?? 'single',
       value: value.get(),
+      values: [...values],
+      range: { ...range },
+      selectionRequestId: selectionId,
+      selectionCommit: old.selectionCommit,
       month: month.get(),
       min: p.min ?? '',
       max: p.max ?? '',
@@ -193,22 +260,79 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       active: active ?? old.active,
       focusRequest: null,
     };
+    const pending = pendingSelection;
+    let completedSelection = false;
+    if (pending) {
+      const key = calendarSelectionKey(next.mode, next.value, next.values, next.range);
+      const eligible =
+        !next.disabled &&
+        !next.readOnly &&
+        next.mode === pending.mode &&
+        (next.mode === 'multiple'
+          ? calendarValuesAvailable(next.values, p, pending.allowMinimumProgress)
+          : next.mode === 'range'
+            ? calendarRangeAvailable(next.range, p)
+            : dateAvailable(next.value, next.min, next.max, next.unavailable));
+      if (eligible && key === pending.expected) {
+        next.selectionCommit = {
+          id: pending.id,
+          complete: pending.complete,
+          reason: pending.reason,
+        };
+        completedSelection = true;
+      } else if (
+        next.disabled ||
+        next.readOnly ||
+        next.mode !== pending.mode ||
+        key !== pending.previous
+      ) {
+        pendingSelection = null;
+      }
+    }
+    mode.set(next.mode, 'calendar selection mode');
+    if (owner !== run || viewEpoch !== epoch || publication !== publicationId) return;
+    selectedCount.set(
+      next.mode === 'multiple'
+        ? next.values.length
+        : next.mode === 'range'
+          ? next.range.to
+            ? calendarRangeNights(next.range) + 1
+            : next.range.from
+              ? 1
+              : 0
+          : next.value
+            ? 1
+            : 0,
+      'calendar selected count'
+    );
+    if (owner !== run || viewEpoch !== epoch || publication !== publicationId) return;
+    rangeComplete.set(
+      next.mode === 'range' && !!next.range.from && !!next.range.to,
+      'calendar range completeness'
+    );
+    if (owner !== run || viewEpoch !== epoch || publication !== publicationId) return;
     weekCount.set(next.weekCount, 'calendar visible week count');
-    if (owner !== run || viewEpoch !== epoch) return;
+    if (owner !== run || viewEpoch !== epoch || publication !== publicationId) return;
     const navigation = pendingNavigation;
     const acceptedNavigation = navigation?.month === next.month && !next.disabled;
     if (acceptedNavigation) next.active = navigation!.date;
     if (navigation && (acceptedNavigation || next.disabled || next.month !== navigation.fromMonth))
       pendingNavigation = null;
+    const selectedDate =
+      next.mode === 'multiple'
+        ? (next.values[0] ?? '')
+        : next.mode === 'range'
+          ? (next.range.from ?? '')
+          : next.value;
     if (
       !next.active ||
       next.active.slice(0, 7) !== next.month ||
       !dateAvailable(next.active, next.min, next.max, next.unavailable)
     )
       next.active =
-        next.value.slice(0, 7) === next.month &&
-        dateAvailable(next.value, next.min, next.max, next.unavailable)
-          ? next.value
+        selectedDate.slice(0, 7) === next.month &&
+        dateAvailable(selectedDate, next.min, next.max, next.unavailable)
+          ? selectedDate
           : (monthDays(next.month, next.weekStartsOn, next.fixedWeeks).find(
               (date) =>
                 date.slice(0, 7) === next.month &&
@@ -222,6 +346,9 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
         .some((part) => readPartState(part, 'focused') === true)
     )
       next.focusRequest = { id: ++focusRequestId, date: next.active };
+    // State observers may synchronously publish a newer owner snapshot above.
+    // Consume acceptance only once this publication still owns the context write.
+    if (completedSelection && pendingSelection === pending) pendingSelection = null;
     if (JSON.stringify(old) !== JSON.stringify(next)) run.context.update(CALENDAR_CONTEXT, next);
   };
   const requestMonth = (next: string, navigationDate?: string) => {
@@ -248,28 +375,89 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     return true;
   };
   def.expose.method('requestMonth', requestMonth);
-  def.expose.method('requestValue', (next: string) => {
+  const requestSelection = (
+    nextValue: string,
+    nextValues: string[],
+    nextRange: CalendarRange,
+    reason: CalendarSelectionReason,
+    active?: string
+  ) => {
     if (!owner) return false;
     const current = owner,
       epoch = viewEpoch;
     const c = current.context.read(CALENDAR_CONTEXT);
+    const p = current.props.get();
+    const previous = calendarSelectionKey(c.mode, c.value, c.values, c.range);
+    const expected = calendarSelectionKey(c.mode, nextValue, nextValues, nextRange);
+    const allowMinimumProgress =
+      c.mode === 'multiple' && active !== undefined && nextValues.length === c.values.length + 1;
+    if (c.disabled || c.readOnly || expected === previous) return false;
     if (
-      c.disabled ||
-      c.readOnly ||
-      !dateAvailable(next, c.min, c.max, c.unavailable) ||
-      next === value.get()
+      c.mode === 'multiple'
+        ? !calendarValuesAvailable(nextValues, p, allowMinimumProgress)
+        : c.mode === 'range'
+          ? !calendarRangeAvailable(nextRange, p)
+          : !dateAvailable(nextValue, c.min, c.max, c.unavailable)
     )
       return false;
+    const id = ++selectionId;
+    pendingSelection = {
+      id,
+      mode: c.mode,
+      previous,
+      expected,
+      complete: c.mode === 'single' || (c.mode === 'range' && !!nextRange.from && !!nextRange.to),
+      reason,
+      allowMinimumProgress,
+    };
     pendingNavigation = null;
-    if (!current.props.isProvided('value')) value.set(next, 'calendar date request');
-    if (owner !== current || viewEpoch !== epoch) return true;
-    publish(current, next);
-    if (owner !== current || viewEpoch !== epoch) return true;
-    requestMonth(next.slice(0, 7));
-    if (owner !== current || viewEpoch !== epoch) return true;
-    current.expose.emit('valueChange', { value: next });
+    if (c.mode === 'multiple') {
+      if (!current.props.isProvided('values')) values = [...nextValues];
+    } else if (c.mode === 'range') {
+      if (!current.props.isProvided('range')) range = { ...nextRange };
+    } else if (!current.props.isProvided('value')) value.set(nextValue, 'calendar date request');
+    if (owner !== current || viewEpoch !== epoch || selectionId !== id) return true;
+    publish(current, active);
+    if (owner !== current || viewEpoch !== epoch || selectionId !== id) return true;
+    if (active) requestMonth(active.slice(0, 7));
+    if (owner !== current || viewEpoch !== epoch || selectionId !== id) return true;
+    if (c.mode === 'multiple') current.expose.emit('valuesChange', { values: [...nextValues] });
+    else if (c.mode === 'range') current.expose.emit('rangeChange', { range: { ...nextRange } });
+    else current.expose.emit('valueChange', { value: nextValue });
     return true;
+  };
+  def.expose.method('requestValues', (next: readonly string[]) => {
+    if (!owner || owner.props.get().mode !== 'multiple' || !isCalendarValues(next)) return false;
+    return requestSelection(value.get(), normalizeCalendarValues(next), range, 'programmatic');
   });
+  def.expose.method('requestRange', (next: CalendarRange) => {
+    if (!owner || owner.props.get().mode !== 'range' || !isCalendarRange(next)) return false;
+    return requestSelection(value.get(), values, normalizeCalendarRange(next), 'programmatic');
+  });
+  def.expose.method(
+    'requestValue',
+    (next: string, inputReason: CalendarSelectionReason = 'programmatic') => {
+      if (!owner || typeof next !== 'string' || !parseDate(next)) return false;
+      const c = owner.context.read(CALENDAR_CONTEXT);
+      if (!dateAvailable(next, c.min, c.max, c.unavailable)) return false;
+      const reason =
+        inputReason === 'pointer' || inputReason === 'keyboard' ? inputReason : 'programmatic';
+      if (c.mode === 'multiple') {
+        const nextValues = c.values.includes(next)
+          ? c.values.filter((date) => date !== next)
+          : normalizeCalendarValues([...c.values, next]);
+        return requestSelection(c.value, nextValues, c.range, reason, next);
+      }
+      if (c.mode === 'range') {
+        const nextRange =
+          !c.range.from || c.range.to
+            ? { from: next }
+            : normalizeCalendarRange({ from: c.range.from, to: next });
+        return requestSelection(c.value, [...c.values], nextRange, reason, next);
+      }
+      return requestSelection(next, [...c.values], c.range, reason, next);
+    }
+  );
   const sync = (run: RunHandle<CalendarRootProps>, created = false) => {
     owner = run;
     const p = run.props.get();
@@ -278,10 +466,24 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
         (run.props.isProvided('value') ? p.value : p.defaultValue) ?? '',
         'calendar owner value'
       );
+    if (created || run.props.isProvided('values'))
+      values = normalizeCalendarValues(
+        (run.props.isProvided('values') ? p.values : p.defaultValues) ?? []
+      );
+    if (created || run.props.isProvided('range'))
+      range = normalizeCalendarRange(
+        (run.props.isProvided('range') ? p.range : p.defaultRange) ?? {}
+      );
     if (created || run.props.isProvided('month')) {
+      const selectedDate =
+        p.mode === 'multiple'
+          ? (values[0] ?? '')
+          : p.mode === 'range'
+            ? (range.from ?? '')
+            : value.get();
       const candidate =
         (run.props.isProvided('month') ? p.month : p.defaultMonth) ??
-        (value.get().slice(0, 7) || p.today?.slice(0, 7) || '1970-01');
+        (selectedDate.slice(0, 7) || p.today?.slice(0, 7) || '1970-01');
       month.set(parseDate(`${candidate}-01`) ? candidate : '1970-01', 'calendar owner month');
     }
     label.set(p.a11yLabel ?? 'Calendar', 'calendar accessible name');
@@ -295,9 +497,11 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.lifecycle.onUnmounted(() => {
     viewEpoch++;
     pendingNavigation = null;
+    pendingSelection = null;
     owner = null;
   });
   def.lifecycle.onBeforeDispose(() => {
+    pendingSelection = null;
     owner = null;
   });
 }
@@ -324,6 +528,10 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
   def.props.setDefaults({ date: '', offset: 0, disabled: false });
   const date = def.state.string('date', ''),
     selected = def.state.bool('selected', false),
+    rangeStart = def.state.bool('rangeStart', false),
+    rangeEnd = def.state.bool('rangeEnd', false),
+    rangeMiddle = def.state.bool('rangeMiddle', false),
+    rangePending = def.state.bool('rangePending', false),
     disabled = def.state.bool('disabled', false),
     outside = def.state.bool('outside', false),
     hidden = def.state.bool('hidden', false),
@@ -350,6 +558,10 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
   for (const [name, state] of Object.entries({
     date,
     selected,
+    rangeStart,
+    rangeEnd,
+    rangeMiddle,
+    rangePending,
     disabled,
     outside,
     hidden,
@@ -373,7 +585,12 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
     const changed = next !== date.get();
     date.set(next, 'calendar day date');
     hidden.set(!next, 'calendar unused capacity');
-    selected.set(!!next && next === c.value, 'calendar selected date');
+    const selection = calendarDaySelection(next, c.mode, c.value, c.values, c.range);
+    selected.set(selection.selected, 'calendar selected date');
+    rangeStart.set(selection.rangeStart, 'calendar range start');
+    rangeEnd.set(selection.rangeEnd, 'calendar range end');
+    rangeMiddle.set(selection.rangeMiddle, 'calendar range middle');
+    rangePending.set(selection.rangePending, 'calendar incomplete range');
     outside.set(next.slice(0, 7) !== c.month, 'calendar outside month');
     today.set(!!next && next === c.today, 'calendar current date');
     current.set(today.get() ? 'date' : 'false', 'calendar current date semantics');
@@ -426,9 +643,16 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
   def.event.on('pointer.leave', clearInteraction);
   def.event.on('pointer.cancel', clearInteraction);
   def.event.on('press.cancel', clearInteraction);
-  def.event.on('press.commit', (run) => {
+  def.event.on('press.commit', (run, event) => {
     pressed.set(false, 'calendar day commit');
-    if (!disabled.get()) callOwner(run, CALENDAR_FAMILY, 'requestValue', date.get());
+    if (!disabled.get())
+      callOwner(
+        run,
+        CALENDAR_FAMILY,
+        'requestValue',
+        date.get(),
+        event.key ? 'keyboard' : 'pointer'
+      );
   });
   def.event.on('key.down', (run, event) => {
     if (!focus.focused.get() || disabled.get() || event.ctrlKey || event.metaKey || event.altKey)
@@ -483,7 +707,18 @@ export const asCalendarDay = defineAsHook<
 export const calendarDay = definePrototype({ name: 'base-calendar-day', setup: setupDay });
 function setupGrid(def: DefHandle<CalendarGridProps, CalendarGridExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'grid' });
-  asAccessible().role('grid');
+  const multiselectable = def.state.bool('multiselectable', false);
+  const a11y = asAccessible();
+  a11y.role('grid');
+  a11y.state('multiSelectable', multiselectable);
+  const sync = (run: RunHandle<CalendarGridProps>) =>
+    multiselectable.set(
+      run.context.read(CALENDAR_CONTEXT).mode !== 'single',
+      'calendar grid selection mode'
+    );
+  def.context.subscribe(CALENDAR_CONTEXT, sync);
+  def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
 }
 function setupRow(def: DefHandle<CalendarRowProps, CalendarRowExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'row' });

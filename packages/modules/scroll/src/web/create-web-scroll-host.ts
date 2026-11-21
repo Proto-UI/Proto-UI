@@ -63,6 +63,10 @@ const clampRatio = (value: number) =>
   Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
 // Existing discrete wheel/key classification, separate from contact lifetime.
 const DISCRETE_READER_INTENT_WINDOW_MS = 250;
+const horizontalSign = (target: Element): 1 | -1 =>
+  target.ownerDocument.defaultView?.getComputedStyle(target).direction === 'rtl' ? -1 : 1;
+const horizontalOffset = (target: HTMLElement): number =>
+  target.scrollLeft * horizontalSign(target);
 const BASE_CONTENT_OBSERVER_OPTIONS = Object.freeze({ childList: true });
 const END_FOLLOW_CONTENT_OBSERVER_OPTIONS = Object.freeze({
   attributes: true,
@@ -93,7 +97,7 @@ function resolveRequestOffset(target: HTMLElement, request: ScrollSurfacePositio
   const viewport = horizontal ? target.clientWidth : target.clientHeight;
   const extent = horizontal ? target.scrollWidth : target.scrollHeight;
   const range = Math.max(0, extent - viewport);
-  const current = horizontal ? target.scrollLeft : target.scrollTop;
+  const current = horizontal ? horizontalOffset(target) : target.scrollTop;
   let next = current;
   if (request.kind === 'by') next += request.delta;
   if (request.kind === 'page') next += request.direction === 'after' ? viewport : -viewport;
@@ -124,7 +128,7 @@ function applyRequest(target: HTMLElement, request: ScrollSurfacePositionRequest
     const authoredScrollBehaviorPriority = target.style.getPropertyPriority('scroll-behavior');
     target.style.setProperty('scroll-behavior', 'auto', 'important');
     try {
-      if (horizontal) target.scrollLeft = next;
+      if (horizontal) target.scrollLeft = next * horizontalSign(target);
       else target.scrollTop = next;
     } finally {
       if (authoredScrollBehavior) {
@@ -139,7 +143,7 @@ function applyRequest(target: HTMLElement, request: ScrollSurfacePositionRequest
     }
     return;
   }
-  if (horizontal) target.scrollLeft = next;
+  if (horizontal) target.scrollLeft = next * horizontalSign(target);
   else target.scrollTop = next;
 }
 
@@ -294,7 +298,7 @@ export function createWebScrollSurfaceHost(
         Object.freeze({
           axes: connection.config.axes,
           horizontal: axisSnapshot(
-            target.scrollLeft,
+            horizontalOffset(target),
             target.clientWidth,
             target.scrollWidth,
             endThreshold
@@ -461,7 +465,11 @@ export function createWebScrollSurfaceHost(
             available,
             Math.max(minThumbSize, available * clampRatio(axisFacts.visibleRatio))
           );
-          const offset = Math.max(0, available - thumbExtent) * clampRatio(axisFacts.position);
+          const position =
+            axis === 'horizontal' && horizontalSign(target) < 0
+              ? 1 - axisFacts.position
+              : axisFacts.position;
+          const offset = Math.max(0, available - thumbExtent) * clampRatio(position);
           const originalThumbStyle = thumbStyles.get(thumb);
           if (originalThumbStyle) writeDisplay(thumb, originalThumbStyle.display);
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', `${thumbExtent}px`);
@@ -490,7 +498,7 @@ export function createWebScrollSurfaceHost(
           : { axis, viewport: target.clientHeight, extent: target.scrollHeight };
       const isAxisAtEnd = (axis: ScrollAxis) => {
         const horizontal = axis === 'horizontal';
-        const offset = horizontal ? target.scrollLeft : target.scrollTop;
+        const offset = horizontal ? horizontalOffset(target) : target.scrollTop;
         const viewport = horizontal ? target.clientWidth : target.clientHeight;
         const extent = horizontal ? target.scrollWidth : target.scrollHeight;
         const range = Math.max(0, extent - viewport);
@@ -601,8 +609,9 @@ export function createWebScrollSurfaceHost(
           const geometry = measureControl(control, axis);
           const grabOffset = dragGrabOffsets.get(thumb);
           if (grabOffset === undefined || geometry.travel <= 0) return;
-          const position =
+          let position =
             (coordinate(sample, axis) - geometry.trackStart - grabOffset) / geometry.travel;
+          if (axis === 'horizontal' && horizontalSign(target) < 0) position = 1 - position;
           executeRequest({ kind: 'control-drag', axis, position: clampRatio(position) });
         };
         return Object.freeze({
@@ -707,7 +716,7 @@ export function createWebScrollSurfaceHost(
       // that can still move the surface keeps the deadline-only path.
       const cancelUnscrollableDeparture = (axis: ScrollAxis) => {
         if (!isAxisEnabled(axis) || isAxisAtEnd(axis) || !scheduledEnd) return;
-        const offset = axis === 'horizontal' ? target.scrollLeft : target.scrollTop;
+        const offset = axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop;
         if (offset > 0) return;
         cancelScheduledEnd(true);
         endFollowState = 'paused';
@@ -740,7 +749,7 @@ export function createWebScrollSurfaceHost(
             if (
               (overflow === 'auto' || overflow === 'scroll') &&
               node.scrollWidth > node.clientWidth &&
-              node.scrollLeft > 0
+              horizontalOffset(node as HTMLElement) > 0
             ) {
               return true;
             }
@@ -761,7 +770,8 @@ export function createWebScrollSurfaceHost(
         const leavingEnd =
           axis === 'vertical'
             ? event.deltaY < 0
-            : event.deltaX < 0 || (event.shiftKey && event.deltaY < 0);
+            : event.deltaX * horizontalSign(target) < 0 ||
+              (event.shiftKey && event.deltaY * horizontalSign(target) < 0);
         if (!leavingEnd) return;
         if (findDepartureConsumer(event, axis)) return;
         armReaderIntent();
@@ -772,7 +782,7 @@ export function createWebScrollSurfaceHost(
         if (!readerContacts.active && axis) {
           contactOrigin = {
             ...readFollowLayout(axis),
-            offset: axis === 'horizontal' ? target.scrollLeft : target.scrollTop,
+            offset: axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop,
           };
         }
         readerIntentUntil = 0;
@@ -781,13 +791,16 @@ export function createWebScrollSurfaceHost(
       const onPointerDown = (event: PointerEvent) => {
         beginContact();
         readerContacts.startPointer(event.pointerId, event.pointerType, {
-          x: event.clientX,
+          x: event.clientX * horizontalSign(target),
           y: event.clientY,
         });
       };
       const onPointerMove = (event: PointerEvent) => {
         sampleContactDeparture();
-        readerContacts.movePointer(event.pointerId, { x: event.clientX, y: event.clientY });
+        readerContacts.movePointer(event.pointerId, {
+          x: event.clientX * horizontalSign(target),
+          y: event.clientY,
+        });
       };
       const onTouchStart = (event: TouchEvent) => {
         const owned = Array.from(event.changedTouches).filter((touch) =>
@@ -797,13 +810,16 @@ export function createWebScrollSurfaceHost(
         beginContact();
         readerContacts.startTouches(
           owned.map((touch) => touch.identifier),
-          owned.map((touch) => ({ x: touch.clientX, y: touch.clientY }))
+          owned.map((touch) => ({ x: touch.clientX * horizontalSign(target), y: touch.clientY }))
         );
       };
       const onTouchMove = (event: TouchEvent) => {
         sampleContactDeparture();
         for (const touch of Array.from(event.changedTouches)) {
-          readerContacts.moveTouch(touch.identifier, { x: touch.clientX, y: touch.clientY });
+          readerContacts.moveTouch(touch.identifier, {
+            x: touch.clientX * horizontalSign(target),
+            y: touch.clientY,
+          });
         }
       };
       const completeReaderIntent = () => {
@@ -814,7 +830,7 @@ export function createWebScrollSurfaceHost(
         const moved = axis !== null && readerContacts.hasDeparture(axis);
         if (moved && contactOrigin && axis === contactOrigin.axis && isAxisEnabled(axis)) {
           const layout = readFollowLayout(axis);
-          const offset = axis === 'horizontal' ? target.scrollLeft : target.scrollTop;
+          const offset = axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop;
           // Sample movement already applied during this session before its
           // scroll event arrives. A later callback cannot reopen the session.
           // Neither stationary contact nor reflow alone is input displacement.
@@ -874,9 +890,13 @@ export function createWebScrollSurfaceHost(
                   (event.key === ' ' && !event.shiftKey)
                 ? 'after'
                 : null
-            : event.key === 'ArrowLeft' || event.key === 'PageUp' || event.key === 'Home'
+            : event.key === (horizontalSign(target) < 0 ? 'ArrowRight' : 'ArrowLeft') ||
+                event.key === 'PageUp' ||
+                event.key === 'Home'
               ? 'before'
-              : event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === 'End'
+              : event.key === (horizontalSign(target) < 0 ? 'ArrowLeft' : 'ArrowRight') ||
+                  event.key === 'PageDown' ||
+                  event.key === 'End'
                 ? 'after'
                 : null;
         if (!scrollDirection) return;

@@ -59,8 +59,8 @@ export const carouselViewport = definePrototype<
       intent: (i) =>
         i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
     });
-    // Base owns the discrete current-slide protocol and Axis Input. It does
-    // not expose Embla's scrolling strip, plugin runtime, or autoplay policy.
+    // Base owns the continuous Scroll surface, Axis Input and snap policy.
+    // This family only projects appearance; it does not install Embla.
     return inherited.render;
   },
 });
@@ -73,7 +73,7 @@ export const carouselSlide = definePrototype<ShadcnCarouselSlideProps, CarouselS
     const inherited = asCarouselSlide();
     setupShadcnStyleSelection(def, 'new-york-v4');
     const axis = setupCarouselAxis(def);
-    def.feedback.style.use(tw('min-w-0 shrink-0 grow-0 basis-full'));
+    def.feedback.style.use(tw('min-w-0 shrink-0 grow-0'));
     def.rule({
       when: (w) => w.state(axis).eq('horizontal'),
       intent: (i) => i.feedback.style.use(tw('pl-4')),

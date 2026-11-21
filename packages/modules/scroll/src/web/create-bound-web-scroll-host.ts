@@ -170,10 +170,7 @@ export function createBoundWebScrollSurfaceHost(
         throw new ScrollSurfaceBindingError('target-retired');
       const capturedTarget = target,
         capturedDocument = document;
-      if (
-        capturedTarget !== options.boundary &&
-        (connection.config.axes !== 'vertical' || connection.projection !== 'system')
-      )
+      if (capturedTarget !== options.boundary && connection.projection !== 'system')
         throw new ScrollSurfaceBindingError('unsupported-profile');
       const current = () => {
         const now = get();

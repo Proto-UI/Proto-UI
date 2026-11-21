@@ -47,6 +47,7 @@ criteria:
 satisfies:
   contracts:
     - C-SCROLL-0001
+    - { id: C-SCROLL-AXIS-SYNC-0001, since: 0.3.0-alpha.2 }
     - { id: C-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: C-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - C-AS-SCROLL-SURFACE-0001
@@ -58,6 +59,7 @@ requires:
     - HC-MOVE-GESTURE-0001
 verifies:
   tests:
+    - { id: T-BASE-CAROUSEL-CONTINUOUS-0001, since: 0.3.0-alpha.2 }
     - T-SCROLL-0001
     - { id: T-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
@@ -68,6 +70,9 @@ sources:
   - path: packages/modules/scroll/src/create.ts
   - path: packages/modules/scroll/src/impl.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added callback-only axis synchronization on the current lease with host-authoritative facts and detached-session safety.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Added current Anatomy descendant validation and non-replayed reveal arbitration on the existing logical surface lease.

@@ -5,15 +5,37 @@ description: 'Gregorian date selection, localized weekdays and explicit caption 
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Calendar 是单日期公历控件。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
+Calendar 是公历控件，支持 `single`（默认）、`multiple` 和 `range` 三种选择模式。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
 
 默认按 canonical month 与 weekStartsOn 显示覆盖全月的最少 4、5 或 6 周；`fixedWeeks=true` 才显式固定六周。Root 公开 `weekCount`。应用可以保留 `index` 0–5 的六个 Row、`offset` 0–41 的 Day 作为容量；多余 Row/Day 公开 `hidden`，投影隐藏语义，多余 Day 禁用且不进入焦点或选择。未给 index 的 Row 与显式 date 仍由应用排布。
+
+## 范围与多选
+
+| 模式       | 受控值 / 初始值                             | 请求回调                     |
+| ---------- | ------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`：YYYY-MM-DD 字符串 | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`：日期数组        | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`：`{ from?, to? }`  | `onRangeChange({ range })`   |
+
+多选模式中，每次激活日期都会增加或移除该日期；数组去重、按民用日期升序排列，并在输入、输出时复制。`minSelected` 默认为 0，省略 `maxSelected` 表示不设上限。逐日增加允许从空值逐步达到最小数量；删除后必须保留最小数量。显式 `requestValues` 整组替换始终同时验证最小与最大数量。范围模式第一次选择产生 `{ from }`，第二次选择完成含两端的 `{ from, to }`；反向选择会自动按时间排序。完成后再次选择会开始新范围，`{}` 表示清空。`minNights=0`（默认）允许同一天作为完整范围。`minNights` / `maxNights` 限制起止日期之间的天数，不是选中格数；省略上限表示不限，所有限制必须是非负整数。
+
+`min`、`max` 和 Root `unavailable` 约束所有选中日期。完整范围只要跨过一个不可用日期就会被拒绝，并保留已有起点。全局日期限制应放在 Root `unavailable`；Day 局部 `disabled` 只禁用该控件。Root `disabled` / `readOnly` 会拒绝选择请求；资格变化不会暗中改写 owner 已有的选择。
+
+`requestValue(date)` 按当前模式激活日期；`requestValues(dates)`、`requestRange(range)` 只在对应模式替换选择。返回 true 表示已经发出请求；受控模式只有在 owner 接受对应属性后才更新绘制。`getValues()`、`getRange()` 返回副本。`default*` 只初始化一次，切换模式时分别保留各自的值。Root 另外公开 `mode`、`selectedCount` 和 `rangeComplete`。
+
+Day 在 `selected` 之外公开 `rangeStart`、`rangeEnd`、`rangeMiddle`、`rangePending`。未完成的起点带 start/pending，完整单日范围同时带 start/end，中间日期带 middle；完整范围中的每天都为 selected。家族配方分别绘制端点与中段，Grid 在范围/多选模式投影 `aria-multiselectable`。键盘导航不变，Enter 或 Space 激活当前日期。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-calendar-selection"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 组合与时钟所有权
 
 十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成最多六个带 index 的容量行，实际显示周数按上述规则同步。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
 
-host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、选中的 `value`/`defaultValue`、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
+host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、当前模式的选中日期（单日期、多个日期中的最早日期或范围起点）、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
 
 ## 显式月份/年份 caption 组合
 

@@ -1,0 +1,27 @@
+id: C-AXIS-INPUT-DELTA-BASIS-0001
+type: contract
+title: Axis Input can normalize displacement by the summed extent of owned parts
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Requested multi-panel drag accuracy needs this neutral geometry definition; stable cross-host and Compiler admission remains separate.
+summary: An optional same-domain role supplies a displacement denominator without exposing host geometry or changing absolute position semantics.
+criteria:
+  - id: C-AXIS-INPUT-DELTA-BASIS-0001-SCOPE
+    text: deltaBasisRole is an optional declared role in the same Anatomy family. Resolve all current parts of that role whose nearest geometryRole ancestor is the input's geometry owner. Empty, stale, detached or foreign-domain parts refuse contact. Replacing membership or logical ownership cancels active contact even if host targets are reused. The author receives only dimensionless samples.
+  - id: C-AXIS-INPUT-DELTA-BASIS-0001-GEOMETRY
+    text: When provided, delta and totalDelta divide by the finite positive sum of the basis parts' border-box extents on the configured physical axis, measured at accepted start in the same host coordinate space. Individual zero extents are valid for collapsed parts. position still uses the original geometry interval. Omission preserves existing normalization. Unsupported transformed geometry refuses contact instead of inventing a denominator. Domain policy such as percentages, adjacent constraints, snapping and collapse stays in the consumer.
+  - id: C-AXIS-INPUT-DELTA-BASIS-0001-LIFETIME
+    text: cancel-on-extent-change observes both the geometry interval and summed displacement basis using the existing active-contact cadence and pre-delivery checks. A changed basis cancels with basis-changed before move/end; target detach/replacement keeps existing cancellation reasons. No observer or callback survives disposal or restarts a retired contact.
+dependsOn:
+  contracts: [C-AXIS-INPUT-CONTACT-BASIS-0001, C-ANATOMY-SCOPED-QUERY-0001]
+sources:
+  - path: packages/core/src/axis-input.ts
+  - path: packages/modules/axis-input/src/create.ts
+  - path: packages/adapters/base/src/gestures/web-axis-input-host.ts
+verifies:
+  tests: [T-AXIS-INPUT-DELTA-BASIS-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define a generic same-domain summed displacement basis for variable layouts with fixed separators.
+tags: [axis-input, geometry, ownership]

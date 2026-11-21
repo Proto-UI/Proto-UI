@@ -14,6 +14,9 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     focus = asFocusable<NumberFieldPartProps>();
   focus.configure({ disabled: false });
   const value = def.state.numberDiscrete('value', 0),
+    empty = def.state.bool('empty', false),
+    valueNow = def.state.string('valueNow', '0'),
+    valueText = def.state.string('valueText', '0'),
     min = def.state.numberDiscrete('min', 0),
     max = def.state.numberDiscrete('max', 100),
     disabled = def.state.bool('disabled', false),
@@ -21,12 +24,14 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     label = def.state.string('label', '');
   for (const [key, s] of Object.entries({
     value,
+    empty,
     disabled,
     readOnly,
     focused: focus.focused,
     focusVisible: focus.focusVisible,
   }))
     def.expose.state(key, s);
+  def.expose.method('getValue', () => (empty.get() ? null : value.get()));
   def.expose.method('focusSelf', () => {
     if (!disabled.get()) focus.focusSelf();
   });
@@ -38,7 +43,8 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
   const a = asAccessible();
   a.role('spinbutton');
   a.name(label);
-  a.state('valueNow', value);
+  a.state('valueNow', valueNow);
+  a.state('valueText', valueText);
   a.state('valueMin', min);
   a.state('valueMax', max);
   a.state('disabled', disabled);
@@ -47,10 +53,16 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     a.relation('labelledBy', {
       target: { kind: 'part', family: NUMBER_FIELD_FAMILY, role: 'label', key: 'label' },
     });
+  let editRevision = 0;
+  let compositionActive = false;
+  let retiredComposition = false;
   const sync = (run: RunHandle<NumberFieldPartProps>) => {
     const c = run.context.read(NUMBER_FIELD_CONTEXT);
     binding?.setPolicy({ disabled: c.controlDisabled, readOnly: c.controlReadOnly });
-    value.set(c.value, 'reason: number input value');
+    if (c.value !== null) value.set(c.value, 'reason: number input value');
+    empty.set(c.value === null, 'reason: number input empty');
+    valueNow.set(c.value === null ? '' : String(c.value), 'reason: number input range value');
+    valueText.set(c.formatted, 'reason: number input formatted value');
     min.set(c.min, 'reason: number input bound');
     max.set(c.max, 'reason: number input bound');
     disabled.set(c.disabled, 'reason: number input policy');
@@ -60,7 +72,7 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     binding?.report({
       value: c.value,
       focused: focus.focused.get(),
-      composing: control.snapshot()?.composing ?? false,
+      composing: c.composing,
       reason: 'sync',
     });
     control.sync({
@@ -72,6 +84,12 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
       name: c.name,
       required: binding?.state.fieldRequired.get() ?? false,
     });
+    if (editRevision !== c.editRevision) {
+      editRevision = c.editRevision;
+      retiredComposition ||= compositionActive;
+      compositionActive = false;
+      control.resetValue();
+    }
   };
   let currentRun: RunHandle<NumberFieldPartProps> | null = null;
   def.lifecycle.onMounted((run) => {
@@ -79,6 +97,8 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
   });
   def.lifecycle.onUnmounted(() => {
     currentRun = null;
+    compositionActive = false;
+    retiredComposition = false;
   });
   def.expose.method('resetValue', () => {
     if (!currentRun) return false;
@@ -100,7 +120,10 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
   );
   def.context.subscribe(NUMBER_FIELD_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
-  control.on('compositionstart', (run) => {
+  control.on('compositionstart', (run, e) => {
+    compositionActive = true;
+    retiredComposition = false;
+    numberFieldMethod(run, 'requestInput', e.value, true);
     binding?.report({
       value: run.context.read(NUMBER_FIELD_CONTEXT).value,
       focused: focus.focused.get(),
@@ -109,6 +132,11 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     });
   });
   control.on('input', (run, e) => {
+    if (retiredComposition && (e.composing || e.inputType?.toLowerCase().includes('composition'))) {
+      control.resetValue();
+      return;
+    }
+    retiredComposition = false;
     numberFieldMethod(run, 'requestInput', e.value, e.composing);
     binding?.report({
       value: run.context.read(NUMBER_FIELD_CONTEXT).value,
@@ -118,6 +146,11 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     });
   });
   control.on('compositionend', (run, e) => {
+    if (!compositionActive) {
+      control.resetValue();
+      return;
+    }
+    compositionActive = false;
     numberFieldMethod(run, 'requestInput', e.value, false);
     binding?.report({
       value: run.context.read(NUMBER_FIELD_CONTEXT).value,
@@ -174,6 +207,7 @@ export const asNumberFieldInput = defineAsHook<
       disabled: State<boolean>;
       focusVisible: ObservedStateHandle<boolean, NumberFieldPartProps>;
       value: State<number>;
+      empty: State<boolean>;
       readOnly: State<boolean>;
       focused: ObservedStateHandle<boolean, NumberFieldPartProps>;
     };

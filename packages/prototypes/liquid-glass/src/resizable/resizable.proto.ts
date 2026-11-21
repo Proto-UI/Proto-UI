@@ -30,7 +30,8 @@ export const resizablePanel = definePrototype<ResizablePanelProps, ResizablePane
   name: 'liquid-glass-resizable-panel',
   setup(def) {
     const behavior = asResizablePanel();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground p-4'));
+    // Keep the sizing surface free of padding so zero means physically collapsed.
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground'));
     return behavior.render;
   },
 });

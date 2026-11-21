@@ -6,7 +6,7 @@ description: 'carousel functional composition and current verification limits.'
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Carousel composes a current slide, viewport and bounded Previous/Next controls. index can be controlled; loop is optional. Keyboard navigation and thresholded swipe use the same selection requests. This slice never starts autoplay or invents a timer.
+Carousel composes an equal-size slide strip, a continuously scrollable viewport and Previous/Next controls. Pointer or touch dragging moves the strip before release; wheel, trackpad and scrollbar scrolling use the same surface. Releasing a drag or finishing native scrolling snaps to the nearest reachable item boundary. Keyboard navigation uses the same index requests.
 
 This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
 
@@ -16,13 +16,24 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Responsive viewport and controlled index
+
+Set Root `slidesPerView` to the maximum equal items to display (default `1`) and `minSlideSize` to their minimum extent in logical host pixels (default `0`). The demo requests two items with a minimum extent of `180`; narrowing the viewport reduces the actual capacity, including partial items. All slides retain their layout extent. Root exposes `visibleSlides` and `maxIndex` from the observed viewport, and the final snap aligns the strip end without leaving empty space.
+
+A provided `index` selects controlled mode. `indexChange` proposes the new snap index. While dragging, the committed `index` stays unchanged; release uses synchronous owner acceptance or returns to the existing index. A later owner update moves the viewport when it arrives. Viewport exposes `dragging`, `scrolling` and normalized `scrollPosition`; Slide `current` follows the committed snap, while `hidden` follows actual offscreen visibility without removing the slide from layout.
+
+`orientation="vertical"` requires an explicitly bounded viewport height. Horizontal `direction="rtl"` reverses physical dragging and arrow keys while retaining logical item order. Cancellation, disable, axis changes and removal discard unfinished dragging. `loop` wraps index requests between reachable ends; this slice does not clone slides for a seamless infinite strip. Autoplay and variable-size slides are outside the current contract.
+
 ## API
 
-Carousel is workspace source. There is no public `proto-ui add` target. Passing `index` selects controlled mode. Viewport has no props. Slide `index` defaults to `0`.
+Carousel is workspace source. There is no public `proto-ui add` target. Passing `index` selects controlled mode. Viewport has no props. Omitting Slide `index` uses its current anatomy order. Explicit indexes should match the item order.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'index', type: 'number', default: '—' },
+    { name: 'slidesPerView', type: 'number', default: '1' },
+    { name: 'minSlideSize', type: 'number', default: '0' },
     { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'loop', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
@@ -33,4 +44,3 @@ Carousel is workspace source. There is no public `proto-ui add` target. Passing 
 />
 
 These props belong to Root.
-

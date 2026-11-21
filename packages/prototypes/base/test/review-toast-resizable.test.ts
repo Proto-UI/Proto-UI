@@ -298,7 +298,7 @@ it.each(['dispose', 'unmount', 'remount'] as const)(
         armed = false;
         await root.session.mount();
         root.session.invokeInCallbackScope(() => root.exposes.requestValue(70, true));
-        expect(actions).toEqual(['valueChange', 'valueCommit']);
+        expect(actions).toEqual(['sizesChange', 'valueChange', 'sizesCommit', 'valueCommit']);
       }
     } finally {
       await observer.session.dispose();

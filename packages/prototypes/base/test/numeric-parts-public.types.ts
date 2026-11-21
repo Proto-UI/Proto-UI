@@ -81,6 +81,8 @@ function f0sliderFieldThumb(x: ProtoAdapterExposes<typeof f0slider.sliderFieldTh
 }
 import * as f0numberfield from '@proto.ui/prototypes-base/number-field';
 function f0numberfieldInput(x: ProtoAdapterExposes<typeof f0numberfield.numberFieldInput>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -91,6 +93,8 @@ function f0numberfieldInput(x: ProtoAdapterExposes<typeof f0numberfield.numberFi
   const wrong: string = x.value.get();
 }
 function f0numberfieldControl(x: ProtoAdapterExposes<typeof f0numberfield.numberFieldControl>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -245,6 +249,8 @@ function f1sliderFieldThumb(x: ProtoAdapterExposes<typeof f1slider.sliderFieldTh
 }
 import * as f1numberfield from '@proto.ui/prototypes-shadcn/number-field';
 function f1numberfieldInput(x: ProtoAdapterExposes<typeof f1numberfield.numberFieldInput>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -255,6 +261,8 @@ function f1numberfieldInput(x: ProtoAdapterExposes<typeof f1numberfield.numberFi
   const wrong: string = x.value.get();
 }
 function f1numberfieldControl(x: ProtoAdapterExposes<typeof f1numberfield.numberFieldControl>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -409,6 +417,8 @@ function f2sliderFieldThumb(x: ProtoAdapterExposes<typeof f2slider.sliderFieldTh
 }
 import * as f2numberfield from '@proto.ui/prototypes-brutalist/number-field';
 function f2numberfieldInput(x: ProtoAdapterExposes<typeof f2numberfield.numberFieldInput>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -419,6 +429,8 @@ function f2numberfieldInput(x: ProtoAdapterExposes<typeof f2numberfield.numberFi
   const wrong: string = x.value.get();
 }
 function f2numberfieldControl(x: ProtoAdapterExposes<typeof f2numberfield.numberFieldControl>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -573,6 +585,8 @@ function f3sliderFieldThumb(x: ProtoAdapterExposes<typeof f3slider.sliderFieldTh
 }
 import * as f3numberfield from '@proto.ui/prototypes-bootstrap-2-3-2/number-field';
 function f3numberfieldInput(x: ProtoAdapterExposes<typeof f3numberfield.numberFieldInput>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -583,6 +597,8 @@ function f3numberfieldInput(x: ProtoAdapterExposes<typeof f3numberfield.numberFi
   const wrong: string = x.value.get();
 }
 function f3numberfieldControl(x: ProtoAdapterExposes<typeof f3numberfield.numberFieldControl>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -737,6 +753,8 @@ function f4sliderFieldThumb(x: ProtoAdapterExposes<typeof f4slider.sliderFieldTh
 }
 import * as f4numberfield from '@proto.ui/prototypes-liquid-glass/number-field';
 function f4numberfieldInput(x: ProtoAdapterExposes<typeof f4numberfield.numberFieldInput>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();
@@ -747,6 +765,8 @@ function f4numberfieldInput(x: ProtoAdapterExposes<typeof f4numberfield.numberFi
   const wrong: string = x.value.get();
 }
 function f4numberfieldControl(x: ProtoAdapterExposes<typeof f4numberfield.numberFieldControl>) {
+  const canonical: number | null = x.getValue();
+  const empty: boolean = x.empty.get();
   // @ts-expect-error no arbitrary index-signature capabilities
   x.notARealExpose;
   const value: number = x.value.get();

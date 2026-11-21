@@ -1,0 +1,36 @@
+id: T-AXIS-INPUT-DELTA-BASIS-0001
+type: test
+title: Summed displacement basis ownership and host evidence
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Executable host and nested consumer cases are separate from stable native and Compiler admission.
+summary: Verifies accurate normalized displacement, collapsed parts, revocation and nested-domain isolation.
+cases:
+  - id: T-AXIS-INPUT-DELTA-BASIS-0001-CASE-HOST
+    title: Preserve position, normalize displacement and revoke changed bases
+    expectation: delta-uses-the-positive-summed-owned-extent-without-changing-position-or-retaining-invalid-contact
+    covers: [C-AXIS-INPUT-DELTA-BASIS-0001-GEOMETRY, C-AXIS-INPUT-DELTA-BASIS-0001-LIFETIME]
+  - id: T-AXIS-INPUT-DELTA-BASIS-0001-CASE-OWNER
+    title: Nested groups supply only their nearest geometry owner's parts
+    expectation: nested-resizing-excludes-outer-and-foreign-panel-geometry
+    covers: [C-AXIS-INPUT-DELTA-BASIS-0001-SCOPE]
+verifies:
+  contracts: [C-AXIS-INPUT-DELTA-BASIS-0001]
+implementations:
+  - id: host-delta-basis
+    path: packages/adapters/base/test/web-axis-delta-basis.test.ts
+    status: passing
+    kind: runtime-test
+    required: true
+    consumesCases: [T-AXIS-INPUT-DELTA-BASIS-0001-CASE-HOST]
+  - id: nested-resizable-consumer
+    path: packages/prototypes/base/test/resizable-group.test.ts
+    status: passing
+    kind: runtime-test
+    required: true
+    consumesCases: [T-AXIS-INPUT-DELTA-BASIS-0001-CASE-OWNER]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Add independent host geometry and real family composition fixtures.
+tags: [axis-input, geometry, conformance]

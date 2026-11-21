@@ -102,8 +102,13 @@ export const datePickerDay = definePrototype<DatePickerDayProps, DatePickerDayEx
         i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
     });
     def.rule({
-      when: (w) => w.state(states.selected).eq(true),
+      when: (w) => w.all(w.state(states.selected).eq(true), w.state(states.rangeMiddle).eq(false)),
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+    });
+    def.rule({
+      when: (w) => w.state(states.rangeMiddle).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('rounded-none bg-secondary text-secondary-foreground')),
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),

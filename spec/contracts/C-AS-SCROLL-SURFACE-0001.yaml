@@ -20,8 +20,8 @@ criteria:
       en: '`asScrollSurface()` must use a no-argument once or singleton caller; repeated calls in one setup must return the exact same handle.'
   - id: C-AS-SCROLL-SURFACE-0001-B
     text:
-      zh-CN: configuration 必须通过返回 handle 的 setup-only API 表达，不得通过重复参数化调用合并隐式副作用。
-      en: Configuration must be expressed through the returned handle's setup-only API rather than by merging implicit side effects from repeated parameterized calls.
+      zh-CN: 初始 configuration 必须通过返回 handle 的 setup-only configure API 表达，不得通过重复参数化调用合并隐式副作用。运行期仅 axes 的变化遵守 C-SCROLL-AXIS-SYNC-0001 中独立的 callback-only sync。
+      en: Initial configuration must be expressed through the returned handle's setup-only configure API rather than by merging implicit side effects from repeated parameterized calls. Later axis-only updates use the distinct callback-only sync operation in C-SCROLL-AXIS-SYNC-0001.
   - id: C-AS-SCROLL-SURFACE-0001-C
     text:
       zh-CN: axis、overflow、normalized position、visible ratio、scrolling 与 resolved projection 必须是 module-owned observed facts，而不是 author-writable state。
@@ -56,10 +56,14 @@ dependsOn:
     - C-AS-HOOK-PRIVILEGED-0001
 verifies:
   tests:
+    - { id: T-BASE-CAROUSEL-CONTINUOUS-0001, since: 0.3.0-alpha.2 }
     - T-SCROLL-0001
     - { id: T-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Kept configure setup-only and defined a separate bounded runtime axis sync without exposing geometry or authored facts.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Extended the existing semantic request entry with current-part vertical reveal without exposing host targets or geometry.

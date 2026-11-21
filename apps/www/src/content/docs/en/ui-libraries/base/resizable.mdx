@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Resizable composes two ratio-sized panels with one focusable separator. value is the first panel percentage; min/max, collapse, controlled updates, arrow keys, Home/End and Shift acceleration share one request path. Pointer input uses the shared dimensionless Axis Input host capability.
+Resizable composes two or more percentage-sized panels and indexed separators. Each separator continuously resizes only its adjacent pair. A nested Root owns an independent layout and may use a different orientation. Pointer, arrow-key, Home/End, Shift acceleration and collapse use the same constrained request path.
 
 This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
 
@@ -21,7 +21,7 @@ Panel exposes its dimensionless size through the existing exposed-state projecti
 
 ## API
 
-Resizable is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. The anatomy requires two panels and one handle. Handle has no props; its accessible name is `Resize panels`.
+Root `sizes` / `defaultSizes` is the complete percentage vector. Supply N Panels (`index: 0..N-1`) and N−1 Handles (`index: 0..N-2`). A Handle names its preceding panel and retains the accessible name `Resize panels`. The legacy `value` / `defaultValue` API continues to create two panels; `sizes` takes precedence when supplied.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -43,3 +43,11 @@ These props belong to Root. Panel defaults `index` to `0`.
 ## References
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-RESIZABLE.yaml']} />
+
+### Multi-panel ownership
+
+`constraints` supplies each panel's `min`, `max`, `collapsible` and `collapsedSize`. Defaults are 0, 100, false and 0. Percentages are normalized to total 100; infeasible layouts retain the previous valid state and reject resizing. A separator preserves its pair's total and every other panel. Collapse is a discrete stop; an adjacent panel's maximum can prevent collapse.
+
+Read `sizes` or call `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`. `sizesChange` and `sizesCommit` carry `{ sizes }`. Passing `sizes` makes the layout controlled: update it from the proposal to accept, or retain it to refuse. Panels and ARIA remain at the committed owner value. Cancellation emits no commit.
+
+Nested Roots establish independent ownership, constraints and geometry. The example combines three horizontal panels with a two-panel vertical group. Panel border-box extents form the drag denominator, excluding fixed separator widths.

@@ -5,12 +5,26 @@ description: 'date-picker composition and explicit implementation boundary.'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Date Picker 组合真实 Popover 与 Calendar 原子。日期请求通过 Calendar 选择，并请求关闭 Popover。open、value 与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
+Date Picker 组合真实 Popover 与 Calendar 原子。选择使用 Calendar 的单日期、多选或范围模式；只有被接受的完整单日期/范围选择才请求关闭 Popover。open、选择值与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
 
 当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-date-picker"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 范围与多选
+
+范围使用 `mode="range"` 与 `range` / `defaultRange`，多选使用 `mode="multiple"` 与 `values` / `defaultValues`。它们继承 Calendar 页描述的属性、回调、方法和日期资格规则，包括范围内部不可用日期、数量与间隔天数限制。
+
+范围的第一个端点保持弹层打开，第二个端点被接受并形成完整范围后才请求关闭一次。受控请求被拒绝或等待接受时不关闭；之后匹配的 owner 接受仅在同一次打开期间触发关闭。关闭后重开、卸载、模式改变、disabled/readOnly 改变或 owner 替换选择会终止过期的完成行为。单纯外部改值不关闭弹层，受控 `open` 仍可拒绝关闭请求。多选保持打开以继续增减日期，完成后使用 Popover 的正常关闭交互。
+
+Value 分别显示单个 ISO 民用日期、逗号分隔的有序多日期、未完成范围的 `from …` 或完整范围的 `from – to`；空值显示 `placeholder`。逐日状态与家族范围绘制直接继承 Calendar，焦点返回和关闭交互继续由 Popover 管理。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-date-picker-selection"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />

@@ -14,7 +14,7 @@ export const NUMBER_FIELD_FAMILY = createAnatomyFamily('base-number-field', {
   })),
 });
 export type NumberFieldContext = {
-  value: number;
+  value: number | null;
   draft: string;
   min: number;
   max: number;
@@ -25,6 +25,11 @@ export type NumberFieldContext = {
   readOnly: boolean;
   label: string;
   name: string;
+  formatted: string;
+  scrub: boolean;
+  direction: 'ltr' | 'rtl';
+  composing: boolean;
+  editRevision: number;
 };
 export const NUMBER_FIELD_CONTEXT = createContextKey<NumberFieldContext>('base-number-field');
 export function numberFieldMethod(run: RunHandle<any>, key: string, ...args: unknown[]) {

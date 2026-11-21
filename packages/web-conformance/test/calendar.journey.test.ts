@@ -120,15 +120,6 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
       setup(ctx) {
         api = ctx.api;
         api.setProps('root', rootProps());
-        const listener = (e: Event) => {
-          if (
-            e instanceof CustomEvent &&
-            (e.target as HTMLElement)?.getAttribute('data-demo-ref') === 'root'
-          )
-            onMonthChange(e.detail);
-        };
-        host.addEventListener('monthChange', listener);
-        return () => host.removeEventListener('monthChange', listener);
       },
     };
     const session = await renderDemo({ runtime, demo, host });

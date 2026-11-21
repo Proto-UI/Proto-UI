@@ -1,0 +1,60 @@
+id: T-BASE-CAROUSEL-CONTINUOUS-0001
+type: test
+title: Continuous responsive Carousel and its generic Scroll prerequisites
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Executable Web Component and bounded host tests verify this slice; full native-host and independent stable admission remain separate.
+summary: Verify continuous motion, actual viewport capacity, controlled snapping, cancellation and logical-axis host projection.
+cases:
+  - id: T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-MOTION
+    title: Continuous contact and native scroll settle through one index owner
+    expectation: movement-precedes-release-and-nearest-snap-uses-accepted-index-or-rolls-back-on-refusal
+    covers: [P-BASE-CAROUSEL-CONTINUOUS, P-BASE-CAROUSEL-CONTROLLED]
+  - id: T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-LAYOUT
+    title: Responsive equal items retain layout and update actual visible state
+    expectation: multiple-items-remain-in-layout-and-resize-recomputes-actual-capacity-end-alignment-and-offscreen-state
+    covers: [P-BASE-CAROUSEL-VIEWPORT, P-BASE-CAROUSEL-VISIBILITY]
+  - id: T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-LIFETIME
+    title: Cancellation, disable, removal and directional families
+    expectation: interrupted-contact-emits-no-index-change-and-retired-input-cannot-scroll-while-rtl-and-vertical-preserve-logical-order
+    covers: [P-BASE-CAROUSEL-LIFETIME]
+  - id: T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-AXIS
+    title: Callback-only axes preserve current lease identity and observed facts
+    expectation: callback-only-sync-updates-current-or-next-lease-without-authoring-facts-or-reviving-retired-targets
+    covers: [C-SCROLL-AXIS-SYNC-0001-SYNC]
+  - id: T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-HOST
+    title: Logical RTL offsets and bounded split system surfaces
+    expectation: rtl-negative-native-offsets-normalize-all-request-and-control-paths-and-split-system-axes-retain-cleanup
+    covers: [C-SCROLL-AXIS-SYNC-0001-RTL, HC-SCROLL-SURFACE-0001-SPLIT]
+verifies:
+  contracts: [C-SCROLL-AXIS-SYNC-0001]
+  prototypes: [P-BASE-CAROUSEL]
+implementations:
+  - id: continuous-carousel-consumer
+    path: packages/prototypes/base/test/carousel-continuous.test.ts
+    status: passing
+    kind: runtime-test
+    required: true
+    consumesCases:
+      [
+        T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-MOTION,
+        T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-LAYOUT,
+        T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-LIFETIME,
+      ]
+  - id: scroll-axis-module
+    path: packages/modules/scroll/test/impl-spec.test.ts
+    status: passing
+    kind: module-test
+    required: true
+    consumesCases: [T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-AXIS]
+  - id: scroll-logical-direction-host
+    path: packages/modules/scroll/test/web-scroll-axis-direction.test.ts
+    status: passing
+    kind: adapter-test
+    required: true
+    consumesCases: [T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-HOST]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Added coverage beyond thresholded swipe and current-slide visibility.
+tags: [carousel, scroll, conformance]

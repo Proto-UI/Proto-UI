@@ -46,7 +46,7 @@ export function createNumericInputDemo(
         ]
       : component === 'number-field'
         ? [
-            atom('label', {}, ['Quantity · 数量']),
+            atom('label', {}, ['Amount · 金额 — 拖动标签 / Drag label']),
             atom('decrement', {}, ['−']),
             atom('input'),
             atom('increment', {}, ['+']),
@@ -66,11 +66,43 @@ export function createNumericInputDemo(
             'root',
             component === 'input-otp'
               ? { length: 6, ariaLabel: 'Verification code · 验证码' }
-              : { defaultValue: 25, min: 0, max: 100, step: 5, ariaLabel: 'Value · 数值' },
+              : component === 'number-field'
+                ? {
+                    defaultValue: 1234.5,
+                    min: 0,
+                    max: 10000,
+                    step: 0.5,
+                    locale: 'de-DE',
+                    formatOptions: { minimumFractionDigits: 2 },
+                    scrub: true,
+                    scrubSteps: 20,
+                    allowEmpty: true,
+                    ariaLabel: 'Amount · 金额',
+                  }
+                : { defaultValue: 25, min: 0, max: 100, step: 5, ariaLabel: 'Value · 数值' },
             children
           ),
           ref: 'control',
         },
+        ...(component === 'number-field'
+          ? [
+              atom(
+                'root',
+                {
+                  defaultValue: null,
+                  allowEmpty: true,
+                  locale: 'en-US',
+                  ariaLabel: 'Optional quantity · 可选数量',
+                },
+                [
+                  atom('label', {}, ['Optional quantity · 可选数量（可以留空 / may be empty）']),
+                  atom('decrement', {}, ['−']),
+                  atom('input'),
+                  atom('increment', {}, ['+']),
+                ]
+              ),
+            ]
+          : []),
       ],
     },
   };

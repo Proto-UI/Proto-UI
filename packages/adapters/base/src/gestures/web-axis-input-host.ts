@@ -11,7 +11,25 @@ import type {
 } from '@proto.ui/core';
 import { createWebMoveGestureHost } from './web-move-gesture-host';
 
-type Geometry = { origin: number; span: number; sign: 1 | -1 };
+type Geometry = {
+  origin: number;
+  span: number;
+  deltaSpan: number;
+  sign: 1 | -1;
+  /**
+   * Untransformed layout extents used by 'cancel-on-extent-change' only.
+   * Transformed rect extents wobble by a few hundredths of a CSS pixel while a
+   * translated surface is repainted; they are measured positions, not the
+   * accepted contact basis.
+   */
+  basisSpan?: number;
+  basisDeltaSpan?: number;
+};
+// Summing independently transformed part extents may differ by a few floating
+// point ULPs after redistribution. Ignore only arithmetic noise, not CSS-pixel
+// or subpixel changes to the accepted contact basis.
+const sameExtent = (a: number, b: number) =>
+  Math.abs(a - b) <= Number.EPSILON * Math.max(1, Math.abs(a), Math.abs(b)) * 16;
 type Session = { geometry: Geometry; onSample: AxisInputHostBinding['onSample']; started: boolean };
 
 function webTarget(value: unknown): HTMLElement {
@@ -57,14 +75,37 @@ function axisAligned(target: HTMLElement): boolean {
 function geometryOf(
   target: HTMLElement,
   config: AxisInputConfig,
-  travel?: HTMLElement
+  travel?: HTMLElement,
+  deltaBasis?: readonly HTMLElement[]
 ): Geometry | null {
   if (!target.isConnected) return null;
   const rect = target.getBoundingClientRect();
   const horizontal = config.axis === 'horizontal';
+  const computed = (element: HTMLElement) =>
+    element.ownerDocument.defaultView!.getComputedStyle(element);
+  const read = (value: string) => (value === '' ? 0 : Number.parseFloat(value));
+  /**
+   * Untransformed border-box extent in CSS pixels, the transform-independent
+   * counterpart of the measured rect extent used only by the contact-basis
+   * cancellation below.
+   */
+  const untransformedExtent = (element: HTMLElement): number => {
+    const style = computed(element);
+    const before =
+      read(horizontal ? style.borderLeftWidth : style.borderTopWidth) +
+      read(horizontal ? style.paddingLeft : style.paddingTop);
+    const after =
+      read(horizontal ? style.borderRightWidth : style.borderBottomWidth) +
+      read(horizontal ? style.paddingRight : style.paddingBottom);
+    const specified = Number.parseFloat(horizontal ? style.width : style.height);
+    const extent = style.boxSizing === 'border-box' ? specified : specified + before + after;
+    return Number.isFinite(extent) ? extent : NaN;
+  };
   let origin = horizontal ? rect.left : rect.top;
   let span = horizontal ? rect.width : rect.height;
   if (!Number.isFinite(origin) || !Number.isFinite(span) || span <= 0) return null;
+  let basisBefore = 0;
+  let travelExtent = 0;
   if (travel) {
     if (
       !travel.isConnected ||
@@ -73,8 +114,7 @@ function geometryOf(
       !axisAligned(travel)
     )
       return null;
-    const style = target.ownerDocument.defaultView!.getComputedStyle(target);
-    const read = (value: string) => (value === '' ? 0 : Number.parseFloat(value));
+    const style = computed(target);
     const before =
       read(horizontal ? style.borderLeftWidth : style.borderTopWidth) +
       read(horizontal ? style.paddingLeft : style.paddingTop);
@@ -100,9 +140,47 @@ function geometryOf(
     origin += before * scale + handle / 2;
     span -= (before + after) * scale + handle;
     if (!Number.isFinite(origin) || !Number.isFinite(span) || span <= 0) return null;
+    basisBefore = before + after;
+    const untransformedHandle = untransformedExtent(travel);
+    if (!Number.isFinite(untransformedHandle) || untransformedHandle <= 0) return null;
+    travelExtent = untransformedHandle;
+  }
+  let deltaSpan = span;
+  if (deltaBasis) {
+    if (!deltaBasis.length || !axisAligned(target)) return null;
+    deltaSpan = 0;
+    for (const part of deltaBasis) {
+      if (!part.isConnected || part.ownerDocument !== target.ownerDocument || !axisAligned(part))
+        return null;
+      const rect = part.getBoundingClientRect();
+      const extent = horizontal ? rect.width : rect.height;
+      if (!Number.isFinite(extent) || extent < 0) return null;
+      deltaSpan += extent;
+    }
+    if (!Number.isFinite(deltaSpan) || deltaSpan <= 0) return null;
   }
   const reverse = (horizontal && config.direction === 'rtl') !== config.reverse;
-  return { origin, span, sign: reverse ? -1 : 1 };
+  if (config.contactBasis !== 'cancel-on-extent-change') {
+    return { origin, span, deltaSpan, sign: reverse ? -1 : 1 };
+  }
+  // The basis mirrors the span composition in untransformed extents: the
+  // target's border box minus its border/padding inset and the travel handle,
+  // or the summed part extents when a delta basis is declared.
+  const targetExtent = untransformedExtent(target);
+  if (!Number.isFinite(targetExtent) || targetExtent <= 0) return null;
+  const basisSpan = targetExtent - basisBefore - travelExtent;
+  if (!Number.isFinite(basisSpan) || basisSpan <= 0) return null;
+  let basisDeltaSpan = basisSpan;
+  if (deltaBasis) {
+    basisDeltaSpan = 0;
+    for (const part of deltaBasis) {
+      const extent = untransformedExtent(part);
+      if (!Number.isFinite(extent) || extent < 0) return null;
+      basisDeltaSpan += extent;
+    }
+    if (!Number.isFinite(basisDeltaSpan) || basisDeltaSpan <= 0) return null;
+  }
+  return { origin, span, deltaSpan, sign: reverse ? -1 : 1, basisSpan, basisDeltaSpan };
 }
 
 function normalized(
@@ -113,8 +191,8 @@ function normalized(
 ): AxisInputSample | null {
   const axis = config.axis === 'horizontal' ? 'x' : 'y';
   const rawPosition = (sample.position[axis] - geometry.origin) / geometry.span;
-  const delta = (sample.delta[axis] / geometry.span) * geometry.sign;
-  const totalDelta = (sample.totalDelta[axis] / geometry.span) * geometry.sign;
+  const delta = (sample.delta[axis] / geometry.deltaSpan) * geometry.sign;
+  const totalDelta = (sample.totalDelta[axis] / geometry.deltaSpan) * geometry.sign;
   if (![rawPosition, delta, totalDelta].every(Number.isFinite)) return null;
   return Object.freeze({
     phase,
@@ -163,6 +241,7 @@ export function createWebAxisInputHost(
       let geometryTarget = webTarget(binding.geometryTarget);
       let travelTarget =
         binding.travelTarget === undefined ? undefined : webTarget(binding.travelTarget);
+      let deltaBasis = binding.deltaBasisTargets?.map(webTarget);
       let moveLease: MoveGestureHostLease | null = null;
       let session: Session | null = null;
       let pending: Geometry | null = null;
@@ -201,7 +280,7 @@ export function createWebAxisInputHost(
               )
                 return false;
             }
-            pending = geometryOf(geometryTarget, binding.config, travelTarget);
+            pending = geometryOf(geometryTarget, binding.config, travelTarget, deltaBasis);
             return !!pending && !!normalized(sample, binding.config, pending, 'start');
           },
           onStart(sample) {
@@ -222,7 +301,8 @@ export function createWebAxisInputHost(
                   currentEpoch === epoch &&
                   (!input.isConnected ||
                     !geometryTarget.isConnected ||
-                    (travelTarget && !travelTarget.isConnected))
+                    (travelTarget && !travelTarget.isConnected) ||
+                    deltaBasis?.some((part) => !part.isConnected))
                 )
                   restart('target-detached');
               });
@@ -261,12 +341,13 @@ export function createWebAxisInputHost(
         if (
           !input.isConnected ||
           !geometryTarget.isConnected ||
-          (travelTarget && !travelTarget.isConnected)
+          (travelTarget && !travelTarget.isConnected) ||
+          deltaBasis?.some((part) => !part.isConnected)
         ) {
           restart('target-detached');
           return false;
         }
-        const live = geometryOf(geometryTarget, binding.config, travelTarget);
+        const live = geometryOf(geometryTarget, binding.config, travelTarget, deltaBasis);
         if (disposed || currentEpoch !== epoch || session !== current) return false;
         if (!live) {
           restart('invalid-geometry');
@@ -274,7 +355,8 @@ export function createWebAxisInputHost(
         }
         if (
           binding.config.contactBasis === 'cancel-on-extent-change' &&
-          live.span !== current.geometry.span
+          (!sameExtent(live.basisSpan!, current.geometry.basisSpan!) ||
+            !sameExtent(live.basisDeltaSpan!, current.geometry.basisDeltaSpan!))
         ) {
           restart('basis-changed');
           return false;
@@ -316,13 +398,19 @@ export function createWebAxisInputHost(
           const nextGeometry = webTarget(next.geometryTarget);
           const nextTravel =
             next.travelTarget === undefined ? undefined : webTarget(next.travelTarget);
+          const nextBasis = next.deltaBasisTargets?.map(webTarget);
           const replaced =
-            input !== nextInput || geometryTarget !== nextGeometry || travelTarget !== nextTravel;
+            input !== nextInput ||
+            geometryTarget !== nextGeometry ||
+            travelTarget !== nextTravel ||
+            (nextBasis?.length ?? 0) !== (deltaBasis?.length ?? 0) ||
+            (nextBasis?.some((part, i) => part !== deltaBasis?.[i]) ?? false);
           const changed = !sameConfig(binding.config, next.config);
           binding = next;
           input = nextInput;
           geometryTarget = nextGeometry;
           travelTarget = nextTravel;
+          deltaBasis = nextBasis;
           if (replaced || changed)
             restart(
               replaced
