@@ -460,6 +460,14 @@ async function nativePopup(
   }
 }
 
+async function waitForPassiveSurface(owner: Locator) {
+  // Progressive decoration mounts each owner's Surface independently. Observe
+  // that owner's mounted paint before reading styles or starting focus changes.
+  await owner
+    .locator(':scope > :is(wc-site-shadcn-surface,wc-site-brutalist-surface)[data-pui-root]')
+    .waitFor({ state: 'visible', timeout: 10_000 });
+}
+
 async function linkPaint(link: Locator) {
   return link.evaluate((anchor) => {
     const surface = anchor.querySelector<HTMLElement>('[data-pui-root]')!;
@@ -751,6 +759,7 @@ async function assertHostCurrentProjection(link: Locator, family: string) {
 }
 
 async function assertNavigationFocus(page: Page, link: Locator) {
+  await waitForPassiveSurface(link);
   await link.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
   await link.focus();
@@ -1364,6 +1373,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           .filter({ has: page.locator('a[aria-current="page"]') })
           .last();
         const summary = group.locator(':scope > summary');
+        await waitForPassiveSurface(summary);
         await summary.scrollIntoViewIfNeeded();
         const summaryPaint = () =>
           summary.evaluate((element) => {
@@ -3136,8 +3146,7 @@ it('records the English shell labels, destinations and native activation ownersh
       '#home-social [data-projection-generation-state="active"] a'
     );
     expect(shellNavigationIssues(social, socialExpectation)).toEqual([]);
-    const popupNavigation = await collectShellLinks(page, HOMEPAGE_POPUP_NAVIGATION);
-    expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
+    expect(await page.locator(HOMEPAGE_POPUP_NAVIGATION).first().isVisible()).toBe(false);
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
       await page
@@ -3161,7 +3170,7 @@ it('records the English shell labels, destinations and native activation ownersh
       'shadcn',
       'wc',
       'en; hero-keyboard-focus; native-theme-dark; 390px popup-navigation',
-      { desktopNavigation, popupNavigation, narrowNavigation, hero, social, focused, themeBefore }
+      { desktopNavigation, narrowNavigation, hero, social, focused, themeBefore }
     );
   } finally {
     await enContext.close();
