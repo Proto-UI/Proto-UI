@@ -3,7 +3,7 @@ export const READY_ROUTES: readonly string[];
 export const BROWSER_SUITES: readonly string[];
 export const PRODUCTION_BROWSER_SUITES: readonly string[];
 export const PRODUCTION_BROWSER_OWNERS: Readonly<Record<string, string>>;
-export const BROWSER_SHARD_COUNT: 10;
+export const BROWSER_SHARD_COUNT: number;
 export const BROWSER_SUITE_WEIGHT_SECONDS: Readonly<Record<string, number>>;
 export function corepackInvocation(platform?: string): {
   executable: 'corepack' | 'corepack.cmd';

@@ -1135,6 +1135,71 @@ describe('Website projection composition', () => {
     (cleanup as () => void)();
   });
 
+  it('pushes a theme update through a nested Proto that inherits the runtime tab surface', async () => {
+    const composition = createProjectionComposition({
+      ownerId: 'nested-theme',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 4,
+      componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
+      childDemo: {
+        type: 'demo',
+        root: {
+          kind: 'proto',
+          prototypeId: 'shadcn-button',
+          ref: 'child-button',
+          children: ['Child'],
+        },
+      },
+      controls: {
+        ...controls(),
+        runtime: { ...controls().runtime, presentation: 'tabs' },
+      },
+      controlIds: ['runtime'],
+      themeSurfaceStyle: {
+        '--pui-background': '#ffffff',
+        '--pui-foreground': '#1d1d1f',
+      },
+    });
+    const prototypeIds = new Set<string>();
+    collectPrototypeIds(composition.demo.root, prototypeIds);
+    await loadPrototypes([...prototypeIds]);
+    const host = document.createElement('div');
+    document.body.append(host);
+    let context!: DemoSetupContext;
+    const view = await renderDemo({
+      runtime: 'wc',
+      host,
+      demo: {
+        ...composition.demo,
+        setup(next) {
+          context = next;
+          return composition.demo.setup?.(next);
+        },
+      },
+    });
+    const themeValue = (name: string) => {
+      const boundary = context.refs['child-button'];
+      const surface =
+        boundary?.shadowRoot?.querySelector<HTMLElement>('[part~="surface"], [part~="root"]') ??
+        boundary;
+      return surface?.style.getPropertyValue(name) || boundary?.style.getPropertyValue(name) || '';
+    };
+    try {
+      expect(themeValue('--pui-background')).toBe('#ffffff');
+      expect(themeValue('--pui-foreground')).toBe('#1d1d1f');
+      composition.setThemeSurfaceStyle({
+        '--pui-background': '#2c2c2e',
+        '--pui-foreground': '#f5f5f7',
+      });
+      expect(themeValue('--pui-background')).toBe('#2c2c2e');
+      expect(themeValue('--pui-foreground')).toBe('#f5f5f7');
+    } finally {
+      await view.destroy();
+    }
+  });
+
   it('shares one owner-filtered marker observer across compositions', async () => {
     const childDemo = {
       type: 'demo',

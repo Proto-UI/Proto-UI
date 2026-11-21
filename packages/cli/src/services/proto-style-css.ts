@@ -419,6 +419,7 @@ const staticUtilities: Record<string, string[]> = {
   'cursor-not-allowed': ['cursor: not-allowed;'],
   'cursor-default': ['cursor: default;'],
   'cursor-ew-resize': ['cursor: ew-resize;'],
+  'cursor-grabbing': ['cursor: grabbing;'],
   'cursor-ns-resize': ['cursor: ns-resize;'],
   'cursor-pointer': ['cursor: pointer;'],
   'select-auto': ['-webkit-user-select: auto;', 'user-select: auto;'],

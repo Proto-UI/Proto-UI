@@ -191,6 +191,58 @@ describe('Website dynamic projection wrapper', () => {
     expect(setChildren).not.toHaveBeenCalled();
   });
 
+  it('pushes a theme update through a nested Proto committed by setChildren', async () => {
+    let ctx!: DemoSetupContext;
+    const view = composition(
+      child((context) => {
+        ctx = context;
+      })
+    );
+    const mounted = mount(view.demo);
+    const setChildren = vi.fn(
+      async (_slot: string, _nodes: readonly DemoKeyedChild[]) => 'committed' as const
+    );
+    const setSurfaceStyle = vi.fn((_ref: string, _style: DemoSurfaceStyle) => {});
+    const api: DemoRuntimeApi = {
+      call() {},
+      getExposes() {
+        return undefined;
+      },
+      setProps() {},
+      setChildren,
+      setSurfaceStyle,
+    };
+    cleanups.push(view.demo.setup!({ ...mounted, api }) as () => void);
+    await ctx.api.setChildren!('results', [
+      {
+        key: 'dyn',
+        node: {
+          kind: 'proto',
+          prototypeId: 'shadcn-button',
+          children: [
+            {
+              kind: 'proto',
+              prototypeId: 'shadcn-button',
+              surfaceStyle: { '--pui-background': '#fff' },
+              children: ['Inner'],
+            },
+          ],
+        },
+      },
+    ]);
+    const projected = setChildren.mock.calls[0][1][0].node;
+    if (typeof projected === 'string' || projected.kind !== 'proto')
+      throw new Error('Expected Proto');
+    const inner = projected.children?.[0];
+    if (!inner || typeof inner === 'string' || inner.kind !== 'proto' || !inner.ref)
+      throw new Error('Expected nested renderer ref');
+    mounted.refs[inner.ref] = document.createElement('div');
+    view.setThemeSurfaceStyle({ '--pui-background': '#222' });
+    const pushed = setSurfaceStyle.mock.calls.find(([ref]) => ref === inner.ref);
+    expect(pushed).toBeDefined();
+    expect(pushed![1]).toEqual({ '--pui-background': '#222' });
+  });
+
   it('keeps private renderer handles stable and preserves mixed author styles across current-theme updates', async () => {
     let ctx!: DemoSetupContext;
     const view = composition(

@@ -907,8 +907,8 @@ describe('same-origin response collector native controls', () => {
             issues: collector.issues,
           };
           await writeFile(path.join(directory, 'control.json'), JSON.stringify(record, null, 2));
-          expect(collector.responses.length).toBeGreaterThan(0);
           if (arm === 'success') {
+            expect(collector.responses.length).toBeGreaterThan(0);
             expect(client).toEqual({ status: 200, bytes: font.length });
             expect(collector.issues).toEqual([]);
             expect(collector.responses.map((row) => row.status)).toEqual([
@@ -931,12 +931,17 @@ describe('same-origin response collector native controls', () => {
               expect(collector.responses[i + 1].from).toBe(collector.responses[i].id);
             }
           } else {
+            // ERR_INVALID_REDIRECT terminates the first hop before any
+            // response event reaches the collector; the failed request itself
+            // is the only recorded artifact for a malformed Location.
+            if (arm === 'invalid-location') expect(collector.responses).toEqual([]);
+            else expect(collector.responses.length).toBeGreaterThan(0);
             expect(collector.issues.length).toBeGreaterThan(0);
             expect(collector.assets).toEqual([]);
             const operation =
               arm === 'http-error' || arm === 'unknown-status'
                 ? 'asset-http-status'
-                : arm === 'request-abort'
+                : arm === 'request-abort' || arm === 'invalid-location'
                   ? 'asset-request-failed'
                   : 'asset-redirect';
             expect(collector.issues).toEqual(
