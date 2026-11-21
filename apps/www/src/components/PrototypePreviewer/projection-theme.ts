@@ -63,6 +63,22 @@ export type ProjectionThemeSurfaceStyle = Readonly<Record<`--pui-${string}`, str
 type ProjectionThemeSurface = HTMLElement | SVGElement;
 
 const appliedThemeProperties = new WeakMap<ProjectionThemeSurface, ReadonlySet<string>>();
+type ThemeStamp = Readonly<{ value: string; priority: string }>;
+const preservedThemeStamps = new WeakMap<
+  ProjectionThemeSurface,
+  { properties: Map<string, ThemeStamp>; authored: Set<string> }
+>();
+
+function retainsThemeStamp(
+  element: ProjectionThemeSurface,
+  property: string,
+  stamp: ThemeStamp
+): boolean {
+  return (
+    element.style.getPropertyValue(property) === stamp.value &&
+    element.style.getPropertyPriority(property) === stamp.priority
+  );
+}
 
 function isDarkTheme(scope: Element): boolean {
   for (let current: Element | null = scope; current; current = current.parentElement) {
@@ -174,8 +190,54 @@ export function scheduleProjectionThemeRead<T>(scope: Element, read: () => T): P
 
 export function applyProjectionThemeSurfaceStyle(
   element: ProjectionThemeSurface,
-  theme: ProjectionThemeSurfaceStyle
+  theme: ProjectionThemeSurfaceStyle,
+  mode: 'replace' | 'preserve-inline' = 'replace'
 ): void {
+  if (mode === 'preserve-inline') {
+    if (appliedThemeProperties.has(element)) clearProjectionThemeSurfaceStyle(element);
+    let state = preservedThemeStamps.get(element);
+    if (!state) {
+      state = { properties: new Map(), authored: new Set() };
+      preservedThemeStamps.set(element, state);
+    }
+    const nextProperties = new Set(Object.keys(theme));
+    for (const [property, stamp] of state.properties) {
+      if (!retainsThemeStamp(element, property, stamp)) {
+        // A changed value, priority, or deletion relinquishes this lease for
+        // the rest of this stamp's lifetime, including later theme refreshes.
+        state.properties.delete(property);
+        state.authored.add(property);
+      } else if (!nextProperties.has(property)) {
+        element.style.removeProperty(property);
+        state.properties.delete(property);
+      }
+    }
+    for (const [property, value] of Object.entries(theme)) {
+      if (state.authored.has(property)) continue;
+      if (
+        !state.properties.has(property) &&
+        (element.style.getPropertyValue(property) || element.style.getPropertyPriority(property))
+      ) {
+        state.authored.add(property);
+        continue;
+      }
+      if (
+        !state.properties.has(property) ||
+        element.style.getPropertyValue(property) !== value ||
+        element.style.getPropertyPriority(property)
+      ) {
+        element.style.setProperty(property, value);
+      }
+      // Ownership starts with our write to an absent property, never with a
+      // matching authored value. Equal external rewrites are indistinguishable.
+      state.properties.set(property, {
+        value: element.style.getPropertyValue(property),
+        priority: element.style.getPropertyPriority(property),
+      });
+    }
+    return;
+  }
+  if (preservedThemeStamps.has(element)) clearProjectionThemeSurfaceStyle(element);
   const nextProperties = new Set(Object.keys(theme));
   for (const property of appliedThemeProperties.get(element) ?? []) {
     if (!nextProperties.has(property)) element.style.removeProperty(property);
@@ -196,6 +258,10 @@ export function clearProjectionThemeSurfaceStyle(element: ProjectionThemeSurface
     element.style.removeProperty(property);
   }
   appliedThemeProperties.delete(element);
+  for (const [property, stamp] of preservedThemeStamps.get(element)?.properties ?? []) {
+    if (retainsThemeStamp(element, property, stamp)) element.style.removeProperty(property);
+  }
+  preservedThemeStamps.delete(element);
 }
 
 /**

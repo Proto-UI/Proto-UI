@@ -507,6 +507,812 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
       });
     }
   }, 150000);
+
+  it('preserves authored theme tokens through a real WC portal and native observer cleanup', async () => {
+    if (!evidence)
+      throw new Error('Theme ownership artifacts require PROTO_UI_MATERIAL_EVIDENCE_DIR');
+    const directory = path.join(evidence, 'theme-ownership');
+    await mkdir(directory, { recursive: true });
+    const files = [
+      'pnpm-lock.yaml',
+      'apps/www/src/components/PrototypePreviewer/projection-composition.ts',
+      'apps/www/src/components/PrototypePreviewer/projection-theme.ts',
+      'apps/www/src/components/PrototypePreviewer/projection-families.ts',
+      'apps/www/src/components/PrototypePreviewer/demo-renderer.ts',
+      'apps/www/src/components/PrototypePreviewer/demo-types.ts',
+      'apps/www/src/components/PrototypePreviewer/prototype-modules.ts',
+      'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      'apps/www/src/content/docs/demo-liquid-glass-dropdown-menu.demo.ts',
+      'packages/prototypes/liquid-glass/src/dropdown/content.proto.ts',
+      'packages/prototypes/liquid-glass/src/theme.ts',
+      'packages/prototypes/base/src/dropdown/content.proto.ts',
+      'packages/adapters/web-component/src/adapt.ts',
+      'packages/adapters/web-component/src/props.ts',
+      'packages/adapters/web-component/src/shadow-profile.ts',
+      'packages/adapters/web-component/src/portal-mount.ts',
+      'packages/adapters/web-component/src/runtime/modules.ts',
+      'packages/adapters/base/src/material/sink.ts',
+      'apps/www/src/pages/en/test/liquid-glass-material.astro',
+      'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+      'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
+      '.github/workflows/liquid-glass-frame-budget.yml',
+    ];
+    const identity = async () => ({
+      head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+      tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim(),
+      status: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(),
+      selectedSourceHashes: Object.fromEntries(
+        await Promise.all(
+          files.map(async (file) => [
+            file,
+            createHash('sha256')
+              .update(await readFile(file))
+              .digest('hex'),
+          ])
+        )
+      ),
+    });
+    const report: Record<string, any> = {
+      schemaVersion: 1,
+      scope:
+        'Candidate-only WC projection theme ownership; not a latency sample or cross-adapter portal certification.',
+      inputBoundary:
+        'Real Playwright pointer clicks and Escape key. Theme changes and the distinct CSS value/priority overwrite are explicit programmatic consumer inputs; no synthetic pointer/key event, manual reparent, forced stamp or observer delivery.',
+      ownershipLimit:
+        'A different value or priority is observable. An external write of the same value and priority is indistinguishable and is not claimed here.',
+      physicalLifetime:
+        'The default non-split WC Dropdown uses its persistent Custom Element as the presentation target. Its real portal unmount invokes revoke with restoreToOrigin=true and restores that same element at its retained origin marker. This does not require other adapters to retain a physical node.',
+      opticalBoundary:
+        'The authored foreground can legitimately reject optical admission. Material quality/reason/source and document resource observations are retained; optical success and document-wide zero resources are not this ownership oracle.',
+      cleanupOwnership:
+        'The Website caller explicitly stops its theme watcher before rendered.destroy. Only the latter owns the composition marker observer and supplementary stamps. Harness host removal occurs after product cleanup assertions.',
+      nativeObserverObservation:
+        'A temporary wrapper of the real MutationObserver.prototype.disconnect records the actual caller stack and disposal phase, preserving native this/arguments/return/exception. It does not replace observers or callbacks, consume mutation records, or make this a timing measurement.',
+      sharedObserverBoundary:
+        'The marker observer is Document-shared. Physical disconnect is expected here only because a freshly navigated standalone material fixture has no existing projection composition and this case creates exactly one. A remaining registration in a multi-scope document need not disconnect its shared observer.',
+      checkpoints: [],
+      failures: [],
+      console: [],
+      pageErrors: [],
+      sourceAtStart: await identity(),
+    };
+    const failure = (stage: string, error: unknown) =>
+      report.failures.push({
+        stage,
+        name: error instanceof Error ? error.name : typeof error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    const onConsole = (message: any) =>
+      report.console.push({
+        type: message.type(),
+        text: message.text(),
+        location: message.location(),
+      });
+    const onError = (error: Error) =>
+      report.pageErrors.push({
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    page.on('console', onConsole);
+    page.on('pageerror', onError);
+    let fixture: import('playwright-core').JSHandle<any> | undefined;
+    let stage = 'source-preflight';
+    const snapshot = () => fixture!.evaluate((value) => value.snapshot());
+    const checkpoint = async (name: string) => {
+      const value = await snapshot();
+      report.checkpoints.push({ name, ...value });
+      return value;
+    };
+    const screenshot = async (name: string) => {
+      const target = await fixture!.evaluateHandle((value) => value.surface as HTMLElement);
+      try {
+        const element = target.asElement();
+        if (!element) throw new Error('Normalized Content presentation surface is unavailable.');
+        const buffer = await element.screenshot({
+          path: path.join(directory, `${name}.png`),
+          timeout: 5000,
+        });
+        (report.screenshots ??= []).push({
+          file: `${name}.png`,
+          sha256: createHash('sha256').update(buffer).digest('hex'),
+          note: 'Captured after the named checkpoint; not its exact render timestamp.',
+        });
+      } finally {
+        await target.dispose();
+      }
+    };
+    const authored = (value: any) => {
+      expect(value.surface.inline['--pui-foreground']).toEqual({ value: '#aabbcc', priority: '' });
+      expect(value.authoredTreeUnchanged).toBe(true);
+      expect(value.canonicalDemoUnchanged).toBe(true);
+      expect(value.surface.id).toBe(value.retainedSurfaceId);
+      expect(value.surface.owner).toBe('liquid-theme-native-owner');
+      expect(value.surface.generation).toBe('1');
+      expect(value.surface.prototype).toBe('liquid-glass-dropdown-content');
+    };
+    try {
+      expect(report.sourceAtStart.status).toBe('');
+      if (process.env.CANDIDATE_SHA)
+        expect(report.sourceAtStart.head).toBe(process.env.CANDIDATE_SHA);
+      await preference('light', { 'prefers-reduced-motion': 'reduce' });
+      await page.setViewportSize({ width: 1200, height: 1050 });
+      await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'networkidle' });
+      await page.waitForFunction(() => document.documentElement.dataset.materialReady, undefined, {
+        timeout: 30000,
+      });
+      await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+      stage = 'mount-real-composition';
+      fixture = await page.evaluateHandle(async () => {
+        type DemoChild = import('../../../components/PrototypePreviewer/demo-types').DemoChild;
+        type DemoSpec = import('../../../components/PrototypePreviewer/demo-types').DemoSpec;
+        type DemoSetupContext =
+          import('../../../components/PrototypePreviewer/demo-types').DemoSetupContext;
+        const load = new Function('url', 'return import(url)') as (url: string) => Promise<any>;
+        const { createProjectionComposition } = (await load(
+          '/src/components/PrototypePreviewer/projection-composition.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/projection-composition');
+        const { renderDemo } = (await load(
+          '/src/components/PrototypePreviewer/demo-renderer.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/demo-renderer');
+        const { collectPrototypeIds } = (await load(
+          '/src/components/PrototypePreviewer/demo-types.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/demo-types');
+        const { loadPrototypes } = (await load(
+          '/src/components/PrototypePreviewer/prototype-modules.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/prototype-modules');
+        const { resolveProjectionThemeSurfaceStyle, watchProjectionThemeSurfaceStyle } =
+          (await load(
+            '/src/components/PrototypePreviewer/projection-theme.ts'
+          )) as typeof import('../../../components/PrototypePreviewer/projection-theme');
+        const { default: canonical } = (await load(
+          '/src/content/docs/demo-liquid-glass-dropdown-menu.demo.ts'
+        )) as { default: DemoSpec };
+        const canonicalBefore = JSON.stringify(canonical.root);
+        const findProto = (
+          node: DemoChild,
+          prototypeId: string
+        ): Extract<DemoChild, { kind: 'proto' }> | undefined => {
+          if (typeof node === 'string' || node.kind === 'text') return undefined;
+          if (node.kind === 'proto' && node.prototypeId === prototypeId) return node;
+          for (const child of node.children ?? []) {
+            const found = findProto(child, prototypeId);
+            if (found) return found;
+          }
+          return undefined;
+        };
+        const originalRoot = findProto(canonical.root, 'liquid-glass-dropdown-root');
+        if (!originalRoot) throw new Error('Canonical Liquid Dropdown Root is missing.');
+        const root = structuredClone(originalRoot);
+        const content = findProto(root, 'liquid-glass-dropdown-content');
+        const trigger = findProto(root, 'liquid-glass-dropdown-trigger');
+        if (!content || !trigger) throw new Error('Canonical Liquid Dropdown parts are missing.');
+        root.ref = 'theme-owner-root';
+        content.ref = 'theme-owner-content';
+        trigger.ref = 'theme-owner-trigger';
+        content.surfaceStyle = [
+          ...(Array.isArray(content.surfaceStyle)
+            ? content.surfaceStyle
+            : content.surfaceStyle
+              ? [content.surfaceStyle]
+              : []),
+          { '--pui-foreground': '#aabbcc', color: 'var(--pui-foreground)' },
+        ];
+        const declaredBefore = JSON.stringify(content.surfaceStyle);
+        const host = document.createElement('div');
+        // A construction failure can precede the returned JSHandle. Preserve a
+        // test-owned abort receipt and release every actually acquired owner.
+        const abortSteps: Array<() => void | Promise<void>> = [];
+        const observerDisconnections: Array<Record<string, unknown>> = [];
+        let observationPhase = 'mount';
+        const observerPrototype = MutationObserver.prototype;
+        const originalDisconnect = observerPrototype.disconnect;
+        const observedDisconnect: MutationObserver['disconnect'] = function (
+          this: MutationObserver,
+          ...args: Parameters<MutationObserver['disconnect']>
+        ) {
+          const entry = {
+            at: performance.now(),
+            phase: observationPhase,
+            stack: new Error('Native observer disconnect callsite').stack,
+          };
+          try {
+            const result = Reflect.apply(originalDisconnect, this, args);
+            observerDisconnections.push({ ...entry, outcome: 'returned' });
+            return result;
+          } catch (error) {
+            observerDisconnections.push({ ...entry, outcome: 'threw', error: String(error) });
+            throw error;
+          }
+        };
+        observerPrototype.disconnect = observedDisconnect;
+        const restoreDisconnect = () => {
+          if (observerPrototype.disconnect !== observedDisconnect)
+            throw new Error('Native disconnect observation was replaced by another writer.');
+          observerPrototype.disconnect = originalDisconnect;
+        };
+        abortSteps.push(restoreDisconnect);
+        (window as any).liquidThemeOwnershipAbort = async () => {
+          const errors: string[] = [];
+          for (const cleanup of [...abortSteps].reverse()) {
+            try {
+              await cleanup();
+            } catch (error) {
+              errors.push(String(error));
+            }
+          }
+          delete (window as any).liquidThemeOwnershipAbort;
+          return {
+            acquiredCleanupSteps: abortSteps.length,
+            errors,
+            hostConnected: host.isConnected,
+          };
+        };
+        abortSteps.push(() => host.remove());
+        host.dataset.themeOwnershipCase = '';
+        host.dataset.theme = 'light';
+        host.style.cssText = 'margin:24px;padding:32px;max-width:900px;min-height:160px;';
+        document.body.append(host);
+        const palettes = {
+          light: resolveProjectionThemeSurfaceStyle('liquid-glass', host),
+          dark: {} as Record<string, string>,
+        };
+        host.dataset.theme = 'dark';
+        palettes.dark = resolveProjectionThemeSurfaceStyle('liquid-glass', host);
+        host.dataset.theme = 'light';
+        const observerPrecondition = {
+          route: location.pathname,
+          preexistingProjectionScopes: document.querySelectorAll('[data-projection-scope]').length,
+          preexistingProjectionOwnerSurfaces: document.querySelectorAll(
+            '[class*="pui-projection-owner-"]'
+          ).length,
+        };
+        if (
+          observerPrecondition.preexistingProjectionScopes ||
+          observerPrecondition.preexistingProjectionOwnerSurfaces
+        )
+          throw new Error(
+            'Shared observer scenario precondition: this fresh standalone document already has a projection composition.'
+          );
+        let context: DemoSetupContext | undefined;
+        const composition = createProjectionComposition({
+          ownerId: 'liquid-theme-native-owner',
+          generation: 1,
+          runtimeId: 'wc',
+          projectionFamilyId: 'liquid-glass',
+          componentId: 'dropdown-menu',
+          childDemo: {
+            type: 'demo',
+            root,
+            setup(value) {
+              context = value;
+            },
+          },
+          themeSurfaceStyle: palettes.light,
+          controlIds: [],
+          controls: {
+            runtime: {
+              label: 'Runtime',
+              options: [{ value: 'wc', label: 'WC' }],
+              onValueChange() {},
+            },
+            family: {
+              label: 'Family',
+              options: [{ value: 'liquid-glass', label: 'Liquid' }],
+              onValueChange() {},
+            },
+            component: {
+              label: 'Component',
+              options: [{ value: 'dropdown-menu', label: 'Dropdown' }],
+              onValueChange() {},
+            },
+          },
+        });
+        const projected = findProto(composition.demo.root, 'liquid-glass-dropdown-content')!;
+        const projectedRoot = findProto(composition.demo.root, 'liquid-glass-dropdown-root')!;
+        const ownerMarker = projected.className
+          ?.split(/\s+/)
+          .find((value) => value.startsWith('pui-projection-owner-'));
+        const generationMarker = projected.className
+          ?.split(/\s+/)
+          .find((value) => value.startsWith('pui-projection-generation-'));
+        const marker = (node: typeof projected) =>
+          node.className
+            ?.split(/\s+/)
+            .find((value) => value.startsWith('pui-projection-prototype-'));
+        const contentMarker = marker(projected),
+          rootMarker = marker(projectedRoot);
+        if (!ownerMarker || !generationMarker || !contentMarker || !rootMarker)
+          throw new Error('Projection-owned presentation markers are missing.');
+        const ids = new Set<string>();
+        collectPrototypeIds(composition.demo.root, ids);
+        await loadPrototypes([...ids]);
+        const rendered = await renderDemo({ runtime: 'wc', host, demo: composition.demo });
+        abortSteps.push(() => rendered.destroy());
+        const surfaces = (prototypeMarker: string) =>
+          Array.from(document.getElementsByClassName(prototypeMarker)).filter(
+            (element): element is HTMLElement =>
+              element instanceof HTMLElement &&
+              element.classList.contains(ownerMarker) &&
+              element.classList.contains(generationMarker)
+          );
+        const candidates = surfaces(contentMarker),
+          roots = surfaces(rootMarker);
+        if (candidates.length !== 1 || roots.length !== 1)
+          throw new Error(
+            'Expected exactly one normalized WC Content and Root presentation surface.'
+          );
+        const surface = candidates[0]!,
+          rootSurface = roots[0]!;
+        const publicRef = context?.refs['theme-owner-content'];
+        // Preview WC uses its standard, non-split Dropdown profile. Do not apply
+        // this physical-node oracle to a split target or another renderer.
+        if (!publicRef || publicRef !== surface)
+          throw new Error(
+            'WC scenario precondition: public Content ref is not this standard persistent presentation surface.'
+          );
+        const originParent = surface.parentNode;
+        if (!originParent || !rootSurface.contains(surface))
+          throw new Error(
+            'WC scenario precondition: Content does not start beneath its declared Root.'
+          );
+        const identities = new WeakMap<Node, number>();
+        let nextIdentity = 0;
+        const id = (node: Node | null | undefined) => {
+          if (!node) return null;
+          if (!identities.has(node)) identities.set(node, ++nextIdentity);
+          return identities.get(node)!;
+        };
+        const retainedSurfaceId = id(surface);
+        const properties = ['--pui-foreground', '--pui-background', '--pui-border'];
+        const describe = (element: HTMLElement) => {
+          const computed = getComputedStyle(element),
+            rect = element.getBoundingClientRect();
+          return {
+            id: id(element),
+            tag: element.tagName,
+            connected: element.isConnected,
+            parent: id(element.parentNode),
+            owner: element.dataset.projectionOwner,
+            generation: element.dataset.projectionGeneration,
+            prototype: element.dataset.projectionPrototype,
+            classes: [...element.classList],
+            role: element.getAttribute('role'),
+            inline: Object.fromEntries(
+              properties.map((property) => [
+                property,
+                {
+                  value: element.style.getPropertyValue(property),
+                  priority: element.style.getPropertyPriority(property),
+                },
+              ])
+            ),
+            computed: Object.fromEntries(
+              [...properties, 'color', 'display', 'visibility'].map((property) => [
+                property,
+                computed.getPropertyValue(property).trim(),
+              ])
+            ),
+            bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            material: {
+              quality: element.dataset.materialQuality,
+              reason: element.dataset.materialReason,
+              frame: element.dataset.materialFrame,
+              contact: element.dataset.materialContact,
+              session: element.dataset.materialSession,
+              source: element.dataset.materialSource,
+              sourceRevision: element.dataset.materialSourceRevision,
+            },
+          };
+        };
+        const trace: unknown[] = [],
+          themeEvents: unknown[] = [],
+          inputs: Array<Record<string, unknown>> = [];
+        let overflow = false,
+          mutationRecords = 0,
+          destroyed = false,
+          themeStopped = false;
+        const snapshot = () => ({
+          at: performance.now(),
+          theme: host.dataset.theme,
+          retainedSurfaceId,
+          surface: describe(surface),
+          root: describe(rootSurface),
+          publicRef: { id: id(publicRef), sameAsSurface: publicRef === surface },
+          originParentId: id(originParent),
+          currentSurfaceIds: surfaces(contentMarker).map(id),
+          rootContainsSurface: rootSurface.contains(surface),
+          restoredToOrigin: surface.parentNode === originParent,
+          ownedConnectedNodes: document.getElementsByClassName(ownerMarker).length,
+          authoredTreeUnchanged: JSON.stringify(projected.surfaceStyle) === declaredBefore,
+          canonicalDemoUnchanged: JSON.stringify(canonical.root) === canonicalBefore,
+          themeCallbackCount: themeEvents.length,
+          destroyed,
+          themeStopped,
+          documentResourceObservation: (window as any).liquidMaterialFixture.metrics(),
+          canvases: Array.from(host.querySelectorAll('canvas[data-material-backdrop]')).map(
+            (canvas) => ({
+              id: id(canvas),
+              connected: canvas.isConnected,
+              width: (canvas as HTMLCanvasElement).width,
+              height: (canvas as HTMLCanvasElement).height,
+            })
+          ),
+        });
+        const record = (kind: string, details?: unknown) => {
+          if (trace.length >= 400) {
+            overflow = true;
+            return;
+          }
+          trace.push({ kind, details, snapshot: snapshot() });
+        };
+        const belongs = (node: Node) =>
+          node === host ||
+          (node instanceof Element &&
+            (node.classList.contains(ownerMarker) ||
+              node.querySelector(`.${ownerMarker}`) !== null));
+        const observer = new MutationObserver((records) => {
+          const relevant = records.filter(
+            (entry) =>
+              belongs(entry.target) || [...entry.addedNodes, ...entry.removedNodes].some(belongs)
+          );
+          if (!relevant.length) return;
+          mutationRecords += relevant.length;
+          if (mutationRecords > 2000) {
+            overflow = true;
+            return;
+          }
+          record(
+            'native-mutation-delivery',
+            relevant.map((entry) => ({
+              type: entry.type,
+              target: id(entry.target),
+              attribute: entry.attributeName,
+              oldValue: entry.oldValue,
+              currentValue:
+                entry.type === 'attributes'
+                  ? (entry.target as Element).getAttribute(entry.attributeName!)
+                  : null,
+              added: [...entry.addedNodes].map(id),
+              removed: [...entry.removedNodes].map(id),
+            }))
+          );
+        });
+        observer.observe(document.body, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeOldValue: true,
+          attributeFilter: [
+            'style',
+            'class',
+            'data-theme',
+            'data-projection-owner',
+            'data-projection-generation',
+          ],
+        });
+        abortSteps.push(() => observer.disconnect());
+        const input = (event: Event) => {
+          if (event.type === 'keydown' && (event as KeyboardEvent).key !== 'Escape') return;
+          if (
+            event.type !== 'keydown' &&
+            !(
+              event.target instanceof Node &&
+              (host.contains(event.target) || surface.contains(event.target))
+            )
+          )
+            return;
+          const value = {
+            type: event.type,
+            trusted: event.isTrusted,
+            at: performance.now(),
+            target: event.target instanceof Node ? id(event.target) : null,
+            key: event instanceof KeyboardEvent ? event.key : null,
+          };
+          inputs.push(value);
+          record('native-input', value);
+        };
+        for (const name of ['pointerdown', 'pointerup', 'click', 'keydown'])
+          document.addEventListener(name, input, true);
+        const stopInputs = () => {
+          for (const name of ['pointerdown', 'pointerup', 'click', 'keydown'])
+            document.removeEventListener(name, input, true);
+        };
+        abortSteps.push(stopInputs);
+        const stopTheme = watchProjectionThemeSurfaceStyle('liquid-glass', host, (theme) => {
+          themeEvents.push({ at: performance.now(), theme });
+          composition.setThemeSurfaceStyle(theme);
+          record('real-theme-watcher');
+        });
+        abortSteps.push(stopTheme);
+        observationPhase = 'running';
+        const twoRaf = () =>
+          new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Theme ownership RAF deadline')), 2000);
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                clearTimeout(timer);
+                resolve();
+              })
+            );
+          });
+        const stopCallerTheme = () => {
+          if (themeStopped) return;
+          observationPhase = 'caller-theme-watcher-stop';
+          record('before-caller-theme-watcher-stop');
+          stopTheme();
+          themeStopped = true;
+          record('after-caller-theme-watcher-stop');
+          observationPhase = 'after-caller-theme-watcher-stop';
+        };
+        const destroy = async () => {
+          if (destroyed) return;
+          observationPhase = 'rendered-destroy';
+          record('before-real-destroy');
+          try {
+            await rendered.destroy();
+          } finally {
+            destroyed = true;
+            await twoRaf();
+            record('after-real-destroy');
+            observationPhase = 'after-rendered-destroy';
+          }
+        };
+        return {
+          host,
+          surface,
+          palettes,
+          observerPrecondition,
+          snapshot,
+          twoRaf,
+          stopCallerTheme,
+          destroy,
+          record,
+          finish() {
+            observationPhase = 'harness-cleanup';
+            observer.disconnect();
+            stopInputs();
+            const final = snapshot();
+            const hostConnectedBeforeHarnessRemoval = host.isConnected;
+            host.remove();
+            restoreDisconnect();
+            delete (window as any).liquidThemeOwnershipAbort;
+            return {
+              trace,
+              themeEvents,
+              inputs,
+              mutationRecords,
+              overflow,
+              final,
+              observerDisconnections,
+              hostConnectedBeforeHarnessRemoval,
+              nativeDisconnectRestored: observerPrototype.disconnect === originalDisconnect,
+            };
+          },
+        };
+      });
+      report.palettes = await fixture.evaluate((value) => value.palettes);
+      report.observerPrecondition = await fixture.evaluate((value) => value.observerPrecondition);
+      const light = report.palettes.light,
+        dark = report.palettes.dark;
+      stage = 'mounted-light';
+      const mounted = await checkpoint(stage);
+      authored(mounted);
+      expect(mounted.publicRef.sameAsSurface).toBe(true);
+      expect(mounted.rootContainsSurface).toBe(true);
+      expect(mounted.surface.inline['--pui-background'].value).toBe('');
+      expect(mounted.root.inline['--pui-background'].value).toBe(light['--pui-background']);
+      const trigger = page.locator('[data-demo-ref="theme-owner-trigger"]');
+      const waitDetached = () =>
+        expect
+          .poll(
+            async () => {
+              const value = await snapshot();
+              return (
+                value.surface.connected &&
+                !value.rootContainsSurface &&
+                !value.restoredToOrigin &&
+                value.surface.role === 'menu' &&
+                value.currentSurfaceIds.length === 1 &&
+                value.currentSurfaceIds[0] === value.retainedSurfaceId
+              );
+            },
+            { timeout: 10000 }
+          )
+          .toBe(true);
+      stage = 'native-open-light';
+      await trigger.click();
+      await waitDetached();
+      await expect
+        .poll(async () => (await snapshot()).surface.inline['--pui-background'].value)
+        .toBe(light['--pui-background']);
+      const opened = await checkpoint(stage);
+      authored(opened);
+      expect(opened.surface.computed.color).toBe('rgb(170, 187, 204)');
+      await screenshot('open-light');
+      stage = 'detached-dark-via-watcher';
+      await fixture.evaluate((value) => {
+        value.host.dataset.theme = 'dark';
+      });
+      await expect
+        .poll(async () => ({
+          surface: (await snapshot()).surface.inline['--pui-background'].value,
+          root: (await snapshot()).root.inline['--pui-background'].value,
+        }))
+        .toEqual({ surface: dark['--pui-background'], root: dark['--pui-background'] });
+      const darkened = await checkpoint(stage);
+      authored(darkened);
+      expect(darkened.themeCallbackCount).toBeGreaterThan(mounted.themeCallbackCount);
+      expect(darkened.surface.computed.color).toBe('rgb(170, 187, 204)');
+      await screenshot('open-dark');
+      stage = 'native-escape-reattach';
+      // No theme setter, marker write or explicit stamp is allowed between
+      // Escape and this observation: the real browser observer must clear it.
+      await page.keyboard.press('Escape');
+      await expect
+        .poll(
+          async () => {
+            const value = await snapshot();
+            return (
+              value.surface.connected &&
+              value.rootContainsSurface &&
+              value.restoredToOrigin &&
+              value.surface.inline['--pui-background'].value === ''
+            );
+          },
+          { timeout: 10000 }
+        )
+        .toBe(true);
+      const reattached = await checkpoint(stage);
+      authored(reattached);
+      expect(reattached.currentSurfaceIds).toEqual([reattached.retainedSurfaceId]);
+      expect(reattached.surface.inline['--pui-border'].value).toBe('');
+      expect(reattached.surface.computed['--pui-background']).toBe(dark['--pui-background']);
+      stage = 'author-reclaims-one-stamp';
+      await trigger.click();
+      await waitDetached();
+      await expect
+        .poll(async () => (await snapshot()).surface.inline['--pui-background'].value)
+        .toBe(dark['--pui-background']);
+      await fixture.evaluate((value) => {
+        value.surface.style.setProperty('--pui-background', '#123456', 'important');
+        value.record('explicit-author-value-and-priority-overwrite');
+        value.host.dataset.theme = 'light';
+      });
+      await expect
+        .poll(async () => (await snapshot()).surface.inline['--pui-border'].value)
+        .toBe(light['--pui-border']);
+      const reclaimed = await checkpoint(stage);
+      authored(reclaimed);
+      expect(reclaimed.surface.inline['--pui-background']).toEqual({
+        value: '#123456',
+        priority: 'important',
+      });
+      expect(reclaimed.root.inline['--pui-background'].value).toBe(light['--pui-background']);
+      expect(reclaimed.themeCallbackCount).toBeGreaterThan(darkened.themeCallbackCount);
+      await screenshot('author-override');
+      stage = 'real-destroy-with-open-portal';
+      await fixture.evaluate((value) => value.stopCallerTheme());
+      report.callerThemeCleanup = await snapshot();
+      expect(report.callerThemeCleanup.surface.connected).toBe(true);
+      expect(report.callerThemeCleanup.surface.inline).toEqual(reclaimed.surface.inline);
+      await fixture.evaluate((value) => value.destroy());
+      const cleaned = await checkpoint(stage);
+      authored(cleaned);
+      expect(cleaned.surface.connected).toBe(false);
+      expect(cleaned.ownedConnectedNodes).toBe(0);
+      expect(cleaned.surface.inline['--pui-background']).toEqual({
+        value: '#123456',
+        priority: 'important',
+      });
+      expect(cleaned.surface.inline['--pui-border'].value).toBe('');
+      await fixture.evaluate(async (value) => {
+        value.host.dataset.theme = 'dark';
+        await value.twoRaf();
+      });
+      report.afterStoppedThemeInput = await snapshot();
+      expect(report.afterStoppedThemeInput.themeCallbackCount).toBe(cleaned.themeCallbackCount);
+      expect(report.afterStoppedThemeInput.surface.inline).toEqual(cleaned.surface.inline);
+      expect(report.checkpoints.map((value: any) => value.name)).toEqual([
+        'mounted-light',
+        'native-open-light',
+        'detached-dark-via-watcher',
+        'native-escape-reattach',
+        'author-reclaims-one-stamp',
+        'real-destroy-with-open-portal',
+      ]);
+    } catch (error) {
+      failure(stage, error);
+    } finally {
+      if (fixture) {
+        try {
+          await fixture.evaluate((value) => value.stopCallerTheme());
+        } catch (error) {
+          failure('caller-watcher-cleanup', error);
+        }
+        try {
+          await fixture.evaluate((value) => value.destroy());
+        } catch (error) {
+          failure('cleanup', error);
+        }
+        try {
+          report.native = await fixture.evaluate((value) => value.finish());
+          expect(report.native.overflow).toBe(false);
+          expect(report.native.inputs.filter((value: any) => value.type === 'click')).toHaveLength(
+            2
+          );
+          expect(
+            report.native.inputs.filter(
+              (value: any) => value.type === 'keydown' && value.key === 'Escape'
+            )
+          ).toHaveLength(1);
+          expect(report.native.inputs.every((value: any) => value.trusted === true)).toBe(true);
+          expect(report.native.hostConnectedBeforeHarnessRemoval).toBe(true);
+          expect(report.native.nativeDisconnectRestored).toBe(true);
+          expect(
+            report.native.observerDisconnections.some(
+              (value: any) =>
+                value.phase === 'caller-theme-watcher-stop' &&
+                value.outcome === 'returned' &&
+                value.stack?.includes('/projection-theme.ts')
+            )
+          ).toBe(true);
+          expect(
+            report.native.observerDisconnections.some(
+              (value: any) =>
+                value.phase === 'rendered-destroy' &&
+                value.outcome === 'returned' &&
+                value.stack?.includes('/projection-composition.ts')
+            )
+          ).toBe(true);
+        } catch (error) {
+          failure('archive-native-observation', error);
+        }
+        try {
+          await fixture.dispose();
+        } catch (error) {
+          failure('dispose-browser-handle', error);
+        }
+      } else {
+        try {
+          report.mountFailureCleanup = await page.evaluate(async () => {
+            const abort = (window as any).liquidThemeOwnershipAbort;
+            return abort
+              ? await abort()
+              : { acquiredCleanupSteps: 0, errors: [], available: false };
+          });
+          expect(report.mountFailureCleanup.errors).toEqual([]);
+        } catch (error) {
+          failure('incomplete-mount-cleanup', error);
+        }
+      }
+      page.off('console', onConsole);
+      page.off('pageerror', onError);
+      try {
+        report.sourceAtEnd = await identity();
+        report.sourceStable =
+          JSON.stringify(report.sourceAtStart) === JSON.stringify(report.sourceAtEnd);
+        expect(report.sourceStable).toBe(true);
+        expect(report.pageErrors).toEqual([]);
+      } catch (error) {
+        failure('final-source-and-page-errors', error);
+      }
+      report.completedAt = new Date().toISOString();
+      observations.push({
+        themeOwnership: 'theme-ownership/report.json',
+        checkpoints: report.checkpoints.length,
+        failures: report.failures,
+      });
+      await writeFile(
+        path.join(directory, 'console.json'),
+        JSON.stringify({ console: report.console, pageErrors: report.pageErrors }, null, 2)
+      );
+      await writeFile(path.join(directory, 'report.json'), JSON.stringify(report, null, 2));
+    }
+    expect(report.failures).toEqual([]);
+  }, 90000);
 });
 
 describe.sequential('bounded release lifecycle', () => {
