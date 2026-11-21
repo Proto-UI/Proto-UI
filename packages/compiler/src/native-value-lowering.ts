@@ -309,6 +309,8 @@ export function emitJavaScriptValue(
           return `Number.isFinite(${args.join(', ')})`;
         case 'object.freeze':
           return `Object.freeze(${args.join(', ')})`;
+        case 'object.assign':
+          return `Object.assign(${args.join(', ')})`;
         case 'object.hasOwn':
           return `Object.hasOwn(${args.join(', ')})`;
         case 'array.every':

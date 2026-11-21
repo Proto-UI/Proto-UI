@@ -22,6 +22,11 @@ export function writtenMemberFields(value: unknown): ReadonlySet<string> {
     const node = value as Record<string, unknown>;
     if (node.kind === 'member-write' && typeof node.property === 'string')
       fields.add(node.property);
+    if (node.kind === 'intrinsic' && node.name === 'object.assign' && Array.isArray(node.arguments))
+      for (const source of node.arguments.slice(1) as ExpressionIR[])
+        if (source?.kind === 'record' && Array.isArray(source.entries))
+          for (const entry of source.entries)
+            if (typeof entry?.key === 'string') fields.add(entry.key);
     for (const [key, child] of Object.entries(node))
       if (!['type', 'span', 'sourceFiles', 'captures'].includes(key)) inspect(child);
   };
@@ -51,7 +56,8 @@ export function functionCanMutateFlow(
       ].includes(String(node.kind))
     )
       return true;
-    if (node.kind === 'intrinsic' && node.name === 'array.every') return true;
+    if (node.kind === 'intrinsic' && ['array.every', 'object.assign'].includes(String(node.name)))
+      return true;
     if (
       node.kind === 'operation' &&
       OPERATION_RULES[node.operation as SemanticOperation]?.effects.some((effect) =>
