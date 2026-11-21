@@ -532,12 +532,46 @@ try {
             await page.waitForSelector('[data-site-contents-button]');
             await page.locator('[data-site-contents-button]').click();
           }
-          await page.waitForFunction(() =>
-            [
-              ...document.querySelectorAll<HTMLElement>(
-                '.sidebar-pane a[data-site-link-appearance="sidebar"]'
-              ),
-            ].some((e) => e.checkVisibility() && e.querySelector('[data-pui-root]'))
+          // Documentation chrome progressively mounts one complete owner per
+          // task. One ready sidebar link does not make the remaining rows ready.
+          // Reading TOC rows retain their own Surface/Text, while the separate
+          // shared Surface owns the visible-section range fill.
+          await page.waitForFunction(
+            ({ candidate, desktop }) => {
+              const [left, right] = [
+                '.sidebar-pane a[data-site-link-appearance="sidebar"]',
+                '.right-sidebar a[data-site-link-appearance="toc"]',
+              ].map((selector) =>
+                [...document.querySelectorAll<HTMLElement>(selector)].filter((link) =>
+                  link.checkVisibility()
+                )
+              );
+              if (!left!.length || (desktop && !right!.length)) return false;
+              for (const link of [...left!, ...right!]) {
+                const surface = link.querySelector<HTMLElement>(
+                  '[data-projection-prototype$="-surface-root"],wc-site-shadcn-surface,wc-site-brutalist-surface'
+                );
+                const text = link.querySelector<HTMLElement>(
+                  'wc-site-shadcn-text,wc-site-brutalist-text,[data-projection-prototype$="-text-root"]'
+                );
+                if (!surface?.hasAttribute('data-pui-root') || !text?.hasAttribute('data-pui-root'))
+                  return false;
+              }
+              if (candidate && right!.length)
+                for (const toc of document.querySelectorAll<HTMLElement>('.right-sidebar sl-toc')) {
+                  if (!toc.checkVisibility()) continue;
+                  const ranges = toc.querySelectorAll<HTMLElement>(
+                    ':scope > [data-site-toc-highlight][aria-hidden="true"][data-toc-range-ready]'
+                  );
+                  if (ranges.length !== 1) return false;
+                  const surface = ranges[0]!.querySelector<HTMLElement>(
+                    '[data-projection-prototype$="-surface-root"],wc-site-shadcn-surface,wc-site-brutalist-surface'
+                  );
+                  if (!surface?.hasAttribute('data-pui-root')) return false;
+                }
+              return true;
+            },
+            { candidate: kind === 'candidate', desktop: v.width === 1440 }
           );
           const read = () =>
             page.evaluate(() => {
@@ -554,8 +588,15 @@ try {
                     const text = link.querySelector<HTMLElement>(
                       'wc-site-shadcn-text,wc-site-brutalist-text,[data-projection-prototype$="-text-root"]'
                     )!;
-                    if (!surface || !text)
-                      throw new Error('Navigation requires real Surface/Text leaves');
+                    if (!surface?.hasAttribute('data-pui-root') || !text?.hasAttribute('data-pui-root'))
+                      throw new Error(
+                        `Navigation requires real Surface/Text leaves: ${JSON.stringify({
+                          href: link.getAttribute('href'),
+                          label: link.textContent?.trim(),
+                          surfaceReady: !!surface?.hasAttribute('data-pui-root'),
+                          textReady: !!text?.hasAttribute('data-pui-root'),
+                        })}`
+                      );
                     const c = getComputedStyle(text),
                       s = getComputedStyle(surface);
                     return {
@@ -699,7 +740,11 @@ try {
                 );
                 assert.equal(await range.count(), 1);
                 const rangePaint = await range.evaluate((element) => {
-                  const surface = element.querySelector<HTMLElement>('[data-pui-root]');
+                  const surface = element.querySelector<HTMLElement>(
+                    '[data-projection-prototype$="-surface-root"],wc-site-shadcn-surface,wc-site-brutalist-surface'
+                  );
+                  if (!surface?.hasAttribute('data-pui-root'))
+                    throw new Error('Reading TOC range requires its real shared Surface leaf');
                   const box = element.getBoundingClientRect();
                   return {
                     visible: getComputedStyle(element).visibility,
