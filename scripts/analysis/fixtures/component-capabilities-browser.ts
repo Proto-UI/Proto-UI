@@ -19,7 +19,12 @@ import * as ReactDOMClientRuntime from '../../../apps/www/node_modules/react-dom
 // package-owned declarations alongside the browser ESM entry selected by esbuild.
 import * as VueRuntime from '../../../apps/www/node_modules/vue';
 import Vue2 from '../../../apps/www/node_modules/vue2-runtime';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { createControlLabelRef, type InstanceAssociations } from '@proto.ui/core';
+import {
+  AdaptToWebComponent,
+  setElementAssociations,
+  setElementProps,
+} from '@proto.ui/adapter-web-component';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import { createVueAdapter, type VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import { createVue2Adapter, type Vue2Runtime as AdapterVue2Runtime } from '@proto.ui/adapter-vue2';
@@ -28,6 +33,7 @@ import * as baseCarousel from '../../../packages/prototypes/base/src/carousel';
 import * as baseResizable from '../../../packages/prototypes/base/src/resizable';
 import * as baseCalendar from '../../../packages/prototypes/base/src/calendar';
 import * as basePicker from '../../../packages/prototypes/base/src/date-picker';
+import { labelRoot } from '../../../packages/prototypes/base/src/label';
 import * as shadcnNumber from '../../../packages/prototypes/shadcn/src/number-field';
 import * as shadcnCarousel from '../../../packages/prototypes/shadcn/src/carousel';
 import * as shadcnResizable from '../../../packages/prototypes/shadcn/src/resizable';
@@ -73,6 +79,7 @@ type Node = {
   props: Props;
   style: Style;
   children: Array<Node | string>;
+  associations?: InstanceAssociations;
 };
 type Handle = { getExposes(): Record<string, any> };
 export type EventRecord = { id: string; type: string; detail: unknown };
@@ -172,20 +179,47 @@ function tree(family: Family, kind: Kind, options: Props): Node {
           display: 'inline-block',
           width: '180px',
         }),
-        node('input', p.numberFieldInput, {}, [], { width: '180px' }),
         node('decrement', p.numberFieldDecrement, {}, ['−']),
+        // Size the declared native editor through the public surface input.
+        // A WC's transparent owner host is not the editor; constraining that
+        // host alone can leave its native input wider than its allocated slot.
+        node('input', p.numberFieldInput, {
+          surfaceStyle: { width: '180px', flex: '0 0 auto' },
+        }),
         node('increment', p.numberFieldIncrement, {}, ['+']),
       ],
-      { width: '100%' }
+      family === 'base'
+        ? {
+            width: '100%',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '12px',
+          }
+        : { width: '100%' }
     );
   }
   if (kind === 'carousel') {
+    const previousAssociation = { controlLabel: createControlLabelRef() };
+    const nextAssociation = { controlLabel: createControlLabelRef() };
+    const namingStyle = {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      overflow: 'hidden',
+      clipPath: 'inset(50%)',
+      whiteSpace: 'nowrap',
+    };
     return node(
       'root',
       p.carouselRoot,
       { defaultIndex: 0, slidesPerView: 2, minSlideSize: 180, ...options },
       [
-        node('prev', p.carouselPrevious, {}, ['Previous']),
+        { ...node('prev', p.carouselPrevious, {}, ['‹']), associations: previousAssociation },
+        {
+          ...node('prev-label', labelRoot, { activation: false }, ['Previous slide'], namingStyle),
+          associations: previousAssociation,
+        },
         node(
           'viewport',
           p.carouselViewport,
@@ -197,7 +231,11 @@ function tree(family: Family, kind: Kind, options: Props): Node {
           ),
           { width: '100%', height: options.orientation === 'vertical' ? '300px' : '220px' }
         ),
-        node('next', p.carouselNext, {}, ['Next']),
+        { ...node('next', p.carouselNext, {}, ['›']), associations: nextAssociation },
+        {
+          ...node('next-label', labelRoot, { activation: false }, ['Next slide'], namingStyle),
+          associations: nextAssociation,
+        },
       ],
       { width: '100%' }
     );
@@ -277,9 +315,9 @@ function tree(family: Family, kind: Kind, options: Props): Node {
       : {};
   const body = [
     node('caption', p.calendarCaption, {}, [
-      node('prev', p.calendarPrevious, { a11yLabel: 'Previous month' }, ['Previous month']),
+      node('prev', p.calendarPrevious, { a11yLabel: 'Previous month' }, ['‹']),
       node('heading', p.calendarHeading),
-      node('next', p.calendarNext, { a11yLabel: 'Next month' }, ['Next month']),
+      node('next', p.calendarNext, { a11yLabel: 'Next month' }, ['›']),
     ]),
     node('grid', p.calendarGrid, {}, [
       node(
@@ -390,6 +428,7 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
       const element = document.createElement(current.proto.name) as HTMLElement & Handle;
       element.className = `cap-${current.id}`;
       Object.assign(element.style, current.style);
+      if (current.associations) setElementAssociations(element, current.associations);
       setElementProps(element, current.props);
       handles.set(current.id, element);
       if (current.id === 'root' || current.id === 'inner')
@@ -423,6 +462,7 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
           key: current.id,
           ...current.props,
           ...callbacks(current.id),
+          instanceAssociations: current.associations,
           className: `cap-${current.id}`,
           style: current.style,
           ref: refs.get(current.id),
@@ -452,6 +492,7 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
           key: current.id,
           ...current.props,
           ...callbacks(current.id),
+          instanceAssociations: current.associations,
           class: `cap-${current.id}`,
           style: current.style,
           ref: refs.get(current.id),
@@ -490,6 +531,7 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
               key: current.id,
               ref: current.id,
               attrs: current.props,
+              props: { instanceAssociations: current.associations },
               on: Object.fromEntries(
                 Object.entries(callbacks(current.id)).map(([key, callback]) => [
                   key[2].toLowerCase() + key.slice(3),

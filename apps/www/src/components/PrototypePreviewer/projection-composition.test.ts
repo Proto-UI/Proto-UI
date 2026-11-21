@@ -7,6 +7,7 @@ import {
   type DemoRuntimeApi,
   type DemoSetupContext,
   type DemoSpec,
+  type DemoSurfaceStyle,
 } from './demo-types';
 import { loadDemo } from './demo-modules';
 import { renderDemo } from './demo-renderer';
@@ -442,6 +443,212 @@ describe('Website projection composition', () => {
     refs.outer!.appendChild(refs.inner!);
     await vi.waitFor(() => expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe(''));
     (cleanup as () => void)();
+  });
+
+  describe('renderer theme ownership', () => {
+    it.each(['object', 'array'] as const)(
+      'preserves nested authored theme tokens in %s styles while updating owned copies inside Tabs',
+      (shape) => {
+        const authored: DemoSurfaceStyle =
+          shape === 'object'
+            ? { '--pui-foreground': '#aabbcc', color: 'red' }
+            : ['color: red;', { '--pui-foreground': '#aabbcc' }];
+        const childDemo: DemoSpec = {
+          type: 'demo',
+          root: {
+            kind: 'proto',
+            prototypeId: 'shadcn-button',
+            ref: 'outer',
+            surfaceStyle: shape === 'object' ? { color: 'navy' } : 'color: navy;',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-text-root',
+                ref: 'inner',
+                surfaceStyle: authored,
+                children: ['Authored text'],
+              },
+            ],
+          },
+        };
+        const original = structuredClone(childDemo.root);
+        const config = controls();
+        const composition = createProjectionComposition({
+          ownerId: `authored-theme-${shape}`,
+          runtimeId: 'react',
+          projectionFamilyId: 'shadcn',
+          generation: 3,
+          componentId: 'button',
+          contentRecipe: {
+            id: 'button-with-authored-text',
+            prototypeIds: ['shadcn-button', 'shadcn-text-root'],
+            rootPrototypeId: 'shadcn-button',
+          },
+          childDemo,
+          controls: { ...config, runtime: { ...config.runtime, presentation: 'tabs' } },
+          controlIds: ['runtime'],
+          themeSurfaceStyle: { '--pui-background': '#fff', '--pui-foreground': '#111' },
+        });
+        const inner = findNode(
+          composition.demo,
+          (node) => node.kind === 'proto' && node.ref === 'inner'
+        );
+        const outer = findNode(
+          composition.demo,
+          (node) => node.kind === 'proto' && node.ref === 'outer'
+        );
+        if (inner.kind !== 'proto' || outer.kind !== 'proto')
+          throw new Error('Expected Proto nodes.');
+        expect(inner.surfaceStyle).toEqual(authored);
+        expect(Array.isArray(outer.surfaceStyle)).toBe(shape === 'array');
+        const owned = [
+          outer,
+          ...['shadcn-tabs-root', 'shadcn-tabs-list'].map((prototypeId) =>
+            findNode(
+              composition.demo,
+              (node) => node.kind === 'proto' && node.prototypeId === prototypeId
+            )
+          ),
+        ].map((node) => {
+          if (node.kind !== 'proto') throw new Error('Expected an owned Proto.');
+          const entry = Array.isArray(node.surfaceStyle)
+            ? node.surfaceStyle.at(-1)
+            : node.surfaceStyle;
+          if (!entry || typeof entry !== 'object')
+            throw new Error('Expected a renderer style object.');
+          expect(entry['--pui-foreground']).toBe('#111');
+          return entry;
+        });
+
+        composition.setThemeSurfaceStyle({
+          '--pui-background': '#090909',
+          '--pui-foreground': '#eeeeee',
+        });
+
+        expect(inner.surfaceStyle).toEqual(authored);
+        expect(JSON.stringify(inner.surfaceStyle)).not.toContain('--pui-background');
+        for (const entry of owned) {
+          expect(entry['--pui-background']).toBe('#090909');
+          expect(entry['--pui-foreground']).toBe('#eeeeee');
+        }
+        if (Array.isArray(outer.surfaceStyle)) expect(outer.surfaceStyle[0]).toBe('color: navy;');
+        else expect(outer.surfaceStyle).toMatchObject({ color: 'navy' });
+        expect(childDemo.root).toEqual(original);
+      }
+    );
+
+    it.each(['no initial copy', 'replaced copy'] as const)(
+      'rejects an update with %s instead of inferring ownership from the tree',
+      (condition) => {
+        const composition = createProjectionComposition({
+          ownerId: 'missing-theme-owner',
+          runtimeId: 'wc',
+          projectionFamilyId: 'shadcn',
+          generation: 3,
+          componentId: 'button',
+          contentRecipe: buttonFixtureRecipe('shadcn'),
+          childDemo: {
+            type: 'demo',
+            root: { kind: 'proto', prototypeId: 'shadcn-button', ref: 'child' },
+          },
+          controls: controls(),
+          controlIds: [],
+          ...(condition === 'replaced copy'
+            ? { themeSurfaceStyle: { '--pui-foreground': '#111' } }
+            : {}),
+        });
+        const node = findNode(
+          composition.demo,
+          (entry) => entry.kind === 'proto' && entry.ref === 'child'
+        );
+        if (node.kind !== 'proto') throw new Error('Expected the child Proto.');
+        const previous = node.surfaceStyle;
+        if (condition === 'replaced copy') node.surfaceStyle = { color: 'red' };
+        expect(() => composition.setThemeSurfaceStyle({ '--pui-foreground': '#eeeeee' })).toThrow(
+          /missing renderer-owned theme state/
+        );
+        if (condition === 'replaced copy') {
+          expect(node.surfaceStyle).toEqual({ color: 'red' });
+          expect(previous).toMatchObject({ '--pui-foreground': '#111' });
+        }
+      }
+    );
+  });
+
+  it('preserves authored portal theme tuples through refresh, reattachment and cleanup', () => {
+    const childDemo: DemoSpec = {
+      type: 'demo',
+      root: {
+        kind: 'proto',
+        prototypeId: 'shadcn-button',
+        ref: 'outer',
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'shadcn-text-root',
+            ref: 'inner',
+            className: 'authored-token pui-projection-renderer-theme',
+            surfaceStyle: { '--pui-foreground': '#aabbcc', color: 'red' },
+          },
+        ],
+      },
+    };
+    const original = structuredClone(childDemo.root);
+    const composition = createProjectionComposition({
+      ownerId: 'authored-portal-theme',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 3,
+      componentId: 'button',
+      childDemo,
+      contentRecipe: {
+        id: 'button-with-authored-text',
+        prototypeIds: ['shadcn-button', 'shadcn-text-root'],
+        rootPrototypeId: 'shadcn-button',
+      },
+      controls: controls(),
+      controlIds: [],
+      themeSurfaceStyle: { '--pui-background': '#fff', '--pui-foreground': '#111' },
+    });
+    const { host, refs } = mountDemoTree(composition.demo);
+    // This marker harness does not render style inputs. Install the authored
+    // DOM tuple explicitly; native renderer acceptance is a separate check.
+    refs.inner!.style.setProperty('--pui-foreground', '#aabbcc');
+    refs.inner!.style.color = 'red';
+    const cleanup = composition.demo.setup!({
+      host,
+      refs,
+      api: { call: () => undefined, getExposes: () => undefined, setProps: () => undefined },
+    }) as () => void;
+    try {
+      expect(refs.inner!.style.getPropertyValue('--pui-foreground')).toBe('#aabbcc');
+      document.body.appendChild(refs.inner!);
+      // Use the public update's synchronous stamp, independently from mock
+      // MutationObserver delivery timing for the detach/reattach transition.
+      composition.setThemeSurfaceStyle({
+        '--pui-background': '#090909',
+        '--pui-foreground': '#eee',
+      });
+      expect(refs.inner!.style.getPropertyValue('--pui-foreground')).toBe('#aabbcc');
+      expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe('#090909');
+      refs.outer!.appendChild(refs.inner!);
+      composition.setThemeSurfaceStyle({ '--pui-background': '#fff', '--pui-foreground': '#111' });
+      expect(refs.inner!.style.getPropertyValue('--pui-foreground')).toBe('#aabbcc');
+      expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe('');
+      document.body.appendChild(refs.inner!);
+      composition.setThemeSurfaceStyle({
+        '--pui-background': '#090909',
+        '--pui-foreground': '#eee',
+      });
+      expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe('#090909');
+      cleanup();
+      expect(refs.inner!.style.getPropertyValue('--pui-foreground')).toBe('#aabbcc');
+      expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe('');
+      expect(refs.inner!.style.color).toBe('red');
+      expect(childDemo.root).toEqual(original);
+    } finally {
+      cleanup();
+    }
   });
 
   it('materializes only explicitly requested controls for a fixed-family consumer', () => {
@@ -1133,6 +1340,71 @@ describe('Website projection composition', () => {
     });
 
     (cleanup as () => void)();
+  });
+
+  it('pushes a theme update through a nested Proto that inherits the runtime tab surface', async () => {
+    const composition = createProjectionComposition({
+      ownerId: 'nested-theme',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 4,
+      componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
+      childDemo: {
+        type: 'demo',
+        root: {
+          kind: 'proto',
+          prototypeId: 'shadcn-button',
+          ref: 'child-button',
+          children: ['Child'],
+        },
+      },
+      controls: {
+        ...controls(),
+        runtime: { ...controls().runtime, presentation: 'tabs' },
+      },
+      controlIds: ['runtime'],
+      themeSurfaceStyle: {
+        '--pui-background': '#ffffff',
+        '--pui-foreground': '#1d1d1f',
+      },
+    });
+    const prototypeIds = new Set<string>();
+    collectPrototypeIds(composition.demo.root, prototypeIds);
+    await loadPrototypes([...prototypeIds]);
+    const host = document.createElement('div');
+    document.body.append(host);
+    let context!: DemoSetupContext;
+    const view = await renderDemo({
+      runtime: 'wc',
+      host,
+      demo: {
+        ...composition.demo,
+        setup(next) {
+          context = next;
+          return composition.demo.setup?.(next);
+        },
+      },
+    });
+    const themeValue = (name: string) => {
+      const boundary = context.refs['child-button'];
+      const surface =
+        boundary?.shadowRoot?.querySelector<HTMLElement>('[part~="surface"], [part~="root"]') ??
+        boundary;
+      return surface?.style.getPropertyValue(name) || boundary?.style.getPropertyValue(name) || '';
+    };
+    try {
+      expect(themeValue('--pui-background')).toBe('#ffffff');
+      expect(themeValue('--pui-foreground')).toBe('#1d1d1f');
+      composition.setThemeSurfaceStyle({
+        '--pui-background': '#2c2c2e',
+        '--pui-foreground': '#f5f5f7',
+      });
+      expect(themeValue('--pui-background')).toBe('#2c2c2e');
+      expect(themeValue('--pui-foreground')).toBe('#f5f5f7');
+    } finally {
+      await view.destroy();
+    }
   });
 
   it('shares one owner-filtered marker observer across compositions', async () => {

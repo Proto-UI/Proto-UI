@@ -24,7 +24,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
-    sourceSha256: '768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816',
+    sourceSha256: '54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782',
     specifiers: Object.freeze([
       './initial-paint-bridge',
       './paint-mutations',

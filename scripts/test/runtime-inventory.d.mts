@@ -1,2 +1,2 @@
-/** Shared discovery patterns used by Vitest and the exact-source CI planner. */
+/** Shared immutable discovery patterns used by Vitest and the exact-source CI plan. */
 export declare const RUNTIME_TEST_INCLUDES: readonly string[];

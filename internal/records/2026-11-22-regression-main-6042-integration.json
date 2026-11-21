@@ -1,0 +1,2603 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T21:40:21.205314+00:00",
+  "baseCandidate": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+  "incomingMain": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+  "previousIntegratedMain": "4d2da5beadafccfdff47d8c2d1263c98834eafbf",
+  "boundary": "Actual dirty merge source review and local controls. Original upstream commits/authors remain in merge ancestry. Not GitHub approval, clean final source, native validation, or release acceptance.",
+  "materialImplementation": {
+    "observedAt": "2026-11-21T21:32:57.025141+00:00",
+    "ourHead": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+    "upstreamHead": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+    "sourceHashes": {
+      "packages/adapters/base/src/material/sink.ts": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+      "packages/adapters/base/test/web-material-sink.test.ts": "96187fc7ecf8be2d64eaeebe66d6764be533dbf6c153e144780fe8ce18f14dc1",
+      "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts": "c70406a5d5f3eed133f5d76b8d768fbf9c7c441ffe8d4f2caf4cc5d81c08d7bc"
+    },
+    "upstreamFiniteReleaseBlockSha256": "4220ab14a74829c40ced351d2f2d620c16361d6b2f1fff0d5a383b0b7108e4d8",
+    "scope": "local merge implementation; not independent approval or clean-head/native acceptance",
+    "premiseAdjustments": {
+      "ownB418WidthAssertions100to118": 7,
+      "ownB418OutsetAssertions0to9": 2,
+      "originalPreB418AssertionsEdited": false,
+      "upstreamFiniteReleaseBlockChanged": false,
+      "ownAddedToggleZeroChangedToStablePositiveFootprint": true
+    }
+  },
+  "assertionPreservation": {
+    "scope": "AST assertion preservation audit, not test execution or semantic approval",
+    "sinkOriginal": {
+      "blob": "b3b97878308ee6ba68c1612b2cd10e4dd5569bb9",
+      "count": 435,
+      "mergedCount": 553,
+      "missing": []
+    },
+    "sinkIncoming": {
+      "head": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+      "count": 495,
+      "missing": [],
+      "finiteReleaseBlockByteIdentical": true,
+      "blockSha256": "4220ab14a74829c40ced351d2f2d620c16361d6b2f1fff0d5a383b0b7108e4d8"
+    },
+    "toggleOriginal": {
+      "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+      "count": 243,
+      "mergedCount": 247,
+      "missing": []
+    }
+  },
+  "materialFullReceipt": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "--no-file-parallelism",
+      "packages/adapters/base/test/web-material-sink.test.ts",
+      "packages/adapters/base/test/web-material-contact-motion.test.ts",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/fbd6f62bb640/material-main-6042-merge/whole-material.json"
+    ],
+    "startedAt": "2026-11-21T21:34:15.697591+00:00",
+    "finishedAt": "2026-11-21T21:34:19.909381+00:00",
+    "seconds": 4.212,
+    "exitCode": 0,
+    "observedHead": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+    "sourceBefore": {
+      "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts": "c70406a5d5f3eed133f5d76b8d768fbf9c7c441ffe8d4f2caf4cc5d81c08d7bc",
+      "packages/adapters/base/src/events/pointer-contact.ts": "8979916b5ca021cf4770168292681c99b0816e46b2cd47caa4bd361543bc0f09",
+      "packages/adapters/base/src/material/contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+      "packages/adapters/base/src/material/contact-motion.ts": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe",
+      "packages/adapters/base/src/material/contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+      "packages/adapters/base/src/material/geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+      "packages/adapters/base/src/material/image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+      "packages/adapters/base/src/material/index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+      "packages/adapters/base/src/material/initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+      "packages/adapters/base/src/material/initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+      "packages/adapters/base/src/material/initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+      "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+      "packages/adapters/base/src/material/paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+      "packages/adapters/base/src/material/preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "packages/adapters/base/src/material/prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "packages/adapters/base/src/material/program-inputs.ts": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+      "packages/adapters/base/src/material/program-pool.ts": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854",
+      "packages/adapters/base/src/material/program.ts": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "packages/adapters/base/src/material/sink.ts": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+      "packages/adapters/base/src/material/source-refresh-task.ts": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7",
+      "packages/adapters/base/src/material/source.ts": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2",
+      "packages/adapters/base/src/material/style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "packages/adapters/base/src/material/style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+      "packages/adapters/base/test/web-material-contact-motion.test.ts": "d1dcd51b0273de4cfe5e40a741063e6644a9a2c0a5d6ebb7f9af492bab1c4b54",
+      "packages/adapters/base/test/web-material-sink.test.ts": "96187fc7ecf8be2d64eaeebe66d6764be533dbf6c153e144780fe8ce18f14dc1"
+    },
+    "sourceAfter": {
+      "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts": "c70406a5d5f3eed133f5d76b8d768fbf9c7c441ffe8d4f2caf4cc5d81c08d7bc",
+      "packages/adapters/base/src/events/pointer-contact.ts": "8979916b5ca021cf4770168292681c99b0816e46b2cd47caa4bd361543bc0f09",
+      "packages/adapters/base/src/material/contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+      "packages/adapters/base/src/material/contact-motion.ts": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe",
+      "packages/adapters/base/src/material/contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+      "packages/adapters/base/src/material/geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+      "packages/adapters/base/src/material/image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+      "packages/adapters/base/src/material/index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+      "packages/adapters/base/src/material/initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+      "packages/adapters/base/src/material/initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+      "packages/adapters/base/src/material/initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+      "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+      "packages/adapters/base/src/material/paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+      "packages/adapters/base/src/material/preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "packages/adapters/base/src/material/prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "packages/adapters/base/src/material/program-inputs.ts": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+      "packages/adapters/base/src/material/program-pool.ts": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854",
+      "packages/adapters/base/src/material/program.ts": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "packages/adapters/base/src/material/sink.ts": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+      "packages/adapters/base/src/material/source-refresh-task.ts": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7",
+      "packages/adapters/base/src/material/source.ts": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2",
+      "packages/adapters/base/src/material/style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "packages/adapters/base/src/material/style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+      "packages/adapters/base/test/web-material-contact-motion.test.ts": "d1dcd51b0273de4cfe5e40a741063e6644a9a2c0a5d6ebb7f9af492bab1c4b54",
+      "packages/adapters/base/test/web-material-sink.test.ts": "96187fc7ecf8be2d64eaeebe66d6764be533dbf6c153e144780fe8ce18f14dc1"
+    },
+    "sourceStable": true,
+    "logBytes": 67672,
+    "logSha256": "a23067be36ac076d0c8b67f0cf80b7418e003c1a651e1c059d8f3560c32b76d4",
+    "scope": "full sink and contact-motion controls on a dirty merge; not optical/native acceptance"
+  },
+  "materialFullResults": {
+    "success": true,
+    "numTotalTests": 171,
+    "numPassedTests": 171,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "files": [
+      {
+        "path": "packages/adapters/base/test/web-material-contact-motion.test.ts",
+        "status": "passed",
+        "cases": [
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim uses the newest sample and finite release with a small reversal",
+            "status": "passed"
+          },
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim settles cancel immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim settles lostcapture immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim settles blur immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim settles replaced immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim settles unmount immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "bounded optical contact envelope, no browser paint claim withdrawal rejects the old session until a new down and disabled motion has no animation",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-sink.test.ts",
+        "status": "passed",
+        "cases": [
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) publishes a self-optical receipt only after host paint and restores owned styles on release",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) withdraws an existing receipt on authored sibling ::before and recovers after removal",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) withdraws an existing receipt on authored sibling ::after and recovers after removal",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) waits for exact asynchronous framework style delivery and discards a superseded frame",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) actual delayed DOM token delivery schedules one shared geometry check and then goes idle",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revokes the non-contact receipt after author replaces background-size",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revokes the non-contact receipt after author replaces background-repeat",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revokes the non-contact receipt after author replaces background-origin",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revokes the non-contact receipt after author replaces background-clip",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revokes the non-contact receipt when an owned background priority changes alone",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) keeps opaque paint until image decode and drops superseded, revoked and retired preparations",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) never reuses the previous white fallback when the current palette getter fails",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revalidates transparency at the asynchronous decode boundary without publishing an unsafe frame",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revalidates contrast at the asynchronous decode boundary without publishing an unsafe frame",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revalidates geometry at the asynchronous decode boundary without publishing an unsafe frame",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revalidates palette at the asynchronous decode boundary without publishing an unsafe frame",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) constrains reduced motion to static optics but transparency loss withdraws and recovers",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) revokes source pixels and recovers without forging a new semantic frame",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) does not resurrect a view released during GPU preparation, even if it throws",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) a source replacement during preparation cannot publish the obsolete optical result",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) shares one GPU context across surfaces and withdraws/rebuilds all leases after context loss",
+            "status": "passed"
+          },
+          {
+            "fullName": "V2 physical-view material ownership (mock GPU, not optical evidence) preserves unrelated inline updates and legal style when fallback cannot be owned",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation retires an obsolete expanded frame while preserving up during admission",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation retires an obsolete expanded frame while preserving new session during admission",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation rechecks a silent reduce motion preference after expanded admission",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation rechecks a silent unknown motion preference after expanded admission",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation does not publish an obsolete source withdrawn during expanded admission",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation keeps expanded-source bounds blocking even when the rest source was admitted",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation uses a static receipt with the stable profile footprint under reduce motion",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation uses a static receipt with the stable profile footprint under unknown motion",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation withdraws the admitted image when the sampled source owner is replaced",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation keeps the profile footprint while same-session motion releases and returns to rest",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation does not retain or revive release motion after cancel",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation does not retain or revive release motion after lostcapture",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) contact admission and motion revocation does not retain or revive release motion after blur",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint keeps the profile footprint while release motion settles at 240 ms from clock 0",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint keeps the profile footprint while release motion settles at 240 ms from clock 1000000",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint withdraws release motion on cancel and rejects a late up from that session",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint withdraws release motion on lostcapture and rejects a late up from that session",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint withdraws release motion on blur and rejects a late up from that session",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint withdraws release motion on replaced and rejects a late up from that session",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint withdraws release motion on unmount and rejects a late up from that session",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint uses the replacement session release deadline without inheriting the old completion",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint retires release motion on source invalidation without revival by queued work",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint retires release motion on preference invalidation without revival by queued work",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint retires release motion on view invalidation without revival by queued work",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint continues release after the same-clock held frame finishes its existing decode",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint cancels a queued same-clock continuation before a stale held decode completes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint rechecks expanded-source clipping during the release tail",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) finite release footprint rechecks expanded-source overlap during the release tail",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask renders the newest same-turn session before RAF and still waits for normal decode",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask keeps later moves coalesced until RAF after the early press render",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after up",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after cancel",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after lostcapture",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after blur",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after view release",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after router replacement",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after source loss",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after source replacement",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask cannot publish queued held paint after preference",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask retires the queued binding after actual owner-document adoption",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) fresh-press microtask bounds reentrant fresh downs to the original RAF convergence",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) coalesces many moves to the newest sample in one RAF",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) keeps one decode in flight and atomically replaces the admitted safe image",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) retains admitted paint through first down while rejecting superseded session completions",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) retains admitted paint through repress during release while rejecting superseded session completions",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) atomically replaces cancel held paint with admitted neutral while its successor decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) atomically replaces lostcapture held paint with admitted neutral while its successor decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) atomically replaces blur held paint with admitted neutral while its successor decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after source admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after source owner admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after palette admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after geometry admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after preference admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after author admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after material admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) does not bridge neutral after view admission is revoked",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws an already restored neutral bridge on later source revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws an already restored neutral bridge on later palette revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws an already restored neutral bridge on later geometry revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws an already restored neutral bridge on later preference revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws an already restored neutral bridge on later author revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) rebuilds neutral carrier origin for current left/top borders 5/7 without changing outer bounds",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) rebuilds neutral carrier origin for current left/top borders 2.5/3.25 without changing outer bounds",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) rebuilds neutral carrier origin for current left/top borders 0/8 without changing outer bounds",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) keeps cancellation latched across source ticks but re-arms a fresh semantic keyboard press",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) rejects neutral bridge completion after a new pointer session replaces cancellation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) re-admits neutral after cancellation reenters a held render without installing stale work",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) bounds retained decoded ownership to current plus one neutral and releases each exactly once",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) commits a new session even when its contact paint inputs match the previous session",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws retained new-down paint when source revoked before the replacement decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws retained new-down paint when reduced transparency before the replacement decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws retained new-down paint when geometry changed before the replacement decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws retained new-down paint when material withdrawn before the replacement decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws retained new-down paint when contact cancelled before the replacement decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws retained new-down paint when view retired before the replacement decodes",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) keeps held contact through a Base style/phase transition while retiring its older decode",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) atomically refreshes a live source frame without ending its held contact",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) revocation and a new session cannot revive a late decoded image",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) restores the tinted neutral contact profile and rejects an obsolete held completion",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) cannot bridge removed tint after a held decode and pointer cancellation",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) withdraws old tinted pixels before a new fill and foreground decode is ready",
+            "status": "passed"
+          },
+          {
+            "fullName": "continuous contact scheduler (mock GPU/decode, not optical evidence) rejects an obsolete tinted decode when rendering reenters with a neutral candidate",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent-review R2: failed carrier must become idle marker-only negative control does not retry without external changes and recovers after a real edit",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent-review R2: failed carrier must become idle real stylesheet refused by computed-style admission does not retry without external changes and recovers after a real edit",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent-review R2: failed carrier must become idle retains carrier stylesheet refusal through contact shutdown but retries changed geometry and sessions",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent-review R2: failed carrier must become idle retains image transport refusal through contact shutdown but retries changed geometry and sessions",
+            "status": "passed"
+          },
+          {
+            "fullName": "holds an image-transport failure across source revisions and retries changed preferences",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent: preserves external background-size through subsequent source and semantic repaints",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent: preserves external background-repeat through subsequent source and semantic repaints",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent: preserves external background-origin through subsequent source and semantic repaints",
+            "status": "passed"
+          },
+          {
+            "fullName": "independent: preserves external background-clip through subsequent source and semantic repaints",
+            "status": "passed"
+          },
+          {
+            "fullName": "re-admits optics only after the author relinquishes the background-size override",
+            "status": "passed"
+          },
+          {
+            "fullName": "re-admits optics only after the author relinquishes the background-repeat override",
+            "status": "passed"
+          },
+          {
+            "fullName": "re-admits optics only after the author relinquishes the background-origin override",
+            "status": "passed"
+          },
+          {
+            "fullName": "re-admits optics only after the author relinquishes the background-clip override",
+            "status": "passed"
+          },
+          {
+            "fullName": "keeps priority-only ownership replacement across repaint but can recover after removal",
+            "status": "passed"
+          },
+          {
+            "fullName": "retains simultaneous author takeovers until each declaration is removed",
+            "status": "passed"
+          },
+          {
+            "fullName": "retains author ownership when preferences revoke paint before the style observer runs",
+            "status": "passed"
+          },
+          {
+            "fullName": "release preserves first falsy failure undefined while cleaning later resources",
+            "status": "passed"
+          },
+          {
+            "fullName": "release preserves first falsy failure null while cleaning later resources",
+            "status": "passed"
+          },
+          {
+            "fullName": "release preserves first falsy failure false while cleaning later resources",
+            "status": "passed"
+          },
+          {
+            "fullName": "release preserves first falsy failure 0 while cleaning later resources",
+            "status": "passed"
+          },
+          {
+            "fullName": "release preserves first falsy failure  while cleaning later resources",
+            "status": "passed"
+          },
+          {
+            "fullName": "forced-color UA palette versus authored foreground ownership withdraws optics for the UA forced palette and restores only after preference reset",
+            "status": "passed"
+          },
+          {
+            "fullName": "forced-color UA palette versus authored foreground ownership reads preference changes made during source lookup before any new optical render",
+            "status": "passed"
+          },
+          {
+            "fullName": "forced-color UA palette versus authored foreground ownership cannot promote an earlier UA palette exemption after a reentrant preference reset",
+            "status": "passed"
+          },
+          {
+            "fullName": "forced-color UA palette versus authored foreground ownership rejects mismatched author colors when forced-color-adjust is none",
+            "status": "passed"
+          },
+          {
+            "fullName": "forced-color UA palette versus authored foreground ownership rejects mismatched author colors when forced-color-adjust is preserve-parent-color",
+            "status": "passed"
+          },
+          {
+            "fullName": "forced-color UA palette versus authored foreground ownership keeps the ordinary foreground mismatch gate under reduced transparency alone",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) passes only the governed palette with an explicitly identified supported profile",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) retains complete same-state fallback when the profile reports style-tint-empty-budget",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) retains complete same-state fallback when the profile reports rendered-contrast-unsafe",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) invalidates a delayed tinted lease when only the governed foreground changes",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) retains the old no-tint path and refuses unsupported clear+tint rather than ignoring it",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) never bridges or publishes an obsolete tint mode when fill/foreground remain identical",
+            "status": "passed"
+          },
+          {
+            "fullName": "style-fill tint ownership (mock GPU/decode, not pixel evidence) retains tint under reduced motion and synchronously withdraws it for forced colors and source loss",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) admits compatible updates synchronously, keeps decoded paint and coalesces one latest-state task",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) gives each of four warm bindings one independently progressing source task",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) rejects changed source alpha synchronously even when the admitted frame identity and revision match",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels a queued source task on fresh down and keeps the existing early press path immediate",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) withdraws queued warm paint synchronously when alpha becomes invalid",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) withdraws queued warm paint synchronously when pixel length becomes invalid",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) withdraws queued warm paint synchronously when geometry becomes invalid",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) withdraws queued warm paint synchronously when tint becomes invalid",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on source revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on owner revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on palette revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on preference revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on carrier revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on external paint revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued work synchronously on release revocation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) re-reads and rejects a silent source replacement when the task executes",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels queued tasks across context loss and reads a restored source immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) retires the queued document binding before replaying intent after adoption",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) keeps cold and keyboard-pressed source refresh on the immediate path",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) does not defer held contact, its finite release, or pointer cancellation",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) cancels source work on a non-source commit and renders the new intent immediately",
+            "status": "passed"
+          },
+          {
+            "fullName": "warm rest source task admission (mock GPU/decode, not performance evidence) retains one task across reentrant source reads and rechecks revocation during its render",
+            "status": "passed"
+          },
+          {
+            "fullName": "source cadence versus controlled decode completion (logical time, not browser performance) publishes each source when decode settles before the unchanged120ms source cadence",
+            "status": "passed"
+          },
+          {
+            "fullName": "source cadence versus controlled decode completion (logical time, not browser performance) records cold-start supersession without inventing a latency-driven downgrade tier, then recovers on a stable source",
+            "status": "passed"
+          },
+          {
+            "fullName": "source cadence versus controlled decode completion (logical time, not browser performance) distinguishes compatible warm-paint bridging from opaque fallback while newer decodes are superseded",
+            "status": "passed"
+          },
+          {
+            "fullName": "source cadence versus controlled decode completion (logical time, not browser performance) keeps silent replacement, genuine source revocation, preferences and disposal distinct",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "materialFocusedReceipt": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "--no-file-parallelism",
+      "packages/adapters/base/test/web-material-sink.test.ts",
+      "--testNamePattern=contact admission and motion revocation|finite release footprint|independent-review R2|image-transport failure",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/fbd6f62bb640/material-main-6042-merge/focused-material.json"
+    ],
+    "startedAt": "2026-11-21T21:33:33.326611+00:00",
+    "finishedAt": "2026-11-21T21:33:36.149749+00:00",
+    "seconds": 2.823,
+    "exitCode": 0,
+    "observedHead": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+    "sourceBefore": {
+      "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts": "c70406a5d5f3eed133f5d76b8d768fbf9c7c441ffe8d4f2caf4cc5d81c08d7bc",
+      "packages/adapters/base/src/events/pointer-contact.ts": "8979916b5ca021cf4770168292681c99b0816e46b2cd47caa4bd361543bc0f09",
+      "packages/adapters/base/src/material/contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+      "packages/adapters/base/src/material/contact-motion.ts": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe",
+      "packages/adapters/base/src/material/contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+      "packages/adapters/base/src/material/geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+      "packages/adapters/base/src/material/image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+      "packages/adapters/base/src/material/index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+      "packages/adapters/base/src/material/initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+      "packages/adapters/base/src/material/initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+      "packages/adapters/base/src/material/initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+      "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+      "packages/adapters/base/src/material/paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+      "packages/adapters/base/src/material/preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "packages/adapters/base/src/material/prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "packages/adapters/base/src/material/program-inputs.ts": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+      "packages/adapters/base/src/material/program-pool.ts": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854",
+      "packages/adapters/base/src/material/program.ts": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "packages/adapters/base/src/material/sink.ts": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+      "packages/adapters/base/src/material/source-refresh-task.ts": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7",
+      "packages/adapters/base/src/material/source.ts": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2",
+      "packages/adapters/base/src/material/style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "packages/adapters/base/src/material/style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+      "packages/adapters/base/test/web-material-contact-motion.test.ts": "d1dcd51b0273de4cfe5e40a741063e6644a9a2c0a5d6ebb7f9af492bab1c4b54",
+      "packages/adapters/base/test/web-material-sink.test.ts": "96187fc7ecf8be2d64eaeebe66d6764be533dbf6c153e144780fe8ce18f14dc1"
+    },
+    "sourceAfter": {
+      "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts": "c70406a5d5f3eed133f5d76b8d768fbf9c7c441ffe8d4f2caf4cc5d81c08d7bc",
+      "packages/adapters/base/src/events/pointer-contact.ts": "8979916b5ca021cf4770168292681c99b0816e46b2cd47caa4bd361543bc0f09",
+      "packages/adapters/base/src/material/contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+      "packages/adapters/base/src/material/contact-motion.ts": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe",
+      "packages/adapters/base/src/material/contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+      "packages/adapters/base/src/material/geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+      "packages/adapters/base/src/material/image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+      "packages/adapters/base/src/material/index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+      "packages/adapters/base/src/material/initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+      "packages/adapters/base/src/material/initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+      "packages/adapters/base/src/material/initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+      "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+      "packages/adapters/base/src/material/paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+      "packages/adapters/base/src/material/preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "packages/adapters/base/src/material/prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "packages/adapters/base/src/material/program-inputs.ts": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+      "packages/adapters/base/src/material/program-pool.ts": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854",
+      "packages/adapters/base/src/material/program.ts": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "packages/adapters/base/src/material/sink.ts": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+      "packages/adapters/base/src/material/source-refresh-task.ts": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7",
+      "packages/adapters/base/src/material/source.ts": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2",
+      "packages/adapters/base/src/material/style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "packages/adapters/base/src/material/style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+      "packages/adapters/base/test/web-material-contact-motion.test.ts": "d1dcd51b0273de4cfe5e40a741063e6644a9a2c0a5d6ebb7f9af492bab1c4b54",
+      "packages/adapters/base/test/web-material-sink.test.ts": "96187fc7ecf8be2d64eaeebe66d6764be533dbf6c153e144780fe8ce18f14dc1"
+    },
+    "sourceStable": true,
+    "logBytes": 25429,
+    "logSha256": "6787912b9d46c805d2158da5d9b5b8c9d5380d96e9cf29c8d09470db292ce728",
+    "scope": "focused mock GPU/decode controls on a dirty merge; not optical/native acceptance"
+  },
+  "themeFullReceipt": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts",
+      "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts",
+      "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/fbd6f62bb640/main-6042-integration/theme-controls-vitest.json"
+    ],
+    "startedAt": "2026-11-21T21:33:37.225101+00:00",
+    "finishedAt": "2026-11-21T21:33:44.051623+00:00",
+    "seconds": 6.827,
+    "exitCode": 0,
+    "before": {
+      "apps/www/src/components/PrototypePreviewer/projection-composition.ts": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+      "apps/www/src/components/PrototypePreviewer/projection-theme.ts": "b7f53bc02ed2eec4067e218cb3dc2ab820c9b682661ef2ca216fbb1a747bb826",
+      "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts": "0488faa725ce1624427129e31f5537c55bdf9c23fd5e5672133e17efac9c1ad5",
+      "apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts": "c2db58d9aa0692b08e989c7d4e01f4091564b63810e0e809e662add340092369",
+      "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts": "e3124b0df674ac8484f996db7c9d2c29f30374f2cf352a28bd8f8ac52295fcf1",
+      "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts": "1a9ac1ebf9c570caeb2f41a354af772b7461d36548c508ce8a79d4f1faab4974"
+    },
+    "after": {
+      "apps/www/src/components/PrototypePreviewer/projection-composition.ts": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+      "apps/www/src/components/PrototypePreviewer/projection-theme.ts": "b7f53bc02ed2eec4067e218cb3dc2ab820c9b682661ef2ca216fbb1a747bb826",
+      "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts": "0488faa725ce1624427129e31f5537c55bdf9c23fd5e5672133e17efac9c1ad5",
+      "apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts": "c2db58d9aa0692b08e989c7d4e01f4091564b63810e0e809e662add340092369",
+      "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts": "e3124b0df674ac8484f996db7c9d2c29f30374f2cf352a28bd8f8ac52295fcf1",
+      "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts": "1a9ac1ebf9c570caeb2f41a354af772b7461d36548c508ce8a79d4f1faab4974"
+    },
+    "reviewedSourceStable": true,
+    "logSha256": "74407002864e4eee5dc33722c2012f43e8f86ffb8f17f2571717c3a0ddb2c102",
+    "boundary": "Actual focused working-tree merge controls; other disjoint files may change. Not a clean final-head or native receipt."
+  },
+  "themeFullResults": {
+    "success": true,
+    "numTotalTests": 119,
+    "numPassedTests": 119,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "files": [
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts",
+        "status": "passed",
+        "cases": [
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization shares body removal observation and retires only the detached preview",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization retains the original live loading status through module loading and renderer preparation",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization releases the initial status on failure without retaining a busy shell",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization releases the initial status on destroy without retaining a busy shell",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization keeps an uncataloged demo on the legacy demo renderer",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization ignores legacy data-loader URLs and keeps the static prototype module path",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization uses the persisted page-level adapter preference for its first mount",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization aligns the projected selector with a non-wc initial runtime",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization routes a projected selection through one page-level remount path",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization remounts when the page-level adapter selector broadcasts a compatible runtime",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization commits the latest generic family when it changes while the renderer is pending",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization does not let a stale runtime completion replace the current runtime",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization does not remount when duplicate adapter events target the active runtime",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization lets a newer adapter event replace an in-flight runtime request",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization clears the active runtime before a failed remount",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization offers a recovery path when a lazy-loaded chunk fails to load",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization keeps unrelated preview failures free of the chunk recovery controls",
+            "status": "passed"
+          },
+          {
+            "fullName": "PrototypePreviewer adapter preference synchronization invalidates the host before every switch and terminal destroy",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts",
+        "status": "passed",
+        "cases": [
+          {
+            "fullName": "Website dynamic projection wrapper includes future prototypes in explicit recipe closure while the slot remains empty",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper projects dynamic values through the selected lane and keeps refs live until cleanup",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper rejects foreign lane, reserved refs and accessor data before dispatch to the renderer",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper pushes a theme update through a nested Proto committed by setChildren",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper keeps private renderer handles stable and preserves mixed author styles across current-theme updates",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper uses the latest theme after a started commit even if a newer request rejects",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper filters complete subscription batches and owns listener teardown",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper forwards only live child public instance lookups, without wrapping or leaking reserved refs",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper does not manufacture public instance access for an external API without it",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website dynamic projection wrapper explicitly preserves every standard API capability but not nonstandard external extensions",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+        "status": "passed",
+        "cases": [
+          {
+            "fullName": "provides a stable public Select author label and uses native profile in wc",
+            "status": "passed"
+          },
+          {
+            "fullName": "provides a stable public Select author label and uses native profile in react",
+            "status": "passed"
+          },
+          {
+            "fullName": "provides a stable public Select author label and uses native profile in vue",
+            "status": "passed"
+          },
+          {
+            "fullName": "provides a stable public Select author label and uses native profile in vue2",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'shadcn' 'wc' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'shadcn' 'react' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'shadcn' 'vue' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'shadcn' 'vue2' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'brutalist' 'wc' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'brutalist' 'react' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'brutalist' 'vue' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition keeps 'brutalist' 'vue2' control values shrinkable without shortening their accessible text",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition wc routes the explicit Header appearance only into the Brutalist Trigger",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition react routes the explicit Header appearance only into the Brutalist Trigger",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition vue routes the explicit Header appearance only into the Brutalist Trigger",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition vue2 routes the explicit Header appearance only into the Brutalist Trigger",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition clones the child tree and closes style plus identity markers over every Proto surface",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition lets nested Proto surfaces inherit theme and restamps a detached surface",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition renderer theme ownership preserves nested authored theme tokens in object styles while updating owned copies inside Tabs",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition renderer theme ownership preserves nested authored theme tokens in array styles while updating owned copies inside Tabs",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition renderer theme ownership rejects an update with no initial copy instead of inferring ownership from the tree",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition renderer theme ownership rejects an update with replaced copy instead of inferring ownership from the tree",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition preserves authored portal theme tuples through refresh, reattachment and cleanup",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition materializes only explicitly requested controls for a fixed-family consumer",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition accepts every concrete shared-family recipe only after its manifest closure is complete",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition composes the real shadcn Popover demo and rejects an undeclared outside-focus Button",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition composes the real brutalist Popover demo and rejects an undeclared outside-focus Button",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition composes the real bootstrap-2-3-2 Popover demo and rejects an undeclared outside-focus Button",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition fails closed when a projection recipe omits its required 'component root'",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition fails closed when a projection recipe omits its required 'compound part'",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition rejects unrepresentable important surface priorities before wc rendering",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition rejects unrepresentable important surface priorities before react rendering",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition rejects unrepresentable important surface priorities before vue rendering",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition rejects unrepresentable important surface priorities before vue2 rendering",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition bounds child setup and rejects gated, locked and retired control requests",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition seals the outgoing generation portals in the request turn and keeps a repeated value unsealed",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition finishes real Item close and Trigger handback before accepting wc",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition finishes real Item close and Trigger handback before accepting react",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition continues composition teardown after a control close fails",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition routes react projection controls through the framework callback channel only",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition routes vue projection controls through the framework callback channel only",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition routes vue2 projection controls through the framework callback channel only",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition reprojects the latest complete theme onto mounted and late portal surfaces",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition pushes a theme update through a nested Proto that inherits the runtime tab surface",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition shares one owner-filtered marker observer across compositions",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition binds native editor boundary only for an empty or current lease: null/null",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition binds native editor boundary only for an empty or current lease: 'editor-owner'/'9'",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition binds native editor boundary only for an empty or current lease: 'foreign-owner'/'9'",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition binds native editor boundary only for an empty or current lease: 'editor-owner'/'8'",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition stamps the exact private caption Prototype identity with its control coordinate",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition restamps changed projection coordinates without rewriting identical attributes",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition stamps SVG Prototype surfaces with generation identity and theme values",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection composition runs child cleanup and releases the mount when setup fails after child setup",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website native-only content recipes preserves anchor host semantics without claiming a Link or Button Prototype",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website native-only content recipes rejects missing, duplicate, or falsely omitted declared Prototype identity",
+            "status": "passed"
+          },
+          {
+            "fullName": "keeps full-value wrapping an explicit consumer opt-in rather than changing preview defaults",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection shadcn wc composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection shadcn react composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection shadcn vue composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection shadcn vue2 composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection brutalist wc composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection brutalist react composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection brutalist vue composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          },
+          {
+            "fullName": "Header Select family projection brutalist vue2 composes both Header Roots without a size policy or item CSS",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts",
+        "status": "passed",
+        "cases": [
+          {
+            "fullName": "Website projection theme inputs samples each publication scope before releasing writes for the batch",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs schedules one urgent publication task and handles rejection (false)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs schedules one urgent publication task and handles rejection (true)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs samples within a microtask when the document has no priority scheduler",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs leaves other queued publications readable when a theme read fails",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs copies only the explicit Website Shadcn input and fails closed on a missing token",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs reads explicit Shadcn typography overrides without borrowing a retained other-family font",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs withdraws a previous family font with the owned theme map and leaves caller style alone",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs uses the Prototype-owned Brutalist theme for the active Website color mode",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs resolves the nearest explicit Brutalist frame theme before the document theme",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs watches the owning scope ancestry for explicit Brutalist theme changes",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs uses an explicit light class before a dark system preference",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs only writes changed live theme declarations and still reclaims owned priority",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs applies a closed theme copy and removes properties retired from its owned shape",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps keeps an existing author tuple #aabbcc even when it matches the theme",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps keeps an existing author tuple #111 even when it matches the theme",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps leaves a stamped property after author 'value' takeover (refresh=false)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps leaves a stamped property after author 'value' takeover (refresh=true)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps leaves a stamped property after author 'priority' takeover (refresh=false)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps leaves a stamped property after author 'priority' takeover (refresh=true)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps leaves a stamped property after author 'removal' takeover (refresh=false)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps leaves a stamped property after author 'removal' takeover (refresh=true)",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs preserved inline theme stamps updates and retires only its explicitly written missing properties",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs watches color-mode changes without self-looping and returns idempotent cleanup",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs does not reread the theme bank for unchanged attributes and keeps real changes in mixed batches",
+            "status": "passed"
+          },
+          {
+            "fullName": "Website projection theme inputs disconnects every observer when the initial watcher publication throws",
+            "status": "passed"
+          },
+          {
+            "fullName": "source-owned partial family themes preserves historical Bootstrap light paint and explicit accessible dark adaptations",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "finiteBindingAudit": {
+    "schema": 1,
+    "observedAt": "2026-11-21T21:37:58.414Z",
+    "scope": "Read-only finite binding admission in an in-progress merge; not a clean candidate, final portfolio audit, full gate, or native acceptance.",
+    "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+    "mergeHead": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+    "composition": {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "prior": {
+        "revision": "3fd734e9e87e19477a59deee6a8f4f9c32ac07cf",
+        "blob": "56970ebb2670720a4f778419954c6ae22ec03479",
+        "sha256": "f195b0e80eaf0fe7d14f31391e70d97a08c5dc2edaea3bc6be387221bd52f200",
+        "recomputedGitBlob": "56970ebb2670720a4f778419954c6ae22ec03479",
+        "blobProofMatches": true
+      },
+      "upstream": {
+        "revision": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+        "blob": "7f2cdc426076260c33b8d1c3305c357f15ed7dc1",
+        "sha256": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+        "recomputedGitBlob": "7f2cdc426076260c33b8d1c3305c357f15ed7dc1",
+        "blobProofMatches": true
+      },
+      "worktree": {
+        "sha256": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+        "byteIdenticalToUpstream": true
+      },
+      "history": [
+        {
+          "revision": "b842881c2483ae0a7433259dfaf11262a1995b56",
+          "blob": "7f2cdc426076260c33b8d1c3305c357f15ed7dc1",
+          "sha256": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+          "subject": "Merge remote-tracking branch 'origin/main' into fix/material-uniform-release-theme"
+        },
+        {
+          "revision": "e9d5164a3a90b1adb36794073a44f822cbbe4935",
+          "blob": "17f296b7889b78bc418cf1377b5e27175b0b1f15",
+          "sha256": "6c83f452463ea0a8aac6f633186c7d98374f87dd1b5490c5d2b5bc52adfe3cca",
+          "subject": "fix(previewer): push nested theme copies through dynamic commits too"
+        },
+        {
+          "revision": "2016c395bdea68e1543edd1b6bd7d5dfd858bc6d",
+          "blob": "adba6d5bd2b10591b8559918f9799615c58d535a",
+          "sha256": "d3caff41f66ae457acaac894e24ce86e123dcffb0c278fb4ab99b682687b7fe9",
+          "subject": "fix(preview): update nested Proto theme copies on live theme change"
+        },
+        {
+          "revision": "3fd734e9e87e19477a59deee6a8f4f9c32ac07cf",
+          "blob": "56970ebb2670720a4f778419954c6ae22ec03479",
+          "sha256": "f195b0e80eaf0fe7d14f31391e70d97a08c5dc2edaea3bc6be387221bd52f200",
+          "subject": "fix(previewer): preserve authored theme styles across portals"
+        },
+        {
+          "revision": "80433aac69482bddb3d418af65a700f0f26408f8",
+          "blob": "3dd76302eda24262ba86d51c496b7b4cdc05b8bf",
+          "sha256": "cfa3d945c41ff5793e3ff2537a11f165c6c4d3af2f34509bd28e84ae4d7da583",
+          "subject": "fix(www): inherit projection theme through nested Proto surfaces"
+        },
+        {
+          "revision": "8afc5f951c724deffc58574aa4ab34ebc4ebd569",
+          "blob": "6a2a6f13c8afdb8160c79cfafcaf0f1e08dcd953",
+          "sha256": "e0c61cfb47d608244ec7e9f7c266b2c44dea28985ad9ede1d690c97563c0fdd6",
+          "subject": "Merge main into the closed Select portal lock"
+        }
+      ],
+      "importsBefore": {
+        "parseDiagnostics": [],
+        "entries": [
+          {
+            "kind": "import",
+            "specifier": "./demo-dynamic-children",
+            "isTypeOnly": false,
+            "raw": "import { snapshotDemoValue } from './demo-dynamic-children';"
+          },
+          {
+            "kind": "import",
+            "specifier": "../site-select-dismissal",
+            "isTypeOnly": false,
+            "raw": "import { bindSiteSelectDismissal } from '../site-select-dismissal';"
+          },
+          {
+            "kind": "import",
+            "specifier": "../site-text-recipes",
+            "isTypeOnly": false,
+            "raw": "import { siteTextRecipe } from '../site-text-recipes';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./runtimes/ids",
+            "isTypeOnly": true,
+            "raw": "import type { RuntimeId } from './runtimes/ids';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./demo-types",
+            "isTypeOnly": false,
+            "raw": "import {\n  assertDemoSpec,\n  type DemoBoxAttrs,\n  type DemoChild,\n  type DemoKeyedChild,\n  type DemoPublicInstancesListener,\n  type DemoPublicInstance,\n  type DemoNode,\n  type DemoSetupContext,\n  type DemoSpec,\n  type DemoSurfaceStyle,\n  type DemoSurfaceStyleEntry,\n} from './demo-types';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./projection-families",
+            "isTypeOnly": false,
+            "raw": "import {\n  PROJECTION_FAMILY_MANIFESTS,\n  resolveProjectionPart,\n  resolveProjectionSelectParts,\n  type ProjectionSelectParts,\n  type ProjectionComponentId,\n  type ProjectionFamilyId,\n  type ProjectionFamilyManifest,\n} from './projection-families';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./projection-theme",
+            "isTypeOnly": false,
+            "raw": "import {\n  applyProjectionThemeSurfaceStyle,\n  clearProjectionThemeSurfaceStyle,\n  type ProjectionThemeSurfaceStyle,\n} from './projection-theme';"
+          }
+        ]
+      },
+      "importsAfter": {
+        "parseDiagnostics": [],
+        "entries": [
+          {
+            "kind": "import",
+            "specifier": "./demo-dynamic-children",
+            "isTypeOnly": false,
+            "raw": "import { snapshotDemoValue } from './demo-dynamic-children';"
+          },
+          {
+            "kind": "import",
+            "specifier": "../site-select-dismissal",
+            "isTypeOnly": false,
+            "raw": "import { bindSiteSelectDismissal } from '../site-select-dismissal';"
+          },
+          {
+            "kind": "import",
+            "specifier": "../site-text-recipes",
+            "isTypeOnly": false,
+            "raw": "import { siteTextRecipe } from '../site-text-recipes';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./runtimes/ids",
+            "isTypeOnly": true,
+            "raw": "import type { RuntimeId } from './runtimes/ids';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./demo-types",
+            "isTypeOnly": false,
+            "raw": "import {\n  assertDemoSpec,\n  type DemoBoxAttrs,\n  type DemoChild,\n  type DemoKeyedChild,\n  type DemoPublicInstancesListener,\n  type DemoPublicInstance,\n  type DemoNode,\n  type DemoSetupContext,\n  type DemoSpec,\n  type DemoSurfaceStyle,\n  type DemoSurfaceStyleEntry,\n} from './demo-types';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./projection-families",
+            "isTypeOnly": false,
+            "raw": "import {\n  PROJECTION_FAMILY_MANIFESTS,\n  resolveProjectionPart,\n  resolveProjectionSelectParts,\n  type ProjectionSelectParts,\n  type ProjectionComponentId,\n  type ProjectionFamilyId,\n  type ProjectionFamilyManifest,\n} from './projection-families';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./projection-theme",
+            "isTypeOnly": false,
+            "raw": "import {\n  applyProjectionThemeSurfaceStyle,\n  clearProjectionThemeSurfaceStyle,\n  type ProjectionThemeSurfaceStyle,\n} from './projection-theme';"
+          }
+        ]
+      },
+      "importsAndDeclarationBytesIdentical": true,
+      "expectedOwnerIds": ["www.demo.home-demo-select", "www.demo.runtime-select"],
+      "currentBindingRow": "| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e` |",
+      "upstreamBindingRow": "| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `f195b0e80eaf0fe7d14f31391e70d97a08c5dc2edaea3bc6be387221bd52f200` |",
+      "ownerRows": [
+        "| `www.demo.runtime-select` | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro`, `apps/www/src/components/PrototypePreviewer/previewer-client.ts`, `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | Choose the Web Component, React, Vue 3, or Vue 2 preview runtime | Website demonstration UI | `site-composition` | Select or Tabs generated facade; runtime key remains application state | Base and consumed Shadcn, Brutalist, Bootstrap 2.3.2 and Liquid Glass Tabs remain draft; selection consumer evidence is not stable | WC: one supported public runtime alongside React, Vue 3 and Vue 2; legacy runtime-tabs composes family Tabs through WC, while projected pages use their active runtime generation; SSR: labels and deterministic default; no-JS: source remains readable | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) selection-pattern and cross-host evidence; owner: Select/Tabs domains plus website demos | F5 | M0 / S13 | `blocked` | Exact runtime-tabs source and five literal imports are admitted only as a blocked consumer, following the source-hashed Shadow controller convention; controlled runtime acceptance, panel movement, loading gates and focus-return leases remain application-owned | — | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) retains selected-runtime ownership, static WC/four-family versus lazy Adapter acquisition, native keyboard and controlled requests, loading/focus cancellation and supersession, SSR/no-JS, disposal and remount evidence debt; source/import admission grants no stable or experimental lifecycle promotion; the former no-shell-runtime rule is superseded |",
+        "| `www.demo.home-demo-select` | `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro`, `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | Use the homepage component gallery and choose its presentation family | Website landing-page demos | `site-composition` | Family Select and actual gallery controls within the homepage projection transaction; app-owned content and feedback | Selection semantics and website consumer evidence are not stable | WC: generated website facade is required for the selector; SSR: labels and deterministic featured demo are present; no-JS: links to every featured demo are required and remain unverified | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) selection-pattern decision; owner: Select/Tabs/Collection domains plus website landing page | F5 | M0 / S13 | `blocked` | HomeDemoPreviewer renders the website-component-gallery with inert decorative rails, responsive layout and a localized no-script explanation plus one documentation link to the Shadcn Accordion page; this does not establish links to every featured demo. Homepage runtime, showcase, gallery parts and live preview own the live composition; home-demo-client remains an inventoried legacy consumer, not the current homepage initializer | — | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) removes app-owned selector state after keyboard, mobile, and remount proof |",
+        "| `www.demo.runtime-select` | #420 selection-pattern and cross-host evidence; owner: Select/Tabs domains plus website demos | #420 requires selected-runtime ownership, lazy Adapter acquisition, no-JS and remount evidence; the former no-shell-runtime rule is superseded |",
+        "| `www.demo.home-demo-select` | #420 selection-pattern decision; owner: Select/Tabs/Collection domains plus website landing page | #420 removes app-owned selector state after keyboard, mobile, and remount proof |"
+      ],
+      "ownerRowsEqualUpstream": true,
+      "headOwnerRows": [
+        "| `www.demo.runtime-select` | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro`, `apps/www/src/components/PrototypePreviewer/previewer-client.ts`, `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | Choose the Web Component, React, Vue 3, or Vue 2 preview runtime | Website demonstration UI | `site-composition` | Select or Tabs generated facade; runtime key remains application state | Base and consumed Shadcn, Brutalist, Bootstrap 2.3.2 and Liquid Glass Tabs remain draft; selection consumer evidence is not stable | WC: one supported public runtime alongside React, Vue 3 and Vue 2; legacy runtime-tabs composes family Tabs through WC, while projected pages use their active runtime generation; SSR: labels and deterministic default; no-JS: source remains readable | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) selection-pattern and cross-host evidence; owner: Select/Tabs domains plus website demos | F5 | M0 / S13 | `blocked` | Exact runtime-tabs source and five literal imports are admitted only as a blocked consumer, following the source-hashed Shadow controller convention; controlled runtime acceptance, panel movement, loading gates and focus-return leases remain application-owned | — | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) retains selected-runtime ownership, static WC/four-family versus lazy Adapter acquisition, native keyboard and controlled requests, loading/focus cancellation and supersession, SSR/no-JS, disposal and remount evidence debt; source/import admission grants no stable or experimental lifecycle promotion; the former no-shell-runtime rule is superseded |",
+        "| `www.demo.home-demo-select` | `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro`, `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | Use the homepage component gallery and choose its presentation family | Website landing-page demos | `site-composition` | Family Select and actual gallery controls within the homepage projection transaction; app-owned content and feedback | Selection semantics and website consumer evidence are not stable | WC: generated website facade is required for the selector; SSR: labels and deterministic featured demo are present; no-JS: links to every featured demo are required and remain unverified | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) selection-pattern decision; owner: Select/Tabs/Collection domains plus website landing page | F5 | M0 / S13 | `blocked` | HomeDemoPreviewer renders the website-component-gallery with inert decorative rails, responsive layout and a localized no-script explanation plus one documentation link to the Shadcn Accordion page; this does not establish links to every featured demo. Homepage runtime, showcase, gallery parts and live preview own the live composition; home-demo-client remains an inventoried legacy consumer, not the current homepage initializer | — | [#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) removes app-owned selector state after keyboard, mobile, and remount proof |",
+        "| `www.demo.runtime-select` | #420 selection-pattern and cross-host evidence; owner: Select/Tabs domains plus website demos | #420 requires selected-runtime ownership, lazy Adapter acquisition, no-JS and remount evidence; the former no-shell-runtime rule is superseded |",
+        "| `www.demo.home-demo-select` | #420 selection-pattern decision; owner: Select/Tabs/Collection domains plus website landing page | #420 removes app-owned selector state after keyboard, mobile, and remount proof |"
+      ],
+      "preservedHistoricalParagraphs": [
+        {
+          "sha256": "8efafe5488927d6a2ffed525747371682d8bb5846c84c5bc261bf020b9216bd9",
+          "presentByteForByte": true
+        },
+        {
+          "sha256": "c46492f56dec97178dc5974fbe0454cacdf530c00ba91e94a3550975e9c521b1",
+          "presentByteForByte": true
+        }
+      ],
+      "bindingRowDiffExactlyOneExistingHash": true,
+      "ownersStillBlocked": true,
+      "ownerAcceptanceStatusesMatchPriorHead": true,
+      "themeCompanion": {
+        "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+        "worktreeSha256": "b7f53bc02ed2eec4067e218cb3dc2ab820c9b682661ef2ca216fbb1a747bb826",
+        "upstreamSha256": "b7f53bc02ed2eec4067e218cb3dc2ab820c9b682661ef2ca216fbb1a747bb826",
+        "byteIdenticalToUpstream": true
+      }
+    },
+    "sink": {
+      "path": "packages/adapters/base/src/material/sink.ts",
+      "prior": {
+        "revision": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "blob": "834e668da6430224e832b1f069077c1223cc03d4",
+        "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+      },
+      "worktree": {
+        "sha256": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782"
+      },
+      "importsBefore": {
+        "parseDiagnostics": [],
+        "entries": [
+          {
+            "kind": "import",
+            "specifier": "./initial-paint-bridge",
+            "isTypeOnly": false,
+            "raw": "import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./paint-mutations",
+            "isTypeOnly": false,
+            "raw": "import { withOwnedCarrierMarker } from './paint-mutations';"
+          },
+          {
+            "kind": "import",
+            "specifier": "../events/pointer-contact",
+            "isTypeOnly": false,
+            "raw": "import { observeWebPointerContact } from '../events/pointer-contact';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./contact-motion",
+            "isTypeOnly": false,
+            "raw": "import { createContactMotion } from './contact-motion';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./contact-carrier",
+            "isTypeOnly": false,
+            "raw": "import { createContactCarrier, inspectContactCarrier } from './contact-carrier';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./contact-profile",
+            "isTypeOnly": false,
+            "raw": "import { contactProfile, contactPaintOutset } from './contact-profile';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./style-tint-profile",
+            "isTypeOnly": false,
+            "raw": "import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./image-prepare",
+            "isTypeOnly": false,
+            "raw": "import { prepareOpticalImage } from './image-prepare';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./geometry-watch",
+            "isTypeOnly": false,
+            "raw": "import { observeMaterialGeometry } from './geometry-watch';"
+          },
+          {
+            "kind": "import",
+            "specifier": "@proto.ui/core",
+            "isTypeOnly": true,
+            "raw": "import type { EffectsPort } from '@proto.ui/core';"
+          },
+          {
+            "kind": "import",
+            "specifier": "@proto.ui/module-feedback",
+            "isTypeOnly": true,
+            "raw": "import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';"
+          },
+          {
+            "kind": "import",
+            "specifier": "@proto.ui/module-feedback/internal/shared-policy",
+            "isTypeOnly": false,
+            "raw": "import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared-policy';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./source",
+            "isTypeOnly": false,
+            "raw": "import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./preferences",
+            "isTypeOnly": false,
+            "raw": "import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./program",
+            "isTypeOnly": true,
+            "raw": "import type { OpticalGeometry, OpticalFrame } from './program';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./program-inputs",
+            "isTypeOnly": false,
+            "raw": "import { validateOpticalFrameInputs } from './program-inputs';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./source-refresh-task",
+            "isTypeOnly": false,
+            "raw": "import { createSourceRefreshTask } from './source-refresh-task';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./program-pool",
+            "isTypeOnly": false,
+            "raw": "import { acquireWebOpticalProgram } from './program-pool';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./style",
+            "isTypeOnly": false,
+            "raw": "import {\n  resolveMaterialStyle,\n  resolvePaletteColor,\n  rgbaCss,\n  type MaterialPaletteSource,\n} from './style';"
+          }
+        ]
+      },
+      "importsAfter": {
+        "parseDiagnostics": [],
+        "entries": [
+          {
+            "kind": "import",
+            "specifier": "./initial-paint-bridge",
+            "isTypeOnly": false,
+            "raw": "import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./paint-mutations",
+            "isTypeOnly": false,
+            "raw": "import { withOwnedCarrierMarker } from './paint-mutations';"
+          },
+          {
+            "kind": "import",
+            "specifier": "../events/pointer-contact",
+            "isTypeOnly": false,
+            "raw": "import { observeWebPointerContact } from '../events/pointer-contact';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./contact-motion",
+            "isTypeOnly": false,
+            "raw": "import { createContactMotion } from './contact-motion';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./contact-carrier",
+            "isTypeOnly": false,
+            "raw": "import { createContactCarrier, inspectContactCarrier } from './contact-carrier';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./contact-profile",
+            "isTypeOnly": false,
+            "raw": "import { contactProfile, contactPaintOutset } from './contact-profile';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./style-tint-profile",
+            "isTypeOnly": false,
+            "raw": "import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./image-prepare",
+            "isTypeOnly": false,
+            "raw": "import { prepareOpticalImage } from './image-prepare';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./geometry-watch",
+            "isTypeOnly": false,
+            "raw": "import { observeMaterialGeometry } from './geometry-watch';"
+          },
+          {
+            "kind": "import",
+            "specifier": "@proto.ui/core",
+            "isTypeOnly": true,
+            "raw": "import type { EffectsPort } from '@proto.ui/core';"
+          },
+          {
+            "kind": "import",
+            "specifier": "@proto.ui/module-feedback",
+            "isTypeOnly": true,
+            "raw": "import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';"
+          },
+          {
+            "kind": "import",
+            "specifier": "@proto.ui/module-feedback/internal/shared-policy",
+            "isTypeOnly": false,
+            "raw": "import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared-policy';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./source",
+            "isTypeOnly": false,
+            "raw": "import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./preferences",
+            "isTypeOnly": false,
+            "raw": "import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./program",
+            "isTypeOnly": true,
+            "raw": "import type { OpticalGeometry, OpticalFrame } from './program';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./program-inputs",
+            "isTypeOnly": false,
+            "raw": "import { validateOpticalFrameInputs } from './program-inputs';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./source-refresh-task",
+            "isTypeOnly": false,
+            "raw": "import { createSourceRefreshTask } from './source-refresh-task';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./program-pool",
+            "isTypeOnly": false,
+            "raw": "import { acquireWebOpticalProgram } from './program-pool';"
+          },
+          {
+            "kind": "import",
+            "specifier": "./style",
+            "isTypeOnly": false,
+            "raw": "import {\n  resolveMaterialStyle,\n  resolvePaletteColor,\n  rgbaCss,\n  type MaterialPaletteSource,\n} from './style';"
+          }
+        ]
+      },
+      "importsAndDeclarationBytesIdentical": true,
+      "policy": {
+        "sourceSha256": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+        "specifiers": [
+          "./initial-paint-bridge",
+          "./paint-mutations",
+          "../events/pointer-contact",
+          "./contact-motion",
+          "./contact-carrier",
+          "./contact-profile",
+          "./style-tint-profile",
+          "./image-prepare",
+          "./geometry-watch",
+          "@proto.ui/core",
+          "@proto.ui/module-feedback",
+          "@proto.ui/module-feedback/internal/shared-policy",
+          "./source",
+          "./preferences",
+          "./program",
+          "./program-inputs",
+          "./source-refresh-task",
+          "./program-pool",
+          "./style"
+        ]
+      },
+      "policySha256MatchesBody": true,
+      "allowlistedLiteralsEqualSourceOrder": true,
+      "sourceEdgesInAllowlist": true,
+      "headPolicySha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8",
+      "policyDiffExactlyOneExistingHash": true,
+      "policyCurrentSha256": "a84beb3754bbbc31328755e73309e291f0a133423708b90219715a0c11657f41",
+      "gitBlobHashOfReviewedBody": "3f8cc27dcfff26d21ddcafbe0e7ec9a01b895231"
+    },
+    "parentExecutedFocusedControls": {
+      "receiptPath": "/workspace/scratch/fbd6f62bb640/main-6042-integration/theme-controls-receipt.json",
+      "receiptSha256": "7e14ea7639f7f93b430efc940fa3b7548ad0f96420852e4013e8a4346f2e01e5",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+        "apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts",
+        "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts",
+        "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/fbd6f62bb640/main-6042-integration/theme-controls-vitest.json"
+      ],
+      "exitCode": 0,
+      "seconds": 6.827,
+      "reviewedSourceStable": true,
+      "sourceHashMatchesComposition": true,
+      "numTotalTests": 119,
+      "numPassedTests": 119,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "suites": [
+        {
+          "name": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/components/PrototypePreviewer/previewer-client.test.ts",
+          "status": "passed",
+          "assertions": 18,
+          "failed": 0
+        },
+        {
+          "name": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts",
+          "status": "passed",
+          "assertions": 10,
+          "failed": 0
+        },
+        {
+          "name": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "status": "passed",
+          "assertions": 64,
+          "failed": 0
+        },
+        {
+          "name": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/components/PrototypePreviewer/projection-theme.test.ts",
+          "status": "passed",
+          "assertions": 27,
+          "failed": 0
+        }
+      ],
+      "boundary": "Actual focused working-tree merge controls; other disjoint files may change. Not a clean final-head or native receipt."
+    },
+    "parentExecutedMaterialControls": {
+      "receiptPath": "/workspace/scratch/fbd6f62bb640/material-main-6042-merge/whole-material-receipt.json",
+      "receiptSha256": "0642bd22c255e853033a4cc20f6baf606d5ecdff93f4f703890f51a6e6e2455f",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--no-file-parallelism",
+        "packages/adapters/base/test/web-material-sink.test.ts",
+        "packages/adapters/base/test/web-material-contact-motion.test.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/fbd6f62bb640/material-main-6042-merge/whole-material.json"
+      ],
+      "seconds": 4.212,
+      "exitCode": 0,
+      "sourceStable": true,
+      "sourceHashMatchesReviewedSink": true,
+      "numTotalTests": 171,
+      "numPassedTests": 171,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "scope": "full sink and contact-motion controls on a dirty merge; not optical/native acceptance"
+    },
+    "readback": {
+      "observedAt": "2026-11-21T21:39:17.862852+00:00",
+      "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+      "mergeHead": "604231ff21b9efbe01a23609d13f4e37f2729b4b",
+      "compositionBodyUnchangedSinceInitialAudit": true,
+      "sinkBodyUnchangedSinceInitialAudit": true
+    },
+    "admissionRecommendation": {
+      "composition": "Renew only the SHA-256 in the existing row; existing owners, blocked states, criteria and history stay unchanged. No import expansion.",
+      "sink": "Renew only the existing sourceSha256 value. All 19 import declarations, literal order and allowlisted edges are unchanged.",
+      "boundary": "Finite source/import admission only. The working tree is a merge in progress, and these focused controls do not constitute clean-head full regression or native acceptance. Final source/inventory/Git-object proof audit remains required after the merge and real generator."
+    }
+  },
+  "preservedPriorHeadLocalValidation": {
+    "generator": {
+      "phase": "generator",
+      "command": [
+        "node",
+        "scripts/coverage-matrices/prototype-coverage.mjs",
+        "--refresh-candidate",
+        "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "--write"
+      ],
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-21T21:22:19.043404+00:00",
+      "finishedAt": "2026-11-21T21:22:41.199406+00:00",
+      "seconds": 22.156,
+      "exitCode": 0,
+      "before": {
+        "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "tree": "e809d870ea870e320661853e57fceab4d95cece8",
+        "statusPorcelain": "",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "6c75914c7aaab4c8366d23ab5d06dd65e773357c4626a3ffcade454eaef08758"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "1641074f64887c8011ff5d6f363d56e08022e54187239d91c1fa68c32f04c5de"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "packages/adapters/base/src/material/sink.ts",
+            "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+          },
+          {
+            "path": "packages/adapters/base/test/web-material-sink.test.ts",
+            "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+            "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+          },
+          {
+            "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+            "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+          },
+          {
+            "path": ".github/workflows/finf-representative-features-evidence.yml",
+            "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+            "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540"
+          },
+          {
+            "path": "scripts/coverage-matrices/library-card-imports.mjs",
+            "sha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8"
+          }
+        ]
+      },
+      "after": {
+        "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "tree": "e809d870ea870e320661853e57fceab4d95cece8",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "2ff792b73b370f8dd84503aaefac20f2991ec4d87df9f103b2b72b1d0b4f31be",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "8000f332cc0d695a9afe952f582b7a7ffee558a633ef86a38807485acd6ab346"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "packages/adapters/base/src/material/sink.ts",
+            "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+          },
+          {
+            "path": "packages/adapters/base/test/web-material-sink.test.ts",
+            "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+            "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+          },
+          {
+            "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+            "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+          },
+          {
+            "path": ".github/workflows/finf-representative-features-evidence.yml",
+            "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+            "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540"
+          },
+          {
+            "path": "scripts/coverage-matrices/library-card-imports.mjs",
+            "sha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8"
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": null,
+      "logBytes": 113,
+      "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "boundary": "Actual local execution. Generated worktree changes are explicit; final clean native evidence remains separate."
+    },
+    "coverage": {
+      "phase": "coverage",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-21T21:23:11.586308+00:00",
+      "finishedAt": "2026-11-21T21:30:37.612099+00:00",
+      "seconds": 446.026,
+      "exitCode": 0,
+      "before": {
+        "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "tree": "e809d870ea870e320661853e57fceab4d95cece8",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "beaedf9b0c58fc8a40e1a3a781f9abb20720a3fd8263338f7a9cd8bbbad7eeb9",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "2f57970b9baef73276d9e755714ce5a6695dbfafd50d4e171736261e9a507861"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "packages/adapters/base/src/material/sink.ts",
+            "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+          },
+          {
+            "path": "packages/adapters/base/test/web-material-sink.test.ts",
+            "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+            "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+          },
+          {
+            "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+            "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+          },
+          {
+            "path": ".github/workflows/finf-representative-features-evidence.yml",
+            "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+            "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540"
+          },
+          {
+            "path": "scripts/coverage-matrices/library-card-imports.mjs",
+            "sha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8"
+          }
+        ]
+      },
+      "after": {
+        "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "tree": "e809d870ea870e320661853e57fceab4d95cece8",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "beaedf9b0c58fc8a40e1a3a781f9abb20720a3fd8263338f7a9cd8bbbad7eeb9",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "2f57970b9baef73276d9e755714ce5a6695dbfafd50d4e171736261e9a507861"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "packages/adapters/base/src/material/sink.ts",
+            "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+          },
+          {
+            "path": "packages/adapters/base/test/web-material-sink.test.ts",
+            "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+            "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+          },
+          {
+            "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+            "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+          },
+          {
+            "path": ".github/workflows/finf-representative-features-evidence.yml",
+            "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+            "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540"
+          },
+          {
+            "path": "scripts/coverage-matrices/library-card-imports.mjs",
+            "sha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8"
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": true,
+      "logBytes": 484442,
+      "logSha256": "d874b6acd500337101d8c42f5b894cdfd4b2819e9f27ed46eb198404474fb9c0",
+      "boundary": "Actual local execution. Generated worktree changes are explicit; final clean native evidence remains separate."
+    },
+    "types": {
+      "phase": "types",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-21T21:23:11.548718+00:00",
+      "finishedAt": "2026-11-21T21:27:01.541308+00:00",
+      "seconds": 229.993,
+      "exitCode": 0,
+      "before": {
+        "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "tree": "e809d870ea870e320661853e57fceab4d95cece8",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "beaedf9b0c58fc8a40e1a3a781f9abb20720a3fd8263338f7a9cd8bbbad7eeb9",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "2f57970b9baef73276d9e755714ce5a6695dbfafd50d4e171736261e9a507861"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "packages/adapters/base/src/material/sink.ts",
+            "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+          },
+          {
+            "path": "packages/adapters/base/test/web-material-sink.test.ts",
+            "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+            "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+          },
+          {
+            "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+            "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+          },
+          {
+            "path": ".github/workflows/finf-representative-features-evidence.yml",
+            "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+            "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540"
+          },
+          {
+            "path": "scripts/coverage-matrices/library-card-imports.mjs",
+            "sha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8"
+          }
+        ]
+      },
+      "after": {
+        "head": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+        "tree": "e809d870ea870e320661853e57fceab4d95cece8",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "beaedf9b0c58fc8a40e1a3a781f9abb20720a3fd8263338f7a9cd8bbbad7eeb9",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "2f57970b9baef73276d9e755714ce5a6695dbfafd50d4e171736261e9a507861"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "packages/adapters/base/src/material/sink.ts",
+            "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+          },
+          {
+            "path": "packages/adapters/base/test/web-material-sink.test.ts",
+            "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+            "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+          },
+          {
+            "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+            "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+          },
+          {
+            "path": ".github/workflows/finf-representative-features-evidence.yml",
+            "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+            "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540"
+          },
+          {
+            "path": "scripts/coverage-matrices/library-card-imports.mjs",
+            "sha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8"
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": true,
+      "logBytes": 10228,
+      "logSha256": "d5c80f12cb1715ebf3248d5bde94fc14ef5400cf9316094495fe37317aefc88f",
+      "boundary": "Actual local execution. Generated worktree changes are explicit; final clean native evidence remains separate."
+    }
+  },
+  "priorHeadBindingAudit": {
+    "auditedAt": "2026-11-21T21:25:20.557024+00:00",
+    "sourceRevision": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+    "sourceTree": "e809d870ea870e320661853e57fceab4d95cece8",
+    "comparisonCheckoutRevision": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+    "previousCandidateRevision": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+    "candidateRevision": "e993fcf087c6e48d6bb11a6f7e7d33c1cd29b34d",
+    "generatorSourceWasClean": true,
+    "beforeSnapshotMatchesE775AndE993CommittedProjection": true,
+    "changedTopLevelKeys": ["candidateSource"],
+    "changedCandidateKeys": ["revision", "sourceBindingsObject", "sourceObjectProof"],
+    "sourceBindingInventory": {
+      "before": 5955,
+      "after": 5955,
+      "uniquePaths": 5955,
+      "samePathsOrderAndHashes": true,
+      "additions": [],
+      "removals": [],
+      "hashRenewals": []
+    },
+    "gitObjectProof": {
+      "verificationKind": "Git object content/hash integrity only; no GPG signature or approval verification is asserted.",
+      "commitBytesMatchGitObject": true,
+      "commitObjectShaMatches": true,
+      "rootTreeMatches": true,
+      "treeObjectsChecked": 322,
+      "requiredTrees": 322,
+      "unusedProofTrees": [],
+      "treeErrors": [],
+      "bindingPathErrors": [],
+      "uniqueBoundBlobs": 5891,
+      "uniqueBoundBlobBytes": 16294711,
+      "blobObjectHashErrors": []
+    },
+    "blobAndWorktreeAudit": {
+      "checked": 5955,
+      "matching": 5955,
+      "mismatches": [],
+      "details": "blob-audit.json"
+    },
+    "generatedOutputs": [
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+        "beforeSha256": "6c75914c7aaab4c8366d23ab5d06dd65e773357c4626a3ffcade454eaef08758",
+        "rawGeneratedSha256": "8000f332cc0d695a9afe952f582b7a7ffee558a633ef86a38807485acd6ab346",
+        "finalFormattedSha256": "2f57970b9baef73276d9e755714ce5a6695dbfafd50d4e171736261e9a507861",
+        "changedFromBefore": true
+      },
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+        "beforeSha256": "1641074f64887c8011ff5d6f363d56e08022e54187239d91c1fa68c32f04c5de",
+        "rawGeneratedSha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e",
+        "finalFormattedSha256": "b9f262c15c2cac6da562520f9be51d18a7a2a0b41e95535274dd5ceae08c810e",
+        "changedFromBefore": true
+      },
+      {
+        "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+        "beforeSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "rawGeneratedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "finalFormattedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "changedFromBefore": false
+      }
+    ],
+    "formattedJsonValuesEqualRawGenerator": true,
+    "markdownOnlyCandidateRevisionChanged": true,
+    "checklistByteIdentical": true,
+    "unchangedAcceptance": {
+      "allTopLevelExceptCandidateDeepEqual": true,
+      "allCandidateExceptIdentityAndObjectProofDeepEqual": true,
+      "consumerRows": 141,
+      "websiteRows": 78,
+      "websiteStates": {
+        "native/static": 14,
+        "research": 7,
+        "blocked": 40,
+        "infrastructure-exempt": 17
+      },
+      "harnessRows": 63,
+      "harnessStates": {
+        "ready": 22,
+        "native/static": 2,
+        "research": 13,
+        "blocked": 11,
+        "app-local-proto": 7,
+        "infrastructure-exempt": 8
+      },
+      "candidateEntities": 585,
+      "draft": 585,
+      "active": 0,
+      "deprecated": 0,
+      "removed": 0,
+      "gpuiRows": 456,
+      "gpuiStates": {
+        "required-unassessed": 456
+      },
+      "ownersCriteriaSourceMappingsLifecycleMainHistoricalEvidenceAndGatesUnchanged": true
+    },
+    "finitePolicyAudit": {
+      "details": "finite-policy-audit.json",
+      "entriesChecked": 122,
+      "matches": 122,
+      "mismatches": [],
+      "onlyExistingSinkHashRenewed": true,
+      "sink19ImportDeclarationsUnchanged": true
+    },
+    "cardPreservedSourceAudit": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts",
+        "e775Sha256": "40203e0e8357de726e930a2ba81ae74116275f88bd7adb0f4e414bbf45ab5e09",
+        "d682Sha256": "40203e0e8357de726e930a2ba81ae74116275f88bd7adb0f4e414bbf45ab5e09",
+        "e993Sha256": "40203e0e8357de726e930a2ba81ae74116275f88bd7adb0f4e414bbf45ab5e09",
+        "worktreeSha256": "40203e0e8357de726e930a2ba81ae74116275f88bd7adb0f4e414bbf45ab5e09",
+        "allByteIdentical": true
+      },
+      {
+        "path": "apps/www/src/components/library-card-snapshot.test.ts",
+        "e775Sha256": "49c194433d8b2271b07c011ae1b441bab7a42d0693185b8bfa010be89046d1c9",
+        "d682Sha256": "49c194433d8b2271b07c011ae1b441bab7a42d0693185b8bfa010be89046d1c9",
+        "e993Sha256": "49c194433d8b2271b07c011ae1b441bab7a42d0693185b8bfa010be89046d1c9",
+        "worktreeSha256": "49c194433d8b2271b07c011ae1b441bab7a42d0693185b8bfa010be89046d1c9",
+        "allByteIdentical": true
+      },
+      {
+        "path": "apps/www/src/components/UiLibraryGallery.astro",
+        "e775Sha256": "a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb",
+        "d682Sha256": "a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb",
+        "e993Sha256": "a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb",
+        "worktreeSha256": "a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb",
+        "allByteIdentical": true
+      },
+      {
+        "path": "spec/tests/T-SHADCN-CARD-0001.yaml",
+        "e775Sha256": "250ab0b0955d4b0f820159281c16445799f9040ea0c2f43c4b75dc0d7eed5eb6",
+        "d682Sha256": "250ab0b0955d4b0f820159281c16445799f9040ea0c2f43c4b75dc0d7eed5eb6",
+        "e993Sha256": "250ab0b0955d4b0f820159281c16445799f9040ea0c2f43c4b75dc0d7eed5eb6",
+        "worktreeSha256": "250ab0b0955d4b0f820159281c16445799f9040ea0c2f43c4b75dc0d7eed5eb6",
+        "allByteIdentical": true
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-CARD.yaml",
+        "e775Sha256": "eb7da54408fd69bfd687cdd4bad671729be43a8a565ce2cf70b489b0ae8b70cc",
+        "d682Sha256": "eb7da54408fd69bfd687cdd4bad671729be43a8a565ce2cf70b489b0ae8b70cc",
+        "e993Sha256": "eb7da54408fd69bfd687cdd4bad671729be43a8a565ce2cf70b489b0ae8b70cc",
+        "worktreeSha256": "eb7da54408fd69bfd687cdd4bad671729be43a8a565ce2cf70b489b0ae8b70cc",
+        "allByteIdentical": true
+      }
+    ],
+    "scopeBoundary": "The 5955-path portfolio covers six prototype packages, style-source closure and consumer ledgers. Sink/adapter tests, Website browser tests, compiler fixture tests and report-validator changes are outside its direct inventory; separate finite policies and native receipts still apply.",
+    "historicalRedReceipt": "../regression-ready-validation/coverage-receipt.json",
+    "historicalRedIsUnmodified": true,
+    "fullCoverageAndTypesGates": "Owned by parent; this read-only audit does not claim their not-yet-recorded outcome.",
+    "finalCommittedHeadReadback": "Pending parent-provided commit after actual gates and derived-record commit.",
+    "conclusion": "PASS for independent source binding/object proof, all 122 finite body policies, and unchanged Card/native/Gallery/spec bytes; no acceptance or lifecycle promotion."
+  },
+  "generatedPresets": {
+    "actualCommand": ["corepack", "pnpm@10.32.1", "-s", "styles:preset:generate"],
+    "exitCode": 0,
+    "boundary": "Actual execution during merge; no clean-head or standalone duration claim. Existing generators produced manifests from merged prototype source.",
+    "sameAsIncomingMain": {
+      "packages/cli/src/generated/shadcn-style-tokens.ts": true,
+      "packages/cli/src/generated/brutalist-style-tokens.ts": true,
+      "packages/cli/src/generated/draft-family-style-tokens.ts": false
+    },
+    "draftDeltaReason": "Incoming main changes shared Carousel drag cursor to cursor-move; its draft manifest still retains cursor-grabbing. The actual generator removes/replaces stale entries.",
+    "initialReadback": "An initial all-three-identical-to-upstream assertion was false for the draft manifest. Actual generator outputs were retained and inspected; no replacement with the stale upstream file.",
+    "draftManifestDiff": "diff --git a/packages/cli/src/generated/draft-family-style-tokens.ts b/packages/cli/src/generated/draft-family-style-tokens.ts\nindex 36d3af858..16c4c89d9 100644\n--- a/packages/cli/src/generated/draft-family-style-tokens.ts\n+++ b/packages/cli/src/generated/draft-family-style-tokens.ts\n@@ -109,7 +109,7 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {\n     'content-start',\n     'cursor-default',\n     'cursor-ew-resize',\n-    'cursor-grabbing',\n+    'cursor-move',\n     'cursor-not-allowed',\n     'cursor-ns-resize',\n     'cursor-pointer',\n@@ -154,7 +154,7 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {\n     'data-[disabled]:shadow-none',\n     'data-[disabled]:text-[#555]',\n     'data-[disabled]:text-[#999]',\n-    'data-[dragging]:cursor-grabbing',\n+    'data-[dragging]:cursor-move',\n     'data-[dragging]:select-none',\n     'data-[dragging]:transition-none',\n     'data-[expanded]:not-[data-disabled]:bg-[#999]',\n@@ -705,7 +705,6 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {\n     'content-start',\n     'cursor-default',\n     'cursor-ew-resize',\n-    'cursor-grabbing',\n     'cursor-move',\n     'cursor-not-allowed',\n     'cursor-ns-resize',\n@@ -743,7 +742,7 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {\n     'data-[disabled]:pointer-events-none',\n     'data-[disabled]:shadow-none',\n     'data-[disabled]:text-muted-foreground',\n-    'data-[dragging]:cursor-grabbing',\n+    'data-[dragging]:cursor-move',\n     'data-[dragging]:select-none',\n     'data-[expanded]:text-foreground',\n     'data-[focus-visible]:forced-colors-focus-outline',\n"
+  },
+  "reviewedWorkingTreeHashes": {
+    ".github/workflows/homepage-visual-evidence.yml": "807a257380402f07250a5752c0990ec6ef1dabd04365d64ae393e069fd426171",
+    ".github/workflows/liquid-glass-frame-budget.yml": "259971a00fed77e3e22ca190500d2aab8c1b9231bd5b0c2767987a38f0df6533",
+    "apps/www/scripts/homepage-evidence-contract.test.ts": "52828d48a3e87339fbfa64cd51b6ca9b4da72c8d803a2dba40b3d9de2d31d910",
+    "apps/www/scripts/label-selection-observer.test.ts": "fd91ff939dc2dabcd08449704bdcd10348fd77c2bb67a34dfa70e304621379b5",
+    "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts": "1a9ac1ebf9c570caeb2f41a354af772b7461d36548c508ce8a79d4f1faab4974",
+    "apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts": "c2db58d9aa0692b08e989c7d4e01f4091564b63810e0e809e662add340092369",
+    "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts": "0488faa725ce1624427129e31f5537c55bdf9c23fd5e5672133e17efac9c1ad5",
+    "apps/www/src/components/PrototypePreviewer/projection-composition.ts": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+    "apps/www/src/components/PrototypePreviewer/projection-theme.test.ts": "e3124b0df674ac8484f996db7c9d2c29f30374f2cf352a28bd8f8ac52295fcf1",
+    "apps/www/src/components/PrototypePreviewer/projection-theme.ts": "b7f53bc02ed2eec4067e218cb3dc2ab820c9b682661ef2ca216fbb1a747bb826",
+    "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts": "a470e975d00f2410b29128e94e3e90a1559bf80ea6013e41aeaac20378f94534",
+    "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts": "c70406a5d5f3eed133f5d76b8d768fbf9c7c441ffe8d4f2caf4cc5d81c08d7bc",
+    "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts": "bd20d31dc560991e5cd3856563e1be143bd0b12e9eb1883069274b0b0e73f5b1",
+    "internal/records/2026-11-22-component-capabilities.md": "df4f6bfe3ad5a14f76ffb954d6a004e879c0cf69b8305472d7a7404cc16688d9",
+    "internal/website/self-hosting-coverage-matrix.md": "7041fa96991efb56d51cd3f7d300bdc85fd573de4ab06ad969e05857adbab6eb",
+    "packages/adapters/base/src/gestures/web-axis-input-host.ts": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+    "packages/adapters/base/src/material/sink.ts": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+    "packages/adapters/base/test/web-axis-delta-basis.test.ts": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41",
+    "packages/adapters/base/test/web-axis-input-host.test.ts": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322",
+    "packages/adapters/base/test/web-material-contact-motion.test.ts": "d1dcd51b0273de4cfe5e40a741063e6644a9a2c0a5d6ebb7f9af492bab1c4b54",
+    "packages/adapters/base/test/web-material-sink.test.ts": "96187fc7ecf8be2d64eaeebe66d6764be533dbf6c153e144780fe8ce18f14dc1",
+    "packages/cli/src/generated/brutalist-style-tokens.ts": "209c6c72e891b441183a6127223fa6e2b2e16797ddb22f2bb9a49b1662b63031",
+    "packages/cli/src/generated/draft-family-style-tokens.ts": "acf4d420deb1af06c89a3df5254339774e3fd76a80817f196a37a4883566d3f3",
+    "packages/cli/src/generated/shadcn-style-tokens.ts": "c5ced4582996500c2430330c541e5caa32690a64e3c8b5668075793b6cfec584",
+    "packages/compiler/src/gpui-native-move.ts": "41676d9558d32c7dd7df4b8ff719bcb144551da61cd4cbe5501e575c3a8ce43c",
+    "packages/compiler/test/fixtures/gpui-ordinary-values/README.md": "be653c9ea11c8097cc7a304143831733ca7fd09051f304e40a05224f954d8a33",
+    "packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs": "a16b1fdc65fd1e942cd0d9f68d6deb9887a2f68d4ccaffe71a3fee2fa4afb858",
+    "packages/modules/overlay/src/web/z-index-layer-scheduler.ts": "f735734c134c673718dda536b5fec254f164b0025e7b13d03ce53af2906f02bd",
+    "packages/prototypes/base/src/carousel/carousel.proto.ts": "7e4afc7d8ea287d01dd8cafd2157fd4e71cc594d7b61d3742ace78eec75b6dc5",
+    "scripts/analysis/component-capabilities-browser.mjs": "a60d2a9415738c161af0dc2bc79c4d39afa55d4c1c77d47f07577452c5752d3e",
+    "scripts/analysis/component-capabilities-preview.mjs": "83416ec30365d3c059c044709031b317380ff077e10c69e02404619afec36c31",
+    "scripts/analysis/fixtures/component-capabilities-browser.ts": "38f9c8537a4ece2ab975055a59cdc5ad078a0b087ad6c7ca92a413614053f590",
+    "scripts/coverage-matrices/library-card-imports.mjs": "a84beb3754bbbc31328755e73309e291f0a133423708b90219715a0c11657f41",
+    "scripts/test/runtime-inventory.d.mts": "55ffe4bd576612f2586a6a758142942bdb197832dad857563094c5070b7eecd1",
+    "spec/host-caps/HC-MOVE-GESTURE-0001.yaml": "27423f6cbe21e40ca3bb3101ad3f634ddeb3832d6e1c94dcc9e81a267e3de4c7",
+    "spec/tests/T-MOVE-GESTURE-0001.yaml": "817000d4d6e7c391c93424163402065ddb4f427e4b9209e72b74905c52f524c9"
+  },
+  "retainedNativeRun": {
+    "id": 44945602403,
+    "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+    "newSourceReceipt": false
+  },
+  "remainingVerification": "Refresh candidate source bindings on clean integrated commit; execute full local types/coverage and actual strict measurement; obtain full native cycle on final published head.",
+  "commitFormattingReadback": {
+    "boundary": "The commit hook reformatted only these two incoming documentation/spec files. All other reviewed working-tree bytes match the commit; original pre-hook hashes remain above.",
+    "files": [
+      {
+        "path": "packages/compiler/test/fixtures/gpui-ordinary-values/README.md",
+        "incomingSha256": "be653c9ea11c8097cc7a304143831733ca7fd09051f304e40a05224f954d8a33",
+        "committedSha256": "c66a19db76ab63fa2298aaf996b5f3769dbebd639b931c8fbae4ef123cbf4b2b",
+        "exactRepositoryPrettierOutput": true,
+        "yamlParsedValuePreserved": null
+      },
+      {
+        "path": "spec/host-caps/HC-MOVE-GESTURE-0001.yaml",
+        "incomingSha256": "27423f6cbe21e40ca3bb3101ad3f634ddeb3832d6e1c94dcc9e81a267e3de4c7",
+        "committedSha256": "e4c0a464a67b110a36c924e9e0f3920dd1dc535bd445cdfc3a8a0f11be140b2c",
+        "exactRepositoryPrettierOutput": true,
+        "yamlParsedValuePreserved": true
+      }
+    ]
+  }
+}

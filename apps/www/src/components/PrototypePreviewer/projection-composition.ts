@@ -125,6 +125,11 @@ export type ProjectionComposition = Readonly<{
 type DemoProtoNode = Extract<DemoNode, { kind: 'proto' }>;
 type DemoBoxNode = Extract<DemoNode, { kind: 'box' }>;
 
+// Construction owns the merged renderer object; token names and later nesting
+// cannot identify it. A Tabs wrapper may contain several independently owned copies.
+const rendererThemeEntries = new WeakMap<DemoProtoNode, Record<string, string>>();
+const RENDERER_THEME_CLASS = 'pui-projection-renderer-theme';
+
 const REF_PREFIX = '__pui_projection__';
 const SCOPE_REF = `${REF_PREFIX}scope`;
 const CONTENT_REF = `${REF_PREFIX}content`;
@@ -334,6 +339,34 @@ function updateRendererThemeSurfaceStyles(
   if (typeof node === 'string' || node.kind === 'text') return;
   if (node.kind === 'proto') {
     const style = node.surfaceStyle;
+    const themeEntry = rendererThemeEntries.get(node);
+    if (
+      themeEntry &&
+      (style === themeEntry || (Array.isArray(style) && style.includes(themeEntry)))
+    ) {
+      Object.assign(themeEntry, theme);
+    } else if (themeEntry || !inheritTheme) {
+      throw new Error(
+        '[PrototypePreviewer] projected Proto surface is missing renderer-owned theme state.'
+      );
+    }
+  }
+  const nested = inheritTheme || node.kind === 'proto';
+  for (const child of node.children ?? []) updateRendererThemeSurfaceStyles(child, theme, nested);
+}
+
+// An outer Proto owns the generation, so stamp inherits through it and does not
+// rewrite nested copies. Those copies still have to travel with a portal, so
+// the normalized surface channel must receive the updated theme explicitly.
+function pushNestedOwnedThemeSurfaces(
+  node: DemoChild,
+  api: DemoSetupContext['api'],
+  theme: ProjectionThemeSurfaceStyle,
+  inheritTheme = false
+): void {
+  if (typeof node === 'string' || node.kind === 'text') return;
+  if (node.kind === 'proto' && inheritTheme && node.ref && api.setSurfaceStyle) {
+    const style = node.surfaceStyle;
     const themeEntry = Array.isArray(style) ? style.at(-1) : style;
     if (
       themeEntry &&
@@ -342,15 +375,16 @@ function updateRendererThemeSurfaceStyles(
         Object.prototype.hasOwnProperty.call(themeEntry, property)
       )
     ) {
-      Object.assign(themeEntry, theme);
-    } else if (!inheritTheme) {
-      throw new Error(
-        '[PrototypePreviewer] projected Proto surface is missing renderer-owned theme state.'
-      );
+      // Committed snapshots freeze author styles: rebuild the trailing theme
+      // block with the new values instead of mutating the stored entry.
+      const pushed = Array.isArray(style)
+        ? [...style.slice(0, -1), { ...themeEntry, ...theme }]
+        : { ...themeEntry, ...theme };
+      api.setSurfaceStyle(node.ref, pushed as DemoSurfaceStyle);
     }
   }
   const nested = inheritTheme || node.kind === 'proto';
-  for (const child of node.children ?? []) updateRendererThemeSurfaceStyles(child, theme, nested);
+  for (const child of node.children ?? []) pushNestedOwnedThemeSurfaces(child, api, theme, nested);
 }
 
 function copyThemeSurfaceStyle(
@@ -476,15 +510,21 @@ function createCoordinateAttrs(options: ProjectionCompositionOptions): DemoBoxAt
 function createProjectedProto(
   prototypeId: string,
   coordinateAttrs: DemoBoxAttrs,
-  themeSurfaceStyle: DemoSurfaceStyle | undefined,
+  themeSurfaceStyle: ProjectionThemeSurfaceStyle | undefined,
   input: Omit<DemoProtoNode, 'kind' | 'prototypeId'> = {}
 ): DemoProtoNode {
-  return {
+  // An authored class cannot claim the private renderer role. Only the exact
+  // object registered below may emit this marker into the physical surface.
+  const authoredClassName = input.className
+    ?.split(/\s+/)
+    .filter((name) => name !== RENDERER_THEME_CLASS)
+    .join(' ');
+  const node: DemoProtoNode = {
     ...input,
     kind: 'proto',
     prototypeId,
     className: mergeClassName(
-      input.className,
+      authoredClassName,
       'pui-projection-prototype',
       ...coordinateMarkerClasses(coordinateAttrs),
       markerClass('prototype', prototypeId)
@@ -492,12 +532,24 @@ function createProjectedProto(
     props: { ...(input.props ?? {}) },
     surfaceStyle: mergeSurfaceStyle(input.surfaceStyle, themeSurfaceStyle) ?? {},
   };
+  if (themeSurfaceStyle && Object.keys(themeSurfaceStyle).length > 0) {
+    const style = node.surfaceStyle;
+    const entry = Array.isArray(style) ? style.at(-1) : style;
+    if (!entry || typeof entry === 'string') {
+      throw new Error(
+        '[PrototypePreviewer] projected Proto surface is missing renderer-owned theme state.'
+      );
+    }
+    rendererThemeEntries.set(node, entry);
+    node.className = mergeClassName(node.className, RENDERER_THEME_CLASS);
+  }
+  return node;
 }
 
 function cloneProjectedChild(
   node: DemoChild,
   coordinateAttrs: DemoBoxAttrs,
-  themeSurfaceStyle: DemoSurfaceStyle | undefined,
+  themeSurfaceStyle: ProjectionThemeSurfaceStyle | undefined,
   allowedPrototypeIds: ReadonlySet<string>,
   componentRootPrototypeId: string | null,
   inheritTheme = false
@@ -579,7 +631,7 @@ function createSelectControl<Value extends string>(
   config: ProjectionControlConfig<Value>,
   selectParts: ProjectionSelectParts,
   coordinateAttrs: DemoBoxAttrs,
-  themeSurfaceStyle: DemoSurfaceStyle | undefined,
+  themeSurfaceStyle: ProjectionThemeSurfaceStyle | undefined,
   locked: boolean
 ): DemoBoxNode {
   const refs = CONTROL_REFS[id];
@@ -972,7 +1024,23 @@ export function createProjectionComposition(
     ])) {
       prototypeMarkers.set(markerClass('prototype', prototypeId), prototypeId);
     }
+    const preservedThemeSurfaces = new Set<HTMLElement | SVGElement>();
+    const clearPreservedThemes = () => {
+      for (const element of preservedThemeSurfaces) clearProjectionThemeSurfaceStyle(element);
+      preservedThemeSurfaces.clear();
+    };
     const stampProjectionSurfaces = () => {
+      for (const element of preservedThemeSurfaces) {
+        if (
+          !element.isConnected ||
+          element.ownerDocument !== document ||
+          !element.classList.contains(ownerMarker) ||
+          !element.classList.contains(generationMarker)
+        ) {
+          clearProjectionThemeSurfaceStyle(element);
+          preservedThemeSurfaces.delete(element);
+        }
+      }
       const themeParent = (node: Element): Element | null => {
         if (node.parentElement) return node.parentElement;
         if (node.assignedSlot) return node.assignedSlot;
@@ -999,8 +1067,16 @@ export function createProjectionComposition(
           if (element.getAttribute(name) !== value) element.setAttribute(name, value);
         }
         if (themeSurfaceStyle) {
-          if (inheritsProjectionTheme(element)) clearProjectionThemeSurfaceStyle(element);
-          else applyProjectionThemeSurfaceStyle(element, themeSurfaceStyle);
+          if (element.classList.contains(RENDERER_THEME_CLASS)) {
+            applyProjectionThemeSurfaceStyle(element, themeSurfaceStyle);
+            preservedThemeSurfaces.delete(element);
+          } else if (inheritsProjectionTheme(element)) {
+            clearProjectionThemeSurfaceStyle(element);
+            preservedThemeSurfaces.delete(element);
+          } else {
+            applyProjectionThemeSurfaceStyle(element, themeSurfaceStyle, 'preserve-inline');
+            preservedThemeSurfaces.add(element);
+          }
         }
         for (const [prototypeMarker, prototypeId] of prototypeMarkers) {
           if (!element.classList.contains(prototypeMarker)) continue;
@@ -1155,7 +1231,11 @@ export function createProjectionComposition(
             const nested = inheritTheme || node.kind === 'proto';
             for (const child of node.children ?? []) apply(child, nested);
           };
-          for (const child of value.children) apply(child.node);
+          for (const child of value.children) {
+            apply(child.node);
+            if (context.api.setSurfaceStyle)
+              pushNestedOwnedThemeSurfaces(child.node, context.api, themeSurfaceStyle ?? {});
+          }
         }
       };
       applyActiveDynamicTheme = applyDynamicTheme;
@@ -1331,6 +1411,7 @@ export function createProjectionComposition(
       attempt(stopInstanceSubscriptions);
       attempt(clearDynamicChildren);
       attempt(stopObservingMarkerChanges);
+      attempt(clearPreservedThemes);
       for (const cleanup of appearanceCleanups) attempt(cleanup);
       for (const { element, listener } of listeners) {
         attempt(() => element.removeEventListener('valueChange', listener));
@@ -1366,6 +1447,7 @@ export function createProjectionComposition(
       attempt(stopInstanceSubscriptions);
       attempt(clearDynamicChildren);
       attempt(stopObservingMarkerChanges);
+      attempt(clearPreservedThemes);
       for (const cleanup of appearanceCleanups) attempt(cleanup);
       for (const id of controlIds) {
         if (id === 'runtime' && runtimeTabs) continue;
@@ -1476,6 +1558,8 @@ export function createProjectionComposition(
       themeSurfaceStyle = nextTheme;
       applyActiveDynamicTheme?.();
       stampActiveProjectionSurfaces?.();
+      if (activeContext?.api.setSurfaceStyle)
+        pushNestedOwnedThemeSurfaces(demo.root, activeContext.api, nextTheme);
     },
     restoreFocus(focusKey) {
       if (!activeContext) return false;

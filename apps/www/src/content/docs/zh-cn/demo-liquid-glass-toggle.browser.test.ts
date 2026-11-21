@@ -519,7 +519,8 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           const active = await capture(`${runtime}-${theme}-active`, target, observations);
           optical(active);
           expect(active.receipt.contact).toBe('rest');
-          expect(active.paint.paintOutset).toBe(0);
+          expect(active.paint.paintOutset).toBe(inactive.paint.paintOutset);
+          expect(active.paint.paintOutset).toBeGreaterThan(0);
           expect(active.underline).toBe('none');
           expect(active.borderColor).toEqual(active.ringColor);
           expect(active.background).toEqual(inactive.background);

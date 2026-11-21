@@ -633,15 +633,11 @@ function createDocumentMaterialSink(
         !suppressCancelledPress &&
         policy.effectiveMotion === 'press' &&
         candidate.deformation?.phase === 'pressed';
-      // Use the same effective frame for geometry, paint and its receipt. The
-      // motion owner already owns the finite release tail and revocation; a
-      // second pointer-up clock can drift from it or survive motion.stop().
-      const paintOutset =
-        tracksContact &&
-        policy.effectiveMotion === 'press' &&
-        (motionFrame.animating || (motionFrame.contact?.strength ?? 0) > 0 || effectivePressed)
-          ? contactPaintOutset(rect.width, rect.height)
-          : 0;
+      // Keep the profile's conservative footprint across rest, held contact
+      // and its finite release tail so admitted neutral images retain their
+      // lease. Motion can stop without collapsing the owned image geometry.
+      // Re-admit the complete footprint with this same source/policy snapshot.
+      const paintOutset = wantsContact ? contactPaintOutset(rect.width, rect.height) : 0;
       if (paintOutset > 0) {
         admission = inspectCanvasBackdrop(host, source, paintOutset);
         const currentPreferences = preferences.current();
@@ -760,9 +756,9 @@ function createDocumentMaterialSink(
       // Carrier/transport refusal is independent of changing source pixels or
       // pointer-move samples. Only a new style/geometry/profile/session can
       // make that failed admission useful to retry; GPU failures remain uncached.
-      // Stopping rejected contact changes its paint extent, not those inputs.
-      // Keep that internal transition out of the failure identity while paint
-      // and pending leases still bind the complete current extent.
+      // Contact shutdown is not a repaired admission condition. Keep motion
+      // samples out of this failure identity; paint and pending leases still
+      // bind the profile's complete conservative extent.
       const retryKey = JSON.stringify([
         paintConditions,
         motionFrame.session,
@@ -806,9 +802,16 @@ function createDocumentMaterialSink(
         paintSignature === signature &&
         owned.get('background-image')?.applied[0] === host.style.backgroundImage &&
         (!carrier || carrier.valid(paintedImage))
-      )
+      ) {
+        // Equal pixels at the first release tick still need a later sample.
+        if (motionFrame.animating) schedule();
         return;
-      if (pending?.signature === signature) return;
+      }
+      if (pending?.signature === signature) {
+        // Let the existing decode finish before continuing the release tail.
+        if (motionFrame.animating) queued = true;
+        return;
+      }
       if (pending?.lease === lease) {
         queued = true;
         return;

@@ -436,6 +436,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
               return {
                 color: style.color,
                 background: style.backgroundColor,
+                backgroundImage: style.backgroundImage,
                 radius: style.borderRadius,
               };
             });
