@@ -87,6 +87,7 @@ export interface CallbackRule {
 export type ArgumentRole =
   | 'value'
   | 'static-key'
+  | 'finite-key'
   | 'static-keys'
   | 'prop-key'
   | 'declared-prop-keys'
@@ -155,6 +156,7 @@ const aliveContexts: readonly CallbackContext[] = [
   'control-label-target',
 ];
 const key: ArgumentRule = { role: 'static-key', types: ['string'] };
+const finiteKey: ArgumentRule = { role: 'finite-key', types: ['string'] };
 const record: ArgumentRule = { role: 'value', types: ['record'] };
 const boolean: ArgumentRule = { role: 'value', types: ['boolean'] };
 // Native watch cleanup has a fixed callable ABI. A coarse 'function' marker
@@ -1591,7 +1593,7 @@ export const OPERATION_RULES = {
     'anatomy.has',
     runtime,
     'boolean',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.parts': rule(
@@ -1607,7 +1609,7 @@ export const OPERATION_RULES = {
     'anatomy.partsOf',
     runtime,
     'anatomy-parts',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.version': rule(
@@ -1631,7 +1633,7 @@ export const OPERATION_RULES = {
     'anatomy.order.partsOf',
     runtime,
     'anatomy-parts',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.indexOfSelf': rule(
@@ -1639,7 +1641,7 @@ export const OPERATION_RULES = {
     'anatomy.order.indexOfSelf',
     runtime,
     'number',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.prevOfSelf': rule(
@@ -1647,7 +1649,7 @@ export const OPERATION_RULES = {
     'anatomy.order.prevOfSelf',
     runtime,
     'nullable:anatomy-part',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.nextOfSelf': rule(
@@ -1655,7 +1657,7 @@ export const OPERATION_RULES = {
     'anatomy.order.nextOfSelf',
     runtime,
     'nullable:anatomy-part',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomyPart.hasExpose': rule(
@@ -2793,6 +2795,10 @@ export function validateOperationArguments(
         reject('argument-type', 'The entry override is only admitted by focus scope activation.');
     }
     switch (requirement.role) {
+      case 'finite-key':
+        if (!finiteStringKeys(argument))
+          reject('static-key', 'A finite set of nonempty string keys is required.');
+        break;
       case 'declared-event-key': {
         const keys = finiteStringKeys(argument);
         if (
