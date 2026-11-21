@@ -770,6 +770,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         const eventPort = hostSessionRef.current?.caps.getPort<EventPort>('event');
         const router = createWebProtoEventRouter({
           rootRegistrations: eventPort,
+          globalKeyDown: eventPort?.hasGlobalRegistration?.('key.down') !== false,
           globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
           rootEl,
           instanceToken: instanceTokenRef.current,
