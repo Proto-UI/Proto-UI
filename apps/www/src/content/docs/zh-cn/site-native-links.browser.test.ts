@@ -2374,26 +2374,81 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               '[data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
             )
             .click();
-        const facts = () =>
-          current.evaluate((link) => {
-            const boundary = link.closest<HTMLElement>('.docs-sidebar')!;
+        const facts = (settleWheel = false) =>
+          current.evaluate(async (link, settleWheel) => {
+            const boundary = link.closest<HTMLElement>('.docs-sidebar');
             let owner: HTMLElement | null = null;
+            const ancestors = [];
+            const composedParent = (node: Element): Element | null => {
+              if (node.assignedSlot) return node.assignedSlot;
+              if (node.parentElement) return node.parentElement;
+              const root = node.getRootNode();
+              return root instanceof ShadowRoot ? root.host : null;
+            };
+            // Observe the actual composed scrollport independently of production:
+            // Contents can move the retained nav under an enclosing public surface.
             for (
-              let node = link.parentElement;
-              node && boundary.contains(node);
-              node = node.parentElement
+              let node = boundary?.contains(link) ? composedParent(link) : null;
+              node && node !== document.body && node !== document.documentElement;
+              node = composedParent(node)
             ) {
+              if (!(node instanceof HTMLElement)) continue;
+              const overflowY = getComputedStyle(node).overflowY;
+              const rect = node.getBoundingClientRect();
+              ancestors.push({
+                tag: node.localName,
+                id: node.id,
+                className: node.className,
+                overflowY,
+                clientHeight: node.clientHeight,
+                scrollHeight: node.scrollHeight,
+                scrollTop: node.scrollTop,
+                rect: {
+                  top: rect.top,
+                  bottom: rect.bottom,
+                  width: rect.width,
+                  height: rect.height,
+                },
+              });
               if (
+                !owner &&
                 node.clientHeight > 0 &&
                 node.scrollHeight > node.clientHeight &&
-                /^(auto|scroll|overlay)$/.test(getComputedStyle(node).overflowY)
+                /^(auto|scroll|overlay)$/.test(overflowY)
               ) {
                 owner = node;
-                break;
               }
-              if (node === boundary) break;
+            }
+            const attribution = {
+              width: innerWidth,
+              route: location.pathname,
+              relocated: boundary?.hasAttribute('data-site-contents-popover-tree') ?? false,
+              ancestors,
+              resolvedOwner: owner
+                ? { tag: owner.localName, id: owner.id, className: owner.className }
+                : null,
+            };
+            if (settleWheel) {
+              if (!owner)
+                throw new Error(`Missing actual scroll owner: ${JSON.stringify(attribution)}`);
+              let previous = owner.scrollTop,
+                stable = 0;
+              for (let frame = 0; frame < 60; frame++) {
+                const { promise, resolve } = Promise.withResolvers<void>();
+                requestAnimationFrame(() => resolve());
+                await promise;
+                const next = owner.scrollTop;
+                stable = next === previous ? stable + 1 : 0;
+                previous = next;
+                if (stable >= 2) break;
+                if (frame === 59)
+                  throw new Error(
+                    `Manual scrolling did not settle: ${JSON.stringify({ ...attribution, scrollTop: next })}`
+                  );
+              }
             }
             const empty = {
+              ...attribution,
               visible: false,
               reason: 'missing sidebar owner',
               owner: null,
@@ -2430,6 +2485,8 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
             const surface = link.querySelector<HTMLElement>('[data-site-link-content]');
             const content = (surface ?? link).getBoundingClientRect();
             return {
+              ...attribution,
+              reason: 'current row geometry relative to resolved scrollport',
               visible:
                 row.width > 0 &&
                 row.height > 0 &&
@@ -2475,8 +2532,10 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               projected: link.getAttribute('data-site-link-enhanced'),
               focus: document.activeElement?.outerHTML.slice(0, 300),
             };
-          });
-        await expect.poll(async () => (await facts()).visible, { timeout: 10_000 }).toBe(true);
+          }, settleWheel);
+        await expect
+          .poll(() => facts(), { timeout: 10_000 })
+          .toEqual(expect.objectContaining({ visible: true }));
         const entered = await facts();
         expect(entered.documentY).toBe(0);
         // No-pointer control: the route-entry reveal owner keeps adjusting this
@@ -2606,32 +2665,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         await expect
           .poll(async () => (await facts()).scrollTop)
           .toBeLessThan(beforeWheel.scrollTop!);
-        await current.evaluate(async (link) => {
-          const boundary = link.closest<HTMLElement>('.docs-sidebar')!;
-          let owner = link.parentElement!;
-          while (
-            boundary.contains(owner) &&
-            !(
-              owner.clientHeight > 0 &&
-              owner.scrollHeight > owner.clientHeight &&
-              /^(auto|scroll|overlay)$/.test(getComputedStyle(owner).overflowY)
-            )
-          ) {
-            if (owner === boundary || !owner.parentElement)
-              throw new Error('Missing actual scroll owner');
-            owner = owner.parentElement;
-          }
-          let previous = owner.scrollTop,
-            stable = 0;
-          for (let frame = 0; frame < 60; frame++) {
-            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-            const next = owner.scrollTop;
-            stable = next === previous ? stable + 1 : 0;
-            previous = next;
-            if (stable >= 2) return;
-          }
-          throw new Error('Manual scrolling did not settle');
-        });
+        await facts(true);
         const manuallyScrolled = await facts();
         await captureLinks(
           page,
@@ -2683,7 +2717,9 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               '[data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
             )
             .click();
-        await expect.poll(async () => (await facts()).visible, { timeout: 10_000 }).toBe(true);
+        await expect
+          .poll(() => facts(), { timeout: 10_000 })
+          .toEqual(expect.objectContaining({ visible: true }));
         await captureLinks(
           page,
           `sidebar-current-${width}-reload`,
