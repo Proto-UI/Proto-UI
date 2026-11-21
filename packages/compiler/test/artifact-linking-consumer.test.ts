@@ -518,15 +518,21 @@ describe('ordinary consumers of independently compiled and linked libraries', ()
       React.createElement('div', { 'data-domain': 'private' }, React.createElement(Scope, null,
         React.createElement(Source), React.createElement(Private))));
     await React.act(async () => root.render(tree(true)));
-    const first = host.querySelector('[data-domain="one"] button')!;
+    // The authored button/article are template children. Accessibility binds each
+    // independently compiled endpoint's physical Root, not its authored child tag.
+    const first = host.querySelector('[data-domain="one"] button')!.closest<HTMLElement>('[data-pui-root]')!;
     const article = host.querySelector<HTMLElement>('[data-domain="one"] article')!;
-    const firstId = article.id;
+    const targetRoot = article.closest<HTMLElement>('[data-pui-root]')!;
+    const firstId = targetRoot.id;
     expect(firstId).toMatch(/^pui-part-/);
     expect(first.getAttribute('aria-controls')).toBe(firstId);
-    const adjacent = host.querySelector<HTMLElement>('[data-domain="adjacent"] article')!;
+    expect(article.getAttribute('id')).toBeNull();
+    expect(host.querySelector('[data-domain="one"] button')!.getAttribute('aria-controls')).toBeNull();
+    const adjacent = host.querySelector('[data-domain="adjacent"] article')!.closest<HTMLElement>('[data-pui-root]')!;
+    expect(adjacent.id).toMatch(/^pui-part-/);
     expect(adjacent.id).not.toBe(firstId);
-    expect(host.querySelector('[data-domain="adjacent"] button')!.getAttribute('aria-controls')).toBe(adjacent.id);
-    expect(host.querySelector('[data-domain="private"] button')!.hasAttribute('aria-controls')).toBe(false);
+    expect(host.querySelector('[data-domain="adjacent"] button')!.closest('[data-pui-root]')!.getAttribute('aria-controls')).toBe(adjacent.id);
+    expect(host.querySelector('[data-domain="private"] button')!.closest('[data-pui-root]')!.hasAttribute('aria-controls')).toBe(false);
     const targetApi = targetRef.current!.getExposes() as unknown as { key(value: string): void };
     const sourceApi = sourceRef.current!.getExposes() as unknown as { key(value: string): void };
     await React.act(async () => targetApi.key('arbitrary / [] unicode 中'));
@@ -540,9 +546,9 @@ describe('ordinary consumers of independently compiled and linked libraries', ()
     expect(first.getAttribute('aria-controls')).toBe(firstId);
     await React.act(async () => root.render(tree(false)));
     expect(first.hasAttribute('aria-controls')).toBe(false);
-    expect(article.hasAttribute('id')).toBe(false);
+    expect(targetRoot.hasAttribute('id')).toBe(false);
     await React.act(async () => root.render(tree(true)));
-    const replacement = host.querySelector<HTMLElement>('[data-domain="one"] article')!;
+    const replacement = host.querySelector('[data-domain="one"] article')!.closest<HTMLElement>('[data-pui-root]')!;
     expect(replacement.id).toMatch(/^pui-part-/);
     expect(first.getAttribute('aria-controls')).toBe(replacement.id);
   });

@@ -34,10 +34,18 @@ for (const profile of nativeOwnerProfiles) describe(profile, () => {
     const owner = await mountNativeOwner(source, profile);
     cleanup.push(owner.dispose);
     const api = owner.handle.getExposes();
-    const initial = owner.host.querySelector('section')!;
+    const content = owner.host.querySelector('section')!;
+    // A11y belongs to the physical instance Root, not an authored template child.
+    // Web Components bind their custom-element host; the framework profiles mark their Root.
+    const initial = profile === 'web-component-source-v1'
+      ? owner.handle as unknown as HTMLElement
+      : content.closest<HTMLElement>('[data-pui-root]')!;
     const id = initial.id;
     expect(id).toMatch(/^pui-part-/);
     expect(initial.getAttribute('aria-controls')).toBe(id);
+    expect(initial).not.toBe(content);
+    expect(content.getAttribute('id')).toBeNull();
+    expect(content.getAttribute('aria-controls')).toBeNull();
     await owner.act(() => api.targetKey('other'));
     expect(initial.hasAttribute('aria-controls')).toBe(false);
     await owner.act(() => api.targetKey('other'));
@@ -51,7 +59,9 @@ for (const profile of nativeOwnerProfiles) describe(profile, () => {
     expect(owner.host.querySelector('section')).toBeNull();
     await owner.act(() => api.show());
     await owner.flush();
-    const remounted = owner.host.querySelector('section')!;
+    const remounted = profile === 'web-component-source-v1'
+      ? owner.handle as unknown as HTMLElement
+      : owner.host.querySelector('section')!.closest<HTMLElement>('[data-pui-root]')!;
     expect(remounted.id).toBe(id);
     expect(remounted.getAttribute('aria-controls')).toBe(id);
     await owner.dispose();
@@ -64,7 +74,11 @@ for (const profile of nativeOwnerProfiles) describe(profile, () => {
     const owner = await mountNativeOwner(source, profile);
     cleanup.push(owner.dispose);
     const api = owner.handle.getExposes();
-    const view = owner.host.querySelector('section')!;
+    const view = profile === 'web-component-source-v1'
+      ? owner.handle as unknown as HTMLElement
+      : owner.host.querySelector('section')!.closest<HTMLElement>('[data-pui-root]')!;
+    expect(view.id).toMatch(/^pui-part-/);
+    expect(view.getAttribute('aria-controls')).toBe(view.id);
     await owner.act(() => api.sourceKey('missing'));
     view.id = 'host-authored-id';
     view.setAttribute('aria-controls', 'host-token host-authored-id');
@@ -81,8 +95,12 @@ for (const profile of nativeOwnerProfiles) describe(profile, () => {
   it('fails closed on host collisions and reconciles a live host identity edit', async () => {
     const owner = await mountNativeOwner(source, profile);
     cleanup.push(owner.dispose);
-    const view = owner.host.querySelector('section')!;
+    const view = profile === 'web-component-source-v1'
+      ? owner.handle as unknown as HTMLElement
+      : owner.host.querySelector('section')!.closest<HTMLElement>('[data-pui-root]')!;
     const reserved = view.id;
+    expect(reserved).toMatch(/^pui-part-/);
+    expect(view.getAttribute('aria-controls')).toBe(reserved);
     const collision = document.createElement('div'); collision.id = reserved; document.body.append(collision);
     await vi.waitFor(() => expect(view.hasAttribute('aria-controls')).toBe(false));
     expect(view.id).toBe(reserved);
@@ -93,5 +111,24 @@ for (const profile of nativeOwnerProfiles) describe(profile, () => {
     await owner.dispose();
     expect(view.id).toBe('host-live-replacement');
     expect(view.hasAttribute('aria-controls')).toBe(false);
+  });
+
+  it('distinguishes an absent projection from an explicitly empty host-authored id', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = await mountNativeOwner(source, profile);
+    cleanup.push(owner.dispose);
+    const api = owner.handle.getExposes();
+    const view = profile === 'web-component-source-v1'
+      ? owner.handle as unknown as HTMLElement
+      : owner.host.querySelector('section')!.closest<HTMLElement>('[data-pui-root]')!;
+    expect(view.id).toMatch(/^pui-part-/);
+    await owner.act(() => api.sourceKey('missing'));
+    // No IDREF tokens remain: the contract removes the attribute instead of writing ''.
+    expect(view.getAttribute('aria-controls')).toBeNull();
+    view.setAttribute('id', '');
+    await owner.dispose();
+    // The host's later empty id is an authored value; compare-and-restore must preserve it.
+    expect(view.getAttribute('id')).toBe('');
+    expect(view.getAttribute('aria-controls')).toBeNull();
   });
 });
