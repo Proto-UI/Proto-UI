@@ -460,6 +460,14 @@ async function nativePopup(
   }
 }
 
+async function waitForPassiveSurface(owner: Locator) {
+  // Progressive decoration mounts each owner's Surface independently. Observe
+  // that owner's mounted paint before reading styles or starting focus changes.
+  await owner
+    .locator(':scope > :is(wc-site-shadcn-surface,wc-site-brutalist-surface)[data-pui-root]')
+    .waitFor({ state: 'visible', timeout: 10_000 });
+}
+
 async function linkPaint(link: Locator) {
   return link.evaluate((anchor) => {
     const surface = anchor.querySelector<HTMLElement>('[data-pui-root]')!;
@@ -489,9 +497,24 @@ async function linkPaint(link: Locator) {
       box.top >= ringExtent &&
       box.right + ringExtent <= innerWidth &&
       box.bottom + ringExtent <= innerHeight;
+    const clippingAncestors = [];
     for (let parent = surface.parentElement; parent; parent = parent.parentElement) {
       const clip = getComputedStyle(parent);
       const bounds = parent.getBoundingClientRect();
+      if (
+        ['hidden', 'clip', 'scroll', 'auto'].includes(clip.overflowX) ||
+        ['hidden', 'clip', 'scroll', 'auto'].includes(clip.overflowY)
+      )
+        clippingAncestors.push({
+          tag: parent.localName,
+          className: parent.className,
+          overflowX: clip.overflowX,
+          overflowY: clip.overflowY,
+          left: bounds.left,
+          right: bounds.right,
+          top: bounds.top,
+          bottom: bounds.bottom,
+        });
       if (['hidden', 'clip', 'scroll', 'auto'].includes(clip.overflowX))
         unclipped &&=
           box.left - ringExtent >= bounds.left && box.right + ringExtent <= bounds.right;
@@ -530,6 +553,8 @@ async function linkPaint(link: Locator) {
         box.height > 0 &&
         anchor === document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2),
       unclipped,
+      clippingAncestors,
+      viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
       // Record the native root outline too: the Prototype ring alone does not
       // prove that a browser focus outline is absent or visually acceptable.
       nativeOutline: getComputedStyle(anchor).outline,
@@ -751,6 +776,7 @@ async function assertHostCurrentProjection(link: Locator, family: string) {
 }
 
 async function assertNavigationFocus(page: Page, link: Locator) {
+  await waitForPassiveSurface(link);
   await link.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
   await link.focus();
@@ -1354,16 +1380,12 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
       const page = await context.newPage();
       try {
         await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
-        await page
-          .locator(
-            'a[data-site-native-link][aria-label="GitHub"] :is(wc-site-shadcn-surface,wc-site-brutalist-surface)'
-          )
-          .waitFor({ state: 'attached' });
         const group = page
           .locator('.sidebar-pane details')
           .filter({ has: page.locator('a[aria-current="page"]') })
           .last();
         const summary = group.locator(':scope > summary');
+        await waitForPassiveSurface(summary);
         await summary.scrollIntoViewIfNeeded();
         const summaryPaint = () =>
           summary.evaluate((element) => {
@@ -3120,7 +3142,10 @@ it('records the English shell labels, destinations and native activation ownersh
         for (const link of await page.locator(HOMEPAGE_DESKTOP_NAVIGATION).all()) {
           const paint = await linkPaint(link);
           expect(paint.visibleTarget).toBe(true);
-          expect(paint.unclipped).toBe(true);
+          expect(
+            paint.unclipped,
+            JSON.stringify({ width, rootSize, href: await link.getAttribute('href'), paint })
+          ).toBe(true);
         }
       }
     }
@@ -3136,8 +3161,7 @@ it('records the English shell labels, destinations and native activation ownersh
       '#home-social [data-projection-generation-state="active"] a'
     );
     expect(shellNavigationIssues(social, socialExpectation)).toEqual([]);
-    const popupNavigation = await collectShellLinks(page, HOMEPAGE_POPUP_NAVIGATION);
-    expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
+    expect(await page.locator(HOMEPAGE_POPUP_NAVIGATION).first().isVisible()).toBe(false);
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
       await page
@@ -3161,7 +3185,7 @@ it('records the English shell labels, destinations and native activation ownersh
       'shadcn',
       'wc',
       'en; hero-keyboard-focus; native-theme-dark; 390px popup-navigation',
-      { desktopNavigation, popupNavigation, narrowNavigation, hero, social, focused, themeBefore }
+      { desktopNavigation, narrowNavigation, hero, social, focused, themeBefore }
     );
   } finally {
     await enContext.close();
