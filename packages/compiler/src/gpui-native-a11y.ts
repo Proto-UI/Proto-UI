@@ -1,7 +1,36 @@
 // Pinned GPUI Element::write_a11y_info writes the actual AccessKit node.
-export const gpuiNativeA11ySource = String.raw`use gpui::{App, Bounds, Element, ElementId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, Pixels, Window};
+export const gpuiNativeA11ySource = String.raw`use gpui::{App, Bounds, Element, ElementId, GlobalElementId, InspectorElementId, LayoutId, Pixels, Window};
 use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view};
 use std::hash::{Hash,Hasher};
+#[cfg(not(feature = "gpui-modern-element-api"))]
+fn node_id(id: &GlobalElementId) -> gpui::accesskit::NodeId {
+    let mut hasher = std::hash::DefaultHasher::default();
+    id.hash(&mut hasher);
+    gpui::accesskit::NodeId(hasher.finish())
+}
+
+#[cfg(feature = "gpui-modern-element-api")]
+fn node_id(id: &GlobalElementId) -> gpui::accesskit::NodeId {
+    // GPUI's GlobalElementId writes its cached path hash as one u64 and
+    // uses that same hash for the AccessKit node ID.
+    #[derive(Default)]
+    struct PathHash(Option<u64>);
+    impl Hasher for PathHash {
+        fn write(&mut self, _: &[u8]) {
+            panic!("GPUI GlobalElementId no longer hashes as one u64");
+        }
+        fn write_u64(&mut self, value: u64) {
+            assert!(self.0.replace(value).is_none(), "GPUI GlobalElementId wrote multiple hashes");
+        }
+        fn finish(&self) -> u64 {
+            self.0.expect("GPUI GlobalElementId did not write a hash")
+        }
+    }
+    let mut hasher = PathHash::default();
+    id.hash(&mut hasher);
+    gpui::accesskit::NodeId(hasher.finish())
+}
+
 struct LayoutFrame{serial:u64,names:std::collections::HashMap<String,Option<OwnerWeak>>}
 thread_local!{
 static A11Y_LAYOUT_FRAMES:std::cell::RefCell<std::collections::HashMap<gpui::WindowId,LayoutFrame>>=std::cell::RefCell::new(std::collections::HashMap::new());
@@ -42,14 +71,15 @@ fn aria_boolean(value:&Value)->Option<bool>{match value{Value::Json(serde_json::
 struct NativeViewLease{owner:OwnerWeak,hitbox:gpui::HitboxId}
 impl Drop for NativeViewLease{fn drop(&mut self){if let Some(owner)=self.owner.upgrade(){let live=owner.borrow().native_hitbox.as_ref().is_some_and(|hitbox|hitbox.id==self.hitbox);if live{detach_native_view(&owner);}}}}
 pub struct Semantics<E:Element>{pub element:E,pub owner:OwnerWeak,pub role:Option<gpui::Role>}
-impl<E:Element> IntoElement for Semantics<E>{type Element=Self;fn into_element(self)->Self{self}}
+#[cfg(not(feature = "gpui-modern-element-api"))]
+impl<E:Element> gpui::IntoElement for Semantics<E>{type Element=Self;fn into_element(self)->Self{self}}
 impl<E:Element> Element for Semantics<E>{
 type RequestLayoutState=E::RequestLayoutState;
 type PrepaintState=E::PrepaintState;
 fn id(&self)->Option<ElementId>{self.element.id()}
 fn source_location(&self)->Option<&'static std::panic::Location<'static>>{self.element.source_location()}
 fn request_layout(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorElementId>,window:&mut Window,cx:&mut App)->(LayoutId,Self::RequestLayoutState){
-if let Some(owner)=self.owner.upgrade(){let window_id=window.window_handle().window_id();owner.borrow_mut().window_id=Some(window_id);if self.a11y_role().is_some(){if let Some(id)=id{let frame=layout_frame(window,cx);let mut hasher=std::hash::DefaultHasher::default();id.hash(&mut hasher);{let mut owner=owner.borrow_mut();if owner.modules.a11y_frame!=frame{owner.modules.a11y_frame=frame;owner.modules.a11y_bindings=0;}owner.modules.a11y_bindings+=1;owner.modules.a11y_node=Some(gpui::accesskit::NodeId(hasher.finish()));}let name=owner.borrow().modules.accessible_text.get("id").map(resolved);if let Some(Value::Json(serde_json::Value::String(name)))=name{if !name.is_empty(){A11Y_LAYOUT_FRAMES.with(|frames|{let mut frames=frames.borrow_mut();let names=&mut frames.get_mut(&window_id).expect("current native layout frame").names;match names.entry(name){std::collections::hash_map::Entry::Vacant(entry)=>{entry.insert(Some(self.owner.clone()));},std::collections::hash_map::Entry::Occupied(mut entry)=>{entry.insert(None);}}});}}}}}self.element.request_layout(id,inspector,window,cx)
+if let Some(owner)=self.owner.upgrade(){let window_id=window.window_handle().window_id();owner.borrow_mut().window_id=Some(window_id);if self.a11y_role().is_some(){if let Some(id)=id{let frame=layout_frame(window,cx);{let mut owner=owner.borrow_mut();if owner.modules.a11y_frame!=frame{owner.modules.a11y_frame=frame;owner.modules.a11y_bindings=0;}owner.modules.a11y_bindings+=1;owner.modules.a11y_node=Some(node_id(id));}let name=owner.borrow().modules.accessible_text.get("id").map(resolved);if let Some(Value::Json(serde_json::Value::String(name)))=name{if !name.is_empty(){A11Y_LAYOUT_FRAMES.with(|frames|{let mut frames=frames.borrow_mut();let names=&mut frames.get_mut(&window_id).expect("current native layout frame").names;match names.entry(name){std::collections::hash_map::Entry::Vacant(entry)=>{entry.insert(Some(self.owner.clone()));},std::collections::hash_map::Entry::Occupied(mut entry)=>{entry.insert(None);}}});}}}}}self.element.request_layout(id,inspector,window,cx)
 }
 fn prepaint(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorElementId>,bounds:Bounds<Pixels>,layout:&mut Self::RequestLayoutState,window:&mut Window,cx:&mut App)->Self::PrepaintState{
 if let Some(owner)=self.owner.upgrade(){let hitbox=window.insert_hitbox(bounds,gpui::HitboxBehavior::Normal);let hitbox_id=hitbox.id;{let mut owner=owner.borrow_mut();owner.bounds=Some(bounds);owner.native_hitbox=Some(hitbox);}
