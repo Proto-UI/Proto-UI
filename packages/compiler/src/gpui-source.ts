@@ -1553,6 +1553,8 @@ impl __PuiNativeRecordValue {
             return `typeof_value(&(${args[0]}))`;
           case 'error':
             return `record(vec![("name", Value::string("Error")), ("message", Value::string(&(${args[0] ?? 'Value::Undefined'}).error_message()))])`;
+          default:
+            throw new Error('Checked GPUI intrinsic has no direct lowering.');
         }
       }
       case 'object-spread':
