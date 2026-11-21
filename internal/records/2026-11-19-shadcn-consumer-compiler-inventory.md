@@ -72,6 +72,16 @@ Upstream main now implements `stateHandles`. This patch admits three more forms:
 | Family | Next diagnostic |
 | --- | --- |
 | separator | Clears the frontend. It now stops at the target: `react-dom-source-v1` does not implement `props.watchAll` or `props.watchRaw`. |
-| button, toggle | `for...of` statements |
+| button, toggle | `for...of` statements (resolved below) |
 
 The other families are unchanged.
+
+## Update 2026-11-21: static loop unrolling
+
+Static `for...of` loops are now unrolled, and literal-only branches are decided at compile time.
+
+| Family | Next diagnostic |
+| --- | --- |
+| toggle | Clears the frontend. It now stops at the target: `props.watchRaw` is not implemented by `react-dom-source-v1`. |
+| separator | Also stops at the target: `props.watchAll` and `props.watchRaw`. |
+| button | Stops at rule `w.meta('colorScheme')`, which appears 101 times across the families. Rule metadata needs its own host-capability definition. |

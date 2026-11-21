@@ -463,6 +463,35 @@ export function extractRuleStyleHandle(
     value = unwrap(value);
     if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) return value.text;
     if (ts.isIdentifier(value)) return declaration(owner, value, stringValue);
+    // `${a}-${b}` over static strings, and `TABLE[key]` with a static key into a
+    // static object literal, fold to the string they name.
+    if (ts.isTemplateExpression(value))
+      return value.templateSpans.reduce(
+        (text, span) => text + stringValue(owner, span.expression) + span.literal.text,
+        value.head.text
+      );
+    if (ts.isElementAccessExpression(value)) {
+      const key = stringValue(owner, value.argumentExpression);
+      const table = (current: SourceModule, object: ts.Expression): string => {
+        object = unwrap(object);
+        if (ts.isIdentifier(object)) return declaration(current, object, table);
+        if (!ts.isObjectLiteralExpression(object))
+          rejectNode(
+            object,
+            code,
+            'Style tokens require static strings, not interpolations, functions or host values.'
+          );
+        const property = object.properties.find(
+          (item) =>
+            ts.isPropertyAssignment(item) &&
+            (ts.isIdentifier(item.name) || ts.isStringLiteral(item.name)) &&
+            item.name.text === key
+        ) as ts.PropertyAssignment | undefined;
+        if (!property) rejectNode(value, code, `Static style table has no entry ${key}.`);
+        return stringValue(current, property.initializer);
+      };
+      return table(owner, value.expression);
+    }
     // A static string list joined by a literal separator is the same string
     // the module-data admission folds (source-language.md).
     const joined = staticJoin(value);

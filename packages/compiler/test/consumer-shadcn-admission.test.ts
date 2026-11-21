@@ -58,4 +58,47 @@ describe('source forms the shadcn families use', () => {
     expect(ir).toContain('shrink-0');
     expect(ir).toContain('bg-border');
   });
+
+  // A for...of over finite literal data in setup is unrolled at compile time;
+  // literal-only branches inside it are decided, and style tables indexed by a
+  // static key or template fold to the token they name.
+  it('unrolls static loops into one rule per element', () => {
+    const parsed = parsePrototype(`import {definePrototype,tw} from '@proto.ui/core';
+      const IDS=['vega','rhea'] as const;
+      const TONES={primary:'bg-primary',ghost:'bg-transparent'} as const;
+      const SIZES={'vega-sm':'h-7','vega-lg':'h-9','rhea-sm':'h-6','rhea-lg':'h-8'} as const;
+      export default definePrototype({name:'x',setup(def){
+        def.props.define({tone:{type:'string'},size:{type:'string'},id:{type:'string'}});
+        for (const tone of Object.keys(TONES) as Array<keyof typeof TONES>) {
+          def.rule({when:(w)=>w.prop('tone').eq(tone),intent:(i)=>i.feedback.style.use(tw(TONES[tone]))});
+        }
+        for (const id of IDS) {
+          for (const size of ['sm','lg','icon'] as const) {
+            if (size === 'icon') {
+              def.rule({when:(w)=>w.prop('size').eq(size),intent:(i)=>i.feedback.style.use(tw('size-8'))});
+            } else {
+              def.rule({when:(w)=>w.all(w.prop('id').eq(id),w.prop('size').eq(size)),intent:(i)=>i.feedback.style.use(tw(SIZES[\`\${id}-\${size}\`]))});
+            }
+          }
+        }
+        return r=>r.el('div',[]);
+      }});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const ir = JSON.stringify(parsed.value);
+    for (const token of ['bg-primary', 'bg-transparent', 'h-7', 'h-9', 'h-6', 'h-8', 'size-8'])
+      expect(ir).toContain(token);
+    expect(ir.match(/"rule.declare"/g)?.length).toBe(2 + 2 * 3);
+  });
+
+  it('keeps for...of over non-static data unsupported', () => {
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'x',setup(def){
+        const list=[1,2];
+        for (const item of list) { def.expose.method('m',()=>item); }
+      }});`);
+    expect(parsed).toMatchObject({
+      ok: false,
+      diagnostics: [{ message: expect.stringContaining('ForOfStatement') }],
+    });
+  });
 });

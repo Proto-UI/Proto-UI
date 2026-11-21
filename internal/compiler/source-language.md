@@ -78,6 +78,16 @@ A local `const` or `let` declaration may use an object binding pattern with stat
 
 The global `String(value)` conversion is admitted with exactly one argument of finite data or `unknown`, and lowers to the target's own conversion. GPUI implements it for scalar data only; a structured or `unknown` argument keeps an explicit unsupported diagnostic on that target. A style token written as a module constant may be `<static string list>.join(<string literal>)`, folded like other module data. A state handle that a binding receives from a member read or a helper call is observed through that binding: rules may use it, and its identity is the binding site, exactly as for a handle read from a capture.
 
+A `for (const x of <static list>)` statement is unrolled at compile time. A static list is one of:
+
+- an array literal of string or number literals;
+- a module binding that resolves to such an array;
+- `Object.keys(<module object literal>)`.
+
+The body is repeated once per element, and each read of `x` becomes that element's literal. Each copy keeps the source range of the identifier it replaces. Nested static loops unroll inside each copy. An `if` whose condition compares only literals is decided at compile time: only the taken branch is lowered. An unrolled body may not declare bindings. Any other `for...of` keeps the unsupported-statement diagnostic. Nothing is iterated at run time.
+
+Style tokens also fold `TABLE[key]`, where the key is static and `TABLE` is a static object literal, and template literals over static strings.
+
 A definition descriptor may state `modules: <hook>.modules` when `<hook>` resolves to a static `defineHook` or `defineAsHook` declaration. The requirements are read from that declaration's own descriptor, so a family projection reuses its base hook's Module declarations without restating them, and a duplicate declaration is still rejected. A shared mutable binding's declared type must remain finite data; `unknown`, functions, execution handles, and mutable containers carrying them cannot be used to retain an owner's closures beyond that owner's lifetime. The portable IR validator applies the same restriction before emission. A static module function can still create and return an ordinary closure to the current owner, and a local mutable binding can hold a capability or callable value. This restriction concerns the shared storage boundary rather than the spelling or declaration location of a function.
 
 Structural width subtyping may omit additional pure-data fields. A type annotation, assertion, callable signature, return annotation, or assignment cannot erase additional callable or owner-capability fields from the compiler's runtime shape proof: the JavaScript object still contains those fields. Such authority-hiding views receive an explicit diagnostic in this private subset. A view retaining every authority-bearing field remains legal. This rule also prevents a finite-data module slot from retaining an owner closure under a narrower record schema; portable IR is checked by the same assignability rules.

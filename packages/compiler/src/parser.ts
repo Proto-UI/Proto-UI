@@ -955,7 +955,7 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
-    nodes = lowerObjectPatterns(nodes);
+    nodes = unrollStaticLoops(module, lowerObjectPatterns(nodes));
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
@@ -3548,4 +3548,259 @@ function hasObjectPattern(node: ts.Statement): boolean {
       ts.isObjectBindingPattern(declaration.name)
     )
   );
+}
+
+const unrolledLoops = new WeakMap<ts.Statement, readonly ts.Statement[]>();
+
+/**
+ * `for (const x of <static list>) { ... }` over finite literal data is expanded
+ * at compile time: the body is repeated once per element, with each read of
+ * `x` replaced by that element's literal. A static list is an array literal of
+ * string or number literals, a module binding that resolves to one, or
+ * `Object.keys(<module object literal>)`. Each synthesized literal keeps the
+ * source range of the identifier it replaces. Any other `for...of` keeps the
+ * unsupported-statement diagnostic; nothing is iterated at run time.
+ */
+function unrollStaticLoops(
+  module: SourceModule,
+  nodes: readonly ts.Statement[]
+): readonly ts.Statement[] {
+  if (!nodes.some((node) => ts.isForOfStatement(node))) return nodes;
+  const out: ts.Statement[] = [];
+  for (const node of nodes) {
+    if (!ts.isForOfStatement(node)) {
+      out.push(node);
+      continue;
+    }
+    const cached = unrolledLoops.get(node);
+    if (cached) {
+      out.push(...cached);
+      continue;
+    }
+    const list = node.initializer;
+    if (
+      node.awaitModifier ||
+      !ts.isVariableDeclarationList(list) ||
+      !(list.flags & ts.NodeFlags.Const) ||
+      list.declarations.length !== 1 ||
+      !ts.isIdentifier(list.declarations[0].name)
+    ) {
+      out.push(node);
+      continue;
+    }
+    const values = staticLoopValues(module, node.expression, new Set());
+    if (!values) {
+      out.push(node);
+      continue;
+    }
+    const name = list.declarations[0].name.text;
+    const body = ts.isBlock(node.statement) ? node.statement.statements : [node.statement];
+    if (
+      body.some(
+        (statement) => ts.isVariableStatement(statement) || ts.isFunctionDeclaration(statement)
+      )
+    )
+      rejectNode(node, 'PUI1004', 'A statically unrolled loop body cannot declare bindings.');
+    const expanded: ts.Statement[] = [];
+    for (const value of values)
+      for (const statement of body)
+        expanded.push(substituteLoopValue(statement, name, value, node.parent));
+    // A nested static loop is unrolled within each copy of its enclosing body,
+    // and a branch whose condition is now made of literals only is decided.
+    const unrolled = unrollStaticLoops(module, decideLiteralBranches(expanded));
+    unrolledLoops.set(node, unrolled);
+    out.push(...unrolled);
+  }
+  return out;
+}
+
+function staticLoopValues(
+  module: SourceModule,
+  node: ts.Expression,
+  active: Set<string>
+): (string | number)[] | undefined {
+  while (
+    ts.isParenthesizedExpression(node) ||
+    ts.isAsExpression(node) ||
+    ts.isSatisfiesExpression(node) ||
+    ts.isTypeAssertionExpression(node)
+  )
+    node = node.expression;
+  if (ts.isArrayLiteralExpression(node)) {
+    const values: (string | number)[] = [];
+    for (let element of node.elements) {
+      while (ts.isParenthesizedExpression(element) || ts.isAsExpression(element))
+        element = element.expression;
+      if (ts.isStringLiteral(element) || ts.isNoSubstitutionTemplateLiteral(element))
+        values.push(element.text);
+      else if (ts.isNumericLiteral(element)) values.push(Number(element.text));
+      else return undefined;
+    }
+    return values;
+  }
+  const resolved = (
+    identifier: ts.Identifier
+  ): { module: SourceModule; node: ts.Expression } | undefined => {
+    if (!module.declarations.has(identifier.text) && !module.imports.has(identifier.text))
+      return undefined;
+    const binding = module.graph.resolveBinding(module, identifier.text);
+    if (!binding.module || !ts.isExpression(binding.node)) return undefined;
+    const identity = `${binding.module.file.fileName}#${binding.name}`;
+    if (active.has(identity)) return undefined;
+    active.add(identity);
+    return { module: binding.module, node: binding.node };
+  };
+  if (ts.isIdentifier(node)) {
+    const target = resolved(node);
+    return target && staticLoopValues(target.module, target.node, active);
+  }
+  if (
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    ts.isIdentifier(node.expression.expression) &&
+    node.expression.expression.text === 'Object' &&
+    node.expression.name.text === 'keys' &&
+    node.arguments.length === 1 &&
+    ts.isIdentifier(node.arguments[0])
+  ) {
+    const target = resolved(node.arguments[0]);
+    let object = target?.node;
+    while (
+      object &&
+      (ts.isParenthesizedExpression(object) ||
+        ts.isAsExpression(object) ||
+        ts.isSatisfiesExpression(object))
+    )
+      object = object.expression;
+    if (!object || !ts.isObjectLiteralExpression(object)) return undefined;
+    const keys: string[] = [];
+    for (const property of object.properties) {
+      if (!ts.isPropertyAssignment(property)) return undefined;
+      if (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name))
+        keys.push(property.name.text);
+      else return undefined;
+    }
+    return keys;
+  }
+  return undefined;
+}
+
+function substituteLoopValue(
+  statement: ts.Statement,
+  name: string,
+  value: string | number,
+  parent: ts.Node
+): ts.Statement {
+  const factory = ts.factory;
+  const literal = (from: ts.Node): ts.Expression =>
+    ts.setTextRange(
+      typeof value === 'number'
+        ? factory.createNumericLiteral(value)
+        : factory.createStringLiteral(value),
+      from
+    );
+  const result = ts.transform(statement, [
+    (context) => {
+      const visit = (node: ts.Node): ts.Node => {
+        // A nested function or loop that rebinds the name keeps its own binding.
+        if (
+          (ts.isFunctionLike(node) &&
+            node.parameters.some(
+              (parameter) => ts.isIdentifier(parameter.name) && parameter.name.text === name
+            )) ||
+          (ts.isForOfStatement(node) &&
+            ts.isVariableDeclarationList(node.initializer) &&
+            node.initializer.declarations.some(
+              (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
+            ))
+        )
+          return node;
+        if (ts.isIdentifier(node) && node.text === name) {
+          const owner = node.parent;
+          if (
+            (owner && ts.isPropertyAccessExpression(owner) && owner.name === node) ||
+            (owner && ts.isPropertyAssignment(owner) && owner.name === node) ||
+            (owner && ts.isShorthandPropertyAssignment(owner))
+          )
+            return node;
+          return literal(node);
+        }
+        return ts.visitEachChild(node, visit, context);
+      };
+      return (root) => ts.visitNode(root, visit) as ts.Statement;
+    },
+  ]);
+  const lowered = result.transformed[0];
+  result.dispose();
+  (lowered as { parent: ts.Node }).parent = parent;
+  linkParents(lowered);
+  return lowered;
+}
+
+/** An `if` whose condition compares literals only is decided at compile time. */
+function decideLiteralBranches(nodes: readonly ts.Statement[]): ts.Statement[] {
+  const out: ts.Statement[] = [];
+  for (const node of nodes) {
+    if (!ts.isIfStatement(node)) {
+      out.push(node);
+      continue;
+    }
+    const decided = literalCondition(node.expression);
+    if (decided === undefined) {
+      out.push(node);
+      continue;
+    }
+    const branch = decided ? node.thenStatement : node.elseStatement;
+    if (!branch) continue;
+    out.push(...decideLiteralBranches(ts.isBlock(branch) ? branch.statements : [branch]));
+  }
+  return out;
+}
+
+function literalCondition(node: ts.Expression): boolean | undefined {
+  while (ts.isParenthesizedExpression(node)) node = node.expression;
+  const literal = (value: ts.Expression): string | number | boolean | undefined => {
+    while (ts.isParenthesizedExpression(value)) value = value.expression;
+    if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) return value.text;
+    if (ts.isNumericLiteral(value)) return Number(value.text);
+    if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
+    if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
+    return undefined;
+  };
+  if (ts.isPrefixUnaryExpression(node) && node.operator === ts.SyntaxKind.ExclamationToken) {
+    const inner = literalCondition(node.operand);
+    return inner === undefined ? undefined : !inner;
+  }
+  if (!ts.isBinaryExpression(node)) {
+    const value = literal(node);
+    return typeof value === 'boolean' ? value : undefined;
+  }
+  const operator = node.operatorToken.kind;
+  if (
+    operator === ts.SyntaxKind.BarBarToken ||
+    operator === ts.SyntaxKind.AmpersandAmpersandToken
+  ) {
+    const left = literalCondition(node.left),
+      right = literalCondition(node.right);
+    if (left === undefined || right === undefined) return undefined;
+    return operator === ts.SyntaxKind.BarBarToken ? left || right : left && right;
+  }
+  if (
+    operator === ts.SyntaxKind.EqualsEqualsEqualsToken ||
+    operator === ts.SyntaxKind.ExclamationEqualsEqualsToken
+  ) {
+    const left = literal(node.left),
+      right = literal(node.right);
+    if (left === undefined || right === undefined) return undefined;
+    return operator === ts.SyntaxKind.EqualsEqualsEqualsToken ? left === right : left !== right;
+  }
+  return undefined;
+}
+
+/** Point every descendant of a synthesized node at its actual parent. */
+function linkParents(node: ts.Node): void {
+  ts.forEachChild(node, (child) => {
+    (child as { parent: ts.Node }).parent = node;
+    linkParents(child);
+  });
 }
