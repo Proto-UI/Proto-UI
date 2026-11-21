@@ -108,7 +108,14 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
       setElementProps(root, { open: true });
     },
     side(side: 'left' | 'bottom') {
-      setElementProps(content, { side, maxExtent: { unit: 'root-text', value: 12.5 } });
+      // C-DRAWER-EXTENT-MODEL-0001-LENGTH: an explicit maximum also
+      // controls horizontal extent. Keep the observed 20rem left recipe and
+      // 12.5rem bottom recipe explicit instead of relying on the old ignored
+      // horizontal maxExtent input.
+      setElementProps(content, {
+        side,
+        maxExtent: { unit: 'root-text', value: side === 'left' ? 20 : 12.5 },
+      });
     },
     request(position: number) {
       return (content as any).getExposes().__testScrollTo(position);

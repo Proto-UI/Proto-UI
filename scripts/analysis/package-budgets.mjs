@@ -3,6 +3,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 import { build, version as esbuildVersion } from 'esbuild';
 import {
@@ -11,9 +12,18 @@ import {
   parseBudgetArguments,
   resolveBudgetPolicy,
 } from './package-budget-policy.mjs';
+import {
+  assertBudgetCandidate,
+  assertStableBudgetSource,
+  captureBudgetSource,
+  describeBudgetClosure,
+} from './package-budget-evidence.mjs';
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const { json, finfDevelopment } = parseBudgetArguments(process.argv.slice(2));
+const { json, finfDevelopment, requireClean, expectedSha } = parseBudgetArguments(
+  process.argv.slice(2)
+);
+const sourceBefore = captureBudgetSource(ROOT_DIR);
 const policy = resolveBudgetPolicy({ finfDevelopment, root: ROOT_DIR });
 // Provenance makes a ceiling change reviewable per the #654 policy: a number
 // is only comparable with the Node/zlib/esbuild/platform environment and the
@@ -29,6 +39,9 @@ const environment = {
 // Finf development may report size overruns without blocking, never relabel them:
 // internal/governance/finf-package-budgets.md
 // internal/records/2026-10-07-finf-main-495b-budget.json
+// Separately reviewable restoration of integrated capability costs; preserves all
+// old ceilings and canonical red results in the source-bound transaction record.
+// internal/records/2026-11-22-package-budget-numeric-transaction.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -36,7 +49,7 @@ const cases = [
   // #652 capability growth. The blocking whole-entry gate and measurement
   // shape remain unchanged; see the exact Linux CI comparison and attribution:
   // internal/records/2026-09-27-shadow-split-budget-proposal.zh-CN.md
-  ['core root', 'packages/core/src/index.ts', 7_600],
+  ['core root', 'packages/core/src/index.ts', 11_500],
   // The prior 64,000 ceiling covered #621 Table Checkpoint B registering
   // module-table-structure in the eager runtime closure: +3,294 gzip bytes
   // over main 9eb93e9b (63,294 at Table head 2d305208 vs 60,000 on main).
@@ -70,7 +83,7 @@ const cases = [
   // internal/records/2026-10-07-finf-source-parity-budget.json
   // Integrated Portal/opt-in sink/review repair closure and bounded margin:
   // internal/records/2026-10-07-finf-web-optical-portal-budget.json
-  ['runtime root', 'packages/runtime/src/index.ts', 78_500],
+  ['runtime root', 'packages/runtime/src/index.ts', 101_500],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -91,8 +104,8 @@ const cases = [
   // Subsequent bounded request/owner-release repair measured as an actual union:
   // internal/records/2026-10-06-focus-request-release-budget.json
   // internal/records/2026-10-06-template-scroll-focus-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 106_000],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 106_000],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 164_500],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 163_500],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -100,9 +113,9 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 132_000],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 197_500],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
-  ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
+  ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];
 
 // Second, diagnostic-only measurement layer per the #654 direction: fixed
@@ -153,18 +166,41 @@ const measure = async (entry) => {
     platform: 'browser',
     target: ['es2020'],
     external,
+    metafile: true,
     logLevel: 'silent',
   });
-  return measureBuildOutput(result);
+  return {
+    ...measureBuildOutput(result),
+    closure: describeBudgetClosure({
+      metafile: result.metafile,
+      root: ROOT_DIR,
+      source: sourceBefore,
+    }),
+  };
 };
 
 const report = await collectBudgetReport({ cases, diagnostics, measure, environment, policy });
+const sourceAfter = captureBudgetSource(ROOT_DIR);
+assertStableBudgetSource(sourceBefore, sourceAfter);
+assertBudgetCandidate(sourceAfter, { requireClean, expectedSha });
+report.schemaVersion = 2;
+report.source = {
+  ...sourceAfter.receipt,
+  stableDuringMeasurement: true,
+  requireClean,
+  expectedSha: expectedSha ?? null,
+};
+report.measurement.external = external;
+report.measurement.externalSha256 = createHash('sha256')
+  .update(JSON.stringify(external))
+  .digest('hex');
 const { results, diagnostics: diagnosticResults } = report;
 
 if (json) console.log(JSON.stringify(report, null, 2));
 else {
   console.log(`[package-budgets] ${JSON.stringify(environment)}`);
   console.log(`[package-budgets] policy=${JSON.stringify(policy)}`);
+  console.log(`[package-budgets] source=${JSON.stringify(report.source)}`);
   for (const result of results) {
     console.log(
       `${result.pass ? 'PASS' : result.blocking ? 'FAIL' : 'ADVISORY'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; overBudget=${result.overBudgetBytes}; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`

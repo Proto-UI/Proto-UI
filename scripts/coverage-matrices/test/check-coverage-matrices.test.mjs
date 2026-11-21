@@ -19046,6 +19046,71 @@ for (const [source, allowed] of [
   });
 }
 
+for (const [relative, allowed] of [
+  [
+    'apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts',
+    '../../../../../../packages/adapters/base/src/material/program',
+  ],
+  ['apps/www/src/pages/en/test/liquid-glass-portal.astro', '@proto.ui/adapter-base/web-material'],
+]) {
+  test(`diagnostic import review rejects owner, body and edge drift: ${path.basename(relative)}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const file = path.join(root, relative);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const rawIssue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    fs.writeFileSync(file, reviewed);
+    assert.ok(
+      !collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(rawIssue),
+      'the exact reviewed diagnostic import is admitted'
+    );
+
+    const foreign = relative.replace(/([^/]+)$/u, 'copied-$1');
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+    assert.ok(
+      validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``),
+      'copying the same bytes does not admit another importer'
+    );
+    fs.rmSync(path.join(root, foreign));
+
+    fs.writeFileSync(file, `${reviewed}\n// Unreviewed source change.\n`);
+    assert.ok(validationMessage(root).includes(rawIssue), 'changed source requires renewed review');
+
+    const adjacent = relative.endsWith('.astro')
+      ? "\n<script>import '@proto.ui/adapter-react';</script>\n"
+      : "\nimport '@proto.ui/adapter-react';\n";
+    fs.writeFileSync(file, reviewed + adjacent);
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/adapter-react\` in \`${relative}\``
+      ),
+      'a diagnostic route does not receive a blanket Adapter allowance'
+    );
+  });
+}
+
+test('relocated Playwright fixtures re-enter review when imported by website source', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/test/fixtures/browser-only.ts';
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(
+    file,
+    "import '@proto.ui/adapter-base'; export const load = new Function('url', 'return import(url)');"
+  );
+  assert.doesNotThrow(() => validateCoverageMatrices({ rootDir: root }));
+
+  fs.writeFileSync(
+    path.join(root, 'apps/www/src/components/override/Search.astro'),
+    "<script>import '../../../test/fixtures/browser-only';</script>"
+  );
+  const message = validationMessage(root);
+  assert.ok(message.includes(`raw Proto UI import \`@proto.ui/adapter-base\` in \`${relative}\``));
+  assert.ok(message.includes(`runtime code compilation in \`${relative}\` is unverified`));
+});
+
 for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dynamic-css']) {
   test(`Finf continuous optical closure: ${scenario}`, () => {
     const root = createRoot();
@@ -19191,6 +19256,8 @@ for (const [relative, allowed] of [
   ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
   ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
+  ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
+  ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
 ])
   test(`private Liquid Card import stays source-bound: ${relative}`, () => {
     const root = createRoot();
@@ -19209,6 +19276,13 @@ for (const [relative, allowed] of [
     assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
     fs.writeFileSync(target, bytes + '\n// unreviewed bytes\n');
     assert.ok(collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    fs.writeFileSync(target, bytes + "\nimport '@proto.ui/adapter-react';\n");
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/adapter-react\` in \`${relative}\``
+      ),
+      'renewing a source binding does not admit an adjacent Adapter import'
+    );
     const foreign = relative.replace('.ts', '-foreign.ts');
     fs.writeFileSync(path.join(root, foreign), bytes);
     fs.writeFileSync(
@@ -19221,6 +19295,47 @@ for (const [relative, allowed] of [
         .includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
     );
   });
+
+test('merged material helper edges retain exact importers and reject neighboring modules', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const material = 'packages/adapters/base/src/material/';
+  for (const [name, imports] of [
+    ['program.ts', ['./program-inputs', './prefilter']],
+    ['program-pool.ts', ['./source-refresh-task']],
+  ]) {
+    const relative = material + name;
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const importer = path.join(root, 'apps/www/src/components/MaterialImportProbe.ts');
+    fs.mkdirSync(path.dirname(importer), { recursive: true });
+    const source = imports.map((specifier) => `import '${specifier}';`).join('\n');
+    fs.writeFileSync(target, source);
+    fs.writeFileSync(
+      importer,
+      `import '${path.relative(path.dirname(importer), target).replaceAll('\\', '/')}';`
+    );
+    for (const specifier of [...imports, './unreviewed-sibling'])
+      fs.writeFileSync(path.join(root, material, specifier + '.ts'), 'export {};');
+    const raw = (file, specifier) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const exact = validationMessage(root);
+    for (const specifier of imports) assert.ok(!exact.includes(raw(relative, specifier)), exact);
+
+    fs.writeFileSync(target, source + "\nimport './unreviewed-sibling';\n");
+    assert.ok(validationMessage(root).includes(raw(relative, './unreviewed-sibling')));
+
+    const foreign = relative.replace('.ts', '-foreign.ts');
+    fs.writeFileSync(path.join(root, foreign), source);
+    fs.writeFileSync(
+      importer,
+      `import '${path.relative(path.dirname(importer), path.join(root, foreign)).replaceAll('\\', '/')}';`
+    );
+    const rejected = validationMessage(root);
+    for (const specifier of imports)
+      assert.ok(rejected.includes(raw(foreign, specifier)), rejected);
+    fs.rmSync(path.join(root, foreign));
+  }
+});
 
 test('Calendar caption import and controller binding require reviewed source', () => {
   const root = createRoot();

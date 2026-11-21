@@ -2,6 +2,10 @@
 
 Status: non-normative operational inventory. Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Observed 2026-10-06T16:35:12Z; Proto UI main baseline `25c3d0731e39003d87f541afc5e1a294a9d95568`; source inventory main `25c3d0731e39003d87f541afc5e1a294a9d95568`. This replaces #377 as the active matrix entry without closing existing implementation or consumer trackers. Generated from [the structured matrix](prototype-coverage-matrix.json) by `node scripts/coverage-matrices/prototype-coverage.mjs --write`.
 
+Release boundary: [the 0.3 plan](../governance/release-0.3-plan.md) commits Base, Shadcn, Brutalist and Lucide scope; Bootstrap 2.3.2 and Liquid Glass remain WIP / Experimental for 0.4. The four-family tracking matrix retains its [recorded 0.4 deferral](https://github.com/Proto-UI/Proto-UI/issues/870#issuecomment-6684477558). Original mixed criteria and evidence debts remain separately accountable; deferral, source presence and this documentation update do not complete them or close #870.
+
+The main comparison counts and migration states below are the pinned historical observations at their recorded dates. A separately bound candidate inventory follows; it does not relabel historical source hashes, checks, approvals or unfinished work.
+
 ## Independent project and counting boundary
 
 Proto UI is independent. Comparison projects and design/specification references are evidence, not project authority, automatic dependencies or mandatory roadmap obligations. Existing reference-source identifiers and licenses are preserved.
@@ -23,18 +27,201 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate local tree bf17187e1f95044b8aaf598447289d8ed352716f; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit fc17170c7a647cd4248efd51db3c3678b9b34e0a; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
-| Library | Main families / identities | Candidate families / identities |
-| --- | --- | --- |
-| base | 22 / 55 | 49 / 88 |
-| shadcn | 17 / 48 | 51 / 83 |
-| brutalist | 19 / 51 | 52 / 78 |
-| bootstrap-2-3-2 | 2 / 2 | 44 / 48 |
-| liquid-glass | 2 / 2 | 39 / 41 |
-| lucide | 1 / 1 | 1 / 1 |
+| Library | Historical main families / identities | Candidate families / identities | Release scope |
+| --- | --- | --- | --- |
+| base | 22 / 55 | 55 / 114 | 0.3 committed scope; acceptance separate |
+| shadcn | 17 / 48 | 57 / 126 | 0.3 committed scope; acceptance separate |
+| brutalist | 19 / 51 | 58 / 116 | 0.3 committed scope; acceptance separate |
+| bootstrap-2-3-2 | 2 / 2 | 54 / 116 | WIP / Experimental; 0.4 |
+| liquid-glass | 2 / 2 | 54 / 112 | WIP / Experimental; 0.4 |
+| lucide | 1 / 1 | 1 / 1 | 0.3 committed scope; acceptance separate |
 
-Candidate atomic GPUI obligations: 352; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
+Candidate atomic GPUI obligations: 456; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
+
+Candidate source definitions include regular .proto.ts files and concrete TypeScript entries resolved from catalog citations. A cataloged composition contributes only its actual P identity; its exported helpers do not invent unadmitted atomic parts. All concrete paths and hashes remain in the JSON.
+
+### Candidate four-family source cells
+
+| Base family / P identities | Shadcn | Brutalist | Bootstrap 2.3.2 (WIP / 0.4) | Liquid Glass (WIP / 0.4) |
+| --- | --- | --- | --- | --- |
+| accordion / 5 | implemented-draft / 5 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities |
+| alert-dialog / 1 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 2 P identities | implemented-draft / 1 P identities |
+| async-region / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| autocomplete / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| button / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| calendar / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| carousel / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| checkbox / 2 | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities |
+| checkbox-group / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| collapsible / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
+| combobox / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| command / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| context-menu / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| data-table / 2 | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities |
+| date-picker / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| dialog / 7 | implemented-draft / 10 P identities | implemented-draft / 10 P identities | implemented-draft / 10 P identities | implemented-draft / 7 P identities |
+| drawer / 5 | implemented-draft / 4 P identities | implemented-draft / 1 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
+| dropdown / 8 | implemented-draft / 8 P identities | implemented-draft / 8 P identities | implemented-draft / 8 P identities | implemented-draft / 8 P identities |
+| field / 6 | implemented-draft / 6 P identities | implemented-draft / 6 P identities | implemented-draft / 6 P identities | implemented-draft / 6 P identities |
+| fieldset / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
+| form / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| hover-card / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
+| image / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| input / 1 | implemented-draft / 2 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| input-otp / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| label / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| live-region / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| menu-primitives / 0 | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities |
+| menubar / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| message-scroller / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| meter / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| navigation-menu / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| number-field / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| popover / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| progress / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| radio-group / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
+| resizable / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| scroll-area / 4 | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
+| select / 7 | implemented-draft / 8 P identities | implemented-draft / 5 P identities | implemented-draft / 7 P identities | implemented-draft / 7 P identities |
+| separator / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| slider / 4 | implemented-draft / 4 P identities | implemented-draft / 1 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
+| surface / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| switch / 2 | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities |
+| table / 5 | implemented-draft / 5 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities |
+| tabs / 5 | implemented-draft / 5 P identities | implemented-draft / 4 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities |
+| text / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| textarea / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| toast / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| toggle / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| toggle-group / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| toolbar / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| tooltip / 4 | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
+| transition / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| tree / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| virtual-list / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+
+### Separate Shadcn style obligations
+
+Membership source: [retained manifest](../fixtures/shadcn-style-source/manifest.json), shadcn-ui/ui `3d98900e9b73c45f035f8109e9d41ba6a51685e7`. The eight modern styles and New York are distinct columns. Listed projection identities establish family inheritance only; every style mapping, unsupported boundary, runtime, consumer, visual and native result remains unassessed here. Neither a shared style selector nor one successful component/profile proves another cell.
+
+| Base P identity | Shadcn family inheritance only | vega | nova | maia | lyra | mira | luma | sera | rhea | new-york-v4 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| P-BASE-ACCORDION | P-SHADCN-ACCORDION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-ACCORDION-CONTENT | P-SHADCN-ACCORDION-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-ACCORDION-HEADING | P-SHADCN-ACCORDION-HEADING | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-ACCORDION-ITEM | P-SHADCN-ACCORDION-ITEM | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-ACCORDION-TRIGGER | P-SHADCN-ACCORDION-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-ALERT-DIALOG | P-SHADCN-ALERT-DIALOG | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-ASYNC-REGION | P-SHADCN-ASYNC-REGION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-AUTOCOMPLETE | P-SHADCN-AUTOCOMPLETE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-BUTTON | P-SHADCN-BUTTON | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-CALENDAR | P-SHADCN-CALENDAR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-CAROUSEL | P-SHADCN-CAROUSEL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-CHECKBOX | P-SHADCN-CHECKBOX | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-CHECKBOX-INDICATOR | P-SHADCN-CHECKBOX-INDICATOR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-CHECKBOX-GROUP | P-SHADCN-CHECKBOX-GROUP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-COLLAPSIBLE | P-SHADCN-COLLAPSIBLE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-COLLAPSIBLE-CONTENT | P-SHADCN-COLLAPSIBLE-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-COLLAPSIBLE-TRIGGER | P-SHADCN-COLLAPSIBLE-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-COMBOBOX | P-SHADCN-COMBOBOX | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-COMMAND | P-SHADCN-COMMAND | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-CONTEXT-MENU | P-SHADCN-CONTEXT-MENU | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DATA-TABLE | P-SHADCN-DATA-TABLE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DATA-TABLE-HEADER-ROW | P-SHADCN-DATA-TABLE-HEADER-ROW | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DATE-PICKER | P-SHADCN-DATE-PICKER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG | P-SHADCN-DIALOG | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG-CLOSE | P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG-CONTENT | P-SHADCN-DIALOG-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG-DESCRIPTION | P-SHADCN-DIALOG-DESCRIPTION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG-MASK | P-SHADCN-DIALOG-MASK | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG-TITLE | P-SHADCN-DIALOG-TITLE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DIALOG-TRIGGER | P-SHADCN-DIALOG-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DRAWER | P-SHADCN-DRAWER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DRAWER-ACCEPTED-SIDE | required missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing |
+| P-BASE-DRAWER-FOOTER | P-SHADCN-DRAWER-FOOTER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DRAWER-HEADER | P-SHADCN-DRAWER-HEADER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DRAWER-SCROLL | required missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing |
+| P-BASE-DROPDOWN-MENU | P-SHADCN-DROPDOWN-MENU | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-CONTENT | P-SHADCN-DROPDOWN-MENU-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-GROUP | P-SHADCN-DROPDOWN-MENU-GROUP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-ITEM | P-SHADCN-DROPDOWN-MENU-ITEM | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-LABEL | P-SHADCN-DROPDOWN-MENU-LABEL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-SEPARATOR | P-SHADCN-DROPDOWN-MENU-SEPARATOR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-SHORTCUT | P-SHADCN-DROPDOWN-MENU-SHORTCUT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD | P-SHADCN-FIELD | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD-CONTROL | P-SHADCN-FIELD-CONTROL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD-DESCRIPTION | P-SHADCN-FIELD-DESCRIPTION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD-ERROR | P-SHADCN-FIELD-ERROR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD-LABEL | P-SHADCN-FIELD-LABEL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD-VALIDITY | P-SHADCN-FIELD-VALIDITY | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELDSET | P-SHADCN-FIELDSET | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELDSET-DESCRIPTION | P-SHADCN-FIELDSET-DESCRIPTION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELDSET-LEGEND | P-SHADCN-FIELDSET-LEGEND | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FORM | P-SHADCN-FORM | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-HOVER-CARD | P-SHADCN-HOVER-CARD | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-HOVER-CARD-CONTENT | P-SHADCN-HOVER-CARD-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-HOVER-CARD-TRIGGER | P-SHADCN-HOVER-CARD-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-IMAGE | P-SHADCN-IMAGE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-INPUT | P-SHADCN-INPUT, P-SHADCN-INPUT-SHELL-CONTROL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-INPUT-OTP | P-SHADCN-INPUT-OTP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-LABEL | P-SHADCN-LABEL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-LIVE-REGION | P-SHADCN-LIVE-REGION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-MENUBAR | P-SHADCN-MENUBAR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-MESSAGE-SCROLLER | P-SHADCN-MESSAGE-SCROLLER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-METER | P-SHADCN-METER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-NAVIGATION-MENU | P-SHADCN-NAVIGATION-MENU | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-NUMBER-FIELD | P-SHADCN-NUMBER-FIELD | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-POPOVER | P-SHADCN-POPOVER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-PROGRESS | P-SHADCN-PROGRESS | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-RADIO-GROUP | P-SHADCN-RADIO-GROUP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-RADIO-GROUP-INDICATOR | P-SHADCN-RADIO-GROUP-INDICATOR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-RADIO-GROUP-ITEM | P-SHADCN-RADIO-GROUP-ITEM | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-RESIZABLE | P-SHADCN-RESIZABLE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SCROLL-AREA | P-SHADCN-SCROLL-AREA | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SCROLL-AREA-SCROLLBAR | P-SHADCN-SCROLL-AREA-SCROLLBAR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SCROLL-AREA-THUMB | P-SHADCN-SCROLL-AREA-THUMB | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SCROLL-AREA-VIEWPORT | P-SHADCN-SCROLL-AREA-VIEWPORT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT | P-SHADCN-SELECT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT-ALIGNMENT-PARTS | P-SHADCN-SELECT-ALIGNMENT-PARTS | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT-ITEM | P-SHADCN-SELECT-ITEM | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT-STRUCTURAL-PARTS | P-SHADCN-SELECT-STRUCTURAL-PARTS | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SLIDER | P-SHADCN-SLIDER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SLIDER-FIELD-THUMB | P-SHADCN-SLIDER-FIELD-THUMB | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SLIDER-THUMB | P-SHADCN-SLIDER-THUMB | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SLIDER-VALUES | P-SHADCN-SLIDER-VALUES | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SURFACE | P-SHADCN-SURFACE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SWITCH | P-SHADCN-SWITCH | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SWITCH-THUMB | P-SHADCN-SWITCH-THUMB | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABLE | P-SHADCN-TABLE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABLE-CAPTION | P-SHADCN-TABLE-CAPTION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABLE-CELL | P-SHADCN-TABLE-CELL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABLE-HEADER-CELL | P-SHADCN-TABLE-HEADER-CELL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABLE-ROW | P-SHADCN-TABLE-ROW | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABS | P-SHADCN-TABS | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABS-CONTENT | P-SHADCN-TABS-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABS-INDICATOR | P-SHADCN-TABS-INDICATOR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABS-LIST | P-SHADCN-TABS-LIST | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TEXT | P-SHADCN-TEXT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TEXTAREA | P-SHADCN-TEXTAREA | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOAST | P-SHADCN-TOAST | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOGGLE | P-SHADCN-TOGGLE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOGGLE-GROUP | P-SHADCN-TOGGLE-GROUP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOOLBAR | P-SHADCN-TOOLBAR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOOLTIP-CONTENT | P-SHADCN-TOOLTIP-CONTENT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOOLTIP-GROUP | P-SHADCN-TOOLTIP-GROUP | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TOOLTIP-TRIGGER | P-SHADCN-TOOLTIP-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TRANSITION | P-SHADCN-TRANSITION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-TREE | P-SHADCN-TREE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-VIRTUAL-LIST | P-SHADCN-VIRTUAL-LIST | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 
 ## Reference sets and difference accounting
 
@@ -198,8 +385,8 @@ These matrices count user-facing jobs, not prototype families. Their exact row I
 
 | Program | Rows | Recorded states | Dedicated ledger |
 | --- | --- | --- | --- |
-| website | 78 | native/static: 14; research: 7; blocked: 40; infrastructure-exempt: 17 | [Website](../website/self-hosting-coverage-matrix.md) |
-| harness | 63 | ready: 22; native/static: 2; research: 13; blocked: 11; app-local-proto: 7; infrastructure-exempt: 8 | [Harness](../agent-harness/dogfood-coverage-matrix.md) |
+| website | 78 | blocked: 40; infrastructure-exempt: 17; native/static: 14; research: 7 | [Website](../website/self-hosting-coverage-matrix.md) |
+| harness | 63 | app-local-proto: 7; blocked: 11; infrastructure-exempt: 8; native/static: 2; ready: 22; research: 13 | [Harness](../agent-harness/dogfood-coverage-matrix.md) |
 
 - Tree (#523)
 - Windowed Collection/Virtual Viewport (#521)
@@ -216,11 +403,11 @@ These matrices count user-facing jobs, not prototype families. Their exact row I
 
 The App keeps domain truth, backend transport, file storage, credentials, navigation and execution decisions. UI primitives expose semantic requests; rendering/remounts must not send, delete, approve or retry. HIG comparison remains #864/#869: its 158 article rows are not 158 missing components.
 
-## Fresh migration ledger
+## Pinned historical migration ledger
 
-**101 Issue/PR references re-read** (93 carried references plus 8 directly relevant current dependencies). The old #377 body is preserved in [this dated snapshot](snapshots/2026-10-06-issue-377-before-migration.md). Closed/merged is a GitHub state, not proof of current runtime, lifecycle admission or consumer acceptance. Historical unchecked criteria are preserved in JSON but require reconciliation; they are not blindly re-opened.
+**101 retained Issue/PR references** (93 carried references plus 8 dependencies at the original observation). Each JSON row retains its own observedAt, state and inherited criteria. These are dated observations, not freshly queried GitHub state. The old #377 body is preserved in [this dated snapshot](snapshots/2026-10-06-issue-377-before-migration.md). Closed/merged is a GitHub state, not proof of current runtime, lifecycle admission or consumer acceptance. Historical unchecked criteria remain accountable.
 
-| Issue / PR | Fresh observed state | Carried result, debt and routing |
+| Issue / PR | State at recorded observation | Carried result, debt and routing |
 | --- | --- | --- |
 | [#341](https://github.com/Proto-UI/Proto-UI/issues/341) feat(brutalist): add ChatUI Message and Code Block | closed unmerged; head e9fa2fe41fab4eeb1561022c52367235791ad0c0 | Closed unmerged former proposal; current private composition slices are distinct, not copied as accepted Base. |
 | [#349](https://github.com/Proto-UI/Proto-UI/issues/349) [proposal] Define the Base Radio and Radio Group semantic slice | closed | Preserve historical result and source link. Closed/merged is not fresh runtime, stable-lifecycle or end-to-end consumer acceptance. |

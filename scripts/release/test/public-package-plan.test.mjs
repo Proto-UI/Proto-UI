@@ -169,7 +169,9 @@ test('budget implementation, phase ledger and policy tests select every public p
   for (const path of [
     'scripts/analysis/package-budgets.mjs',
     'scripts/analysis/package-budget-policy.mjs',
+    'scripts/analysis/package-budget-evidence.mjs',
     'scripts/analysis/test/package-budget-policy.test.mjs',
+    'scripts/analysis/test/package-budget-evidence.test.mjs',
     'internal/coverage-matrices/prototype-coverage-matrix.json',
   ]) {
     assert.deepEqual(

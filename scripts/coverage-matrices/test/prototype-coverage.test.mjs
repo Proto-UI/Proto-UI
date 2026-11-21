@@ -12,6 +12,7 @@ import {
   render,
   renderPlan,
   inheritedPrototypeIds,
+  consumerLedgerRows,
   refreshCandidateSource,
   refreshSourceInventory,
   captureGitObjectProof,
@@ -669,6 +670,58 @@ function sameSourceCandidate() {
   d.candidateSource = refreshCandidateSource(d, root, { tree });
   return d;
 }
+test('a Base subject directory owns shared implementation citations only once', () => {
+  const inventory = sameSourceCandidate().candidateSource.prototypeInventory.base;
+  const owners = Object.entries(inventory)
+    .filter(([, family]) => family.entityIds.includes('P-BASE-MENUBAR'))
+    .map(([family]) => family);
+  assert.deepEqual(owners, ['menubar']);
+  assert(
+    inventory['menu-primitives'].sourceFiles.includes(
+      'packages/prototypes/base/src/menu-primitives/family.ts'
+    )
+  );
+});
+test('a cross-directory inherited Input entry is mapped without admitting its passive shell', () => {
+  const data = sameSourceCandidate();
+  const cell = data.candidateSource.projectionRows.find((row) => row.base.family === 'input')
+    .families.shadcn;
+  assert(cell.entityIds.includes('P-SHADCN-INPUT-SHELL-CONTROL'));
+  assert(cell.sourceFiles.includes('packages/prototypes/shadcn/src/input-shell/control.proto.ts'));
+  assert(!cell.entityIds.includes('P-SHADCN-INPUT-SHELL'));
+  assert(!cell.sourceFiles.includes('packages/prototypes/shadcn/src/input-shell/root.proto.ts'));
+  assert.deepEqual(validate(data), []);
+
+  cell.entityIds = cell.entityIds.filter((id) => id !== 'P-SHADCN-INPUT-SHELL-CONTROL');
+  assert(validate(data).some((issue) => issue.includes('Projection cell atomic mapping mismatch')));
+  cell.entityIds.push('P-SHADCN-INPUT-SHELL-CONTROL', 'P-SHADCN-INPUT-SHELL');
+  assert(validate(data).some((issue) => issue.includes('Projection cell inventory mismatch')));
+});
+for (const scenario of ['file-only', 'two-directories']) {
+  test(`ambiguous Base source citations fail closed: ${scenario}`, (t) => {
+    mockRead(t, {
+      'spec/prototypes/P-BASE-MENUBAR.yaml': (text) => {
+        if (typeof text !== 'string') return text;
+        const entity = parseYaml(text);
+        entity.sources =
+          scenario === 'file-only'
+            ? [
+                { path: 'packages/prototypes/base/src/menubar/index.ts' },
+                { path: 'packages/prototypes/base/src/menu-primitives/family.ts' },
+              ]
+            : [
+                { path: 'packages/prototypes/base/src/menubar/' },
+                { path: 'packages/prototypes/base/src/menu-primitives/' },
+              ];
+        return stringifyYaml(entity);
+      },
+    });
+    assert.throws(
+      sameSourceCandidate,
+      /P-BASE-MENUBAR cites multiple base families.*without one inherited Base family/
+    );
+  });
+}
 test('supporting declarations cannot give a projection a second family owner', (t) => {
   mockRead(t, {
     'spec/prototypes/P-SHADCN-BUTTON.yaml': (text) => {
@@ -1163,11 +1216,15 @@ test('cataloged compositions retain real entries without inventing P identities'
     for (const library of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
       const projection = d.candidateSource.prototypeInventory[library][family];
       assert(projection.sourceFiles.length > 0);
-      assert.deepEqual(projection.entityIds, [`P-${library.toUpperCase()}-${family.toUpperCase()}`]);
+      assert.deepEqual(projection.entityIds, [
+        `P-${library.toUpperCase()}-${family.toUpperCase()}`,
+      ]);
       assert.equal(projection.lifecycle, 'draft');
       assert.equal(projection.freshRuntimeResult, 'not-run');
     }
-    const mapping = d.candidateSource.atomicProjectionMapping.find((row) => row.baseIdentity === baseId);
+    const mapping = d.candidateSource.atomicProjectionMapping.find(
+      (row) => row.baseIdentity === baseId
+    );
     assert.deepEqual(mapping.projectionCells.shadcn.mappedCurrentIdentities, [
       `P-SHADCN-${family.toUpperCase()}`,
     ]);
@@ -1182,7 +1239,15 @@ test('Shadcn style cells cover every candidate Base identity and preserve separa
   const d = sameSourceCandidate();
   const coverage = d.candidateSource.shadcnStyleCoverage;
   assert.deepEqual(coverage.styles, [
-    'vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea', 'new-york-v4',
+    'vega',
+    'nova',
+    'maia',
+    'lyra',
+    'mira',
+    'luma',
+    'sera',
+    'rhea',
+    'new-york-v4',
   ]);
   assert.deepEqual(
     coverage.rows.map((row) => row.baseIdentity),
@@ -1200,19 +1265,33 @@ test('Shadcn style cells cover every candidate Base identity and preserve separa
       assert.deepEqual(cell.evidence, []);
     }
   }
-  assert(d.candidateSource.sourceBindings.some((binding) => binding.path === coverage.reference.path));
+  assert(
+    d.candidateSource.sourceBindings.some((binding) => binding.path === coverage.reference.path)
+  );
   assert.deepEqual(validate(d), []);
 });
 
 test('Shadcn style source, missing cells and fabricated acceptance fail closed', () => {
   const current = sameSourceCandidate();
   for (const mutate of [
-    (coverage) => { delete coverage.rows[0].styleCells.vega; },
-    (coverage) => { delete coverage.rows[0].styleCells['new-york-v4']; },
-    (coverage) => { coverage.reference.revision = '1'.repeat(40); },
-    (coverage) => { coverage.rows[0].projectionIdentities = ['P-SHADCN-BUTTON']; },
-    (coverage) => { coverage.rows[0].styleCells.vega.acceptance = 'passed'; },
-    (coverage) => { coverage.rows[0].styleCells.vega.status = 'not-applicable'; },
+    (coverage) => {
+      delete coverage.rows[0].styleCells.vega;
+    },
+    (coverage) => {
+      delete coverage.rows[0].styleCells['new-york-v4'];
+    },
+    (coverage) => {
+      coverage.reference.revision = '1'.repeat(40);
+    },
+    (coverage) => {
+      coverage.rows[0].projectionIdentities = ['P-SHADCN-BUTTON'];
+    },
+    (coverage) => {
+      coverage.rows[0].styleCells.vega.acceptance = 'passed';
+    },
+    (coverage) => {
+      coverage.rows[0].styleCells.vega.status = 'not-applicable';
+    },
   ]) {
     const d = structuredClone(current);
     mutate(d.candidateSource.shadcnStyleCoverage);
@@ -1228,15 +1307,24 @@ test('source inventory refresh derives consumer fields while preserving original
   const preimage = structuredClone(data);
   const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim();
   const refreshed = refreshSourceInventory(data, root, { revision });
-  const canonical = consumerLedgerRows(fs.readFileSync(path.join(root, consumer.source), 'utf8'))
-    .rows.get(consumer.ID);
+  const canonical = consumerLedgerRows(
+    fs.readFileSync(path.join(root, consumer.source), 'utf8')
+  ).rows.get(consumer.ID);
   for (const [field, value] of Object.entries(canonical))
     assert.equal(refreshed.consumerRows[0][field], value);
   assert.deepEqual(data, preimage);
   for (const field of [
-    'protoMain', 'observedAt', 'mainSourceEvidence', 'comparisonRows', 'migrationLedger',
-    'deliveryPlan', 'atomicProjectionMapping', 'gpuiCoverageRows', 'referenceSnapshots',
-  ]) assert.deepEqual(refreshed[field], preimage[field], field);
+    'protoMain',
+    'observedAt',
+    'mainSourceEvidence',
+    'comparisonRows',
+    'migrationLedger',
+    'deliveryPlan',
+    'atomicProjectionMapping',
+    'gpuiCoverageRows',
+    'referenceSnapshots',
+  ])
+    assert.deepEqual(refreshed[field], preimage[field], field);
   for (const program of ['website', 'harness']) {
     const rows = refreshed.consumerRows.filter((row) => row.program === program);
     const actual = {};

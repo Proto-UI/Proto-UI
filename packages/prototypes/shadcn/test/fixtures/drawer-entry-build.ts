@@ -4,43 +4,48 @@ import { build } from 'esbuild';
 import path from 'node:path';
 /** Alias applies only to the diagnostic bundle; production sources remain byte unchanged. */
 export async function buildPublicDrawerEntryProbe() {
-  return (
-    await build({
-      stdin: {
-        contents:
-          "import demo from './apps/www/src/content/docs/demo-shadcn-drawer.demo'; import {createPublicDrawerEntryFixture as create} from './packages/prototypes/shadcn/test/fixtures/drawer-www-entry'; export const createPublicDrawerEntryFixture = fixed => create(fixed, demo); export const createMissingScopeFixture = () => create(false, demo, false);",
-        resolveDir: process.cwd(),
-        loader: 'ts',
-      },
-      bundle: true,
-      write: false,
-      format: 'iife',
-      globalName: 'PublicDrawerEntry',
-      platform: 'browser',
-      tsconfig: 'tsconfig.json',
-      plugins: [
-        {
-          name: 'drawer-entry-observation-only',
-          setup(builder) {
-            builder.onResolve({ filter: /^@proto\.ui\/module-feedback$/ }, () => ({
-              path: path.resolve(
-                'packages/prototypes/shadcn/test/fixtures/drawer-entry-projector-probe.ts'
-              ),
-            }));
-            builder.onResolve({ filter: /^virtual:proto-ui\/runtime-retry-urls$/ }, () => ({
-              path: 'retry-urls',
-              namespace: 'drawer-entry',
-            }));
-            // WC does not use framework retry URLs. Fail rather than acquiring another runtime.
-            builder.onLoad({ filter: /.*/, namespace: 'drawer-entry' }, () => ({
-              contents: 'export default {};',
-              loader: 'js',
-            }));
-          },
+  const result = await build({
+    stdin: {
+      contents:
+        "import demo from './apps/www/src/content/docs/demo-shadcn-drawer.demo'; import {createPublicDrawerEntryFixture as create} from './packages/prototypes/shadcn/test/fixtures/drawer-www-entry'; export const createPublicDrawerEntryFixture = fixed => create(fixed, demo); export const createMissingScopeFixture = () => create(false, demo, false);",
+      resolveDir: process.cwd(),
+      loader: 'ts',
+    },
+    bundle: true,
+    write: false,
+    // The real preview renderer imports its scene stylesheet. Keep that
+    // dependency in the fixture instead of dropping it with an empty loader.
+    outfile: 'drawer-public-entry.js',
+    format: 'iife',
+    globalName: 'PublicDrawerEntry',
+    platform: 'browser',
+    tsconfig: 'tsconfig.json',
+    plugins: [
+      {
+        name: 'drawer-entry-observation-only',
+        setup(builder) {
+          builder.onResolve({ filter: /^@proto\.ui\/module-feedback$/ }, () => ({
+            path: path.resolve(
+              'packages/prototypes/shadcn/test/fixtures/drawer-entry-projector-probe.ts'
+            ),
+          }));
+          builder.onResolve({ filter: /^virtual:proto-ui\/runtime-retry-urls$/ }, () => ({
+            path: 'retry-urls',
+            namespace: 'drawer-entry',
+          }));
+          // WC does not use framework retry URLs. Fail rather than acquiring another runtime.
+          builder.onLoad({ filter: /.*/, namespace: 'drawer-entry' }, () => ({
+            contents: 'export default {};',
+            loader: 'js',
+          }));
         },
-      ],
-    })
-  ).outputFiles[0].text;
+      },
+    ],
+  });
+  const script = result.outputFiles.find((file) => file.path.endsWith('.js'));
+  const css = result.outputFiles.find((file) => file.path.endsWith('.css'));
+  if (!script || !css) throw new Error('Public Drawer fixture requires its JS and CSS outputs');
+  return { script: script.text, css: css.text };
 }
 
 /** Compile the real www Tailwind entry for actual box classes, including its reset. */

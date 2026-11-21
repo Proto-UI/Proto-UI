@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-21T16:58:24.830779+00:00",
+  "kind": "read-only merge integration comparison",
+  "preIntegrationSource": "8c2b9b39c14fa478d46e7480a7e2054b30b28187",
+  "upstreamSource": "d31b159811348138e321b865193d3d2c73c00263",
+  "mergedSource": "0cf1cb9039fb57c85747025432c76c6836197f47",
+  "observedHead": "0cf1cb9039fb57c85747025432c76c6836197f47",
+  "originalTriageRecord": {
+    "path": "internal/records/2026-11-22-regression-browser-triage.json",
+    "sha256": "fc4f2b39102f0301acff19492f5f2366332737b9fc0c810a0cba5b8b39673355",
+    "unchangedFromPreIntegrationCommit": true,
+    "historical61PassAnd197UnrunReceiptsPreserved": true
+  },
+  "reviewedOriginalSources": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+      "recordedSHA256": "e46580435c73d887d996dc3e39b4c2fda9c3ba80f5fb302048d3bea9a19f8c5c",
+      "mergedSHA256": "e46580435c73d887d996dc3e39b4c2fda9c3ba80f5fb302048d3bea9a19f8c5c",
+      "workingTreeSHA256": "e46580435c73d887d996dc3e39b4c2fda9c3ba80f5fb302048d3bea9a19f8c5c",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts",
+      "recordedSHA256": "7bf80d6ea55439e51b7a6b7b3362c6d823dd29e1425dcd3e40a31d84fdcbc5de",
+      "mergedSHA256": "7bf80d6ea55439e51b7a6b7b3362c6d823dd29e1425dcd3e40a31d84fdcbc5de",
+      "workingTreeSHA256": "7bf80d6ea55439e51b7a6b7b3362c6d823dd29e1425dcd3e40a31d84fdcbc5de",
+      "unchanged": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+      "recordedSHA256": "ad59800ee7b40816dc7f261b83ce97d620e5cdad095ad90f66de9538839caacf",
+      "mergedSHA256": "ad59800ee7b40816dc7f261b83ce97d620e5cdad095ad90f66de9538839caacf",
+      "workingTreeSHA256": "ad59800ee7b40816dc7f261b83ce97d620e5cdad095ad90f66de9538839caacf",
+      "unchanged": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "recordedSHA256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+      "mergedSHA256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+      "workingTreeSHA256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+      "unchanged": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+      "recordedSHA256": "6d2e6dab2d844541e71baed7a8966d18aecdf2f4fcdd2e223b74b06ea84cea01",
+      "mergedSHA256": "6d2e6dab2d844541e71baed7a8966d18aecdf2f4fcdd2e223b74b06ea84cea01",
+      "workingTreeSHA256": "6d2e6dab2d844541e71baed7a8966d18aecdf2f4fcdd2e223b74b06ea84cea01",
+      "unchanged": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-presence.ts",
+      "recordedSHA256": "49a1a1479d71b26f3b17fdf1499c779e8c12879e0dc8438cc8da0aea14c268e3",
+      "mergedSHA256": "49a1a1479d71b26f3b17fdf1499c779e8c12879e0dc8438cc8da0aea14c268e3",
+      "workingTreeSHA256": "49a1a1479d71b26f3b17fdf1499c779e8c12879e0dc8438cc8da0aea14c268e3",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-showcase.ts",
+      "recordedSHA256": "0d0f1c6cf9aa355866e9c85d4870014069ba3943b723cbf3d17c62667b2038fa",
+      "mergedSHA256": "0d0f1c6cf9aa355866e9c85d4870014069ba3943b723cbf3d17c62667b2038fa",
+      "workingTreeSHA256": "0d0f1c6cf9aa355866e9c85d4870014069ba3943b723cbf3d17c62667b2038fa",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+      "recordedSHA256": "6079b4367f861d6c99f2b06455e268be4aff0960619ac9fef9e91ecbc78b3862",
+      "mergedSHA256": "6079b4367f861d6c99f2b06455e268be4aff0960619ac9fef9e91ecbc78b3862",
+      "workingTreeSHA256": "6079b4367f861d6c99f2b06455e268be4aff0960619ac9fef9e91ecbc78b3862",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/components/override/Search.astro",
+      "recordedSHA256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0",
+      "mergedSHA256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0",
+      "workingTreeSHA256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/components/site-search-data.ts",
+      "recordedSHA256": "bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb",
+      "mergedSHA256": "bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb",
+      "workingTreeSHA256": "bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/components/site-pagefind-resource.ts",
+      "recordedSHA256": "1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a",
+      "mergedSHA256": "1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a",
+      "workingTreeSHA256": "1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.css",
+      "recordedSHA256": "95e09b50f20d6e8b64334448369dccb288a8b2ec7fcdf7dd4fc51a1438c432d3",
+      "mergedSHA256": "95e09b50f20d6e8b64334448369dccb288a8b2ec7fcdf7dd4fc51a1438c432d3",
+      "workingTreeSHA256": "95e09b50f20d6e8b64334448369dccb288a8b2ec7fcdf7dd4fc51a1438c432d3",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+      "recordedSHA256": "a81616ab292b272c87ca1fa614f4cfa857446bc8a15bff30cb91acd6470476dd",
+      "mergedSHA256": "a81616ab292b272c87ca1fa614f4cfa857446bc8a15bff30cb91acd6470476dd",
+      "workingTreeSHA256": "a81616ab292b272c87ca1fa614f4cfa857446bc8a15bff30cb91acd6470476dd",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "recordedSHA256": "f3218ed22385f622e10b73067064a744f2900b70334d6879e330d776020a0229",
+      "mergedSHA256": "f3218ed22385f622e10b73067064a744f2900b70334d6879e330d776020a0229",
+      "workingTreeSHA256": "f3218ed22385f622e10b73067064a744f2900b70334d6879e330d776020a0229",
+      "unchanged": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "recordedSHA256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "mergedSHA256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "workingTreeSHA256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "unchanged": true
+    },
+    {
+      "path": "packages/prototypes/base/src/drawer/extent-model.ts",
+      "recordedSHA256": "283265aac5fd560d1f5d0db751b20182e5998ff23a65a8ade9a9ff9f49a743b6",
+      "mergedSHA256": "283265aac5fd560d1f5d0db751b20182e5998ff23a65a8ade9a9ff9f49a743b6",
+      "workingTreeSHA256": "283265aac5fd560d1f5d0db751b20182e5998ff23a65a8ade9a9ff9f49a743b6",
+      "unchanged": true
+    },
+    {
+      "path": "spec/contracts/C-DRAWER-EXTENT-MODEL-0001.yaml",
+      "recordedSHA256": "e2ac3b9364a37705df0f5c3be761286cd71d5539a6ed828956e2d9c23b6b43f7",
+      "mergedSHA256": "e2ac3b9364a37705df0f5c3be761286cd71d5539a6ed828956e2d9c23b6b43f7",
+      "workingTreeSHA256": "e2ac3b9364a37705df0f5c3be761286cd71d5539a6ed828956e2d9c23b6b43f7",
+      "unchanged": true
+    },
+    {
+      "path": "spec/contracts/C-DRAWER-AUTO-CONSUMER-0001.yaml",
+      "recordedSHA256": "39e46405dace2f01d78347d5ab134bef172d1ca3b2495aa806d0a7858d558cc8",
+      "mergedSHA256": "39e46405dace2f01d78347d5ab134bef172d1ca3b2495aa806d0a7858d558cc8",
+      "workingTreeSHA256": "39e46405dace2f01d78347d5ab134bef172d1ca3b2495aa806d0a7858d558cc8",
+      "unchanged": true
+    }
+  ],
+  "originalSourceComparison": {
+    "total": 18,
+    "byteIdentical": 18,
+    "changed": 0,
+    "warning": "This list is not a complete transitive dependency closure; unchanged listed files do not establish unchanged runtime behavior."
+  },
+  "browserRelevantUpstreamChanges": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+      "category": "preview-presentation",
+      "explanation": "Public renderer explicitly requests preview presentation instead of relying on diagnostic default.",
+      "beforeSHA256": "4df442ee2d0db4db61fbc2aee0a7fadbb2cbe359b2ab23760eb7cb9772376e54",
+      "mergedSHA256": "47e8678bee11d9ce281419fc9acb16e0e285847ed3277bad2f8294fcba259af5",
+      "upstreamSHA256": "47e8678bee11d9ce281419fc9acb16e0e285847ed3277bad2f8294fcba259af5",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+      "category": "preview-presentation",
+      "explanation": "Separates preview/diagnostic backgrounds; preview is static by default, visible-canvas gradient presentation, opt-in elapsed-time motion, offscreen/document visibility gating, cached renderability, and scope-local appearance observation.",
+      "beforeSHA256": "c60e2c5fe947a1f8f7855b167b42754be51023f32086086463292e478a30f2b1",
+      "mergedSHA256": "0f4ab1ce59f374c1f39f732fc8d3b7418f7bffcb65369f69a3279e55bc43eeed",
+      "upstreamSHA256": "0f4ab1ce59f374c1f39f732fc8d3b7418f7bffcb65369f69a3279e55bc43eeed",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts",
+      "category": "button-layout",
+      "explanation": "Public Button recipe gap changes from gap-3 to gap-6, affecting actual geometry and potential paint overlap.",
+      "beforeSHA256": "9a23bd1970b0355b1adc54a6f0de6011ffbe4784e55d12956c05ae144fdc4f2f",
+      "mergedSHA256": "03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4",
+      "upstreamSHA256": "03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/prefilter.ts",
+      "category": "optical-preparation",
+      "explanation": "Adds optional real WebGL prefilter implementation. It is not imported as the ordinary default optical path.",
+      "beforeSHA256": null,
+      "mergedSHA256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "upstreamSHA256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/program-inputs.ts",
+      "category": "optical-admission",
+      "explanation": "Extracts pure optical-frame validation for use by both the program and source-notification continuation.",
+      "beforeSHA256": null,
+      "mergedSHA256": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+      "upstreamSHA256": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/program-pool.ts",
+      "category": "material-observations",
+      "explanation": "Adds owned source-refresh task counters to material resource inspection.",
+      "beforeSHA256": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+      "mergedSHA256": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854",
+      "upstreamSHA256": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/program.ts",
+      "category": "optical-preparation",
+      "explanation": "Adds bounded prepared-source cache with identity/revision checks, packed CPU prefilter, optional GPU factory, reused readback buffer, lookup-based contrast arithmetic and metrics; clear unbinds current program before deletion. Ordinary default remains CPU prefilter; original per-render input admission and rendered contrast rejection remain.",
+      "beforeSHA256": "844be51a9b40a16f04e53888602bcd5235117b7949359cf20042203e477d156d",
+      "mergedSHA256": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "upstreamSHA256": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/sink.ts",
+      "category": "material-scheduling",
+      "explanation": "Adds fresh-down microtask and cancellable latest-state source tasks. Only already decoded neutral same-lease paint at rest can bridge a task; source admission is synchronous and active input/fallback/retirement cancel queued work.",
+      "beforeSHA256": "e5de14a554483dc0877673b8ea6618a4162e26b58a113a232e8102379a000ae9",
+      "mergedSHA256": "a7fedd80467728e4caf13414141c49deddfb29ecec1f50ec7c2e318a1d585e41",
+      "upstreamSHA256": "a7fedd80467728e4caf13414141c49deddfb29ecec1f50ec7c2e318a1d585e41",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/source-refresh-task.ts",
+      "category": "material-scheduling",
+      "explanation": "Adds one owned latest-state browser task with feature-detected user-visible postTask, abort ownership and zero-delay timer fallback; explicit cancellation/reentrant ownership and document counters.",
+      "beforeSHA256": null,
+      "mergedSHA256": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7",
+      "upstreamSHA256": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/source.ts",
+      "category": "source-snapshot",
+      "explanation": "Avoids redundant canvas dimension reset and extra full pixel copy, retaining independent getImageData snapshot ownership and complete opacity validation.",
+      "beforeSHA256": "7480e587d4f777d7df9a790196840b56a25c006c7ed2fc79b93e272ed588a9e6",
+      "mergedSHA256": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6",
+      "upstreamSHA256": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/finf-shadcn-toggle.browser.test.ts",
+      "category": "upstream-native-test-premise",
+      "explanation": "After scheme flip, immediate border-color/inputColor equality becomes expect.poll for settled transition-colors paint. Equality target remains; this is an upstream test timing premise change, not a fix authored by this regression PR.",
+      "beforeSHA256": "1c637a34394951b500748490d718c8e9fae2ad94dc4cb280a0795d591b1d728c",
+      "mergedSHA256": "aae4e072984e099c62aea7f26af6b6a76bb9a1ba9fc6cee8632731635eca6dc3",
+      "upstreamSHA256": "aae4e072984e099c62aea7f26af6b6a76bb9a1ba9fc6cee8632731635eca6dc3",
+      "exactUpstreamBytes": true,
+      "workingTreeMatchesMergedCommit": true
+    }
+  ],
+  "formattingOnlyComparisons": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.test.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "0c097f7f34e7d990165986d2e38396c7534206d807081d1d6cedb6396bc1e8f2",
+      "syntaxTreeSHA256": "0c097f7f34e7d990165986d2e38396c7534206d807081d1d6cedb6396bc1e8f2"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "2d29376a00ce6bf8f27a511670ea811275e1935004af5be30075522ae921a215",
+      "syntaxTreeSHA256": "2d29376a00ce6bf8f27a511670ea811275e1935004af5be30075522ae921a215"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "be295ca33070395f5531532c8bd0fcf726455ebd51d772f89afda09bc4f31942",
+      "syntaxTreeSHA256": "be295ca33070395f5531532c8bd0fcf726455ebd51d772f89afda09bc4f31942"
+    },
+    {
+      "path": "packages/adapters/react/src/adapt.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "48ccf83bf23e4d27194de081de984f991fbcff4552ae35d00d2b250459b48d8b",
+      "syntaxTreeSHA256": "48ccf83bf23e4d27194de081de984f991fbcff4552ae35d00d2b250459b48d8b"
+    },
+    {
+      "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "ae10d92093934bec3e243d83a6765f0c2ae886eacfce43f9fe962107e6263ca2",
+      "syntaxTreeSHA256": "ae10d92093934bec3e243d83a6765f0c2ae886eacfce43f9fe962107e6263ca2"
+    }
+  ],
+  "syntaxComparison": {
+    "beforeSource": "8c2b9b39c14fa478d46e7480a7e2054b30b28187",
+    "mergedSource": "0cf1cb9039fb57c85747025432c76c6836197f47",
+    "method": "TypeScript syntax kinds, child structure and identifier/literal text; SourceFile raw text, comments, positions and formatting excluded. This is source comparison, not test execution.",
+    "observations": [
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "401d4131e972b77585eed1ca9089a782b3d81b695fc15936a453604e65f5435a",
+        "syntaxTreeSHA256": "70b683f7358fd3d690945c4c1b61ea85484b8e2970d2acf38dd4caddf0765940"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.test.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "b2d9d3eeee7f056869051afe4a42203a1ed3ecd49d71537cdb6bd81bbd6178a5",
+        "syntaxTreeSHA256": "500f436266e462745458c3d4636fe5eaf73c84322a1f8337e8648815e5231052"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "758da09841116bc0898ac558baeacd8917dfaed5cdd93871ad66fdfc38684a8d",
+        "syntaxTreeSHA256": "0251ed9ea4dedde1393058dd26decadb50713a17062593cab92cba33f09a9c09"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.test.ts",
+        "status": "formatting-or-comments-only",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "0c097f7f34e7d990165986d2e38396c7534206d807081d1d6cedb6396bc1e8f2",
+        "syntaxTreeSHA256": "0c097f7f34e7d990165986d2e38396c7534206d807081d1d6cedb6396bc1e8f2"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "d0413566f92dbed77a4d28fe1419edb6629487749d1ed06d701e605292adf20c",
+        "syntaxTreeSHA256": "1d6951108c696a691165ad75539059d02d65dfe5a462e333a4d8ad37250ec8c0"
+      },
+      {
+        "path": "apps/www/src/content/docs/liquid-glass-button-demo-layout.test.ts",
+        "status": "added",
+        "parseDiagnosticsBefore": null,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": null,
+        "syntaxTreeSHA256": "3a0d0b18674b6b22f7cdb4efc33260a74d5da71c566b63cc7246acb852835c3b"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts",
+        "status": "formatting-or-comments-only",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "2d29376a00ce6bf8f27a511670ea811275e1935004af5be30075522ae921a215",
+        "syntaxTreeSHA256": "2d29376a00ce6bf8f27a511670ea811275e1935004af5be30075522ae921a215"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/finf-shadcn-toggle.browser.test.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "6ebeffe041e2954b5aba5b0a3d897b1807c86cf7279943fb6a396b052fb91e66",
+        "syntaxTreeSHA256": "1f05d040d7f89f8d25a8c02f8f62dca7e913f36d438a7c86d20564acc5136d8e"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+        "status": "formatting-or-comments-only",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "be295ca33070395f5531532c8bd0fcf726455ebd51d772f89afda09bc4f31942",
+        "syntaxTreeSHA256": "be295ca33070395f5531532c8bd0fcf726455ebd51d772f89afda09bc4f31942"
+      },
+      {
+        "path": "packages/adapters/base/src/material/prefilter.ts",
+        "status": "added",
+        "parseDiagnosticsBefore": null,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": null,
+        "syntaxTreeSHA256": "006efbe48a239bb0c086e4c2f3181fd1ba0f1c612df2cb5f742a8417b3807e62"
+      },
+      {
+        "path": "packages/adapters/base/src/material/program-inputs.ts",
+        "status": "added",
+        "parseDiagnosticsBefore": null,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": null,
+        "syntaxTreeSHA256": "618b0052ad18b5b8180744d53873942f4380f32c08a412f0cfaeb91e7d3d4eca"
+      },
+      {
+        "path": "packages/adapters/base/src/material/program-pool.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "e39d900180d0c20de4d1e0fe5ed08508e74a6e00ec8efde3615eba8206a1966b",
+        "syntaxTreeSHA256": "882384a6ef642312f74afc48760d4a8e49fbb9d1427dc070b9d1ccfb8769280c"
+      },
+      {
+        "path": "packages/adapters/base/src/material/program.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "a814ac73d1cba8ce6b0524224487f1721e2774595cb70546f4b14e2f8eaa2cdd",
+        "syntaxTreeSHA256": "8a7c9f6683eb657d58e105da915a1bbd09745a7aeaf6bf942928a3dd87425983"
+      },
+      {
+        "path": "packages/adapters/base/src/material/sink.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "edd29b8b7180ffe52cd4ec220c4965b290e421aaacf9fbcbf20c913373bde4a4",
+        "syntaxTreeSHA256": "b038754f1967f8a3509f734a900d29a517e2683a6f35edcf61ed25e91826eb1b"
+      },
+      {
+        "path": "packages/adapters/base/src/material/source-refresh-task.ts",
+        "status": "added",
+        "parseDiagnosticsBefore": null,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": null,
+        "syntaxTreeSHA256": "af8ce9b366ff69eaea49cb54a60bb64f871389181ba7a0986fb39c730d86d00a"
+      },
+      {
+        "path": "packages/adapters/base/src/material/source.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "3b6ee4808b571599e18d76cc180270f37b3cf390aaf6b9d5cb28f73ca2a95e94",
+        "syntaxTreeSHA256": "5c9841c8a4b6ee4319da38b33c728249ec4673ba3b4ff4da534d3aa177106edb"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "8f81be8763b844d32f2b52221bc52b9e9ef020353acbc9ffef422e9ccd3ff865",
+        "syntaxTreeSHA256": "68d5fe08458f771bcf477b375e9ebc379a43079b0e75d4e374ca363d75901917"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-prefilter.test.ts",
+        "status": "added",
+        "parseDiagnosticsBefore": null,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": null,
+        "syntaxTreeSHA256": "f8ffdada6e0fc0f0f125d1655f7a34f98979936e7ce0a2c80cbde7c0c46cad59"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-program.test.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "4e8ae9006fc4d236f2d7d8ea96aee626b24321baa40f902e60b7ed2b5fb1dd38",
+        "syntaxTreeSHA256": "37df18eba2c15973a0d6a7fa6a084e922704851eb7df0990726515990f7327de"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-sink.test.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "b0f4fc0e00acffaa8607b6ae67151eb55205f848ec887c3e026ce11d06bbc04e",
+        "syntaxTreeSHA256": "c556f022761bf706edb50ec8ddba5a2d62979ed949bd75658cf3f4bc7ca47cef"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-source-refresh-task.test.ts",
+        "status": "added",
+        "parseDiagnosticsBefore": null,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": null,
+        "syntaxTreeSHA256": "1f3ae7f496b44662fde4359ec82de76724672f827d504190fb05b0b92f5e302a"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-source.test.ts",
+        "status": "syntax-tree-changed",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "bce2acbbdf09bdcd820c6037497f66809f1252d68a7d6518be40709eedaff22f",
+        "syntaxTreeSHA256": "51f0f4f15028aa038846c441ca29a6faec7a19c1d1f34b4d770e4a55231c129b"
+      },
+      {
+        "path": "packages/adapters/react/src/adapt.ts",
+        "status": "formatting-or-comments-only",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "48ccf83bf23e4d27194de081de984f991fbcff4552ae35d00d2b250459b48d8b",
+        "syntaxTreeSHA256": "48ccf83bf23e4d27194de081de984f991fbcff4552ae35d00d2b250459b48d8b"
+      },
+      {
+        "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+        "status": "formatting-or-comments-only",
+        "parseDiagnosticsBefore": 0,
+        "parseDiagnosticsAfter": 0,
+        "beforeSyntaxTreeSHA256": "ae10d92093934bec3e243d83a6765f0c2ae886eacfce43f9fe962107e6263ca2",
+        "syntaxTreeSHA256": "ae10d92093934bec3e243d83a6765f0c2ae886eacfce43f9fe962107e6263ca2"
+      }
+    ]
+  },
+  "popoverFixtureMerge": {
+    "upstreamPath": "apps/www/src/content/docs/zh-cn/popover-nova-fixture.ts",
+    "mergedPath": "apps/www/test/fixtures/popover-nova-fixture.ts",
+    "upstreamSHA256": "c30ec12c8d393ea2fb86baa8d4e3591982236ac056c429e6b6361a7afa4eec1e",
+    "mergedSHA256": "9d4358c3201ebec5f59cb5baffa5de5b47872b2264aae6e3e1fa7d4b32ff2d7b",
+    "onlyFiveTypeImportRelativePathsChanged": true,
+    "runtimeBodyMatchesUpstream": true,
+    "obsoletePathAbsent": true,
+    "consumersUseNewPath": [
+      "apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts",
+      "apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts"
+    ]
+  },
+  "originalNativeTestFiles": [
+    {
+      "path": "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+      "sha256": "b4cfc887fb4b3114f21595024ef318ff6e7f269d34663328e22de73c35f4b730",
+      "unchangedAcrossMerge": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "sha256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+      "unchangedAcrossMerge": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts",
+      "sha256": "7bf80d6ea55439e51b7a6b7b3362c6d823dd29e1425dcd3e40a31d84fdcbc5de",
+      "unchangedAcrossMerge": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+      "sha256": "e46580435c73d887d996dc3e39b4c2fda9c3ba80f5fb302048d3bea9a19f8c5c",
+      "unchangedAcrossMerge": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+      "sha256": "a81616ab292b272c87ca1fa614f4cfa857446bc8a15bff30cb91acd6470476dd",
+      "unchangedAcrossMerge": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "sha256": "f3218ed22385f622e10b73067064a744f2900b70334d6879e330d776020a0229",
+      "unchangedAcrossMerge": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "sha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "unchangedAcrossMerge": true
+    }
+  ],
+  "generatedOpticalKernel": {
+    "path": "packages/adapters/base/src/material/liquidgl-kernel.generated.ts",
+    "sha256": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+    "unchangedAcrossMerge": true
+  },
+  "acceptanceBoundary": [
+    "No tests or browsers were run for this read-only comparison.",
+    "The original 61 passed non-native controls and 197 unrun native cases retain their original source/evidence interpretation; they are not rerun results for the merge.",
+    "Shared material and preview semantics changed outside the original eighteen-file inventory, so current Liquid optical/geometry/latency results require new native execution.",
+    "React adapt and WC shadow-split-effects changes here are formatting-only. This merge does not by itself demonstrate a semantic repair for the historical Shadow opacity/blueprint failures.",
+    "The unchanged original Demo Matrix, Search, Drawer, runtime roundtrip, Liquid and Shadow native cases remain the required acceptance boundary.",
+    "This is a scoped source integration review, not a full review of every compiler, workflow or upstream change."
+  ]
+}

@@ -8,7 +8,7 @@ import {
   awaitProminentTintCheckpoint,
   PROMINENT_TINT_OBSERVATION_PROGRESS,
   type TintRunnerFailure,
-} from './liquid-prominent-tint-test-harness';
+} from '../../../../test/fixtures/liquid-prominent-tint-test-harness';
 
 afterEach(() => vi.unstubAllGlobals());
 

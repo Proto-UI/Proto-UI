@@ -9,7 +9,7 @@
 // is not passing), the scheduled slot, actual start and queue delay, missed
 // slots, consecutive failed/unknown cycles and hours since the last valid
 // complete baseline. Incidents are surfaced as workflow annotations; the job
-// exit code is fail-closed on the lane verdict only.
+// exit code is fail-closed on the lane and native execution verdict.
 //
 // Slot attribution of the scheduled history comes from the native run name:
 // a scheduled cycle is named `regression-cycle:<cron>`, and that declared cron
@@ -21,6 +21,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cycleJobInventory } from './cycle-job-inventory.mjs';
 
 export const QUEUE_DELAY_LIMIT_MS = 60 * 60 * 1000;
 export const STALE_BASELINE_HOURS = 24;
@@ -120,7 +121,15 @@ export function runIsBaseline(run) {
   return run.status === 'completed' && run.conclusion === 'success';
 }
 
-export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, policyActivatedAt }) {
+export function auditCycle({
+  now,
+  cron,
+  laneResults,
+  currentRun,
+  recentRuns,
+  policyActivatedAt,
+  nativeJobs = null,
+}) {
   const nowMs = Date.parse(now);
   const activationMs = Date.parse(policyActivatedAt);
   if (!Number.isFinite(activationMs) || activationMs > nowMs)
@@ -141,7 +150,24 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
   for (const [name, result] of Object.entries(laneResults)) {
     lanes[name] = { rawResult: result, outcome: laneOutcome(result) };
   }
-  const verdict = cycleVerdict(lanes);
+  const laneVerdict = cycleVerdict(lanes);
+  let verdict = laneVerdict;
+  if (nativeJobs) {
+    const outcomes = Object.keys(nativeJobs.counts);
+    if (
+      outcomes.some((outcome) =>
+        ['failure', 'timed_out', 'startup_failure', 'action_required'].includes(outcome)
+      )
+    ) {
+      verdict = 'fail';
+    } else if (
+      verdict !== 'fail' &&
+      (nativeJobs.incomplete.length > 0 ||
+        outcomes.some((outcome) => !['success', 'neutral', 'skipped'].includes(outcome)))
+    ) {
+      verdict = 'unknown';
+    }
+  }
 
   // All scheduled runs, including queued/in_progress/never-finished ones: an
   // unknown cycle still counts (it breaks the green chain and is counted as
@@ -247,6 +273,12 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
         3600000;
 
   const incidents = [];
+  if (nativeJobs?.incomplete.length > 0) {
+    incidents.push({
+      type: 'native-jobs-incomplete',
+      detail: `upstream native jobs are not complete: ${nativeJobs.incomplete.join(', ')}`,
+    });
+  }
   if (cron && expectedMs !== null && startedMs - expectedMs > QUEUE_DELAY_LIMIT_MS) {
     incidents.push({
       type: 'queue-delay',
@@ -306,6 +338,8 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
     queueDelayMs,
     slotDelayMs,
     laneInventory: lanes,
+    laneVerdict,
+    ...(nativeJobs ? { nativeJobs } : {}),
     verdict,
     missedSlots: missedSlots.map((slot) => new Date(slot).toISOString()),
     consecutiveFailedCycles,
@@ -349,6 +383,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const args = parseArgs(process.argv.slice(2));
   const env = process.env;
   const currentRunMeta = JSON.parse(readFileSync(args['current-run'], 'utf8'));
+  if (env.CYCLE_SHA && env.CYCLE_SHA !== currentRunMeta.head_sha)
+    throw new Error('Cycle event source disagrees with the native run');
   const recentRunsJson = JSON.parse(readFileSync(args['recent-runs'], 'utf8'));
   const recentRuns = Array.isArray(recentRunsJson)
     ? recentRunsJson
@@ -358,6 +394,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   for (const [name, value] of Object.entries(laneResults)) {
     lanes[name] = value?.result ?? value;
   }
+  const nativeJobs = cycleJobInventory(JSON.parse(readFileSync(args.jobs, 'utf8')), {
+    runId: currentRunMeta.id,
+    sourceRevision: currentRunMeta.head_sha,
+    runAttempt: Number(env.CYCLE_ATTEMPT ?? currentRunMeta.run_attempt ?? 1),
+  });
   const { receipt, verdict, incidents } = auditCycle({
     now: new Date().toISOString(),
     policyActivatedAt: env.CYCLE_POLICY_ACTIVATED_AT,
@@ -373,11 +414,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       run_started_at: currentRunMeta.run_started_at,
     },
     recentRuns,
+    nativeJobs,
   });
   writeFileSync(args.out, JSON.stringify(receipt, null, 2) + '\n');
   emitAnnotations({ receipt, incidents });
-  // Fail closed on lane outcomes only. Queue/missed-slot incidents are
-  // reported as annotations, never converted into a fabricated green.
+  // The JSON, baseline counters, annotations and exit code share one verdict.
+  // Queue/missed-slot incidents are retained independently as annotations.
   if (verdict !== 'pass') {
     console.error(
       `::error::regression cycle verdict is ${verdict}; a lane that never started is unknown, not passing`

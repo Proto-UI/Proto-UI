@@ -12,8 +12,19 @@ import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { corepackInvocation, createRuntimeTestPlan, READY_ROUTES } from './runtime-test-plan.mjs';
-import { runtimeSelection, assertVitestReport, writeJson, ciContext } from './runtime-ci.mjs';
+import {
+  runtimeSelection,
+  assertVitestReport,
+  assertRuntimeSource,
+  writeJson,
+  ciContext,
+} from './runtime-ci.mjs';
 import { waitForServerReadiness } from './server-readiness.mjs';
+import {
+  readOptionalJson,
+  runtimeObservation,
+  runtimeSourceSnapshot,
+} from './runtime-observation.mjs';
 import {
   observeReadinessFailures,
   observeRuntimeServer,
@@ -42,9 +53,47 @@ const evidenceId = selection
 const reportPath = selection
   ? path.resolve(evidenceDirectory, `vitest-${evidenceId}.json`)
   : undefined;
+const progressPath = selection
+  ? path.resolve(evidenceDirectory, `progress-${evidenceId}.json`)
+  : undefined;
+const sourceBefore = selection ? runtimeSourceSnapshot(root) : undefined;
+let terminalObservationWritten = false;
+function recordObservation({ exitCode = null, signal = null, error = null } = {}) {
+  if (!selection || terminalObservationWritten) return;
+  const reportRead = readOptionalJson(reportPath);
+  const progressRead = readOptionalJson(progressPath);
+  const report = reportRead.value;
+  const sourceAfter = runtimeSourceSnapshot(root);
+  const observation = runtimeObservation({
+    selection,
+    root,
+    report,
+    progress: progressRead.value,
+    sourceBefore,
+    sourceAfter,
+    exitCode,
+    signal,
+    error,
+  });
+  observation.parseErrors = { report: reportRead.error, checkpoint: progressRead.error };
+  writeJson(path.join(evidenceDirectory, `observation-${evidenceId}.json`), observation);
+  // Preserve completed red reports too. The unchanged strict gate still
+  // rejects failures, skips, wrong inventory and incomplete producer outcomes.
+  const source = { before: sourceBefore, after: sourceAfter };
+  if (report)
+    writeJson(path.join(evidenceDirectory, `result-${evidenceId}.json`), {
+      ...selection,
+      report,
+      source,
+    });
+  terminalObservationWritten = true;
+  assertRuntimeSource(source, selection);
+}
 if (selection) {
   // Clear only this invocation's result: stale evidence must never satisfy a rerun.
   rmSync(reportPath, { force: true });
+  rmSync(progressPath, { force: true });
+  rmSync(path.join(evidenceDirectory, `observation-${evidenceId}.json`), { force: true });
   rmSync(path.join(evidenceDirectory, `result-${evidenceId}.json`), { force: true });
   writeJson(path.join(evidenceDirectory, `selection-${evidenceId}.json`), selection);
   console.log(`[test:runtime] selection ${JSON.stringify(selection)}`);
@@ -184,9 +233,27 @@ async function runVitest(args, baseUrl) {
     // Invoke Vitest's ESM entry with the current Node executable instead so
     // forwarded test arguments remain an argv array on every platform.
     const vitestBin = path.join(root, 'node_modules', 'vitest', 'vitest.mjs');
-    const env = baseUrl ? { ...process.env, PROTO_UI_BROWSER_BASE_URL: baseUrl } : process.env;
+    const env = {
+      ...process.env,
+      ...(baseUrl ? { PROTO_UI_BROWSER_BASE_URL: baseUrl } : {}),
+      ...(selection
+        ? {
+            PROTO_UI_RUNTIME_ROOT: root,
+            PROTO_UI_RUNTIME_PROGRESS_FILE: progressPath,
+            PROTO_UI_RUNTIME_SELECTION_FILE: path.join(
+              evidenceDirectory,
+              `selection-${evidenceId}.json`
+            ),
+          }
+        : {}),
+    };
     const reportArgs = reportPath
-      ? ['--reporter=default', '--reporter=json', `--outputFile=${reportPath}`]
+      ? [
+          '--reporter=default',
+          '--reporter=json',
+          '--reporter=./scripts/test/runtime-progress-reporter.mjs',
+          `--outputFile=${reportPath}`,
+        ]
       : [];
     const child = spawn(process.execPath, [vitestBin, 'run', ...args, ...reportArgs], {
       cwd: root,
@@ -215,7 +282,7 @@ async function runVitest(args, baseUrl) {
         new Promise((done) => process.stdout.write('', done)),
         new Promise((done) => process.stderr.write('', done)),
       ]);
-      resolve(signal ? 1 : (code ?? 1));
+      resolve({ exitCode: code, signal });
     });
   });
 }
@@ -225,6 +292,11 @@ async function runVitest(args, baseUrl) {
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(signal, () => {
     reportServerSnapshot(`runner received ${signal}`);
+    try {
+      recordObservation({ signal });
+    } catch (error) {
+      console.error(`[test:runtime] interrupted evidence: ${error.message}`);
+    }
     void stopServer().finally(() => {
       process.exit(signal === 'SIGINT' ? 130 : 143);
     });
@@ -238,21 +310,24 @@ try {
     if (baseUrl) {
       console.log(`[test:runtime] sharing ${baseUrl} across the browser suites`);
     }
-    exitCode = await runVitest(phase.args, baseUrl);
+    const termination = await runVitest(phase.args, baseUrl);
+    exitCode = termination.signal ? 1 : (termination.exitCode ?? 1);
+    recordObservation(termination);
     if (exitCode !== 0) break;
     if (selection) {
       const report = JSON.parse(readFileSync(reportPath, 'utf8'));
       assertVitestReport(report, selection);
-      writeJson(path.join(evidenceDirectory, `result-${evidenceId}.json`), {
-        ...selection,
-        report,
-      });
     }
   }
 } catch (error) {
   console.error(`[test:runtime] ${error instanceof Error ? error.message : String(error)}`);
   reportServerSnapshot('runtime test runner failed');
   exitCode = 1;
+  try {
+    recordObservation({ exitCode, error: error instanceof Error ? error.message : String(error) });
+  } catch (evidenceError) {
+    console.error(`[test:runtime] evidence error: ${evidenceError.message}`);
+  }
 } finally {
   await stopServer();
 }

@@ -168,8 +168,8 @@ function validateBuiltPackage(pkg, distDir) {
       { cwd: ROOT_DIR, encoding: 'utf8', timeout: 60000 }
     );
     if (smoke.status !== 0) {
-      const outcome = smoke.error?.message ??
-        (smoke.signal ? `signal ${smoke.signal}` : `exit ${smoke.status}`);
+      const outcome =
+        smoke.error?.message ?? (smoke.signal ? `signal ${smoke.signal}` : `exit ${smoke.status}`);
       throw new Error(
         `${pkg.name}: JavaScript-only import smoke failed for ${relative(distDir, entry)}: ${outcome}\n${smoke.stderr || smoke.stdout || ''}`,
         { cause: smoke.error }
@@ -289,7 +289,7 @@ function selectChangedPackages(packages, base) {
 
 export function selectAffectedPackages(packages, changedFiles) {
   const globalChange = changedFiles.some((file) =>
-    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|scripts\/analysis\/(package-budgets|package-budget-policy)\.mjs$|scripts\/analysis\/test\/package-budget-policy\.test\.mjs$|internal\/coverage-matrices\/prototype-coverage-matrix\.json$|\.github\/)/.test(
+    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|scripts\/analysis\/(package-budgets|package-budget-policy|package-budget-evidence)\.mjs$|scripts\/analysis\/test\/package-budget-(policy|evidence)\.test\.mjs$|internal\/coverage-matrices\/prototype-coverage-matrix\.json$|\.github\/)/.test(
       file
     )
   );

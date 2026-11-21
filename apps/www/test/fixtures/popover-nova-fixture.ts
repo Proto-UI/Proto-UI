@@ -1,9 +1,9 @@
 import type { JSHandle, Page } from 'playwright-core';
-import type * as DemoRenderer from '../../../components/PrototypePreviewer/demo-renderer';
-import type * as DemoTypes from '../../../components/PrototypePreviewer/demo-types';
-import type * as PrototypeModules from '../../../components/PrototypePreviewer/prototype-modules';
-import type * as ProjectionTheme from '../../../components/PrototypePreviewer/projection-theme';
-import type * as RuntimePreviewSurface from '../../../components/PrototypePreviewer/runtime-preview-surface';
+import type * as DemoRenderer from '../../src/components/PrototypePreviewer/demo-renderer';
+import type * as DemoTypes from '../../src/components/PrototypePreviewer/demo-types';
+import type * as PrototypeModules from '../../src/components/PrototypePreviewer/prototype-modules';
+import type * as ProjectionTheme from '../../src/components/PrototypePreviewer/projection-theme';
+import type * as RuntimePreviewSurface from '../../src/components/PrototypePreviewer/runtime-preview-surface';
 import type * as AdapterBase from '@proto.ui/adapter-base';
 
 export interface PopoverNovaFixture {
