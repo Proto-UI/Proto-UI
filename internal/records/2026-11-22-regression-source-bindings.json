@@ -1033,5 +1033,61 @@
     ],
     "protectedFields": "Historical main evidence, reference pins, comparison criteria, migration identities, gates and acceptance receipts remain unchanged.",
     "postMergeConsumerLedgerDifferences": 0
+  },
+  "latestMainContinuationReview": {
+    "upstreamMain": "844bed6ffaa340e0269749ac974fe12ba6d139bb",
+    "mergeRevision": "e140ffcbab5185d968ce9f4a2b580df8ee4c64ba",
+    "pullRequest": 1663,
+    "scope": "Frozen latest-known-main combination for the final candidate; later main advances are not substituted into this receipt.",
+    "sources": [
+      {
+        "path": "packages/adapters/base/src/material/contact-motion.ts",
+        "previous": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "26c29c228a47d188f6298c800a2e8ee932af1987",
+          "sourceSha256": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6"
+        },
+        "reviewed": {
+          "revision": "e140ffcbab5185d968ce9f4a2b580df8ee4c64ba",
+          "gitBlob": "3ce89c95f272dde8d26f75b006d65f579abd212c",
+          "sourceSha256": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe"
+        },
+        "review": "Extracts the existing 240 ms release-tail duration into CONTACT_RELEASE_MS and consumes the same constant in the unchanged progress formula. Both literal import specifiers are unchanged. Renew only the exact body fingerprint; source, foreign-importer and adjacent-import rejection remain tested."
+      },
+      {
+        "path": "packages/adapters/base/src/material/sink.ts",
+        "previous": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "3451f55c7033560edfa72ecf7f5275e31417fbd0",
+          "sourceSha256": "a7fedd80467728e4caf13414141c49deddfb29ecec1f50ec7c2e318a1d585e41"
+        },
+        "reviewed": {
+          "revision": "e140ffcbab5185d968ce9f4a2b580df8ee4c64ba",
+          "gitBlob": "7319d3f0472e8342579676c1fef73df8118da287",
+          "sourceSha256": "5cbe6fdff1d85b015190f242498bb42704589732ef95aa7d3f1a980f077dde79"
+        },
+        "review": "Imports the shared duration from its existing contact-motion edge and records a release deadline on pointer-up. Expanded-paint admission now applies only during an active pointer, finite release tail or an explicitly pressed Liquid deformation request. The actual expansion still passes the ordinary backdrop, overlap and clipping checks. This changes optical admission geometry at rest; source review does not certify resulting pixels or consumer acceptance. The nineteen admitted literal imports are unchanged."
+      },
+      {
+        "path": "packages/adapters/base/src/material/source.ts",
+        "previous": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "4ab4a9a51b5984f3223d8c76a1b2a42919d4f24c",
+          "sourceSha256": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6"
+        },
+        "reviewed": {
+          "revision": "e140ffcbab5185d968ce9f4a2b580df8ee4c64ba",
+          "gitBlob": "4267d1e6fa7fccaded5d7878b0656eb9bd102d9c",
+          "sourceSha256": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2"
+        },
+        "review": "Reorders two retained rejection conditions so an opaque painted ancestor reports source-painted-ancestor before a clipping diagnosis. Both painted-ancestor and expanded-paint clipping checks remain; no new import or controller owner is introduced."
+      }
+    ],
+    "newImportSpecifiers": 0,
+    "renewedExactBodyFingerprints": [
+      "packages/adapters/base/src/material/contact-motion.ts",
+      "packages/adapters/base/src/material/sink.ts"
+    ],
+    "matrixRowsOrStatesChanged": false
   }
 }

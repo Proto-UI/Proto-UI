@@ -8,7 +8,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./paint-mutations']),
   }),
   'packages/adapters/base/src/material/contact-motion.ts': Object.freeze({
-    sourceSha256: 'fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6',
+    sourceSha256: '3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe',
     specifiers: Object.freeze(['../events/pointer-contact', './program']),
   }),
   'packages/adapters/base/src/material/initial-paint-bridge.ts': Object.freeze({
@@ -24,7 +24,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
-    sourceSha256: 'a7fedd80467728e4caf13414141c49deddfb29ecec1f50ec7c2e318a1d585e41',
+    sourceSha256: '5cbe6fdff1d85b015190f242498bb42704589732ef95aa7d3f1a980f077dde79',
     specifiers: Object.freeze([
       './initial-paint-bridge',
       './paint-mutations',

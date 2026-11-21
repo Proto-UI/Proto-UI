@@ -50,6 +50,8 @@ The independently reviewed numeric transaction is commit `c15081a47`; the first 
 
 The merge preserved upstream historical evidence bytes rather than applying a formatter to those archived measurements. Conflict resolutions were checked separately. A final generated projection and clean budget result must bind the resulting source; historical snapshots remain identifiable by their own commits.
 
+Before final validation, main advanced once more to `844bed6ffaa340e0269749ac974fe12ba6d139bb` through the three-file contact-paint ownership repair. Merge `e140ffcbab5185d968ce9f4a2b580df8ee4c64ba` retains its active/release-tail/pressed expansion rule and both ancestor/clipping refusals. The source review renews only the affected exact fingerprints and retains the original finite import boundaries. This main combination is the candidate for the ensuing validation; subsequent main movement is not silently included in its results.
+
 Local controls exercise overloaded shards, malformed timings, continuation after prerequisite failure, retained original assertion failures, source drift, truncated reports, duplicate/missing evidence, partial reruns and actual pinned-Vitest reporter behavior. Independent review checks the implementation and cost attribution; it is not a GitHub approval or native execution result.
 
 The accompanying focused records state their actual pass/fail/unrun results. The final PR must link the dispatched run with the same head SHA, retain every terminal outcome and identify any product, fixture, measurement-capability or resource diagnosis from concrete evidence. A completely ended red cycle supplies useful failure evidence but does not satisfy the existing green-baseline or scheduled-recovery policy.
