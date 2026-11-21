@@ -20,6 +20,7 @@ import {
 } from './template-shape';
 import { isDataValueType, isPublicValueType, lexicalStoredType, statementsTerminate } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
+import { valueAlternatives } from './value-types';
 import {
   GPUI_MISSING_FOCUS_TREE,
   GPUI_UNAVAILABLE_OPERATIONS,
@@ -1520,10 +1521,24 @@ impl __PuiNativeRecordValue {
       case 'intrinsic': {
         const args = node.arguments.map((argument) => expression(argument, environment, depth));
         switch (node.name) {
-          case 'string':
-            throw new Error('GPUI does not yet support native String coercion.');
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
+          case 'string': {
+            // GPUI values coerce scalars exactly as ECMAScript does; a
+            // structured or unknown argument has no admitted native coercion.
+            const type = node.arguments[0].type;
+            const scalar = valueAlternatives(type).every(
+              (member) =>
+                member === 'string' ||
+                member === 'number' ||
+                member === 'boolean' ||
+                member === 'null' ||
+                member === 'void' ||
+                (typeof member !== 'string' && member.kind === 'literal')
+            );
+            if (!scalar) throw new Error('GPUI supports String() only for scalar data arguments.');
+            return `Value::string(&(${args[0]}).scalar_text())`;
+          }
           case 'object.assign':
             throw new Error('GPUI does not yet support fresh-target Object.assign.');
           case 'object.freeze':
@@ -1538,6 +1553,8 @@ impl __PuiNativeRecordValue {
             return `typeof_value(&(${args[0]}))`;
           case 'error':
             return `record(vec![("name", Value::string("Error")), ("message", Value::string(&(${args[0] ?? 'Value::Undefined'}).error_message()))])`;
+          default:
+            throw new Error('Checked GPUI intrinsic has no direct lowering.');
         }
       }
       case 'object-spread':

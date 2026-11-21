@@ -76,13 +76,30 @@ it('dispatches keyed raw snapshot diffs through a real generated React owner', a
 }, 30_000);
 
 it('retains target and source admission boundaries outside keyed React raw watch', () => {
-  for (const profile of ['vue-source-v1', 'vue2-source-v1', 'web-component-source-v1', 'gpui-source-v1']) {
+  for (const profile of [
+    'vue-source-v1',
+    'vue2-source-v1',
+    'web-component-source-v1',
+    'gpui-source-v1',
+  ]) {
     expect(compilePrototype(source, { profile })).toMatchObject({
-      ok: false, diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
+      ok: false,
+      diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
     });
   }
-  expect(compilePrototype(source.replace("def.props.watchRaw(['value','extra'],()=>{cancelledCalls++;})", 'def.props.watchRawAll(()=>{cancelledCalls++;})'), { profile: 'react-dom-source-v1' })).toMatchObject({
-    ok: false, diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
+  expect(
+    compilePrototype(
+      source.replace(
+        "def.props.watchRaw(['value','extra'],()=>{cancelledCalls++;})",
+        'def.props.watchRawAll(()=>{cancelledCalls++;})'
+      ),
+      { profile: 'react-dom-source-v1' }
+    )
+  ).toMatchObject({
+    ok: false,
+    diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
   });
-  expect(compilePrototype(source.replace("['value','extra']", '[]'), { profile: 'react-dom-source-v1' })).toMatchObject({ ok: false });
+  expect(
+    compilePrototype(source.replace("['value','extra']", '[]'), { profile: 'react-dom-source-v1' })
+  ).toMatchObject({ ok: false });
 });

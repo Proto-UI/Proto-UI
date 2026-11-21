@@ -26,7 +26,8 @@ function operations(ir: PrototypeIR): Extract<ExpressionIR, { kind: 'operation' 
   const found: Extract<ExpressionIR, { kind: 'operation' }>[] = [];
   function visit(value: unknown) {
     if (!value || typeof value !== 'object') return;
-    if ('kind' in value && value.kind === 'operation') found.push(value as Extract<ExpressionIR, { kind: 'operation' }>);
+    if ('kind' in value && value.kind === 'operation')
+      found.push(value as Extract<ExpressionIR, { kind: 'operation' }>);
     for (const child of Object.values(value)) visit(child);
   }
   visit(ir);
@@ -35,7 +36,9 @@ function operations(ir: PrototypeIR): Extract<ExpressionIR, { kind: 'operation' 
 
 describe('draft anatomy-part relationship compiler admission', () => {
   it('preserves direct string and empty reference-list declarations', () => {
-    portable(`accessible.relation('labelledBy',{target:'authored-id',mode:'append'});accessible.relation('controls',{target:[]});`);
+    portable(
+      `accessible.relation('labelledBy',{target:'authored-id',mode:'append'});accessible.relation('controls',{target:[]});`
+    );
   });
 
   it('retains family identity and State keys through source and serialized IR', () => {
@@ -43,7 +46,7 @@ describe('draft anatomy-part relationship compiler admission', () => {
       accessible.part(FAMILY,{key});
       const target={kind:'part' as const,family:FAMILY,role:'root',key};
       accessible.relation('controls',{target,mode:'append'});`);
-    expect(operations(ir).map(operation => operation.operation)).toContain('accessible.part');
+    expect(operations(ir).map((operation) => operation.operation)).toContain('accessible.part');
     expect(validateIR(JSON.parse(JSON.stringify(ir)))).toMatchObject({ ok: true });
   });
 
@@ -59,45 +62,77 @@ describe('draft anatomy-part relationship compiler admission', () => {
     `accessible.relation('controls',{target:{kind:'other',family:FAMILY,role:'root',key:'value'}});`,
     `accessible.relation('controls',{target:'host-id',mode:'guess'});`,
     `def.lifecycle.onMounted(()=>accessible.part(FAMILY,{key:'value'}));`,
-  ])('rejects invalid source: %s', body => {
+  ])('rejects invalid source: %s', (body) => {
     expect(parsePrototype(source(body))).toMatchObject({ ok: false });
   });
 
-  it.each(['family', 'missing-key', 'numeric-key'] as const)('independently rejects coherent serialized %s forgery', mutation => {
-    const ir = portable(`accessible.part(FAMILY,{key:'value'});`);
-    const part = operations(ir).find(operation => operation.operation === 'accessible.part')!;
-    if (mutation === 'family') part.arguments[0] = { kind: 'literal', type: 'string', value: 'family', span: part.span };
-    else part.arguments[1] = {
-      kind: 'record',
-      type: { kind: 'record', fields: mutation === 'missing-key' ? [] : [{ name: 'key', type: 'number' }] },
-      entries: mutation === 'missing-key' ? [] : [{ key: 'key', value: { kind: 'literal', type: 'number', value: 42, span: part.span } }],
-      span: part.span,
-    };
-    expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
-  });
+  it.each(['family', 'missing-key', 'numeric-key'] as const)(
+    'independently rejects coherent serialized %s forgery',
+    (mutation) => {
+      const ir = portable(`accessible.part(FAMILY,{key:'value'});`);
+      const part = operations(ir).find((operation) => operation.operation === 'accessible.part')!;
+      if (mutation === 'family')
+        part.arguments[0] = { kind: 'literal', type: 'string', value: 'family', span: part.span };
+      else
+        part.arguments[1] = {
+          kind: 'record',
+          type: {
+            kind: 'record',
+            fields: mutation === 'missing-key' ? [] : [{ name: 'key', type: 'number' }],
+          },
+          entries:
+            mutation === 'missing-key'
+              ? []
+              : [
+                  {
+                    key: 'key',
+                    value: { kind: 'literal', type: 'number', value: 42, span: part.span },
+                  },
+                ],
+          span: part.span,
+        };
+      expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
+    }
+  );
 
   it('independently rejects a serialized structured target with a wrong nominal family', () => {
-    const ir = portable(`accessible.relation('controls',{target:{kind:'part',family:FAMILY,role:'root',key:'value'}});`);
-    const relation = operations(ir).find(operation => operation.operation === 'accessible.relation')!;
+    const ir = portable(
+      `accessible.relation('controls',{target:{kind:'part',family:FAMILY,role:'root',key:'value'}});`
+    );
+    const relation = operations(ir).find(
+      (operation) => operation.operation === 'accessible.relation'
+    )!;
     const config = relation.arguments[1];
     if (config.kind !== 'record') throw new Error('Missing relationship config');
-    const target = config.entries.find(entry => entry.key === 'target')!.value;
+    const target = config.entries.find((entry) => entry.key === 'target')!.value;
     if (target.kind !== 'record') throw new Error('Missing structured target');
-    const family = target.entries.find(entry => entry.key === 'family')!;
+    const family = target.entries.find((entry) => entry.key === 'family')!;
     family.value = { kind: 'literal', type: 'string', value: 'family', span: target.span };
     // Rebuild coherent ordinary record types; the operation contract must still reject it.
-    target.type = { kind: 'record', fields: [
-      { name: 'kind', type: 'string' }, { name: 'family', type: 'string' },
-      { name: 'role', type: 'string' }, { name: 'key', type: 'string' },
-    ] };
+    target.type = {
+      kind: 'record',
+      fields: [
+        { name: 'kind', type: 'string' },
+        { name: 'family', type: 'string' },
+        { name: 'role', type: 'string' },
+        { name: 'key', type: 'string' },
+      ],
+    };
     config.type = { kind: 'record', fields: [{ name: 'target', type: target.type }] };
     expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
   });
 
   it('independently rejects a setup declaration moved into a mounted callback', () => {
     const ir = portable(`accessible.part(FAMILY,{key:'value'});def.lifecycle.onMounted(()=>{});`);
-    const declaration = ir.setup.body.findIndex(statement => statement.kind === 'effect' && statement.expression.kind === 'operation' && statement.expression.operation === 'accessible.part');
-    const mounted = operations(ir).find(operation => operation.operation === 'lifecycle.onMounted')!;
+    const declaration = ir.setup.body.findIndex(
+      (statement) =>
+        statement.kind === 'effect' &&
+        statement.expression.kind === 'operation' &&
+        statement.expression.operation === 'accessible.part'
+    );
+    const mounted = operations(ir).find(
+      (operation) => operation.operation === 'lifecycle.onMounted'
+    )!;
     const callback = mounted.arguments[0];
     if (callback.kind !== 'function') throw new Error('Missing mounted callback');
     callback.function.body.push(ir.setup.body.splice(declaration, 1)[0]);
@@ -105,9 +140,18 @@ describe('draft anatomy-part relationship compiler admission', () => {
   });
 
   it('keeps non-DOM native part lowering explicitly unavailable', () => {
-    expect(compilePrototype(source(`accessible.part(FAMILY,{key:'value'});`), { profile: 'gpui-source-v1' })).toMatchObject({
+    expect(
+      compilePrototype(source(`accessible.part(FAMILY,{key:'value'});`), {
+        profile: 'gpui-source-v1',
+      })
+    ).toMatchObject({
       ok: false,
-      diagnostics: [expect.objectContaining({ code: 'PUI4003', message: expect.stringContaining('accessible.part') })],
+      diagnostics: [
+        expect.objectContaining({
+          code: 'PUI4003',
+          message: expect.stringContaining('accessible.part'),
+        }),
+      ],
     });
   });
 });

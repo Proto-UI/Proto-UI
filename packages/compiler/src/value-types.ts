@@ -338,9 +338,13 @@ export function intrinsicResult(
         typeof type === 'string' ||
         type.kind !== 'record' ||
         !isDataValueType(type) ||
-        value.entries.some((entry) => entry.key === '__proto__' || !isDataValueType(entry.value.type))
+        value.entries.some(
+          (entry) => entry.key === '__proto__' || !isDataValueType(entry.value.type)
+        )
       )
-        throw new TypeError('Object.assign requires direct finite own-data record literals without __proto__.');
+        throw new TypeError(
+          'Object.assign requires direct finite own-data record literals without __proto__.'
+        );
       for (const entry of value.entries) fields.set(entry.key, entry.value.type);
     };
     const target = expressions[0];
@@ -359,19 +363,27 @@ export function intrinsicResult(
     args[0].kind === 'array' &&
     valueAlternatives(args[0].element).length > 0 &&
     valueAlternatives(args[0].element).every(
-      (type) => typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
+      (type) =>
+        typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
     )
-  ) return 'boolean';
+  )
+    return 'boolean';
   if (name === 'typeof' && args.length === 1) return 'string';
   if (name === 'string') {
-    if (args.length <= 1 && args.every((type) =>
-      valueAlternatives(type).every((member) => member === 'unknown' || isDataValueType(member))
-    )) return 'string';
+    if (
+      args.length <= 1 &&
+      args.every((type) =>
+        valueAlternatives(type).every((member) => member === 'unknown' || isDataValueType(member))
+      )
+    )
+      return 'string';
     throw new TypeError('String requires zero or one data or opaque unknown operand.');
   }
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
     return 'exception';
   if (name === 'number.isFinite' && args.length === 1 && isDataValueType(args[0])) return 'boolean';
+  if (name === 'string' && args.length === 1 && (isDataValueType(args[0]) || args[0] === 'unknown'))
+    return 'string';
   if (name === 'object.freeze' && args.length === 1 && objectFields(args[0])) return args[0];
   if (
     name === 'object.hasOwn' &&

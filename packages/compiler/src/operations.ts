@@ -305,13 +305,25 @@ const relationSpecType: ValueType = {
       name: 'target',
       type: {
         kind: 'value-union',
-        members: [partKeyType, 'a11y-ref', 'a11y-ref-list', { kind: 'array', element: { kind: 'union', members: [] } }, partTargetType],
+        members: [
+          partKeyType,
+          'a11y-ref',
+          'a11y-ref-list',
+          { kind: 'array', element: { kind: 'union', members: [] } },
+          partTargetType,
+        ],
       },
     },
     {
       name: 'mode',
       optional: true,
-      type: { kind: 'union', members: [{ kind: 'literal', value: 'replace' }, { kind: 'literal', value: 'append' }] },
+      type: {
+        kind: 'union',
+        members: [
+          { kind: 'literal', value: 'replace' },
+          { kind: 'literal', value: 'append' },
+        ],
+      },
     },
   ],
 };
@@ -1540,7 +1552,10 @@ export const OPERATION_RULES = {
     'void',
     [
       { role: 'value', types: ['anatomy-family'] },
-      { role: 'value', valueSchema: { kind: 'object', fields: [{ name: 'key', type: partKeyType }] } },
+      {
+        role: 'value',
+        valueSchema: { kind: 'object', fields: [{ name: 'key', type: partKeyType }] },
+      },
     ],
     [effect('declare', 'accessibility')]
   ),

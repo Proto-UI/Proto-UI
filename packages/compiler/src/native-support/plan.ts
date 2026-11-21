@@ -68,13 +68,33 @@ export const nativeSupportUnits: Readonly<Record<NativeSupportFeature, NativeSup
   },
   'part-relationships': {
     imports: ['a11y', 'anatomy'],
-    resources: ['part-registrations', 'part-key-subscriptions', 'relationship-id-reservations', 'relationship-token-leases'],
-    cleanup: ['unregister-parts', 'unsubscribe-part-keys', 'release-relationship-tokens', 'release-relationship-identity'],
+    resources: [
+      'part-registrations',
+      'part-key-subscriptions',
+      'relationship-id-reservations',
+      'relationship-token-leases',
+    ],
+    cleanup: [
+      'unregister-parts',
+      'unsubscribe-part-keys',
+      'release-relationship-tokens',
+      'release-relationship-identity',
+    ],
   },
   'control-label': {
     imports: ['a11y', 'anatomy'],
-    resources: ['control-label-pair', 'control-label-name-lease', 'control-label-input-listeners', 'control-label-view-observer'],
-    cleanup: ['release-control-label-pair', 'release-control-label-name', 'remove-control-label-listeners', 'disconnect-control-label-observer'],
+    resources: [
+      'control-label-pair',
+      'control-label-name-lease',
+      'control-label-input-listeners',
+      'control-label-view-observer',
+    ],
+    cleanup: [
+      'release-control-label-pair',
+      'release-control-label-name',
+      'remove-control-label-listeners',
+      'disconnect-control-label-observer',
+    ],
   },
   anatomy: {
     imports: ['ownership'],

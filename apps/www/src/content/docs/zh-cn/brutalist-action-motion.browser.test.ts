@@ -216,61 +216,76 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
             await itemBounded(
               'Menu release and panel placement',
               expect
-                .poll(async () => {
-                  const observed = await menu.evaluate(async (node) => {
-                    const panel = document.getElementById(node.getAttribute('aria-controls') ?? '');
-                    if (!panel) throw new Error('Missing owned menu panel');
-                    type MenuPlacementFrame = {
-                      released: boolean;
-                      idle: boolean;
-                      connected: boolean;
-                      expanded: string | null;
-                      rects: number[][];
-                      placement: string[];
-                    };
-                    const snapshot = () => {
-                      const css = getComputedStyle(panel);
-                      return {
-                        released: !node.matches(':hover, :active'),
-                        idle: [node, panel].every((owner) =>
-                          owner.getAnimations({ subtree: owner === node }).every(
-                            (animation) =>
-                              !animation.pending &&
-                              (animation.playState === 'finished' || animation.playState === 'idle')
-                          )
-                        ),
-                        connected: node.isConnected && panel.isConnected,
-                        expanded: node.getAttribute('aria-expanded'),
-                        rects: [node, panel].map((owner) => {
-                          const rect = owner.getBoundingClientRect();
-                          return [rect.x, rect.y, rect.width, rect.height];
-                        }),
-                        placement: [
-                          '--site-header-panel-left',
-                          '--site-header-panel-top',
-                          '--site-header-panel-max-width',
-                          '--site-header-panel-max-height',
-                        ].map((name) => css.getPropertyValue(name)),
+                .poll(
+                  async () => {
+                    const observed = await menu.evaluate(async (node) => {
+                      const panel = document.getElementById(
+                        node.getAttribute('aria-controls') ?? ''
+                      );
+                      if (!panel) throw new Error('Missing owned menu panel');
+                      type MenuPlacementFrame = {
+                        released: boolean;
+                        idle: boolean;
+                        connected: boolean;
+                        expanded: string | null;
+                        rects: number[][];
+                        placement: string[];
                       };
-                    };
-                    const frames: MenuPlacementFrame[] = [];
-                    for (let index = 0; index < 3; index++) {
-                      const { promise, resolve } = Promise.withResolvers<void>();
-                      requestAnimationFrame(() => resolve());
-                      await promise;
-                      frames.push(snapshot());
-                    }
-                    return {
-                      frames,
-                      settled:
-                        frames.every((frame) =>
-                          frame.released && frame.idle && frame.connected && frame.expanded === 'true'
-                        ) && frames.every((frame) => JSON.stringify(frame) === JSON.stringify(frames[0])),
-                    };
-                  });
-                  placement = observed;
-                  return observed.settled;
-                }, { timeout: 4_000 })
+                      const snapshot = () => {
+                        const css = getComputedStyle(panel);
+                        return {
+                          released: !node.matches(':hover, :active'),
+                          idle: [node, panel].every((owner) =>
+                            owner
+                              .getAnimations({ subtree: owner === node })
+                              .every(
+                                (animation) =>
+                                  !animation.pending &&
+                                  (animation.playState === 'finished' ||
+                                    animation.playState === 'idle')
+                              )
+                          ),
+                          connected: node.isConnected && panel.isConnected,
+                          expanded: node.getAttribute('aria-expanded'),
+                          rects: [node, panel].map((owner) => {
+                            const rect = owner.getBoundingClientRect();
+                            return [rect.x, rect.y, rect.width, rect.height];
+                          }),
+                          placement: [
+                            '--site-header-panel-left',
+                            '--site-header-panel-top',
+                            '--site-header-panel-max-width',
+                            '--site-header-panel-max-height',
+                          ].map((name) => css.getPropertyValue(name)),
+                        };
+                      };
+                      const frames: MenuPlacementFrame[] = [];
+                      for (let index = 0; index < 3; index++) {
+                        const { promise, resolve } = Promise.withResolvers<void>();
+                        requestAnimationFrame(() => resolve());
+                        await promise;
+                        frames.push(snapshot());
+                      }
+                      return {
+                        frames,
+                        settled:
+                          frames.every(
+                            (frame) =>
+                              frame.released &&
+                              frame.idle &&
+                              frame.connected &&
+                              frame.expanded === 'true'
+                          ) &&
+                          frames.every(
+                            (frame) => JSON.stringify(frame) === JSON.stringify(frames[0])
+                          ),
+                      };
+                    });
+                    placement = observed;
+                    return observed.settled;
+                  },
+                  { timeout: 4_000 }
+                )
                 .toBe(true)
             );
             traces.push({ preference, phase: 'menu-release-placement', placement });
@@ -1148,8 +1163,9 @@ async function captureItemPair(
                   offending: owner === current,
                   tag: owner.localName,
                   attributes: Object.fromEntries(
-                    ['id', 'role', 'data-pui-style', 'data-state', 'data-transition-state']
-                      .map((name) => [name, owner.getAttribute(name)])
+                    ['id', 'role', 'data-pui-style', 'data-state', 'data-transition-state'].map(
+                      (name) => [name, owner.getAttribute(name)]
+                    )
                   ),
                   rect: [rect.x, rect.y, rect.width, rect.height],
                   paint: {
@@ -1167,16 +1183,24 @@ async function captureItemPair(
                   animations: animations.slice(0, 16).map((animation) => ({
                     type: animation.constructor.name,
                     name: animation instanceof CSSAnimation ? animation.animationName : null,
-                    property: animation instanceof CSSTransition ? animation.transitionProperty : null,
-                    target: animation.effect instanceof KeyframeEffect && animation.effect.target instanceof Element
-                      ? geometryId(animation.effect.target) : null,
-                    currentTime: typeof animation.currentTime === 'number'
-                      ? animation.currentTime : String(animation.currentTime),
+                    property:
+                      animation instanceof CSSTransition ? animation.transitionProperty : null,
+                    target:
+                      animation.effect instanceof KeyframeEffect &&
+                      animation.effect.target instanceof Element
+                        ? geometryId(animation.effect.target)
+                        : null,
+                    currentTime:
+                      typeof animation.currentTime === 'number'
+                        ? animation.currentTime
+                        : String(animation.currentTime),
                     pending: animation.pending,
                     playState: animation.playState,
                     playbackRate: animation.playbackRate,
-                    startTime: typeof animation.startTime === 'number'
-                      ? animation.startTime : String(animation.startTime),
+                    startTime:
+                      typeof animation.startTime === 'number'
+                        ? animation.startTime
+                        : String(animation.startTime),
                   })),
                   animationsTruncated: animations.length > 16,
                 });
@@ -1470,22 +1494,26 @@ for (const theme of ['light', 'dark'] as const) {
             trigger.evaluate(
               (node) =>
                 !node.matches(':hover, :active') &&
-                node.getAnimations({ subtree: true }).every(
-                  (animation) =>
-                    !animation.pending &&
-                    (animation.playState === 'finished' || animation.playState === 'idle')
-                )
+                node
+                  .getAnimations({ subtree: true })
+                  .every(
+                    (animation) =>
+                      !animation.pending &&
+                      (animation.playState === 'finished' || animation.playState === 'idle')
+                  )
             )
           )
           .toBe(true);
         await expect
           .poll(() =>
             content.evaluate((node) =>
-              node.getAnimations({ subtree: true }).every(
-                (animation) =>
-                  !animation.pending &&
-                  (animation.playState === 'finished' || animation.playState === 'idle')
-              )
+              node
+                .getAnimations({ subtree: true })
+                .every(
+                  (animation) =>
+                    !animation.pending &&
+                    (animation.playState === 'finished' || animation.playState === 'idle')
+                )
             )
           )
           .toBe(true);
@@ -1655,7 +1683,17 @@ for (const theme of ['light', 'dark'] as const) {
           writeFile(
             path.join(output, `items-${theme}-final.json`),
             JSON.stringify(
-              { source, theme, native, opener, traces, external, failed, secondaryErrors, contextClosed },
+              {
+                source,
+                theme,
+                native,
+                opener,
+                traces,
+                external,
+                failed,
+                secondaryErrors,
+                contextClosed,
+              },
               null,
               2
             )

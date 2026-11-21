@@ -1,0 +1,866 @@
+{
+  "schemaVersion": 1,
+  "started": "2026-11-20T21:26:39.823Z",
+  "probeSha256": "fb6d52bd2fb5f2a94b7caa83ac457a4b1906abde18feca03f60cd46d968a7d89",
+  "sources": [
+    {
+      "label": "before",
+      "sha": "19d175f454468fa27364c8283e084f3bb7a1016b",
+      "tree": "d8403f0f516765ab9725e4d7fc48e6af9fcb8a69",
+      "bundleSha256": "921f6986a95a1faaca1b2b78534c4306987320ae2745068563f9ef9c2534da57",
+      "inputs": {
+        "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": {
+          "sha256": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+          "blob": "63543476cd7cc3f35556b71e94b81d421871e222"
+        },
+        "packages/adapters/base/src/material/contact-profile.ts": {
+          "sha256": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+          "blob": "d84b08103e2e61c4437a8f8a82f4dde068063db5"
+        },
+        "packages/core/src/handles.ts": {
+          "sha256": "1136fa1f99728541ba9fd2bd1c5987bac675e505d65e4272dac1a397d487b6a5",
+          "blob": "15ef2f2677a037a2091b83c3c37973487ea89c8e"
+        },
+        "packages/core/src/spec/feedback/placeholder.ts": {
+          "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052",
+          "blob": "dd90ff5e5f46517d375ccf2b147c0885b436cb71"
+        },
+        "packages/core/src/spec/feedback/application-role.ts": {
+          "sha256": "4dcbb148476982d560f1957bb5cc49f4e53fc9cdb0027b2b14681d647711abe1",
+          "blob": "e138cffe82feae1480bd4fd7f0e5234d6b7820d4"
+        },
+        "packages/core/src/spec/feedback/semantic-merge.ts": {
+          "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+          "blob": "2000e3fb91fd0f2f40fef252105facb52b774993"
+        },
+        "packages/core/src/spec/feedback/tokens.ts": {
+          "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3",
+          "blob": "3d8eb3e1f9af9eeda621e25ce9f1ffdad80a5804"
+        },
+        "packages/core/src/spec/feedback/root-effect.ts": {
+          "sha256": "38c07aca4122c82f2cb0ac5dac470e52c784a1f2553d99f036a5684d5601cdbb",
+          "blob": "eac47be3da2e5573c9bfd94abc976fea0fc13722"
+        },
+        "packages/core/src/internal.ts": {
+          "sha256": "96c57e2fc6a68a197118b0f5143de1415423bd5fb8c86ab42994bc8a7d4b1855",
+          "blob": "66e6dc82f121e46da9e91069883abab326665cd6"
+        },
+        "packages/core/src/prototype.ts": {
+          "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc",
+          "blob": "98f09837478e1cdb668a88f826a31792f42c08b1"
+        },
+        "packages/core/src/anatomy.ts": {
+          "sha256": "7223692e13cd0374df56bd0a4c00fc5f37ef8b10ef6e97e10fc1aaa8960ea5aa",
+          "blob": "9ad879e3560ddb8d00ad2808532c0033b3fd40cd"
+        },
+        "packages/core/src/spec/feedback/recorder.ts": {
+          "sha256": "d0622791924858f06da45c936bf847752ab1451a2adf2f9539cafef4f8229edb",
+          "blob": "bb99d51b1606d96bdb41177551363e0ab8757d12"
+        },
+        "packages/core/src/spec/feedback/style.ts": {
+          "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc",
+          "blob": "cc3fd2b507de4e9b2d87268dc77b28224cc6760f"
+        },
+        "packages/core/src/spec/feedback/index.ts": {
+          "sha256": "5615a1d8614eafa79cd3c245317d433208f81262bc2bf19d153e460f5d1105a3",
+          "blob": "9d4f5ba12ec60cabe96843dbe21c834034d05ddc"
+        },
+        "packages/core/src/spec/template.ts": {
+          "sha256": "4e2e9f13e9a273ad42140591bfa43d4bb0204578bdc40d95b596146bc34de7f4",
+          "blob": "f4a469c3c60548a2081b99d1047636b8bba676eb"
+        },
+        "packages/core/src/spec/owned-template-blueprint.ts": {
+          "sha256": "bf0308e95a26d83cdc730e2a3b0e29c9557da8eaa658de9a99ac9b27a2cb332b",
+          "blob": "0bd2e688b08006aab57931aeaa52373dbd762558"
+        },
+        "packages/core/src/spec/index.ts": {
+          "sha256": "24f03a4f1c9ea9b526a2defa35239fc920e34d2b48e41c106f409f1167694bb3",
+          "blob": "1a08c1367b78a7ae75d311525fa6d1fbbe1f990f"
+        },
+        "packages/core/src/effects/types.ts": {
+          "sha256": "dcaeed5ba405406d18ad15e7c86e9a1f76fa2e988b719b5f733e7b6fed75c471",
+          "blob": "871a3a298d5517b797da2a6f60a3089fe1ddbb26"
+        },
+        "packages/core/src/effects/index.ts": {
+          "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+          "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+        },
+        "packages/core/src/module/types.ts": {
+          "sha256": "07feee9d49bd7ae7e78cf2329edb6ded3d8b909c9a4c261ae8fc04df26a912df",
+          "blob": "1432584f5e7bd6af3fc79d2869d9ee0f25fae6e8"
+        },
+        "packages/core/src/module/index.ts": {
+          "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+          "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+        },
+        "packages/core/src/errors/codes.ts": {
+          "sha256": "1e35e7e6a995ef0b484ea4fb3852f2aaa8579340316f15e27ff4d048d567268f",
+          "blob": "c9aa31ad8d8d163f0b9f24ede17a260e014347a9"
+        },
+        "packages/core/src/errors/index.ts": {
+          "sha256": "652c62a961d7e676deda59136735193f362515d55132038ea572724e4b3f4b9d",
+          "blob": "6492fac9dd5d7b861b7fb0662898e76e76c21472"
+        },
+        "packages/core/src/state.ts": {
+          "sha256": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f",
+          "blob": "23c28110fb5d45c29a430d4685a7888278976ae5"
+        },
+        "packages/core/src/context.ts": {
+          "sha256": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+          "blob": "5c0b015319482d9bfa4772f04721a14608760dad"
+        },
+        "packages/core/src/a11y.ts": {
+          "sha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+          "blob": "fcd467d6218f61aa38485193d6c9f54318a361d4"
+        },
+        "packages/core/src/focus.ts": {
+          "sha256": "1d9b84a5fb1e58187ccf7e3a90bf66c3d270e4c0f610b7c784d7b3d75cef7941",
+          "blob": "bc4aa539f34dfe51647075321fe70e487e28395b"
+        },
+        "packages/core/src/boundary.ts": {
+          "sha256": "41008ba239136e46494041787d6b8ca265fb1cdcf02ccfec0fa7e3396cc6de63",
+          "blob": "ef9face05ce2a81df5743692a11e953b366f9dc6"
+        },
+        "packages/core/src/hit-participation.ts": {
+          "sha256": "d2e293f4887dc8d2717f8f7858e07fd95d5906706d7f40e012d8c13ef5f93a43",
+          "blob": "d6e034ac1c08cfebb63c8a0e0307ecbaacc78a7d"
+        },
+        "packages/core/src/overlay.ts": {
+          "sha256": "020ed59cd9fe99ed3ece6a9e48b3f702b2449cace10ba1d289fca4b3924405d2",
+          "blob": "a41e9a0fc18e339af7941e54eaaec6316d65eadc"
+        },
+        "packages/core/src/positioning.ts": {
+          "sha256": "d0336ed3c5ecf5ac1082116029374443ece6e5db746ad2f73d60d375097265d4",
+          "blob": "4a33fbfaa4d024c6a201b582aa649357d1984707"
+        },
+        "packages/core/src/scroll.ts": {
+          "sha256": "7baf541113e190a230ab5b80ae59844b35705e7c49698440d23870d4b5729c79",
+          "blob": "815a6563e21dbf6d49c07de8ce0f04f32a365fe6"
+        },
+        "packages/core/src/move.ts": {
+          "sha256": "4fc461f2f14b893649b3e6f34a42edf24fe65c54e70a31e5269625586e698d30",
+          "blob": "8db67f37b54d8c48dbf71def8ae2ce208cb410d6"
+        },
+        "packages/core/src/collection.ts": {
+          "sha256": "a4a451c037b2114c7f9c94c814c2f09abc584890e24004d55e8b49fe8792c4bc",
+          "blob": "4f055258656fece360b4c1f5285276aa2526bca2"
+        },
+        "packages/core/src/delay.ts": {
+          "sha256": "b2111d833c7d46e48e06a4816eb1b8638afccb1b98cd630b1e36aea611b8dbfe",
+          "blob": "e3feb8e3d771aa4c41f4cf1a7ddf0be6c41185e5"
+        },
+        "packages/core/src/text-control.ts": {
+          "sha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+          "blob": "9639fd2c82cee28d8d8c7c85a0569cec5bb26677"
+        },
+        "packages/core/src/caps/token.ts": {
+          "sha256": "f1e92dece196a380477006d905f5b2abc528f8eba41caa7aeaee1edf88e9df79",
+          "blob": "63ad39e723c724fb30ad25c83775e6672f99dfdf"
+        },
+        "packages/core/src/caps/host.ts": {
+          "sha256": "b2542e965a6c0f548003662f931b505f063118cd4036cfbabf27767462e9e81d",
+          "blob": "002173ba9da01775590c00937d868180950355f8"
+        },
+        "packages/core/src/caps/index.ts": {
+          "sha256": "a0833fa73b44034da91bff352029f01181427cdb21fdc3be50fdbf7bafa387ef",
+          "blob": "a5ea97b480b78043bed8741059e49be6f29b8485"
+        },
+        "packages/core/src/image-view.ts": {
+          "sha256": "3a6df9612b0982a50ec02d2544342dc88d431ea91a49d5207704cbc723a18673",
+          "blob": "d7bbb6a1697b737d2c1fc7a535f07902aac26740"
+        },
+        "packages/core/src/control-label.ts": {
+          "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6",
+          "blob": "12ac5bb0c2b9c720bd305ea1e135fa9b5548b1e1"
+        },
+        "packages/core/src/material.ts": {
+          "sha256": "28b285b8a0347fb3fdebfec9b3eebe0002f48a6817559dd9d9ce08f10eb1f78c",
+          "blob": "0a44bacc2f46b7fa3b48a35e8ebcf90b964a9d9f"
+        },
+        "packages/core/src/axis-input.ts": {
+          "sha256": "d8e836c770dacb40e2fe3d98c028a35be24648152b862f188d7409e0d53de0a0",
+          "blob": "c0adb122871b7eb42ee38cd0b12e050e24b5b283"
+        },
+        "packages/core/src/context-menu-input.ts": {
+          "sha256": "0c276fd43a01dd4539284e1e0242d71695c122a1f6b16acdf2f8144c6da36da5",
+          "blob": "33e876b2ff3987a671395055bb38b26cd1a0269a"
+        },
+        "packages/core/src/native-link.ts": {
+          "sha256": "3b9b67e934ff43b09bdd01c0c208a9fcd975d02ce0f36f842cf07844e6ad29c4",
+          "blob": "b739e62ec353c8496e30782c54a1cc488f45bd7e"
+        },
+        "packages/core/src/resident-motion.ts": {
+          "sha256": "11cda0d9f4490745959ce1f5365965b9613c4d95cef22cb97494f9518abbc909",
+          "blob": "a49f85ef907da055ab4a1a6810d899b8101b96e6"
+        },
+        "packages/core/src/presence-presentation.ts": {
+          "sha256": "8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398",
+          "blob": "befcce3e43ec967f3358d3c7c89feaadab0daa05"
+        },
+        "packages/core/src/index.ts": {
+          "sha256": "f52052991bb9960ed6af61908ee8cdbfd1459e71193b45d545354d7daaebd024",
+          "blob": "966968b8fc399f7c391e51a892b32c496eb5609b"
+        },
+        "packages/adapters/base/src/material/style.ts": {
+          "sha256": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+          "blob": "6f677310e3829889afc038c726228bc3e19ec286"
+        },
+        "packages/adapters/base/src/material/style-tint-profile.ts": {
+          "sha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+          "blob": "d84b4869afdc86fae962801b46a18579ed1daf47"
+        },
+        "packages/adapters/base/src/material/prefilter.ts": {
+          "sha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+          "blob": "abfd224e81eb33994f167ab789729de445d2afaf"
+        },
+        "packages/adapters/base/src/material/program.ts": {
+          "sha256": "1f3da22261d3a1a2c295ecd6adfc1983928730f8467c33fe23ec60eee2a48115",
+          "blob": "82007f149b28119767ba441605319e50432234ae"
+        }
+      }
+    },
+    {
+      "label": "after",
+      "sha": "a514f3a3b1ea2f9087351a97d9b3c3f67a715df0",
+      "tree": "c41eba853ddebc3d6c8e848dab03c237b0420cb1",
+      "bundleSha256": "c94814e7b9828649ff435e1c769f9c38cb8ea04160966325f7f45b2b973d3be1",
+      "inputs": {
+        "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": {
+          "sha256": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+          "blob": "63543476cd7cc3f35556b71e94b81d421871e222"
+        },
+        "packages/adapters/base/src/material/contact-profile.ts": {
+          "sha256": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+          "blob": "d84b08103e2e61c4437a8f8a82f4dde068063db5"
+        },
+        "packages/core/src/handles.ts": {
+          "sha256": "1136fa1f99728541ba9fd2bd1c5987bac675e505d65e4272dac1a397d487b6a5",
+          "blob": "15ef2f2677a037a2091b83c3c37973487ea89c8e"
+        },
+        "packages/core/src/spec/feedback/placeholder.ts": {
+          "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052",
+          "blob": "dd90ff5e5f46517d375ccf2b147c0885b436cb71"
+        },
+        "packages/core/src/spec/feedback/application-role.ts": {
+          "sha256": "4dcbb148476982d560f1957bb5cc49f4e53fc9cdb0027b2b14681d647711abe1",
+          "blob": "e138cffe82feae1480bd4fd7f0e5234d6b7820d4"
+        },
+        "packages/core/src/spec/feedback/semantic-merge.ts": {
+          "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+          "blob": "2000e3fb91fd0f2f40fef252105facb52b774993"
+        },
+        "packages/core/src/spec/feedback/tokens.ts": {
+          "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3",
+          "blob": "3d8eb3e1f9af9eeda621e25ce9f1ffdad80a5804"
+        },
+        "packages/core/src/spec/feedback/root-effect.ts": {
+          "sha256": "38c07aca4122c82f2cb0ac5dac470e52c784a1f2553d99f036a5684d5601cdbb",
+          "blob": "eac47be3da2e5573c9bfd94abc976fea0fc13722"
+        },
+        "packages/core/src/internal.ts": {
+          "sha256": "96c57e2fc6a68a197118b0f5143de1415423bd5fb8c86ab42994bc8a7d4b1855",
+          "blob": "66e6dc82f121e46da9e91069883abab326665cd6"
+        },
+        "packages/core/src/prototype.ts": {
+          "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc",
+          "blob": "98f09837478e1cdb668a88f826a31792f42c08b1"
+        },
+        "packages/core/src/anatomy.ts": {
+          "sha256": "7223692e13cd0374df56bd0a4c00fc5f37ef8b10ef6e97e10fc1aaa8960ea5aa",
+          "blob": "9ad879e3560ddb8d00ad2808532c0033b3fd40cd"
+        },
+        "packages/core/src/spec/feedback/recorder.ts": {
+          "sha256": "d0622791924858f06da45c936bf847752ab1451a2adf2f9539cafef4f8229edb",
+          "blob": "bb99d51b1606d96bdb41177551363e0ab8757d12"
+        },
+        "packages/core/src/spec/feedback/style.ts": {
+          "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc",
+          "blob": "cc3fd2b507de4e9b2d87268dc77b28224cc6760f"
+        },
+        "packages/core/src/spec/feedback/index.ts": {
+          "sha256": "5615a1d8614eafa79cd3c245317d433208f81262bc2bf19d153e460f5d1105a3",
+          "blob": "9d4f5ba12ec60cabe96843dbe21c834034d05ddc"
+        },
+        "packages/core/src/spec/template.ts": {
+          "sha256": "4e2e9f13e9a273ad42140591bfa43d4bb0204578bdc40d95b596146bc34de7f4",
+          "blob": "f4a469c3c60548a2081b99d1047636b8bba676eb"
+        },
+        "packages/core/src/spec/owned-template-blueprint.ts": {
+          "sha256": "bf0308e95a26d83cdc730e2a3b0e29c9557da8eaa658de9a99ac9b27a2cb332b",
+          "blob": "0bd2e688b08006aab57931aeaa52373dbd762558"
+        },
+        "packages/core/src/spec/index.ts": {
+          "sha256": "24f03a4f1c9ea9b526a2defa35239fc920e34d2b48e41c106f409f1167694bb3",
+          "blob": "1a08c1367b78a7ae75d311525fa6d1fbbe1f990f"
+        },
+        "packages/core/src/effects/types.ts": {
+          "sha256": "dcaeed5ba405406d18ad15e7c86e9a1f76fa2e988b719b5f733e7b6fed75c471",
+          "blob": "871a3a298d5517b797da2a6f60a3089fe1ddbb26"
+        },
+        "packages/core/src/effects/index.ts": {
+          "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+          "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+        },
+        "packages/core/src/module/types.ts": {
+          "sha256": "07feee9d49bd7ae7e78cf2329edb6ded3d8b909c9a4c261ae8fc04df26a912df",
+          "blob": "1432584f5e7bd6af3fc79d2869d9ee0f25fae6e8"
+        },
+        "packages/core/src/module/index.ts": {
+          "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+          "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+        },
+        "packages/core/src/errors/codes.ts": {
+          "sha256": "1e35e7e6a995ef0b484ea4fb3852f2aaa8579340316f15e27ff4d048d567268f",
+          "blob": "c9aa31ad8d8d163f0b9f24ede17a260e014347a9"
+        },
+        "packages/core/src/errors/index.ts": {
+          "sha256": "652c62a961d7e676deda59136735193f362515d55132038ea572724e4b3f4b9d",
+          "blob": "6492fac9dd5d7b861b7fb0662898e76e76c21472"
+        },
+        "packages/core/src/state.ts": {
+          "sha256": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f",
+          "blob": "23c28110fb5d45c29a430d4685a7888278976ae5"
+        },
+        "packages/core/src/context.ts": {
+          "sha256": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+          "blob": "5c0b015319482d9bfa4772f04721a14608760dad"
+        },
+        "packages/core/src/a11y.ts": {
+          "sha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+          "blob": "fcd467d6218f61aa38485193d6c9f54318a361d4"
+        },
+        "packages/core/src/focus.ts": {
+          "sha256": "1d9b84a5fb1e58187ccf7e3a90bf66c3d270e4c0f610b7c784d7b3d75cef7941",
+          "blob": "bc4aa539f34dfe51647075321fe70e487e28395b"
+        },
+        "packages/core/src/boundary.ts": {
+          "sha256": "41008ba239136e46494041787d6b8ca265fb1cdcf02ccfec0fa7e3396cc6de63",
+          "blob": "ef9face05ce2a81df5743692a11e953b366f9dc6"
+        },
+        "packages/core/src/hit-participation.ts": {
+          "sha256": "d2e293f4887dc8d2717f8f7858e07fd95d5906706d7f40e012d8c13ef5f93a43",
+          "blob": "d6e034ac1c08cfebb63c8a0e0307ecbaacc78a7d"
+        },
+        "packages/core/src/overlay.ts": {
+          "sha256": "020ed59cd9fe99ed3ece6a9e48b3f702b2449cace10ba1d289fca4b3924405d2",
+          "blob": "a41e9a0fc18e339af7941e54eaaec6316d65eadc"
+        },
+        "packages/core/src/positioning.ts": {
+          "sha256": "d0336ed3c5ecf5ac1082116029374443ece6e5db746ad2f73d60d375097265d4",
+          "blob": "4a33fbfaa4d024c6a201b582aa649357d1984707"
+        },
+        "packages/core/src/scroll.ts": {
+          "sha256": "7baf541113e190a230ab5b80ae59844b35705e7c49698440d23870d4b5729c79",
+          "blob": "815a6563e21dbf6d49c07de8ce0f04f32a365fe6"
+        },
+        "packages/core/src/move.ts": {
+          "sha256": "4fc461f2f14b893649b3e6f34a42edf24fe65c54e70a31e5269625586e698d30",
+          "blob": "8db67f37b54d8c48dbf71def8ae2ce208cb410d6"
+        },
+        "packages/core/src/collection.ts": {
+          "sha256": "a4a451c037b2114c7f9c94c814c2f09abc584890e24004d55e8b49fe8792c4bc",
+          "blob": "4f055258656fece360b4c1f5285276aa2526bca2"
+        },
+        "packages/core/src/delay.ts": {
+          "sha256": "b2111d833c7d46e48e06a4816eb1b8638afccb1b98cd630b1e36aea611b8dbfe",
+          "blob": "e3feb8e3d771aa4c41f4cf1a7ddf0be6c41185e5"
+        },
+        "packages/core/src/text-control.ts": {
+          "sha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+          "blob": "9639fd2c82cee28d8d8c7c85a0569cec5bb26677"
+        },
+        "packages/core/src/caps/token.ts": {
+          "sha256": "f1e92dece196a380477006d905f5b2abc528f8eba41caa7aeaee1edf88e9df79",
+          "blob": "63ad39e723c724fb30ad25c83775e6672f99dfdf"
+        },
+        "packages/core/src/caps/host.ts": {
+          "sha256": "b2542e965a6c0f548003662f931b505f063118cd4036cfbabf27767462e9e81d",
+          "blob": "002173ba9da01775590c00937d868180950355f8"
+        },
+        "packages/core/src/caps/index.ts": {
+          "sha256": "a0833fa73b44034da91bff352029f01181427cdb21fdc3be50fdbf7bafa387ef",
+          "blob": "a5ea97b480b78043bed8741059e49be6f29b8485"
+        },
+        "packages/core/src/image-view.ts": {
+          "sha256": "3a6df9612b0982a50ec02d2544342dc88d431ea91a49d5207704cbc723a18673",
+          "blob": "d7bbb6a1697b737d2c1fc7a535f07902aac26740"
+        },
+        "packages/core/src/control-label.ts": {
+          "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6",
+          "blob": "12ac5bb0c2b9c720bd305ea1e135fa9b5548b1e1"
+        },
+        "packages/core/src/material.ts": {
+          "sha256": "28b285b8a0347fb3fdebfec9b3eebe0002f48a6817559dd9d9ce08f10eb1f78c",
+          "blob": "0a44bacc2f46b7fa3b48a35e8ebcf90b964a9d9f"
+        },
+        "packages/core/src/axis-input.ts": {
+          "sha256": "d8e836c770dacb40e2fe3d98c028a35be24648152b862f188d7409e0d53de0a0",
+          "blob": "c0adb122871b7eb42ee38cd0b12e050e24b5b283"
+        },
+        "packages/core/src/context-menu-input.ts": {
+          "sha256": "0c276fd43a01dd4539284e1e0242d71695c122a1f6b16acdf2f8144c6da36da5",
+          "blob": "33e876b2ff3987a671395055bb38b26cd1a0269a"
+        },
+        "packages/core/src/native-link.ts": {
+          "sha256": "3b9b67e934ff43b09bdd01c0c208a9fcd975d02ce0f36f842cf07844e6ad29c4",
+          "blob": "b739e62ec353c8496e30782c54a1cc488f45bd7e"
+        },
+        "packages/core/src/resident-motion.ts": {
+          "sha256": "11cda0d9f4490745959ce1f5365965b9613c4d95cef22cb97494f9518abbc909",
+          "blob": "a49f85ef907da055ab4a1a6810d899b8101b96e6"
+        },
+        "packages/core/src/presence-presentation.ts": {
+          "sha256": "8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398",
+          "blob": "befcce3e43ec967f3358d3c7c89feaadab0daa05"
+        },
+        "packages/core/src/index.ts": {
+          "sha256": "f52052991bb9960ed6af61908ee8cdbfd1459e71193b45d545354d7daaebd024",
+          "blob": "966968b8fc399f7c391e51a892b32c496eb5609b"
+        },
+        "packages/adapters/base/src/material/style.ts": {
+          "sha256": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+          "blob": "6f677310e3829889afc038c726228bc3e19ec286"
+        },
+        "packages/adapters/base/src/material/style-tint-profile.ts": {
+          "sha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+          "blob": "d84b4869afdc86fae962801b46a18579ed1daf47"
+        },
+        "packages/adapters/base/src/material/prefilter.ts": {
+          "sha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+          "blob": "abfd224e81eb33994f167ab789729de445d2afaf"
+        },
+        "packages/adapters/base/src/material/program.ts": {
+          "sha256": "25706f5254d6f6d6c31413d53baf7b46aafdd15c463648ccdf48ce0031ffa5b2",
+          "blob": "5a7db4c5701e9599c2d02dfc8ca60e807b298358"
+        }
+      }
+    }
+  ],
+  "environment": {
+    "node": "v24.22.3",
+    "headless": true,
+    "browser": "157.0.8103.78",
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "amdSwitchable": false,
+        "canSupportThreadedTextureMailbox": false,
+        "directRenderingVersion": "",
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_robust_resource_initialization GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_translated_shader_source GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_rgba8 GL_ARM_shader_framebuffer_fetch GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clear_texture GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_semaphore_fd GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_paletted_texture GL_OES_copy_image GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 GL_QCOM_texture_lod_bias ",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glResetNotificationStrategy": 33362,
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+        "glWsExtensions": "EGL_EXT_create_context_robustness EGL_ANGLE_surface_orientation EGL_KHR_create_context EGL_KHR_image EGL_KHR_image_base EGL_EXT_image_gl_colorspace EGL_KHR_gl_colorspace EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_get_all_proc_addresses EGL_KHR_fence_sync EGL_KHR_wait_sync EGL_ANGLE_create_context_webgl_compatibility EGL_CHROMIUM_create_context_bind_generates_resource EGL_KHR_swap_buffers_with_damage EGL_EXT_pixel_format_float EGL_KHR_surfaceless_context EGL_ANGLE_display_texture_share_group EGL_ANGLE_display_semaphore_share_group EGL_ANGLE_create_context_client_arrays EGL_ANGLE_program_cache_control EGL_ANGLE_robust_resource_initialization EGL_ANGLE_create_context_extensions_enabled EGL_ANDROID_blob_cache EGL_ANDROID_recordable EGL_ANGLE_create_context_backwards_compatible EGL_KHR_no_config_context EGL_IMG_context_priority EGL_KHR_create_context_no_error EGL_KHR_reusable_sync EGL_EXT_buffer_age EGL_ANGLE_create_surface_swap_interval EGL_ANGLE_vulkan_image EGL_KHR_partial_update EGL_ANGLE_global_fence_sync EGL_ANGLE_memory_usage_report ",
+        "glWsVendor": "Google Inc. (Google)",
+        "glWsVersion": "1.5 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+        "hardwareSupportsVulkan": false,
+        "inProcessGpu": false,
+        "initializationTime": 0.011159,
+        "isAsan": false,
+        "isClangCoverage": false,
+        "jpegDecodeAcceleratorSupported": false,
+        "maxMsaaSamples": "4",
+        "optimus": false,
+        "passthroughCmdDecoder": true,
+        "pixelShaderVersion": "3.00",
+        "processCrashCount": 0,
+        "sandboxed": false,
+        "skiaBackendType": "None",
+        "subpixelFontRendering": true,
+        "targetCpuBits": 64,
+        "vertexShaderVersion": "3.00",
+        "visibilityCallbackCallCount": 0
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      },
+      "driverBugWorkarounds": [],
+      "videoDecoding": [],
+      "videoEncoding": []
+    }
+  },
+  "failures": [],
+  "limitations": [
+    "Untimed program-lifetime control on one real browser/renderer, not a performance or physical display claim.",
+    "Only application getError calls are observed; no extra call consumes the GL error."
+  ],
+  "evidence": [
+    {
+      "label": "before",
+      "first": {
+        "success": true,
+        "imageSha256": "7b307ac0e6380532ab07c6456bdd8a70682e2e9954ccf5bd9e5d30e2389d541b",
+        "imageSize": {
+          "width": 64,
+          "height": 32
+        },
+        "gpuPreparations": 1
+      },
+      "second": {
+        "success": false,
+        "error": "Error: gpu-prefilter-failed",
+        "resources": {
+          "renders": 1,
+          "programBuilds": 2,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "sourcePreparationMilliseconds": 11.700000000011642,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 1,
+          "gpuSourcePreparationSubmitMilliseconds": 11.700000000011642,
+          "prefilterProgramBuilds": 2,
+          "readbackAllocations": 1,
+          "readbackMilliseconds": 92.69999999995343,
+          "contrastMilliseconds": 0.7000000000116415,
+          "renderMilliseconds": 181.5,
+          "encodeMilliseconds": 0.7999999999883585,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0
+        }
+      },
+      "trace": [
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": 1
+        },
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": 2
+        },
+        {
+          "phase": "clear",
+          "call": "deleteProgram",
+          "program": 1
+        },
+        {
+          "phase": "clear",
+          "call": "deleteProgram",
+          "program": 2
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": 2
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": 3
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": 2
+        },
+        {
+          "phase": "second",
+          "call": "deleteProgram",
+          "program": 3
+        },
+        {
+          "phase": "second",
+          "call": "deleteProgram",
+          "program": 4
+        }
+      ],
+      "errors": [
+        {
+          "phase": "second",
+          "code": 1282,
+          "afterCall": 8
+        }
+      ],
+      "disposalError": null,
+      "frame": {
+        "sourceWidth": 416,
+        "sourceHeight": 161,
+        "sourceBytes": 267904,
+        "geometry": {
+          "width": 64,
+          "height": 32,
+          "radius": 16,
+          "dpr": 1,
+          "bounds": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "tint": "style-fill",
+        "fill": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "foreground": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "afterClear": {
+        "renders": 1,
+        "programBuilds": 1,
+        "sourceUploads": 1,
+        "sourcePreparations": 1,
+        "sourcePreparationMilliseconds": 11.700000000011642,
+        "sourcePreparationCacheHits": 0,
+        "cpuSourcePreparations": 0,
+        "cpuSourcePreparationMilliseconds": 0,
+        "gpuSourcePreparations": 1,
+        "gpuSourcePreparationSubmitMilliseconds": 11.700000000011642,
+        "prefilterProgramBuilds": 1,
+        "readbackAllocations": 1,
+        "readbackMilliseconds": 92.69999999995343,
+        "contrastMilliseconds": 0.7000000000116415,
+        "renderMilliseconds": 181.5,
+        "encodeMilliseconds": 0.7999999999883585,
+        "sourcePreparationCacheEntries": 0,
+        "sourcePreparationCacheBytes": 0,
+        "sourcePreparationCpuCacheBytes": 0,
+        "sourcePreparationGpuCacheBytes": 0
+      },
+      "lastProgramUseAfterClear": 2,
+      "afterDispose": {
+        "renders": 1,
+        "programBuilds": 2,
+        "sourceUploads": 1,
+        "sourcePreparations": 1,
+        "sourcePreparationMilliseconds": 11.700000000011642,
+        "sourcePreparationCacheHits": 0,
+        "cpuSourcePreparations": 0,
+        "cpuSourcePreparationMilliseconds": 0,
+        "gpuSourcePreparations": 1,
+        "gpuSourcePreparationSubmitMilliseconds": 11.700000000011642,
+        "prefilterProgramBuilds": 2,
+        "readbackAllocations": 1,
+        "readbackMilliseconds": 92.69999999995343,
+        "contrastMilliseconds": 0.7000000000116415,
+        "renderMilliseconds": 181.5,
+        "encodeMilliseconds": 0.7999999999883585,
+        "sourcePreparationCacheEntries": 0,
+        "sourcePreparationCacheBytes": 0,
+        "sourcePreparationCpuCacheBytes": 0,
+        "sourcePreparationGpuCacheBytes": 0
+      },
+      "reboundRetiredProgram": true
+    },
+    {
+      "label": "after",
+      "first": {
+        "success": true,
+        "imageSha256": "7b307ac0e6380532ab07c6456bdd8a70682e2e9954ccf5bd9e5d30e2389d541b",
+        "imageSize": {
+          "width": 64,
+          "height": 32
+        },
+        "gpuPreparations": 1
+      },
+      "second": {
+        "success": true,
+        "imageSha256": "7b307ac0e6380532ab07c6456bdd8a70682e2e9954ccf5bd9e5d30e2389d541b",
+        "imageSize": {
+          "width": 64,
+          "height": 32
+        },
+        "gpuPreparations": 2
+      },
+      "trace": [
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": 1
+        },
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "first",
+          "call": "useProgram",
+          "program": 2
+        },
+        {
+          "phase": "clear",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "clear",
+          "call": "deleteProgram",
+          "program": 1
+        },
+        {
+          "phase": "clear",
+          "call": "deleteProgram",
+          "program": 2
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": 3
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "second",
+          "call": "useProgram",
+          "program": 4
+        },
+        {
+          "phase": "dispose",
+          "call": "useProgram",
+          "program": null
+        },
+        {
+          "phase": "dispose",
+          "call": "deleteProgram",
+          "program": 3
+        },
+        {
+          "phase": "dispose",
+          "call": "deleteProgram",
+          "program": 4
+        }
+      ],
+      "errors": [],
+      "disposalError": null,
+      "frame": {
+        "sourceWidth": 416,
+        "sourceHeight": 161,
+        "sourceBytes": 267904,
+        "geometry": {
+          "width": 64,
+          "height": 32,
+          "radius": 16,
+          "dpr": 1,
+          "bounds": [
+            0,
+            0,
+            1,
+            1
+          ]
+        },
+        "tint": "style-fill",
+        "fill": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "foreground": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "afterClear": {
+        "renders": 1,
+        "programBuilds": 1,
+        "sourceUploads": 1,
+        "sourcePreparations": 1,
+        "sourcePreparationMilliseconds": 9.700000000011642,
+        "sourcePreparationCacheHits": 0,
+        "cpuSourcePreparations": 0,
+        "cpuSourcePreparationMilliseconds": 0,
+        "gpuSourcePreparations": 1,
+        "gpuSourcePreparationSubmitMilliseconds": 9.700000000011642,
+        "prefilterProgramBuilds": 1,
+        "readbackAllocations": 1,
+        "readbackMilliseconds": 77.30000000004657,
+        "contrastMilliseconds": 0.6999999999534339,
+        "renderMilliseconds": 142.59999999997672,
+        "encodeMilliseconds": 0.5,
+        "sourcePreparationCacheEntries": 0,
+        "sourcePreparationCacheBytes": 0,
+        "sourcePreparationCpuCacheBytes": 0,
+        "sourcePreparationGpuCacheBytes": 0
+      },
+      "lastProgramUseAfterClear": null,
+      "afterDispose": {
+        "renders": 2,
+        "programBuilds": 2,
+        "sourceUploads": 2,
+        "sourcePreparations": 2,
+        "sourcePreparationMilliseconds": 15.099999999976717,
+        "sourcePreparationCacheHits": 0,
+        "cpuSourcePreparations": 0,
+        "cpuSourcePreparationMilliseconds": 0,
+        "gpuSourcePreparations": 2,
+        "gpuSourcePreparationSubmitMilliseconds": 15.099999999976717,
+        "prefilterProgramBuilds": 2,
+        "readbackAllocations": 2,
+        "readbackMilliseconds": 151.90000000002328,
+        "contrastMilliseconds": 0.6999999999534339,
+        "renderMilliseconds": 273.19999999995343,
+        "encodeMilliseconds": 1,
+        "sourcePreparationCacheEntries": 0,
+        "sourcePreparationCacheBytes": 0,
+        "sourcePreparationCpuCacheBytes": 0,
+        "sourcePreparationGpuCacheBytes": 0
+      },
+      "reboundRetiredProgram": false
+    }
+  ],
+  "ended": "2026-11-20T21:26:41.796Z"
+}

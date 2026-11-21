@@ -33,6 +33,133 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe('visible in-app canvas backdrop lease', () => {
+  it('owns the exact readback range without copying or exposing bytes outside that snapshot', () => {
+    const { canvas, lease } = fixture();
+    const allocation = new Uint8ClampedArray(400 * 240 * 4 + 16);
+    const data = allocation.subarray(7, allocation.length - 9);
+    data.fill(255);
+    data[0] = 37;
+    Object.assign(canvas.getContext('2d')!, { getImageData: () => ({ data }) });
+    lease.draw(() => {});
+    const frame = lease.current()!;
+    expect(frame.pixels).toBeInstanceOf(Uint8Array);
+    expect(frame.pixels.buffer).toBe(data.buffer);
+    expect(frame.pixels.byteOffset).toBe(7);
+    expect(frame.pixels).toHaveLength(400 * 240 * 4);
+    expect(frame.pixels[0]).toBe(37);
+    expect(frame.pixels.at(-1)).toBe(255);
+    lease.dispose();
+  });
+
+  it('retains independent snapshot bytes across canvas redraw and revocation', () => {
+    const { canvas, lease } = fixture();
+    const canvasPixels = new Uint8ClampedArray(400 * 240 * 4).fill(255);
+    Object.assign(canvas.getContext('2d')!, {
+      // Native getImageData returns a new snapshot, not the canvas backing store.
+      getImageData: () => ({ data: canvasPixels.slice() }),
+    });
+    lease.draw(() => {
+      canvasPixels[0] = 23;
+    });
+    const first = lease.current()!;
+    lease.draw(() => {
+      canvasPixels[0] = 91;
+    });
+    const second = lease.current()!;
+    expect(first.pixels.buffer).not.toBe(second.pixels.buffer);
+    expect(first.pixels[0]).toBe(23);
+    expect(second.pixels[0]).toBe(91);
+    lease.revoke();
+    expect(lease.current()).toBeNull();
+    expect(first.pixels[0]).toBe(23);
+    expect(second.pixels[0]).toBe(91);
+    lease.dispose();
+  });
+
+  it('resets same-sized producer backing once without a redundant height assignment', () => {
+    const { canvas, lease } = fixture();
+    const context = canvas.getContext('2d')!;
+    const reset = vi.fn();
+    Object.assign(context, { reset });
+    const width = vi.spyOn(canvas, 'width', 'set');
+    const height = vi.spyOn(canvas, 'height', 'set');
+    const paint = vi.fn(() => expect(width).toHaveBeenCalledOnce());
+    lease.draw(paint);
+    expect(paint).toHaveBeenCalledOnce();
+    expect(reset).not.toHaveBeenCalled();
+    expect(width).toHaveBeenCalledWith(400);
+    expect(height).not.toHaveBeenCalled();
+    expect(lease.current()?.revision).toBe(2);
+    lease.dispose();
+  });
+
+  it('retains reset-by-resize on hosts without context reset', () => {
+    const { canvas, lease } = fixture();
+    const width = vi.spyOn(canvas, 'width', 'set');
+    const height = vi.spyOn(canvas, 'height', 'set');
+    lease.draw(() => {});
+    expect(width).toHaveBeenCalledOnce();
+    expect(width).toHaveBeenCalledWith(400);
+    expect(height).not.toHaveBeenCalled();
+    expect(lease.current()?.revision).toBe(2);
+    lease.dispose();
+  });
+
+  it('restores origin-clean backing for the first producer and after a failed producer', () => {
+    const { scope, canvas, lease: initialLease } = fixture();
+    initialLease.dispose();
+    let tainted = true;
+    let backingWidth = canvas.width;
+    Object.defineProperty(canvas, 'width', {
+      configurable: true,
+      get: () => backingWidth,
+      set(value: number) {
+        backingWidth = value;
+        tainted = false;
+      },
+    });
+    const context = canvas.getContext('2d')!;
+    const originalRead = context.getImageData.bind(context);
+    Object.assign(context, {
+      // Canvas2D reset clears drawing state without guaranteeing origin-clean.
+      reset() {},
+      getImageData(x: number, y: number, width: number, height: number) {
+        if (tainted) throw new DOMException('Tainted canvas', 'SecurityError');
+        return originalRead(x, y, width, height);
+      },
+    });
+    const lease = createCanvasBackdropLease(scope, canvas);
+    const observed: unknown[] = [];
+    lease.subscribe(() => observed.push(lease.current()));
+    lease.draw(() => {});
+    expect(lease.current()?.revision).toBe(1);
+    expect(() =>
+      lease.draw(() => {
+        tainted = true;
+      })
+    ).toThrow('Tainted canvas');
+    expect(lease.current()).toBeNull();
+    expect(observed.at(-1)).toBeNull();
+    lease.draw(() => {});
+    expect(lease.current()?.revision).toBe(3);
+    // External writes between draws must not poison a later clean producer.
+    tainted = true;
+    lease.draw(() => {});
+    expect(lease.current()?.revision).toBe(4);
+    lease.dispose();
+  });
+
+  it('does not publish or paint after backing reset revokes the source reentrantly', () => {
+    const { canvas, lease } = fixture();
+    Object.assign(canvas.getContext('2d')!, { reset() {} });
+    vi.spyOn(canvas, 'width', 'set').mockImplementation(() => lease.revoke());
+    const paint = vi.fn();
+    lease.draw(paint);
+    expect(paint).not.toHaveBeenCalled();
+    expect(lease.current()).toBeNull();
+    lease.dispose();
+  });
+
   it.each([
     { name: 'undefined', value: undefined },
     { name: 'null', value: null },

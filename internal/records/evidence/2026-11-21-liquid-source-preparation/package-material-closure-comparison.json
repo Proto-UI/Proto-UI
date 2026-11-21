@@ -1,0 +1,325 @@
+{
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "scope": "Matched source closures with the existing budget build options; additional subpath diagnostic does not change the nine-entry gate or its policy.",
+  "revisions": [
+    {
+      "label": "baseline",
+      "sourceBefore": {
+        "sha": "1d860891a59aca6ed71ac251e08977cde303b81c",
+        "changes": "",
+        "materialHashes": {
+          "contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+          "contact-motion.ts": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6",
+          "contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+          "geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+          "image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+          "index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+          "initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+          "initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+          "initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+          "liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+          "paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+          "preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+          "program-pool.ts": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+          "program.ts": "c084788bfc4974d09274ab832ab98c81ef4fd33f218b45eb5ea2f4ce476e2a29",
+          "sink.ts": "29f3e965758ef6192998c892889b1157bd96bd39c82d532b52b0ff2c27005ecd",
+          "source.ts": "b6510c697814f0d9627fe757cfaf075dbacaabb4d1897af79af704fa6cf9152e",
+          "style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+          "style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c"
+        }
+      },
+      "sourceAfter": {
+        "sha": "1d860891a59aca6ed71ac251e08977cde303b81c",
+        "changes": "",
+        "materialHashes": {
+          "contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+          "contact-motion.ts": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6",
+          "contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+          "geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+          "image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+          "index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+          "initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+          "initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+          "initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+          "liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+          "paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+          "preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+          "program-pool.ts": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+          "program.ts": "c084788bfc4974d09274ab832ab98c81ef4fd33f218b45eb5ea2f4ce476e2a29",
+          "sink.ts": "29f3e965758ef6192998c892889b1157bd96bd39c82d532b52b0ff2c27005ecd",
+          "source.ts": "b6510c697814f0d9627fe757cfaf075dbacaabb4d1897af79af704fa6cf9152e",
+          "style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+          "style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c"
+        }
+      },
+      "materialSourceStable": true,
+      "rows": [
+        {
+          "name": "adapter-react root",
+          "entry": "packages/adapters/react/src/index.ts",
+          "minifiedBytes": 575819,
+          "minifiedSha256": "7053b1125bd1e9190c0a92ec1455072b5210ad2fa92d9c01a5ff0d9616ebbbc5",
+          "gzipBytes": 163242,
+          "materialInputs": [
+            "packages/modules/feedback/src/material/shared-sink.ts",
+            "packages/modules/feedback/src/material/declaration-id.ts",
+            "packages/modules/feedback/src/material/runtime-cap.ts",
+            "packages/modules/feedback/src/material/final-style-sink.ts",
+            "packages/modules/feedback/src/material/deferred-view-sink.ts"
+          ],
+          "containsOpticalProgram": false,
+          "containsGpuPrefilter": false
+        },
+        {
+          "name": "adapter-vue root",
+          "entry": "packages/adapters/vue/src/index.ts",
+          "minifiedBytes": 571193,
+          "minifiedSha256": "5ff7dccad88cc8e4ec2b78ce7307657cf5e978b2c586ece93e451d0a717efddf",
+          "gzipBytes": 162016,
+          "materialInputs": [
+            "packages/modules/feedback/src/material/shared-sink.ts",
+            "packages/modules/feedback/src/material/declaration-id.ts",
+            "packages/modules/feedback/src/material/runtime-cap.ts",
+            "packages/modules/feedback/src/material/final-style-sink.ts",
+            "packages/modules/feedback/src/material/deferred-view-sink.ts"
+          ],
+          "containsOpticalProgram": false,
+          "containsGpuPrefilter": false
+        },
+        {
+          "name": "adapter-web-component root",
+          "entry": "packages/adapters/web-component/src/index.ts",
+          "minifiedBytes": 673951,
+          "minifiedSha256": "77eb1709983b4eccb3acd59a6bd274e564b497d3b2f1ee25f3e0441ec16c6bb3",
+          "gzipBytes": 196151,
+          "materialInputs": [
+            "packages/modules/feedback/src/material/shared-sink.ts",
+            "packages/modules/feedback/src/material/declaration-id.ts",
+            "packages/modules/feedback/src/material/runtime-cap.ts",
+            "packages/modules/feedback/src/material/final-style-sink.ts",
+            "packages/modules/feedback/src/material/deferred-view-sink.ts",
+            "packages/modules/feedback/src/material/owned-slot.ts",
+            "packages/adapters/web-component/src/material/owned-texture-sink.ts"
+          ],
+          "containsOpticalProgram": false,
+          "containsGpuPrefilter": false
+        },
+        {
+          "name": "opt-in web-material subpath",
+          "entry": "packages/adapters/base/src/material/index.ts",
+          "minifiedBytes": 74320,
+          "minifiedSha256": "1514a65bdffd47fe823d7ea7c988188a8251e9b8d1486eb74199cf7ba2eaa689",
+          "gzipBytes": 25190,
+          "materialInputs": [
+            "packages/adapters/base/src/material/initial-paint-bridge.ts",
+            "packages/adapters/base/src/material/paint-mutations.ts",
+            "packages/adapters/base/src/material/contact-motion.ts",
+            "packages/adapters/base/src/material/contact-carrier.ts",
+            "packages/adapters/base/src/material/liquidgl-kernel.generated.ts",
+            "packages/adapters/base/src/material/contact-profile.ts",
+            "packages/adapters/base/src/material/style.ts",
+            "packages/adapters/base/src/material/style-tint-profile.ts",
+            "packages/adapters/base/src/material/image-prepare.ts",
+            "packages/adapters/base/src/material/geometry-watch.ts",
+            "packages/modules/feedback/src/material/shared-policy.ts",
+            "packages/adapters/base/src/material/source.ts",
+            "packages/adapters/base/src/material/preferences.ts",
+            "packages/adapters/base/src/material/program.ts",
+            "packages/adapters/base/src/material/program-pool.ts",
+            "packages/adapters/base/src/material/sink.ts",
+            "packages/adapters/base/src/material/index.ts"
+          ],
+          "containsOpticalProgram": true,
+          "containsGpuPrefilter": false
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "sourceBefore": {
+        "sha": "1d860891a59aca6ed71ac251e08977cde303b81c",
+        "changes": "M  .github/workflows/liquid-glass-frame-budget.yml\nM  apps/www/src/components/PrototypePreviewer/preview-material-scene.test.ts\nM  apps/www/src/components/PrototypePreviewer/preview-material-scene.ts\nA  internal/records/2026-11-21-liquid-glass-source-preparation.md\nA  internal/records/2026-11-21-liquid-preview-local-appearance.md\nA  internal/records/evidence/2026-11-21-liquid-source-preparation/baseline-lifecycle-check.json\nM  internal/website/self-hosting-coverage-matrix.md\nA  packages/adapters/base/src/material/prefilter.ts\nM  packages/adapters/base/src/material/program.ts\nM  packages/adapters/base/src/material/source.ts\nA  packages/adapters/base/test/web-material-prefilter.test.ts\nM  packages/adapters/base/test/web-material-program.test.ts\nM  packages/adapters/base/test/web-material-source.test.ts\nM  scripts/analysis/liquid-glass-frame-budget.mjs\nM  scripts/analysis/liquid-glass-frame-budget.test.mjs\nA  scripts/analysis/liquid-glass-gpu-prefilter.mjs\nA  scripts/analysis/liquid-glass-gpu-prefilter.test.mjs\nM  scripts/analysis/liquid-optical-cpu-benchmark.mjs",
+        "materialHashes": {
+          "contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+          "contact-motion.ts": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6",
+          "contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+          "geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+          "image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+          "index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+          "initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+          "initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+          "initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+          "liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+          "paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+          "preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+          "prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+          "program-pool.ts": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+          "program.ts": "1f3da22261d3a1a2c295ecd6adfc1983928730f8467c33fe23ec60eee2a48115",
+          "sink.ts": "29f3e965758ef6192998c892889b1157bd96bd39c82d532b52b0ff2c27005ecd",
+          "source.ts": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6",
+          "style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+          "style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c"
+        }
+      },
+      "sourceAfter": {
+        "sha": "1d860891a59aca6ed71ac251e08977cde303b81c",
+        "changes": "M  .github/workflows/liquid-glass-frame-budget.yml\nM  apps/www/src/components/PrototypePreviewer/preview-material-scene.test.ts\nM  apps/www/src/components/PrototypePreviewer/preview-material-scene.ts\nA  internal/records/2026-11-21-liquid-glass-source-preparation.md\nA  internal/records/2026-11-21-liquid-preview-local-appearance.md\nA  internal/records/evidence/2026-11-21-liquid-source-preparation/baseline-lifecycle-check.json\nM  internal/website/self-hosting-coverage-matrix.md\nA  packages/adapters/base/src/material/prefilter.ts\nM  packages/adapters/base/src/material/program.ts\nM  packages/adapters/base/src/material/source.ts\nA  packages/adapters/base/test/web-material-prefilter.test.ts\nM  packages/adapters/base/test/web-material-program.test.ts\nM  packages/adapters/base/test/web-material-source.test.ts\nM  scripts/analysis/liquid-glass-frame-budget.mjs\nM  scripts/analysis/liquid-glass-frame-budget.test.mjs\nA  scripts/analysis/liquid-glass-gpu-prefilter.mjs\nA  scripts/analysis/liquid-glass-gpu-prefilter.test.mjs\nM  scripts/analysis/liquid-optical-cpu-benchmark.mjs",
+        "materialHashes": {
+          "contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+          "contact-motion.ts": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6",
+          "contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+          "geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+          "image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+          "index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+          "initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+          "initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+          "initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+          "liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+          "paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+          "preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+          "prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+          "program-pool.ts": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+          "program.ts": "1f3da22261d3a1a2c295ecd6adfc1983928730f8467c33fe23ec60eee2a48115",
+          "sink.ts": "29f3e965758ef6192998c892889b1157bd96bd39c82d532b52b0ff2c27005ecd",
+          "source.ts": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6",
+          "style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+          "style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c"
+        }
+      },
+      "materialSourceStable": true,
+      "rows": [
+        {
+          "name": "adapter-react root",
+          "entry": "packages/adapters/react/src/index.ts",
+          "minifiedBytes": 575819,
+          "minifiedSha256": "7053b1125bd1e9190c0a92ec1455072b5210ad2fa92d9c01a5ff0d9616ebbbc5",
+          "gzipBytes": 163242,
+          "materialInputs": [
+            "packages/modules/feedback/src/material/shared-sink.ts",
+            "packages/modules/feedback/src/material/declaration-id.ts",
+            "packages/modules/feedback/src/material/runtime-cap.ts",
+            "packages/modules/feedback/src/material/final-style-sink.ts",
+            "packages/modules/feedback/src/material/deferred-view-sink.ts"
+          ],
+          "containsOpticalProgram": false,
+          "containsGpuPrefilter": false
+        },
+        {
+          "name": "adapter-vue root",
+          "entry": "packages/adapters/vue/src/index.ts",
+          "minifiedBytes": 571193,
+          "minifiedSha256": "5ff7dccad88cc8e4ec2b78ce7307657cf5e978b2c586ece93e451d0a717efddf",
+          "gzipBytes": 162016,
+          "materialInputs": [
+            "packages/modules/feedback/src/material/shared-sink.ts",
+            "packages/modules/feedback/src/material/declaration-id.ts",
+            "packages/modules/feedback/src/material/runtime-cap.ts",
+            "packages/modules/feedback/src/material/final-style-sink.ts",
+            "packages/modules/feedback/src/material/deferred-view-sink.ts"
+          ],
+          "containsOpticalProgram": false,
+          "containsGpuPrefilter": false
+        },
+        {
+          "name": "adapter-web-component root",
+          "entry": "packages/adapters/web-component/src/index.ts",
+          "minifiedBytes": 673951,
+          "minifiedSha256": "77eb1709983b4eccb3acd59a6bd274e564b497d3b2f1ee25f3e0441ec16c6bb3",
+          "gzipBytes": 196151,
+          "materialInputs": [
+            "packages/modules/feedback/src/material/shared-sink.ts",
+            "packages/modules/feedback/src/material/declaration-id.ts",
+            "packages/modules/feedback/src/material/runtime-cap.ts",
+            "packages/modules/feedback/src/material/final-style-sink.ts",
+            "packages/modules/feedback/src/material/deferred-view-sink.ts",
+            "packages/modules/feedback/src/material/owned-slot.ts",
+            "packages/adapters/web-component/src/material/owned-texture-sink.ts"
+          ],
+          "containsOpticalProgram": false,
+          "containsGpuPrefilter": false
+        },
+        {
+          "name": "opt-in web-material subpath",
+          "entry": "packages/adapters/base/src/material/index.ts",
+          "minifiedBytes": 82224,
+          "minifiedSha256": "8f2cbd790044e083438665af2a79070fc1e69d3b5825ac68eae07bf925b32e97",
+          "gzipBytes": 27322,
+          "materialInputs": [
+            "packages/adapters/base/src/material/initial-paint-bridge.ts",
+            "packages/adapters/base/src/material/paint-mutations.ts",
+            "packages/adapters/base/src/material/contact-motion.ts",
+            "packages/adapters/base/src/material/contact-carrier.ts",
+            "packages/adapters/base/src/material/liquidgl-kernel.generated.ts",
+            "packages/adapters/base/src/material/contact-profile.ts",
+            "packages/adapters/base/src/material/style.ts",
+            "packages/adapters/base/src/material/style-tint-profile.ts",
+            "packages/adapters/base/src/material/image-prepare.ts",
+            "packages/adapters/base/src/material/geometry-watch.ts",
+            "packages/modules/feedback/src/material/shared-policy.ts",
+            "packages/adapters/base/src/material/source.ts",
+            "packages/adapters/base/src/material/preferences.ts",
+            "packages/adapters/base/src/material/prefilter.ts",
+            "packages/adapters/base/src/material/program.ts",
+            "packages/adapters/base/src/material/program-pool.ts",
+            "packages/adapters/base/src/material/sink.ts",
+            "packages/adapters/base/src/material/index.ts"
+          ],
+          "containsOpticalProgram": true,
+          "containsGpuPrefilter": true
+        }
+      ]
+    }
+  ],
+  "comparison": [
+    {
+      "name": "adapter-react root",
+      "baselineGzipBytes": 163242,
+      "candidateGzipBytes": 163242,
+      "deltaGzipBytes": 0,
+      "deltaPercent": 0,
+      "baselineHash": "7053b1125bd1e9190c0a92ec1455072b5210ad2fa92d9c01a5ff0d9616ebbbc5",
+      "candidateHash": "7053b1125bd1e9190c0a92ec1455072b5210ad2fa92d9c01a5ff0d9616ebbbc5",
+      "candidateContainsOpticalProgram": false,
+      "candidateContainsGpuPrefilter": false
+    },
+    {
+      "name": "adapter-vue root",
+      "baselineGzipBytes": 162016,
+      "candidateGzipBytes": 162016,
+      "deltaGzipBytes": 0,
+      "deltaPercent": 0,
+      "baselineHash": "5ff7dccad88cc8e4ec2b78ce7307657cf5e978b2c586ece93e451d0a717efddf",
+      "candidateHash": "5ff7dccad88cc8e4ec2b78ce7307657cf5e978b2c586ece93e451d0a717efddf",
+      "candidateContainsOpticalProgram": false,
+      "candidateContainsGpuPrefilter": false
+    },
+    {
+      "name": "adapter-web-component root",
+      "baselineGzipBytes": 196151,
+      "candidateGzipBytes": 196151,
+      "deltaGzipBytes": 0,
+      "deltaPercent": 0,
+      "baselineHash": "77eb1709983b4eccb3acd59a6bd274e564b497d3b2f1ee25f3e0441ec16c6bb3",
+      "candidateHash": "77eb1709983b4eccb3acd59a6bd274e564b497d3b2f1ee25f3e0441ec16c6bb3",
+      "candidateContainsOpticalProgram": false,
+      "candidateContainsGpuPrefilter": false
+    },
+    {
+      "name": "opt-in web-material subpath",
+      "baselineGzipBytes": 25190,
+      "candidateGzipBytes": 27322,
+      "deltaGzipBytes": 2132,
+      "deltaPercent": 8.463676061929327,
+      "baselineHash": "1514a65bdffd47fe823d7ea7c988188a8251e9b8d1486eb74199cf7ba2eaa689",
+      "candidateHash": "8f2cbd790044e083438665af2a79070fc1e69d3b5825ac68eae07bf925b32e97",
+      "candidateContainsOpticalProgram": true,
+      "candidateContainsGpuPrefilter": true
+    }
+  ]
+}

@@ -1969,7 +1969,7 @@ export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResu
     ) {
       const { createPreviewMaterialScene } = await import('./preview-material-scene');
       if (!ownsLease(opt, lease)) return abandonLease(lease);
-      scene = createPreviewMaterialScene(opt.host);
+      scene = createPreviewMaterialScene(opt.host, { presentation: 'preview' });
       const original = lease;
       lease = {
         ...original,

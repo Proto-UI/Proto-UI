@@ -107,6 +107,9 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'props.define',
   'props.setDefaults',
   'props.watch',
+  'props.watchAll',
+  'props.watchRaw',
+  'props.watchRawAll',
   'props.get',
   'props.getRaw',
   'props.isProvided',
@@ -337,6 +340,12 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
   });
 }
 
+const VUE2_DEFERRED_OPERATIONS: ReadonlySet<Operation> = new Set([
+  'props.watchAll',
+  'props.watchRaw',
+  'props.watchRawAll',
+] as Operation[]);
+
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
   'accessible.part',
@@ -429,7 +438,9 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '2.6.14',
     mode: 'source',
     implemented: true,
-    operations: webOperations,
+    // Vue2 keeps its explicit rejection control for all-key and raw props
+    // watchers (vue2-native-template.test.ts) until that target is accepted.
+    operations: webOperations.filter((operation) => !VUE2_DEFERRED_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [{ name: 'vue', version: '2.6.14', role: 'target' }, ...floatingUiDependency],
     helpers: [
@@ -719,16 +730,16 @@ export function checkTargetOperations(
           value.name === 'string' &&
           !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
         )
-          diagnostic('PUI4003', `String coercion is not implemented by ${selected.id}.`, value.span);
+          diagnostic(
+            'PUI4003',
+            `String coercion is not implemented by ${selected.id}.`,
+            value.span
+          );
         if (
           value.name === 'object.assign' &&
           !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
         )
-          diagnostic(
-            'PUI4003',
-            `Object.assign is not implemented by ${selected.id}.`,
-            value.span
-          );
+          diagnostic('PUI4003', `Object.assign is not implemented by ${selected.id}.`, value.span);
         break;
       case 'context-key':
         if (!capabilities.has('context-scope'))

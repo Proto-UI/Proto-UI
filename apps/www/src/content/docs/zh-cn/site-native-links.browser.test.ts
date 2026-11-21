@@ -3325,9 +3325,7 @@ it('records the English shell labels, destinations and native activation ownersh
     // disclosure through panel visibility and the command's expanded state.
     // Close that disclosure before the real activation control below.
     await docs.keyboard.press('Escape');
-    await expect
-      .poll(() => docs.locator('[data-site-header-panel]').isVisible())
-      .toBe(false);
+    await expect.poll(() => docs.locator('[data-site-header-panel]').isVisible()).toBe(false);
     const menuCommand = docs.locator('[data-site-menu-button]');
     expect(await menuCommand.getAttribute('aria-expanded')).toBe('false');
     expect(await menuCommand.evaluate((element) => element === document.activeElement)).toBe(true);

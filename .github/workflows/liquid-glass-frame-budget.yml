@@ -1,0 +1,178 @@
+name: Liquid Glass matched frame-budget observations
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_sha:
+        description: Exact baseline commit for the matched observation
+        type: string
+        required: true
+        default: 543c8a2990239dec7c08458a902da3f5a97b49dd
+  workflow_call:
+    inputs:
+      baseline_sha:
+        description: Exact baseline commit for the matched observation
+        type: string
+        required: false
+        default: 543c8a2990239dec7c08458a902da3f5a97b49dd
+permissions:
+  contents: read
+concurrency:
+  group: liquid-glass-frame-budget-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+env:
+  BASELINE_SHA: ${{ inputs.baseline_sha || '543c8a2990239dec7c08458a902da3f5a97b49dd' }}
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PROGRAM_REGRESSION_SHA: 19d175f454468fa27364c8283e084f3bb7a1016b
+  ASTRO_TELEMETRY_DISABLED: '1'
+jobs:
+  matched-browser:
+    # Heavy evidence is explicitly dispatched or called by the owned CI cycle.
+    # It never adds a separate automatic pull-request lane.
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASELINE_SHA }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PROGRAM_REGRESSION_SHA }}
+          path: regression-source
+          persist-credentials: false
+      - name: Verify exact source revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$BASELINE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git -C baseline rev-parse HEAD)" = "$BASELINE_SHA"
+          test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git -C regression-source rev-parse HEAD)" = "$PROGRAM_REGRESSION_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install separate source-bound workspaces
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 --dir candidate install --frozen-lockfile
+          corepack pnpm@10.32.1 --dir baseline install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/liquid-frame-budget"
+          "$CHROME" --version > "$RUNNER_TEMP/liquid-frame-budget/browser.txt"
+          node --version > "$RUNNER_TEMP/liquid-frame-budget/node.txt"
+          corepack pnpm@10.32.1 --dir candidate --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --dir baseline --filter apps-www exec astro preferences disable devToolbar
+      - name: Check measurement attribution
+        working-directory: candidate
+        run: |
+          node --test scripts/analysis/liquid-glass-frame-budget.test.mjs \
+            scripts/analysis/liquid-glass-gpu-prefilter.test.mjs \
+            scripts/analysis/liquid-glass-source-progress.test.mjs \
+            scripts/analysis/liquid-glass-program-clear.test.mjs
+      - name: Install and record the same Chinese fonts for both revisions
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
+            > "$RUNNER_TEMP/liquid-frame-budget/font-environment.txt"
+      - name: Baseline on the same runner
+        id: baseline
+        continue-on-error: true
+        working-directory: baseline
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 9m \
+            node --import tsx "$GITHUB_WORKSPACE/candidate/scripts/analysis/liquid-glass-frame-budget.mjs" \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline" 3 \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/baseline.log"
+      - name: Candidate on the same runner
+        id: candidate
+        continue-on-error: true
+        working-directory: candidate
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 9m \
+            node --import tsx scripts/analysis/liquid-glass-frame-budget.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate" 3 \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/candidate.log"
+      - name: Baseline four-host source progress
+        id: baseline-progress
+        continue-on-error: true
+        working-directory: baseline
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 4m \
+            node --import tsx "$GITHUB_WORKSPACE/candidate/scripts/analysis/liquid-glass-source-progress.mjs" \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline-progress" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/baseline-progress.log"
+      - name: Candidate four-host source progress
+        id: candidate-progress
+        continue-on-error: true
+        working-directory: candidate
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 4m \
+            node --import tsx scripts/analysis/liquid-glass-source-progress.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate-progress" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/candidate-progress.log"
+      - name: Verify GPU prefilter bytes outside timing windows
+        working-directory: candidate
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 2m \
+            node --import tsx scripts/analysis/liquid-glass-gpu-prefilter.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/gpu-prefilter" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/gpu-prefilter.log"
+      - name: Verify program clear against the exact old source
+        working-directory: candidate
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=20s 2m \
+            node --import tsx scripts/analysis/liquid-glass-program-clear.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/program-clear" \
+            "$GITHUB_WORKSPACE/regression-source" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/program-clear.log"
+      - name: Retain comparison and propagate evidence failures
+        if: always()
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          node scripts/analysis/liquid-glass-frame-budget.mjs --compare \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline/report.json" \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate/report.json" \
+            "$RUNNER_TEMP/liquid-frame-budget"
+          cat "$RUNNER_TEMP/liquid-frame-budget/comparison.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Propagate four-host progress evidence failures
+        if: always()
+        run: |
+          if [ '${{ steps.baseline-progress.outcome }}' != 'success' ] || \
+             [ '${{ steps.candidate-progress.outcome }}' != 'success' ]; then
+            exit 1
+          fi
+      - name: Retain raw timing, GPU, failures and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-frame-budget-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/liquid-frame-budget
+          if-no-files-found: error
+          retention-days: 30

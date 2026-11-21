@@ -140,7 +140,11 @@ export function traceSetupOperations(
   setup: FunctionIR,
   moduleBindings: readonly StatementIR[],
   trace: {
-    operation(value: TracedOperation, introduced: readonly CapturedState[], definite: boolean): void;
+    operation(
+      value: TracedOperation,
+      introduced: readonly CapturedState[],
+      definite: boolean
+    ): void;
     hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>): void;
   },
   hooks: readonly AuthoredHookIR[] = []
@@ -167,7 +171,11 @@ function analyzeCallableFlow(
     hooks: readonly AuthoredHookIR[];
   },
   trace?: {
-    operation(value: TracedOperation, introduced: readonly CapturedState[], definite: boolean): void;
+    operation(
+      value: TracedOperation,
+      introduced: readonly CapturedState[],
+      definite: boolean
+    ): void;
     hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>): void;
     owned?: HookContributionObserver;
   },
@@ -761,7 +769,12 @@ function analyzeCallableFlow(
       else if (value.kind === 'cell')
         pending.push(...cellValue(value).map((value) => ({ value, type })));
       else if (value.kind === 'capture') {
-        pending.push(...(captureContents(value).render ?? UNDEFINED).map((value) => ({ value, type: undefined })));
+        pending.push(
+          ...(captureContents(value).render ?? UNDEFINED).map((value) => ({
+            value,
+            type: undefined,
+          }))
+        );
         for (const method of captureContents(value).methods.values())
           pending.push(...method.map((value) => ({ value, type: undefined })));
         for (const children of captureContents(value).children.values())
@@ -783,8 +796,7 @@ function analyzeCallableFlow(
       !(rule.callback.acceptsValue && type && !carriesCallable(type)) &&
       rule.callback.parameterPolicy !== 'declared-method'
     ) {
-      if (values.some((value) => value.kind === 'unknown' && !value.data))
-        opaque(ir.setup.span);
+      if (values.some((value) => value.kind === 'unknown' && !value.data)) opaque(ir.setup.span);
       const signature = rule.callback;
       const origin: Execution =
         signature.contextFrom === 'caller'
@@ -812,7 +824,8 @@ function analyzeCallableFlow(
 
   function property(values: Known, name: string): Known {
     return values.flatMap((value) =>
-      value.kind === 'record' ? (fields(value).get(name) ?? UNDEFINED)
+      value.kind === 'record'
+        ? (fields(value).get(name) ?? UNDEFINED)
         : value.kind === 'capture' && name === 'render'
           ? (captureContents(value).render ?? UNDEFINED)
           : UNKNOWN
@@ -1100,12 +1113,14 @@ function analyzeCallableFlow(
         }
         const stateMembers = trace ? privilegedStateMembers(value.operation) : [];
         const handle: Known | undefined = stateMembers.length
-          ? [{
-              kind: 'record',
-              fields: new Map<string, Known>(stateMembers.map((state) => [
-                state.name, [{ kind: 'named-state', state }],
-              ])),
-            }]
+          ? [
+              {
+                kind: 'record',
+                fields: new Map<string, Known>(
+                  stateMembers.map((state) => [state.name, [{ kind: 'named-state', state }]])
+                ),
+              },
+            ]
           : undefined;
         for (const child of privilegedHookCaptures(value))
           recordChild(captureFrames.at(-1), child.name, {

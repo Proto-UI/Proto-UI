@@ -1,0 +1,16 @@
+{
+  "kind": "cpu-benchmark-run-context",
+  "capturedAt": "2026-11-20T20:48:43.753Z",
+  "base": "1d860891a59aca6ed71ac251e08977cde303b81c",
+  "candidateCommit": "19d175f454468fa27364c8283e084f3bb7a1016b",
+  "candidateProgramSha256BeforeAndAfter": "1f3da22261d3a1a2c295ecd6adfc1983928730f8467c33fe23ec60eee2a48115",
+  "scriptSha256BeforeAndAfter": "365ecda4a115200a183a861a0361f34114830f38b5d9489fc373ae6346d7b4a0",
+  "knownConcurrentRepositoryValidation": false,
+  "validationContext": "The coordinating agent explicitly reported that coverage inventory, workspace and website type checks, bundle measurement and other tests had all exited before this capture. Native browser CI runs on a separate GitHub runner.",
+  "schedulerIsolation": false,
+  "limits": "This removes the known concurrent repository validation workload, not shared host CPU, scheduler, frequency or thermal variability. This is only CPU fallback arithmetic with fresh scratch and output per call. No GPU, browser, cache-reuse, display or input-to-photon conclusion follows.",
+  "previousRunDirectory": "../cpu-fallback-1d86089",
+  "statisticsVerified": "Both benchmark reports retain 31 finite nonnegative samples per side per case. Recomputed p50 rank16 and p95 rank30 match every reported aggregate. No sample was omitted or rerun for a faster result.",
+  "prefilterReportSha256": "fb565d73d887f3ebc27331d3b80c0fd791ccbb06f82af04a342c6a5f2c602c4b",
+  "contrastReportSha256": "b1e165296a3fef2f9c06319e63606cfb0c1cd1914cb265f351ec58593da931d9"
+}

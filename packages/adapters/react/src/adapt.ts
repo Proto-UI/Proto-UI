@@ -819,10 +819,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           }
           const releases = [
             () => {
-              if (
-                ownedStyle !== null &&
-                rootEl.getAttribute('data-pui-style') === ownedStyle
-              )
+              if (ownedStyle !== null && rootEl.getAttribute('data-pui-style') === ownedStyle)
                 rootEl.removeAttribute('data-pui-style');
             },
             () => eventGate.disable(),

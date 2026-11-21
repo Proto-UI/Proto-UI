@@ -13,6 +13,8 @@ import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared
 import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';
 import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';
 import type { OpticalGeometry, OpticalFrame } from './program';
+import { validateOpticalFrameInputs } from './program-inputs';
+import { createSourceRefreshTask } from './source-refresh-task';
 import { acquireWebOpticalProgram } from './program-pool';
 import {
   resolveMaterialStyle,
@@ -134,6 +136,8 @@ function createDocumentMaterialSink(
   let retired = false,
     painting = false,
     again = false;
+  let againFromSource = true;
+  const sourceRefresh = createSourceRefreshTask(document, () => repaint());
   function currentDocument() {
     if (retired) return false;
     if (host.ownerDocument === document) return true;
@@ -141,6 +145,7 @@ function createDocumentMaterialSink(
     return false;
   }
   let scheduled: number | null = null;
+  let pressQueued = false;
   let queued = false;
   let paintLease = '';
   let geometryLease = '';
@@ -161,11 +166,13 @@ function createDocumentMaterialSink(
   let last: VisualFeedbackFrame | null = null;
   const contact = observeWebPointerContact(host, (sample) => {
     if (!currentDocument()) return;
+    sourceRefresh.cancel();
     if (motion.update(sample, win.performance.now())) {
       contactEpoch++;
       if (sample.active) {
         cancellationSession = null;
         cancelledPointerPhase = false;
+        if (sample.reason === 'down') schedulePress();
       }
       cancelPending();
       // A fresh down retires the old session's completion, not an already
@@ -186,6 +193,21 @@ function createDocumentMaterialSink(
     }
     schedule();
   });
+  function schedulePress() {
+    if (pressQueued) return;
+    pressQueued = true;
+    queueMicrotask(() => {
+      try {
+        // Leave the contact router callback before the first paint attempt; use
+        // latest same-turn sample through every ordinary admission/decode guard.
+        if (currentDocument() && contact.current()?.active) repaint();
+      } finally {
+        // Keep this latch through repaint: reentrant input converges at the
+        // already scheduled RAF instead of extending the microtask checkpoint.
+        pressQueued = false;
+      }
+    });
+  }
   function schedule() {
     if (!currentDocument() || scheduled !== null) return;
     scheduled = win!.requestAnimationFrame(() => {
@@ -273,6 +295,7 @@ function createDocumentMaterialSink(
     });
   }
   function restore() {
+    sourceRefresh.cancel();
     withOwnedCarrierMarker(host, () => carrier?.release());
     carrier = null;
     paintedImage = '';
@@ -325,6 +348,7 @@ function createDocumentMaterialSink(
     effects.requestFlush();
   }
   function ordinary(reason?: string) {
+    sourceRefresh.cancel();
     initialPaint?.retire();
     motion.stop();
     cancelPending();
@@ -339,6 +363,7 @@ function createDocumentMaterialSink(
     }
   }
   function fallback(fill: Parameters<typeof rgbaCss>[0], reason: string, releaseGPU = true) {
+    sourceRefresh.cancel();
     initialPaint?.retire();
     if (releaseGPU) {
       motion.stop();
@@ -355,10 +380,12 @@ function createDocumentMaterialSink(
     report('materialProfile', undefined);
     report('materialSource', undefined);
   }
-  function repaint() {
+  function repaint(fromSource = false) {
+    if (!fromSource) sourceRefresh.cancel();
     if (!currentDocument() || !last) return;
     if (painting) {
       again = true;
+      againFromSource &&= fromSource;
       return;
     }
     painting = true;
@@ -713,18 +740,6 @@ function createDocumentMaterialSink(
         resolved.fill,
         resolved.foreground,
       ]);
-      if (
-        paintSignature === signature &&
-        owned.get('background-image')?.applied[0] === host.style.backgroundImage &&
-        (!carrier || carrier.valid(paintedImage))
-      )
-        return;
-      if (pending?.signature === signature) return;
-      if (pending?.lease === lease) {
-        queued = true;
-        return;
-      }
-      cancelPending();
       const renderFrame: OpticalFrame = {
         source,
         geometry: opticalGeometry,
@@ -738,6 +753,21 @@ function createDocumentMaterialSink(
         fill: resolved.fill,
         foreground: resolved.foreground,
       };
+      // Source notification admission includes the real program's pure guards,
+      // even if the paint signature already matches. Never queue invalid pixels.
+      if (fromSource) validateOpticalFrameInputs(renderFrame);
+      if (
+        paintSignature === signature &&
+        owned.get('background-image')?.applied[0] === host.style.backgroundImage &&
+        (!carrier || carrier.valid(paintedImage))
+      )
+        return;
+      if (pending?.signature === signature) return;
+      if (pending?.lease === lease) {
+        queued = true;
+        return;
+      }
+      cancelPending();
       // Only an explicitly registered internal server-plane lease can defer the
       // preparing fallback. All ordinary source/policy/style guards ran above.
       const initialCandidate = initialPaint?.matches(frame, renderFrame) ?? false;
@@ -746,6 +776,26 @@ function createDocumentMaterialSink(
       if (paintLease !== nextPaintLease && !initialCandidate)
         fallback(resolved.fill, 'preparing', false);
       if (!currentDocument() || program.lost) return;
+      // Only already decoded neutral pixels of this same owned lease may bridge
+      // a source task. SSR claims, keyboard press and the release envelope do not
+      // establish that permission. The callback retains no frame/source snapshot.
+      if (
+        fromSource &&
+        !initialCandidate &&
+        !cancellingContact &&
+        !cancelledPointerPhase &&
+        !contact.current()?.active &&
+        !motionFrame.animating &&
+        !motionFrame.contact?.strength &&
+        candidate.deformation?.phase !== 'pressed' &&
+        !renderFrame.pressed &&
+        paintLease === nextPaintLease &&
+        neutralPaint?.lease === nextPaintLease &&
+        paintedImage === neutralPaint.image &&
+        sourceRefresh.schedule()
+      )
+        return;
+      sourceRefresh.cancel();
       cancellationSession = null;
       const image = program.render(renderFrame);
       // Host callbacks may cancel/replace input reentrantly while rendering.
@@ -939,7 +989,9 @@ function createDocumentMaterialSink(
       painting = false;
       if (again) {
         again = false;
-        repaint();
+        const fromSource = againFromSource;
+        againFromSource = true;
+        repaint(fromSource);
       }
       lastOwnedStyle = host.getAttribute('style');
       lastOwnedTokens = host.getAttribute('data-pui-style');
@@ -966,13 +1018,14 @@ function createDocumentMaterialSink(
         // decode, not its input session. Repaint withdraws null/rebound/invalid
         // sources synchronously, while a valid successor can replace atomically.
         cancelPending();
-        repaint();
+        repaint(true);
       })
     );
     disposers.push(options.palette.subscribe(() => invalidate('material-palette-invalidated')));
     disposers.push(preferences.subscribe(() => invalidate('material-preferences-invalidated')));
   } catch (error) {
     retired = true;
+    sourceRefresh.dispose();
     for (const dispose of disposers) {
       try {
         dispose();
@@ -1000,6 +1053,7 @@ function createDocumentMaterialSink(
     release(view) {
       if (retired || (last && view !== last.view)) return;
       retired = true;
+      sourceRefresh.dispose();
       if (scheduled !== null) win!.cancelAnimationFrame(scheduled);
       scheduled = null;
       motion.stop();
