@@ -34,18 +34,27 @@ jobs:
           set -euo pipefail
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
-        env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+      - name: Install and identify the bounded video evidence toolchain
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          /usr/bin/sudo /usr/bin/apt-get update
+          /usr/bin/sudo /usr/bin/apt-get install --no-install-recommends -y ffmpeg python3
+          /usr/bin/dpkg-query --show --showformat='${Package}=${Version}\n' ffmpeg python3
+          /usr/bin/python3 --version
+          /usr/bin/ffmpeg -version
+          /usr/bin/ffprobe -version
+          /usr/bin/ffmpeg -version | /usr/bin/grep -E '^ffmpeg version 6\.1\.'
+          /usr/bin/ffprobe -version | /usr/bin/grep -E '^ffprobe version 6\.1\.'
+          # Real fixture decoding proves fd seek/seal and codec capabilities;
+          # inventory or version strings alone do not satisfy this gate.
+          node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs
+
+      - name: Validate coverage matrices with remaining diagnostics visible
+        run: corepack pnpm@10.32.1 check:coverage-matrices
+      - name: Exercise coverage negative controls
+        if: success() || failure()
+        run: node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs
+      - name: Retain candidate source identity
         if: always()
         uses: actions/upload-artifact@v4
         with:
