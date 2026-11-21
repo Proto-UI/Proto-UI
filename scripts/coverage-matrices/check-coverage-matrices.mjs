@@ -437,7 +437,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '2ae76ee72be64dcec48ae013d16d880a8e8b8f92fc4dbb315e550b00315c801e',
+    sourceSha256: '8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
