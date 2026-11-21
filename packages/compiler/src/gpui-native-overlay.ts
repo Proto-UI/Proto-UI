@@ -106,6 +106,7 @@ fn overlay_presentation(owner:&OwnerRef)->Option<(bool,usize)>{
     Some((bool_or(field(&overlay.config,"portal"),false),(10000.+overlay.layer_order as f64+role_offset as f64+offset).max(0.)as usize))
 }
 struct ViewportRoot{element:AnyElement}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for ViewportRoot{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for ViewportRoot{
     type RequestLayoutState=();type PrepaintState=();fn id(&self)->Option<gpui::ElementId>{None}fn source_location(&self)->Option<&'static std::panic::Location<'static>>{None}
@@ -114,6 +115,7 @@ impl gpui::Element for ViewportRoot{
     fn paint(&mut self,_:Option<&gpui::GlobalElementId>,_:Option<&gpui::InspectorElementId>,_:Bounds<Pixels>,_:&mut (),_:&mut (),window:&mut Window,cx:&mut App){self.element.paint(window,cx)}
 }
 struct ClippedLayer{element:AnyElement,mask:Rc<Cell<Option<gpui::ContentMask<Pixels>>>>}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for ClippedLayer{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for ClippedLayer{
     type RequestLayoutState=();type PrepaintState=();fn id(&self)->Option<gpui::ElementId>{None}fn source_location(&self)->Option<&'static std::panic::Location<'static>>{None}
@@ -122,6 +124,7 @@ impl gpui::Element for ClippedLayer{
     fn paint(&mut self,_:Option<&gpui::GlobalElementId>,_:Option<&gpui::InspectorElementId>,_:Bounds<Pixels>,_:&mut (),_:&mut (),window:&mut Window,cx:&mut App){window.with_content_mask(self.mask.get(),|window|self.element.paint(window,cx));}
 }
 struct OverlayLayer{element:Option<AnyElement>,mask:Option<Rc<Cell<Option<gpui::ContentMask<Pixels>>>>>,priority:usize}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for OverlayLayer{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for OverlayLayer{
     type RequestLayoutState=();type PrepaintState=();fn id(&self)->Option<gpui::ElementId>{None}fn source_location(&self)->Option<&'static std::panic::Location<'static>>{None}

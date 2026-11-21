@@ -8,6 +8,11 @@ import type { GeneratedModule } from './ir';
 
 export const GPUI_NATIVE_SDK_PATH = '.proto-ui/gpui-native';
 export const GPUI_NATIVE_SDK_VERSION = '0.2.0';
+const GPUI_PINNED_DEPENDENCY = 'git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8"';
+
+export function gpuiCargoDependency(useWorkspace: boolean): string {
+  return useWorkspace ? 'workspace = true' : GPUI_PINNED_DEPENDENCY;
+}
 
 const styleVocabularyConstructor = String.raw`
 impl StyleVocabulary {
@@ -22,25 +27,27 @@ impl StyleVocabulary {
 }
 `;
 
-let cached: NonNullable<GeneratedModule['supportingFiles']> | undefined;
+const cached = new Map<boolean, NonNullable<GeneratedModule['supportingFiles']>>();
 
 /** One ordinary native-source crate; all composed prototypes share its owner types and registries. */
-export function gpuiNativeSdkFiles(): NonNullable<GeneratedModule['supportingFiles']> {
-  if (cached) return cached;
+export function gpuiNativeSdkFiles(useWorkspace = false): NonNullable<GeneratedModule['supportingFiles']> {
+  const existing = cached.get(useWorkspace);
+  if (existing) return existing;
   const style = buildGpuiNativeStyleFiles([]);
+  const defaultFeatures = useWorkspace ? 'default = ["gpui-modern-element-api"]\n' : '';
   const source = (path: string, contents: string) => ({
     path: `${GPUI_NATIVE_SDK_PATH}/${path}`,
     kind: 'source' as const,
     contents,
   });
-  cached = [
+  const files = [
     source(
       'LICENSE',
       'MIT License\n\nCopyright (c) 2026 Proto UI Contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the "Software"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n'
     ),
     source(
       'Cargo.toml',
-      `[package]\nname = "proto-ui-gpui-native"\nversion = "${GPUI_NATIVE_SDK_VERSION}"\nedition = "2021"\nlicense = "MIT"\npublish = false\n\n[features]\n# Requires an explicit local upstream focus-tree patch; not an advertised profile capability.\nexperimental-focus-tree = []\n# Native consumer evidence only; no product introspection surface by default.\ntest-support = []\n\n[dependencies]\ngpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8" }\nserde = { version = "1.0", features = ["derive"] }\nserde_json = "1.0"\nunicode-segmentation = "=1.13.3"\ndata-url = "=0.3.2"\nimage = { version = "=0.25.10", default-features = false }\n`
+      `[package]\nname = "proto-ui-gpui-native"\nversion = "${GPUI_NATIVE_SDK_VERSION}"\nedition = "2021"\nlicense = "MIT"\npublish = false\n\n[features]\n${defaultFeatures}# Host ABI selection for GPUI's blanket IntoElement impl and cached path IDs.\ngpui-modern-element-api = []\n# Requires an explicit local upstream focus-tree patch; not an advertised profile capability.\nexperimental-focus-tree = []\n# Native consumer evidence only; no product introspection surface by default.\ntest-support = []\n\n[dependencies]\ngpui = { ${gpuiCargoDependency(useWorkspace)} }\nserde = { version = "1.0", features = ["derive"] }\nserde_json = "1.0"\nunicode-segmentation = "=1.13.3"\ndata-url = "=0.3.2"\nimage = { version = "=0.25.10", default-features = false }\n`
     ),
     source(
       'src/lib.rs',
@@ -58,5 +65,6 @@ export function gpuiNativeSdkFiles(): NonNullable<GeneratedModule['supportingFil
       )
     ),
   ];
-  return cached;
+  cached.set(useWorkspace, files);
+  return files;
 }
