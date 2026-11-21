@@ -299,6 +299,7 @@ export type ExpressionIR = ExpressionBase &
         kind: 'intrinsic';
         name:
           | 'number.isFinite'
+          | 'string'
           | 'object.freeze'
           | 'object.assign'
           | 'object.hasOwn'

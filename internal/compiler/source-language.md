@@ -34,6 +34,16 @@ At this comparison boundary only, a single erased assertion to a finite string-l
 
 A true direct guard refines an immutable searched binding to the receiver's checked element domain. Mutable cells, member reads, calls and saved booleans do not acquire this proof; false branches exclude nothing. Shared JavaScript emission uses native membership for Web targets. GPUI explicitly rejects this intrinsic; Flutter and experimental Qt have no native acceptance evidence for this extension. Source admission alone establishes neither target support nor downstream component completion.
 
+## Native String conversion
+
+An unshadowed `String()` or `String(value)` admits zero or one checked data or opaque `unknown` operand and returns a string. Local declarations and imports named `String` remain ordinary bindings. Optional calls, spread arguments, constructor syntax and known callable or owner-capability operands remain unsupported. This bounded admission does not erase callable or capability fields into data.
+
+JavaScript targets emit the native `String` call, preserving missing versus undefined operands, null, signed zero, non-finite numbers, arrays, object coercion order, string-hint conversion and abrupt completion. An unknown operand remains opaque: conversion grants no field or capability authority. Coercion can invoke user code, so both frontend and portable validation invalidate mutable flow observations; an unused conversion remains executable. Portable IR independently checks arity, operand domain and result type.
+
+Runtime-backed React and browser source profiles share this native lowering. GPUI and direct Qt/Flutter experiments explicitly reject this intrinsic until their own JavaScript-compatible conversion is implemented and accepted. Source admission alone does not establish native support or component completion.
+
+This intrinsic does not broaden profile-specific public method signatures. React and Vue3 source methods still require checked public value signatures. An internal helper accepting `unknown` and an exposed method accepting `unknown` are separate admission questions. Likewise, source admission of raw Props reads does not establish target admission of watcher operations: the browser source profiles currently reject `props.watchRawAll` in their target-operation registry, even though emitter support exists.
+
 ## Fresh-target own-data assignment
 
 An unshadowed `Object.assign(target, ...sources)` is admitted for a direct fresh record literal or a direct `new Error(message)` target, followed by zero or more direct finite record literals. Each record entry must have a checked pure-data value. Sources are ordinary own enumerable data properties; arbitrary references, spreads, accessors, dynamic keys, callable or capability values, arrays, scalars and nullish sources remain unsupported. An aliased, asserted, frozen or readonly target is not a freshness proof. A field named `__proto__` is excluded from every participating record because assignment can invoke an inherited setter instead of defining an own data property. Optional calls remain unsupported. A local or imported `Object` binding is an ordinary binding and grants no intrinsic authority.

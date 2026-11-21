@@ -363,6 +363,12 @@ export function intrinsicResult(
     )
   ) return 'boolean';
   if (name === 'typeof' && args.length === 1) return 'string';
+  if (name === 'string') {
+    if (args.length <= 1 && args.every((type) =>
+      valueAlternatives(type).every((member) => member === 'unknown' || isDataValueType(member))
+    )) return 'string';
+    throw new TypeError('String requires zero or one data or opaque unknown operand.');
+  }
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
     return 'exception';
   if (name === 'number.isFinite' && args.length === 1 && isDataValueType(args[0])) return 'boolean';
