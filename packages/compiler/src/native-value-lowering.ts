@@ -305,6 +305,8 @@ export function emitJavaScriptValue(
     case 'intrinsic': {
       const args = value.arguments.map(emit);
       switch (value.name) {
+        case 'string':
+          return `String(${args.join(', ')})`;
         case 'number.isFinite':
           return `Number.isFinite(${args.join(', ')})`;
         case 'object.freeze':

@@ -1236,7 +1236,7 @@ class Frontend {
     const value = this.expressionValue(module, node, scope, phase, argumentRule, expectedType);
     if (value.kind === 'intrinsic' && value.name === 'array.every')
       this.invalidateFlow(scope, true);
-    if (value.kind === 'intrinsic' && value.name === 'object.assign')
+    if (value.kind === 'intrinsic' && ['object.assign', 'string'].includes(value.name))
       this.invalidateFlow(scope, true, true);
     this.flow.observe(value);
     return value;
@@ -2426,6 +2426,19 @@ class Frontend {
     expectedType?: ValueType
   ): ExpressionIR {
     const span = sourceSpan(node);
+    if (
+      ts.isIdentifier(node.expression) && node.expression.text === 'String' &&
+      !scope.has('String') && !module.declarations.has('String') && !module.imports.has('String')
+    ) {
+      if (node.questionDotToken)
+        rejectNode(node, 'PUI1006', 'String does not admit optional calls.');
+      const args = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
+      return {
+        kind: 'intrinsic', name: 'string', arguments: args,
+        type: this.checkedValue(node, () => intrinsicResult('string', args.map((arg) => arg.type))),
+        span,
+      };
+    }
     if (ts.isPropertyAccessExpression(node.expression)) {
       const owner = node.expression.expression,
         property = node.expression.name.text;

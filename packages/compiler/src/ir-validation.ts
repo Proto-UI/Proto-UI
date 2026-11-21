@@ -1572,7 +1572,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               intrinsicResult(text(node.name), args, node.arguments as ExpressionIR[])
             );
             if (node.name === 'array.every') invalidateFlow(scope, true);
-            if (node.name === 'object.assign') invalidateFlow(scope, true, true);
+            if (node.name === 'object.assign' || node.name === 'string') invalidateFlow(scope, true, true);
             break;
           }
           case 'object-spread': {
