@@ -21,6 +21,21 @@ function documentQueue(document: Document): DocumentQueue {
   const existing = queues.get(document);
   if (existing) return existing;
   const view = document.defaultView;
+  const postRefill = (refill: () => void): void => {
+    if (!view?.MessageChannel) {
+      setTimeout(refill, 0);
+      return;
+    }
+    // One posted browser task per coalesced refill, independent of timer
+    // nesting/clamping. Close both ports before entering the original drain.
+    const channel = new view.MessageChannel();
+    channel.port1.onmessage = () => {
+      channel.port1.close();
+      channel.port2.close();
+      refill();
+    };
+    channel.port2.postMessage(null);
+  };
   const queue: DocumentQueue = {
     active: 0,
     pending: new Set(),
@@ -34,7 +49,7 @@ function documentQueue(document: Document): DocumentQueue {
       recordPreviewerDrain(document, 'scheduled');
       // Admission continues without idle callbacks or a visible animation frame.
       // Each refill starts in a browser task rather than a completion microtask.
-      setTimeout(() => {
+      postRefill(() => {
         queue.scheduled = false;
         recordPreviewerDrain(document, 'entered');
         recordPreviewerQueue(document, queue.active, queue.pending.size);
@@ -42,7 +57,7 @@ function documentQueue(document: Document): DocumentQueue {
           if (queue.active >= BACKGROUND_INITIAL_RENDER_LIMIT) break;
           ticket.admit();
         }
-      }, 0);
+      });
     },
   };
   if (view?.IntersectionObserver) {
