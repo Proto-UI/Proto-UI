@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as base from '../src/resizable';
 import * as shadcn from '../../shadcn/src/resizable';
@@ -10,9 +10,14 @@ const flush = async () => {
   for (let i = 0; i < 32; i++) await Promise.resolve();
 };
 const roots: HTMLElement[] = [];
+const layoutBoxes = new Map<Element, () => { width: number; height: number }>();
+let restoreLayoutStyles: (() => void) | undefined;
 afterEach(async () => {
   roots.splice(0).forEach((el) => el.remove());
   await flush();
+  restoreLayoutStyles?.();
+  restoreLayoutStyles = undefined;
+  layoutBoxes.clear();
 });
 function element(proto: any, props: Record<string, unknown> = {}): any {
   if (!customElements.get(proto.name)) AdaptToWebComponent(proto);
@@ -59,16 +64,38 @@ function geometry(
   vertical = false
 ) {
   const available = (vertical ? height : width) - 16 * g.handles.length;
-  g.root.getBoundingClientRect = () => ({ left: 0, top: 0, width, height }) as DOMRect;
+  const rootBox = () => ({ left: 0, top: 0, width, height });
+  layoutBoxes.set(g.root, rootBox);
+  g.root.getBoundingClientRect = () => rootBox() as DOMRect;
   g.panels.forEach((panel, index) => {
-    panel.getBoundingClientRect = () =>
-      ({
-        left: 0,
-        top: 0,
-        width: vertical ? width : (available * g.api().sizes.get()[index]) / 100,
-        height: vertical ? (available * g.api().sizes.get()[index]) / 100 : height,
-      }) as DOMRect;
+    const box = () => ({
+      left: 0,
+      top: 0,
+      width: vertical ? width : (available * g.api().sizes.get()[index]) / 100,
+      height: vertical ? (available * g.api().sizes.get()[index]) / 100 : height,
+    });
+    panel.getBoundingClientRect = () => box() as DOMRect;
+    layoutBoxes.set(panel, box);
   });
+  // Resolve only these fixture boxes through the same live dimensions used
+  // by their rects, including panel redistribution and nested group ownership.
+  if (!restoreLayoutStyles) {
+    const originalStyle = window.getComputedStyle.bind(window);
+    const mock = vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+      const actual = originalStyle(element, pseudo);
+      const box = layoutBoxes.get(element);
+      if (!box) return actual;
+      return new Proxy(actual, {
+        get(target, key) {
+          if (key === 'width' || key === 'height') return `${box()[key]}px`;
+          if (key === 'boxSizing') return 'border-box';
+          const value = Reflect.get(target, key, target);
+          return typeof value === 'function' ? value.bind(target) : value;
+        },
+      });
+    });
+    restoreLayoutStyles = () => mock.mockRestore();
+  }
   return available;
 }
 function pointer(el: HTMLElement, type: string, x: number, y = 20) {

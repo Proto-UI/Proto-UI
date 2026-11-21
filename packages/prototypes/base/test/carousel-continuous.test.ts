@@ -62,6 +62,11 @@ async function fixture(props: Record<string, unknown> = {}, family = 'base', cou
     scrollTop: { configurable: true, value: 0, writable: true },
   });
   viewport.getBoundingClientRect = () => new DOMRect(0, 0, width, height);
+  // These are the same untransformed border-box dimensions as the synthetic
+  // rect/client extents; happy-dom does not derive computed layout from them.
+  viewport.style.boxSizing = 'border-box';
+  viewport.style.width = `${width}px`;
+  viewport.style.height = `${height}px`;
   if (props.direction === 'rtl') viewport.style.direction = 'rtl';
   viewport.append(...slides);
   root.append(viewport, previous, next);
@@ -81,6 +86,7 @@ async function fixture(props: Record<string, unknown> = {}, family = 'base', cou
     resize: async (newWidth: number, newExtent: number) => {
       width = newWidth;
       extent = newExtent;
+      viewport.style.width = `${width}px`;
       window.dispatchEvent(new Event('resize'));
       await flush();
     },

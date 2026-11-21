@@ -142,6 +142,11 @@ export function axisInputConformance(
       const [geometry, input] = Array.from(m.host.querySelectorAll<HTMLElement>('[data-pui-root]'));
       let width = 200;
       geometry.getBoundingClientRect = () => ({ left: 0, top: 0, width, height: 100 }) as DOMRect;
+      // The synthetic rect is an untransformed border box. Supply its same
+      // layout extent to the host's computed-style contact-basis observation.
+      geometry.style.boxSizing = 'border-box';
+      geometry.style.width = `${width}px`;
+      geometry.style.height = '100px';
       const event = (type: string, x: number) =>
         new PointerEvent(type, {
           bubbles: true,
@@ -155,6 +160,7 @@ export function axisInputConformance(
       await m.dispatch(input, event('pointerdown', 100));
       expect(preview).toBe(0.5);
       width = 300;
+      geometry.style.width = `${width}px`;
       await frame();
       await frame();
       await m.flush();
@@ -172,6 +178,7 @@ export function axisInputConformance(
       unmounted = true;
       const count = samples.length;
       width = 400;
+      geometry.style.width = `${width}px`;
       await frame();
       await frame();
       input.dispatchEvent(event('pointerup', 260));

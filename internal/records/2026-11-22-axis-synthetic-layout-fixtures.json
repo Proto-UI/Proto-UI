@@ -1,0 +1,619 @@
+{
+  "schemaVersion": 1,
+  "recordDate": "2026-11-22",
+  "baseRevision": "f0b502704b825b5b644639522555d13e3d64231e",
+  "branch": "fix/axis-fixture-layout-extents-20261122",
+  "scope": "Repair four synthetic layout fixtures after accepted upstream contact-basis observation changed; preserve all original tests and product admission.",
+  "authority": {
+    "contract": "C-AXIS-INPUT-CONTACT-BASIS-0001",
+    "contractStatus": "draft",
+    "test": "T-AXIS-INPUT-CONTACT-BASIS-0001",
+    "testStatus": "draft",
+    "criterion": "T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME",
+    "limits": "Synthetic DOM geometry and simulated Pointer Events only; no stable lifecycle, native layout/input, compiler, optical or release acceptance promotion."
+  },
+  "nativeFailure": {
+    "runId": 44956263999,
+    "attempt": 1,
+    "head": "f0b502704b825b5b644639522555d13e3d64231e",
+    "jobId": 137005019953,
+    "newFailures": 25,
+    "sourceAudit": {
+      "path": "/workspace/scratch/fbd6f62bb640/native-ready-44956263999-general/new-axis-fixture-failures.json",
+      "bytes": 25264,
+      "sha256": "65ae159b379e0ae83e37ae14f4bc9b16599932854b693d87aeba8da9f598c7ac"
+    }
+  },
+  "changes": [
+    {
+      "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+      "beforeSha256": "fa83dc1f1a50590e4b0f51d3a92bb9c61f0faa0951b42bbc44021d952830a6b9",
+      "afterSha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+      "originalAssertionsEqualInOrder": true,
+      "authoredTitlesAndCaseInputsEqualInOrder": true,
+      "allOriginalNumericLiteralsEqualMultiset": true
+    },
+    {
+      "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+      "beforeSha256": "9cc43f41042721e18534baef6e20c089e41ec202ea3162329a5f73aa18ccebc1",
+      "afterSha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+      "originalAssertionsEqualInOrder": true,
+      "authoredTitlesAndCaseInputsEqualInOrder": true,
+      "allOriginalNumericLiteralsEqualMultiset": true
+    },
+    {
+      "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+      "beforeSha256": "ec1c576c9e27ed998a4af19b816239d947336c2e93cc6e95de0bd67822043787",
+      "afterSha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+      "originalAssertionsEqualInOrder": true,
+      "authoredTitlesAndCaseInputsEqualInOrder": true,
+      "allOriginalNumericLiteralsEqualMultiset": true
+    },
+    {
+      "path": "packages/prototypes/base/test/resizable-group.test.ts",
+      "beforeSha256": "ecbed53bb14018cd31b1130e2d3a5a802b99f152ef0e867740efc6bf463b5785",
+      "afterSha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+      "originalAssertionsEqualInOrder": true,
+      "authoredTitlesAndCaseInputsEqualInOrder": true,
+      "allOriginalNumericLiteralsEqualMultiset": true
+    }
+  ],
+  "attempts": [
+    {
+      "phase": "red",
+      "meaning": "Unmodified tracked f0 source; shared dependencies",
+      "receipt": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/red-receipt.json",
+        "bytes": 12524,
+        "sha256": "7dba6df7b9cc9217f14f15c104df426c02600bd11358cce43f47a85cd50ad32d"
+      },
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/red.log",
+        "bytes": 220033,
+        "sha256": "0d4cb969d711440b82abf3595db545d0eb0d6952e47b7f909bf1cef7e005e61a"
+      },
+      "report": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/red-vitest.json",
+        "bytes": 89305,
+        "sha256": "0b6106cc191aa099773d71fffbc3d7585b4fab40bea23435e29868e4ca957ed2"
+      },
+      "startedAt": "2026-11-21T22:55:34.624089+00:00",
+      "finishedAt": "2026-11-21T22:55:47.124268+00:00",
+      "elapsedSeconds": 12.5,
+      "exitCode": 1,
+      "counts": {
+        "numTotalTests": 122,
+        "numPassedTests": 97,
+        "numFailedTests": 25,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "exactRequestedInventory": true,
+      "sourceStable": true,
+      "wholeWorktreeClean": false,
+      "untrackedDependencyLinksDuringRun": 59,
+      "reportedUnhandledErrors": 0,
+      "sourceBefore": {
+        "head": "f0b502704b825b5b644639522555d13e3d64231e",
+        "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+        "status": "?? apps/workspace/node_modules\n?? apps/www/node_modules\n?? node_modules\n?? packages/adapters/base/node_modules\n?? packages/adapters/gpui-peer/node_modules\n?? packages/adapters/react/node_modules\n?? packages/adapters/vue/node_modules\n?? packages/adapters/vue2/node_modules\n?? packages/adapters/web-component/node_modules\n?? packages/cli/node_modules\n?? packages/compiler/node_modules\n?? packages/compositions/chatui/node_modules\n?? packages/core/node_modules\n?? packages/hooks/node_modules\n?? packages/modules/a11y/node_modules\n?? packages/modules/anatomy/node_modules\n?? packages/modules/as-trigger/node_modules\n?? packages/modules/axis-input/node_modules\n?? packages/modules/base/node_modules\n?? packages/modules/boundary/node_modules\n?? packages/modules/collection/node_modules\n?? packages/modules/context/node_modules\n?? packages/modules/control-label/node_modules\n?? packages/modules/event/node_modules\n?? packages/modules/expose-event/node_modules\n?? packages/modules/expose-state-web/node_modules\n?? packages/modules/expose-state/node_modules\n?? packages/modules/expose/node_modules\n?? packages/modules/feedback/node_modules\n?? packages/modules/focus/node_modules\n?? packages/modules/hit-participation/node_modules\n?? packages/modules/image-view/node_modules\n?? packages/modules/material-contact/node_modules\n?? packages/modules/native-link/node_modules\n?? packages/modules/overlay/node_modules\n?? packages/modules/positioning/node_modules\n?? packages/modules/presence/node_modules\n?? packages/modules/props/node_modules\n?? packages/modules/rule-expose-state-web/node_modules\n?? packages/modules/rule-meta/node_modules\n?? packages/modules/rule/node_modules\n?? packages/modules/scroll/node_modules\n?? packages/modules/state-accessibility/node_modules\n?? packages/modules/state-interaction/node_modules\n?? packages/modules/state/node_modules\n?? packages/modules/table-structure/node_modules\n?? packages/modules/test-sys/node_modules\n?? packages/modules/text-control/node_modules\n?? packages/prototypes/base/node_modules\n?? packages/prototypes/bootstrap-2-3-2/node_modules\n?? packages/prototypes/brutalist/node_modules\n?? packages/prototypes/liquid-glass/node_modules\n?? packages/prototypes/lucide/node_modules\n?? packages/prototypes/shadcn/node_modules\n?? packages/runtime/node_modules\n?? packages/spec/engine/node_modules\n?? packages/spec/graph/node_modules\n?? packages/spec/schema/node_modules\n?? packages/web-conformance/node_modules\n",
+        "files": [
+          {
+            "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+            "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322"
+          },
+          {
+            "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+            "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41"
+          },
+          {
+            "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+            "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b"
+          },
+          {
+            "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+            "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f"
+          },
+          {
+            "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+            "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5"
+          },
+          {
+            "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+            "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4"
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "9cc43f41042721e18534baef6e20c089e41ec202ea3162329a5f73aa18ccebc1"
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "ecbed53bb14018cd31b1130e2d3a5a802b99f152ef0e867740efc6bf463b5785"
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "ec1c576c9e27ed998a4af19b816239d947336c2e93cc6e95de0bd67822043787"
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "fa83dc1f1a50590e4b0f51d3a92bb9c61f0faa0951b42bbc44021d952830a6b9"
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+          },
+          {
+            "path": "vitest.config.ts",
+            "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+          }
+        ]
+      },
+      "sourceAfter": {
+        "head": "f0b502704b825b5b644639522555d13e3d64231e",
+        "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+        "status": "?? apps/workspace/node_modules\n?? apps/www/node_modules\n?? node_modules\n?? packages/adapters/base/node_modules\n?? packages/adapters/gpui-peer/node_modules\n?? packages/adapters/react/node_modules\n?? packages/adapters/vue/node_modules\n?? packages/adapters/vue2/node_modules\n?? packages/adapters/web-component/node_modules\n?? packages/cli/node_modules\n?? packages/compiler/node_modules\n?? packages/compositions/chatui/node_modules\n?? packages/core/node_modules\n?? packages/hooks/node_modules\n?? packages/modules/a11y/node_modules\n?? packages/modules/anatomy/node_modules\n?? packages/modules/as-trigger/node_modules\n?? packages/modules/axis-input/node_modules\n?? packages/modules/base/node_modules\n?? packages/modules/boundary/node_modules\n?? packages/modules/collection/node_modules\n?? packages/modules/context/node_modules\n?? packages/modules/control-label/node_modules\n?? packages/modules/event/node_modules\n?? packages/modules/expose-event/node_modules\n?? packages/modules/expose-state-web/node_modules\n?? packages/modules/expose-state/node_modules\n?? packages/modules/expose/node_modules\n?? packages/modules/feedback/node_modules\n?? packages/modules/focus/node_modules\n?? packages/modules/hit-participation/node_modules\n?? packages/modules/image-view/node_modules\n?? packages/modules/material-contact/node_modules\n?? packages/modules/native-link/node_modules\n?? packages/modules/overlay/node_modules\n?? packages/modules/positioning/node_modules\n?? packages/modules/presence/node_modules\n?? packages/modules/props/node_modules\n?? packages/modules/rule-expose-state-web/node_modules\n?? packages/modules/rule-meta/node_modules\n?? packages/modules/rule/node_modules\n?? packages/modules/scroll/node_modules\n?? packages/modules/state-accessibility/node_modules\n?? packages/modules/state-interaction/node_modules\n?? packages/modules/state/node_modules\n?? packages/modules/table-structure/node_modules\n?? packages/modules/test-sys/node_modules\n?? packages/modules/text-control/node_modules\n?? packages/prototypes/base/node_modules\n?? packages/prototypes/bootstrap-2-3-2/node_modules\n?? packages/prototypes/brutalist/node_modules\n?? packages/prototypes/liquid-glass/node_modules\n?? packages/prototypes/lucide/node_modules\n?? packages/prototypes/shadcn/node_modules\n?? packages/runtime/node_modules\n?? packages/spec/engine/node_modules\n?? packages/spec/graph/node_modules\n?? packages/spec/schema/node_modules\n?? packages/web-conformance/node_modules\n",
+        "files": [
+          {
+            "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+            "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322"
+          },
+          {
+            "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+            "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41"
+          },
+          {
+            "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+            "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b"
+          },
+          {
+            "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+            "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f"
+          },
+          {
+            "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+            "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5"
+          },
+          {
+            "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+            "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4"
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "9cc43f41042721e18534baef6e20c089e41ec202ea3162329a5f73aa18ccebc1"
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "ecbed53bb14018cd31b1130e2d3a5a802b99f152ef0e867740efc6bf463b5785"
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "ec1c576c9e27ed998a4af19b816239d947336c2e93cc6e95de0bd67822043787"
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "fa83dc1f1a50590e4b0f51d3a92bb9c61f0faa0951b42bbc44021d952830a6b9"
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+          },
+          {
+            "path": "vitest.config.ts",
+            "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+          }
+        ]
+      }
+    },
+    {
+      "phase": "green",
+      "meaning": "First fixture attempt failed; CSSStyleDeclaration proxy methods lost their receiver",
+      "receipt": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green-receipt.json",
+        "bytes": 13054,
+        "sha256": "a8d0ad9ddf14db74ca774ebd03d069991015b8b3fde258bd37a8ce4a22145bb6"
+      },
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green.log",
+        "bytes": 267627,
+        "sha256": "82c5796c1ac56e4d0ad0ea7c0efbac8ee03e1b90b4fc6db2a1b14d54ce7e7a46"
+      },
+      "report": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green-vitest.json",
+        "bytes": 91177,
+        "sha256": "ef1442a7afc0e70d255c76c952f1d57e100d1292d33a594ba17df728dc38a5f8"
+      },
+      "startedAt": "2026-11-21T22:58:54.013361+00:00",
+      "finishedAt": "2026-11-21T22:59:06.325250+00:00",
+      "elapsedSeconds": 12.312,
+      "exitCode": 1,
+      "counts": {
+        "numTotalTests": 122,
+        "numPassedTests": 96,
+        "numFailedTests": 26,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "exactRequestedInventory": true,
+      "sourceStable": true,
+      "wholeWorktreeClean": false,
+      "untrackedDependencyLinksDuringRun": 59,
+      "reportedUnhandledErrors": 22,
+      "sourceBefore": {
+        "head": "f0b502704b825b5b644639522555d13e3d64231e",
+        "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+        "status": " M packages/adapters/base/test/fixtures/axis-input-conformance.ts\n M packages/prototypes/base/test/carousel-continuous.test.ts\n M packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts\n M packages/prototypes/base/test/resizable-group.test.ts\n?? apps/workspace/node_modules\n?? apps/www/node_modules\n?? node_modules\n?? packages/adapters/base/node_modules\n?? packages/adapters/gpui-peer/node_modules\n?? packages/adapters/react/node_modules\n?? packages/adapters/vue/node_modules\n?? packages/adapters/vue2/node_modules\n?? packages/adapters/web-component/node_modules\n?? packages/cli/node_modules\n?? packages/compiler/node_modules\n?? packages/compositions/chatui/node_modules\n?? packages/core/node_modules\n?? packages/hooks/node_modules\n?? packages/modules/a11y/node_modules\n?? packages/modules/anatomy/node_modules\n?? packages/modules/as-trigger/node_modules\n?? packages/modules/axis-input/node_modules\n?? packages/modules/base/node_modules\n?? packages/modules/boundary/node_modules\n?? packages/modules/collection/node_modules\n?? packages/modules/context/node_modules\n?? packages/modules/control-label/node_modules\n?? packages/modules/event/node_modules\n?? packages/modules/expose-event/node_modules\n?? packages/modules/expose-state-web/node_modules\n?? packages/modules/expose-state/node_modules\n?? packages/modules/expose/node_modules\n?? packages/modules/feedback/node_modules\n?? packages/modules/focus/node_modules\n?? packages/modules/hit-participation/node_modules\n?? packages/modules/image-view/node_modules\n?? packages/modules/material-contact/node_modules\n?? packages/modules/native-link/node_modules\n?? packages/modules/overlay/node_modules\n?? packages/modules/positioning/node_modules\n?? packages/modules/presence/node_modules\n?? packages/modules/props/node_modules\n?? packages/modules/rule-expose-state-web/node_modules\n?? packages/modules/rule-meta/node_modules\n?? packages/modules/rule/node_modules\n?? packages/modules/scroll/node_modules\n?? packages/modules/state-accessibility/node_modules\n?? packages/modules/state-interaction/node_modules\n?? packages/modules/state/node_modules\n?? packages/modules/table-structure/node_modules\n?? packages/modules/test-sys/node_modules\n?? packages/modules/text-control/node_modules\n?? packages/prototypes/base/node_modules\n?? packages/prototypes/bootstrap-2-3-2/node_modules\n?? packages/prototypes/brutalist/node_modules\n?? packages/prototypes/liquid-glass/node_modules\n?? packages/prototypes/lucide/node_modules\n?? packages/prototypes/shadcn/node_modules\n?? packages/runtime/node_modules\n?? packages/spec/engine/node_modules\n?? packages/spec/graph/node_modules\n?? packages/spec/schema/node_modules\n?? packages/web-conformance/node_modules\n",
+        "files": [
+          {
+            "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+            "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322"
+          },
+          {
+            "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+            "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41"
+          },
+          {
+            "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+            "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b"
+          },
+          {
+            "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+            "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f"
+          },
+          {
+            "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+            "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5"
+          },
+          {
+            "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+            "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4"
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b"
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "99e58e359d90bfdf5f337ba64ae24fbdb5fd8d4c2e165b9298a0acdb229fd1b4"
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "ca26c9951ff3f6b4b1370ed1702cd345bb93e384075cecdbe824005e11323132"
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377"
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+          },
+          {
+            "path": "vitest.config.ts",
+            "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+          }
+        ]
+      },
+      "sourceAfter": {
+        "head": "f0b502704b825b5b644639522555d13e3d64231e",
+        "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+        "status": " M packages/adapters/base/test/fixtures/axis-input-conformance.ts\n M packages/prototypes/base/test/carousel-continuous.test.ts\n M packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts\n M packages/prototypes/base/test/resizable-group.test.ts\n?? apps/workspace/node_modules\n?? apps/www/node_modules\n?? node_modules\n?? packages/adapters/base/node_modules\n?? packages/adapters/gpui-peer/node_modules\n?? packages/adapters/react/node_modules\n?? packages/adapters/vue/node_modules\n?? packages/adapters/vue2/node_modules\n?? packages/adapters/web-component/node_modules\n?? packages/cli/node_modules\n?? packages/compiler/node_modules\n?? packages/compositions/chatui/node_modules\n?? packages/core/node_modules\n?? packages/hooks/node_modules\n?? packages/modules/a11y/node_modules\n?? packages/modules/anatomy/node_modules\n?? packages/modules/as-trigger/node_modules\n?? packages/modules/axis-input/node_modules\n?? packages/modules/base/node_modules\n?? packages/modules/boundary/node_modules\n?? packages/modules/collection/node_modules\n?? packages/modules/context/node_modules\n?? packages/modules/control-label/node_modules\n?? packages/modules/event/node_modules\n?? packages/modules/expose-event/node_modules\n?? packages/modules/expose-state-web/node_modules\n?? packages/modules/expose-state/node_modules\n?? packages/modules/expose/node_modules\n?? packages/modules/feedback/node_modules\n?? packages/modules/focus/node_modules\n?? packages/modules/hit-participation/node_modules\n?? packages/modules/image-view/node_modules\n?? packages/modules/material-contact/node_modules\n?? packages/modules/native-link/node_modules\n?? packages/modules/overlay/node_modules\n?? packages/modules/positioning/node_modules\n?? packages/modules/presence/node_modules\n?? packages/modules/props/node_modules\n?? packages/modules/rule-expose-state-web/node_modules\n?? packages/modules/rule-meta/node_modules\n?? packages/modules/rule/node_modules\n?? packages/modules/scroll/node_modules\n?? packages/modules/state-accessibility/node_modules\n?? packages/modules/state-interaction/node_modules\n?? packages/modules/state/node_modules\n?? packages/modules/table-structure/node_modules\n?? packages/modules/test-sys/node_modules\n?? packages/modules/text-control/node_modules\n?? packages/prototypes/base/node_modules\n?? packages/prototypes/bootstrap-2-3-2/node_modules\n?? packages/prototypes/brutalist/node_modules\n?? packages/prototypes/liquid-glass/node_modules\n?? packages/prototypes/lucide/node_modules\n?? packages/prototypes/shadcn/node_modules\n?? packages/runtime/node_modules\n?? packages/spec/engine/node_modules\n?? packages/spec/graph/node_modules\n?? packages/spec/schema/node_modules\n?? packages/web-conformance/node_modules\n",
+        "files": [
+          {
+            "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+            "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322"
+          },
+          {
+            "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+            "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41"
+          },
+          {
+            "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+            "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b"
+          },
+          {
+            "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+            "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f"
+          },
+          {
+            "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+            "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5"
+          },
+          {
+            "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+            "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4"
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b"
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "99e58e359d90bfdf5f337ba64ae24fbdb5fd8d4c2e165b9298a0acdb229fd1b4"
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "ca26c9951ff3f6b4b1370ed1702cd345bb93e384075cecdbe824005e11323132"
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377"
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+          },
+          {
+            "path": "vitest.config.ts",
+            "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+          }
+        ]
+      }
+    },
+    {
+      "phase": "green-formatted",
+      "meaning": "Final formatted candidate; scoped proxies retain native receivers",
+      "receipt": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green-formatted-receipt.json",
+        "bytes": 13083,
+        "sha256": "a5f0706ebf1bf8f15d57cb50d24c1d7da2f5231c5aae76c663a07fc2c7ba3e0b"
+      },
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green-formatted.log",
+        "bytes": 202388,
+        "sha256": "60f84d2cf1ce8356d0e24c226111763ac5adfe2bfe8578f3ca189ee5b976b812"
+      },
+      "report": {
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green-formatted-vitest.json",
+        "bytes": 46893,
+        "sha256": "532f9ff5a9fa5a39bb76fba88bfd64fcb3e32b08f9c404179a8a6fe0f2dbc11f"
+      },
+      "startedAt": "2026-11-21T23:00:02.120429+00:00",
+      "finishedAt": "2026-11-21T23:00:14.270481+00:00",
+      "elapsedSeconds": 12.15,
+      "exitCode": 0,
+      "counts": {
+        "numTotalTests": 122,
+        "numPassedTests": 122,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "exactRequestedInventory": true,
+      "sourceStable": true,
+      "wholeWorktreeClean": false,
+      "untrackedDependencyLinksDuringRun": 59,
+      "reportedUnhandledErrors": 0,
+      "sourceBefore": {
+        "head": "f0b502704b825b5b644639522555d13e3d64231e",
+        "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+        "status": " M packages/adapters/base/test/fixtures/axis-input-conformance.ts\n M packages/prototypes/base/test/carousel-continuous.test.ts\n M packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts\n M packages/prototypes/base/test/resizable-group.test.ts\n?? apps/workspace/node_modules\n?? apps/www/node_modules\n?? node_modules\n?? packages/adapters/base/node_modules\n?? packages/adapters/gpui-peer/node_modules\n?? packages/adapters/react/node_modules\n?? packages/adapters/vue/node_modules\n?? packages/adapters/vue2/node_modules\n?? packages/adapters/web-component/node_modules\n?? packages/cli/node_modules\n?? packages/compiler/node_modules\n?? packages/compositions/chatui/node_modules\n?? packages/core/node_modules\n?? packages/hooks/node_modules\n?? packages/modules/a11y/node_modules\n?? packages/modules/anatomy/node_modules\n?? packages/modules/as-trigger/node_modules\n?? packages/modules/axis-input/node_modules\n?? packages/modules/base/node_modules\n?? packages/modules/boundary/node_modules\n?? packages/modules/collection/node_modules\n?? packages/modules/context/node_modules\n?? packages/modules/control-label/node_modules\n?? packages/modules/event/node_modules\n?? packages/modules/expose-event/node_modules\n?? packages/modules/expose-state-web/node_modules\n?? packages/modules/expose-state/node_modules\n?? packages/modules/expose/node_modules\n?? packages/modules/feedback/node_modules\n?? packages/modules/focus/node_modules\n?? packages/modules/hit-participation/node_modules\n?? packages/modules/image-view/node_modules\n?? packages/modules/material-contact/node_modules\n?? packages/modules/native-link/node_modules\n?? packages/modules/overlay/node_modules\n?? packages/modules/positioning/node_modules\n?? packages/modules/presence/node_modules\n?? packages/modules/props/node_modules\n?? packages/modules/rule-expose-state-web/node_modules\n?? packages/modules/rule-meta/node_modules\n?? packages/modules/rule/node_modules\n?? packages/modules/scroll/node_modules\n?? packages/modules/state-accessibility/node_modules\n?? packages/modules/state-interaction/node_modules\n?? packages/modules/state/node_modules\n?? packages/modules/table-structure/node_modules\n?? packages/modules/test-sys/node_modules\n?? packages/modules/text-control/node_modules\n?? packages/prototypes/base/node_modules\n?? packages/prototypes/bootstrap-2-3-2/node_modules\n?? packages/prototypes/brutalist/node_modules\n?? packages/prototypes/liquid-glass/node_modules\n?? packages/prototypes/lucide/node_modules\n?? packages/prototypes/shadcn/node_modules\n?? packages/runtime/node_modules\n?? packages/spec/engine/node_modules\n?? packages/spec/graph/node_modules\n?? packages/spec/schema/node_modules\n?? packages/web-conformance/node_modules\n",
+        "files": [
+          {
+            "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+            "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322"
+          },
+          {
+            "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+            "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41"
+          },
+          {
+            "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+            "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b"
+          },
+          {
+            "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+            "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f"
+          },
+          {
+            "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+            "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5"
+          },
+          {
+            "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+            "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4"
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b"
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15"
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0"
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377"
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+          },
+          {
+            "path": "vitest.config.ts",
+            "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+          }
+        ]
+      },
+      "sourceAfter": {
+        "head": "f0b502704b825b5b644639522555d13e3d64231e",
+        "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+        "status": " M packages/adapters/base/test/fixtures/axis-input-conformance.ts\n M packages/prototypes/base/test/carousel-continuous.test.ts\n M packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts\n M packages/prototypes/base/test/resizable-group.test.ts\n?? apps/workspace/node_modules\n?? apps/www/node_modules\n?? node_modules\n?? packages/adapters/base/node_modules\n?? packages/adapters/gpui-peer/node_modules\n?? packages/adapters/react/node_modules\n?? packages/adapters/vue/node_modules\n?? packages/adapters/vue2/node_modules\n?? packages/adapters/web-component/node_modules\n?? packages/cli/node_modules\n?? packages/compiler/node_modules\n?? packages/compositions/chatui/node_modules\n?? packages/core/node_modules\n?? packages/hooks/node_modules\n?? packages/modules/a11y/node_modules\n?? packages/modules/anatomy/node_modules\n?? packages/modules/as-trigger/node_modules\n?? packages/modules/axis-input/node_modules\n?? packages/modules/base/node_modules\n?? packages/modules/boundary/node_modules\n?? packages/modules/collection/node_modules\n?? packages/modules/context/node_modules\n?? packages/modules/control-label/node_modules\n?? packages/modules/event/node_modules\n?? packages/modules/expose-event/node_modules\n?? packages/modules/expose-state-web/node_modules\n?? packages/modules/expose-state/node_modules\n?? packages/modules/expose/node_modules\n?? packages/modules/feedback/node_modules\n?? packages/modules/focus/node_modules\n?? packages/modules/hit-participation/node_modules\n?? packages/modules/image-view/node_modules\n?? packages/modules/material-contact/node_modules\n?? packages/modules/native-link/node_modules\n?? packages/modules/overlay/node_modules\n?? packages/modules/positioning/node_modules\n?? packages/modules/presence/node_modules\n?? packages/modules/props/node_modules\n?? packages/modules/rule-expose-state-web/node_modules\n?? packages/modules/rule-meta/node_modules\n?? packages/modules/rule/node_modules\n?? packages/modules/scroll/node_modules\n?? packages/modules/state-accessibility/node_modules\n?? packages/modules/state-interaction/node_modules\n?? packages/modules/state/node_modules\n?? packages/modules/table-structure/node_modules\n?? packages/modules/test-sys/node_modules\n?? packages/modules/text-control/node_modules\n?? packages/prototypes/base/node_modules\n?? packages/prototypes/bootstrap-2-3-2/node_modules\n?? packages/prototypes/brutalist/node_modules\n?? packages/prototypes/liquid-glass/node_modules\n?? packages/prototypes/lucide/node_modules\n?? packages/prototypes/shadcn/node_modules\n?? packages/runtime/node_modules\n?? packages/spec/engine/node_modules\n?? packages/spec/graph/node_modules\n?? packages/spec/schema/node_modules\n?? packages/web-conformance/node_modules\n",
+        "files": [
+          {
+            "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+            "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322"
+          },
+          {
+            "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+            "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41"
+          },
+          {
+            "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+            "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b"
+          },
+          {
+            "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+            "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f"
+          },
+          {
+            "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+            "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5"
+          },
+          {
+            "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+            "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4"
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b"
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15"
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0"
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377"
+          },
+          {
+            "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+            "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4"
+          },
+          {
+            "path": "vitest.config.ts",
+            "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+          }
+        ]
+      }
+    }
+  ],
+  "exactFocusedCommand": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "--pool=forks",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/green-formatted-vitest.json",
+    "packages/adapters/base/test/web-axis-input-host.test.ts",
+    "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+    "packages/adapters/react/test/axis-input.integration.test.ts",
+    "packages/adapters/vue/test/axis-input.integration.test.ts",
+    "packages/adapters/vue2/test/axis-input.integration.test.ts",
+    "packages/adapters/web-component/test/axis-input.integration.test.ts",
+    "packages/prototypes/base/test/carousel-continuous.test.ts",
+    "packages/prototypes/base/test/resizable-group.test.ts",
+    "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+  ],
+  "node": "24.22.3",
+  "pnpm": "10.32.1",
+  "caseIdentityAudit": {
+    "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/case-identity-audit.json",
+    "bytes": 46405,
+    "sha256": "ff960ecf5092eb0d5901e76fb3d0a5b72f1e486336a415c3b9fc88da7bdcd41f"
+  },
+  "originalExpectationAudit": {
+    "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/source-audit.json",
+    "bytes": 100951,
+    "sha256": "6ec185e8120d19ecb5735d4a223a5a741c748a696b7140e6356510ba0321563e"
+  },
+  "expectationAuditQualification": "All original expect chains, case titles/inputs and numeric literals remain equal. The raw audit enumerates calls rooted at expect including nested calls and must not be interpreted as a count of independent assertions.",
+  "dependencies": {
+    "linksDuringRuns": 59,
+    "allOriginalStatusSnapshotsRetained": true,
+    "wholeWorktreeCleanDuringRuns": false,
+    "declaredVitestAliases": [
+      {
+        "id": "@proto.ui/core",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/core/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/hooks",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/hooks/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/adapter-web-component",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/adapters/web-component/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/adapter-react",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/adapters/react/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/adapter-vue",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/adapters/vue/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/adapter-vue2",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/adapters/vue2/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/prototypes-base",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/prototypes/base/src/index.ts"
+      },
+      {
+        "id": "@proto.ui/prototypes-shadcn",
+        "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-fix/packages/prototypes/shadcn/src/index.ts"
+      }
+    ],
+    "allCheckedAliasesResolveInsideCandidate": true,
+    "cleanup": {
+      "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/dependency-link-cleanup.json",
+      "bytes": 18938,
+      "sha256": "e0e23ba1844b6430702c93d061f7b3ac4a5466344691ddab46f99a3ef9a0c843"
+    },
+    "correction": "The earlier chat described the red worktree as clean. Its immutable sourceBefore/sourceAfter status actually contained 59 untracked node_modules symlinks. Tracked baseline source was unchanged and full status was stable, but the whole worktree was not clean.",
+    "limit": "Focused tests use existing shared third-party dependencies. The actual candidate Vitest resolver points workspace package imports at candidate paths; this is a resolver check, not a full runtime module-resolution trace. Clean integration/native validation remains separate."
+  },
+  "productSourceUnchanged": [
+    {
+      "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+      "committedSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+      "currentSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+      "equal": true
+    },
+    {
+      "path": "packages/core/src/axis-input.ts",
+      "committedSha256": "4da2e000fd49fb44840f18de548d8df1f8159bf3236da76be8a9b040c71fd7c2",
+      "currentSha256": "4da2e000fd49fb44840f18de548d8df1f8159bf3236da76be8a9b040c71fd7c2",
+      "equal": true
+    },
+    {
+      "path": "packages/modules/axis-input/src/create.ts",
+      "committedSha256": "e1f1ce56e49df5ac3a674d3fcd820fe4a0cee1502e765909c71559241883f896",
+      "currentSha256": "e1f1ce56e49df5ac3a674d3fcd820fe4a0cee1502e765909c71559241883f896",
+      "equal": true
+    },
+    {
+      "path": "vitest.config.ts",
+      "committedSha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+      "currentSha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+      "equal": true
+    }
+  ],
+  "candidateDiff": {
+    "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/candidate.diff",
+    "bytes": 8808,
+    "sha256": "629f807a07a06a7a9834b800e097b3ec02f004368d7cb31f100c209924645492"
+  },
+  "earlierFailedCandidateDiff": {
+    "path": "/workspace/scratch/fbd6f62bb640/axis-fixture-evidence/attempt-1.diff",
+    "bytes": 8142,
+    "sha256": "95ad09be5db162a233701c0dd0b357db8261cb7d3539715383756528c96f5427"
+  },
+  "remainingEvidence": "Parent will integrate after review, run these same 9 files under a real frozen dependency installation, then bind the final candidate and rerun complete native CI. This record does not rewrite f0 native failures or claim clean-candidate/native acceptance."
+}

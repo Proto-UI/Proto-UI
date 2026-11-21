@@ -59,23 +59,34 @@ function fixture(
     height: 800,
     toJSON() {},
   });
+  const contentBox = { left: 0, top: 0, width: 200, height: 200 };
+  const layoutBoxes = new WeakMap<Element, typeof contentBox>();
   const originalStyle = window.getComputedStyle.bind(window);
   vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
     const actual = originalStyle(element, pseudo);
-    return element.hasAttribute('data-pui-available-space-probe')
+    const box = layoutBoxes.get(element);
+    const availableSpaceProbe = element.hasAttribute('data-pui-available-space-probe');
+    return box || availableSpaceProbe
       ? new Proxy(actual, {
           get(target, key) {
-            return ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].includes(
-              String(key)
+            // Keep authored height:auto intact while supplying the same
+            // resolved untransformed border box as this fixture's rect.
+            if (box && (key === 'width' || key === 'height')) return `${box[key]}px`;
+            if (box && key === 'boxSizing') return 'border-box';
+            if (
+              availableSpaceProbe &&
+              ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].includes(String(key))
             )
-              ? '0px'
-              : Reflect.get(target, key, target);
+              return '0px';
+            const value = Reflect.get(target, key, target);
+            return typeof value === 'function' ? value.bind(target) : value;
           },
         })
       : actual;
   });
   const root = document.createElement(family.drawerRoot.name) as any;
   const content = document.createElement(family.drawerContent.name) as any;
+  layoutBoxes.set(content, contentBox);
   const handle = document.createElement(family.drawerHandle.name) as any;
   const close = document.createElement(family.drawerClose.name) as any;
   close.textContent = 'Close';
@@ -85,7 +96,7 @@ function fixture(
   if (withMask) root.append(document.createElement(family.drawerMask.name));
   root.append(content);
   roots.push(root);
-  content.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 200 }) as DOMRect;
+  content.getBoundingClientRect = () => contentBox as DOMRect;
   document.body.append(root);
   return { root, content, handle, close };
 }
