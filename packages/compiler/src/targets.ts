@@ -339,6 +339,7 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
 
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
+  'accessible.part',
   'eventControl.requestDefaultActionPrevention',
   'hook.asControlLabel',
   'controlLabel.label',

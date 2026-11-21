@@ -283,6 +283,36 @@ const watchParameters: readonly ValueType[] = ['run', 'props', 'props', 'record'
 const rawWatchParameters: readonly ValueType[] = ['run', 'record', 'record', 'record'];
 const optionalRecord: ArgumentRule = { ...record, optional: true };
 const capabilityConfig: ArgumentRule = { role: 'value', types: ['record', 'module-config'] };
+const partKeyType: ValueType = {
+  kind: 'value-union',
+  members: ['string', 'state:string', 'borrowed:string', 'observed:string'],
+};
+const partTargetType: ValueType = {
+  kind: 'object',
+  fields: [
+    { name: 'kind', type: { kind: 'literal', value: 'part' } },
+    { name: 'family', type: 'anatomy-family' },
+    { name: 'role', type: 'string' },
+    { name: 'key', type: partKeyType },
+  ],
+};
+const relationSpecType: ValueType = {
+  kind: 'object',
+  fields: [
+    {
+      name: 'target',
+      type: {
+        kind: 'value-union',
+        members: [partKeyType, 'a11y-ref', 'a11y-ref-list', { kind: 'array', element: { kind: 'union', members: [] } }, partTargetType],
+      },
+    },
+    {
+      name: 'mode',
+      optional: true,
+      type: { kind: 'union', members: [{ kind: 'literal', value: 'replace' }, { kind: 'literal', value: 'append' }] },
+    },
+  ],
+};
 const textSnapshot: DataType = {
   kind: 'record',
   fields: [
@@ -1501,12 +1531,23 @@ export const OPERATION_RULES = {
     [{ role: 'value', types: ['string', 'state:string', 'observed:string'] }],
     [effect('declare', 'accessibility')]
   ),
+  'accessible.part': rule(
+    'accessible',
+    'part',
+    setup,
+    'void',
+    [
+      { role: 'value', types: ['anatomy-family'] },
+      { role: 'value', valueSchema: { kind: 'object', fields: [{ name: 'key', type: partKeyType }] } },
+    ],
+    [effect('declare', 'accessibility')]
+  ),
   'accessible.relation': rule(
     'accessible',
     'relation',
     setup,
     'void',
-    [key, capabilityConfig],
+    [key, { role: 'value', valueSchema: relationSpecType }],
     [effect('declare', 'accessibility')]
   ),
   'accessible.tree': rule(

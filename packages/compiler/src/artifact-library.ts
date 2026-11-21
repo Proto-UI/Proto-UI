@@ -167,6 +167,7 @@ function supportABI(filename: string): { abi: string; version: number } | undefi
     '.proto-ui/interaction/overlay-ownership-v2.ts': ['proto-ui.dom-overlay-ownership', 2],
     '.proto-ui/interaction/hit-ownership-v2.ts': ['proto-ui.dom-hit-ownership', 2],
     '.proto-ui/interaction/table-ownership-v2.ts': ['proto-ui.dom-table-ownership', 2],
+    '.proto-ui/interaction/part-relationships-v1.ts': ['proto-ui.dom-part-relationships', 1],
     '.proto-ui/interaction/control-label-v1.ts': ['proto-ui.dom-control-label', 1],
   };
   const entry = fixed[filename];
