@@ -128,8 +128,12 @@ export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>
       )
     );
     def.rule({
-      when: (w) => w.state(state.selected).eq(true),
+      when: (w) => w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
       intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+    });
+    def.rule({
+      when: (w) => w.state(state.rangeMiddle).eq(true),
+      intent: (i) => i.feedback.style.use(tw('rounded-none bg-main/20 text-foreground')),
     });
     def.rule({
       when: (w) => w.all(w.state(state.today).eq(true), w.state(state.selected).eq(false)),

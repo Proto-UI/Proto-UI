@@ -34,6 +34,7 @@ type Targets = {
   input: unknown;
   geometry: unknown;
   travel?: unknown;
+  deltaBasis?: readonly unknown[];
   ownership?: {
     domain: unknown;
     input: unknown;
@@ -75,7 +76,9 @@ class AxisInputModuleImpl extends ModuleBase {
         if (
           !binding.anatomy.decl.roles[binding.inputRole] ||
           !binding.anatomy.decl.roles[binding.geometryRole] ||
-          (binding.travelRole !== undefined && !binding.anatomy.decl.roles[binding.travelRole])
+          (binding.travelRole !== undefined && !binding.anatomy.decl.roles[binding.travelRole]) ||
+          (binding.deltaBasisRole !== undefined &&
+            !binding.anatomy.decl.roles[binding.deltaBasisRole])
         ) {
           throw new Error(
             '[AxisInput] Input and geometry roles must belong to the anatomy family.'
@@ -168,8 +171,28 @@ class AxisInputModuleImpl extends ModuleBase {
     }
     const travel = travelPart ? this.anatomy.resolvePartTarget(travelPart) : undefined;
     if (travelPart && !travel) return null;
-    const targets: Targets = { input: inputTarget, geometry: geometryTarget, travel };
-    if (this.config.activation === 'directional' || binding.travelRole !== undefined) {
+    const basisParts =
+      binding.deltaBasisRole === undefined
+        ? undefined
+        : this.anatomy.order
+            .partsOf(binding.anatomy, binding.deltaBasisRole, { missing: 'empty' })
+            .filter(
+              (part) =>
+                this.anatomy.resolveAncestorInstance(
+                  binding.anatomy,
+                  part,
+                  binding.geometryRole
+                ) === geometryInstance
+            );
+    const deltaBasis = basisParts?.map((part) => this.anatomy.resolvePartTarget(part));
+    if (deltaBasis && (deltaBasis.length === 0 || deltaBasis.some((target) => !target)))
+      return null;
+    const targets: Targets = { input: inputTarget, geometry: geometryTarget, travel, deltaBasis };
+    if (
+      this.config.activation === 'directional' ||
+      binding.travelRole !== undefined ||
+      binding.deltaBasisRole !== undefined
+    ) {
       const domain = this.anatomy.resolveDomainScope(binding.anatomy);
       if (domain === null) return null;
       targets.ownership = {
@@ -177,7 +200,7 @@ class AxisInputModuleImpl extends ModuleBase {
         input: self,
         geometry: geometryInstance,
         travel: travelPart ? this.anatomy.resolvePartInstance(travelPart) : undefined,
-        parts: travelPart ? [input, geometry, travelPart] : [input, geometry],
+        parts: [input, geometry, ...(travelPart ? [travelPart] : []), ...(basisParts ?? [])],
       };
     }
     return targets;
@@ -189,7 +212,9 @@ class AxisInputModuleImpl extends ModuleBase {
       !this.targets ||
       next.input !== this.targets.input ||
       next.geometry !== this.targets.geometry ||
-      next.travel !== this.targets.travel
+      next.travel !== this.targets.travel ||
+      (next.deltaBasis?.length ?? 0) !== (this.targets.deltaBasis?.length ?? 0) ||
+      (next.deltaBasis?.some((target, i) => target !== this.targets!.deltaBasis?.[i]) ?? false)
     )
       return false;
     return this.sameOwnership(next);
@@ -225,6 +250,7 @@ class AxisInputModuleImpl extends ModuleBase {
         inputTarget: targets!.input,
         geometryTarget: targets!.geometry,
         ...(targets!.travel ? { travelTarget: targets!.travel } : {}),
+        ...(targets!.deltaBasis ? { deltaBasisTargets: targets!.deltaBasis } : {}),
         config: this.config,
         onSample: this.receiver(this.epoch),
       });
@@ -241,6 +267,7 @@ class AxisInputModuleImpl extends ModuleBase {
       inputTarget: targets.input,
       geometryTarget: targets.geometry,
       ...(targets.travel ? { travelTarget: targets.travel } : {}),
+      ...(targets.deltaBasis ? { deltaBasisTargets: targets.deltaBasis } : {}),
       config: this.config,
       onSample: this.receiver(epoch),
     });

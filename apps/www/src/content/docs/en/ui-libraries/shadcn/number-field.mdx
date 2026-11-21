@@ -16,7 +16,13 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Root owns a finite value/defaultValue, min/max (0/100), positive step (1), disabled/readOnly, name and ariaLabel. Input uses one existing TextControl host editor with decimal input hints and a spinbutton role. Incomplete draft text can remain while editing; blur/Enter commits a finite clamped snapped value or restores the canonical number. Increment/Decrement and ArrowUp/ArrowDown use the same step operation; Shift multiplies by ten, Home/End reach bounds. Controlled proposals do not overwrite owner value. Locale-specific formatting, empty/null numbers, scrub and wheel are not implemented.
+Root owns `number | null` value/defaultValue, min/max (0/100), positive step (1), disabled/readOnly, name and ariaLabel. Input uses one TextControl editor with spinbutton semantics. Incomplete drafts can remain while editing; blur/Enter commits a valid number or restores accepted canonical state. Increment/Decrement and ArrowUp/ArrowDown share stepping, Shift multiplies by ten, and Home/End reach bounds. Controlled proposals never replace owner values optimistically.
+
+`locale` and `formatOptions` support standard decimal, currency and percent presentation with matching decimal/group separators, localized digits and signs. Display rounding does not change canonical precision, including a commit without edits. Invalid configuration sets `formatInvalid` and falls back to ungrouped decimals; invalid drafts restore accepted text on commit. Omitting formatting props retains the previous decimal representation. IME composition blocks parsing, commits, stepping and scrub initiation; changing locale preserves the ongoing composition text.
+
+Explicit `null` represents emptiness, and `value={null}` remains controlled. `allowEmpty` defaults to `false`; enable it to request `null` by clearing and committing the editor. Root and Input/Control expose `getValue(): number | null` and `empty`. The compatibility numeric `value` readout represents a canonical number only when `empty` is false; while empty it retains its last finite value. Events and Field/Form reports always carry actual null. The first step from null initializes snapped zero within the bounds.
+
+Enable `scrub` to continuously adjust the number by dragging Label. `scrubSteps` (default100) is the number of steps per initial Label width; `direction="rtl"` reverses horizontal movement. A changed successful release commits once. Cancellation restores the uncontrolled starting value, and controlled values always remain owner-owned. The input retains normal text selection. Wheel adjustment remains unimplemented.
 
 Use Control instead of Input inside Field/FormField: FieldLabel names and activates the actual editor; Field policy, canonical numeric validation, IME cancellation, Form serialization and reset are bridged. Standalone Input continues to use NumberFieldLabel.
 
@@ -31,7 +37,8 @@ Number Field is workspace source. There is no public `proto-ui add` target. Pass
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'defaultValue', type: 'number', default: '0' },
+    { name: 'value', type: 'number | null', default: '—' },
+    { name: 'defaultValue', type: 'number | null', default: '0' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
     { name: 'step', type: 'number', default: '1' },
@@ -39,6 +46,12 @@ Number Field is workspace source. There is no public `proto-ui add` target. Pass
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'name', type: 'string', default: "''" },
+    { name: 'allowEmpty', type: 'boolean', default: 'false' },
+    { name: 'locale', type: 'string', default: '—' },
+    { name: 'formatOptions', type: 'NumberFieldFormatOptions', default: '—' },
+    { name: 'scrub', type: 'boolean', default: 'false' },
+    { name: 'scrubSteps', type: 'number', default: '100' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
 

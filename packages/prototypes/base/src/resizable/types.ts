@@ -6,10 +6,16 @@ import type {
   State,
 } from '@proto.ui/core';
 export type { ResizableRootProps, ResizablePanelProps } from './index';
-export type ResizableHandleProps = Record<string, never>;
+export type ResizableHandleProps = { index?: number };
 export type ResizableRootExposes = {
   value: ExposeState<number>;
+  sizes: ExposeState<readonly number[]>;
   requestValue: ExposeMethod<(next: number, commit?: boolean) => boolean>;
+  requestResize: ExposeMethod<(index: number, next: number, commit?: boolean) => boolean>;
+  requestSizes: ExposeMethod<(next: readonly number[], commit?: boolean) => boolean>;
+  cancelResize: ExposeMethod<() => boolean>;
+  sizesChange: ExposeEvent<{ sizes: readonly number[] }>;
+  sizesCommit: ExposeEvent<{ sizes: readonly number[] }>;
   valueChange: ExposeEvent<{ value: number }>;
   valueCommit: ExposeEvent<{ value: number }>;
 };
@@ -20,7 +26,12 @@ export type ResizableHandleExposes = {
   disabled: ExposeState<boolean>;
 };
 export type ResizableRootAsHookContract = {
-  state: { value: State<number>; orientation: State<string> };
+  state: {
+    value: State<number>;
+    sizes: State<readonly number[]>;
+    orientation: State<string>;
+    direction: State<string>;
+  };
 };
 export type ResizablePanelAsHookContract = { state: { size: State<number> } };
 export type ResizableHandleAsHookContract = {

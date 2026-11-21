@@ -152,6 +152,7 @@ export class ScrollModuleImpl extends ModuleBase {
         requestStatus: this.observed(this.endFollowRequestStatusOwned),
       },
       configure: (patch) => this.configure(patch),
+      sync: (patch) => this.sync(patch),
       bindComposedChrome: (binding) => this.bindComposedChrome(binding),
       request: (request) => this.request(request),
       getSnapshot: () => this.getSnapshot(),
@@ -212,6 +213,24 @@ export class ScrollModuleImpl extends ModuleBase {
       this.offAnatomyOrder = this.anatomyPort.subscribeOrder(binding.anatomy, refresh);
       this.offAnatomyTargets = this.anatomyPort.subscribeTargets(binding.anatomy, refresh);
     }
+  }
+
+  sync(patch: Readonly<{ axes?: ScrollAxes }>): void {
+    if (!this.sys) throw new Error('[Scroll] sync requires callback scope.');
+    this.sys.ensureCallback('asScrollSurface().sync');
+    this.sys.ensureNotDisposed('asScrollSurface().sync');
+    const axes = patch.axes ?? this.config.axes;
+    if (!['horizontal', 'vertical', 'both'].includes(axes))
+      throw new Error('[Scroll] sync axes must be horizontal, vertical or both.');
+    if (axes === this.config.axes) return;
+    this.config = Object.freeze({ ...this.config, axes });
+    this.snapshotEpoch++;
+    if (
+      this.mounted &&
+      this.lease &&
+      (!this.availabilitySession || this.bindingIsCurrent(this.leaseEpoch, this.currentBinding))
+    )
+      this.lease.update(this.createHostAttachment());
   }
 
   request(request: ScrollSurfaceRequest): ScrollSurfaceRequestOutcome {
@@ -571,12 +590,16 @@ export class ScrollModuleImpl extends ModuleBase {
     try {
       this.set(this.projectionOwned, projection);
       if (epoch !== this.leaseEpoch || !this.mounted) return;
-      const lease = host.attach(this.createHostAttachment(epoch));
+      const attachment = this.createHostAttachment(epoch);
+      const lease = host.attach(attachment);
       if (epoch !== this.leaseEpoch || !this.mounted) {
         lease.dispose();
         return;
       }
       this.lease = lease;
+      // Initial facts can synchronously change the requested axis before attach
+      // returns its lease. Apply that latest configuration to the same session.
+      if (attachment.config !== this.config) lease.update(this.createHostAttachment(epoch));
       // Keep the token while draining so reentrant requests join the tail,
       // rather than overtaking requests emitted by earlier fact watchers.
       for (const request of attaching.requests) {

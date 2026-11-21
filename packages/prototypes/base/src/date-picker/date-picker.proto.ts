@@ -17,13 +17,51 @@ import type {
 } from './types';
 export type * from './types';
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asCalendarRoot, asCalendarDay, CALENDAR_CONTEXT, dateAvailable } from '../calendar';
+import { asCalendarRoot, asCalendarDay, CALENDAR_CONTEXT } from '../calendar';
 import { asPopoverRoot, asPopoverTrigger, asPopoverContent } from '../popover';
 import { POPOVER_CONTEXT, requestPopoverOpen } from '../popover/shared';
 
-function setupRoot(_def: DefHandle<DatePickerRootProps, DatePickerRootExposes>) {
+function setupRoot(def: DefHandle<DatePickerRootProps, DatePickerRootExposes>) {
   asPopoverRoot();
   asCalendarRoot();
+  let mounted = false;
+  let lastCompletion = 0;
+  let lastRequest = 0;
+  let requestSessionOpen = false;
+  def.context.subscribe(CALENDAR_CONTEXT, (run, next) => {
+    const open = run.context.read(POPOVER_CONTEXT).open;
+    if (next.selectionRequestId !== lastRequest) {
+      lastRequest = next.selectionRequestId;
+      requestSessionOpen = mounted && open;
+    }
+    const completion = next.selectionCommit;
+    if (!completion || completion.id === lastCompletion) return;
+    lastCompletion = completion.id;
+    if (
+      !mounted ||
+      !requestSessionOpen ||
+      !completion.complete ||
+      next.disabled ||
+      next.readOnly ||
+      !open
+    )
+      return;
+    requestPopoverOpen(run, false, 'date-selection', completion.reason);
+  });
+  def.context.subscribe(POPOVER_CONTEXT, (_run, next) => {
+    if (!next.open) requestSessionOpen = false;
+  });
+  def.lifecycle.onMounted(() => {
+    mounted = true;
+  });
+  def.lifecycle.onUnmounted(() => {
+    mounted = false;
+    requestSessionOpen = false;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    mounted = false;
+    requestSessionOpen = false;
+  });
 }
 export const asDatePickerRoot = defineAsHook<
   DatePickerRootProps,
@@ -61,21 +99,8 @@ export const datePickerContent = definePrototype({
   name: 'base-date-picker-content',
   setup: setupContent,
 });
-function setupDay(def: DefHandle<DatePickerDayProps, DatePickerDayExposes>) {
+function setupDay(_def: DefHandle<DatePickerDayProps, DatePickerDayExposes>) {
   const calendar = asCalendarDay();
-  def.context.subscribe(POPOVER_CONTEXT);
-  def.context.subscribe(CALENDAR_CONTEXT);
-  def.event.on('press.commit', (run, event) => {
-    const c = run.context.read(CALENDAR_CONTEXT),
-      date = calendar.stateHandles?.date.get() ?? '';
-    if (
-      !calendar.stateHandles?.disabled.get() &&
-      !c.disabled &&
-      !c.readOnly &&
-      dateAvailable(date, c.min, c.max, c.unavailable)
-    )
-      requestPopoverOpen(run, false, 'date-selection', event.key ? 'keyboard' : 'pointer');
-  });
   return calendar.render;
 }
 export const asDatePickerDay = defineAsHook<
@@ -91,7 +116,18 @@ function setupValue(def: DefHandle<DatePickerValueProps, DatePickerValueExposes>
   def.expose.state('displayValue', display);
   let mounted = false;
   const sync = (run: RunHandle<{ placeholder?: string }>) => {
-    const next = run.context.read(CALENDAR_CONTEXT).value || run.props.get().placeholder || '';
+    const c = run.context.read(CALENDAR_CONTEXT);
+    const text =
+      c.mode === 'multiple'
+        ? c.values.join(', ')
+        : c.mode === 'range'
+          ? c.range.from
+            ? c.range.to
+              ? `${c.range.from} – ${c.range.to}`
+              : `${c.range.from} …`
+            : ''
+          : c.value;
+    const next = text || run.props.get().placeholder || '';
     if (next !== display.get()) {
       display.set(next, 'date picker display');
       if (mounted) run.update();

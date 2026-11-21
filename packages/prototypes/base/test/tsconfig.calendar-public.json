@@ -13,9 +13,13 @@
     "../../liquid-glass/src/date-picker/**/*.ts",
     "calendar*.ts",
     "../../../web-conformance/test/calendar.journey.test.ts",
+    "../../../web-conformance/test/calendar-selection.journey.test.ts",
     "../../../../apps/www/src/components/PrototypePreviewer/calendar-demo.test.ts",
     "../../../../apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts",
+    "../../../../apps/www/src/content/docs/zh-cn/calendar-selection-demo.shared.ts",
     "../../../../apps/www/src/content/docs/zh-cn/demo-*-calendar.demo.ts",
+    "../../../../apps/www/src/content/docs/zh-cn/demo-*-calendar-selection.demo.ts",
+    "../../../../apps/www/src/content/docs/zh-cn/demo-*-date-picker-selection.demo.ts",
     "../../../../types/runtime-retry-urls.d.ts"
   ],
   "exclude": []

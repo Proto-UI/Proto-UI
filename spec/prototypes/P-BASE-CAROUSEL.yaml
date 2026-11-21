@@ -6,11 +6,31 @@ since: 0.3.0-alpha.1
 lifecycleRationale:
   zh-CN: 'Draft 实现方向，稳定准入需要独立审查及浏览器/native 证据。'
   en: 'Draft implementation direction. Stable admission requires independent review and browser/native evidence.'
-summary: Base carousel protocol with shared Proto UI lifecycle and anatomy boundaries.
+summary: Portable equal-slide carousel with continuous scrolling, committed snap indexes and responsive multi-item viewports.
 statement:
-  zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
-  en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
+  zh-CN: Root 拥有已提交的首项索引；Viewport 通过 Scroll 观察实际位置和可见比例，通过 Axis Input 连续请求移动，在接触结束或原生滚动静止时请求最近吸附索引。各项保持布局参与，多项视口的实际容量随宿主布局变化。受控拒绝必须回到已提交位置。
+  en: Root owns the committed leading-item index. Viewport observes actual position and visible ratio through Scroll, requests continuous movement through Axis Input and proposes the nearest snap index on contact completion or native-scroll rest. Slides remain in layout and actual multi-item capacity follows host layout. Controlled refusal returns to the committed position.
 criteria:
+  - id: P-BASE-CAROUSEL-CONTINUOUS
+    text:
+      en: Every accepted movement sample requests the corresponding normalized scroll offset before release; sliding does not hide or remove noncurrent items from layout. Native wheel, trackpad and scrollbar motion uses the same observed surface and settles at the nearest item boundary.
+      zh-CN: 每个被接受的移动样本在松手前即请求对应归一化滚动位置；非当前项不从布局移除。原生滚轮、触控板和滚动条共用同一观察表面，静止后吸附到最近项边界。
+  - id: P-BASE-CAROUSEL-VIEWPORT
+    text:
+      en: slidesPerView defaults to one and is a finite number at least one; minSlideSize defaults to zero logical host pixels. Equal slide basis is the greater of 100/slidesPerView percent and minSlideSize, capped by the viewport. The observed visible ratio determines actual capacity and end alignment after resize. Vertical consumers provide a bounded viewport block extent.
+      zh-CN: slidesPerView 默认为 1 且为至少 1 的有限数；minSlideSize 默认为零个逻辑宿主像素。等宽项基准为 100/slidesPerView 百分比与 minSlideSize 中较大者，上限为视口。实际可见比例决定缩放后的容量和末端对齐；纵向消费者提供有界视口高度。
+  - id: P-BASE-CAROUSEL-CONTROLLED
+    text:
+      en: indexChange proposes an index; a provided index remains authoritative. Transient dragging and native scrolling never commit it. Completion snaps to synchronously accepted owner input or back to the existing committed index; later acceptance moves to the later input. Finite indexes clamp to the reachable leading-item range; loop wraps between its ends without cloning items or claiming seamless infinite motion.
+      zh-CN: indexChange 只提出索引；受控 index 始终权威。拖动和原生滚动预览不提交索引；结束时吸附到同步接受后的索引或返回原已提交索引，延迟接受再移动。有限索引限制在可达首项范围；loop 在两端循环，不复制项也不声称无缝无限运动。
+  - id: P-BASE-CAROUSEL-LIFETIME
+    text:
+      en: Cancellation, disabled or axis/direction changes, geometry-basis invalidation and view retirement discard transient contact without indexChange. Unmounted callbacks cannot request scrolling. Keyboard navigation and previous/next use the same reachable range; horizontal RTL reverses physical gestures and keys while preserving logical item order.
+      zh-CN: 取消、禁用、轴或方向变化、几何基准失效和视图退役均丢弃临时接触且不发出 indexChange。卸载后的回调不能请求滚动。键盘和前后按钮共享可达范围；水平 RTL 反转物理手势和按键，保留逻辑项顺序。
+  - id: P-BASE-CAROUSEL-VISIBILITY
+    text:
+      en: current identifies the committed snap item; hidden identifies items completely outside the actual viewport and withdraws accessibility-tree and visible interaction participation. Offscreen items retain their layout extent so scrolling remains continuous. The final snap may end-align a partially visible item rather than align a complete leading item.
+      zh-CN: current 标识已提交的吸附项；hidden 标识完全位于实际视口外的项并撤出无障碍树及可见交互。屏外项保留布局尺寸以维持连续滚动；最后一处吸附可按部分项目的末端对齐，不必将完整项目置于起点。
   - id: P-BASE-CAROUSEL-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -19,8 +39,11 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-SCROLL-0001
+    - { id: C-SCROLL-AXIS-SYNC-0001, since: 0.3.0-alpha.2 }
+    - C-AXIS-INPUT-CONTACT-BASIS-0001
 verifies:
-  tests: []
+  tests: [{ id: T-BASE-CAROUSEL-CONTINUOUS-0001, since: 0.3.0-alpha.2 }]
 sources:
   - path: packages/prototypes/base/src/carousel/
 openQuestions:
@@ -31,6 +54,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-CAROUSEL
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Defined continuous drag/native scroll, controlled snapping, responsive equal-slide viewports and cancellation separately from stable admission.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base carousel family as draft.

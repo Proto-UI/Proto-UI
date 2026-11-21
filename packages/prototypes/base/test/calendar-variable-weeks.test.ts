@@ -154,5 +154,7 @@ it('declares a focused Shadcn ring independently of selected when the host repor
   await flush();
   expect(day.getExposes().selected.get()).toBe(true);
   expect(day.getExposes().focused.get()).toBe(true);
-  expect(day.getAttribute('data-pui-style')).toContain('data-[selected]:bg-primary');
+  expect(day.getAttribute('data-pui-style')).toContain(
+    'data-[selected]:not-[data-range-middle]:bg-primary'
+  );
 });

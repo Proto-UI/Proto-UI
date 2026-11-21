@@ -53,6 +53,8 @@ export default withShadcnRheaDemo({
     ],
     'props': {
       'a11yLabel': 'Project stages',
+      'slidesPerView': 2,
+      'minSlideSize': 180,
     },
     'className': 'grid max-w-lg gap-3',
   },

@@ -46,7 +46,7 @@ describe('Base Resizable documentation registration', () => {
     const config = readFileSync(resolve(process.cwd(), 'apps/www/astro.config.mjs'), 'utf8');
     expect(config).toContain("slug: 'ui-libraries/base/resizable'");
   });
-  it('admits a Base-only declarative recipe with one root, two panels, and a single handle', () => {
+  it('admits three outer panels and an independent two-panel nested group', () => {
     const recipe = (recipes['./demo-base-resizable.demo.ts'] as { default?: DemoSpec } | undefined)
       ?.default;
     expect(recipe).toBeDefined();
@@ -55,7 +55,10 @@ describe('Base Resizable documentation registration', () => {
     const countIn = (node: any, protoId: string): number => {
       if (!node || typeof node !== 'object') return 0;
       let count = node.kind === 'proto' && node.prototypeId === protoId ? 1 : 0;
-      for (const child of node.children ?? []) count += countIn(child, protoId);
+      for (const child of node.children ?? []) {
+        if (child?.prototypeId === 'base-resizable-root') continue;
+        count += countIn(child, protoId);
+      }
       return count;
     };
     let rootCount = 0;
@@ -63,12 +66,13 @@ describe('Base Resizable documentation registration', () => {
       if (!node || typeof node !== 'object') return;
       if (node.kind === 'proto' && node.prototypeId === 'base-resizable-root') {
         rootCount += 1;
-        expect(countIn(node, 'base-resizable-panel')).toBe(2);
-        expect(countIn(node, 'base-resizable-handle')).toBe(1);
+        const expected = node.props.defaultSizes.length;
+        expect(countIn(node, 'base-resizable-panel')).toBe(expected);
+        expect(countIn(node, 'base-resizable-handle')).toBe(expected - 1);
       }
       for (const child of node.children ?? []) collectRoots(child);
     };
     collectRoots((recipe as any).root);
-    expect(rootCount).toBe(1);
+    expect(rootCount).toBe(2);
   });
 });

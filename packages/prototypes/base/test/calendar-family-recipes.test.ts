@@ -65,22 +65,31 @@ for (const [family, atoms] of Object.entries(families)) {
     if (family === 'shadcn') {
       for (const token of ['p-2', 'w-fit', 'bg-background'])
         expect(tokens(root).has(token)).toBe(true);
-      for (const token of [
-        'w-7',
-        'h-7',
-        'p-0',
-        'data-[selected]:bg-primary',
-        'data-[focused]:ring-3',
-      ])
+      for (const token of ['w-7', 'h-7', 'p-0', 'data-[focused]:ring-3'])
         expect(tokens(day).has(token)).toBe(true);
+      expect(
+        [...tokens(day)].some(
+          (token) =>
+            token.includes('selected') &&
+            token.includes('range-middle') &&
+            token.endsWith(':bg-primary')
+        )
+      ).toBe(true);
       for (const token of ['w-7', 'h-7']) expect(tokens(previous).has(token)).toBe(true);
       expect(tokens(root).has('border')).toBe(false);
     }
     if (family === 'brutalist') {
       for (const token of ['p-3', 'border-2', 'shadow-[4px_4px_0_0_#000]'])
         expect(tokens(root).has(token)).toBe(true);
-      for (const token of ['w-9', 'h-9', 'border-2', 'data-[selected]:bg-main'])
-        expect(tokens(day).has(token)).toBe(true);
+      for (const token of ['w-9', 'h-9', 'border-2']) expect(tokens(day).has(token)).toBe(true);
+      expect(
+        [...tokens(day)].some(
+          (token) =>
+            token.includes('selected') &&
+            token.includes('range-middle') &&
+            token.endsWith(':bg-main')
+        )
+      ).toBe(true);
       for (const token of ['w-7', 'h-7']) expect(tokens(previous).has(token)).toBe(true);
     }
     setElementProps(root, { defaultMonth: '2026-10', disabled: true });

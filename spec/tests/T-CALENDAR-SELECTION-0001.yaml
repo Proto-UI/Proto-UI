@@ -1,0 +1,63 @@
+id: T-CALENDAR-SELECTION-0001
+type: test
+title: Calendar and Date Picker selection modes
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: The selection suite was defined before implementation and now has focused runtime and four-Adapter journey evidence. Native browser and assistive-technology acceptance remain separate.
+summary: Covers canonical mode ownership, invalid requests, range day states, family paint and Date Picker completion.
+cases:
+  - id: T-CALENDAR-SELECTION-0001-CASE-MULTIPLE
+    title: Multiple toggle, normalized immutable values and count constraints
+    covers:
+      [
+        C-CALENDAR-SELECTION-0001-MODES,
+        C-CALENDAR-SELECTION-0001-REQUEST,
+        C-CALENDAR-SELECTION-0001-ELIGIBILITY,
+      ]
+    expectation: unique-ordered-values-with-unchanged-rejected-owner
+  - id: T-CALENDAR-SELECTION-0001-CASE-RANGE
+    title: Incomplete, reversed, one-day and unavailable-interior ranges
+    covers:
+      [
+        C-CALENDAR-SELECTION-0001-MODES,
+        C-CALENDAR-SELECTION-0001-REQUEST,
+        C-CALENDAR-SELECTION-0001-ELIGIBILITY,
+        C-CALENDAR-SELECTION-0001-DAYS,
+      ]
+    expectation: canonical-inclusive-endpoint-middle-and-pending-day-facts
+  - id: T-CALENDAR-SELECTION-0001-CASE-CONTROLLED
+    title: Refusal, synchronous and delayed acceptance, mode changes and retirement
+    covers: [C-CALENDAR-SELECTION-0001-CONTROLLED]
+    expectation: owner-props-remain-authoritative-without-stale-completion
+  - id: T-CALENDAR-SELECTION-0001-CASE-PICKER
+    title: Popup completion and displayed values follow canonical mode selection
+    covers: [C-CALENDAR-SELECTION-0001-PICKER]
+    expectation: close-on-accepted-complete-selection-only
+implementations:
+  - id: calendar-selection-runtime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/calendar-selection.test.ts
+    required: true
+    consumesCases:
+      - T-CALENDAR-SELECTION-0001-CASE-MULTIPLE
+      - T-CALENDAR-SELECTION-0001-CASE-RANGE
+      - T-CALENDAR-SELECTION-0001-CASE-CONTROLLED
+      - T-CALENDAR-SELECTION-0001-CASE-PICKER
+  - id: calendar-selection-web-journey
+    kind: runtime-test
+    status: passing
+    path: packages/web-conformance/test/calendar-selection.journey.test.ts
+    required: true
+    consumesCases:
+      - T-CALENDAR-SELECTION-0001-CASE-MULTIPLE
+      - T-CALENDAR-SELECTION-0001-CASE-CONTROLLED
+      - T-CALENDAR-SELECTION-0001-CASE-PICKER
+verifies:
+  contracts: [C-CALENDAR-SELECTION-0001]
+  prototypes: [P-BASE-CALENDAR, P-BASE-DATE-PICKER]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Declared discriminating selection-mode and composition cases before implementation.
+tags: [calendar, date-picker, selection, draft]
