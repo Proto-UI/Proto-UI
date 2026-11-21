@@ -85,3 +85,10 @@ Static `for...of` loops are now unrolled, and literal-only branches are decided 
 | toggle | Clears the frontend. It now stops at the target: `props.watchRaw` is not implemented by `react-dom-source-v1`. |
 | separator | Also stops at the target: `props.watchAll` and `props.watchRaw`. |
 | button | Stops at rule `w.meta('colorScheme')`, which appears 101 times across the families. Rule metadata needs its own host-capability definition. |
+
+## Update 2026-11-21: toggle and separator compile
+
+- **Watchers.** `props.watchAll`, `props.watchRaw` and `props.watchRawAll` are now registered for the React, Vue 3, Web Component and GPUI targets. Every native owner already implemented them; the profiles simply did not admit them. Vue 2 keeps its explicit rejection control (`vue2-native-template.test.ts`) until that target is accepted.
+- **Validator fix.** The portable IR validator counted a module binding read inside a closure as a lexical capture; the frontend does not. Any closure in a module helper that called another module helper therefore failed validation. This was reproduced on main, independent of the shadcn sources.
+- **Result.** `shadcn/toggle` and `shadcn/separator` now compile to `react-dom-source-v1` and write their outputs. The generated `Component.tsx` imports only `react`, `react-dom` and its own `.proto-ui` support files. They have not yet been mounted and compared against the `adapter-react` rendering.
+- **Button.** It still stops at rule `w.meta('colorScheme')`.

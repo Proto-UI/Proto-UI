@@ -101,4 +101,52 @@ describe('source forms the shadcn families use', () => {
       diagnostics: [{ message: expect.stringContaining('ForOfStatement') }],
     });
   });
+
+  // watchAll observes every declared prop; watchRaw observes named raw keys,
+  // declared or not. Both lower on the native-owner profiles except Vue2,
+  // which keeps its explicit rejection control.
+  for (const profile of nativeOwnerProfiles.filter((item) => item !== 'vue2-source-v1'))
+    it(`lowers props.watchAll and props.watchRaw for ${profile}`, async () => {
+      const owner = await mountNativeOwner(
+        `import {definePrototype} from '@proto.ui/core';
+        export default definePrototype({name:'watch-all',setup(def){
+          def.props.define({tone:{type:'string'}});
+          const seen=def.state.string('seen','');
+          const raw=def.state.string('raw','');
+          def.props.watchAll((run,next)=>{seen.set(String(next.tone),'watchAll');});
+          def.props.watchRaw(['styleProfile'],(run)=>{raw.set(String(run.props.getRaw().styleProfile),'watchRaw');});
+          def.expose.method('read',()=>seen.get()+'|'+raw.get());
+          return r=>r.el('output',[]);
+        }});`,
+        profile,
+        { props: { tone: 'a', styleProfile: 'vega' } }
+      );
+      cleanup.push(owner.dispose);
+      await owner.setProps({ tone: 'b', styleProfile: 'rhea' });
+      expect(owner.handle.getExposes().read()).toBe('b|rhea');
+    });
+
+  // A closure inside a module helper that calls another module helper reads
+  // shared module scope, not a lexical capture; the portable validator agrees
+  // with the frontend about that.
+  it('does not count module helpers as closure captures', async () => {
+    const owner = await mountNativeOwner(
+      `import {definePrototype,type DefHandle} from '@proto.ui/core';
+      function mark(value: string): string { return value + '!'; }
+      function selection(def: DefHandle<{},{}>) {
+        const selected = def.state.string('selected', '');
+        const sync = () => { selected.set(mark('a'), 'sync'); };
+        def.lifecycle.onCreated(sync);
+        return selected;
+      }
+      export default definePrototype({name:'helpers',setup(def){
+        const selected = selection(def);
+        def.expose.method('read',()=>selected.get());
+        return r=>r.el('output',[]);
+      }});`,
+      'react-dom-source-v1'
+    );
+    cleanup.push(owner.dispose);
+    expect(owner.handle.getExposes().read()).toBe('a!');
+  });
 });
