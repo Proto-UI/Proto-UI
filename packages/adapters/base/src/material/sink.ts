@@ -1,7 +1,7 @@
 import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';
 import { withOwnedCarrierMarker } from './paint-mutations';
 import { observeWebPointerContact } from '../events/pointer-contact';
-import { createContactMotion } from './contact-motion';
+import { CONTACT_RELEASE_MS, createContactMotion } from './contact-motion';
 import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
 import { contactProfile, contactPaintOutset } from './contact-profile';
 import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';
@@ -156,6 +156,7 @@ function createDocumentMaterialSink(
   let cancellationSession: number | null = null;
   let cancelledPointerPhase = false;
   let contactEpoch = 0;
+  let releaseUntil = 0;
   let neutralPaint: {
     lease: string;
     image: string;
@@ -169,6 +170,8 @@ function createDocumentMaterialSink(
     sourceRefresh.cancel();
     if (motion.update(sample, win.performance.now())) {
       contactEpoch++;
+      if (!sample.active && sample.reason === 'up')
+        releaseUntil = win.performance.now() + CONTACT_RELEASE_MS;
       if (sample.active) {
         cancellationSession = null;
         cancelledPointerPhase = false;
@@ -504,7 +507,18 @@ function createDocumentMaterialSink(
         : wantsContact
           ? contactProfile
           : 'liquidgl-v2-app-canvas-1';
-      const paintOutset = wantsContact ? contactPaintOutset(rect.width, rect.height) : 0;
+      // The expanded paint box only exists while pointer deformation is
+      // actually engaged. Rejecting at rest solely for being within outset
+      // distance of a sibling would fall back every contact-tracked surface
+      // in ordinary stacked layouts; engagement re-runs this admission and
+      // still falls back if the real expansion overlaps painted content.
+      const contactEngaged =
+        !!contact.current()?.active ||
+        win!.performance.now() < releaseUntil ||
+        (requestedCandidate?.intent === 'liquid-glass' &&
+          requestedCandidate.deformation?.phase === 'pressed');
+      const paintOutset =
+        wantsContact && contactEngaged ? contactPaintOutset(rect.width, rect.height) : 0;
       const admission = inspectCanvasBackdrop(host, source, paintOutset);
       const carrierConflict =
         carrier && !carrier.valid(paintedImage)

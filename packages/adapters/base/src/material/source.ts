@@ -221,18 +221,21 @@ export function inspectCanvasBackdrop(
     if (!neutral(css)) return fail('source-compositing-unavailable');
     if (css.visibility && css.visibility !== 'visible')
       return fail('source-not-visible-or-composited');
-    if (
-      paintOutset > 0 &&
-      ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||
-        /(?:paint|strict|content)/.test(css.contain))
-    )
-      return fail('source-expanded-paint-clipped');
+    // Painted ancestry is the more specific diagnosis: an opaque ancestor
+    // already hides the canvas even when it also clips expansion, so a
+    // scrolling painted panel reports paint before clip.
     if (
       current !== host &&
       current !== frame.scope &&
       (!transparent(css.backgroundColor) || (css.backgroundImage && css.backgroundImage !== 'none'))
     )
       return fail('source-painted-ancestor');
+    if (
+      paintOutset > 0 &&
+      ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||
+        /(?:paint|strict|content)/.test(css.contain))
+    )
+      return fail('source-expanded-paint-clipped');
     if (current === frame.scope) break;
     current = composedParent(current);
   }

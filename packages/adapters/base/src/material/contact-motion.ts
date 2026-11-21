@@ -1,6 +1,10 @@
 import type { WebPointerContact } from '../events/pointer-contact';
 import type { OpticalFrame } from './program';
 
+/** Finite damped release tail after pointer-up; the expanded paint box stays
+ * claimed through it so the dying wave keeps its sampled geometry. */
+export const CONTACT_RELEASE_MS = 240;
+
 /** Bounded host-private release envelope. No persistent animation clock, input
  * ownership, activation, or semantic state is created here. */
 export function createContactMotion() {
@@ -32,7 +36,7 @@ export function createContactMotion() {
       let strength = sample.active ? 1 : 0;
       let deltaScale = 1;
       if (!sample.active && releasedAt !== null) {
-        const progress = Math.max(0, (now - releasedAt) / 240);
+        const progress = Math.max(0, (now - releasedAt) / CONTACT_RELEASE_MS);
         if (progress >= 1) {
           releasedAt = null;
           return neutral;
