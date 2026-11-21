@@ -398,7 +398,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '19.2.6',
     mode: 'source',
     implemented: true,
-    operations: webOperations,
+    operations: [...webOperations, 'props.watchRaw'],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [...reactDependencies, ...floatingUiDependency],
     helpers: [
