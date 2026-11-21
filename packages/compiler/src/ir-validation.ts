@@ -577,6 +577,8 @@ interface Parameter {
   origin: object;
 }
 interface Binding {
+  /** Derived from the validated declaration scope, never supplied by IR metadata. */
+  moduleBinding?: boolean;
   uninitializedParameter?: boolean;
   uninitializedLexical?: boolean;
   type: ValueType;
@@ -1038,6 +1040,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       if (func.captures !== undefined) {
         const ids = new Set<string>();
+        let lexicalCaptureCount = 0;
+        for (const binding of captures.values())
+          if (!binding.moduleBinding) ++lexicalCaptureCount;
         for (const item of array(func.captures)) {
           const capture = object(item, ['bindingId', 'name', 'storage']);
           const id = text(capture.bindingId),
@@ -1046,13 +1051,14 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           if (
             ids.has(id) ||
             !binding ||
+            binding.moduleBinding ||
             binding.bindingId !== id ||
             capture.storage !== (lexicalStoredType(binding.type) ? 'cell' : 'value')
           )
             bad('Capture must identify the resolved lexical binding.', location);
           ids.add(id);
         }
-        if (ids.size !== captures.size)
+        if (ids.size !== lexicalCaptureCount)
           bad('Capture metadata must include every captured binding.', location);
       }
       const priorCaptures = provenCaptures.get(func);
@@ -1883,6 +1889,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         scope.set(declaration.name, {
           type: valueType(initializer.type),
           origin: declaration,
+          moduleBinding: scope === moduleScope,
           uninitializedLexical: true,
           ...(declaration.bindingId !== undefined
             ? { bindingId: text(declaration.bindingId) }
@@ -1939,6 +1946,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 ...alias,
                 type,
                 origin: alias?.origin ?? node,
+                moduleBinding: scope === moduleScope,
                 uninitializedLexical: false,
                 stateData: stateDeclarationData(val as unknown as ExpressionIR) ?? alias?.stateData,
                 predicate:
