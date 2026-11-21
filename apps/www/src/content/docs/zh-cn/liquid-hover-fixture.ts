@@ -25,6 +25,22 @@ export const LIQUID_HOVER_NEGATIVES = [
 ] as const;
 export type HoverRequest = { kind: string; detail: unknown };
 
+/** These tight fixtures reject the complete contact footprint in every phase. */
+export function isLiquidHoverContactBoundaryFallback(
+  part: string,
+  observation: { quality?: string; reason?: string }
+): boolean {
+  const reason =
+    part === 'source-edge'
+      ? 'source-bounds-unavailable'
+      : part === 'neighbor' || part === 'accordion-tight'
+        ? 'source-overlapping-content'
+        : null;
+  return (
+    reason !== null && observation.quality === 'opaque-fallback' && observation.reason === reason
+  );
+}
+
 /** Actual application paint for the tight-layout negative, not a material override. */
 export function appendLiquidHoverOverlapPaint(destination: HTMLElement): HTMLElement {
   const paint = destination.ownerDocument.createElement('span');

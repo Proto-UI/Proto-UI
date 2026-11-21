@@ -25,6 +25,7 @@ function fixture(onDecode: (call: number) => void | Promise<void> = () => {}) {
     materialPhase: 'rest',
     materialContact: 'held',
     materialMotion: 'press',
+    materialProfile: 'liquidgl-v2-contact-canvas-1',
     materialContactSession: '1',
   });
   document.body.append(host);
@@ -174,25 +175,33 @@ describe('Liquid Toggle immutable committed snapshot (modeled decode timing, not
     expect(f.decode).toHaveBeenCalledOnce();
   });
   it.each(['idle', 'hover', 'focus'])(
-    'maps an unexpanded %s image to the real host content pixels',
+    'registers the neutral %s content inside the full declared contact footprint',
     async () => {
       const f = fixture();
       f.host.dataset.materialContact = 'rest';
-      Object.assign(f.pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
-      Object.assign(f.imageSize, { width: 100, height: 40 });
       f.pixels.at = (x, y) =>
-        x >= 13 && x < 87 && y >= 9 && y < 31 ? [0, 97, 204, 255] : [255, 255, 255, 32];
-      const facts = await observeLiquidToggleSnapshot(f.host);
-      expect(facts.paint).toMatchObject(observeOwnedMaterialPaint(f.host));
-      expect(facts.paint).toMatchObject({ committed: true, geometryMatches: true, paintOutset: 0 });
-      expect(facts.snapshot.verifiedAfterDecode).toBe(true);
-      expect(facts.pixels!.content).toMatchObject({
-        contentPixels: 74 * 22,
-        opaquePixels: 74 * 22,
-        partialAlphaPixels: 0,
-        transparentPixels: 0,
-      });
-      expect(facts.pixels!.tint.meanRgb).toEqual([0, 97, 204]);
+        x >= 22 && x < 96 && y >= 18 && y < 40 ? [0, 97, 204, 255] : [255, 255, 255, 32];
+      for (const profile of ['liquidgl-v2-contact-canvas-1', 'pui-regular-style-tint-contact-5']) {
+        f.host.dataset.materialProfile = profile;
+        Object.assign(f.pseudo, { left: '-10px', top: '-10px', width: '118px', height: '58px' });
+        const facts = await observeLiquidToggleSnapshot(f.host);
+        expect(facts.paint).toMatchObject(observeOwnedMaterialPaint(f.host));
+        expect(facts.paint).toMatchObject({
+          committed: true,
+          geometryMatches: true,
+          paintOutset: 9,
+        });
+        expect(facts.snapshot.verifiedAfterDecode).toBe(true);
+        expect(facts.pixels!.content).toMatchObject({
+          contentPixels: 74 * 22,
+          opaquePixels: 74 * 22,
+          partialAlphaPixels: 0,
+          transparentPixels: 0,
+        });
+        expect(facts.pixels!.tint.meanRgb).toEqual([0, 97, 204]);
+        Object.assign(f.pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
+        expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+      }
     }
   );
   it.each([
@@ -211,10 +220,12 @@ describe('Liquid Toggle immutable committed snapshot (modeled decode timing, not
     Object.assign(f.pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
     expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
   });
-  it('rejects expanded neutral paint, unknown state and a scaled carrier', async () => {
+  it('rejects a collapsed neutral carrier, unknown state and a scaled carrier', async () => {
     const f = fixture();
     f.host.dataset.materialContact = 'rest';
+    Object.assign(f.pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
     expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+    Object.assign(f.pseudo, { left: '-10px', top: '-10px', width: '118px', height: '58px' });
     f.host.dataset.materialContact = 'unknown';
     f.host.dataset.materialPhase = 'pressed';
     expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
@@ -225,6 +236,14 @@ describe('Liquid Toggle immutable committed snapshot (modeled decode timing, not
     Object.assign(f.pseudo, { left: '-19px', top: '-19px', width: '236px', height: '116px' });
     expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
   });
+  it.each(['', 'unknown', 'pui-regular-style-tint-5', 'liquidgl-v2-app-canvas-1'])(
+    'does not infer pointer-contact commitment from profile %j and expanded pixels',
+    async (profile) => {
+      const f = fixture();
+      f.host.dataset.materialProfile = profile;
+      expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+    }
+  );
   it('measures a nonempty content ROI against the foreground from that exact receipt', async () => {
     const f = fixture();
     const facts = await observeLiquidToggleSnapshot(f.host);

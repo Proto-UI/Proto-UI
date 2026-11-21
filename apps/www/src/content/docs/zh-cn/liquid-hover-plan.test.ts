@@ -178,6 +178,17 @@ describe('complete native hover matrix partitions without changing its scope', (
       'negative-release-rest',
       'negative-leave',
     ]);
+    expect([...contactBranch.matchAll(/quality: '([^']+)'/g)].map((match) => match[1])).toEqual(
+      Array(5).fill('opaque-fallback')
+    );
+    expect(
+      [
+        ...contactBranch.matchAll(/isLiquidHoverContactBoundaryFallback\(part, (\w+)\.facts\)/g),
+      ].map((match) => match[1])
+    ).toEqual(['idle', 'hovered', 'rejected', 'released', 'left']);
+    expect(contactBranch).toContain('await page.mouse.down()');
+    expect(contactBranch).toContain('await page.mouse.up()');
+    expect(contactBranch).toContain('expect(rejected.states.pressed).toBe(true)');
     for (const part of [...LIQUID_HOVER_NEGATIVES, 'accordion-tight'])
       expect(liquidHoverStages('policy-and-boundaries', part)).toEqual(
         contactBoundaries.includes(part)

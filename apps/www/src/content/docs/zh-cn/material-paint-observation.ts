@@ -9,16 +9,20 @@ export function observeOwnedMaterialPaint(element: Element) {
   const marker = host.getAttribute('data-pui-material-carrier');
   const carrier = win.getComputedStyle(host, '::before');
   const image = marker === 'contact-v1' ? carrier.backgroundImage : css.backgroundImage;
-  // The committed receipt identifies engagement independently of actual bounds.
-  // Idle/hover/focus use no expansion; held contact, its finite release tail and
-  // keyboard press use contact-profile.ts's displacement + dilation + AA bound.
+  // Only these declared pointer-contact profiles own this full footprint.
+  // Rest, hover, focus, held contact and release keep the same conservative
+  // profile bound; current contact strength never collapses its image lease.
+  // Derive expected geometry from the host and profile, not actual carrier size.
+  const pointerProfile =
+    marker === 'contact-v1' &&
+    (host.dataset.materialProfile === 'liquidgl-v2-contact-canvas-1' ||
+      host.dataset.materialProfile === 'pui-regular-style-tint-contact-5');
   const contact = host.dataset.materialContact;
   const phase = host.dataset.materialPhase;
   const knownContact =
     (contact === 'rest' || contact === 'held' || contact === 'release') &&
     (phase === 'rest' || phase === 'pressed');
-  const engaged = contact === 'held' || contact === 'release' || phase === 'pressed';
-  const outset = engaged ? Math.ceil(Math.max(rect.width, rect.height) * 0.08 + 1) : 0;
+  const outset = pointerProfile ? Math.ceil(Math.max(rect.width, rect.height) * 0.08 + 1) : 0;
   const expected = {
     left: -outset - parseFloat(css.borderLeftWidth),
     top: -outset - parseFloat(css.borderTopWidth),
@@ -32,6 +36,7 @@ export function observeOwnedMaterialPaint(element: Element) {
     height: parseFloat(carrier.height),
   };
   const geometryMatches =
+    pointerProfile &&
     knownContact &&
     Object.keys(expected).every((key) => {
       const name = key as keyof typeof expected;

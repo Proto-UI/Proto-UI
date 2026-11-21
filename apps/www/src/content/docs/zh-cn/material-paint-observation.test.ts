@@ -33,6 +33,7 @@ function fixture(
     materialSource: 'visible-app-canvas',
     materialContact: 'held',
     materialPhase: 'rest',
+    materialProfile: 'liquidgl-v2-contact-canvas-1',
   };
   const rect = { left: 0, top: 0, width: 100, height: 40 };
   const element = {
@@ -59,21 +60,22 @@ describe('owned optical paint observation, independent of quality metadata', () 
     });
   });
   it.each(['idle', 'hover', 'focus'])(
-    'accepts the unexpanded %s carrier only with a neutral committed contact receipt',
+    'keeps the declared contact footprint at neutral %s and rejects collapsed paint',
     () => {
-      const { element, receipt } = fixture({
-        left: '-1px',
-        top: '-1px',
-        width: '100px',
-        height: '40px',
-      });
+      const { element, receipt, pseudo } = fixture();
       receipt.materialContact = 'rest';
-      expect(observeOwnedMaterialPaint(element)).toMatchObject({
-        committed: true,
-        geometryMatches: true,
-        paintOutset: 0,
-        expectedCarrierGeometry: { left: -1, top: -1, width: 100, height: 40 },
-      });
+      for (const profile of ['liquidgl-v2-contact-canvas-1', 'pui-regular-style-tint-contact-5']) {
+        receipt.materialProfile = profile;
+        Object.assign(pseudo, { left: '-10px', top: '-10px', width: '118px', height: '58px' });
+        expect(observeOwnedMaterialPaint(element)).toMatchObject({
+          committed: true,
+          geometryMatches: true,
+          paintOutset: 9,
+          expectedCarrierGeometry: { left: -10, top: -10, width: 118, height: 58 },
+        });
+        Object.assign(pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
+        expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+      }
     }
   );
   it.each([
@@ -92,10 +94,11 @@ describe('owned optical paint observation, independent of quality metadata', () 
     Object.assign(pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
     expect(observeOwnedMaterialPaint(element).committed).toBe(false);
   });
-  it('does not infer engagement from an expanded actual carrier or an unknown receipt', () => {
+  it('does not infer a contact profile or valid phase from expanded actual paint', () => {
     const { element, receipt } = fixture();
-    receipt.materialContact = 'rest';
+    receipt.materialProfile = 'liquidgl-v2-app-canvas-1';
     expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+    receipt.materialProfile = 'liquidgl-v2-contact-canvas-1';
     for (const contact of ['', 'unknown']) {
       receipt.materialContact = contact;
       receipt.materialPhase = 'pressed';
@@ -105,6 +108,14 @@ describe('owned optical paint observation, independent of quality metadata', () 
     receipt.materialPhase = 'unknown';
     expect(observeOwnedMaterialPaint(element).committed).toBe(false);
   });
+  it.each(['', 'unknown', 'pui-regular-style-tint-5', 'liquidgl-v2-app-canvas-1'])(
+    'does not apply pointer-contact bounds to profile %j',
+    (profile) => {
+      const { element, receipt } = fixture();
+      receipt.materialProfile = profile;
+      expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+    }
+  );
   it('recomputes the bound from host dimensions and rejects a scaled old carrier', () => {
     const { element, rect, pseudo } = fixture();
     Object.assign(rect, { width: 200, height: 80 });

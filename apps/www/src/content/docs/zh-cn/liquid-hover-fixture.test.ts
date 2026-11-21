@@ -7,6 +7,7 @@ import {
 import {
   LIQUID_HOVER_PARTS,
   LIQUID_HOVER_NEGATIVES,
+  isLiquidHoverContactBoundaryFallback,
   liquidHoverDemo,
   liquidHoverContextCapture,
   assertLiquidHoverContextReframeEligibility,
@@ -367,4 +368,44 @@ describe('hover fixture authored-prop withdrawal', () => {
     );
     expect(api.setProps).not.toHaveBeenCalled();
   });
+});
+
+describe('full contact footprint keeps specific source guards blocking', () => {
+  it.each([
+    ['source-edge', 'source-bounds-unavailable'],
+    ['neighbor', 'source-overlapping-content'],
+    ['accordion-tight', 'source-overlapping-content'],
+  ])('%s accepts only its actual opaque fallback reason', (part, reason) => {
+    expect(isLiquidHoverContactBoundaryFallback(part, { quality: 'opaque-fallback', reason })).toBe(
+      true
+    );
+    for (const quality of ['self-optical', 'none', undefined])
+      expect(isLiquidHoverContactBoundaryFallback(part, { quality, reason })).toBe(false);
+    for (const wrongReason of [
+      'rendered',
+      'source-lost',
+      'source-bounds-unavailable',
+      'source-overlapping-content',
+      undefined,
+    ]) {
+      if (wrongReason === reason) continue;
+      expect(
+        isLiquidHoverContactBoundaryFallback(part, {
+          quality: 'opaque-fallback',
+          reason: wrongReason,
+        })
+      ).toBe(false);
+    }
+  });
+  it.each(['button', 'authored-before', 'clipped-source', 'neighbor-extra', ''])(
+    'does not broaden the finite three-part contract to %j',
+    (part) => {
+      expect(
+        isLiquidHoverContactBoundaryFallback(part, {
+          quality: 'opaque-fallback',
+          reason: 'source-overlapping-content',
+        })
+      ).toBe(false);
+    }
+  );
 });

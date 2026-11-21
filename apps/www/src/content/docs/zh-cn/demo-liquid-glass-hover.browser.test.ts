@@ -12,6 +12,7 @@ import {
   LIQUID_HOVER_PARTS,
   LIQUID_HOVER_NEGATIVES,
   liquidHoverContextCapture,
+  isLiquidHoverContactBoundaryFallback,
 } from './liquid-hover-fixture';
 import {
   observeLiquidHoverIdle,
@@ -1161,14 +1162,14 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                   await run(part, async (sample, target) => {
                     await page.mouse.move(0, 0);
                     if (['source-edge', 'neighbor', 'accordion-tight'].includes(part)) {
-                      // These layouts reject the expanded contact footprint, not
-                      // the admitted zero-outset idle/hover surface. Keep their
-                      // source/overlap gates blocking under real native press.
+                      // The declared contact profile keeps its full footprint at
+                      // rest too. These real source/overlap negatives must reject
+                      // it in all five stages, including actual native press.
                       const idle = await sample('negative-idle', {
-                        quality: 'self-optical',
-                        contact: 'rest',
+                        quality: 'opaque-fallback',
                       });
-                      optical(idle);
+                      fallback(idle);
+                      expect(isLiquidHoverContactBoundaryFallback(part, idle.facts)).toBe(true);
                       expect(idle.facts.paint.paintOutset).toBe(0);
                       expect(idle.states.pressed).toBe(false);
                       expect(idle.raw.sourceBackdrop).not.toBeNull();
@@ -1224,10 +1225,10 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                       }
                       await target.hover();
                       const hovered = await sample('negative-hover', {
-                        quality: 'self-optical',
-                        contact: 'rest',
+                        quality: 'opaque-fallback',
                       });
-                      optical(hovered);
+                      fallback(hovered);
+                      expect(isLiquidHoverContactBoundaryFallback(part, hovered.facts)).toBe(true);
                       expect(hovered.facts.paint.paintOutset).toBe(0);
                       expect(hovered.states.pressed).toBe(false);
                       expect(hovered.facts.background).toEqual(idle.facts.background);
@@ -1238,6 +1239,7 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                         quality: 'opaque-fallback',
                       });
                       fallback(rejected);
+                      expect(isLiquidHoverContactBoundaryFallback(part, rejected.facts)).toBe(true);
                       expect(rejected.states.pressed).toBe(true);
                       expect(rejected.facts.reason).not.toBe('rendered');
                       if (part === 'source-edge')
@@ -1255,22 +1257,22 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                         );
                       }
                       await page.mouse.up();
-                      // Expansion may remain during the finite release tail;
-                      // after it settles the same actual source must be admitted.
+                      // Release does not turn an insufficient source or visible
+                      // overlap into an admitted contact-profile footprint.
                       const released = await sample('negative-release-rest', {
-                        quality: 'self-optical',
-                        contact: 'rest',
+                        quality: 'opaque-fallback',
                       });
-                      optical(released);
+                      fallback(released);
+                      expect(isLiquidHoverContactBoundaryFallback(part, released.facts)).toBe(true);
                       expect(released.facts.paint.paintOutset).toBe(0);
                       expect(released.states.pressed).toBe(false);
                       sameGeometry(idle, released);
                       await page.mouse.move(0, 0);
                       const left = await sample('negative-leave', {
-                        quality: 'self-optical',
-                        contact: 'rest',
+                        quality: 'opaque-fallback',
                       });
-                      optical(left);
+                      fallback(left);
+                      expect(isLiquidHoverContactBoundaryFallback(part, left.facts)).toBe(true);
                       expect(left.facts.paint.paintOutset).toBe(0);
                       sameGeometry(idle, left);
                       return;
