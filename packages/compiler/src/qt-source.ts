@@ -8,7 +8,7 @@ import {
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
-  unsupportedObjectAssign,
+  unsupportedJavaScriptIntrinsics,
   unsupportedPointerFacts,
 } from './pointer-facts-admission';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -58,8 +58,8 @@ export function emitQtSource(
     'emitted-declarations'
   );
   if (helperDiagnostics.length) return { ok: false, diagnostics: helperDiagnostics };
-  const assignmentDiagnostics = unsupportedObjectAssign(ir, 'qt-source');
-  if (assignmentDiagnostics.length) return { ok: false, diagnostics: assignmentDiagnostics };
+  const intrinsicDiagnostics = unsupportedJavaScriptIntrinsics(ir, 'qt-source');
+  if (intrinsicDiagnostics.length) return { ok: false, diagnostics: intrinsicDiagnostics };
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'qt-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const componentName = options.componentName ?? 'CompiledComponent';

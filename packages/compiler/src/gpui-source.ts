@@ -1519,6 +1519,8 @@ impl __PuiNativeRecordValue {
       case 'intrinsic': {
         const args = node.arguments.map((argument) => expression(argument, environment, depth));
         switch (node.name) {
+          case 'string':
+            throw new Error('GPUI does not yet support native String coercion.');
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
           case 'object.freeze':

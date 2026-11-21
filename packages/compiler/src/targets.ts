@@ -716,6 +716,11 @@ export function checkTargetOperations(
         break;
       case 'intrinsic':
         if (
+          value.name === 'string' &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+        )
+          diagnostic('PUI4003', `String coercion is not implemented by ${selected.id}.`, value.span);
+        if (
           value.name === 'object.assign' &&
           !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
         )
