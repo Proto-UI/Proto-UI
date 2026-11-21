@@ -2873,7 +2873,6 @@ test('restricts Lucide component allowances to the Lucide package family', () =>
 
 test('accepts Lucide package root and subpath imports in reviewed Lucide components', () => {
   const root = createRoot();
-  writeValidMatrices(root);
   for (const [sourcePath, specifier] of [
     ['apps/www/src/components/LucideIconGallery.astro', '@proto.ui/prototypes-lucide'],
     ['apps/www/src/components/StaticLucideIcon.astro', '@proto.ui/prototypes-lucide/check'],
@@ -2882,6 +2881,7 @@ test('accepts Lucide package root and subpath imports in reviewed Lucide compone
     fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
     fs.writeFileSync(absolutePath, ['---', `import icon from '${specifier}';`, '---'].join('\n'));
   }
+  writeValidMatrices(root);
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
@@ -6995,6 +6995,7 @@ test('accepts reviewed fingerprints embedded in Website source bindings', () => 
       '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
       '| --- | --- | --- |',
       `| \`${sourcePath}\` | \`www.shell.primary-nav\`, \`www.shell.header-separators\` | \`${digest}\` |`,
+      `| \`apps/www/src/components/LucideIconGallery.astro\` | \`www.gallery.lucide-card-grid\`, \`www.gallery.prototype-library-cards\` | \`${sourceScanDigest(root, 'apps/www/src/components/LucideIconGallery.astro')}\` |`,
     ].join('\n'),
   });
   writeMatrix(
@@ -17693,7 +17694,15 @@ for (const [source, specifiers] of [
   ['surface-recipes.ts', ['@proto.ui/prototypes-base/surface']],
   [
     'site-shadcn-controls.ts',
-    ['@proto.ui/prototypes-brutalist/button', '@proto.ui/prototypes-brutalist/select'],
+    [
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-bootstrap-2-3-2/button',
+      '@proto.ui/prototypes-bootstrap-2-3-2/select',
+      '@proto.ui/prototypes-shadcn/button',
+      '@proto.ui/prototypes-shadcn/select',
+      '@proto.ui/prototypes-brutalist/button',
+      '@proto.ui/prototypes-brutalist/select',
+    ],
   ],
   [
     'documentation-image-controls.ts',
@@ -17713,10 +17722,12 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    // Search and native-link sources now admit exact reviewed importer bytes rather than a synthetic body.
+    // Source-bound allowances require the exact reviewed importer, not a synthetic body.
     const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
+    const sourceBound =
+      source === 'site-search-commands.ts' || nativeLinkSource || source === 'site-shadcn-controls.ts';
     const content =
-      source === 'site-search-commands.ts' || nativeLinkSource
+      sourceBound
         ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
         : source.endsWith('.astro')
           ? `<script>${code}</script>`
@@ -17733,7 +17744,7 @@ for (const [source, specifiers] of [
       );
       assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copy}\``), message);
     }
-    if (nativeLinkSource) {
+    if (sourceBound) {
       fs.writeFileSync(path.join(root, relative), `${content}\n// Unreviewed importer bytes.\n`);
       const changed = validationMessage(root);
       for (const specifier of specifiers) {
