@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "009612b25e3ba425fc2f5016ae28a7309092f808",
+  "revision": "4d9a621618a63bace047776fbdf9eb7a20685cbc",
   "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners plus the Button example producer. Transitive/runtime and served-source proof remain unobserved.",
   "sourceAdmission": "unverified",
   "sources": [
@@ -27,11 +27,11 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
-      "sha256": "8cc0008be2131c2970195de37ef4968846ff6553bb031a4a69a220240c1e9665"
+      "sha256": "b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "f9e18f47c7711d553647fc0bf4aed7c5b52788c9191276822dec6c50b184571a"
+      "sha256": "297a53f8a65cac3073858bae809bf985055ff83b4ecbc57c01b15d755891e5fc"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
@@ -103,7 +103,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
-      "sha256": "0ff5db00a7e5a1ab12f8f57ccff4f8e8b00b0045e6d88c7c10d728412ae646b9"
+      "sha256": "58dc6a7cda823502e29d4b000d0cc2934b7acf7b8a2ba177be598aa93b471c4e"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
