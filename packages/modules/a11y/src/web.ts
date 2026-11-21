@@ -251,13 +251,40 @@ export function createWebA11yProjectionRegistry(
     return affectedIdRefs;
   };
 
+  const canRetainScalarAttributes = (
+    record: WebProjectorRecord,
+    target: HTMLElement,
+    attributes: ScalarAttributes
+  ): boolean => {
+    if (
+      !attributes.size ||
+      attributes.size !== record.scalarAttributes.size ||
+      attributes.has('id')
+    )
+      return false;
+    const owners = scalarAttributeRefs.get(target);
+    for (const [attr, value] of attributes) {
+      const owner = owners?.get(attr);
+      if (
+        !record.scalarAttributes.has(attr) ||
+        record.scalarAttributes.get(attr) !== value ||
+        owner?.counts.size !== 1 ||
+        owner.counts.get(value) !== 1 ||
+        owner.projectedValue !== (value ?? null) ||
+        target.getAttribute(attr) !== owner.projectedValue
+      )
+        return false;
+    }
+    return true;
+  };
+
   const acquireScalarAttributes = (
     record: WebProjectorRecord,
     target: HTMLElement,
     snapshot: A11ySemanticObjectSnapshot,
+    attributes: ScalarAttributes,
     affectedIdRefs?: Set<A11ySemanticObjectRef>
   ) => {
-    const attributes = projectedScalarAttributes(snapshot, false);
     const identity = logicalIdentities.get(snapshot.objectRef);
     if (snapshot.viewEpoch !== undefined && identity?.supersededId !== undefined) {
       if (identity.supersededId === snapshot.id) attributes.delete('id');
@@ -767,7 +794,20 @@ export function createWebA11yProjectionRegistry(
       identityChanged ||
       structuredRelationsChanged(previousSnapshot, snapshot);
 
-    const releasedIdRefs = releaseScalarAttributes(record);
+    const nextScalars = nextTarget ? projectedScalarAttributes(snapshot, false) : undefined;
+    // A same-view notification need not withdraw and rewrite equal, exclusively
+    // owned scalars. Identity changes, shared owners and host rewrites still
+    // go through the complete release/acquire path.
+    const retainScalars =
+      !bindingReplaced &&
+      !forceStructured &&
+      !reactivating &&
+      !identityChanged &&
+      snapshot.viewEpoch === previousSnapshot?.viewEpoch &&
+      nextTarget &&
+      nextScalars &&
+      canRetainScalarAttributes(record, nextTarget, nextScalars);
+    const releasedIdRefs = retainScalars ? undefined : releaseScalarAttributes(record);
     if (bindingReplaced) {
       unobserve(record);
       clearProjections(record);
@@ -796,19 +836,22 @@ export function createWebA11yProjectionRegistry(
       logicalIdentities.get(snapshot.objectRef)!.supersededId = snapshot.id;
     }
     if (structuredChanged) updateDependencies(record, snapshot);
-    if (nextTarget) {
+    if (nextTarget && nextScalars) {
       const indexed = recordsByRef.get(snapshot.objectRef) ?? new Set<WebProjectorRecord>();
       indexed.add(record);
       recordsByRef.set(snapshot.objectRef, indexed);
-      const attributes = acquireScalarAttributes(
-        record,
-        nextTarget,
-        snapshot,
-        bindingReplaced ? undefined : releasedIdRefs
-      );
-      // Registry ownership already released old values; skip stateless snapshot cleanup.
-      applySnapshot(nextTarget, snapshot, undefined, attributes, false);
-      if (attributes.has('id')) rememberIdWrite(nextTarget);
+      if (!retainScalars) {
+        const attributes = acquireScalarAttributes(
+          record,
+          nextTarget,
+          snapshot,
+          nextScalars,
+          bindingReplaced ? undefined : releasedIdRefs
+        );
+        // Registry ownership already released old values; skip stateless snapshot cleanup.
+        applySnapshot(nextTarget, snapshot, undefined, attributes, false);
+        if (attributes.has('id')) rememberIdWrite(nextTarget);
+      }
       // Transfer a retained logical reservation before the Module retires the
       // previous view projector. Reciprocal peers may still be publishing their
       // new epoch snapshots, so their IDREF lookup cannot own this handoff.
@@ -1239,6 +1282,9 @@ function applySnapshot(
   includeRelations = true
 ): void {
   for (const [attr, value] of attributes) {
+    // ID projection participates in the registry's own-write bookkeeping.
+    // Matching non-ID values can retain ownership without a DOM mutation.
+    if (attr !== 'id' && el.getAttribute(attr) === (value ?? null)) continue;
     if (value === undefined) el.removeAttribute(attr);
     else el.setAttribute(attr, value);
   }
