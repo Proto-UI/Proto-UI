@@ -129,6 +129,21 @@
     overflow-wrap: anywhere;
   }
 
+  /* Prose tokens (identifiers, paths, version strings) have no break
+     opportunity. With enlarged host text one token can exceed the reading
+     column and widen the whole document, because no prose ancestor scrolls.
+     Prose text may break inside a token that cannot fit; code keeps its own
+     token and scroll behavior. */
+  .docs-content-flow > :is(p, blockquote, h1, h2, h3, h4, h5, h6),
+  .docs-content-flow > :is(ul, ol, dl) :is(li, dt, dd) {
+    overflow-wrap: break-word;
+  }
+
+  .docs-content-flow > :is(p, blockquote, h1, h2, h3, h4, h5, h6) :is(code, pre),
+  .docs-content-flow > :is(ul, ol, dl) :is(li, dt, dd) :is(code, pre) {
+    overflow-wrap: normal;
+  }
+
   /* Decorate prose links without changing embedded demos or navigation controls. */
   .docs-content-flow
     > :is(p, ul, ol, dl, blockquote, table, .docs-table-scroll, .starlight-aside)
