@@ -1,0 +1,100 @@
+import type { CompilerDiagnostic } from './ir';
+
+/**
+ * Stable diagnostic registry: the canonical code → category/meaning table for
+ * every PUI diagnostic the compiler emits. The registry records the category
+ * the call sites actually use; it does not redesign them.
+ *
+ * `PUI_*` literals that are generated-source placeholders rather than
+ * diagnostics (e.g. `PUI_CONTEXT_KEY_` Rust bindings, `PUI_SSR_ARTIFACT_BINDING__`
+ * hydration markers) are intentionally absent and are tracked in the drift
+ * test's placeholder denylist, not here.
+ */
+export interface DiagnosticRegistration {
+  readonly category: CompilerDiagnostic['category'];
+  /** One-sentence meaning, bound to the real emission path. */
+  readonly meaning: string;
+}
+
+export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration>> = {
+  // Parser/module semantic front end (1xxx) — source conformance failures.
+  PUI1001: { category: 'unsupported-input', meaning: 'Static type/source graph could not resolve or check the authored type.' },
+  PUI1002: { category: 'unsupported-input', meaning: 'Local declaration or binding conflicts with the module namespace.' },
+  PUI1003: { category: 'invalid-input', meaning: 'Import boundary: unsupported specifier, import kind, or a file/root/closed-source read failure.' },
+  PUI1004: { category: 'unsupported-input', meaning: 'Syntax outside the admitted static subset (async/generator/computed names/effectful expressions).' },
+  PUI1005: { category: 'unsupported-input', meaning: 'Duplicate declaration or binding within the module source.' },
+  PUI1006: { category: 'unsupported-input', meaning: 'Authored value or part violates its type or is not renderable under the family boundary.' },
+  PUI1007: { category: 'unsupported-input', meaning: 'Captured/callback value violates the immutable data boundary.' },
+  PUI1008: { category: 'unsupported-input', meaning: 'Export/import binding fails the declared surface contract.' },
+  PUI1020: { category: 'unsupported-input', meaning: 'Static type resolution fails: absent graph node, cyclic/ambiguous export, or non-finite shape.' },
+  PUI1021: { category: 'unsupported-input', meaning: 'Context declaration fails: non-literal key, non-createContextKey origin, or non-record value type.' },
+  PUI1024: { category: 'unsupported-input', meaning: 'Static rule declaration requires one checked declaration.' },
+  PUI1025: { category: 'unsupported-input', meaning: 'Static/Module declaration fails: duplicate field, non-factory value, or non-JSON value.' },
+  PUI1999: { category: 'compiler-defect', meaning: 'Unexpected internal failure past the admitted input boundary; original stack is preserved.' },
+
+  // Internal IR (2xxx) — machine-checked projection integrity.
+  PUI2001: { category: 'invalid-ir', meaning: 'Private IR schema version is not supported by this compiler.' },
+  PUI2002: { category: 'invalid-ir', meaning: 'Generated IR violates its private schema.' },
+  PUI2024: { category: 'invalid-ir', meaning: 'Rule plan failed to lower a declared rule into the target contract.' },
+
+  // Emitter/source generation (3xxx) — target emission failures and conflicts.
+  PUI3001: { category: 'invalid-input', meaning: 'Reserved/invalid generated component identifier in the emitted profile.' },
+  PUI3002: { category: 'output-conflict', meaning: 'Artifact publication failed; the primary diagnostic is an output conflict (rollback reported).' },
+  PUI3003: { category: 'output-conflict', meaning: 'Artifact publication failed; the primary diagnostic is not a conflict (rollback reported). Registered as the inherited non-conflict sibling of PUI3002.' },
+  PUI3004: { category: 'invalid-input', meaning: 'Artifact output could not be planned or the produced artifact set could not be committed.' },
+  PUI3005: { category: 'compiler-defect', meaning: 'Emitter source-map attachment failed.' },
+  PUI3301: { category: 'unsupported-input', meaning: 'Web-component source emission rejected the input.' },
+  PUI3302: { category: 'unsupported-input', meaning: 'Web-component public surface has an unsupported member/property.' },
+
+  // Target/profile admission (4xxx) — profile and host-capability conformance.
+  PUI4001: { category: 'unsupported-input', meaning: 'Profile or target is not implemented/admitted; also used by watch for unreadable project.' },
+  PUI4002: { category: 'unsupported-input', meaning: 'Requested profile version or native watch path is not admitted.' },
+  PUI4003: { category: 'unsupported-input', meaning: 'Public method/interaction signature cannot cross the portable data boundary.' },
+  PUI4004: { category: 'unsupported-input', meaning: 'Operation or requested capability is unavailable in the selected profile.' },
+  PUI4006: { category: 'unsupported-input', meaning: 'Authored hook has no semantic body, or a recursive hook is rejected.' },
+  PUI4007: { category: 'invalid-input', meaning: 'Component identifier is reserved/invalid (Vue name check). The same code also reports a context-scope requirement at targets.ts:747 as unsupported-input.' },
+  PUI4008: { category: 'unsupported-input', meaning: 'Requested props-update policy or capability override is not admitted.' },
+  PUI4101: { category: 'invalid-input', meaning: 'Project source/manifest entry is not a valid project.' },
+  PUI4102: { category: 'unsupported-input', meaning: 'Vue2 profile rejects the emitted public surface.' },
+  PUI4201: { category: 'invalid-input', meaning: 'Compiler library manifest or artifact input is invalid.' },
+  PUI4202: { category: 'invalid-input', meaning: 'Style plan could not be applied to the library surface.' },
+  PUI4203: { category: 'invalid-input', meaning: 'Compiler library artifact inventory/linking is incomplete or colliding.' },
+  PUI4204: { category: 'invalid-input', meaning: 'Linked declaration contract differs from the exported surface.' },
+
+  // Artifact output (5xxx).
+  PUI5001: { category: 'output-conflict', meaning: 'A produced artifact conflicts with an existing destination or output constraint.' },
+
+  // CLI boundary (9xxx).
+  PUI9001: { category: 'invalid-input', meaning: 'CLI invoked with a missing/invalid input.' },
+  PUI9002: { category: 'compiler-defect', meaning: 'CLI surface hit an unexpected internal failure.' },
+
+  // Native/emission symbolic codes — emission-time profile rejections, not
+  // numeric diagnostics; categories follow their literal call sites.
+  PUI_FLUTTER_NAME: { category: 'invalid-input', meaning: 'Flutter profile requires an uppercase Dart component identifier.' },
+  PUI_QT_NAME: { category: 'invalid-input', meaning: 'Qt profile requires a valid Qt component identifier.' },
+  PUI_QT_STYLE: { category: 'unsupported-input', meaning: 'Qt profile rejects an admitted style token.' },
+  PUI_QT_DYNAMIC_STYLE: { category: 'unsupported-input', meaning: 'Qt profile cannot lower a dynamic style expression.' },
+  PUI_QT_PUBLIC_DATA: { category: 'unsupported-input', meaning: 'Qt public surface exposes non-portable data.' },
+  PUI_GPUI_NAME: { category: 'invalid-input', meaning: 'GPUI profile requires a valid component identifier.' },
+  PUI_GPUI_STYLE: { category: 'unsupported-input', meaning: 'GPUI profile rejects an admitted style token.' },
+  PUI_GPUI_STRING_UNSUPPORTED: { category: 'unsupported-input', meaning: 'GPUI profile cannot lower a string form.' },
+  PUI_GPUI_PUBLIC_DATA: { category: 'unsupported-input', meaning: 'GPUI public surface exposes non-portable data.' },
+  PUI_GPUI_SDK_CAPABILITY: { category: 'unsupported-input', meaning: 'GPUI host does not expose the requested SDK capability.' },
+  PUI_GPUI_HOST_REQUIRED: { category: 'unsupported-input', meaning: 'GPUI lowering requires an owned host bridge.' },
+  PUI_GPUI_INPUT_REQUIRED: { category: 'unsupported-input', meaning: 'GPUI lowering requires a declared input owner.' },
+  PUI_GPUI_MODULE_REQUIRED: { category: 'unsupported-input', meaning: 'GPUI lowering requires a declared module binding.' },
+  PUI_GPUI_EXCEPTION_PROPERTY: { category: 'unsupported-input', meaning: 'GPUI rejects an exception/property payload.' },
+  PUI_GPUI_STATIC_ABI: { category: 'unsupported-input', meaning: 'Shared native Table family must match its declared package ABI.' },
+  PUI_NATIVE_INTERACTION_UNSUPPORTED: { category: 'unsupported-input', meaning: 'Native interaction requires a supported static input type or host:* extension.' },
+  PUI_WC_HYDRATION_MISMATCH: { category: 'compiler-defect', meaning: 'Server-rendered WC hydration disagrees with the produced artifact binding.' },
+};
+
+/** Registered diagnostic category, or `undefined` for an unregistered code. */
+export function diagnosticCategory(code: string): CompilerDiagnostic['category'] | undefined {
+  return DIAGNOSTIC_REGISTRY[code]?.category;
+}
+
+/** True when the literal is an emitted diagnostic code, not a generated-source placeholder. */
+export function isDiagnosticCode(code: string): boolean {
+  return Object.hasOwn(DIAGNOSTIC_REGISTRY, code);
+}
