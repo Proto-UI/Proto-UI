@@ -1,5 +1,6 @@
 import { emitRecordedNotification } from '../notification-plan';
 import { NATIVE_SCROLL_REVEAL_SOURCE } from '../native-scroll-reveal';
+import { NATIVE_PART_RELATIONSHIPS_SOURCE } from './part-relationships.template';
 /** Compiler-owned DOM capability implementation. Specialization consumes its TypeScript AST. */
 export const DOM_MODULE_TEMPLATE = String.raw`// Standalone full DOM capability lowering. No Proto Runtime/Adapter or semantic-IR interpreter.
 import { autoUpdate, computePosition, offset, flip, shift, size, type Middleware, type Placement } from '@floating-ui/dom';
@@ -54,7 +55,7 @@ export type NativeTableCell = Readonly<{ ref: object; kind: 'column-header' | 'r
 export type NativeTableRow = Readonly<{ ref: object; index: number; cells: readonly NativeTableCell[] }>;
 export type NativeTableDiagnostic = Readonly<{ code: string; ref?: object; row?: number; headerKey?: string }>;
 export type NativeTableSnapshot = Readonly<{ root: object; caption: object | undefined; rowCount: number; columnCount: number; rows: readonly NativeTableRow[]; valid: boolean; diagnostics: readonly NativeTableDiagnostic[] }>;
-export interface NativeAccessibleExtension { readonly objectRef: object; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
+export interface NativeAccessibleExtension { readonly objectRef: object; part(family: NativeAnatomyFamily, declaration: { key: string | { get(): unknown } }): void; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
 export type NativeControlLabelAnatomyPair = Readonly<{ family: NativeAnatomyFamily; labelRole: string; targetRole: string }>;
 export type NativeControlLabelRequest = Readonly<{ source: 'pointer' | 'accessibility'; isCurrent(): boolean }>;
 export type NativeControlLabelHandle = Readonly<{ sync(options: Readonly<{ naming: boolean; activation: boolean }>): void }>;
@@ -218,6 +219,7 @@ function projectNativeTable(input: NativeTableInput): NativeTableSnapshot {
     valid: !diagnostics.length, diagnostics: Object.freeze(diagnostics.map(diagnostic => Object.freeze(diagnostic))) });
 }
 ${NATIVE_SCROLL_REVEAL_SOURCE}
+${NATIVE_PART_RELATIONSHIPS_SOURCE}
 
 function logicalRoot(owner: Owner): Owner {
   let current = owner;
@@ -724,6 +726,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   let controlLabelProjection: object | null = null;
   const accessibleSubscriptions = new Map<string, () => void>();
   const relations = new Map<string, NativeConfig>();
+  let partRelationships: NativePartRelationships | null = null;
+  function relationshipOwner(): NativePartRelationships {
+    if (!partRelationships) partRelationships = createNativePartRelationships(owner, () => generation, (state, callback) => options.subscribeState ? options.subscribeState(state, callback) : 'subscribe' in state && typeof state.subscribe === 'function' ? state.subscribe(callback) : undefined);
+    return partRelationships;
+  }
   const relationAttributes: Record<string, string> = { labelledBy: 'aria-labelledby', describedBy: 'aria-describedby', controls: 'aria-controls', owns: 'aria-owns', activeDescendant: 'aria-activedescendant', details: 'aria-details', errorMessage: 'aria-errormessage', flowTo: 'aria-flowto' };
   const readValue = (value: unknown): unknown => value && typeof value === 'object' && 'get' in value && typeof value.get === 'function' ? value.get() : value;
   function watchAccessible(key: string, value: unknown) {
@@ -758,10 +765,35 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   }
   const accessible: NativeAccessibleExtension = {
     objectRef: options.identity,
+    part(family, declaration) {
+      setup('accessible.part');
+      if (__nativeFeature('part-relationships')) {
+        if (!family?.roles || !declaration || typeof declaration.key !== 'string' && !(declaration.key && typeof declaration.key.get === 'function')) throw new TypeError('[A11y] part requires an Anatomy family and string or State key.');
+        relationshipOwner().part(family, declaration.key);
+      }
+    },
     id(value) { setup('accessible.id'); explicitId = value; watchAccessible('id', value); const current = readValue(value); if (typeof current === 'string' && current) hostIds.set(options.identity, current); },
     name(value) { setup('accessible.name'); accessibleName = value; watchAccessible('name', value); },
     description(value) { setup('accessible.description'); accessibleDescription = value; watchAccessible('description', value); },
-    relation(kind, spec) { setup('accessible.relation'); if (!Object.hasOwn(relationAttributes, kind)) throw new Error('[A11y] invalid direct relationship kind.'); const mode = String(spec.mode ?? 'replace'); if (mode !== 'replace' && mode !== 'append') throw new Error('[A11y] relation mode must be replace or append.'); relations.set(kind, { ...spec, mode }); watchAccessible('relation:' + kind, spec.target); },
+    relation(kind, spec) {
+      setup('accessible.relation');
+      if (!Object.hasOwn(relationAttributes, kind)) throw new Error('[A11y] invalid relationship kind.');
+      const mode = String(spec.mode ?? 'replace');
+      if (mode !== 'replace' && mode !== 'append') throw new Error('[A11y] relation mode must be replace or append.');
+      if (__nativeFeature('part-relationships')) {
+        const target = spec.target;
+        if (target && typeof target === 'object' && 'kind' in target && target.kind === 'part') {
+          const part = target as NativePartTarget;
+          if (!part.family?.roles || typeof part.role !== 'string' || typeof part.key !== 'string' && !(part.key && typeof part.key.get === 'function')) throw new TypeError('[A11y] invalid structured part target.');
+          accessibleSubscriptions.get('relation:' + kind)?.(); accessibleSubscriptions.delete('relation:' + kind);
+          relations.delete(kind);
+          relationshipOwner().relation(kind, part, relationAttributes[kind]);
+          return;
+        }
+      }
+      if (__nativeFeature('part-relationships')) partRelationships?.removeRelation(kind);
+      relations.set(kind, { ...spec, mode }); watchAccessible('relation:' + kind, spec.target);
+    },
     tree(config) { setup('accessible.tree'); accessibleTree = { ...accessibleTree, ...config }; for (const key of Object.keys(config)) watchAccessible('tree:' + key, config[key]); },
     level(value) { setup('accessible.level'); const current = readValue(value); if (typeof current !== 'number' || !Number.isInteger(current) || current < 1 || current > 6) throw new Error('[A11y] heading level must be an integer in range 1-6.'); accessibleLevel = value; watchAccessible('level', value); },
   };
@@ -1473,6 +1505,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('table')) refreshTable(false);
     if (!ready()) { requestPresentation(); return; }
     projectModuleAttributes();
+    if (__nativeFeature('part-relationships')) partRelationships?.refresh(root);
     if (__nativeFeature('hit')) projectHit();
     if (__nativeFeature('text')) applyText();
     if (__nativeFeature('image')) applyImage();
@@ -1487,6 +1520,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function portalTarget(): HTMLElement | null { return __nativeFeature('overlay') && ready() && hooks.has('asOverlay') && overlayConfig.portal && overlayOpen.handle.get() ? root!.ownerDocument.body : null; }
   function unmount() {
     const previous = root;
+    if (__nativeFeature('part-relationships')) partRelationships?.unmount();
     if (__nativeFeature('scope')) releaseEntryRoot();
     ++generation;
     if (__nativeFeature('image')) imageRequest = null;
@@ -1601,6 +1635,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (__nativeFeature('scope')) { ++scopeActivation; cancelOwnedEntry(); }
       const rootOwner = logicalRoot(owner);
       const failures: unknown[] = [];
+      if (__nativeFeature('part-relationships')) try { partRelationships?.dispose(); partRelationships = null; } catch (error) { failures.push(error); }
       try { unmount(); } catch (error) { failures.push(error); }
       disposed = true;
       if (__nativeFeature('scope') || __nativeFeature('roving') || __nativeFeature('scroll') || __nativeFeature('overlay')) nativeNotifications.length = 0;

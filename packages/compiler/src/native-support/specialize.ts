@@ -14,6 +14,7 @@ const members: Readonly<Record<string, NativeSupportFeature>> = {
   subscribeControlLabelAnatomy: 'control-label',
   anatomy: 'anatomy',
   accessible: 'a11y',
+  part: 'part-relationships',
   positioning: 'positioning',
   asFocusEntry: 'entry',
   asFocusScope: 'scope',
@@ -95,7 +96,7 @@ function specialize(source: string, plan: NativeSupportPlan): string {
           return bool(next.condition) ? next.whenTrue : next.whenFalse;
         if (ts.isIfStatement(next) && bool(next.expression) !== undefined)
           return bool(next.expression) ? next.thenStatement : next.elseStatement;
-        if (ts.isInterfaceDeclaration(next) && next.name.text === 'NativeModuleCapabilities')
+        if (ts.isInterfaceDeclaration(next) && ['NativeModuleCapabilities', 'NativeAccessibleExtension'].includes(next.name.text))
           return factory.updateInterfaceDeclaration(
             next,
             next.modifiers,
@@ -128,7 +129,7 @@ function specialize(source: string, plan: NativeSupportPlan): string {
         if (
           ts.isVariableDeclaration(next) &&
           ts.isIdentifier(next.name) &&
-          next.name.text === 'capabilities' &&
+          ['capabilities', 'accessible'].includes(next.name.text) &&
           next.initializer &&
           ts.isObjectLiteralExpression(next.initializer)
         )

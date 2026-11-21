@@ -12,6 +12,7 @@ export const nativeSupportFeatures = [
   'scope',
   'roving',
   'a11y',
+  'part-relationships',
   'control-label',
   'anatomy',
   'collection',
@@ -64,6 +65,11 @@ export const nativeSupportUnits: Readonly<Record<NativeSupportFeature, NativeSup
     imports: ['ownership'],
     resources: ['accessible-state-subscriptions', 'attribute-ownership'],
     cleanup: ['unsubscribe-accessible-state', 'restore-attributes'],
+  },
+  'part-relationships': {
+    imports: ['a11y', 'anatomy'],
+    resources: ['part-registrations', 'part-key-subscriptions', 'relationship-id-reservations', 'relationship-token-leases'],
+    cleanup: ['unregister-parts', 'unsubscribe-part-keys', 'release-relationship-tokens', 'release-relationship-identity'],
   },
   'control-label': {
     imports: ['a11y', 'anatomy'],
@@ -237,6 +243,8 @@ export function planNativeSupport(
 ): NativeSupportPlan {
   const roots = new Set<NativeSupportFeature>(options.ownership ? ['ownership'] : []);
   for (const operation of admitted.operations) {
+    if (operation === 'accessible.part' || operation === 'accessible.relation')
+      roots.add('part-relationships');
     const [family, name] = operation.split('.');
     if (ownerOperations.has(family)) continue;
     const feature = family === 'hook' ? hookFeatures[name] : operationFeatures[family];

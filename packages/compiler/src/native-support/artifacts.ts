@@ -52,6 +52,19 @@ const ownerTypes = [
 ];
 const familyUnits = [
   {
+    feature: 'part-relationships',
+    file: 'part-relationships-v1',
+    names: [
+      'createNativePartRelationships', 'nativePartKey', 'nativePartWriteTokens',
+      'nativePartReleaseProjection', 'nativePartProject', 'nativePartReleaseBinding',
+      'nativePartReleaseReservation', 'nativePartId', 'publishNativePartRelationships',
+      'partRelationshipRecords', 'partRelationshipIds', 'partRelationshipTokens',
+      'partRelationshipScopes', 'partRelationshipPublication',
+    ],
+    types: ['Owner', 'NativeAnatomyFamily'],
+    localTypes: ['NativePartKey', 'NativePartTarget', 'NativePartRelationships', 'NativePartProjection', 'NativePartRecord', 'NativePartTokens'],
+  },
+  {
     feature: 'focus',
     file: 'focus-ownership-v2',
     names: ['activeScopes', 'ScopeEntryIntent', 'noteNativeFocusRequest'],
@@ -200,8 +213,9 @@ export function plannedNativeInteractionArtifacts(
     const typeImports = unit.types.length
       ? `import type { ${unit.types.join(', ')} } from './ownership-v2';\n`
       : '';
-    shared.push(file(unit.file, typeImports + extra + rewrite(body)));
-    const names = unit.names.map((name) =>
+    const identityImports = unit.feature === 'part-relationships' ? "import { ancestor, hostIdState } from './ownership-v2';\n" : '';
+    shared.push(file(unit.file, typeImports + identityImports + extra + rewrite(body)));
+    const names = (unit.feature === 'part-relationships' ? ['createNativePartRelationships'] : unit.names).map((name) =>
       ['ScopeEntryIntent', 'NativeTableRecord'].includes(name) ? 'type ' + name : name
     );
     imports += `import { ${names.join(', ')}${unit.feature === 'focus' ? ', focusState' : ''} } from './${unit.file}';\n`;
