@@ -12,6 +12,14 @@ const DEFAULT_ROLE_OFFSETS: Readonly<Record<string, number>> = Object.freeze({
   overlay: 0,
   'dialog-mask': 1000,
   'dialog-content': 1010,
+  // The same mask-below-content pairing that dialog owns. Drawer and Alert
+  // Dialog used unnamed roles, so the registry fell back to attach order and
+  // the later-registered mask covered the panel (finf-drawer-intrinsic
+  // wc pointerdown hit WC-BASE-DRAWER-MASK instead of the handle).
+  'alertDialog-mask': 1000,
+  'alertDialog-content': 1010,
+  'drawer-mask': 1000,
+  'drawer-content': 1010,
 });
 
 function toInteger(value: unknown, fallback: number): number {
