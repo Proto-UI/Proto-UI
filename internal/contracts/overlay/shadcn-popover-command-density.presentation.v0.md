@@ -2,28 +2,11 @@
 
 ## Explicit Nova evidence consumer (2026-11-21)
 
-The public `demo-shadcn-popover` now selects Rhea through `withShadcnRheaDemo`.
-Its 0.75rem inline command inset is not the Nova 0.625rem oracle below. The
-dedicated historical density suite therefore mounts a separate ordinary consumer
-of the same DemoSpec with the public style scope explicitly set to `nova`, using
-the existing preview renderer and theme surface. It preserves all original
-geometry, scaling and pointer assertions and records both profile identities.
-The public demo and prototype recipes remain unchanged. These rows establish
-Nova consumer evidence only; they do not establish Rhea page acceptance.
+The public `demo-shadcn-popover` now selects Rhea through `withShadcnRheaDemo`. Its 0.75rem inline command inset is not the Nova 0.625rem oracle below. The dedicated historical density suite therefore mounts a separate ordinary consumer of the same DemoSpec with the public style scope explicitly set to `nova`, using the existing preview renderer and theme surface. It preserves all original geometry, scaling and pointer assertions and records both profile identities. The public demo and prototype recipes remain unchanged. These rows establish Nova consumer evidence only; they do not establish Rhea page acceptance.
 
-The private consumer scrolls its mounted host into the viewport before any
-coordinate-based hit probe. Its application-owned portal outlet precedes the
-authored outside control in native DOM focus order; neither policy changes the
-commands' styling, dimensions, hit ownership or input behavior.
+The private consumer scrolls its mounted host into the viewport before any coordinate-based hit probe. Its application-owned portal outlet precedes the authored outside control in native DOM focus order; neither policy changes the commands' styling, dimensions, hit ownership or input behavior.
 
-Before measuring Close or sampling its hit targets, the density consumer waits
-within 1,000 ms for the authored native `pui-enter` animation to finish, with no
-pending or unfinished subtree animations, full opacity and an identity panel
-transform. Two successive animation frames must also retain the same panel
-geometry. This applies to every open, including reopen and root32; visibility
-alone can still expose the entry recipe's 0.95 scale under reduced motion.
-The receipt retains both endpoint samples. The probe does not finish or cancel
-animations, change motion preferences, or relax any density or hit assertion.
+Before measuring Close or sampling its hit targets, the density consumer waits within 1,000 ms for the authored native `pui-enter` animation to finish, with no pending or unfinished subtree animations, full opacity and an identity panel transform. Two successive animation frames must also retain the same panel geometry. This applies to every open, including reopen and root32; visibility alone can still expose the entry recipe's 0.95 scale under reduced motion. The receipt retains both endpoint samples. The probe does not finish or cancel animations, change motion preferences, or relax any density or hit assertion.
 
 Status: independently reviewed bounded presentation direction, admitted for this local implementation on 2026-10-11. This is an uncataloged transitional presentation slice, not full Popover or Button admission.
 

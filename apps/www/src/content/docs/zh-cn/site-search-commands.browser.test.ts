@@ -3108,9 +3108,7 @@ it('docs brutalist dark 390px keeps Close focused through delayed Pagefind failu
     // Locator.press would focus Close again and conceal a stolen-focus defect.
     stage(page, id, 'native-space');
     await page.keyboard.press('Space');
-    await expect
-      .poll(async () => (await page.evaluate(readSearchPublicState)).open)
-      .toBe(false);
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
     await expectSearchOpenerFocus(page, trigger, id, 'delayed-failure-space');
     const spaceTargets = await page.evaluate(() => {
       // installOpenCounter owns this in-process event record.

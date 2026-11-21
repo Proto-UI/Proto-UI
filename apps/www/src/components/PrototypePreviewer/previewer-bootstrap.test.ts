@@ -268,9 +268,7 @@ describe('adapter panel first activation', () => {
       expect(replacement.dataset.inited).toBe('1');
       expect(element.dataset.mounting).toBeUndefined();
       expect(initPreviewer).toHaveBeenCalledTimes(1);
-      expect(initPreviewer).toHaveBeenCalledWith(
-        expect.objectContaining({ root: replacement })
-      );
+      expect(initPreviewer).toHaveBeenCalledWith(expect.objectContaining({ root: replacement }));
     }
   );
 

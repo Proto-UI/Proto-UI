@@ -56,7 +56,10 @@ export function functionCanMutateFlow(
       ].includes(String(node.kind))
     )
       return true;
-    if (node.kind === 'intrinsic' && ['array.every', 'object.assign', 'string'].includes(String(node.name)))
+    if (
+      node.kind === 'intrinsic' &&
+      ['array.every', 'object.assign', 'string'].includes(String(node.name))
+    )
       return true;
     if (
       node.kind === 'operation' &&

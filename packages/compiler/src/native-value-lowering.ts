@@ -170,10 +170,18 @@ export function emitJavaScriptMember(
   const type = value.object.type;
   const refinement = type === 'exception' ? '{readonly [key: string]: unknown}' : undefined;
   const object = emit(value.object);
-  if (typeof type !== 'string' && type.kind === 'capture' &&
-      (value.property === 'stateHandles' || value.property === 'render')) {
+  if (
+    typeof type !== 'string' &&
+    type.kind === 'capture' &&
+    (value.property === 'stateHandles' || value.property === 'render')
+  ) {
     const code = `(${object})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
-    return read(value, typed ? `(${code} as ${typeName(value.type)})` : `/** @type {${typeName(value.type)}} */ (${code})`);
+    return read(
+      value,
+      typed
+        ? `(${code} as ${typeName(value.type)})`
+        : `/** @type {${typeName(value.type)}} */ (${code})`
+    );
   }
   const narrowed = !refinement
     ? object
@@ -310,6 +318,8 @@ export function emitJavaScriptValue(
           return `String(${args.join(', ')})`;
         case 'number.isFinite':
           return `Number.isFinite(${args.join(', ')})`;
+        case 'string':
+          return `String(${args[0]})`;
         case 'object.freeze':
           return `Object.freeze(${args.join(', ')})`;
         case 'object.assign':

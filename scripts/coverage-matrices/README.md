@@ -58,16 +58,9 @@ The modeled executable-navigation profile currently covers proven native Locatio
 
 ## Exact Retry virtual-module inputs
 
-The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from
-`apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three
-`runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal
-`virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance.
-Other owners, near-match IDs, HTML and public assets remain outside this profile.
+The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three `runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal `virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance. Other owners, near-match IDs, HTML and public assets remain outside this profile.
 
-Every current-profile input below must be a regular file at its exact authored
-path, with no repository-local symlink component, and match its raw-byte SHA-256.
-Successful admission includes all five files as promotion evidence metadata;
-recording a helper elsewhere cannot replace this conjunction.
+Every current-profile input below must be a regular file at its exact authored path, with no repository-local symlink component, and match its raw-byte SHA-256. Successful admission includes all five files as promotion evidence metadata; recording a helper elsewhere cannot replace this conjunction.
 
 | Input | SHA-256 |
 | --- | --- |
@@ -77,20 +70,9 @@ recording a helper elsewhere cannot replace this conjunction.
 | `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
 | `apps/www/scripts/accordion-activation-probe.mjs` | `9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b` |
 
-This current config remains unrecognized by `promotionBarePackageTargets` for
-general bare-package promotion. Its extracted resolver and optional activation
-probe are bound as source inputs, without certifying general resolver parity,
-probe activation, transformed Adapter bytes, installed framework bytes, emitted
-URLs, or runtime behavior. The virtual edge remains terminal in source traversal;
-the separate production module-graph checks retain their existing responsibility.
+This current config remains unrecognized by `promotionBarePackageTargets` for general bare-package promotion. Its extracted resolver and optional activation probe are bound as source inputs, without certifying general resolver parity, probe activation, transformed Adapter bytes, installed framework bytes, emitted URLs, or runtime behavior. The virtual edge remains terminal in source traversal; the separate production module-graph checks retain their existing responsibility.
 
-Historical Retry configs retain their original Retry/contrast helper requirements.
-Their exact inert inputs are retained in
-`test/fixtures/promotion-resolver-finf-retry-audit.txt` (`428f9cbe…f8ac`) and
-`test/fixtures/promotion-resolver-shadcn-card-retry-audit.txt` (`4ac9f16e…625a`).
-General resolver fixtures and parity controls select historical bytes explicitly;
-current virtual-module fixtures copy the five current inputs separately. The
-full control file is `node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs`.
+Historical Retry configs retain their original Retry/contrast helper requirements. Their exact inert inputs are retained in `test/fixtures/promotion-resolver-finf-retry-audit.txt` (`428f9cbe…f8ac`) and `test/fixtures/promotion-resolver-shadcn-card-retry-audit.txt` (`4ac9f16e…625a`). General resolver fixtures and parity controls select historical bytes explicitly; current virtual-module fixtures copy the five current inputs separately. The full control file is `node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs`.
 
 ## Document bases and runtime graph entries
 

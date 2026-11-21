@@ -184,7 +184,9 @@ function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRul
   return rules;
 }
 
-function verifiedShadowSplitBaseRule(rules: readonly CompiledStyleRule[]): CompiledStyleRule | null {
+function verifiedShadowSplitBaseRule(
+  rules: readonly CompiledStyleRule[]
+): CompiledStyleRule | null {
   const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
   const baseRule = rules.find(({ selector }) => selector.replace(/\s/g, '') === baseSelector);
   return baseRule && hasValidDeclarationReceipt(baseRule) ? baseRule : null;
@@ -428,8 +430,7 @@ export function createShadowSplitEffectsPort({
           (token) => /(?:^|:)opacity-/.test(token) && isLiveSurfaceToken(token)
         ) &&
         applied.surface.some(
-          (token) =>
-            /(?:^|:)transition-(?:opacity|all)$/.test(token) && isLiveSurfaceToken(token)
+          (token) => /(?:^|:)transition-(?:opacity|all)$/.test(token) && isLiveSurfaceToken(token)
         );
   const ownsZeroOpacityAnimation = (direction: 'in' | 'out') => {
     const hasPaint = (name: string) =>
@@ -466,7 +467,10 @@ export function createShadowSplitEffectsPort({
       if (surface.parentNode !== host.shadowRoot) return false;
       if (ownsZeroOpacity() || ownsZeroOpacityAnimation('in') || ownsZeroOpacityAnimation('out'))
         return true;
-      if (zeroOpacityTransition && !surface.getAnimations().includes(zeroOpacityTransition.animation))
+      if (
+        zeroOpacityTransition &&
+        !surface.getAnimations().includes(zeroOpacityTransition.animation)
+      )
         zeroOpacityTransition = null;
       const transition = zeroOpacityTransition;
       return (

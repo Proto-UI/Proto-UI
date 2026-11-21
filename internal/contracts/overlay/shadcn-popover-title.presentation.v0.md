@@ -2,19 +2,9 @@
 
 ## Explicit Nova evidence consumer (2026-11-21)
 
-The public `demo-shadcn-popover` now selects Rhea through `withShadcnRheaDemo`.
-Rhea Title explicitly contributes `text-base font-medium`; the inherited Nova
-14px/20px oracle below does not describe that profile. The dedicated historical
-Title suite mounts a separate ordinary consumer of the same DemoSpec with its
-public style scope explicitly set to `nova`, using the existing preview renderer
-and theme surface. All original typography, ancestor inheritance, lifecycle and
-input assertions remain intact, with both profile identities recorded. The
-public Rhea demo remains unchanged and requires its own acceptance evidence.
+The public `demo-shadcn-popover` now selects Rhea through `withShadcnRheaDemo`. Rhea Title explicitly contributes `text-base font-medium`; the inherited Nova 14px/20px oracle below does not describe that profile. The dedicated historical Title suite mounts a separate ordinary consumer of the same DemoSpec with its public style scope explicitly set to `nova`, using the existing preview renderer and theme surface. All original typography, ancestor inheritance, lifecycle and input assertions remain intact, with both profile identities recorded. The public Rhea demo remains unchanged and requires its own acceptance evidence.
 
-The private consumer registers an application-owned portal outlet immediately
-before the authored outside control. This makes a native Tab from the portaled
-Close reach that control in physical document order, preserving the existing
-focus-outside assertion without synthetic focus or keyboard interception.
+The private consumer registers an application-owned portal outlet immediately before the authored outside control. This makes a native Tab from the portaled Close reach that control in physical document order, preserving the existing focus-outside assertion without synthetic focus or keyboard interception.
 
 Status: independently reviewed bounded presentation direction, approved for this local implementation on 2026-10-11. Full component admission remains open.
 

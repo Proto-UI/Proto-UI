@@ -96,7 +96,10 @@ function specialize(source: string, plan: NativeSupportPlan): string {
           return bool(next.condition) ? next.whenTrue : next.whenFalse;
         if (ts.isIfStatement(next) && bool(next.expression) !== undefined)
           return bool(next.expression) ? next.thenStatement : next.elseStatement;
-        if (ts.isInterfaceDeclaration(next) && ['NativeModuleCapabilities', 'NativeAccessibleExtension'].includes(next.name.text))
+        if (
+          ts.isInterfaceDeclaration(next) &&
+          ['NativeModuleCapabilities', 'NativeAccessibleExtension'].includes(next.name.text)
+        )
           return factory.updateInterfaceDeclaration(
             next,
             next.modifiers,

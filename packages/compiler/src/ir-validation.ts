@@ -607,6 +607,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     // Target walkers memoize by FunctionIR identity. A shared function must not
     // denote different lexical helper closures in different occurrences.
     const provenCaptures = new Map<object, ReadonlyMap<string, Binding>>();
+    // Compiler-named module bindings (`__puiModule*`) never collide with a
+    // local, so a read of one is never a lexical capture.
+    const moduleBindingNames = new Set<string>(
+      Array.isArray((input as { moduleBindings?: unknown })?.moduleBindings)
+        ? (input as { moduleBindings: unknown[] }).moduleBindings.map((item) =>
+            String((item as { name?: unknown })?.name)
+          )
+        : []
+    );
     const captureFrames: {
       outer: Scope;
       parameters: ReadonlySet<string>;
@@ -618,6 +627,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       // their value origin; record the immutable entry binding, not local narrowing.
       for (const frame of captureFrames) {
         const captured = frame.outer.get(name);
+        // Module bindings are shared module scope, not lexical captures: the
+        // frontend records neither module values nor module helpers as captures.
+        if (captured && moduleBindingNames.has(name)) continue;
         if (
           !frame.parameters.has(name) &&
           binding &&
@@ -1041,8 +1053,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (func.captures !== undefined) {
         const ids = new Set<string>();
         let lexicalCaptureCount = 0;
-        for (const binding of captures.values())
-          if (!binding.moduleBinding) ++lexicalCaptureCount;
+        for (const binding of captures.values()) if (!binding.moduleBinding) ++lexicalCaptureCount;
         for (const item of array(func.captures)) {
           const capture = object(item, ['bindingId', 'name', 'storage']);
           const id = text(capture.bindingId),
@@ -1454,11 +1465,26 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                       if (node.optional) return 'void';
                       throw new TypeError('Nullish member receiver.');
                     }
-                    if (typeof member !== 'string' && member.kind === 'capture' && key === 'stateHandles')
-                      return captureStateHandlesType(hooks.find((hook) => hook.id === member.hookId)?.capture as HookCaptureIR | undefined);
-                    if (typeof member !== 'string' && member.kind === 'capture' && key === 'render') {
+                    if (
+                      typeof member !== 'string' &&
+                      member.kind === 'capture' &&
+                      key === 'stateHandles'
+                    )
+                      return captureStateHandlesType(
+                        hooks.find((hook) => hook.id === member.hookId)?.capture as
+                          | HookCaptureIR
+                          | undefined
+                      );
+                    if (
+                      typeof member !== 'string' &&
+                      member.kind === 'capture' &&
+                      key === 'render'
+                    ) {
                       const hook = hooks.find((hook) => hook.id === member.hookId);
-                      return joinValueTypes([hook ? valueType(object(hook.setup).returnType, location) : 'void', 'void']);
+                      return joinValueTypes([
+                        hook ? valueType(object(hook.setup).returnType, location) : 'void',
+                        'void',
+                      ]);
                     }
                     const capability = capabilityMemberType(member, key, node.optional as boolean);
                     if (capability !== undefined) return capability;
@@ -1471,12 +1497,17 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               break;
             }
             if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'stateHandles') {
-              type = captureStateHandlesType(hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined);
+              type = captureStateHandlesType(
+                hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined
+              );
               break;
             }
             if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'render') {
               const hook = hooks.find((hook) => hook.id === owner.hookId);
-              type = joinValueTypes([hook ? valueType(object(hook.setup).returnType, location) : 'void', 'void']);
+              type = joinValueTypes([
+                hook ? valueType(object(hook.setup).returnType, location) : 'void',
+                'void',
+              ]);
               break;
             }
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);
@@ -1587,7 +1618,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               intrinsicResult(text(node.name), args, node.arguments as ExpressionIR[])
             );
             if (node.name === 'array.every') invalidateFlow(scope, true);
-            if (node.name === 'object.assign' || node.name === 'string') invalidateFlow(scope, true, true);
+            if (node.name === 'object.assign' || node.name === 'string')
+              invalidateFlow(scope, true, true);
             break;
           }
           case 'object-spread': {

@@ -29,7 +29,10 @@ function conversions(ir: PrototypeIR): Extract<ExpressionIR, { kind: 'intrinsic'
   const found: Extract<ExpressionIR, { kind: 'intrinsic' }>[] = [];
   function visit(value: unknown): void {
     if (!value || typeof value !== 'object') return;
-    if (Array.isArray(value)) { value.forEach(visit); return; }
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
     const node = value as Record<string, unknown>;
     if (node.kind === 'intrinsic' && node.name === 'string')
       found.push(value as Extract<ExpressionIR, { kind: 'intrinsic' }>);
@@ -77,30 +80,38 @@ afterEach(async () => {
 
 describe('native String conversion', () => {
   it.each(nativeOwnerProfiles)('consumer admission probe: %s', (profile) => {
-    const candidate = profile === 'react-dom-source-v1' || profile === 'vue-source-v1'
-      ? concreteSource : source;
-    const result = compilePrototype(candidate, {profile});
+    const candidate =
+      profile === 'react-dom-source-v1' || profile === 'vue-source-v1' ? concreteSource : source;
+    const result = compilePrototype(candidate, { profile });
     expect(result.ok, result.ok ? undefined : JSON.stringify(result.diagnostics)).toBe(true);
   });
 
   it('admits the opaque helper boundary without narrowing its argument', () => {
     const ir = portable(source);
     expect(conversions(ir).some((value) => value.arguments[0]?.type === 'unknown')).toBe(true);
-    portable(program(`function normalize(value:unknown){throw new Error('Unknown: '+String(value));}
-      def.expose.method('normalize',normalize);`));
+    portable(
+      program(`function normalize(value:unknown){throw new Error('Unknown: '+String(value));}
+      def.expose.method('normalize',normalize);`)
+    );
   });
 
   it.each([
-    'String(1,2);', 'String?.(1);', 'new String(1);', 'String(...[1]);',
-    'String(()=>1);', "String(def.state.number('count',0));",
+    'String(1,2);',
+    'String?.(1);',
+    'new String(1);',
+    'String(...[1]);',
+    'String(()=>1);',
+    "String(def.state.number('count',0));",
     'String({toString:()=>1});',
   ])('keeps unsupported forms explicit: %s', (body) => {
     expect(parsePrototype(program(body)).ok).toBe(false);
   });
 
   it('preserves lexical String bindings as ordinary calls', () => {
-    const ir = portable(program(`function String(value:number){return value+1;}
-      const result:number=String(2);`));
+    const ir = portable(
+      program(`function String(value:number){return value+1;}
+      const result:number=String(2);`)
+    );
     expect(conversions(ir)).toHaveLength(0);
   });
 
@@ -115,80 +126,140 @@ describe('native String conversion', () => {
 
   it('rejects a coherent callable operand in serialized IR', () => {
     const ir = portable(program('const callback=()=>1;const value=String(1);'));
-    const callback = ir.setup.body.find((statement): statement is Extract<StatementIR, {kind:'const'}> =>
-      statement.kind === 'const' && statement.name === 'callback');
+    const callback = ir.setup.body.find(
+      (statement): statement is Extract<StatementIR, { kind: 'const' }> =>
+        statement.kind === 'const' && statement.name === 'callback'
+    );
     if (!callback) throw new Error('Missing callable control.');
     conversions(ir)[0].arguments[0] = callback.value;
     expect(validateIR(ir).ok).toBe(false);
   });
 
   it('invalidates saved mutable observations across opaque coercion', () => {
-    expect(parsePrototype(program(`
+    expect(
+      parsePrototype(
+        program(`
       let value:string|null='before';
       def.expose.method('read',(input:unknown)=>{
         if(value!==null){String(input);return value.length;}
         return 0;
       });
       def.expose.method('clear',()=>{value=null;});
-    `)).ok).toBe(false);
+    `)
+      ).ok
+    ).toBe(false);
   });
 
   it('reports GPUI and direct Qt/Flutter as unsupported', () => {
-    const text = program('const value=String(1);'), ir = portable(text);
-    for (const result of [compilePrototype(text, {profile:'gpui-source-v1'}), emitQtSource(ir), emitFlutterSource(ir)]) {
+    const text = program('const value=String(1);'),
+      ir = portable(text);
+    for (const result of [
+      compilePrototype(text, { profile: 'gpui-source-v1' }),
+      emitQtSource(ir),
+      emitFlutterSource(ir),
+    ]) {
       expect(result.ok).toBe(false);
-      if (!result.ok) expect(result.diagnostics.some((diagnostic) =>
-        diagnostic.code === 'PUI4003' && diagnostic.message.includes('String'))).toBe(true);
+      if (!result.ok)
+        expect(
+          result.diagnostics.some(
+            (diagnostic) => diagnostic.code === 'PUI4003' && diagnostic.message.includes('String')
+          )
+        ).toBe(true);
     }
   });
 
-  it.each(['vue2-source-v1', 'web-component-source-v1'] as const)('preserves JavaScript coercion and abrupt completion in %s', async (profile) => {
-    const native = await mountNativeOwner(source, profile);
-    cleanup.push(() => native.dispose());
-    const api = native.handle.getExposes();
-    expect(api.empty()).toBe('');
-    for (const value of [undefined, null, false, true, -0, NaN, Infinity, -Infinity,
-      1e21, 1e-7, 'text', [], [1,null,undefined,2], {}, Symbol('id'), 42n]) {
-      expect(api.convert(value)).toBe(String(value));
+  it.each(['vue2-source-v1', 'web-component-source-v1'] as const)(
+    'preserves JavaScript coercion and abrupt completion in %s',
+    async (profile) => {
+      const native = await mountNativeOwner(source, profile);
+      cleanup.push(() => native.dispose());
+      const api = native.handle.getExposes();
+      expect(api.empty()).toBe('');
+      for (const value of [
+        undefined,
+        null,
+        false,
+        true,
+        -0,
+        NaN,
+        Infinity,
+        -Infinity,
+        1e21,
+        1e-7,
+        'text',
+        [],
+        [1, null, undefined, 2],
+        {},
+        Symbol('id'),
+        42n,
+      ]) {
+        expect(api.convert(value)).toBe(String(value));
+      }
+      expect(() => api.convert({ toString: 1 })).toThrow(TypeError);
+      const trace: string[] = [];
+      const custom = {
+        [Symbol.toPrimitive](hint: string) {
+          trace.push(hint);
+          return 'custom';
+        },
+        toString() {
+          throw new Error('must use the conversion hook first');
+        },
+      };
+      expect(api.once(custom)).toEqual({ text: 'custom', count: 1 });
+      expect(trace).toEqual(['string']);
+      trace.length = 0;
+      expect(api.discard(custom)).toBe('done');
+      expect(trace).toEqual(['string']);
+      const sentinel = { failure: true };
+      const throws = {
+        [Symbol.toPrimitive]() {
+          throw sentinel;
+        },
+      };
+      let caught: unknown;
+      try {
+        api.caught(throws);
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBe(sentinel);
+      const fallback = {
+        toString() {
+          trace.push('toString');
+          return {};
+        },
+        valueOf() {
+          trace.push('valueOf');
+          return 7;
+        },
+      };
+      trace.length = 0;
+      expect(api.convert(fallback)).toBe('7');
+      expect(trace).toEqual(['toString', 'valueOf']);
     }
-    expect(() => api.convert({toString:1})).toThrow(TypeError);
-    const trace: string[] = [];
-    const custom = {
-      [Symbol.toPrimitive](hint: string) { trace.push(hint); return 'custom'; },
-      toString() { throw new Error('must use the conversion hook first'); },
-    };
-    expect(api.once(custom)).toEqual({text:'custom',count:1});
-    expect(trace).toEqual(['string']);
-    trace.length=0;
-    expect(api.discard(custom)).toBe('done');
-    expect(trace).toEqual(['string']);
-    const sentinel = {failure:true};
-    const throws = {[Symbol.toPrimitive]() { throw sentinel; }};
-    let caught: unknown;
-    try { api.caught(throws); } catch (error) { caught=error; }
-    expect(caught).toBe(sentinel);
-    const fallback = {
-      toString() { trace.push('toString'); return {}; },
-      valueOf() { trace.push('valueOf'); return 7; },
-    };
-    trace.length=0;
-    expect(api.convert(fallback)).toBe('7');
-    expect(trace).toEqual(['toString','valueOf']);
-  });
+  );
 
-  it.each(['react-dom-source-v1', 'vue-source-v1'] as const)('converts internal opaque values behind concrete public methods in %s', async (profile) => {
-    const native = await mountNativeOwner(concreteSource, profile);
-    cleanup.push(() => native.dispose());
-    const api = native.handle.getExposes();
-    for (const value of [null, false, true, -0, 1e21, 1e-7, 'text'])
-      expect(api.convert(value)).toBe(String(value));
-    expect(api.empty()).toBe('');
-    expect(api.missing()).toBe('undefined');
-    for (const [left,right] of [[0,0],[1,0],[-1,0]])
-      expect(api.divide(left,right)).toBe(String(left/right));
-    expect(api.array([1,null,2])).toBe('1,,2');
-    expect(api.record({value:1})).toBe('[object Object]');
-    expect(api.once('once')).toEqual({text:'once',count:1});
-    expect(() => api.discard()).toThrow(TypeError);
-  });
+  it.each(['react-dom-source-v1', 'vue-source-v1'] as const)(
+    'converts internal opaque values behind concrete public methods in %s',
+    async (profile) => {
+      const native = await mountNativeOwner(concreteSource, profile);
+      cleanup.push(() => native.dispose());
+      const api = native.handle.getExposes();
+      for (const value of [null, false, true, -0, 1e21, 1e-7, 'text'])
+        expect(api.convert(value)).toBe(String(value));
+      expect(api.empty()).toBe('');
+      expect(api.missing()).toBe('undefined');
+      for (const [left, right] of [
+        [0, 0],
+        [1, 0],
+        [-1, 0],
+      ])
+        expect(api.divide(left, right)).toBe(String(left / right));
+      expect(api.array([1, null, 2])).toBe('1,,2');
+      expect(api.record({ value: 1 })).toBe('[object Object]');
+      expect(api.once('once')).toEqual({ text: 'once', count: 1 });
+      expect(() => api.discard()).toThrow(TypeError);
+    }
+  );
 });

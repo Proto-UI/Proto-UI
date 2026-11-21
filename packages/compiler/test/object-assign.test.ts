@@ -91,7 +91,10 @@ function assignments(ir: PrototypeIR): Extract<ExpressionIR, { kind: 'intrinsic'
   const found: Extract<ExpressionIR, { kind: 'intrinsic' }>[] = [];
   function visit(value: unknown): void {
     if (!value || typeof value !== 'object') return;
-    if (Array.isArray(value)) { value.forEach(visit); return; }
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
     const node = value as Record<string, unknown>;
     if (node.kind === 'intrinsic' && node.name === 'object.assign')
       found.push(value as Extract<ExpressionIR, { kind: 'intrinsic' }>);
@@ -103,7 +106,8 @@ function assignments(ir: PrototypeIR): Extract<ExpressionIR, { kind: 'intrinsic'
 }
 
 function forgery(target = "new Error('fresh')"): PrototypeIR {
-  return portable(program(`
+  return portable(
+    program(`
     const original=new Error('original');
     const data={code:'DATA'};
     const patch={code:'PATCH'};
@@ -113,7 +117,8 @@ function forgery(target = "new Error('fresh')"): PrototypeIR {
       callback();
       return {data:data.code,patch:patch.code,same:saved===saved,original:original===original};
     });
-  `));
+  `)
+  );
 }
 
 function reference(ir: PrototypeIR, name: string): ExpressionIR {
@@ -122,15 +127,22 @@ function reference(ir: PrototypeIR, name: string): ExpressionIR {
       statement.kind === 'const' && statement.name === name
   );
   if (!binding) throw new Error(`Missing test binding ${name}.`);
-  return { kind: 'reference', name, type: binding.value.type, span: binding.span,
-    ...(binding.bindingId ? { bindingId: binding.bindingId } : {}) };
+  return {
+    kind: 'reference',
+    name,
+    type: binding.value.type,
+    span: binding.span,
+    ...(binding.bindingId ? { bindingId: binding.bindingId } : {}),
+  };
 }
 
 function rejectsAssignment(ir: PrototypeIR): void {
   const checked = validateIR(ir);
   expect(checked.ok).toBe(false);
   if (!checked.ok)
-    expect(checked.diagnostics.some((diagnostic) => diagnostic.message.includes('Object.assign'))).toBe(true);
+    expect(
+      checked.diagnostics.some((diagnostic) => diagnostic.message.includes('Object.assign'))
+    ).toBe(true);
 }
 
 const cleanup: (() => Promise<void>)[] = [];
@@ -142,7 +154,11 @@ describe('fresh-target own-data Object.assign', () => {
   it('round-trips finite record and opaque Error results through portable validation', () => {
     const ir = portable();
     expect(assignments(ir).some((value) => value.type === 'exception')).toBe(true);
-    expect(assignments(ir).some((value) => typeof value.type !== 'string' && value.type.kind === 'record')).toBe(true);
+    expect(
+      assignments(ir).some(
+        (value) => typeof value.type !== 'string' && value.type.kind === 'record'
+      )
+    ).toBe(true);
     portable(program(`const value=Object.assign(new Error());`));
   });
 
@@ -176,16 +192,24 @@ describe('fresh-target own-data Object.assign', () => {
   });
 
   it('does not infer data or capability authority from an enriched exception', () => {
-    expect(parsePrototype(program(`
+    expect(
+      parsePrototype(
+        program(`
       const error=Object.assign(new Error('x'),{code:'DATA'});
       const code:string=error.code;
-    `)).ok).toBe(false);
-    expect(parsePrototype(program(`
+    `)
+      ).ok
+    ).toBe(false);
+    expect(
+      parsePrototype(
+        program(`
       try{throw Object.assign(new Error('x'),{code:'DATA'});}catch(error){
         const projected=error as {state:{get():number}};
         projected.state.get();
       }
-    `)).ok).toBe(false);
+    `)
+      ).ok
+    ).toBe(false);
   });
 
   it.each(['original', 'data'])('rejects a coherent aliased %s target in serialized IR', (name) => {
@@ -201,33 +225,53 @@ describe('fresh-target own-data Object.assign', () => {
   });
 
   it('rejects a frozen target even when its field types remain identical', () => {
-    const ir = forgery("{code:'TARGET'}"), call = assignments(ir)[0];
+    const ir = forgery("{code:'TARGET'}"),
+      call = assignments(ir)[0];
     const target = call.arguments[0];
-    call.arguments[0] = { kind: 'intrinsic', name: 'object.freeze', arguments: [target],
-      type: target.type, span: target.span };
+    call.arguments[0] = {
+      kind: 'intrinsic',
+      name: 'object.freeze',
+      arguments: [target],
+      type: target.type,
+      span: target.span,
+    };
     rejectsAssignment(ir);
   });
 
   it('rejects a readonly target view in serialized IR', () => {
-    const ir = forgery("{code:'TARGET'}"), call = assignments(ir)[0];
+    const ir = forgery("{code:'TARGET'}"),
+      call = assignments(ir)[0];
     const target = call.arguments[0];
-    call.arguments[0] = { kind: 'narrow', value: target,
+    call.arguments[0] = {
+      kind: 'narrow',
+      value: target,
       type: { kind: 'object', fields: [{ name: 'code', type: 'string', readonly: true }] },
-      span: target.span };
+      span: target.span,
+    };
     rejectsAssignment(ir);
   });
 
   it('rejects callable fields without relying on an Error result-type mismatch', () => {
-    const ir = forgery(), call = assignments(ir)[0];
+    const ir = forgery(),
+      call = assignments(ir)[0];
     const callback = reference(ir, 'callback');
-    call.arguments[1] = { kind: 'record', entries: [{ key: 'read', value: callback }],
-      type: { kind: 'object', fields: [{ name: 'read', type: callback.type }] }, span: call.span };
+    call.arguments[1] = {
+      kind: 'record',
+      entries: [{ key: 'read', value: callback }],
+      type: { kind: 'object', fields: [{ name: 'read', type: callback.type }] },
+      span: call.span,
+    };
     rejectsAssignment(ir);
   });
 
   it('rejects a coherent __proto__ source in serialized IR', () => {
-    const ir = forgery(), source = assignments(ir)[0].arguments[1];
-    if (source.kind !== 'record' || typeof source.type === 'string' || source.type.kind !== 'record')
+    const ir = forgery(),
+      source = assignments(ir)[0].arguments[1];
+    if (
+      source.kind !== 'record' ||
+      typeof source.type === 'string' ||
+      source.type.kind !== 'record'
+    )
       throw new Error('Expected the finite test source.');
     source.entries[0].key = '__proto__';
     source.type.fields[0].name = '__proto__';
@@ -241,54 +285,81 @@ describe('fresh-target own-data Object.assign', () => {
   });
 
   it('retains explicit GPUI and direct Qt/Flutter unsupported diagnostics', () => {
-    const text = program(`Object.assign({},{value:1});`), ir = portable(text);
-    for (const result of [compilePrototype(text, { profile: 'gpui-source-v1' }), emitQtSource(ir), emitFlutterSource(ir)]) {
+    const text = program(`Object.assign({},{value:1});`),
+      ir = portable(text);
+    for (const result of [
+      compilePrototype(text, { profile: 'gpui-source-v1' }),
+      emitQtSource(ir),
+      emitFlutterSource(ir),
+    ]) {
       expect(result.ok).toBe(false);
       if (!result.ok)
-        expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'PUI4003' &&
-          diagnostic.message.includes('Object.assign'))).toBe(true);
+        expect(
+          result.diagnostics.some(
+            (diagnostic) =>
+              diagnostic.code === 'PUI4003' && diagnostic.message.includes('Object.assign')
+          )
+        ).toBe(true);
     }
   });
 
-  it.each(nativeOwnerProfiles)('preserves native copying, order, identity and exceptions in %s', async (profile) => {
-    const native = await mountNativeOwner(source, profile);
-    cleanup.push(() => native.dispose());
-    const api = native.handle.getExposes();
-    expect(await native.act(() => api.records())).toEqual({ keep: 1, replace: 2, tail: 3,
-      trace: 'target;first;second;' });
-    expect(await native.act(() => api.nestedIdentity())).toEqual({ same: true, value: 7 });
-    expect(await native.act(() => api.errorIdentity())).toBe(true);
-    expect(await native.act(() => api.zeroSources())).toBe(4);
-    expect(await native.act(() => api.unusedResult())).toBe('unused-target;unused-source;');
-    expect(await native.act(() => api.throwingArgument())).toEqual({ same: true, trace: 'before;throws;' });
+  it.each(nativeOwnerProfiles)(
+    'preserves native copying, order, identity and exceptions in %s',
+    async (profile) => {
+      const native = await mountNativeOwner(source, profile);
+      cleanup.push(() => native.dispose());
+      const api = native.handle.getExposes();
+      expect(await native.act(() => api.records())).toEqual({
+        keep: 1,
+        replace: 2,
+        tail: 3,
+        trace: 'target;first;second;',
+      });
+      expect(await native.act(() => api.nestedIdentity())).toEqual({ same: true, value: 7 });
+      expect(await native.act(() => api.errorIdentity())).toBe(true);
+      expect(await native.act(() => api.zeroSources())).toBe(4);
+      expect(await native.act(() => api.unusedResult())).toBe('unused-target;unused-source;');
+      expect(await native.act(() => api.throwingArgument())).toEqual({
+        same: true,
+        trace: 'before;throws;',
+      });
 
-    const previous = Object.getOwnPropertyDescriptor(Error.prototype, 'assignProbe');
-    const receivers: { value: unknown; error: boolean }[] = [];
-    try {
-      Object.defineProperty(Error.prototype, 'assignProbe', { configurable: true,
-        set(this: object, value: unknown) {
-          receivers.push({ value, error: this instanceof Error });
-          throw false;
-        } });
-      expect(await native.act(() => api.nativeSetter())).toEqual({ same: true, trace: 'target;source;tail;' });
-      expect(receivers).toEqual([{ value: 1, error: true }]);
-    } finally {
-      if (previous) Object.defineProperty(Error.prototype, 'assignProbe', previous);
-      else Reflect.deleteProperty(Error.prototype, 'assignProbe');
+      const previous = Object.getOwnPropertyDescriptor(Error.prototype, 'assignProbe');
+      const receivers: { value: unknown; error: boolean }[] = [];
+      try {
+        Object.defineProperty(Error.prototype, 'assignProbe', {
+          configurable: true,
+          set(this: object, value: unknown) {
+            receivers.push({ value, error: this instanceof Error });
+            throw false;
+          },
+        });
+        expect(await native.act(() => api.nativeSetter())).toEqual({
+          same: true,
+          trace: 'target;source;tail;',
+        });
+        expect(receivers).toEqual([{ value: 1, error: true }]);
+      } finally {
+        if (previous) Object.defineProperty(Error.prototype, 'assignProbe', previous);
+        else Reflect.deleteProperty(Error.prototype, 'assignProbe');
+      }
     }
-  });
+  );
 
-  it.each(nativeOwnerProfiles)('keeps a shadowed Object.assign as an ordinary call in %s', async (profile) => {
-    const text = program(`
+  it.each(nativeOwnerProfiles)(
+    'keeps a shadowed Object.assign as an ordinary call in %s',
+    async (profile) => {
+      const text = program(`
       function ordinary(){
         const Object={assign:(left:number,right:number)=>left+right};
         return Object.assign(2,3);
       }
       def.expose.method('value',()=>ordinary());
     `);
-    expect(assignments(portable(text))).toHaveLength(0);
-    const native = await mountNativeOwner(text, profile);
-    cleanup.push(() => native.dispose());
-    expect(await native.act(() => native.handle.getExposes().value())).toBe(5);
-  });
+      expect(assignments(portable(text))).toHaveLength(0);
+      const native = await mountNativeOwner(text, profile);
+      cleanup.push(() => native.dispose());
+      expect(await native.act(() => native.handle.getExposes().value())).toBe(5);
+    }
+  );
 });

@@ -291,51 +291,66 @@ async function panelFor(page: Page, trigger: Locator, settlements: unknown[]) {
   // or let a screenshot advance it before the density and hit assertions.
   const receipt: { panelId: string; latest?: unknown } = { panelId: id };
   settlements.push(receipt);
-  await expect.poll(async () => {
-    const sample = await panel.evaluate(async (element) => {
-      const read = () => {
-        const rect = element.getBoundingClientRect();
-        const css = getComputedStyle(element);
-        const animations = element.getAnimations({ subtree: true }).map((animation) => ({
-          name: 'animationName' in animation ? String(animation.animationName) : null,
-          playState: animation.playState,
-          pending: animation.pending,
-        }));
-        return {
-          connected: element.isConnected,
-          rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-          transform: css.transform,
-          opacity: css.opacity,
-          animations,
-          endpoint: element.isConnected && rect.width > 0 && rect.height > 0 &&
-            css.opacity === '1' &&
-            (css.transform === 'none' || new DOMMatrixReadOnly(css.transform).isIdentity) &&
-            animations.some((animation) => animation.name === 'pui-enter' &&
-              animation.playState === 'finished' && !animation.pending) &&
-            animations.every((animation) => !animation.pending &&
-              animation.playState === 'finished'),
-        };
-      };
-      const firstFrame = Promise.withResolvers<void>();
-      requestAnimationFrame(() => firstFrame.resolve());
-      await firstFrame.promise;
-      const before = read();
-      const secondFrame = Promise.withResolvers<void>();
-      requestAnimationFrame(() => secondFrame.resolve());
-      await secondFrame.promise;
-      const after = read();
-      return {
-        before,
-        after,
-        settled: before.endpoint && after.endpoint &&
-          (Object.keys(before.rect) as Array<keyof typeof before.rect>).every(
-            (key) => Math.abs(before.rect[key] - after.rect[key]) < 0.01
-          ),
-      };
-    });
-    receipt.latest = sample;
-    return sample.settled;
-  }, { timeout: 1_000, message: 'Popover entry must finish at stable unscaled geometry.' }).toBe(true);
+  await expect
+    .poll(
+      async () => {
+        const sample = await panel.evaluate(async (element) => {
+          const read = () => {
+            const rect = element.getBoundingClientRect();
+            const css = getComputedStyle(element);
+            const animations = element.getAnimations({ subtree: true }).map((animation) => ({
+              name: 'animationName' in animation ? String(animation.animationName) : null,
+              playState: animation.playState,
+              pending: animation.pending,
+            }));
+            return {
+              connected: element.isConnected,
+              rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+              transform: css.transform,
+              opacity: css.opacity,
+              animations,
+              endpoint:
+                element.isConnected &&
+                rect.width > 0 &&
+                rect.height > 0 &&
+                css.opacity === '1' &&
+                (css.transform === 'none' || new DOMMatrixReadOnly(css.transform).isIdentity) &&
+                animations.some(
+                  (animation) =>
+                    animation.name === 'pui-enter' &&
+                    animation.playState === 'finished' &&
+                    !animation.pending
+                ) &&
+                animations.every(
+                  (animation) => !animation.pending && animation.playState === 'finished'
+                ),
+            };
+          };
+          const firstFrame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => firstFrame.resolve());
+          await firstFrame.promise;
+          const before = read();
+          const secondFrame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => secondFrame.resolve());
+          await secondFrame.promise;
+          const after = read();
+          return {
+            before,
+            after,
+            settled:
+              before.endpoint &&
+              after.endpoint &&
+              (Object.keys(before.rect) as Array<keyof typeof before.rect>).every(
+                (key) => Math.abs(before.rect[key] - after.rect[key]) < 0.01
+              ),
+          };
+        });
+        receipt.latest = sample;
+        return sample.settled;
+      },
+      { timeout: 1_000, message: 'Popover entry must finish at stable unscaled geometry.' }
+    )
+    .toBe(true);
   return panel;
 }
 
@@ -404,7 +419,10 @@ for (const runtime of RUNTIMES)
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
           fixture = await mountPopoverNova(page, runtime);
-          observations.profiles = await fixture.evaluate((view) => ({ public: view.publicProfile, fixture: view.fixtureProfile }));
+          observations.profiles = await fixture.evaluate((view) => ({
+            public: view.publicProfile,
+            fixture: view.fixtureProfile,
+          }));
           expect(observations.profiles).toEqual({ public: 'rhea', fixture: 'nova' });
           previewer = page.locator('[data-popover-nova-fixture]');
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });

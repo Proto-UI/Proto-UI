@@ -626,7 +626,9 @@ class Frontend {
           throw new TypeError(`Cannot read ${property} on a nullish value.`);
         }
         if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'stateHandles')
-          return captureStateHandlesType(this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture);
+          return captureStateHandlesType(
+            this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture
+          );
         if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'render')
           return joinValueTypes([this.hooks.get(owner.hookId)?.setup.returnType ?? 'void', 'void']);
         const capability = capabilityMemberType(owner, property, optional);
@@ -955,7 +957,7 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
-    nodes = lowerObjectPatterns(nodes);
+    nodes = unrollStaticLoops(module, lowerObjectPatterns(nodes));
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
@@ -1005,8 +1007,13 @@ class Frontend {
               OPERATION_RULES[value.operation].receiver === 'def' &&
               value.arguments[0]?.kind === 'literal'
                 ? String(value.arguments[0].value)
-                : stateValue(value.type) && value.kind === 'member'
-                  ? `#observed:${value.span.file}:${value.span.start}`
+                : stateValue(value.type) &&
+                    (value.kind === 'member' ||
+                      value.kind === 'call' ||
+                      value.kind === 'helper-call')
+                  ? // A handle read from a capture or returned by a helper is observed
+                    // through this binding; its identity is the binding site.
+                    `#observed:${value.span.file}:${value.span.start}`
                   : alias?.stateId;
             Object.assign(pending, {
               type: value.type,
@@ -1272,8 +1279,14 @@ class Frontend {
       );
       if (constant && value.kind === 'literal')
         return { ...value, type: { kind: 'literal', value: value.value } };
-      if (constant && value.kind === 'array' && value.elements.length > 0 &&
-        value.elements.every((element) => element.kind === 'literal' && typeof element.value === 'string')) {
+      if (
+        constant &&
+        value.kind === 'array' &&
+        value.elements.length > 0 &&
+        value.elements.every(
+          (element) => element.kind === 'literal' && typeof element.value === 'string'
+        )
+      ) {
         const elements = value.elements.map((element) => {
           if (element.kind !== 'literal') return element;
           return { ...element, type: { kind: 'literal' as const, value: element.value } };
@@ -1283,7 +1296,10 @@ class Frontend {
           elements,
           type: {
             kind: 'array',
-            element: parseDataType({ kind: 'union', members: elements.map((element) => element.type) }),
+            element: parseDataType({
+              kind: 'union',
+              members: elements.map((element) => element.type),
+            }),
           },
         };
       }
@@ -2062,13 +2078,17 @@ class Frontend {
     // Discovery unwraps declarations for dispatch. Recover only parentheses and
     // a verified const assertion around an array, not arbitrary erased views.
     let initializer = value;
-    while (ts.isArrayLiteralExpression(value) && initializer.parent &&
+    while (
+      ts.isArrayLiteralExpression(value) &&
+      initializer.parent &&
       (ts.isParenthesizedExpression(initializer.parent) ||
-        ((ts.isAsExpression(initializer.parent) || ts.isTypeAssertionExpression(initializer.parent)) &&
+        ((ts.isAsExpression(initializer.parent) ||
+          ts.isTypeAssertionExpression(initializer.parent)) &&
           ts.isTypeReferenceNode(initializer.parent.type) &&
           ts.isIdentifier(initializer.parent.type.typeName) &&
           initializer.parent.type.typeName.text === 'const')) &&
-      initializer.parent.expression === initializer)
+      initializer.parent.expression === initializer
+    )
       initializer = initializer.parent;
     const initial = this.expression(module, initializer, new Map(), 'setup');
     const scalar =
@@ -2077,7 +2097,9 @@ class Frontend {
     // finite data written as a literal (finiteness is checked below).
     if (!scalar && (module.mutableBindings.has(name) || scalarInitializer(value)))
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
-    const annotation = ts.isVariableDeclaration(initializer.parent) ? initializer.parent.type : undefined;
+    const annotation = ts.isVariableDeclaration(initializer.parent)
+      ? initializer.parent.type
+      : undefined;
     const declared = annotation
       ? parseSourceValueType(module, annotation, this.substitutions)
       : initial.type;
@@ -2429,15 +2451,27 @@ class Frontend {
   ): ExpressionIR {
     const span = sourceSpan(node);
     if (
-      ts.isIdentifier(node.expression) && node.expression.text === 'String' &&
-      !scope.has('String') && !module.declarations.has('String') && !module.imports.has('String')
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'String' &&
+      !scope.has('String') &&
+      !module.declarations.has('String') &&
+      !module.imports.has('String')
     ) {
       if (node.questionDotToken)
         rejectNode(node, 'PUI1006', 'String does not admit optional calls.');
-      const args = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
+      const args = node.arguments.map((argument) =>
+        this.expression(module, argument, scope, phase)
+      );
       return {
-        kind: 'intrinsic', name: 'string', arguments: args,
-        type: this.checkedValue(node, () => intrinsicResult('string', args.map((arg) => arg.type))),
+        kind: 'intrinsic',
+        name: 'string',
+        arguments: args,
+        type: this.checkedValue(node, () =>
+          intrinsicResult(
+            'string',
+            args.map((arg) => arg.type)
+          )
+        ),
         span,
       };
     }
@@ -2461,7 +2495,10 @@ class Frontend {
                   ? 'object.assign'
                   : undefined;
         if (name) {
-          if (name === 'object.assign' && (node.questionDotToken || node.expression.questionDotToken))
+          if (
+            name === 'object.assign' &&
+            (node.questionDotToken || node.expression.questionDotToken)
+          )
             rejectNode(node, 'PUI1006', 'Object.assign does not admit optional calls.');
           if (name === 'object.assign') {
             const operands = node.arguments.map((argument) => {
@@ -2473,7 +2510,11 @@ class Frontend {
               (!ts.isObjectLiteralExpression(operands[0]) && !ts.isNewExpression(operands[0])) ||
               operands.slice(1).some((operand) => !ts.isObjectLiteralExpression(operand))
             )
-              rejectNode(node, 'PUI1006', 'Object.assign requires a direct fresh target and record literal sources.');
+              rejectNode(
+                node,
+                'PUI1006',
+                'Object.assign requires a direct fresh target and record literal sources.'
+              );
           }
           const args = node.arguments.map((argument) =>
             this.expression(
@@ -2503,22 +2544,41 @@ class Frontend {
       if (property === 'includes') {
         const array = this.expression(module, owner, scope, phase);
         if (typeof array.type !== 'string' && array.type.kind === 'array') {
-          if (node.arguments.length !== 1 || node.questionDotToken || node.expression.questionDotToken)
-            rejectNode(node, 'PUI1006', 'Finite string includes requires one search argument and no optional call.');
+          if (
+            node.arguments.length !== 1 ||
+            node.questionDotToken ||
+            node.expression.questionDotToken
+          )
+            rejectNode(
+              node,
+              'PUI1006',
+              'Finite string includes requires one search argument and no optional call.'
+            );
           let search = node.arguments[0];
           // An erased comparison view grants no provenance. Retain the actual operand in IR.
           while (ts.isParenthesizedExpression(search)) search = search.expression;
           if (ts.isAsExpression(search) || ts.isTypeAssertionExpression(search)) {
             const asserted = parseSourceValueType(module, search.type, this.substitutions);
             const members = valueAlternatives(asserted);
-            if (members.length && members.every((type) =>
-              typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
-            )) search = search.expression;
+            if (
+              members.length &&
+              members.every(
+                (type) =>
+                  typeof type !== 'string' &&
+                  type.kind === 'literal' &&
+                  typeof type.value === 'string'
+              )
+            )
+              search = search.expression;
           }
           const value = this.expression(module, search, scope, phase);
           return {
-            kind: 'intrinsic', name: 'array.includes', arguments: [array, value],
-            type: this.checkedValue(node, () => intrinsicResult('array.includes', [array.type, value.type])),
+            kind: 'intrinsic',
+            name: 'array.includes',
+            arguments: [array, value],
+            type: this.checkedValue(node, () =>
+              intrinsicResult('array.includes', [array.type, value.type])
+            ),
             span,
           };
         }
@@ -2595,6 +2655,25 @@ class Frontend {
           phase,
           binding.parsing || binding.lexical ? undefined : binding.helper
         );
+      }
+      if (name === 'String' && !module.imports.has(name) && !module.declarations.has(name)) {
+        // The global String conversion, as authored source uses it in
+        // diagnostics: one argument, no `new`, a string result.
+        if (node.arguments.length !== 1)
+          rejectNode(node, 'PUI1004', 'String() is admitted with exactly one argument.');
+        const args = [this.expression(module, node.arguments[0], scope, phase)];
+        return {
+          kind: 'intrinsic',
+          name: 'string',
+          arguments: args,
+          type: this.checkedValue(node, () =>
+            intrinsicResult(
+              'string',
+              args.map((arg) => arg.type)
+            )
+          ),
+          span,
+        };
       }
       if (!module.imports.has(name) && !module.declarations.has(name))
         rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
@@ -3505,9 +3584,11 @@ function lowerObjectPatterns(nodes: readonly ts.Statement[]): readonly ts.Statem
     const lowered = ranged(factory.createVariableStatement(statement.modifiers, list), statement);
     (lowered as { parent: ts.Node }).parent = statement.parent;
     // TypeScript exports this helper at runtime but omits it from its public declarations.
-    (ts as typeof ts & {
-      setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T;
-    }).setParentRecursive(lowered, true);
+    (
+      ts as typeof ts & {
+        setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T;
+      }
+    ).setParentRecursive(lowered, true);
     loweredPatterns.set(node, lowered);
     return lowered;
   });
@@ -3520,4 +3601,259 @@ function hasObjectPattern(node: ts.Statement): boolean {
       ts.isObjectBindingPattern(declaration.name)
     )
   );
+}
+
+const unrolledLoops = new WeakMap<ts.Statement, readonly ts.Statement[]>();
+
+/**
+ * `for (const x of <static list>) { ... }` over finite literal data is expanded
+ * at compile time: the body is repeated once per element, with each read of
+ * `x` replaced by that element's literal. A static list is an array literal of
+ * string or number literals, a module binding that resolves to one, or
+ * `Object.keys(<module object literal>)`. Each synthesized literal keeps the
+ * source range of the identifier it replaces. Any other `for...of` keeps the
+ * unsupported-statement diagnostic; nothing is iterated at run time.
+ */
+function unrollStaticLoops(
+  module: SourceModule,
+  nodes: readonly ts.Statement[]
+): readonly ts.Statement[] {
+  if (!nodes.some((node) => ts.isForOfStatement(node))) return nodes;
+  const out: ts.Statement[] = [];
+  for (const node of nodes) {
+    if (!ts.isForOfStatement(node)) {
+      out.push(node);
+      continue;
+    }
+    const cached = unrolledLoops.get(node);
+    if (cached) {
+      out.push(...cached);
+      continue;
+    }
+    const list = node.initializer;
+    if (
+      node.awaitModifier ||
+      !ts.isVariableDeclarationList(list) ||
+      !(list.flags & ts.NodeFlags.Const) ||
+      list.declarations.length !== 1 ||
+      !ts.isIdentifier(list.declarations[0].name)
+    ) {
+      out.push(node);
+      continue;
+    }
+    const values = staticLoopValues(module, node.expression, new Set());
+    if (!values) {
+      out.push(node);
+      continue;
+    }
+    const name = list.declarations[0].name.text;
+    const body = ts.isBlock(node.statement) ? node.statement.statements : [node.statement];
+    if (
+      body.some(
+        (statement) => ts.isVariableStatement(statement) || ts.isFunctionDeclaration(statement)
+      )
+    )
+      rejectNode(node, 'PUI1004', 'A statically unrolled loop body cannot declare bindings.');
+    const expanded: ts.Statement[] = [];
+    for (const value of values)
+      for (const statement of body)
+        expanded.push(substituteLoopValue(statement, name, value, node.parent));
+    // A nested static loop is unrolled within each copy of its enclosing body,
+    // and a branch whose condition is now made of literals only is decided.
+    const unrolled = unrollStaticLoops(module, decideLiteralBranches(expanded));
+    unrolledLoops.set(node, unrolled);
+    out.push(...unrolled);
+  }
+  return out;
+}
+
+function staticLoopValues(
+  module: SourceModule,
+  node: ts.Expression,
+  active: Set<string>
+): (string | number)[] | undefined {
+  while (
+    ts.isParenthesizedExpression(node) ||
+    ts.isAsExpression(node) ||
+    ts.isSatisfiesExpression(node) ||
+    ts.isTypeAssertionExpression(node)
+  )
+    node = node.expression;
+  if (ts.isArrayLiteralExpression(node)) {
+    const values: (string | number)[] = [];
+    for (let element of node.elements) {
+      while (ts.isParenthesizedExpression(element) || ts.isAsExpression(element))
+        element = element.expression;
+      if (ts.isStringLiteral(element) || ts.isNoSubstitutionTemplateLiteral(element))
+        values.push(element.text);
+      else if (ts.isNumericLiteral(element)) values.push(Number(element.text));
+      else return undefined;
+    }
+    return values;
+  }
+  const resolved = (
+    identifier: ts.Identifier
+  ): { module: SourceModule; node: ts.Expression } | undefined => {
+    if (!module.declarations.has(identifier.text) && !module.imports.has(identifier.text))
+      return undefined;
+    const binding = module.graph.resolveBinding(module, identifier.text);
+    if (!binding.module || !ts.isExpression(binding.node)) return undefined;
+    const identity = `${binding.module.file.fileName}#${binding.name}`;
+    if (active.has(identity)) return undefined;
+    active.add(identity);
+    return { module: binding.module, node: binding.node };
+  };
+  if (ts.isIdentifier(node)) {
+    const target = resolved(node);
+    return target && staticLoopValues(target.module, target.node, active);
+  }
+  if (
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    ts.isIdentifier(node.expression.expression) &&
+    node.expression.expression.text === 'Object' &&
+    node.expression.name.text === 'keys' &&
+    node.arguments.length === 1 &&
+    ts.isIdentifier(node.arguments[0])
+  ) {
+    const target = resolved(node.arguments[0]);
+    let object = target?.node;
+    while (
+      object &&
+      (ts.isParenthesizedExpression(object) ||
+        ts.isAsExpression(object) ||
+        ts.isSatisfiesExpression(object))
+    )
+      object = object.expression;
+    if (!object || !ts.isObjectLiteralExpression(object)) return undefined;
+    const keys: string[] = [];
+    for (const property of object.properties) {
+      if (!ts.isPropertyAssignment(property)) return undefined;
+      if (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name))
+        keys.push(property.name.text);
+      else return undefined;
+    }
+    return keys;
+  }
+  return undefined;
+}
+
+function substituteLoopValue(
+  statement: ts.Statement,
+  name: string,
+  value: string | number,
+  parent: ts.Node
+): ts.Statement {
+  const factory = ts.factory;
+  const literal = (from: ts.Node): ts.Expression =>
+    ts.setTextRange(
+      typeof value === 'number'
+        ? factory.createNumericLiteral(value)
+        : factory.createStringLiteral(value),
+      from
+    );
+  const result = ts.transform(statement, [
+    (context) => {
+      const visit = (node: ts.Node): ts.Node => {
+        // A nested function or loop that rebinds the name keeps its own binding.
+        if (
+          (ts.isFunctionLike(node) &&
+            node.parameters.some(
+              (parameter) => ts.isIdentifier(parameter.name) && parameter.name.text === name
+            )) ||
+          (ts.isForOfStatement(node) &&
+            ts.isVariableDeclarationList(node.initializer) &&
+            node.initializer.declarations.some(
+              (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
+            ))
+        )
+          return node;
+        if (ts.isIdentifier(node) && node.text === name) {
+          const owner = node.parent;
+          if (
+            (owner && ts.isPropertyAccessExpression(owner) && owner.name === node) ||
+            (owner && ts.isPropertyAssignment(owner) && owner.name === node) ||
+            (owner && ts.isShorthandPropertyAssignment(owner))
+          )
+            return node;
+          return literal(node);
+        }
+        return ts.visitEachChild(node, visit, context);
+      };
+      return (root) => ts.visitNode(root, visit) as ts.Statement;
+    },
+  ]);
+  const lowered = result.transformed[0];
+  result.dispose();
+  (lowered as { parent: ts.Node }).parent = parent;
+  linkParents(lowered);
+  return lowered;
+}
+
+/** An `if` whose condition compares literals only is decided at compile time. */
+function decideLiteralBranches(nodes: readonly ts.Statement[]): ts.Statement[] {
+  const out: ts.Statement[] = [];
+  for (const node of nodes) {
+    if (!ts.isIfStatement(node)) {
+      out.push(node);
+      continue;
+    }
+    const decided = literalCondition(node.expression);
+    if (decided === undefined) {
+      out.push(node);
+      continue;
+    }
+    const branch = decided ? node.thenStatement : node.elseStatement;
+    if (!branch) continue;
+    out.push(...decideLiteralBranches(ts.isBlock(branch) ? branch.statements : [branch]));
+  }
+  return out;
+}
+
+function literalCondition(node: ts.Expression): boolean | undefined {
+  while (ts.isParenthesizedExpression(node)) node = node.expression;
+  const literal = (value: ts.Expression): string | number | boolean | undefined => {
+    while (ts.isParenthesizedExpression(value)) value = value.expression;
+    if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) return value.text;
+    if (ts.isNumericLiteral(value)) return Number(value.text);
+    if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
+    if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
+    return undefined;
+  };
+  if (ts.isPrefixUnaryExpression(node) && node.operator === ts.SyntaxKind.ExclamationToken) {
+    const inner = literalCondition(node.operand);
+    return inner === undefined ? undefined : !inner;
+  }
+  if (!ts.isBinaryExpression(node)) {
+    const value = literal(node);
+    return typeof value === 'boolean' ? value : undefined;
+  }
+  const operator = node.operatorToken.kind;
+  if (
+    operator === ts.SyntaxKind.BarBarToken ||
+    operator === ts.SyntaxKind.AmpersandAmpersandToken
+  ) {
+    const left = literalCondition(node.left),
+      right = literalCondition(node.right);
+    if (left === undefined || right === undefined) return undefined;
+    return operator === ts.SyntaxKind.BarBarToken ? left || right : left && right;
+  }
+  if (
+    operator === ts.SyntaxKind.EqualsEqualsEqualsToken ||
+    operator === ts.SyntaxKind.ExclamationEqualsEqualsToken
+  ) {
+    const left = literal(node.left),
+      right = literal(node.right);
+    if (left === undefined || right === undefined) return undefined;
+    return operator === ts.SyntaxKind.EqualsEqualsEqualsToken ? left === right : left !== right;
+  }
+  return undefined;
+}
+
+/** Point every descendant of a synthesized node at its actual parent. */
+function linkParents(node: ts.Node): void {
+  ts.forEachChild(node, (child) => {
+    (child as { parent: ts.Node }).parent = node;
+    linkParents(child);
+  });
 }

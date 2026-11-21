@@ -60,3 +60,35 @@ The `stateHandles` lowering is now defined in `source-language.md` ("As-hook `st
 3. native support: the JS support object and the GPUI Rust support each gain the frozen record.
 
 It then unblocks button, toggle and separator as far as their next diagnostic.
+
+## Update 2026-11-21: String(), joined tokens, helper-returned rule states
+
+Upstream main now implements `stateHandles`. This patch admits three more forms:
+
+- `String(value)`;
+- joined style-token constants;
+- helper-returned state handles in rules.
+
+| Family | Next diagnostic |
+| --- | --- |
+| separator | Clears the frontend. It now stops at the target: `react-dom-source-v1` does not implement `props.watchAll` or `props.watchRaw`. |
+| button, toggle | `for...of` statements (resolved below) |
+
+The other families are unchanged.
+
+## Update 2026-11-21: static loop unrolling
+
+Static `for...of` loops are now unrolled, and literal-only branches are decided at compile time.
+
+| Family | Next diagnostic |
+| --- | --- |
+| toggle | Clears the frontend. It now stops at the target: `props.watchRaw` is not implemented by `react-dom-source-v1`. |
+| separator | Also stops at the target: `props.watchAll` and `props.watchRaw`. |
+| button | Stops at rule `w.meta('colorScheme')`, which appears 101 times across the families. Rule metadata needs its own host-capability definition. |
+
+## Update 2026-11-21: toggle and separator compile
+
+- **Watchers.** `props.watchAll`, `props.watchRaw` and `props.watchRawAll` are now registered for the React, Vue 3, Web Component and GPUI targets. Every native owner already implemented them; the profiles simply did not admit them. Vue 2 keeps its explicit rejection control (`vue2-native-template.test.ts`) until that target is accepted.
+- **Validator fix.** The portable IR validator counted a module binding read inside a closure as a lexical capture; the frontend does not. Any closure in a module helper that called another module helper therefore failed validation. This was reproduced on main, independent of the shadcn sources.
+- **Result.** `shadcn/toggle` and `shadcn/separator` now compile to `react-dom-source-v1` and write their outputs. The generated `Component.tsx` imports only `react`, `react-dom` and its own `.proto-ui` support files. They have not yet been mounted and compared against the `adapter-react` rendering.
+- **Button.** It still stops at rule `w.meta('colorScheme')`.

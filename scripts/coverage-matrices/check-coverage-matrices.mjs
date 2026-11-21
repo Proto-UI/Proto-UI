@@ -285,10 +285,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts': Object.freeze({
-    specifiers: Object.freeze([
-      '@proto.ui/adapter-base',
-      '@proto.ui/adapter-base/web-material',
-    ]),
+    specifiers: Object.freeze(['@proto.ui/adapter-base', '@proto.ui/adapter-base/web-material']),
     resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
   }),
   'packages/adapters/base/src/material/program-pool.ts': Object.freeze({
@@ -342,10 +339,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({
     sourceSha256: '02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee',
-    specifiers: Object.freeze([
-      '@proto.ui/core',
-      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
-    ]),
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/prototypes-bootstrap-2-3-2/surface']),
   }),
   // Exact demo compositions delegating geometry/materialization to the public Web
   // attachment. Their authored-controller owner remains blocked. Bootstrap and

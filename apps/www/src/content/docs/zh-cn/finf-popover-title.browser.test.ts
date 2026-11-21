@@ -217,7 +217,10 @@ for (const runtime of RUNTIMES)
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
           fixture = await mountPopoverNova(page, runtime);
-          observations.profiles = await fixture.evaluate((view) => ({ public: view.publicProfile, fixture: view.fixtureProfile }));
+          observations.profiles = await fixture.evaluate((view) => ({
+            public: view.publicProfile,
+            fixture: view.fixtureProfile,
+          }));
           expect(observations.profiles).toEqual({ public: 'rhea', fixture: 'nova' });
           previewer = page.locator('[data-popover-nova-fixture]');
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
