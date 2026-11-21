@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import sourceConfig from '../../../../../vitest.config';
@@ -7,6 +8,25 @@ import { transformWithEsbuild, type Plugin } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repository = path.resolve(root, '../../../../..');
+
+interface CollapsibleManifest {
+  profile: string;
+  componentName: string;
+  entries: Record<string, string>;
+}
+
+/**
+ * The compiled Collapsible project manifest is published by the compiler
+ * fixture helper. It names the generated entry modules of one project graph.
+ */
+function readCollapsibleManifest(): CollapsibleManifest {
+  const manifestPath = process.env.COMPILER_COLLAPSIBLE_MANIFEST;
+  if (!manifestPath)
+    throw new Error(
+      'COMPILER_COLLAPSIBLE_MANIFEST must point at a compiled Collapsible project manifest.'
+    );
+  return JSON.parse(readFileSync(manifestPath, 'utf8')) as CollapsibleManifest;
+}
 
 /**
  * Compile unchanged source into a virtual TSX module without writing it to the
@@ -175,9 +195,31 @@ const emitted: Plugin = {
   },
 };
 
+/**
+ * Serve the compiled Collapsible project entries as real modules. The project
+ * writer publishes one shared Context key, anatomy family and transport graph,
+ * so every entry imports the same physical support modules and keeps one
+ * browser module instance per shared declaration.
+ */
+const collapsibleProject: Plugin = {
+  name: 'compiler-collapsible-project',
+  resolveId(id) {
+    if (id === 'virtual:collapsible-manifest') return '\0compiler-collapsible-manifest';
+    if (!id.startsWith('virtual:collapsible-')) return null;
+    const manifest = readCollapsibleManifest();
+    const entry = manifest.entries[id.slice('virtual:collapsible-'.length)];
+    if (!entry) throw new Error(`Unknown Collapsible project entry: ${id}`);
+    return entry;
+  },
+  load(id) {
+    if (id !== '\0compiler-collapsible-manifest') return null;
+    return `export default ${JSON.stringify(readCollapsibleManifest())};\n`;
+  },
+};
+
 export default {
   root,
-  plugins: [...(sourceConfig.plugins ?? []), emitted],
+  plugins: [...(sourceConfig.plugins ?? []), emitted, collapsibleProject],
   resolve: {
     alias: {
       react: path.join(repository, 'packages/adapters/react/node_modules/react'),

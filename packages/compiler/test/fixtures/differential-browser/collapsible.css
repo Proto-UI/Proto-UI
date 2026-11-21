@@ -1,0 +1,14 @@
+/*
+ * Host-owned utility meaning for the tokens the unchanged Base Collapsible
+ * requests. The compiled native owner publishes style tokens as data-pui-style;
+ * the host owns what a token means, so this fixture supplies the `hidden`
+ * utility the retained Content asks for while it stays mounted.
+ */
+[data-pui-style~='hidden'] {
+  display: none;
+}
+
+/* Leave room to detect unintended native Space scrolling. */
+body {
+  min-height: 200vh;
+}
