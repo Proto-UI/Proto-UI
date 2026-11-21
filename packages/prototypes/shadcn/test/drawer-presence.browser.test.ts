@@ -302,15 +302,11 @@ describe('public www Drawer cold-entry diagnostic', () => {
   it.each([false, true])(
     'animates the public cold entry with measured intrinsic geometry (fixed control=%s)',
     async (fixedControl) => {
-      const { buildPublicDrawerEntryProbe, buildPublicDrawerBoxCss } =
-        await import('./fixtures/drawer-entry-build');
-      const { readdir } = await import('node:fs/promises');
-      const files: string[] = [];
-      for (const family of ['base', 'shadcn']) {
-        const directory = `packages/prototypes/${family}/src/drawer`;
-        for (const file of await readdir(directory))
-          if (file.endsWith('.ts')) files.push(`${directory}/${file}`);
-      }
+      const {
+        buildPublicDrawerEntryProbe,
+        buildPublicDrawerBoxCss,
+        collectPublicDrawerEntryStyleTokens,
+      } = await import('./fixtures/drawer-entry-build');
       const demoPath = '../../../../apps/www/src/content/docs/demo-shadcn-drawer.demo';
       const demo = (await import(demoPath)).default;
       const boxTokens = new Set<string>();
@@ -319,9 +315,7 @@ describe('public www Drawer cold-entry diagnostic', () => {
         for (const child of node.children ?? []) if (typeof child === 'object') walk(child);
       };
       walk(demo.root);
-      const sourceTokens = (await collectProtoStyleTokensFromFiles(files)).filter(
-        (token): token is string => typeof token === 'string'
-      );
+      const { tokens: sourceTokens } = await collectPublicDrawerEntryStyleTokens();
       const css = `${await buildPublicDrawerBoxCss([...boxTokens])}\n${renderProtoStyleTokenCss(sourceTokens)}`;
       const diagnostic = await buildPublicDrawerEntryProbe();
       const page = await browser.newPage({ viewport: { width: 900, height: 700 } });

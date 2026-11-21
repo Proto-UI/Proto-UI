@@ -14,6 +14,7 @@ import {
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RUNTIME_TEST_INCLUDES } from './runtime-inventory.mjs';
+import { assertGeneralCheckReports } from './general-check-plan.mjs';
 import {
   BROWSER_SHARD_COUNT,
   BROWSER_SUITES,
@@ -166,6 +167,7 @@ export const runtimeSlots = [
     { length: BROWSER_SHARD_COUNT },
     (_, index) => `browser-${index + 1}-of-${BROWSER_SHARD_COUNT}`
   ),
+  'general-checks',
 ];
 export function artifactName({ runId, attempt, slot }) {
   return `runtime-ci-${runId}-${slot}-attempt-${attempt}`;
@@ -214,7 +216,32 @@ export function assertCiGate(needs, artifacts, context = ciContext()) {
   assert.deepEqual(Object.keys(needs).sort(), ['test-browser', 'test-general', 'test-plan']);
   for (const [job, result] of Object.entries(needs))
     assert.equal(result.result, 'success', `Required job ${job} did not succeed`);
-  const [plan, ...results] = latestSlotReceipts(artifacts, context);
+  const slots = latestSlotReceipts(artifacts, context);
+  const plan = slots.find((receipt) => receipt.slot === 'plan');
+  const checks = slots.find((receipt) => receipt.slot === 'general-checks');
+  const results = slots.filter((receipt) => !['plan', 'general-checks'].includes(receipt.slot));
+  const general = results.find((receipt) => receipt.slot === 'general');
+  const runtimeChecks = general.payload.generalChecks;
+  assertGeneralCheckReports(
+    checks.payload,
+    runtimeChecks,
+    JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'))
+  );
+  for (const report of [checks.payload, runtimeChecks])
+    assertRuntimeSource(
+      { before: report.sourceBefore, after: report.sourceAfter },
+      { checkoutSha: context.checkoutSha }
+    );
+  assert.deepEqual(
+    checks.payload.sourceBefore,
+    runtimeChecks.sourceBefore,
+    'General groups must observe the same candidate source'
+  );
+  assert.deepEqual(
+    { before: runtimeChecks.sourceBefore, after: runtimeChecks.sourceAfter },
+    general.payload.source,
+    'Runtime command and suite receipt must bind the same source'
+  );
   assertRuntimeGate(
     needs,
     plan.payload,
@@ -222,6 +249,10 @@ export function assertCiGate(needs, artifacts, context = ciContext()) {
       const expectedSlot =
         payload.phase === 'general' ? 'general' : `browser-${payload.shard?.replace('/', '-of-')}`;
       assert.equal(slot, expectedSlot, 'Receipt payload must belong to its logical slot');
+      if (slot === 'general') {
+        const { generalChecks: _checks, ...runtime } = payload;
+        return runtime;
+      }
       return payload;
     }),
     context.checkoutSha
@@ -281,7 +312,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     });
     assertCiGate(JSON.parse(process.env.RUNTIME_CI_NEEDS ?? '{}'), artifacts, context);
     console.log(
-      `Runtime gate passed for run ${context.runId} attempt ${context.attempt} event/checkout ${context.checkoutSha}: general plus ${BROWSER_SHARD_COUNT} browser shards`
+      `Runtime gate passed for run ${context.runId} attempt ${context.attempt} event/checkout ${context.checkoutSha}: complete general checks/runtime union plus ${BROWSER_SHARD_COUNT} browser shards`
     );
   } else {
     throw new Error(

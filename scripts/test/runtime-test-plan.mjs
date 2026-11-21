@@ -1,5 +1,6 @@
-import { globSync, readFileSync } from 'node:fs';
+import { globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import browserSuiteCosts from './fixtures/browser-suite-costs-44876125495.json' with { type: 'json' };
 // Astro compiles on first request. Keep the shared runner's readiness inventory
 // importable without starting its server or running Vitest.
 export const READY_ROUTES = Object.freeze([
@@ -432,14 +433,9 @@ export function validateBrowserCostEvidence(evidence) {
   return evidence;
 }
 
-const costEvidence = validateBrowserCostEvidence(
-  JSON.parse(
-    readFileSync(
-      new URL('./fixtures/browser-suite-costs-44876125495.json', import.meta.url),
-      'utf8'
-    )
-  )
-);
+// A real JSON module preserves the same validated fixture under both Node and
+// Vite. Vite's browser-facing import.meta.url is not a filesystem URL.
+const costEvidence = validateBrowserCostEvidence(browserSuiteCosts);
 const observedCosts = Object.fromEntries(
   costEvidence.observations.map(({ suite, durationMs }) => [suite, Math.ceil(durationMs / 1000)])
 );

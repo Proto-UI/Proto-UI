@@ -1,7 +1,31 @@
 import { SHADCN_THEME_CSS } from '../../../../cli/src/legacy/type';
 import { renderPrefixedThemeCss } from '../../../../cli/src/services/proto-style-css';
+import { collectProtoStyleTokensFromFiles } from '../../../../cli/src/services/prototype-style-tokens';
 import { build } from 'esbuild';
+import { readdir } from 'node:fs/promises';
 import path from 'node:path';
+
+/** Physical recipes of the actual public DemoSpec; no full-family preset fallback. */
+export async function collectPublicDrawerEntryStyleTokens() {
+  const files: string[] = [];
+  for (const directory of [
+    'packages/prototypes/base/src/drawer',
+    'packages/prototypes/shadcn/src/drawer',
+    // Public Trigger/Close contain actual Button prototypes, not plain text.
+    'packages/prototypes/base/src/button',
+    'packages/prototypes/shadcn/src/button',
+    // The public demo owns this carrier. It currently contributes no host CSS.
+    'packages/prototypes/shadcn/src/style-scope',
+  ]) {
+    for (const file of (await readdir(directory)).sort())
+      if (file.endsWith('.ts')) files.push(`${directory}/${file}`);
+  }
+  const tokens = (await collectProtoStyleTokensFromFiles(files)).filter(
+    (token): token is string => typeof token === 'string'
+  );
+  return { files, tokens };
+}
+
 /** Alias applies only to the diagnostic bundle; production sources remain byte unchanged. */
 export async function buildPublicDrawerEntryProbe() {
   const result = await build({

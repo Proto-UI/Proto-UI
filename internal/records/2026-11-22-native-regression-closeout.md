@@ -4,6 +4,8 @@ This dated record explains the repairs prompted by native [run 44930338506](http
 
 The [machine-readable companion](2026-11-22-native-regression-closeout.json) binds source hashes, original and replacement local receipts, all 19 retained material failures, finite import review, budget measurements and their limits. Final CI receipts must identify the follow-up's own final commit.
 
+The [bounded browser failure ledger](2026-11-22-native-browser-failure-triage.json) retains every failed case from historical shards 3, 4, 6, 14, 15, 17 and 18, with native artifact/log hashes, source references and explicit uncertainty. These seven shards all reached terminal reports without a 900-second shard timeout. Their observations include the fixed fixture premises as well as unresolved paint, initialization, positioning, scroll-policy and animation observations. They neither represent the whole workflow nor count distinct product bugs.
+
 ## Material extent has one lifecycle owner
 
 The earlier contact-only expansion change exposed two distinct defects. Normal same-session pointer-up can leave `contact-motion` releasing without advancing the sink's duplicate `releaseUntil` clock. Conversely, held contact under reduced or unknown motion can reserve expanded geometry even though the final frame is neutral. These are product lifecycle defects, separate from observation helpers that still expect expansion at rest.
@@ -27,6 +29,8 @@ Six controls read the real DemoSpecs to verify those structural premises. The se
 
 The two Drawer cold-entry failures in shard 18 also stopped before their geometry assertions: the isolated fixture registered Drawer and StyleScope but omitted the public DemoSpec's `shadcn-button` dependency. The fixture now registers that actual public definition. A control using the real DemoSpec, registry and WC renderer first reproduced the missing-Button failure and then passed after registration. The missing-StyleScope countercontrol still rejects, and no width/height overrides, native geometry assertions or deadlines change. Successful fixture admission is not yet a native Drawer geometry result.
 
+That same public Button exposed a second fixture omission: the Drawer-only CSS collector missed eight style tokens emitted by the actual composed Button. A shared, finite collector now includes the two Drawer directories and their actual base Button, Shadcn Button and StyleScope dependencies. It does not load a full-family preset. The control requires coverage of the real Button's emitted tokens and their generated CSS. The missing-token red case remains archived. Final control preparation has a separate 30-second `beforeAll` bound; its behavior body retains the default five seconds. The final one-test run passes in 7.85 seconds overall, including setup. The intermediate whole-case timeout experiments remain historical evidence, not the final test policy.
+
 The CI export for Select places its existing failure snapshots under the uploaded runtime artifact directory. It changes evidence retention only.
 
 ## Keep bindings tied to reviewed source
@@ -36,6 +40,10 @@ Main advanced through theme inheritance and component capability work after the 
 The first diagnostic website scan recorded 21 findings: 19 references to the changing sink body and two Previewer fingerprints. That failure remains in the JSON record. These checks do not manufacture semantic acceptance; final portfolio projections and a full clean-source gate are still required.
 
 The missing inventory declaration and stale declaration of the browser shard count are corrected to match existing executable exports. The complete local type command then passes across 1,259 Astro files with zero errors and 31 hints. This local result does not replace the final native type job.
+
+The first native general report also exposed two collection errors in the Ghost and Popover controls. The new cost fixture had been read through `fs.readFileSync(new URL(..., import.meta.url))`; Vite rewrites that URL for its browser-facing module graph. A real JSON module import now supplies exactly the same fixture to the unchanged validator. Node comparison confirms identical complete 18-shard assignments and cost/capacity vectors.
+
+Local reproduction first recorded two failed suites with no tests collected. Once collection worked, 21 tests passed and one Ghost code-projection check failed: the WC example now supplies props through the public `setElementProps` API instead of an HTML attribute. Its test now executes the actual unique WC snippet with an observed API binding and requires the complete `ghost` props with `disabled=false/true` for the two real elements. The other three runtime attribute assertions and every shared text check remain. The resulting two files pass all 22 tests; that local result does not certify native Ghost or Popover behavior.
 
 ## Strict size policy stays strict
 

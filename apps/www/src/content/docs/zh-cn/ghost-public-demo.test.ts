@@ -90,8 +90,38 @@ it('keeps four public code projections aligned with the enabled and disabled dem
     (match) => match[1]
   );
   expect(blocks).toHaveLength(4);
+  const wcBlocks = blocks.filter((code) => code.includes('<proto-ui-shadcn-button>'));
+  expect(wcBlocks).toHaveLength(1);
   for (const code of blocks) {
-    expect(code).toContain('variant="ghost"');
+    if (code === wcBlocks[0]) {
+      // The public WC projection supplies typed props through setElementProps.
+      // Execute that actual snippet and inspect both calls; an attribute-string
+      // assertion cannot verify this public property API.
+      const script = code.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
+      expect(script).toBeDefined();
+      const importLine = "import { setElementProps } from '@proto.ui/adapter-web-component';";
+      expect(script).toContain(importLine);
+      const host = document.createElement('div');
+      host.innerHTML = code.replace(/<script type="module">[\s\S]*?<\/script>/, '');
+      document.body.append(host);
+      const props: Array<{ element: HTMLElement; value: unknown }> = [];
+      new Function(
+        'document',
+        'HTMLElement',
+        'CustomEvent',
+        'setElementProps',
+        script!.replace(importLine, '')
+      )(document, HTMLElement, CustomEvent, (element: HTMLElement, value: unknown) => {
+        props.push({ element, value });
+      });
+      expect(props.map(({ element }) => element.textContent)).toEqual(['Ghost', 'Disabled ghost']);
+      expect(props.map(({ value }) => value)).toEqual([
+        { styleProfile: 'rhea', variant: 'ghost', disabled: false },
+        { styleProfile: 'rhea', variant: 'ghost', disabled: true },
+      ]);
+    } else {
+      expect(code).toContain('variant="ghost"');
+    }
     expect(code).toContain('disabled');
     expect(code).toContain('Disabled ghost');
     expect(code).toContain('Enabled activations:');

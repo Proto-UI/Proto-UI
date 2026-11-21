@@ -1,0 +1,1498 @@
+{
+  "schemaVersion": 1,
+  "kind": "Historical bounded browser triage; no replacement-candidate acceptance",
+  "runId": 44930338506,
+  "headSha": "031d9b661025312244d31506758eed989cc71f94",
+  "scope": "Completed shared browser shards 3,4,6,14,15,17,18. Other shards and full workflow are not certified by this subset.",
+  "assertionBoundary": "All observed red results are retained. Failed jobs and failed assertions are not counts of distinct product defects.",
+  "sourceReports": [
+    {
+      "name": "ci-44930338506-shards-3-4-6-analysis.json",
+      "sha256": "8d2e5d6e046f546b9452d7d6048269dc7f43a05e47dbed17cd9894da8c604f1e"
+    },
+    {
+      "name": "2026-11-22-native-browser-remaining-shards-triage.json",
+      "sha256": "ae23d8abb2b16ddf4f537f870100727464d690f7487bc419ff2e7a13cb42bc54"
+    }
+  ],
+  "jobs": [
+    {
+      "shard": 3,
+      "jobId": 136925440932,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932",
+      "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+      "exitCode": 1,
+      "complete": true,
+      "jobDeadlineExpired": false,
+      "durationSeconds": 580.2,
+      "files": [
+        {
+          "path": "packages/adapters/vue/test/focus-request-readiness.browser.test.ts",
+          "status": "passed",
+          "assertions": 9
+        },
+        {
+          "path": "packages/prototypes/base/test/async-region.browser.test.ts",
+          "status": "passed",
+          "assertions": 10
+        },
+        {
+          "path": "apps/www/test/virtual-list-resize.browser.test.ts",
+          "status": "passed",
+          "assertions": 1
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "status": "failed",
+          "assertions": 80
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts",
+          "status": "passed",
+          "assertions": 2
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts",
+          "status": "passed",
+          "assertions": 1
+        }
+      ],
+      "counts": {
+        "numTotalTests": 103,
+        "numPassedTests": 83,
+        "numFailedTests": 16,
+        "numPendingTests": 4,
+        "numTodoTests": 0
+      },
+      "rawLogSha256": "55651125d14fb95aeb73764429cb6bafe2acdf7fdc181bab71199f71de2367c3",
+      "artifactId": 14718021821,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/artifacts/14718021821",
+      "artifactZipSha256": "91bcc68ec174b93722b828a49260155a563ca5cbe9afc35bb65dcb18622d1eeb",
+      "failures": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "durationMs": 23009.015013999997,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'react' retains public content and passive ownership",
+          "durationMs": 22938.392063,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'vue' retains public content and passive ownership",
+          "durationMs": 22834.224268000005,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'text'/'vue2' retains public content and passive ownership",
+          "durationMs": 22805.183510000003,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'wc' retains public content and passive ownership",
+          "durationMs": 23595.992084000012,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'react' retains public content and passive ownership",
+          "durationMs": 22981.74175700001,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'vue' retains public content and passive ownership",
+          "durationMs": 22838.239004000003,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'text'/'vue2' retains public content and passive ownership",
+          "durationMs": 22915.27054299999,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "durationMs": 23249.93764399999,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'react' retains public content and passive ownership",
+          "durationMs": 23114.376507999958,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'vue' retains public content and passive ownership",
+          "durationMs": 23124.639882999996,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'en'/'shadcn'/'surface'/'vue2' retains public content and passive ownership",
+          "durationMs": 23431.309414000018,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'wc' retains public content and passive ownership",
+          "durationMs": 23521.13201900001,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'react' retains public content and passive ownership",
+          "durationMs": 23347.174633000046,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'vue' retains public content and passive ownership",
+          "durationMs": 23146.070264999988,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "fullName": "Public passive atom documentation previews 'zh-cn'/'shadcn'/'surface'/'vue2' retains public content and passive ownership",
+          "durationMs": 22986.161162999982,
+          "failureMessageExcerpt": "page.waitForFunction: Timeout 20000ms exceeded.\n    at waitForRuntimeAt (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:680:14)\n    at Module.selectRuntime (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts:652:3)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts:210:9\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at /home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)\n    at runBaseTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/base.BZZh4cSm.js:29:3)\n    at ForksBaseWorker.executeTests (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/workers/forks.js:27:7)\n    at execute (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/worker.js:127:5)\n    at onMessage (/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/entry/process.js:39:18)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440932"
+        }
+      ]
+    },
+    {
+      "shard": 4,
+      "jobId": 136925440971,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971",
+      "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+      "exitCode": 1,
+      "complete": true,
+      "jobDeadlineExpired": false,
+      "durationSeconds": 452.05,
+      "files": [
+        {
+          "path": "packages/compiler/test/focus-scope-native.browser.test.ts",
+          "status": "passed",
+          "assertions": 22
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts",
+          "status": "passed",
+          "assertions": 8
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "status": "failed",
+          "assertions": 24
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts",
+          "status": "passed",
+          "assertions": 2
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts",
+          "status": "passed",
+          "assertions": 11
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts",
+          "status": "passed",
+          "assertions": 6
+        }
+      ],
+      "counts": {
+        "numTotalTests": 73,
+        "numPassedTests": 65,
+        "numFailedTests": 8,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "rawLogSha256": "52587e623ce125a373570d48fb1295d8e302c16edd748d35dc5dd37aaf25b9e7",
+      "artifactId": 14717961964,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/artifacts/14717961964",
+      "artifactZipSha256": "e4767046232e2801d0c86f6f018fc11d5c2d7b8e74f41e58b8fe6ef4c27d48e6",
+      "failures": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/wc/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 23973.998524,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/wc/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 23891.521032999997,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/react/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 24693.43834400001,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/react/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 25066.136281,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/vue/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 24581.276708999983,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/vue/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 24945.06433600001,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/vue2/light: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 24441.455359999993,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "fullName": "actual Bootstrap/Liquid Select input, layout and source-bound paint liquid-glass/vue2/dark: full selection flow, own toolbar, RTL portal and narrow long labels",
+          "durationMs": 24946.834352000005,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 20000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts:318:18\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440971"
+        }
+      ]
+    },
+    {
+      "shard": 6,
+      "jobId": 136925440940,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440940",
+      "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+      "exitCode": 1,
+      "complete": true,
+      "jobDeadlineExpired": false,
+      "durationSeconds": 263.71,
+      "files": [
+        {
+          "path": "packages/adapters/react/test/focus-entry-readiness.browser.test.ts",
+          "status": "passed",
+          "assertions": 9
+        },
+        {
+          "path": "apps/www/test/message-composition.browser.test.ts",
+          "status": "passed",
+          "assertions": 6
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts",
+          "status": "passed",
+          "assertions": 1
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts",
+          "status": "passed",
+          "assertions": 8
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+          "status": "failed",
+          "assertions": 10
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts",
+          "status": "passed",
+          "assertions": 6
+        }
+      ],
+      "counts": {
+        "numTotalTests": 40,
+        "numPassedTests": 39,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0
+      },
+      "rawLogSha256": "1da07fb9da9ed0fd50cf65f344e29342e1aba4546fbcd9546320c6d0e14e41a2",
+      "artifactId": 14717134046,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/artifacts/14717134046",
+      "artifactZipSha256": "15b34788cbfe6ac83886efa7c7abf3daea8b84fc84751fad36f5b863749de9b7",
+      "failures": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+          "fullName": "retains brutalist preference owners and portals through real breakpoint reconnects",
+          "durationMs": 4135.786410000001,
+          "failureMessageExcerpt": "Error: Matcher did not succeed in 1000ms\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/vi.DgezovHB.js:66:37)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts:2315:12\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at processImmediate (node:internal/timers:541:9)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11",
+          "excerptLimit": 3000,
+          "completeMessageSource": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440940"
+        }
+      ]
+    },
+    {
+      "shard": "14/18",
+      "jobId": 136925440969,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440969",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-21T17:47:01Z",
+      "completedAt": "2026-11-21T17:53:32Z",
+      "jobWallSeconds": 391.0,
+      "boundedStepWallSeconds": 372.0,
+      "vitestSeconds": 308.16,
+      "counts": {
+        "selectedSuites": 6,
+        "reportedSuites": 6,
+        "passed": 61,
+        "failed": 1,
+        "skipped": 0
+      },
+      "completeInventory": true,
+      "missingSuites": [],
+      "unexpectedSuites": [],
+      "duplicateSuites": [],
+      "execution": "reported",
+      "exitCode": 1,
+      "signal": null,
+      "parseErrors": {
+        "report": null,
+        "checkpoint": null
+      },
+      "checkpointFinished": true,
+      "unhandledErrors": [],
+      "inner900SecondTimeout": false,
+      "outerInterruption": false,
+      "timeoutEvidence": "All6 selected files have a terminal report and finished checkpoint, signal=null, exitCode=1; total bounded step duration is below900 seconds. Per-case30/60s timeouts are listed separately.",
+      "artifact": {
+        "id": 14717314299,
+        "archive": {
+          "path": "artifact-14717314299.zip",
+          "bytes": 70621566,
+          "sha256": "0f05f1f8017f3fa7ff973aaf198bebfa027b4d17b02a106fbe6cc434bc0e1b1c"
+        }
+      },
+      "rawLog": {
+        "path": "job-136925440969.log",
+        "bytes": 102149,
+        "sha256": "9057dd980a05d6d2dc1e83f20179e3b392a0acdcb6a9aa6184fc3928d335c2ed"
+      },
+      "suites": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts",
+          "status": "passed",
+          "durationMs": 19097.371337890625,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts",
+          "status": "passed",
+          "durationMs": 65948.26904296875,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+          "status": "passed",
+          "durationMs": 30174.4892578125,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+          "status": "failed",
+          "durationMs": 33176.64013671875,
+          "passed": 0,
+          "failed": 1,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts",
+          "status": "passed",
+          "durationMs": 15871.688232421875,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts",
+          "status": "passed",
+          "durationMs": 129942.02661132812,
+          "passed": 33,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "failures": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+          "fullName": "S4: compositor never repaints a closed Dialog after settings changes",
+          "durationMs": 33176.640224,
+          "failureMessageHead": "AssertionError [ERR_ASSERTION]: open Dialog paint marker",
+          "fullFailureEvidence": "artifact-14717314299/result-browser-14-of-18.json",
+          "triage": {
+            "category": "positive-paint-control-failure-unresolved",
+            "failedBoundary": "scripts/analysis/shadow-s4-paint-browser.mjs:114 open Dialog paint marker assertion",
+            "finding": "Open-state positive paint marker did not meet its >=4-pixel requirement.",
+            "productConclusion": "The later closed-Dialog repaint claim was not established. No separate paint screenshot/marker JSON was found in this artifact."
+          }
+        }
+      ],
+      "source": {
+        "before": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "after": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "shard": "15/18",
+      "jobId": 136925440972,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440972",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-21T17:49:05Z",
+      "completedAt": "2026-11-21T18:01:05Z",
+      "jobWallSeconds": 720.0,
+      "boundedStepWallSeconds": 695.0,
+      "vitestSeconds": 583.17,
+      "counts": {
+        "selectedSuites": 6,
+        "reportedSuites": 6,
+        "passed": 83,
+        "failed": 3,
+        "skipped": 0
+      },
+      "completeInventory": true,
+      "missingSuites": [],
+      "unexpectedSuites": [],
+      "duplicateSuites": [],
+      "execution": "reported",
+      "exitCode": 1,
+      "signal": null,
+      "parseErrors": {
+        "report": null,
+        "checkpoint": null
+      },
+      "checkpointFinished": true,
+      "unhandledErrors": [],
+      "inner900SecondTimeout": false,
+      "outerInterruption": false,
+      "timeoutEvidence": "All6 selected files have a terminal report and finished checkpoint, signal=null, exitCode=1; total bounded step duration is below900 seconds. Per-case30/60s timeouts are listed separately.",
+      "artifact": {
+        "id": 14718293071,
+        "archive": {
+          "path": "artifact-14718293071.zip",
+          "bytes": 10489796,
+          "sha256": "b8320ff89ef24e0a177ac1f28aae14922f39a85f21acc99a4b82d36b3b6465bd"
+        }
+      },
+      "rawLog": {
+        "path": "job-136925440972.log",
+        "bytes": 368738,
+        "sha256": "e6ca51a217908858fd03218391085287b64b237172752e4e0da9d71563f4cf3d"
+      },
+      "suites": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts",
+          "status": "passed",
+          "durationMs": 90129.02294921875,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+          "status": "passed",
+          "durationMs": 21459.885986328125,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+          "status": "failed",
+          "durationMs": 212827.60009765625,
+          "passed": 54,
+          "failed": 1,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+          "status": "passed",
+          "durationMs": 40944.95849609375,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+          "status": "failed",
+          "durationMs": 147128.14282226562,
+          "passed": 0,
+          "failed": 2,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts",
+          "status": "passed",
+          "durationMs": 58816.006103515625,
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "failures": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+          "fullName": "Liquid portal container diagnostics (observation, not guard relaxation) measures the actual docs-shell fixed point with a disposable containment handover",
+          "durationMs": 10110.591660000002,
+          "failureMessageHead": "AssertionError: expected 'row' to be 'column' // Object.is equality",
+          "fullFailureEvidence": "artifact-14718293071/result-browser-15-of-18.json",
+          "triage": {
+            "category": "css-container-predicate-oracle-mismatch-unresolved",
+            "failedBoundary": "baseline.css.columnsDirection assertion at line 686",
+            "finding": "At 1440px with rootFont=32, recorded contentWidth=1376 < threshold=2112 and mediaMatches=true, but computed flex direction is row where oracle expects column.",
+            "productConclusion": "CSS behavior versus test predicate/coordinate assumptions needs review; do not change row/column acceptance from this observation alone."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+          "fullName": "S4 complete public Dialog settings zh-cn: native Light/split/mixed acceptance",
+          "durationMs": 73007.902029,
+          "failureMessageHead": "page.waitForFunction: Timeout 60000ms exceeded.",
+          "fullFailureEvidence": "artifact-14718293071/result-browser-15-of-18.json",
+          "triage": {
+            "category": "public-previewer-startup-blocker-unresolved",
+            "failedBoundary": "60-second observeS4Startup wait, before Light/split/mixed journey",
+            "finding": "1268 previewers; first base Accordion WC owner stays data-mounting=1 and data-inited absent. Browser page/console errors are empty; retained mutation observation reaches its own 128-entry cap.",
+            "productConclusion": "Mount scheduling/product/readiness assumptions remain to be isolated. This is not the shard 900-second timeout and is not evidence that all later settings assertions failed."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+          "fullName": "S4 complete public Dialog settings en: native Light/split/mixed acceptance",
+          "durationMs": 74120.142798,
+          "failureMessageHead": "page.waitForFunction: Timeout 60000ms exceeded.",
+          "fullFailureEvidence": "artifact-14718293071/result-browser-15-of-18.json",
+          "triage": {
+            "category": "public-previewer-startup-blocker-unresolved",
+            "failedBoundary": "60-second observeS4Startup wait, before Light/split/mixed journey",
+            "finding": "1268 previewers; first base Accordion WC owner stays data-mounting=1 and data-inited absent. Browser page/console errors are empty; retained mutation observation reaches its own 128-entry cap.",
+            "productConclusion": "Mount scheduling/product/readiness assumptions remain to be isolated. This is not the shard 900-second timeout and is not evidence that all later settings assertions failed."
+          }
+        }
+      ],
+      "source": {
+        "before": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "after": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "shard": "17/18",
+      "jobId": 136925441924,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925441924",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-21T17:50:01Z",
+      "completedAt": "2026-11-21T18:00:05Z",
+      "jobWallSeconds": 604.0,
+      "boundedStepWallSeconds": 571.0,
+      "vitestSeconds": 502.37,
+      "counts": {
+        "selectedSuites": 6,
+        "reportedSuites": 6,
+        "passed": 79,
+        "failed": 9,
+        "skipped": 0
+      },
+      "completeInventory": true,
+      "missingSuites": [],
+      "unexpectedSuites": [],
+      "duplicateSuites": [],
+      "execution": "reported",
+      "exitCode": 1,
+      "signal": null,
+      "parseErrors": {
+        "report": null,
+        "checkpoint": null
+      },
+      "checkpointFinished": true,
+      "unhandledErrors": [],
+      "inner900SecondTimeout": false,
+      "outerInterruption": false,
+      "timeoutEvidence": "All6 selected files have a terminal report and finished checkpoint, signal=null, exitCode=1; total bounded step duration is below900 seconds. Per-case30/60s timeouts are listed separately.",
+      "artifact": {
+        "id": 14717569526,
+        "archive": {
+          "path": "artifact-14717569526.zip",
+          "bytes": 45399655,
+          "sha256": "e866c8bb5fbe9ef74d888362213494510f8da4d2a2dfc55e038ab515ec1d2f21"
+        }
+      },
+      "rawLog": {
+        "path": "job-136925441924.log",
+        "bytes": 106813,
+        "sha256": "12ea7508850c8f648b0b449dd864b56c150a62cbd55ce587a62a2ece48ebddb2"
+      },
+      "suites": [
+        {
+          "path": "apps/www/test/color-scheme.browser.test.ts",
+          "status": "passed",
+          "durationMs": 25332.0595703125,
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+          "status": "failed",
+          "durationMs": 45557.09716796875,
+          "passed": 5,
+          "failed": 1,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts",
+          "status": "passed",
+          "durationMs": 50606.806884765625,
+          "passed": 17,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts",
+          "status": "passed",
+          "durationMs": 127949.919921875,
+          "passed": 32,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+          "status": "passed",
+          "durationMs": 80630.78540039062,
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "status": "failed",
+          "durationMs": 164667.1865234375,
+          "passed": 8,
+          "failed": 8,
+          "skipped": 0
+        }
+      ],
+      "failures": [
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+          "fullName": "chains reverse wheel from an independently located real short PRE to the document",
+          "durationMs": 12252.868472999999,
+          "failureMessageHead": "AssertionError: expected 785 to be less than 285",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "same-page-policy-reversal-failure-unresolved",
+            "failedBoundary": "verifyPassiveCausality product-auto stage after contain-negative, line 546",
+            "finding": "After in-page contain->auto restoration, final document scrollY stays 785 rather than <285. Independent fresh product-auto page moves 785->0 and fresh contain page stays785; original product stage also moved to0.",
+            "productConclusion": "Failure is specific to the policy reversal sequence, not evidence that every unmodified product wheel chain fails. Browser gesture/scroll-node invalidation versus fixture assumptions is unresolved; original strict assertion remains red.",
+            "historicalCoordinateDebt": "Historical (700,550) probe hits DIV, not the prior short PRE; artifact explicitly says not reproduced/fullIssueAcceptance=false."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "wc/ltr: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 5282.688834,
+          "failureMessageHead": "AssertionError: expected 48 to be less than or equal to 1",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "anchored-position-following-product-candidate",
+            "failedBoundary": "bottom/top gap must equal4px within1px, line268",
+            "finding": "nested-after: ancestor scrollTop48 moves anchor top803.25->755.25, floating top stays847.25; bottomGap becomes52, exactly48px over4. Common in WC LTR/RTL and React/Vue/Vue2 LTR.",
+            "productConclusion": "Retained snapshots support missing position follow/update on this dynamic ancestor-scroll setup. Need isolate dynamically introduced scroll-container observation versus product contract; no tolerance change."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "wc/rtl: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 5131.052435,
+          "failureMessageHead": "AssertionError: expected 48 to be less than or equal to 1",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "anchored-position-following-product-candidate",
+            "failedBoundary": "bottom/top gap must equal4px within1px, line268",
+            "finding": "nested-after: ancestor scrollTop48 moves anchor top803.25->755.25, floating top stays847.25; bottomGap becomes52, exactly48px over4. Common in WC LTR/RTL and React/Vue/Vue2 LTR.",
+            "productConclusion": "Retained snapshots support missing position follow/update on this dynamic ancestor-scroll setup. Need isolate dynamically introduced scroll-container observation versus product contract; no tolerance change."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "react/ltr: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 5529.786967999997,
+          "failureMessageHead": "AssertionError: expected 48 to be less than or equal to 1",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "anchored-position-following-product-candidate",
+            "failedBoundary": "bottom/top gap must equal4px within1px, line268",
+            "finding": "nested-after: ancestor scrollTop48 moves anchor top803.25->755.25, floating top stays847.25; bottomGap becomes52, exactly48px over4. Common in WC LTR/RTL and React/Vue/Vue2 LTR.",
+            "productConclusion": "Retained snapshots support missing position follow/update on this dynamic ancestor-scroll setup. Need isolate dynamically introduced scroll-container observation versus product contract; no tolerance change."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "react/rtl: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 32636.497762000003,
+          "failureMessageHead": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[id=\"pui-select-3-content\"]').getByRole('option', { name: 'Brutalist', exact: true })\n",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "rtl-theme-selection-readiness-unresolved",
+            "failedBoundary": "selectBrutalist waits for Brutalist option in pui-select-3-content at line 103",
+            "finding": "React, Vue and Vue2 RTL cases time out before the geometry observations.",
+            "productConclusion": "These three cases do not prove the same 48px geometry defect as the other five."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "vue/ltr: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 4900.841652999996,
+          "failureMessageHead": "AssertionError: expected 48 to be less than or equal to 1",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "anchored-position-following-product-candidate",
+            "failedBoundary": "bottom/top gap must equal4px within1px, line268",
+            "finding": "nested-after: ancestor scrollTop48 moves anchor top803.25->755.25, floating top stays847.25; bottomGap becomes52, exactly48px over4. Common in WC LTR/RTL and React/Vue/Vue2 LTR.",
+            "productConclusion": "Retained snapshots support missing position follow/update on this dynamic ancestor-scroll setup. Need isolate dynamically introduced scroll-container observation versus product contract; no tolerance change."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "vue/rtl: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 32300.49375200001,
+          "failureMessageHead": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[id=\"pui-select-3-content\"]').getByRole('option', { name: 'Brutalist', exact: true })\n",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "rtl-theme-selection-readiness-unresolved",
+            "failedBoundary": "selectBrutalist waits for Brutalist option in pui-select-3-content at line 103",
+            "finding": "React, Vue and Vue2 RTL cases time out before the geometry observations.",
+            "productConclusion": "These three cases do not prove the same 48px geometry defect as the other five."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "vue2/ltr: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 5010.388599000013,
+          "failureMessageHead": "AssertionError: expected 48 to be less than or equal to 1",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "anchored-position-following-product-candidate",
+            "failedBoundary": "bottom/top gap must equal4px within1px, line268",
+            "finding": "nested-after: ancestor scrollTop48 moves anchor top803.25->755.25, floating top stays847.25; bottomGap becomes52, exactly48px over4. Common in WC LTR/RTL and React/Vue/Vue2 LTR.",
+            "productConclusion": "Retained snapshots support missing position follow/update on this dynamic ancestor-scroll setup. Need isolate dynamically introduced scroll-container observation versus product contract; no tolerance change."
+          }
+        },
+        {
+          "suite": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "fullName": "vue2/rtl: Brutalist popper Select tracks scrollbar geometry",
+          "durationMs": 32345.223966999984,
+          "failureMessageHead": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[id=\"pui-select-3-content\"]').getByRole('option', { name: 'Brutalist', exact: true })\n",
+          "fullFailureEvidence": "artifact-14717569526/result-browser-17-of-18.json",
+          "triage": {
+            "category": "rtl-theme-selection-readiness-unresolved",
+            "failedBoundary": "selectBrutalist waits for Brutalist option in pui-select-3-content at line 103",
+            "finding": "React, Vue and Vue2 RTL cases time out before the geometry observations.",
+            "productConclusion": "These three cases do not prove the same 48px geometry defect as the other five."
+          }
+        }
+      ],
+      "source": {
+        "before": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "after": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "shard": "18/18",
+      "jobId": 136925441899,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925441899",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-21T17:54:42Z",
+      "completedAt": "2026-11-21T18:03:33Z",
+      "jobWallSeconds": 531.0,
+      "boundedStepWallSeconds": 507.0,
+      "vitestSeconds": 397.12,
+      "counts": {
+        "selectedSuites": 6,
+        "reportedSuites": 6,
+        "passed": 86,
+        "failed": 4,
+        "skipped": 0
+      },
+      "completeInventory": true,
+      "missingSuites": [],
+      "unexpectedSuites": [],
+      "duplicateSuites": [],
+      "execution": "reported",
+      "exitCode": 1,
+      "signal": null,
+      "parseErrors": {
+        "report": null,
+        "checkpoint": null
+      },
+      "checkpointFinished": true,
+      "unhandledErrors": [],
+      "inner900SecondTimeout": false,
+      "outerInterruption": false,
+      "timeoutEvidence": "All6 selected files have a terminal report and finished checkpoint, signal=null, exitCode=1; total bounded step duration is below900 seconds. Per-case30/60s timeouts are listed separately.",
+      "artifact": {
+        "id": 14718735871,
+        "archive": {
+          "path": "artifact-14718735871.zip",
+          "bytes": 4381857,
+          "sha256": "61663aeec37f073fd2a732e28ed8bca577086ecec316cc7a7b40724525cc3765"
+        }
+      },
+      "rawLog": {
+        "path": "job-136925441899.log",
+        "bytes": 154661,
+        "sha256": "e52038507c56177ba5967c8d45b41ad1654bc96d27e9fd706deee2e82e6c4de9"
+      },
+      "suites": [
+        {
+          "path": "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts",
+          "status": "passed",
+          "durationMs": 3.417236328125,
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+          "status": "failed",
+          "durationMs": 12226.172119140625,
+          "passed": 5,
+          "failed": 2,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/components/documentation-image-preview.browser.test.ts",
+          "status": "failed",
+          "durationMs": 148085.59716796875,
+          "passed": 22,
+          "failed": 2,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+          "status": "passed",
+          "durationMs": 43041.87548828125,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+          "status": "passed",
+          "durationMs": 139656.81494140625,
+          "passed": 36,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts",
+          "status": "passed",
+          "durationMs": 39528.69921875,
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "failures": [
+        {
+          "suite": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+          "fullName": "public www Drawer cold-entry diagnostic animates the public cold entry with measured intrinsic geometry (fixed control=false)",
+          "durationMs": 3024.615740000001,
+          "failureMessageHead": "page.evaluate: Error: [PrototypePreviewer] 未找到原型 \"shadcn-button\"。\n已注册的原型: shadcn-style-scope, shadcn-drawer-root, shadcn-drawer-close, shadcn-drawer-content, shadcn-drawer-description, shadcn-drawer-footer, shadcn-drawer-handle, shadcn-drawer-header, shadcn-drawer-mask, shadcn-drawer-title, shadcn-drawer-trigger\n提示: 请确保在客户端调用 registerPrototype() 之后再使用。",
+          "fullFailureEvidence": "artifact-14718735871/result-browser-18-of-18.json",
+          "triage": {
+            "category": "confirmed-fixture-dependency-drift",
+            "failedBoundary": "renderDemoWc prototype registry admission, before cold-entry readiness/input/frame sampling",
+            "finding": "Actual public DemoSpec includes shadcn-button in Trigger and Close; the isolated fixture registers style-scope and Drawer family only.",
+            "productConclusion": "No intrinsic geometry or motion verdict from these two cases.",
+            "repair": "Explicit Button registration and finite Button/style-scope CSS source closure in the diagnostic fixture; preserve the missing-scope countercontrol, all browser geometry assertions and native timing bounds."
+          }
+        },
+        {
+          "suite": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+          "fullName": "public www Drawer cold-entry diagnostic animates the public cold entry with measured intrinsic geometry (fixed control=true)",
+          "durationMs": 2766.1721500000003,
+          "failureMessageHead": "page.evaluate: Error: [PrototypePreviewer] 未找到原型 \"shadcn-button\"。\n已注册的原型: shadcn-style-scope, shadcn-drawer-root, shadcn-drawer-close, shadcn-drawer-content, shadcn-drawer-description, shadcn-drawer-footer, shadcn-drawer-handle, shadcn-drawer-header, shadcn-drawer-mask, shadcn-drawer-title, shadcn-drawer-trigger\n提示: 请确保在客户端调用 registerPrototype() 之后再使用。",
+          "fullFailureEvidence": "artifact-14718735871/result-browser-18-of-18.json",
+          "triage": {
+            "category": "confirmed-fixture-dependency-drift",
+            "failedBoundary": "renderDemoWc prototype registry admission, before cold-entry readiness/input/frame sampling",
+            "finding": "Actual public DemoSpec includes shadcn-button in Trigger and Close; the isolated fixture registers style-scope and Drawer family only.",
+            "productConclusion": "No intrinsic geometry or motion verdict from these two cases.",
+            "repair": "Explicit Button registration and finite Button/style-scope CSS source closure in the diagnostic fixture; preserve the missing-scope countercontrol, all browser geometry assertions and native timing bounds."
+          }
+        },
+        {
+          "suite": "apps/www/src/components/documentation-image-preview.browser.test.ts",
+          "fullName": "automatic documentation image preview in real Chromium 390px real intermediate frames follow linear forward/reverse motion",
+          "durationMs": 32096.152216000002,
+          "failureMessageHead": "page.waitForFunction: Timeout 30000ms exceeded.",
+          "fullFailureEvidence": "artifact-14718735871/result-browser-18-of-18.json",
+          "triage": {
+            "category": "intermediate-observation-wait-unresolved",
+            "failedBoundary": "30-second wait at line 373 for scrim opacity strictly between 0.1 and 0.8 after awaited trigger.click()",
+            "finding": "Both viewport cases failed before subsequent linear forward/reverse assertions.",
+            "productConclusion": "No proof that the product animation is nonlinear. Missing a transient interval after click completion is a hypothesis; no failure-frame journal was found in this artifact.",
+            "nextEvidence": "Inspect the pre-input motion recorder on a native rerun and retain original motion thresholds."
+          }
+        },
+        {
+          "suite": "apps/www/src/components/documentation-image-preview.browser.test.ts",
+          "fullName": "automatic documentation image preview in real Chromium 1280px real intermediate frames follow linear forward/reverse motion",
+          "durationMs": 32194.145002999998,
+          "failureMessageHead": "page.waitForFunction: Timeout 30000ms exceeded.",
+          "fullFailureEvidence": "artifact-14718735871/result-browser-18-of-18.json",
+          "triage": {
+            "category": "intermediate-observation-wait-unresolved",
+            "failedBoundary": "30-second wait at line 373 for scrim opacity strictly between 0.1 and 0.8 after awaited trigger.click()",
+            "finding": "Both viewport cases failed before subsequent linear forward/reverse assertions.",
+            "productConclusion": "No proof that the product animation is nonlinear. Missing a transient interval after click completion is a hypothesis; no failure-frame journal was found in this artifact.",
+            "nextEvidence": "Inspect the pre-input motion recorder on a native rerun and retain original motion thresholds."
+          }
+        }
+      ],
+      "source": {
+        "before": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "after": {
+          "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+          "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+          "dirty": false,
+          "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "findingsFirstThree": [
+    {
+      "shard": 3,
+      "classification": "confirmed fixture inventory drift",
+      "failingAssertions": 16,
+      "evidence": [
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-surface-react-failure.json",
+          "route": "/en/ui-libraries/shadcn/surface/",
+          "runtime": "react",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [3134.5],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-surface-vue-failure.json",
+          "route": "/en/ui-libraries/shadcn/surface/",
+          "runtime": "vue",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [3085.2000000000116],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-surface-vue2-failure.json",
+          "route": "/en/ui-libraries/shadcn/surface/",
+          "runtime": "vue2",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [3225.4000000000233],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-surface-wc-failure.json",
+          "route": "/en/ui-libraries/shadcn/surface/",
+          "runtime": "wc",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2442.6999999999534, 2442.6999999999534],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-text-react-failure.json",
+          "route": "/en/ui-libraries/shadcn/text/",
+          "runtime": "react",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2846.5],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-text-vue-failure.json",
+          "route": "/en/ui-libraries/shadcn/text/",
+          "runtime": "vue",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2648.6999999999825],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-text-vue2-failure.json",
+          "route": "/en/ui-libraries/shadcn/text/",
+          "runtime": "vue2",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2569.8000000000175],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/en-shadcn-text-wc-failure.json",
+          "route": "/en/ui-libraries/shadcn/text/",
+          "runtime": "wc",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2304.399999999994, 2304.399999999994],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-surface-react-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/surface/",
+          "runtime": "react",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [3339.20000000007],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-surface-vue-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/surface/",
+          "runtime": "vue",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [3102.9000000000233],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-surface-vue2-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/surface/",
+          "runtime": "vue2",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2890.79999999993],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-surface-wc-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/surface/",
+          "runtime": "wc",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2731.9000000000233, 2732.0999999999767],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-text-react-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/text/",
+          "runtime": "react",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2943.899999999965],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-text-vue-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/text/",
+          "runtime": "vue",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2673.2999999999884],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-text-vue2-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/text/",
+          "runtime": "vue2",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2726.7000000000116],
+          "pageErrors": []
+        },
+        {
+          "receipt": "ci-44930338506-browser-3/passive-atom-docs/031d9b661025-2026-11-21T17-32-21.436Z-2964/zh-cn-shadcn-text-wc-failure.json",
+          "route": "/zh-cn/ui-libraries/shadcn/text/",
+          "runtime": "wc",
+          "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+          "sourceDirty": false,
+          "activeSlots": 1,
+          "prototypeCount": 5,
+          "matchingReadyEventsPageMs": [2917.5999999999767, 2917.7000000000116],
+          "pageErrors": []
+        }
+      ],
+      "rootCause": "Both Shadcn atom DemoSpecs use withShadcnRheaDemo, adding one flow-neutral shadcn-style-scope around the original four atoms. waitForRuntimeAt counts all data-pui-root descendants and the test still requests four. All sixteen receipts prove a single active matching runtime with five prototype hosts and no page errors within about 2.3-3.34 seconds. The 20-second timeout is an impossible inventory predicate, not a failure to mount.",
+      "correction": "Require the exact five-host inventory for Shadcn; independently prove one outer contents scope that remains passive and flow-neutral and contains all four samples. Run all original four-sample content, geometry, ownership and typography assertions unchanged. Never accept an arbitrary fifth atom or loosen the count."
+    },
+    {
+      "shard": 4,
+      "classification": "confirmed wrong material owner in fixture assertion; actual Surface optics remain unverified",
+      "failingAssertions": 8,
+      "rootCause": "popup() returns the Content by the trigger aria-controls relationship. The complete Liquid recipe deliberately makes Content a transparent listbox/portal frame, while the unique uncontrolledSurface declares and consumes the material slot. The test polls data-material-quality on Content and always reads null in all four runtimes and both themes.",
+      "correction": "Keep the Content role and portal-stage relationship, require exactly one named uncontrolledSurface with the Liquid Surface prototype, and apply the unchanged self-optical/20-second and owner-stage assertions to that Surface. Keep the trigger self-optical assertion and all later interactions unchanged. Correcting the target does not establish that the actual Surface currently passes.",
+      "diagnosticGap": {
+        "missingEnv": "PROTO_UI_SELECT_SCREENSHOT_DIR",
+        "recommendedValue": "$PROTO_UI_RUNTIME_EVIDENCE_DIR/select-draft-projections",
+        "effect": "Existing failure collector returns immediately without this variable; artifact 4 contains no Select material/stage failure receipts. Wiring the directory preserves the original assertion and provides read-only failure state."
+      }
+    },
+    {
+      "shard": 6,
+      "classification": "real 1-second polling deadline failure with late original query execution; underlying scheduling cause unresolved",
+      "failingAssertions": 1,
+      "familyCommitTiming": {
+        "clock": "Node performance.now() milliseconds",
+        "timeOrigin": 1795282315580.756,
+        "startedMs": 174231.258102,
+        "finishedMs": 175232.341071,
+        "outcome": "rejected",
+        "totalCalls": 2,
+        "droppedCalls": 0,
+        "observerError": false,
+        "calls": [
+          {
+            "call": 1,
+            "startedMs": 174231.58216,
+            "returnedMs": 174365.97511,
+            "value": "shadcn"
+          },
+          {
+            "call": 2,
+            "startedMs": 174416.515458,
+            "returnedMs": 175384.768969,
+            "value": "brutalist"
+          }
+        ],
+        "rejectionSnapshot": [
+          {
+            "call": 1,
+            "startedMs": 174231.58216,
+            "returnedMs": 174365.97511,
+            "value": "shadcn"
+          },
+          {
+            "call": 2,
+            "startedMs": 174416.515458
+          }
+        ]
+      },
+      "writerFacts": {
+        "timeOrigin": 1795282487300.2,
+        "collectedTimeOrigin": 1795282487300.2,
+        "setupPageMs": 2077.2000000000116,
+        "collectedPageMs": 3719.600000000035,
+        "initialValue": "shadcn",
+        "deliveries": [
+          {
+            "deliveredMs": 3324.8000000000466,
+            "oldValues": ["shadcn"],
+            "currentValueAtDelivery": "brutalist",
+            "connected": true
+          }
+        ],
+        "pendingOldValues": [],
+        "pendingDroppedRecords": 0,
+        "currentValueAtCollection": "brutalist",
+        "currentRootSame": true,
+        "connected": true,
+        "droppedRecords": 0,
+        "observerError": null,
+        "writes": [
+          {
+            "startedMs": 3169.8000000000466,
+            "finishedMs": 3169.9000000000233,
+            "previous": "shadcn",
+            "current": "brutalist",
+            "returned": true
+          }
+        ],
+        "droppedWrites": 0,
+        "writerObserverError": false,
+        "datasetRestored": true
+      },
+      "postPollCalibrationNodeMinusPageMs": [171718.808436, 171719.70634199996],
+      "estimatedWriterCompletionAfterPollStartMs": [657.4503340000228, 658.3482399999921],
+      "queryVerdict": {
+        "outcome": "rejected",
+        "nodeMs": 175232.341071,
+        "frozenAtMs": 175232.73759
+      },
+      "pendingAtVerdict": [
+        {
+          "call": 2,
+          "startedMs": 174416.515458
+        }
+      ],
+      "drain": {
+        "startedMs": 175232.961287,
+        "finishedMs": 175385.124582,
+        "drainedReferences": 2,
+        "budgetMs": 1000,
+        "budgetExpired": false,
+        "pendingAtDrainEndCount": 0,
+        "pendingAtDrainEnd": [],
+        "droppedPendingAtDrainEndRows": 0,
+        "displayedOutcomes": [
+          {
+            "call": 1,
+            "status": "fulfilled",
+            "value": "shadcn",
+            "batchObservedAtMs": 175384.974844
+          },
+          {
+            "call": 2,
+            "status": "fulfilled",
+            "value": "brutalist",
+            "batchObservedAtMs": 175384.974844
+          }
+        ],
+        "droppedOutcomeRows": 0,
+        "completeAtDrainPoint": true
+      },
+      "utilityReads": [
+        {
+          "ordinal": 1,
+          "beforeMs": 2644.8000000000466,
+          "afterMs": 2644.8000000000466,
+          "value": "shadcn",
+          "outcome": "returned"
+        },
+        {
+          "ordinal": 2,
+          "beforeMs": 3663.8000000000466,
+          "afterMs": 3663.8000000000466,
+          "value": "brutalist",
+          "outcome": "returned"
+        }
+      ],
+      "sdkBoundary": {
+        "evaluatorGuardPasses": 2,
+        "evaluatorGuardFailures": 0,
+        "mappingCompleteAtSnapshot": true,
+        "extraQueryOrRPC": false,
+        "transportComplete": false,
+        "clockTickLengthMeasured": false,
+        "errors": []
+      },
+      "subsequentFailureState": {
+        "headerRuntimeState": "ready",
+        "family": "brutalist",
+        "transaction": {
+          "selection": {
+            "runtimeId": "wc",
+            "projectionFamilyId": "brutalist"
+          },
+          "generation": 2,
+          "phase": "ready"
+        },
+        "pageErrors": [],
+        "consoleErrors": []
+      },
+      "interpretation": "At rejection, original query 2 was still pending; it later returns brutalist about 152 ms after the 1 s verdict without issuing a replacement query. Source-bound browser writer facts and post-poll clock brackets place the family attribute commit about 658 ms after poll start. Browser-side query 2 executes after the deadline; its selector/getter itself takes under 1 ms, while dispatch-to-response spans about 966 ms. The missing browser arrival observation and unmeasured clock ticks prevent assigning the full delay specifically to transport, renderer load, observer overhead or machine speed. Final state is ready/brutalist with no page error, but downstream breakpoint ownership assertions never ran.",
+      "correction": "No timeout increase, retry, skip or state-assertion replacement is justified by this receipt. Retain the failure and profile the native dispatch-to-browser scheduling interval on the next source-bound run."
+    }
+  ],
+  "sourceReferences": [
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/components/PrototypePreviewer/registry.ts",
+      "gitBlob": "8ce4c248ffa5afbf64bbbdbd05f0a09693fde891",
+      "sha256": "d4719840fd5a8a0d036c66d079494bb8c7306df571769531323210aca08445c9"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/components/documentation-image-preview.browser.test.ts",
+      "gitBlob": "c19e1ebaa267815a52705949a156aeb1443e787d",
+      "sha256": "e70d47b182bf2a39823466c8256663438f8da89760c55097da199a90748d8318"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts",
+      "gitBlob": "63cff919eb707760782cc193d57598896c84fe32",
+      "sha256": "144be637bc412b93e1b4cd4ebde362b696f84fdb8768941c98721c9be3399051"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+      "gitBlob": "f92a0b05edee0ad55f595cd584814b8c98e2cc8e",
+      "sha256": "7325bf1c52fc2abcea3f6c4799941c578ce49969dad95a4ab5602006401c9980"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+      "gitBlob": "a189a6a8fe860dd14d474b415686e4ba523fdee0",
+      "sha256": "3913100f3c56c41a7011b116e742c57fe0ad05efd02be19ac16587277102767e"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+      "gitBlob": "bc0c9631402637ed3840db7da382d33bc95d8096",
+      "sha256": "afcd49f20afd342823510d125811ac600b7e337662140d24a7dcb6e99faf169f"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+      "gitBlob": "2953f82547685b1dd5f99129833bf76163190649",
+      "sha256": "e6590db342bddc56b37fa367ce6b1cc519130cdb201e06e8d14061569d5e0317"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+      "gitBlob": "37a96bc9accac6ccc70d31aabd2db13c877c66a3",
+      "sha256": "8fc15390ec8f76550295533217d918762854c435acc3c93afde7a95d59aaa7ae"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "gitBlob": "13004388833cec31de3c6225dcc22659279585b5",
+      "sha256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+      "gitBlob": "9b848c749fb4dda4ce425045cf2ce8533fb3f88f",
+      "sha256": "31d9b18a5a84458478eeb9e8f46a490dbd7e97a136ac6f2a924f81e83114d682"
+    },
+    {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "path": "scripts/analysis/shadow-s4-paint-browser.mjs",
+      "gitBlob": "d9df22a3a508fddd86b5dcda0dc9db4bfd22b4d6",
+      "sha256": "a6708bf8e0b6e41d3239d6d61538ef4accbc9951e32accea0cfee808ed3c5240"
+    }
+  ],
+  "evidenceLimits": [
+    "This triage covers only four browser shards; do not extrapolate the aggregate to the full workflow.",
+    "No native browser or heavy local rerun was performed during triage.",
+    "Artifact18 contains terminal failure stacks but no Drawer public diagnostic JSON/frame files and no image-preview motion recorder output.",
+    "Artifact14 contains the terminal open-Dialog paint failure but no separate paint marker screenshot/JSON.",
+    "S4 predicate journal is complete for its own bounded collection; mutation journal stopped at128 emitted records and skipped many records.",
+    "Fresh static wheel controls and the failing same-page reversal are distinct observations; fullIssueAcceptance remainsfalse.",
+    "Confirmed local repairs cover fixture Button admission and its emitted physical-style token closure. Product motion/geometry still requires exact final-candidate Chromium evidence."
+  ]
+}

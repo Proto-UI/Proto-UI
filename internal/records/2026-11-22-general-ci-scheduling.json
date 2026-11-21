@@ -1,0 +1,1064 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T18:29:31.504009+00:00",
+  "kind": "bounded general scheduling repair; historical cancelled receipt and complete red inventory preserved",
+  "workingBase": "b418cf0d1b32bd918364b5a22e1d723394a95a47",
+  "workingTreeDirty": true,
+  "native": {
+    "runId": 44930338506,
+    "jobId": 136925440826,
+    "candidate": "031d9b661025312244d31506758eed989cc71f94",
+    "jobURL": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440826",
+    "receipt": {
+      "schemaVersion": 1,
+      "slot": "general",
+      "outcome": "cancelled",
+      "runId": "44930338506",
+      "attempt": 1,
+      "eventSha": "031d9b661025312244d31506758eed989cc71f94",
+      "checkoutSha": "031d9b661025312244d31506758eed989cc71f94"
+    },
+    "artifacts": [
+      {
+        "id": 14717626643,
+        "role": "complete original inventory plan",
+        "bytes": 29659,
+        "sha256": "a651a2f31957ffdd2a2cee64bed1b5be258a9259078340757d687eba207e13b9"
+      },
+      {
+        "id": 14718479816,
+        "role": "general command logs and complete red runtime evidence",
+        "bytes": 10306566,
+        "sha256": "c9e7d92364e3a50b9a949d812d76cb32a28dd2ae5cadea01726e14ed51ffd683"
+      }
+    ],
+    "retainedFiles": [
+      {
+        "path": "general-plan.json",
+        "bytes": 3729,
+        "sha256": "71497c856cc0ea9241853f594a4ec595a0e0e3b2f695f842c75d051314f932e0"
+      },
+      {
+        "path": "general-checks.json",
+        "bytes": 8363,
+        "sha256": "001ae4fe53173019491880290090a604503aa59c6f6f1244477646f979c735ef"
+      },
+      {
+        "path": "general-progress.json",
+        "bytes": 8713,
+        "sha256": "8f8086f3ea648e3146986440ef10e471e66d4d777040476332116d1cca0bebc7"
+      },
+      {
+        "path": "general.log",
+        "bytes": 9014005,
+        "sha256": "ae9147763c60444f86f3dffdcca4bd36a041da3587d12209dfbf273c930a4391"
+      },
+      {
+        "path": "selection-general.json",
+        "bytes": 121050,
+        "sha256": "4f87ad739c76bf85a2430481b5c3bde9c4dd509adc99ec61d0da6deba2725c91"
+      },
+      {
+        "path": "vitest-general.json",
+        "bytes": 9824077,
+        "sha256": "4f515f2a6aa4dafa7f97b35c565ee04a1217482d7d86d62e04dcbd8bdd847ac3"
+      },
+      {
+        "path": "progress-general.json",
+        "bytes": 11803711,
+        "sha256": "3ab0890247176d3236d78d8211f482cb5909ecbe665a0e35e919d768b385d029"
+      },
+      {
+        "path": "progress-general.json.events.jsonl",
+        "bytes": 11172647,
+        "sha256": "22d17c67927714f20a925b8cbfacece4d6687c3e6b6ce95aab09130f500b7ea3"
+      },
+      {
+        "path": "observation-general.json",
+        "bytes": 19601808,
+        "sha256": "8f65d052182813c72f7a83078377a9f7fda18f19533b4988edae7acc1d72dfee"
+      },
+      {
+        "path": "receipt.json",
+        "bytes": 13808230,
+        "sha256": "9defd7419d625115aa1b176d8f2d5458dc18821d0a7b0c50a006938bde1831f5"
+      }
+    ],
+    "commandResults": {
+      "sourceBefore": {
+        "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+        "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+        "dirty": false,
+        "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceAfter": {
+        "checkoutSha": "031d9b661025312244d31506758eed989cc71f94",
+        "treeSha": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+        "dirty": false,
+        "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceStable": true,
+      "passed": false,
+      "results": [
+        {
+          "id": "check:spec-authoring",
+          "args": [
+            "pnpm@10.32.1",
+            "-s",
+            "check:spec-authoring",
+            "--",
+            "--base",
+            "66fa6e49ba3c1eba6de5be2d8136811fafe6ec15"
+          ],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:31:09.475Z",
+          "finishedAt": "2026-11-21T17:31:16.725Z",
+          "logFile": "check-spec-authoring.log",
+          "passed": true
+        },
+        {
+          "id": "check:public-docs",
+          "args": ["pnpm@10.32.1", "-s", "check:public-docs"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:31:16.725Z",
+          "finishedAt": "2026-11-21T17:31:17.503Z",
+          "logFile": "check-public-docs.log",
+          "passed": true
+        },
+        {
+          "id": "check:release-version",
+          "args": ["pnpm@10.32.1", "-s", "check:release-version"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:31:17.503Z",
+          "finishedAt": "2026-11-21T17:31:18.718Z",
+          "logFile": "check-release-version.log",
+          "passed": true
+        },
+        {
+          "id": "release:assets:check",
+          "args": ["pnpm@10.32.1", "-s", "release:assets:check"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:31:18.718Z",
+          "finishedAt": "2026-11-21T17:31:19.048Z",
+          "logFile": "release-assets-check.log",
+          "passed": true
+        },
+        {
+          "id": "check:styles:preset",
+          "args": ["pnpm@10.32.1", "-s", "check:styles:preset"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:31:19.049Z",
+          "finishedAt": "2026-11-21T17:33:18.725Z",
+          "logFile": "check-styles-preset.log",
+          "passed": true
+        },
+        {
+          "id": "check:styles:variant-order",
+          "args": ["pnpm@10.32.1", "-s", "check:styles:variant-order"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:33:18.726Z",
+          "finishedAt": "2026-11-21T17:33:19.068Z",
+          "logFile": "check-styles-variant-order.log",
+          "passed": true
+        },
+        {
+          "id": "check:component-presets",
+          "args": ["pnpm@10.32.1", "-s", "check:component-presets"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:33:19.069Z",
+          "finishedAt": "2026-11-21T17:33:19.639Z",
+          "logFile": "check-component-presets.log",
+          "passed": true
+        },
+        {
+          "id": "check:prototype-catalog",
+          "args": ["pnpm@10.32.1", "-s", "check:prototype-catalog"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:33:19.640Z",
+          "finishedAt": "2026-11-21T17:33:21.952Z",
+          "logFile": "check-prototype-catalog.log",
+          "passed": true
+        },
+        {
+          "id": "check:coverage-matrices",
+          "args": ["pnpm@10.32.1", "-s", "check:coverage-matrices"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:33:21.952Z",
+          "finishedAt": "2026-11-21T17:39:21.252Z",
+          "logFile": "check-coverage-matrices.log",
+          "passed": true
+        },
+        {
+          "id": "check:website-production-bundle",
+          "args": ["pnpm@10.32.1", "-s", "check:website-production-bundle"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:39:21.252Z",
+          "finishedAt": "2026-11-21T17:41:14.166Z",
+          "logFile": "check-website-production-bundle.log",
+          "passed": false
+        },
+        {
+          "id": "check:agent-operations",
+          "args": ["pnpm@10.32.1", "-s", "check:agent-operations"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:41:14.167Z",
+          "finishedAt": "2026-11-21T17:47:16.759Z",
+          "logFile": "check-agent-operations.log",
+          "passed": true
+        },
+        {
+          "id": "check:gpui-style-fixture",
+          "args": ["pnpm@10.32.1", "-s", "check:gpui-style-fixture"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:16.759Z",
+          "finishedAt": "2026-11-21T17:47:17.206Z",
+          "logFile": "check-gpui-style-fixture.log",
+          "passed": false
+        },
+        {
+          "id": "check:gpui-event-fixture",
+          "args": ["pnpm@10.32.1", "-s", "check:gpui-event-fixture"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:17.207Z",
+          "finishedAt": "2026-11-21T17:47:18.829Z",
+          "logFile": "check-gpui-event-fixture.log",
+          "passed": false
+        },
+        {
+          "id": "check:gpui-message-fixture",
+          "args": ["pnpm@10.32.1", "-s", "check:gpui-message-fixture"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:18.830Z",
+          "finishedAt": "2026-11-21T17:47:19.217Z",
+          "logFile": "check-gpui-message-fixture.log",
+          "passed": true
+        },
+        {
+          "id": "check:gpui-session-fixtures",
+          "args": ["pnpm@10.32.1", "-s", "check:gpui-session-fixtures"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:19.217Z",
+          "finishedAt": "2026-11-21T17:47:20.474Z",
+          "logFile": "check-gpui-session-fixtures.log",
+          "passed": false
+        },
+        {
+          "id": "test:gpui-scripts",
+          "args": ["pnpm@10.32.1", "-s", "test:gpui-scripts"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:20.475Z",
+          "finishedAt": "2026-11-21T17:47:29.081Z",
+          "logFile": "test-gpui-scripts.log",
+          "passed": false
+        },
+        {
+          "id": "test:public-docs",
+          "args": ["pnpm@10.32.1", "-s", "test:public-docs"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:29.082Z",
+          "finishedAt": "2026-11-21T17:47:37.353Z",
+          "logFile": "test-public-docs.log",
+          "passed": true
+        },
+        {
+          "id": "test:release",
+          "args": ["pnpm@10.32.1", "-s", "test:release"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:47:37.354Z",
+          "finishedAt": "2026-11-21T17:50:24.303Z",
+          "logFile": "test-release.log",
+          "passed": false
+        },
+        {
+          "id": "test:types",
+          "args": ["pnpm@10.32.1", "-s", "test:types"],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:50:24.303Z",
+          "finishedAt": "2026-11-21T17:50:30.599Z",
+          "logFile": "test-types.log",
+          "passed": true
+        },
+        {
+          "id": "test:runtime:controls",
+          "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+          "args": [
+            "--test",
+            "scripts/test/run-runtime-tests.test.mjs",
+            "scripts/test/regression-baseline.test.mjs",
+            "scripts/test/wc-native-isolation.test.mjs",
+            "scripts/test/happy-dom-mutation-keepalive.test.mjs",
+            "scripts/analysis/shadow-s4-paint-cleanup.test.mjs"
+          ],
+          "exitCode": 0,
+          "signal": null,
+          "startedAt": "2026-11-21T17:50:30.600Z",
+          "finishedAt": "2026-11-21T17:50:39.818Z",
+          "logFile": "test-runtime-controls.log",
+          "passed": true
+        },
+        {
+          "id": "test:runtime:execute",
+          "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+          "args": ["scripts/test/run-runtime-tests.mjs"],
+          "exitCode": 1,
+          "signal": null,
+          "startedAt": "2026-11-21T17:50:39.818Z",
+          "finishedAt": "2026-11-21T18:15:04.702Z",
+          "logFile": "test-runtime-execute.log",
+          "passed": false
+        }
+      ]
+    },
+    "durationsSeconds": [
+      {
+        "id": "check:spec-authoring",
+        "seconds": 7.25,
+        "passed": true
+      },
+      {
+        "id": "check:public-docs",
+        "seconds": 0.778,
+        "passed": true
+      },
+      {
+        "id": "check:release-version",
+        "seconds": 1.215,
+        "passed": true
+      },
+      {
+        "id": "release:assets:check",
+        "seconds": 0.33,
+        "passed": true
+      },
+      {
+        "id": "check:styles:preset",
+        "seconds": 119.676,
+        "passed": true
+      },
+      {
+        "id": "check:styles:variant-order",
+        "seconds": 0.342,
+        "passed": true
+      },
+      {
+        "id": "check:component-presets",
+        "seconds": 0.57,
+        "passed": true
+      },
+      {
+        "id": "check:prototype-catalog",
+        "seconds": 2.312,
+        "passed": true
+      },
+      {
+        "id": "check:coverage-matrices",
+        "seconds": 359.3,
+        "passed": true
+      },
+      {
+        "id": "check:website-production-bundle",
+        "seconds": 112.914,
+        "passed": false
+      },
+      {
+        "id": "check:agent-operations",
+        "seconds": 362.592,
+        "passed": true
+      },
+      {
+        "id": "check:gpui-style-fixture",
+        "seconds": 0.447,
+        "passed": false
+      },
+      {
+        "id": "check:gpui-event-fixture",
+        "seconds": 1.622,
+        "passed": false
+      },
+      {
+        "id": "check:gpui-message-fixture",
+        "seconds": 0.387,
+        "passed": true
+      },
+      {
+        "id": "check:gpui-session-fixtures",
+        "seconds": 1.257,
+        "passed": false
+      },
+      {
+        "id": "test:gpui-scripts",
+        "seconds": 8.606,
+        "passed": false
+      },
+      {
+        "id": "test:public-docs",
+        "seconds": 8.271,
+        "passed": true
+      },
+      {
+        "id": "test:release",
+        "seconds": 166.949,
+        "passed": false
+      },
+      {
+        "id": "test:types",
+        "seconds": 6.296,
+        "passed": true
+      },
+      {
+        "id": "test:runtime:controls",
+        "seconds": 9.218,
+        "passed": true
+      },
+      {
+        "id": "test:runtime:execute",
+        "seconds": 1464.884,
+        "passed": false
+      }
+    ],
+    "inventory": {
+      "selected": 1766,
+      "reported": 1766,
+      "uniqueReported": 1766,
+      "missing": [],
+      "unexpected": [],
+      "duplicate": [],
+      "completeInventory": true,
+      "consoleFileCounts": {
+        "failed": 57,
+        "passed": 1704,
+        "skipped": 5
+      },
+      "jsonFileStatusCounts": {
+        "passed": 1709,
+        "failed": 57
+      },
+      "fileStatusNote": "Vitest JSON calls authored skipped files passed; the console separately reports five skipped files."
+    },
+    "vitestCounts": {
+      "numTotalTests": 22377,
+      "numPassedTests": 21988,
+      "numFailedTests": 343,
+      "numPendingTests": 9,
+      "numTodoTests": 37,
+      "success": false
+    },
+    "checkpoint": {
+      "finished": true,
+      "updatedAt": "2026-11-21T18:15:03.928Z",
+      "leafStates": {
+        "pass": 21988,
+        "fail": 343,
+        "todo": 37,
+        "skip": 9
+      },
+      "unhandledErrors": []
+    },
+    "conditionalSkips": [
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements retains Boolean conditions as the native control"
+      },
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements uses portable truthiness for admitted non-Boolean values"
+      },
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements evaluates conditions once, preserves lazy branches and consumes void effects"
+      },
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements consumes actual Dart void-returning operations in ternary, not and if conditions"
+      },
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements preserves alias arguments, omitted values and optional-call laziness"
+      },
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements evaluates a callable factory once and retains void results and thrown arguments"
+      },
+      {
+        "file": "packages/compiler/test/flutter-conditional.native.test.ts",
+        "name": "Dart execution of emitted conditional statements preserves optional closure result types for bare returns and fallthrough"
+      },
+      {
+        "file": "packages/compiler/test/flutter-scroll-outcomes.native.test.ts",
+        "name": "Flutter checked Scroll outcome consumers executes checked union conversion and real Widget request/lifetime behavior"
+      },
+      {
+        "file": "packages/compiler/test/native-support-migration.test.ts",
+        "name": "exact old CLI corpus capture captures actual Trigger Text Boundary and Modal output directories with complete provenance"
+      }
+    ],
+    "collectionErrors": [
+      {
+        "file": "apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts",
+        "message": "The URL must be of scheme file",
+        "sharedFrame": "scripts/test/runtime-test-plan.mjs:437 readFileSync(new URL(cost-fixture, import.meta.url))"
+      },
+      {
+        "file": "apps/www/src/content/docs/zh-cn/popover-navigation-evidence.test.ts",
+        "message": "The URL must be of scheme file",
+        "sharedFrame": "scripts/test/runtime-test-plan.mjs:437 readFileSync(new URL(cost-fixture, import.meta.url))"
+      }
+    ],
+    "failedFiles": [
+      {
+        "file": "packages/cli/test/bounded-theme-radius.test.ts",
+        "caseStates": {
+          "passed": 4,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/cli/test/brutalist-preset-generator.test.ts",
+        "caseStates": {
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/cli/test/finf-components.test.ts",
+        "caseStates": {
+          "passed": 160,
+          "failed": 30
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/cli/test/hook-source-lexical-index.test.ts",
+        "caseStates": {
+          "passed": 25,
+          "failed": 4
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/cli/test/lowered-hook-coverage.test.ts",
+        "caseStates": {
+          "passed": 177,
+          "failed": 11
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/cli/test/surface-prototype.test.ts",
+        "caseStates": {
+          "passed": 10,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/cli/test/text-prototype.test.ts",
+        "caseStates": {
+          "passed": 12,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/compiler/test/consumer-shadcn-admission.test.ts",
+        "caseStates": {
+          "passed": 11,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/compiler/test/raw-props-watch-consumer.test.ts",
+        "caseStates": {
+          "passed": 1,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+        "caseStates": {
+          "passed": 27,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/web-conformance/test/calendar.journey.test.ts",
+        "caseStates": {
+          "failed": 1,
+          "passed": 3
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/web-conformance/test/select-target-alignment-fixture.test.ts",
+        "caseStates": {
+          "failed": 1,
+          "passed": 3
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/web-conformance/test/shadcn-select-controlled-value.journey.test.ts",
+        "caseStates": {
+          "passed": 3,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/web-conformance/test/text.journey.test.ts",
+        "caseStates": {
+          "passed": 132,
+          "failed": 20
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/base/test/web-material-sink.test.ts",
+        "caseStates": {
+          "passed": 115,
+          "failed": 19
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/gpui-peer/test/control-label-peer.test.ts",
+        "caseStates": {
+          "passed": 4,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/gpui-peer/test/peer-session.test.ts",
+        "caseStates": {
+          "passed": 37,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/gpui-peer/test/select-structural-projections.test.ts",
+        "caseStates": {
+          "passed": 3,
+          "todo": 2,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/react/test/context.integration.test.ts",
+        "caseStates": {
+          "failed": 1,
+          "passed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/vue/test/dialog.test.ts",
+        "caseStates": {
+          "failed": 5,
+          "passed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/vue2/test/focus-teardown-readiness.integration.test.ts",
+        "caseStates": {
+          "passed": 18,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/web-component/test/owned-decoration.integration.test.ts",
+        "caseStates": {
+          "passed": 34,
+          "failed": 27
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/adapters/web-component/test/shadow-s2-admission.test.ts",
+        "caseStates": {
+          "passed": 5,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/compositions/chatui/test/private-boundary.test.ts",
+        "caseStates": {
+          "passed": 2,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/modules/context/test/ancestor-compiler-boundary.test.ts",
+        "caseStates": {
+          "failed": 8
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/bootstrap-2-3-2/test/historical-primitives-layout-r91.test.ts",
+        "caseStates": {
+          "passed": 20,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/base/test/data-table-header-row.test.ts",
+        "caseStates": {
+          "passed": 14,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/base/test/field-nested-consumer.test.ts",
+        "caseStates": {
+          "passed": 4,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/base/test/form-upstream-paint.test.ts",
+        "caseStates": {
+          "passed": 5,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/base/test/hover-card-lifecycle.test.ts",
+        "caseStates": {
+          "passed": 18,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/brutalist/test/depth-motion-grammar.test.ts",
+        "caseStates": {
+          "passed": 13,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/brutalist/test/popover-title.test.ts",
+        "caseStates": {
+          "passed": 4,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/liquid-glass/test/liquid-content-source-r91.test.ts",
+        "caseStates": {
+          "passed": 20,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts",
+        "caseStates": {
+          "passed": 20,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/shadcn/test/command-evidence-app.test.ts",
+        "caseStates": {
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/prototypes/shadcn/test/command-profile-transitions.test.ts",
+        "caseStates": {
+          "passed": 6,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts",
+        "caseStates": {
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/test/contrast-popup-escape.test.ts",
+        "caseStates": {
+          "passed": 58,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/test/contrast-projection-identity.test.ts",
+        "caseStates": {
+          "passed": 400,
+          "failed": 132
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/test/language-select-lifecycle.test.ts",
+        "caseStates": {
+          "passed": 1,
+          "failed": 13
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/header-ghost-appearance.test.ts",
+        "caseStates": {
+          "failed": 5,
+          "passed": 3
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/site-action-appearance.test.ts",
+        "caseStates": {
+          "passed": 8,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/site-select-connected-reaction.test.ts",
+        "caseStates": {
+          "failed": 2,
+          "passed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/content/docs/accordion-demo-teardown.test.ts",
+        "caseStates": {
+          "passed": 2,
+          "failed": 3
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+        "caseStates": {
+          "passed": 10,
+          "failed": 15
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/content/docs/field-demo-layout.test.ts",
+        "caseStates": {
+          "passed": 8,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/PrototypePreviewer/demo-renderer.public-instance.test.ts",
+        "caseStates": {
+          "passed": 55,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/PrototypePreviewer/homepage-presentation.test.ts",
+        "caseStates": {
+          "passed": 6,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/PrototypePreviewer/previewer-client.test.ts",
+        "caseStates": {
+          "passed": 16,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/override/Search.commands.test.ts",
+        "caseStates": {
+          "passed": 56,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/override/Search.test.ts",
+        "caseStates": {
+          "passed": 2,
+          "failed": 2
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/override/Sidebar.test.ts",
+        "caseStates": {
+          "passed": 3,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/components/override/theme-startup-contract.test.ts",
+        "caseStates": {
+          "passed": 2,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/content/docs/zh-cn/demo-base-input.test.ts",
+        "caseStates": {
+          "passed": 6,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/content/docs/zh-cn/demo-base-label.test.ts",
+        "caseStates": {
+          "passed": 4,
+          "failed": 1
+        },
+        "message": ""
+      },
+      {
+        "file": "apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts",
+        "caseStates": {},
+        "message": "The URL must be of scheme file"
+      },
+      {
+        "file": "apps/www/src/content/docs/zh-cn/popover-navigation-evidence.test.ts",
+        "caseStates": {},
+        "message": "The URL must be of scheme file"
+      }
+    ],
+    "timeline": {
+      "preflightStartedAt": "2026-11-21T17:31:09.475Z",
+      "runtimeStartedAt": "2026-11-21T17:50:39.818Z",
+      "lastFileEndedAt": "2026-11-21T18:15:03.598012+00:00",
+      "finishedCheckpointAt": "2026-11-21T18:15:03.928Z",
+      "runtimeChildClosedAt": "2026-11-21T18:15:04.702Z",
+      "lastFileToChildCloseMs": 1103.98779296875,
+      "runtimeExitCode": 1,
+      "runtimeSignal": null,
+      "runtimeError": null,
+      "vitestConsoleDurationSeconds": 1463.32,
+      "interpretation": "Continuous actual test execution reached the job boundary; only 1.104 seconds separated last file end and child close. No long shutdown-hang observation. GitHub cancellation timestamp has second precision; exact signal ordering is not inferred."
+    },
+    "observationBoundary": "All 21 commands returned and the complete 1766-file inventory was observed. This does not convert the cancelled native producer into success, erase 343 failed assertions/two collection errors, or execute authored skipped/todo bodies."
+  },
+  "repair": {
+    "groups": {
+      "checks": "Original first 20 commands, including runtime controls",
+      "runtime": "Original final runtime execution command with complete source-discovered inventory"
+    },
+    "independentNativeRunners": true,
+    "outerJobLimitMinutesEach": 45,
+    "runtimeMaxWorkers": 2,
+    "failFast": false,
+    "environmentAdmission": "Both VMs keep the original FFmpeg/Python identification and real decoder gate. Repeated environment admission is distinct from the exact-once governed 21-command plan.",
+    "gate": "Require latest successful general-checks and general slots, recompute complete original plan and exact group command/argv membership, validate union exactly once and unchanged clean source before/after, then require original strict general runtime inventory/assertion gate."
+  },
+  "changedSource": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 43651,
+      "sha256": "ceaeb7dc384d3c626560fe77e0a5fa7063b03762f7c5fafa3ec24291e093f848"
+    },
+    {
+      "path": "scripts/test/general-check-plan.mjs",
+      "bytes": 4118,
+      "sha256": "16f859a148b88fb508408e6af1770094f310aca3355f3a44f64dda9765d19206"
+    },
+    {
+      "path": "scripts/test/general-ci.mjs",
+      "bytes": 4938,
+      "sha256": "703a6e523e00b4002bc1af01878be8c9bda10f56e15e984f30d480c13019feb7"
+    },
+    {
+      "path": "scripts/test/runtime-ci.mjs",
+      "bytes": 13356,
+      "sha256": "e2d46150f4b62ffc31f125362d3a1f4e8d955dd3406e999cf1910f78aca1594b"
+    },
+    {
+      "path": "scripts/test/regression-baseline.test.mjs",
+      "bytes": 11598,
+      "sha256": "b5947c3ec85870f7cb03779286cbcd468a826b34d235f9497923caffb82083ea"
+    },
+    {
+      "path": "scripts/test/run-runtime-tests.test.mjs",
+      "bytes": 74045,
+      "sha256": "6030936f3bf488fdd7842849325fb870debb2cd618b1068579190ab7832a14e9"
+    },
+    {
+      "path": "scripts/ci/test/cycle-job-inventory.test.mjs",
+      "bytes": 2711,
+      "sha256": "90dec1fb25cf0a4b31f643f227efa92300aef7589d689421343fdf82f81e42b1"
+    }
+  ],
+  "localControls": {
+    "command": [
+      "node",
+      "--test",
+      "--test-reporter=tap",
+      "scripts/test/regression-baseline.test.mjs",
+      "scripts/test/run-runtime-tests.test.mjs",
+      "scripts/ci/test/cycle-job-inventory.test.mjs"
+    ],
+    "exitCode": 0,
+    "counts": {
+      "tests": 143,
+      "suites": 9,
+      "pass": 143,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "durationMs": 15348.445466,
+    "logSHA256": "b3069b8afbd8b540c4e6855333b4a12fe4f42833d38f290e014cd031328bedc8",
+    "nativeBrowserRuns": 0,
+    "fullRuntimeRuns": 0
+  },
+  "remaining": "Next exact candidate native checks/runtime matrix legs and aggregate gate; no native success or future duration is claimed by local controls."
+}

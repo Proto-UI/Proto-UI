@@ -63,3 +63,23 @@ test('a queued or running upstream job is explicit incomplete evidence', () => {
   assert.deepEqual(r.incomplete, [1]);
   assert.equal(r.counts.unknown, 1);
 });
+
+test('keeps both independent general matrix jobs and their distinct outcomes', () => {
+  const p = [
+    {
+      total_count: 2,
+      jobs: [
+        job(1, { name: 'test-general (checks, general-checks)', conclusion: 'failure' }),
+        job(2, { name: 'test-general (runtime, general)', conclusion: 'success' }),
+      ],
+    },
+  ];
+  const r = cycleJobInventory(p, binding);
+  assert.equal(r.completed, 2);
+  assert.deepEqual(r.counts, { failure: 1, success: 1 });
+  assert.deepEqual(
+    r.inventory.map(({ name }) => name),
+    p[0].jobs.map(({ name }) => name)
+  );
+  assert.equal(r.inventory[0].diagnosis, 'requires-evidence-triage');
+});

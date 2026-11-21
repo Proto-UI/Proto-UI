@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { generalCheckPlan, executeGeneralChecks } from './general-ci.mjs';
+import { selectGeneralChecks } from './general-check-plan.mjs';
 import { assertRuntimeSource, createCiPlan, runtimeRoot } from './runtime-ci.mjs';
 import { RUNTIME_TEST_INCLUDES } from './runtime-inventory.mjs';
 import {
@@ -126,6 +127,22 @@ test('a failed source-binding check and a spawn error do not suppress later test
     executeGeneralChecks([], async () => ({})),
     /empty/
   );
+});
+
+test('independent general groups partition the original plan without omitting or duplicating work', () => {
+  const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+  const plan = generalCheckPlan(manifest, sha);
+  const checks = selectGeneralChecks(plan, 'checks');
+  const runtime = selectGeneralChecks(plan, 'runtime');
+  assert.equal(checks.length, 20);
+  assert.deepEqual(
+    runtime.map((step) => step.id),
+    ['test:runtime:execute']
+  );
+  assert.deepEqual([...checks, ...runtime], plan);
+  assert.throws(() => selectGeneralChecks(plan, 'partial'), /Unknown general check group/);
+  assert.throws(() => selectGeneralChecks([...plan, plan[0]], 'checks'), /Duplicate general step/);
+  assert.throws(() => selectGeneralChecks(checks, 'checks'), /exactly one runtime execution/);
 });
 
 test('a complete red report preserves failures and skipped tests separately', () => {

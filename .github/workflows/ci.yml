@@ -513,20 +513,28 @@ jobs:
   test-general:
     needs: [test-plan, cycle-plan]
     if: ${{ github.event_name != 'pull_request' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: checks
+            slot: general-checks
+          - group: runtime
+            slot: general
     env:
       PROTO_UI_RUNTIME_PHASE: general
-      PROTO_UI_RUNTIME_SLOT: general
+      PROTO_UI_RUNTIME_SLOT: ${{ matrix.slot }}
+      PROTO_UI_GENERAL_GROUP: ${{ matrix.group }}
       COMPILER_EVIDENCE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
       COVERAGE_BASE_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
       COVERAGE_HEAD_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       COVERAGE_MERGE_REVISION: ${{ github.event_name == 'pull_request' && github.sha || '' }}
     # Linux memfd and the distro FFmpeg 6.1 line form the video evidence baseline.
     runs-on: ubuntu-24.04
-    # 913009ef: setup/real-decoder gate took 9m13s; the prior repository
-    # suite took 17m27s. Coverage validation now adds a separately retained
-    # preflight, and a red preflight no longer prevents the runtime phase.
-    # Reserve time for that complete chain, teardown and evidence upload;
-    # this total-job allowance does not change decoder or test timeouts.
+    # 44930338506: the original 20 checks took 19m30s and the complete
+    # 1766-suite runtime took 24m25s, reaching the shared 45m outer deadline.
+    # Independent runners keep both original groups and their AND gate, with
+    # the same toolchain admission, job cap and two-worker runtime policy.
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -603,8 +611,8 @@ jobs:
           export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
           mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
           git rev-parse HEAD | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          # Preserve each original check and its exit status, but collect later
-          # evidence even when a coverage/source binding check is red.
+          # Execute this group's original commands once. Both matrix legs must
+          # supply source-bound receipts; neither can replace the other's result.
           exec > >(tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/general.log") 2>&1
           node scripts/test/general-ci.mjs
 

@@ -10,6 +10,7 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import YAML from 'yaml';
 import { WC_NATIVE_BROWSER_SUITE } from './wc-native-isolation.mjs';
+import { generalCheckPlan, selectGeneralChecks } from './general-check-plan.mjs';
 // Synthetic clean-source controls; these are not execution evidence.
 const cleanSourceControl = (sha) => {
   const snapshot = {
@@ -1521,40 +1522,117 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
   const needs = Object.fromEntries(
     ['test-plan', 'test-general', 'test-browser'].map((job) => [job, { result: 'success' }])
   );
+  const generalReport = (group, sha) => {
+    const source = cleanSourceControl(sha);
+    const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+    return {
+      schemaVersion: 1,
+      group,
+      specBase: 'c'.repeat(40),
+      sourceBefore: source.before,
+      sourceAfter: source.after,
+      sourceStable: true,
+      passed: true,
+      results: selectGeneralChecks(generalCheckPlan(manifest, 'c'.repeat(40)), group).map(
+        (step) => ({ ...step, passed: true, exitCode: 0, signal: null })
+      ),
+    };
+  };
   const complete = (binding = context, attempt = 1) => {
     const plan = createCiPlan(binding.checkoutSha);
     return runtimeSlots.map((slot, index) => {
       const selection =
-        index === 0
+        index === 0 || slot === 'general-checks'
           ? null
           : index === 1
             ? runtimeSelection('general', undefined, plan)
             : runtimeSelection('browser', `${index - 1}/${BROWSER_SHARD_COUNT}`, plan);
-      const payload = selection
-        ? {
-            ...selection,
-            source: cleanSourceControl(selection.checkoutSha),
-            report: {
-              success: true,
-              numFailedTests: 0,
-              numFailedTestSuites: 0,
-              numPassedTests: selection.suites.length,
-              testResults: selection.suites.map((suite) => ({
-                name: path.join(runtimeRoot, suite),
-                status: 'passed',
-                assertionResults: [
-                  { status: 'passed', fullName: 'simulated rerun control, not browser evidence' },
-                ],
-              })),
-            },
-          }
-        : plan;
+      const payload =
+        slot === 'general-checks'
+          ? generalReport('checks', binding.checkoutSha)
+          : selection
+            ? {
+                ...selection,
+                source: cleanSourceControl(selection.checkoutSha),
+                ...(slot === 'general'
+                  ? { generalChecks: generalReport('runtime', binding.checkoutSha) }
+                  : {}),
+                report: {
+                  success: true,
+                  numFailedTests: 0,
+                  numFailedTestSuites: 0,
+                  numPassedTests: selection.suites.length,
+                  testResults: selection.suites.map((suite) => ({
+                    name: path.join(runtimeRoot, suite),
+                    status: 'passed',
+                    assertionResults: [
+                      {
+                        status: 'passed',
+                        fullName: 'simulated rerun control, not browser evidence',
+                      },
+                    ],
+                  })),
+                },
+              }
+            : plan;
       const receipt = { schemaVersion: 1, ...binding, attempt, slot, outcome: 'success', payload };
       return { name: artifactName(receipt), receipt };
     });
   };
   it('accepts an aggregate-only rerun with all original successful slots', () => {
     assert.doesNotThrow(() => assertCiGate(needs, complete(), context));
+  });
+  it('requires the two general groups to execute every original command exactly once', () => {
+    for (const mutate of [
+      (checks) => checks.results.pop(),
+      (checks) => checks.results.push(checks.results[0]),
+      (checks) => (checks.results[0].args = ['pnpm@10.32.1', '-s', 'test:types']),
+      (_checks, runtime) => runtime.results.push(runtime.results[0]),
+      (_checks, runtime) => (runtime.specBase = 'd'.repeat(40)),
+      (_checks, runtime) => (runtime.group = 'checks'),
+    ]) {
+      const artifacts = complete();
+      const checks = artifacts.find(({ receipt }) => receipt.slot === 'general-checks').receipt;
+      const runtime = artifacts.find(({ receipt }) => receipt.slot === 'general').receipt;
+      mutate(checks.payload, runtime.payload.generalChecks);
+      assert.throws(() => assertCiGate(needs, artifacts, context));
+    }
+    assert.throws(
+      () =>
+        assertCiGate(
+          needs,
+          complete().filter(({ receipt }) => receipt.slot !== 'general-checks'),
+          context
+        ),
+      /Missing logical slot: general-checks/
+    );
+  });
+  it('a green runtime cannot cover failed, interrupted or source-drifted prerequisite checks', () => {
+    for (const mutate of [
+      (checks) => (checks.passed = false),
+      (checks) => (checks.results[0].passed = false),
+      (checks) => (checks.results[0].exitCode = 1),
+      (checks) => (checks.results[0].signal = 'SIGTERM'),
+      (checks) => (checks.sourceAfter.treeSha = 'd'.repeat(40)),
+      (_checks, runtime) => (runtime.sourceBefore.dirty = true),
+      (_checks, runtime) => (runtime.sourceAfter.checkoutSha = 'd'.repeat(40)),
+    ]) {
+      const artifacts = complete();
+      const checks = artifacts.find(({ receipt }) => receipt.slot === 'general-checks').receipt;
+      const runtime = artifacts.find(({ receipt }) => receipt.slot === 'general').receipt;
+      mutate(checks.payload, runtime.payload.generalChecks);
+      assert.throws(() => assertCiGate(needs, artifacts, context));
+    }
+    for (const outcome of ['failure', 'cancelled', 'skipped']) {
+      const artifacts = complete();
+      const later = complete(context, 2).find(({ receipt }) => receipt.slot === 'general-checks');
+      later.receipt.outcome = outcome;
+      artifacts.push(later);
+      assert.throws(
+        () => assertCiGate(needs, artifacts, context),
+        /Latest general-checks attempt did not succeed/
+      );
+    }
   });
   it('accepts only the failed shard rerunning while plan/general/other shards stay at attempt one', () => {
     const artifacts = complete();
@@ -1781,6 +1859,23 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
       assert.equal(jobs[name].permissions, undefined);
     }
     assert.equal(jobs['test-browser'].env.PROTO_UI_RUNTIME_SLOT, '${{ matrix.slot }}');
+    const general = jobs['test-general'];
+    assert.equal(general['timeout-minutes'], 45);
+    assert.equal(general.strategy['fail-fast'], false);
+    assert.deepEqual(general.strategy.matrix.include, [
+      { group: 'checks', slot: 'general-checks' },
+      { group: 'runtime', slot: 'general' },
+    ]);
+    assert.equal(general.env.PROTO_UI_GENERAL_GROUP, '${{ matrix.group }}');
+    assert.equal(general.env.PROTO_UI_RUNTIME_SLOT, '${{ matrix.slot }}');
+    const toolchain = general.steps.find(
+      (step) => step.name === 'Install and identify the bounded video evidence toolchain'
+    );
+    assert.equal(toolchain.if, undefined, 'Each VM must retain its own real decoder admission');
+    assert.match(
+      toolchain.run,
+      /node --test scripts\/coverage-matrices\/test\/decode-video-evidence.integration.mjs/
+    );
   });
 });
 

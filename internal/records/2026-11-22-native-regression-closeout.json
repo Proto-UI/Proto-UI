@@ -67,7 +67,23 @@
     },
     {
       "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
-      "sha256": "f8a107cf7f608f930799fbf6080aacdd4430901016169369acbbfc1024d9580a"
+      "sha256": "8356520dd8363d76acda198cb31711ec5a7b9356842676e15ef1a4fb149f6738"
+    },
+    {
+      "path": "scripts/test/runtime-test-plan.mjs",
+      "sha256": "ecbd91806d5d594699216a6f4117222d527f619dce482c25c355c2c3c0ee5405"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts",
+      "sha256": "79168c427e38a886f83c0b41f779d32dc0eb7e31842b5dd21310f168c5b6361f"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+      "sha256": "8bc0de8a6966d2fef277e14ca5f9d92096f73543c769422394f4ece9b12a4148"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "sha256": "2c77c92425d2ff6a7fa5ded9e85b2e870c78b23e6c5477575dc9c5e8c3f521d9"
     }
   ],
   "material": {
@@ -702,5 +718,240 @@
       }
     },
     "qualification": "A passing fixture control admits the native geometry test; it does not certify Drawer geometry."
+  },
+  "runtimePlanImportRepair": {
+    "nativeRun": 44930338506,
+    "jobId": 136925440826,
+    "collectionErrors": [
+      "apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts",
+      "apps/www/src/content/docs/zh-cn/popover-navigation-evidence.test.ts"
+    ],
+    "cause": "Vite rewrites the browser-facing import.meta.url. Passing that URL to fs.readFileSync during module collection raised The URL must be of scheme file.",
+    "repair": "Import the unchanged JSON fixture as a real JSON module with type=json, retaining every validateBrowserCostEvidence, inventory, weight and capacity condition.",
+    "unchangedNodePlan": "Compared browserShards() and browserShardCosts() against the clean a8bf baseline under Node24; both complete 18-shard vectors are deeply equal.",
+    "localReceipts": [
+      {
+        "exitCode": 1,
+        "failedSuites": 2,
+        "executedTests": 0,
+        "durationSeconds": 5.42,
+        "log": "runtime-plan-import-before.log",
+        "logSha256": "1bc603bf0a79ae6732311c74f960e0eb10cb6e30d02aa18d62a031177a758311"
+      },
+      {
+        "exitCode": 1,
+        "passedTests": 21,
+        "failedTests": 1,
+        "durationSeconds": 6.9,
+        "log": "runtime-plan-import-after.log",
+        "logSha256": "1bab530b57baf74ec347f050ecc2c8d9826ee4ea64f6f35b48b7c55f6ccf609b"
+      },
+      {
+        "exitCode": 0,
+        "passedSuites": 2,
+        "passedTests": 22,
+        "failedTests": 0,
+        "durationSeconds": 5.85,
+        "log": "runtime-plan-import-and-projection-after.log",
+        "logSha256": "a8815cc3fe34abd236b10fd23eb56f1b5db8225a0d690f43f44322d9fb6fae4f"
+      }
+    ],
+    "revealedProjectionDrift": "Once collection worked, the Ghost public-code check required an HTML attribute in the WC example even though that generated example now uses the public setElementProps API. The test executes the actual unique WC snippet with an observed API binding and asserts both complete ghost props plus disabled=false/true. The other three runtimes retain the original attribute assertion; all common text checks remain.",
+    "qualification": "These are local collection/public-projection controls. No native Ghost or Popover acceptance is inferred."
+  },
+  "drawerStyleClosure": {
+    "scope": "Real public Drawer fixture CSS dependency closure; no native geometry or animation receipt",
+    "worktreeBaseSha": "b418cf0d1b32bd918364b5a22e1d723394a95a47",
+    "sourceFiles": [
+      {
+        "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+        "sha256": "8bc0de8a6966d2fef277e14ca5f9d92096f73543c769422394f4ece9b12a4148"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+        "sha256": "2c77c92425d2ff6a7fa5ded9e85b2e870c78b23e6c5477575dc9c5e8c3f521d9"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+        "sha256": "8356520dd8363d76acda198cb31711ec5a7b9356842676e15ef1a4fb149f6738"
+      }
+    ],
+    "command": "corepack pnpm@10.32.1 exec vitest run packages/prototypes/shadcn/test/drawer-www-entry.test.ts --maxWorkers=1 --minWorkers=1",
+    "before": {
+      "exitCode": 1,
+      "failed": 1,
+      "durationSeconds": 9.04,
+      "missingTokens": [
+        "box-border",
+        "bg-clip-padding",
+        "py-0",
+        "leading-5",
+        "rounded-[var(--pui-radius-2xl)]",
+        "h-8",
+        "gap-1.5",
+        "px-3"
+      ],
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-styles-before.log",
+        "sha256": "d3bf157126fda361598f53bd0134d821c9b351a3b5ceadcfdaf90adebaf014b3"
+      },
+      "timeoutSemantics": {
+        "caseTimeoutMs": 30000,
+        "hasSeparateBeforeAll": false
+      }
+    },
+    "initialControlSetup": {
+      "exitCode": 1,
+      "reason": "5000ms default entire-case budget expired while loading the real TypeScript collector; no separate beforeAll existed. Preserved as cold-load history, not the missing-token red baseline.",
+      "log": "drawer-www-entry-styles-setup-timeout.log",
+      "sha256": "6f40ef6fc3b5bdfd331a877850e4581a67ae1337453381d63389340eecd72087",
+      "timeoutSemantics": {
+        "caseTimeoutMs": 5000,
+        "hasSeparateBeforeAll": false
+      }
+    },
+    "nativeTimingBoundsChanged": false,
+    "nativeAssertionsChanged": false,
+    "nativeBrowserRun": false,
+    "directories": [
+      "packages/prototypes/base/src/drawer",
+      "packages/prototypes/shadcn/src/drawer",
+      "packages/prototypes/base/src/button",
+      "packages/prototypes/shadcn/src/button",
+      "packages/prototypes/shadcn/src/style-scope"
+    ],
+    "schemaVersion": 2,
+    "intermediateAfterWholeCaseTimeout": {
+      "exitCode": 0,
+      "passed": 1,
+      "durationSeconds": 6.47,
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-styles-after.log",
+        "sha256": "16671efb3711a0434fd5fd5d0993aa95d518bdece48c2f457d199684c0225d6b"
+      },
+      "timeoutSemantics": {
+        "caseTimeoutMs": 30000,
+        "hasSeparateBeforeAll": false
+      }
+    },
+    "after": {
+      "exitCode": 0,
+      "passed": 1,
+      "durationSeconds": 7.85,
+      "reportedSuiteDurationMs": 7146,
+      "reportedSuiteDurationIncludesHook": true,
+      "testBodyDurationMs": null,
+      "log": {
+        "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-styles-hook-budget.log",
+        "sha256": "f06a151a718cffd3eb1973eedd81d8d889d322d00bae2b51771444eb0f662a5a"
+      }
+    },
+    "currentTimeoutSemantics": {
+      "beforeAllTimeoutMs": 30000,
+      "beforeAllWork": [
+        "reset modules for fresh registry",
+        "load actual public fixture and its renderer, registry and DemoSpec",
+        "load source collector and CSS renderer",
+        "collect finite fixture dependency tokens",
+        "generate actual physical CSS; any error fails beforeAll"
+      ],
+      "testBodyTimeoutMs": 5000,
+      "testBodyUsesVitestDefault": true,
+      "testBodyWork": [
+        "missing-scope rejection",
+        "real public fixture mount and dependency resolution",
+        "actual emitted Button tokens covered by independently collected source tokens",
+        "generated CSS contains the actual select-none selector",
+        "intrinsic fixture has no width or height override",
+        "dispose actual fixture"
+      ],
+      "nativeBrowserCaseTimeoutMs": 30000,
+      "nativeBrowserAssertionsChanged": false
+    },
+    "historicalEvidence": {
+      "record": {
+        "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-styles-case-timeout-history.json",
+        "sha256": "3e42187647c99c77bfbd8539c38ad8cbb48fcbf6fc86c1eed44add2cf101f13f"
+      },
+      "sourceSnapshot": {
+        "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-case-timeout-history.test.ts",
+        "sha256": "d328c0535ada80c74be5792024e69aa042d0d8ea4c96c55f910bce4f54d58fa9"
+      }
+    },
+    "historicalWholeCaseTimeoutRecord": {
+      "scope": "Historical intermediate control; superseded by a separate beforeAll setup budget and default test-body budget",
+      "timeoutClarification": {
+        "initialControlSetup": "The 5000ms limit applied to the entire case, including module load; no beforeAll existed. The legacy log filename says setup-timeout because cold load caused expiration.",
+        "before": "30000ms entire-case timeout; this is the missing-token red baseline.",
+        "after": "30000ms entire-case timeout; this is the intermediate passing control, not a setup-only budget."
+      },
+      "sourceSnapshot": {
+        "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-case-timeout-history.test.ts",
+        "sha256": "d328c0535ada80c74be5792024e69aa042d0d8ea4c96c55f910bce4f54d58fa9"
+      },
+      "originalEvidence": {
+        "scope": "Real public Drawer fixture CSS dependency closure; no native geometry or animation receipt",
+        "worktreeBaseSha": "b418cf0d1b32bd918364b5a22e1d723394a95a47",
+        "sourceFiles": [
+          {
+            "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+            "sha256": "8bc0de8a6966d2fef277e14ca5f9d92096f73543c769422394f4ece9b12a4148"
+          },
+          {
+            "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+            "sha256": "2c77c92425d2ff6a7fa5ded9e85b2e870c78b23e6c5477575dc9c5e8c3f521d9"
+          },
+          {
+            "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+            "sha256": "d328c0535ada80c74be5792024e69aa042d0d8ea4c96c55f910bce4f54d58fa9"
+          }
+        ],
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/prototypes/shadcn/test/drawer-www-entry.test.ts --maxWorkers=1 --minWorkers=1",
+        "before": {
+          "exitCode": 1,
+          "failed": 1,
+          "durationSeconds": 9.04,
+          "missingTokens": [
+            "box-border",
+            "bg-clip-padding",
+            "py-0",
+            "leading-5",
+            "rounded-[var(--pui-radius-2xl)]",
+            "h-8",
+            "gap-1.5",
+            "px-3"
+          ],
+          "log": {
+            "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-styles-before.log",
+            "sha256": "d3bf157126fda361598f53bd0134d821c9b351a3b5ceadcfdaf90adebaf014b3"
+          }
+        },
+        "after": {
+          "exitCode": 0,
+          "passed": 1,
+          "durationSeconds": 6.47,
+          "log": {
+            "path": "/workspace/scratch/fbd6f62bb640/drawer-www-entry-styles-after.log",
+            "sha256": "16671efb3711a0434fd5fd5d0993aa95d518bdece48c2f457d199684c0225d6b"
+          }
+        },
+        "initialControlSetup": {
+          "exitCode": 1,
+          "reason": "5s default unit budget expired while loading the actual TypeScript collector; separate from missing-token baseline",
+          "log": "drawer-www-entry-styles-setup-timeout.log",
+          "sha256": "6f40ef6fc3b5bdfd331a877850e4581a67ae1337453381d63389340eecd72087"
+        },
+        "nativeTimingBoundsChanged": false,
+        "nativeAssertionsChanged": false,
+        "nativeBrowserRun": false,
+        "directories": [
+          "packages/prototypes/base/src/drawer",
+          "packages/prototypes/shadcn/src/drawer",
+          "packages/prototypes/base/src/button",
+          "packages/prototypes/shadcn/src/button",
+          "packages/prototypes/shadcn/src/style-scope"
+        ]
+      }
+    }
   }
 }
