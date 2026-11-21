@@ -17,6 +17,7 @@ import {
   type FunctionContext,
   type ExpressionIR,
   type FunctionIR,
+  type HookCaptureIR,
   type ModuleDeclarationIR,
   type Phase,
   type PrototypeIR,
@@ -35,6 +36,7 @@ import {
   validateOperationPhase,
   isTemplateChildType,
   capabilityMemberType,
+  captureStateHandlesType,
   capabilityBinaryType,
   stateValue,
   stateDeclarationData,
@@ -575,6 +577,8 @@ interface Parameter {
   origin: object;
 }
 interface Binding {
+  /** Derived from the validated declaration scope, never supplied by IR metadata. */
+  moduleBinding?: boolean;
   uninitializedParameter?: boolean;
   uninitializedLexical?: boolean;
   type: ValueType;
@@ -810,7 +814,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         if (!isDataValueType(valueType(exposure.payload, location)))
           bad('Outward event payload must be serializable data.', location);
       } else if (exposure.kind === 'method') {
-        parameters(exposure.parameters);
+        parameters(exposure.parameters, false);
         if (!isPublicValueType(valueType(exposure.returnType, location)))
           bad('Exposed methods cannot return setup or execution-scope capabilities.', location);
       } else bad('Invalid exposure kind.', location);
@@ -901,7 +905,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (hook.capture !== undefined) {
         const capture = object(hook.capture, ['states', 'methods', 'children']);
         for (const item of array(capture.states)) {
-          const state = object(item, ['name', 'type', 'valueType']);
+          const state = object(item, ['name', 'type', 'valueType', 'definite']);
+          if (state.definite !== undefined && typeof state.definite !== 'boolean')
+            bad('Capture state presence must be boolean.');
           text(state.name);
           if (!stateValue(valueType(state.type)))
             bad('Capture State metadata requires a State capability.');
@@ -926,7 +932,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     for (const requirement of array(root.requirements)) text(requirement);
     const active = new Set<object>();
-    function parameters(value: unknown): Parameter[] {
+    function parameters(value: unknown, declaration = true): Parameter[] {
       const names = new Set<string>();
       let optionalSeen = false;
       return array(value).map((item) => {
@@ -937,7 +943,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           (param.optional !== undefined && typeof param.optional !== 'boolean')
         )
           bad('Invalid function parameter.');
-        if (optionalSeen && param.optional !== true && param.default === undefined)
+        // Expose signatures project defaults to optional slots without carrying
+        // initializer expressions. Only declarations obey source optional order.
+        if (declaration && optionalSeen && param.optional !== true && param.default === undefined)
           bad('Required parameter follows an optional parameter.');
         optionalSeen ||= param.optional === true && param.default === undefined;
         names.add(param.name);
@@ -1032,6 +1040,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       if (func.captures !== undefined) {
         const ids = new Set<string>();
+        let lexicalCaptureCount = 0;
+        for (const binding of captures.values())
+          if (!binding.moduleBinding) ++lexicalCaptureCount;
         for (const item of array(func.captures)) {
           const capture = object(item, ['bindingId', 'name', 'storage']);
           const id = text(capture.bindingId),
@@ -1040,13 +1051,14 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           if (
             ids.has(id) ||
             !binding ||
+            binding.moduleBinding ||
             binding.bindingId !== id ||
             capture.storage !== (lexicalStoredType(binding.type) ? 'cell' : 'value')
           )
             bad('Capture must identify the resolved lexical binding.', location);
           ids.add(id);
         }
-        if (ids.size !== captures.size)
+        if (ids.size !== lexicalCaptureCount)
           bad('Capture metadata must include every captured binding.', location);
       }
       const priorCaptures = provenCaptures.get(func);
@@ -1442,6 +1454,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                       if (node.optional) return 'void';
                       throw new TypeError('Nullish member receiver.');
                     }
+                    if (typeof member !== 'string' && member.kind === 'capture' && key === 'stateHandles')
+                      return captureStateHandlesType(hooks.find((hook) => hook.id === member.hookId)?.capture as HookCaptureIR | undefined);
+                    if (typeof member !== 'string' && member.kind === 'capture' && key === 'render') {
+                      const hook = hooks.find((hook) => hook.id === member.hookId);
+                      return joinValueTypes([hook ? valueType(object(hook.setup).returnType, location) : 'void', 'void']);
+                    }
                     const capability = capabilityMemberType(member, key, node.optional as boolean);
                     if (capability !== undefined) return capability;
                     if (member === 'props' && props.has(key)) return props.get(key)!;
@@ -1450,6 +1468,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                   })
                 )
               );
+              break;
+            }
+            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'stateHandles') {
+              type = captureStateHandlesType(hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined);
+              break;
+            }
+            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'render') {
+              const hook = hooks.find((hook) => hook.id === owner.hookId);
+              type = joinValueTypes([hook ? valueType(object(hook.setup).returnType, location) : 'void', 'void']);
               break;
             }
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);
@@ -1556,8 +1583,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const args = array(node.arguments).map((argument) =>
               expression(argument, scope, phase, context, true)
             );
-            type = valueAction(location, () => intrinsicResult(text(node.name), args));
+            type = valueAction(location, () =>
+              intrinsicResult(text(node.name), args, node.arguments as ExpressionIR[])
+            );
             if (node.name === 'array.every') invalidateFlow(scope, true);
+            if (node.name === 'object.assign' || node.name === 'string') invalidateFlow(scope, true, true);
             break;
           }
           case 'object-spread': {
@@ -1745,7 +1775,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 const exposure = exposures.get(first.value);
                 if (!exposure || exposure.kind !== 'method')
                   bad('Expose method must have recorded signature.', location);
-                bindings.methodParameters = parameters(exposure.parameters);
+                bindings.methodParameters = parameters(exposure.parameters, false);
                 bindings.methodReturnType = valueType(exposure.returnType, location);
               }
             }
@@ -1859,6 +1889,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         scope.set(declaration.name, {
           type: valueType(initializer.type),
           origin: declaration,
+          moduleBinding: scope === moduleScope,
           uninitializedLexical: true,
           ...(declaration.bindingId !== undefined
             ? { bindingId: text(declaration.bindingId) }
@@ -1915,6 +1946,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 ...alias,
                 type,
                 origin: alias?.origin ?? node,
+                moduleBinding: scope === moduleScope,
                 uninitializedLexical: false,
                 stateData: stateDeclarationData(val as unknown as ExpressionIR) ?? alias?.stateData,
                 predicate:
@@ -2020,6 +2052,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     const moduleScope: Scope = new Map();
     if (root.moduleBindings !== undefined) {
+      const moduleNames = new Set<string>(
+        array(root.moduleBindings).map((item) =>
+          String(object(item, ['kind', 'name', 'bindingId', 'value', 'span']).name)
+        )
+      );
       for (const value of array(root.moduleBindings)) {
         const binding = object(value, ['kind', 'name', 'bindingId', 'value', 'span']);
         if (binding.kind !== 'const')
@@ -2036,6 +2073,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             ? object(initializer.value, EXPRESSION_FIELDS)
             : initializer;
         while (scalar.kind === 'narrow') scalar = object(scalar.value, EXPRESSION_FIELDS);
+        if (
+          initializer.kind !== 'lexical-cell' &&
+          (scalar.kind === 'array' || scalar.kind === 'record') &&
+          staticDataExpression(scalar, moduleNames) &&
+          readonlyModuleData(valueType(initializer.type, span(binding.span)))
+        )
+          continue;
         if (
           initializer.kind !== 'function' &&
           scalar.kind !== 'literal' &&
@@ -2150,4 +2194,52 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       ],
     };
   }
+}
+
+/** A literal data tree: literals, arrays and records of them, and references
+ *  to other shared module bindings. Nothing in it calls or captures. */
+function staticDataExpression(
+  expression: Record<string, unknown>,
+  moduleNames: ReadonlySet<string>
+): boolean {
+  let node = expression;
+  while (node.kind === 'narrow') node = node.value as Record<string, unknown>;
+  if (node.kind === 'literal') return true;
+  if (node.kind === 'unary')
+    return (
+      (node.operator === '+' || node.operator === '-') &&
+      (node.operand as { kind?: unknown })?.kind === 'literal'
+    );
+  if (node.kind === 'reference') return typeof node.name === 'string' && moduleNames.has(node.name);
+  if (node.kind === 'array')
+    return (
+      Array.isArray(node.elements) &&
+      node.elements.every((element) => staticDataExpression(element, moduleNames))
+    );
+  if (node.kind === 'record')
+    return (
+      Array.isArray(node.entries) &&
+      node.entries.every((entry: { value: Record<string, unknown> }) =>
+        staticDataExpression(entry.value, moduleNames)
+      )
+    );
+  return false;
+}
+
+/** Shared module data must be a read-only view at every depth. */
+function readonlyModuleData(type: ValueType): boolean {
+  if (typeof type === 'string') return isDataValueType(type);
+  if (type.kind === 'literal') return true;
+  if (type.kind === 'object')
+    return (
+      type.index === undefined &&
+      type.fields.every((field) => field.readonly === true && readonlyModuleData(field.type))
+    );
+  if (type.kind === 'array')
+    return valueAlternatives(type.element).every(
+      (member) => typeof member === 'string' || member.kind === 'literal'
+    );
+  if (type.kind === 'union')
+    return type.members.every((member) => typeof member === 'string' || member.kind === 'literal');
+  return false;
 }

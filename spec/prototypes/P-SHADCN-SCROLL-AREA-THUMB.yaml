@@ -21,6 +21,10 @@ criteria:
     text:
       en: Thumb must project relative flex-1 bg-border without an authored border while host facts determine its border-box size and offset. New York and the nonsquare profiles use rounded-full; Lyra and Sera use rounded-none. The retained New York source does not add a transparent Thumb border. Native forced-color visibility requires separate evidence and is not certified by this ordinary fill recipe.
       zh-CN: Thumb 必须投射 relative flex-1 bg-border，不添加 authored border；border-box size 与 offset 仍由 host facts 决定。New York 与非方角 profiles 使用 rounded-full，Lyra 与 Sera 使用 rounded-none。保留的 New York 源不添加透明 Thumb border；native forced-color 可见性需要独立证据，普通 fill recipe 不构成认证。
+  - id: P-SHADCN-SCROLL-AREA-THUMB-FORCED-COLORS-CONTOUR
+    text:
+      en: Only when the existing preference.forcedColors fact is active, Thumb must add a one-pixel solid currentColor border inside its host-owned border box using box-border border border-current. This conditional accessibility adaptation qualifies the ordinary borderless recipe above. The user agent retains system-palette rendering authority through forced-color-adjust:auto; no authored system-color literal, palette override, new public API or compiler special case is introduced. The none and unknown facts must not enable the adaptation, and leaving active must withdraw it. Both vertical and horizontal New York Thumb cross axes must retain their ordinary 7px outer extent; host size, offset, travel, drag mapping and profile corner shape remain unchanged. Acceptance must compare the actually painted contour against the immediately adjacent rendered surface in both light and dark forced-color palettes, rather than treating computed fill or the presence of a border as proof of visibility. Existing native geometry, drag, focus, keyboard and teardown acceptance remains required.
+      zh-CN: 仅当既有 preference.forcedColors fact 为 active 时，Thumb 必须以 box-border border border-current 在 host 所有的 border box 内添加一像素实线 currentColor 边框。该条件性无障碍适配限定上述普通无边框配方。用户代理通过 forced-color-adjust:auto 保留系统调色板绘制权；不得引入 authored system-color literal、调色板覆盖、新 public API 或 compiler 特例。none 与 unknown 不得启用适配，离开 active 时必须撤销。New York 的纵横 Thumb 交叉轴均须保持普通 7px 外部尺寸；host size、offset、travel、drag mapping 与 profile corner shape 均不变。验收必须在浅色与深色 forced-color 调色板下，将实际绘制轮廓与紧邻 rendered surface 对比，不得以 computed fill 或边框存在作为可见性证明。既有 native geometry、drag、focus、keyboard 与 teardown 验收仍须保留。
   - id: P-SHADCN-SCROLL-AREA-THUMB-PASSIVE-BOUNDARY
     text:
       en: Thumb must remain roleless and outside sequential focus; movement requests must retain Base pointer guards and teardown.
@@ -32,13 +36,20 @@ inherits:
   prototypes:
     - id: P-BASE-SCROLL-AREA-THUMB
 dependsOn:
-  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - id: C-RULE-PREFERENCES-0001
+      since: 0.3.0-alpha.1
   decisions: [D-SCROLL-PROJECTION-0001]
 relates:
   prototypes: [P-SHADCN-SCROLL-AREA]
 verifies:
   tests: [T-SHADCN-SCROLL-AREA-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Proposed an active-forced-colors-only contour using existing Preference and border vocabulary while preserving the ordinary borderless recipe and host geometry; native acceptance remains pending.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Reconciled retained New York borderless Thumb paint and square Lyra/Sera profiles; supersedes the earlier transparent-border recipe without claiming native forced-color acceptance.

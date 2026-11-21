@@ -98,6 +98,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   let desiredRuntimeId = initialRuntime;
   let desiredIntentRevision = 0;
   let controller!: ProjectionScopeController;
+  const startupOwner = new AbortController();
   let destroyed = false;
   let requestEpoch = 0;
   let mounted = false;
@@ -279,6 +280,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
           componentId
         ]!.recipeId
       );
+      startupOwner.signal.throwIfAborted();
       const surface = createRuntimePreviewSurface(
         originalDemo,
         projectionFamilyId,
@@ -291,6 +293,10 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         componentId,
         controls: controls(),
         controlIds: toolbar ? ['runtime'] : [],
+        backgroundPreparation:
+          request.generation === 1 && root.dataset.lazy !== 'true'
+            ? { signal: startupOwner.signal, isPending: () => !mounted }
+            : undefined,
         sealOutgoingPortals,
         content: {
           demo: surface.demo,
@@ -482,6 +488,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     if (destroyPromise) return destroyPromise;
     destroyPromise = (async () => {
       destroyed = true;
+      startupOwner.abort();
       requestEpoch += 1;
       stopThemeWatcher?.();
       stopThemeWatcher = null;

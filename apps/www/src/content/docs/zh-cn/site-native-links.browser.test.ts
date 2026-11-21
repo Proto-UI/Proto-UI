@@ -460,6 +460,14 @@ async function nativePopup(
   }
 }
 
+async function waitForPassiveSurface(owner: Locator) {
+  // Progressive decoration mounts each owner's Surface independently. Observe
+  // that owner's mounted paint before reading styles or starting focus changes.
+  await owner
+    .locator(':scope > :is(wc-site-shadcn-surface,wc-site-brutalist-surface)[data-pui-root]')
+    .waitFor({ state: 'visible', timeout: 10_000 });
+}
+
 async function linkPaint(link: Locator) {
   return link.evaluate((anchor) => {
     const surface = anchor.querySelector<HTMLElement>('[data-pui-root]')!;
@@ -489,9 +497,24 @@ async function linkPaint(link: Locator) {
       box.top >= ringExtent &&
       box.right + ringExtent <= innerWidth &&
       box.bottom + ringExtent <= innerHeight;
+    const clippingAncestors = [];
     for (let parent = surface.parentElement; parent; parent = parent.parentElement) {
       const clip = getComputedStyle(parent);
       const bounds = parent.getBoundingClientRect();
+      if (
+        ['hidden', 'clip', 'scroll', 'auto'].includes(clip.overflowX) ||
+        ['hidden', 'clip', 'scroll', 'auto'].includes(clip.overflowY)
+      )
+        clippingAncestors.push({
+          tag: parent.localName,
+          className: parent.className,
+          overflowX: clip.overflowX,
+          overflowY: clip.overflowY,
+          left: bounds.left,
+          right: bounds.right,
+          top: bounds.top,
+          bottom: bounds.bottom,
+        });
       if (['hidden', 'clip', 'scroll', 'auto'].includes(clip.overflowX))
         unclipped &&=
           box.left - ringExtent >= bounds.left && box.right + ringExtent <= bounds.right;
@@ -516,6 +539,11 @@ async function linkPaint(link: Locator) {
       ringOffset: style.getPropertyValue('--pui-ring-offset-width').trim(),
       ringColor: style.getPropertyValue('--pui-ring-color').trim(),
       focused: anchor === document.activeElement && anchor.matches(':focus-visible'),
+      activeElement: {
+        tag: document.activeElement?.localName ?? null,
+        href: document.activeElement?.getAttribute('href') ?? null,
+        label: document.activeElement?.getAttribute('aria-label') ?? null,
+      },
       nativePressed: anchor.matches(':active'),
       nativeRect: {
         x: nativeBox.x,
@@ -530,6 +558,8 @@ async function linkPaint(link: Locator) {
         box.height > 0 &&
         anchor === document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2),
       unclipped,
+      clippingAncestors,
+      viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
       // Record the native root outline too: the Prototype ring alone does not
       // prove that a browser focus outline is absent or visually acceptable.
       nativeOutline: getComputedStyle(anchor).outline,
@@ -750,7 +780,13 @@ async function assertHostCurrentProjection(link: Locator, family: string) {
   await expect.poll(async () => (await linkPaint(link)).weight).toBe(baseline.weight);
 }
 
-async function assertNavigationFocus(page: Page, link: Locator) {
+async function assertNavigationFocus(
+  page: Page,
+  link: Locator,
+  focusProfile: 'default' | 'rhea' = 'default'
+) {
+  await waitForPassiveSurface(link);
+  const focusToken = focusProfile === 'rhea' ? 'ring-3' : 'ring-2';
   await link.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
   await link.focus();
@@ -759,7 +795,7 @@ async function assertNavigationFocus(page: Page, link: Locator) {
     .poll(
       async () => {
         const paint = await linkPaint(link);
-        return !paint.tokens.includes('ring-2') && paint.paintSettled;
+        return !paint.tokens.includes(focusToken) && paint.paintSettled;
       },
       { timeout: 1_000 }
     )
@@ -767,21 +803,23 @@ async function assertNavigationFocus(page: Page, link: Locator) {
   const baseline = await linkPaint(link);
   await page.keyboard.press('Shift+Tab');
   await expect
-    .poll(
-      async () => {
-        const paint = await linkPaint(link);
-        return paint.tokens.includes('ring-2') && paint.paintSettled;
-      },
-      { timeout: 1_000 }
-    )
-    .toBe(true);
+    .poll(() => linkPaint(link), { timeout: 1_000 })
+    .toMatchObject({ tokens: expect.arrayContaining([focusToken]), paintSettled: true });
   const observed = await linkPaint(link);
   expect(observed.focused).toBe(true);
-  expect(observed.tokens).toEqual(
-    expect.arrayContaining(['ring-ring', 'ring-offset-2', 'ring-offset-background'])
-  );
-  expect(observed.ringWidth).toBe('2px');
-  expect(observed.ringOffset).toBe('2px');
+  if (focusProfile === 'rhea') {
+    expect(observed.tokens).toEqual(expect.arrayContaining(['border-ring', 'ring-ring/30']));
+    expect(observed.tokens).not.toContain('ring-offset-2');
+    expect(observed.ringWidth).toBe('3px');
+    // The Rhea action profile authors no offset; the emitter defaults to 0px.
+    expect(['', '0px']).toContain(observed.ringOffset);
+  } else {
+    expect(observed.tokens).toEqual(
+      expect.arrayContaining(['ring-ring', 'ring-offset-2', 'ring-offset-background'])
+    );
+    expect(observed.ringWidth).toBe('2px');
+    expect(observed.ringOffset).toBe('2px');
+  }
   expect(observed.ringColor).not.toMatch(/^(?:|transparent|rgba\(0, 0, 0, 0\))$/);
   expect(observed.shadow).not.toBe(baseline.shadow);
   expect(observed.visibleTarget).toBe(true);
@@ -1354,16 +1392,12 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
       const page = await context.newPage();
       try {
         await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
-        await page
-          .locator(
-            'a[data-site-native-link][aria-label="GitHub"] :is(wc-site-shadcn-surface,wc-site-brutalist-surface)'
-          )
-          .waitFor({ state: 'attached' });
         const group = page
           .locator('.sidebar-pane details')
           .filter({ has: page.locator('a[aria-current="page"]') })
           .last();
         const summary = group.locator(':scope > summary');
+        await waitForPassiveSurface(summary);
         await summary.scrollIntoViewIfNeeded();
         const summaryPaint = () =>
           summary.evaluate((element) => {
@@ -1530,6 +1564,106 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         console.error('CSSOM fixture diagnostic capture failed', safeError(captureError, baseUrl))
       );
       throw error;
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
+
+  it.each([
+    ['Bootstrap', '/zh-cn/ui-libraries/bootstrap-2-3-2/button/', 390, 100],
+    ['Shadcn', '/zh-cn/ui-libraries/shadcn/button/', 390, 100],
+    ['Brutalist', '/zh-cn/ui-libraries/brutalist/components/button/', 390, 100],
+    ['Bootstrap desktop', '/en/ui-libraries/bootstrap-2-3-2/button/', 1280, 100],
+    ['Shadcn enlarged RTL', '/en/ui-libraries/shadcn/button/', 320, 200],
+    ['Brutalist enlarged RTL', '/zh-cn/ui-libraries/brutalist/components/button/', 320, 200],
+    ['Bootstrap enlarged RTL', '/en/ui-libraries/bootstrap-2-3-2/button/', 320, 200],
+  ] as const)(
+    'keeps %s pagination height stable through native link enhancement',
+    async (_family, route, width, textSize) => {
+      const context = await browser.newContext({ viewport: { width, height: 844 } });
+      try {
+        const page = await context.newPage();
+        await page.addInitScript((size) => {
+          document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+              const footer = document.querySelector<HTMLElement>('footer .pagination-links')!;
+              if (size !== 100) {
+                footer.dir = 'rtl';
+                document.documentElement.style.fontSize = `${size}%`;
+              }
+              const links = [...footer.querySelectorAll('a')];
+              const hrefs = links.map((link) => link.getAttribute('href'));
+              const samples: Array<{ height: number; enhanced: number; ownsLinks: boolean }> = [];
+              const capture = () => {
+                const current = [...footer.querySelectorAll('a')];
+                samples.push({
+                  height: footer.getBoundingClientRect().height,
+                  enhanced: current.filter((link) => link.hasAttribute('data-site-link-enhanced'))
+                    .length,
+                  ownsLinks: current.every(
+                    (link, index) =>
+                      link === links[index] && link.getAttribute('href') === hrefs[index]
+                  ),
+                });
+              };
+              capture();
+              new ResizeObserver(capture).observe(footer);
+              new MutationObserver(capture).observe(footer, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['data-site-link-enhanced'],
+              });
+              Object.assign(window, { __paginationLayout: samples });
+            },
+            { once: true }
+          );
+        }, textSize);
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded' });
+        expect(await page.locator('footer .pagination-links a').count()).toBe(2);
+        await page
+          .locator('footer .pagination-links a:not([data-site-link-enhanced])')
+          .first()
+          .waitFor({ state: 'detached' });
+        const samples = await page.evaluate(async () => {
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+          return (
+            window as unknown as {
+              __paginationLayout: Array<{ height: number; enhanced: number; ownsLinks: boolean }>;
+            }
+          ).__paginationLayout;
+        });
+        expect(samples[0]?.enhanced).toBe(0);
+        expect(samples.some(({ enhanced }) => enhanced === 2)).toBe(true);
+        expect(samples.every(({ ownsLinks }) => ownsLinks)).toBe(true);
+        expect(
+          Math.max(...samples.map(({ height }) => height)) -
+            Math.min(...samples.map(({ height }) => height))
+        ).toBeLessThanOrEqual(1);
+      } finally {
+        await context.close();
+      }
+    },
+    60_000
+  );
+
+  it('keeps native pagination focus visible with scripts disabled and forced colors', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 320, height: 844 },
+      javaScriptEnabled: false,
+      forcedColors: 'active',
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/button/`);
+      const next = page.locator('footer .pagination-links a[rel="next"]');
+      await next.focus();
+      expect(await next.evaluate((link) => link.matches(':focus-visible'))).toBe(true);
+      expect(await next.evaluate((link) => getComputedStyle(link).outlineStyle)).toBe('solid');
+      const destination = new URL((await next.getAttribute('href'))!, page.url()).href;
+      await Promise.all([page.waitForURL(destination), page.keyboard.press('Enter')]);
     } finally {
       await context.close();
     }
@@ -2240,26 +2374,81 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               '[data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
             )
             .click();
-        const facts = () =>
-          current.evaluate((link) => {
-            const boundary = link.closest<HTMLElement>('.docs-sidebar')!;
+        const facts = (settleWheel = false) =>
+          current.evaluate(async (link, settleWheel) => {
+            const boundary = link.closest<HTMLElement>('.docs-sidebar');
             let owner: HTMLElement | null = null;
+            const ancestors = [];
+            const composedParent = (node: Element): Element | null => {
+              if (node.assignedSlot) return node.assignedSlot;
+              if (node.parentElement) return node.parentElement;
+              const root = node.getRootNode();
+              return root instanceof ShadowRoot ? root.host : null;
+            };
+            // Observe the actual composed scrollport independently of production:
+            // Contents can move the retained nav under an enclosing public surface.
             for (
-              let node = link.parentElement;
-              node && boundary.contains(node);
-              node = node.parentElement
+              let node = boundary?.contains(link) ? composedParent(link) : null;
+              node && node !== document.body && node !== document.documentElement;
+              node = composedParent(node)
             ) {
+              if (!(node instanceof HTMLElement)) continue;
+              const overflowY = getComputedStyle(node).overflowY;
+              const rect = node.getBoundingClientRect();
+              ancestors.push({
+                tag: node.localName,
+                id: node.id,
+                className: node.className,
+                overflowY,
+                clientHeight: node.clientHeight,
+                scrollHeight: node.scrollHeight,
+                scrollTop: node.scrollTop,
+                rect: {
+                  top: rect.top,
+                  bottom: rect.bottom,
+                  width: rect.width,
+                  height: rect.height,
+                },
+              });
               if (
+                !owner &&
                 node.clientHeight > 0 &&
                 node.scrollHeight > node.clientHeight &&
-                /^(auto|scroll|overlay)$/.test(getComputedStyle(node).overflowY)
+                /^(auto|scroll|overlay)$/.test(overflowY)
               ) {
                 owner = node;
-                break;
               }
-              if (node === boundary) break;
+            }
+            const attribution = {
+              width: innerWidth,
+              route: location.pathname,
+              relocated: boundary?.hasAttribute('data-site-contents-popover-tree') ?? false,
+              ancestors,
+              resolvedOwner: owner
+                ? { tag: owner.localName, id: owner.id, className: owner.className }
+                : null,
+            };
+            if (settleWheel) {
+              if (!owner)
+                throw new Error(`Missing actual scroll owner: ${JSON.stringify(attribution)}`);
+              let previous = owner.scrollTop,
+                stable = 0;
+              for (let frame = 0; frame < 60; frame++) {
+                const { promise, resolve } = Promise.withResolvers<void>();
+                requestAnimationFrame(() => resolve());
+                await promise;
+                const next = owner.scrollTop;
+                stable = next === previous ? stable + 1 : 0;
+                previous = next;
+                if (stable >= 2) break;
+                if (frame === 59)
+                  throw new Error(
+                    `Manual scrolling did not settle: ${JSON.stringify({ ...attribution, scrollTop: next })}`
+                  );
+              }
             }
             const empty = {
+              ...attribution,
               visible: false,
               reason: 'missing sidebar owner',
               owner: null,
@@ -2296,6 +2485,8 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
             const surface = link.querySelector<HTMLElement>('[data-site-link-content]');
             const content = (surface ?? link).getBoundingClientRect();
             return {
+              ...attribution,
+              reason: 'current row geometry relative to resolved scrollport',
               visible:
                 row.width > 0 &&
                 row.height > 0 &&
@@ -2341,8 +2532,10 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               projected: link.getAttribute('data-site-link-enhanced'),
               focus: document.activeElement?.outerHTML.slice(0, 300),
             };
-          });
-        await expect.poll(async () => (await facts()).visible, { timeout: 10_000 }).toBe(true);
+          }, settleWheel);
+        await expect
+          .poll(() => facts(), { timeout: 10_000 })
+          .toEqual(expect.objectContaining({ visible: true }));
         const entered = await facts();
         expect(entered.documentY).toBe(0);
         // No-pointer control: the route-entry reveal owner keeps adjusting this
@@ -2472,32 +2665,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         await expect
           .poll(async () => (await facts()).scrollTop)
           .toBeLessThan(beforeWheel.scrollTop!);
-        await current.evaluate(async (link) => {
-          const boundary = link.closest<HTMLElement>('.docs-sidebar')!;
-          let owner = link.parentElement!;
-          while (
-            boundary.contains(owner) &&
-            !(
-              owner.clientHeight > 0 &&
-              owner.scrollHeight > owner.clientHeight &&
-              /^(auto|scroll|overlay)$/.test(getComputedStyle(owner).overflowY)
-            )
-          ) {
-            if (owner === boundary || !owner.parentElement)
-              throw new Error('Missing actual scroll owner');
-            owner = owner.parentElement;
-          }
-          let previous = owner.scrollTop,
-            stable = 0;
-          for (let frame = 0; frame < 60; frame++) {
-            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-            const next = owner.scrollTop;
-            stable = next === previous ? stable + 1 : 0;
-            previous = next;
-            if (stable >= 2) return;
-          }
-          throw new Error('Manual scrolling did not settle');
-        });
+        await facts(true);
         const manuallyScrolled = await facts();
         await captureLinks(
           page,
@@ -2549,7 +2717,9 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               '[data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
             )
             .click();
-        await expect.poll(async () => (await facts()).visible, { timeout: 10_000 }).toBe(true);
+        await expect
+          .poll(() => facts(), { timeout: 10_000 })
+          .toEqual(expect.objectContaining({ visible: true }));
         await captureLinks(
           page,
           `sidebar-current-${width}-reload`,
@@ -3020,7 +3190,10 @@ it('records the English shell labels, destinations and native activation ownersh
         for (const link of await page.locator(HOMEPAGE_DESKTOP_NAVIGATION).all()) {
           const paint = await linkPaint(link);
           expect(paint.visibleTarget).toBe(true);
-          expect(paint.unclipped).toBe(true);
+          expect(
+            paint.unclipped,
+            JSON.stringify({ width, rootSize, href: await link.getAttribute('href'), paint })
+          ).toBe(true);
         }
       }
     }
@@ -3036,8 +3209,7 @@ it('records the English shell labels, destinations and native activation ownersh
       '#home-social [data-projection-generation-state="active"] a'
     );
     expect(shellNavigationIssues(social, socialExpectation)).toEqual([]);
-    const popupNavigation = await collectShellLinks(page, HOMEPAGE_POPUP_NAVIGATION);
-    expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
+    expect(await page.locator(HOMEPAGE_POPUP_NAVIGATION).first().isVisible()).toBe(false);
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
       await page
@@ -3061,7 +3233,7 @@ it('records the English shell labels, destinations and native activation ownersh
       'shadcn',
       'wc',
       'en; hero-keyboard-focus; native-theme-dark; 390px popup-navigation',
-      { desktopNavigation, popupNavigation, narrowNavigation, hero, social, focused, themeBefore }
+      { desktopNavigation, narrowNavigation, hero, social, focused, themeBefore }
     );
   } finally {
     await enContext.close();
@@ -3099,7 +3271,8 @@ it('records the English shell labels, destinations and native activation ownersh
     await expect
       .poll(async () => (await linkPaint(navHover)).tokens)
       .not.toEqual(navResting.tokens);
-    const navFocus = await assertNavigationFocus(docs, desktopLinks.first());
+    // Shadcn primary navigation opts into the Rhea minimal action appearance.
+    const navFocus = await assertNavigationFocus(docs, desktopLinks.first(), 'rhea');
     await captureLinks(
       docs,
       'english-docs-primary-navigation-focus',
@@ -3114,6 +3287,12 @@ it('records the English shell labels, destinations and native activation ownersh
     ).toBe(0);
     await openSettings(docs);
     await assertHeaderPopupSurface(docs, 'shadcn', 'wc', false);
+    // Popup primary navigation is hidden on desktop in documentation too.
+    // Observe its native hit targets only at the viewport that displays them.
+    expect(await docs.locator('[data-site-header-navigation]').isVisible()).toBe(false);
+    await docs.setViewportSize({ width: 390, height: 844 });
+    expect(await docs.locator('[data-site-header-desktop-navigation]').isVisible()).toBe(false);
+    await openSettings(docs);
     const popup = await collectShellLinks(docs, '[data-site-header-navigation] a');
     expect(shellNavigationIssues(popup, englishExpectation)).toEqual([]);
     expect(
@@ -3124,6 +3303,8 @@ it('records the English shell labels, destinations and native activation ownersh
       )
     ).toEqual([navigationLabel]);
     expect(await docs.locator('[data-site-header-navigation] a[aria-current]').count()).toBe(0);
+    await docs.setViewportSize({ width: 1440, height: 1000 });
+    await openSettings(docs);
     const socialLinks = docs.locator('.site-social-links a[data-site-native-link]');
     const socialFacts = await collectShellLinks(
       docs,
@@ -3140,16 +3321,16 @@ it('records the English shell labels, destinations and native activation ownersh
         evidence
       );
     });
-    // The panel owns the pointer while it is open, so the real activation
-    // control below runs after the native disclosure has closed again.
+    // Enhancement retains details.open for fallback content and owns actual
+    // disclosure through panel visibility and the command's expanded state.
+    // Close that disclosure before the real activation control below.
     await docs.keyboard.press('Escape');
     await expect
-      .poll(() =>
-        docs.evaluate(
-          () => (document.querySelector('[data-site-header-panel]') as HTMLDetailsElement).open
-        )
-      )
+      .poll(() => docs.locator('[data-site-header-panel]').isVisible())
       .toBe(false);
+    const menuCommand = docs.locator('[data-site-menu-button]');
+    expect(await menuCommand.getAttribute('aria-expanded')).toBe('false');
+    expect(await menuCommand.evaluate((element) => element === document.activeElement)).toBe(true);
     // Mutation controls: the shared observer must fail closed on the three
     // shapes a translated snapshot or a Button-role regression would produce.
     // Only the collected observation is mutated; the page is never rewritten to
@@ -3210,9 +3391,11 @@ it('records the English shell labels, destinations and native activation ownersh
     await narrow.goto(`${baseUrl}/en/ui-libraries/brutalist/components/button/`, {
       waitUntil: 'networkidle',
     });
-    await narrow.locator('.site-social-links a[data-site-native-link]').first().waitFor();
     expect(await narrow.locator('[data-site-header-desktop-navigation]').isVisible()).toBe(false);
     await openSettings(narrow);
+    // Documentation social anchors belong to the initially closed Header panel.
+    // Require visibility only after its native command has opened that owner.
+    await narrow.locator('.site-social-links a[data-site-native-link]').first().waitFor();
     const popupNavigation = await collectShellLinks(narrow, '[data-site-header-navigation] a');
     expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
     for (const link of await narrow.locator('[data-site-header-navigation] a').all()) {

@@ -782,6 +782,7 @@ function initSession<Props extends PropsBaseType>(
   const eventPort = state.hostSession?.caps.getPort<EventPort>('event');
   const router = createWebProtoEventRouter({
     rootRegistrations: eventPort,
+    globalKeyDown: eventPort?.hasGlobalRegistration?.('key.down') !== false,
     globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
     rootEl,
     instanceToken: state.instanceToken,

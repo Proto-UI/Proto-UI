@@ -283,6 +283,15 @@ export function conditionRefinements(
     return true;
   };
   if (!fresh(condition)) return [];
+  if (truth && condition.kind === 'intrinsic' && condition.name === 'array.includes') {
+    const [array, search] = condition.arguments;
+    // Only an immutable binding can carry this proof beyond the comparison.
+    // The receiver is checked again by portable intrinsic admission.
+    if (search?.kind === 'reference' && fresh(search) &&
+      array && typeof array.type !== 'string' && array.type.kind === 'array')
+      return [[search.name, array.type.element]];
+    return [];
+  }
   // Positive strict identity is the only refinement from the inert join.
   // It carries nominal authority, which a generic non-null proof cannot infer.
   if (

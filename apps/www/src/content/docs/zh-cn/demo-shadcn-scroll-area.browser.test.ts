@@ -187,8 +187,8 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
             width: style.width,
             top: style.top,
             right: style.right,
-            borderWidth: style.borderTopWidth,
-            borderColor: style.borderTopColor,
+            borderWidth: style.borderLeftWidth,
+            borderColor: style.borderLeftColor,
             flexDirection: style.flexDirection,
           };
         });
@@ -210,7 +210,7 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           width: '10px',
           top: '0px',
           right: '0px',
-          borderWidth: '2px',
+          borderWidth: '1px',
           borderColor: 'rgba(0, 0, 0, 0)',
           flexDirection: 'row',
         });
@@ -219,7 +219,7 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           height: '10px',
           bottom: '0px',
           left: '0px',
-          borderWidth: '2px',
+          borderWidth: '1px',
           borderColor: 'rgba(0, 0, 0, 0)',
           flexDirection: 'column',
         });

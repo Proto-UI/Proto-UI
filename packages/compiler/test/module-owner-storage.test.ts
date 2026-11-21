@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
+import { emitGpuiSource } from '../src/gpui-source';
 import type { PrototypeIR } from '../src/ir';
 import { partitionModuleBindings } from '../src/source-module-bindings';
 
@@ -15,6 +16,100 @@ function checked(source: string): PrototypeIR {
 }
 
 describe('shared module storage and owner closures', () => {
+  it('invokes eligible data methods through the live owner registration', () => {
+    const ir = checked(`${core}
+      type Input = { held: boolean };
+      type Decision = { consumed: boolean; effects: string[] };
+      function reply(consumed: boolean, effects: string[]): Decision {
+        return { consumed, effects };
+      }
+      function decide(input: Input): Decision {
+        const held = input.held;
+        if (held) return reply(true, ['hold']);
+        return reply(false, []);
+      }
+      let counter = 0;
+      function readCounter(): number { return counter; }
+      function readIndirect(): number { return readCounter(); }
+      export default definePrototype({ name: 'data-entry', setup(def) {
+        const flag = def.state.bool('flag', false);
+        def.expose.method('decide', decide);
+        def.expose.method('readIndirect', readIndirect);
+        def.expose.method('readFlag', () => flag.get());
+      }});`);
+    const result = emitGpuiSource(ir, { componentName: 'DataEntry' });
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    const { code } = result.value;
+    const dataMethod = code.slice(
+      code.indexOf('pub fn call_data_method('),
+      code.indexOf('pub fn owner(&self)')
+    );
+    expect(dataMethod).toContain(
+      'pub fn call_data_method(&self, name: &str, arguments: Vec<Option<Json>>)'
+    );
+    expect(dataMethod).toContain('ensure(&self.owner())');
+    expect(dataMethod).toContain('self.owner.borrow().exposes.get(name).cloned()');
+    expect(dataMethod).toContain('invoke(&self.owner, "expose-method", &callback, arguments)');
+    expect(dataMethod).not.toContain('function.call_authored');
+    expect(dataMethod).toContain('check_method(name, &arguments)');
+    expect(dataMethod).toContain('exposed method returned invalid portable data');
+    expect(dataMethod).toContain('unknown or ineligible data method');
+    expect(dataMethod).not.toContain('"readIndirect"');
+    expect(dataMethod).not.toContain('"readFlag"');
+    expect(code).toContain(
+      'pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App)'
+    );
+    expect(code).toContain('expose_method(&owner, Value::string("readFlag")');
+  });
+
+  it.each([
+    "def.expose.method('decide', () => flag.get());",
+    "if (true) { def.expose.method('decide', () => flag.get()); }",
+  ])('rejects ambiguous data registration when setup also contains %s', (registration) => {
+    const ir = checked(`${core}
+      function decide(): boolean { return true; }
+      export default definePrototype({ name: 'ambiguous-entry', setup(def) {
+        const flag = def.state.bool('flag', false);
+        def.expose.method('decide', decide);
+        ${registration}
+      }});`);
+    const result = emitGpuiSource(ir);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).not.toContain('pub fn call_data_method(');
+    expect(result.value.code).toContain('expose_method(&owner, Value::string("decide")');
+  });
+
+  it('preserves undefined argument holes for a conditionally registered data method', () => {
+    const ir = checked(`${core}
+      function decide(first: number = 7, last: number): number { return first + last; }
+      let enabled = false;
+      export default definePrototype({ name: 'conditional-data-entry', setup(def) {
+        enabled = !enabled;
+        if (enabled) { def.expose.method('decide', decide); }
+      }});`);
+    const result = emitGpuiSource(ir);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).toContain('pub fn call_data_method(&self');
+    expect(result.value.code).toContain(
+      'value.map(Value::json).unwrap_or(Value::Undefined)'
+    );
+    expect(result.value.code).toContain('self.owner.borrow().exposes.get(name).cloned()');
+  });
+
+  it('does not promote a conditional callback shadowed by a setup-local function', () => {
+    const ir = checked(`${core}
+      function decide(): number { return 7; }
+      export default definePrototype({ name: 'shadowed-data-entry', setup(def) {
+        if (true) {
+          const decide = () => 9;
+          def.expose.method('decide', decide);
+        }
+      }});`);
+    const result = emitGpuiSource(ir);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).not.toContain('pub fn call_data_method(');
+  });
+
   it('retains owner dependencies in defaults without promoting scalar-only module helpers', () => {
     const ir = checked(`import {definePrototype,delay} from '@proto.ui/core';
       function wait(task=delay(0,()=>{})){return 1;}

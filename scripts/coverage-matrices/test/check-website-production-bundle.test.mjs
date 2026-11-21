@@ -60,8 +60,10 @@ test('pointer contact is an actual router-owned leaf with no optical dependency'
 });
 
 const RECONCILED_DEMO_FACADES = [
+  'apps/www/src/pages/en/test/button-boundaries/[runtime].astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/button-ghost/[runtime].astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/command-no-addon.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/command-width.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-hover.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',
@@ -819,6 +821,8 @@ for (const family of ['react', 'vue', 'vue2', 'wc'])
     });
 
 const reviewedWcHelpers = [
+  'packages/adapters/base/src/events/keyboard-press-owner.ts',
+  'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/platform/portal-direction.ts',
   'packages/adapters/web-component/src/focus-scope-targets.ts',
   'packages/adapters/web-component/src/keyed-meta-sources.ts',

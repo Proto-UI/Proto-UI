@@ -173,6 +173,61 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Post-admission body drift is invisible to this gate and stays source-review
   // debt under #420; the affected sources and their owning rows are enumerated
   // in internal/website/self-hosting-coverage-matrix.md.
+  // Exact legacy runtime-selection composition; its owning row stays blocked.
+  'apps/www/src/components/PrototypePreviewer/runtime-tabs.ts': Object.freeze({
+    sourceSha256: 'f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/tabs',
+      '@proto.ui/prototypes-brutalist/tabs',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tabs',
+      '@proto.ui/prototypes-liquid-glass/tabs',
+    ]),
+  }),
+  // Exact progressive CodeExample WC bridges. Their site-composition owners
+  // remain blocked; import admission does not resolve native fallback disposition
+  // or provide host, keyboard, SSR/no-JS, or remount acceptance evidence.
+  'apps/www/src/components/code-example-tabs.ts': Object.freeze({
+    sourceSha256: '88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/tabs',
+      '@proto.ui/prototypes-brutalist/tabs',
+    ]),
+  }),
+  'apps/www/src/components/code-example-tree.ts': Object.freeze({
+    sourceSha256: '1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/tree',
+      '@proto.ui/prototypes-brutalist/tree',
+      '@proto.ui/prototypes-lucide/icons/chevron-down',
+      '@proto.ui/prototypes-lucide/icons/chevron-right',
+      '@proto.ui/prototypes-lucide/icons/folder',
+      '@proto.ui/prototypes-lucide/icons/file',
+      '@proto.ui/prototypes-lucide/icons/file-code',
+      '@proto.ui/prototypes-lucide/icons/file-braces',
+      '@proto.ui/prototypes-lucide/icons/file-cog',
+      '@proto.ui/prototypes-lucide/icons/file-text',
+    ]),
+  }),
+  // Exact passive CSS endpoint inputs; Bootstrap remains WIP / Experimental.
+  'apps/www/src/pages/styles/site-library-theme.css.ts': Object.freeze({
+    sourceSha256: '6e97d6eaca3627a636340869e7c350e6596364640ffee004f3a99c5cde94e2f8',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-bootstrap-2-3-2/theme',
+      '@proto.ui/prototypes-brutalist/theme',
+      '@proto.ui/prototypes-shadcn/text',
+    ]),
+  }),
+  // Exact passive Homepage theme source; the homepage demo owner remains blocked.
+  'apps/www/src/components/Homepage/homepage-ghost-theme.ts': Object.freeze({
+    sourceSha256: '106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4',
+    specifiers: Object.freeze([
+      '../../../../../packages/prototypes/bootstrap-2-3-2/src/theme',
+      '../../../../../packages/prototypes/brutalist/src/theme',
+    ]),
+  }),
   // Exact #652 acceptance compositions. Their App controls remain blocked
   // consumers, not an infrastructure or stable-prototype exemption.
   'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
@@ -223,10 +278,17 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Exact opt-in optical host and its owned-source diagnostics, not app controls.
   'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-feedback']),
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/module-feedback',
+      '@proto.ui/adapter-base',
+    ]),
   }),
   'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/adapter-base/web-material']),
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-base',
+      '@proto.ui/adapter-base/web-material',
+    ]),
     resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
   }),
   'packages/adapters/base/src/material/program-pool.ts': Object.freeze({
@@ -262,13 +324,80 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2',
   }),
 
+  // Exact public caption binding consumed by the blocked application controller.
+  'apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts': Object.freeze({
+    sourceSha256: '57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894',
+    specifiers: Object.freeze(['@proto.ui/prototypes-base/calendar']),
+  }),
   // Reviewed Field validation request type consumed by the blocked demo controller.
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
+  // Exact public-fact demo compositions under the blocked authored-controller
+  // owner (#420). Core is type-only; the Bootstrap helper supplies passive
+  // appearance, while Drawer/Dialog retain input, focus and dismissal ownership.
+  'apps/www/src/content/docs/drawer-command-disabled.shared.ts': Object.freeze({
+    sourceSha256: 'bdbf1708e7a961aec3085222c0d1faaea49cc674aa10e06c9921f926ccac59d3',
+    specifiers: Object.freeze(['@proto.ui/core']),
+  }),
+  'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({
+    sourceSha256: '02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee',
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+    ]),
+  }),
+  // Exact demo compositions delegating geometry/materialization to the public Web
+  // attachment. Their authored-controller owner remains blocked. Bootstrap and
+  // Liquid Glass remain WIP/Experimental; these ten edges grant no family support.
+  'apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: 'f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: '97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts': Object.freeze({
+    sourceSha256: '8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-base/virtual-list/web',
+      '@proto.ui/prototypes-base/virtual-list',
+    ]),
+  }),
+  // The recipe projects serializable intent into the render-local association scope.
+  'apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts': Object.freeze({
+    sourceSha256: '249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/checkbox']),
+  }),
+  // The application demo supplies view lifetime and disposes the public binding.
+  'apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts': Object.freeze({
+    sourceSha256: '64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+  }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
-  // and they do not certify the admitted source body (see the note above).
+  // and unpinned entries do not certify the source body (see the note above).
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
   }),
@@ -276,26 +405,40 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
+    sourceSha256: '9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
+      '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-brutalist/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
     ]),
   }),
   'apps/www/src/components/site-native-controls.ts': Object.freeze({
+    sourceSha256: '3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/surface',
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/module-expose-state']),
-    resolvedPaths: Object.freeze([
-      'packages/prototypes/lucide/src/icons/search',
-      'packages/prototypes/lucide/src/icons/x',
+    sourceSha256: '7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3',
+    specifiers: Object.freeze([
+      '@proto.ui/module-expose-state',
+      '../../../../packages/prototypes/lucide/src/icons/search',
+      '../../../../packages/prototypes/lucide/src/icons/arrow-right',
+      '../../../../packages/prototypes/lucide/src/icons/x',
     ]),
+  }),
+  // Public InputShell binding only; neither Search source gains UI acceptance.
+  'apps/www/src/components/site-search-composition.ts': Object.freeze({
+    sourceSha256: '8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
@@ -348,6 +491,203 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/PrototypePreviewer/prototype-modules.ts': Object.freeze({
     categories: Object.freeze(['prototype-package', 'prototype-internal']),
   }),
+  // Exact lazy Finf registry source under www.demo.prototype-previewer (#1323).
+  // Public prototype subpaths plus the Core type import; registrations check identity.
+  'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts': Object.freeze({
+    sourceSha256: 'b078e1e9e43782d87e5966b88ec6fe01b31d43ab70357c17e2f1e3baa30b6f06',
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/prototypes-base/alert-dialog',
+      '@proto.ui/prototypes-base/autocomplete',
+      '@proto.ui/prototypes-base/calendar',
+      '@proto.ui/prototypes-base/carousel',
+      '@proto.ui/prototypes-base/checkbox-group',
+      '@proto.ui/prototypes-base/combobox',
+      '@proto.ui/prototypes-base/command',
+      '@proto.ui/prototypes-base/context-menu',
+      '@proto.ui/prototypes-base/data-table',
+      '@proto.ui/prototypes-base/date-picker',
+      '@proto.ui/prototypes-base/drawer',
+      '@proto.ui/prototypes-base/dropdown',
+      '@proto.ui/prototypes-base/fieldset',
+      '@proto.ui/prototypes-base/form',
+      '@proto.ui/prototypes-base/input-otp',
+      '@proto.ui/prototypes-base/menubar',
+      '@proto.ui/prototypes-base/message-scroller',
+      '@proto.ui/prototypes-base/meter',
+      '@proto.ui/prototypes-base/navigation-menu',
+      '@proto.ui/prototypes-base/number-field',
+      '@proto.ui/prototypes-base/popover',
+      '@proto.ui/prototypes-base/progress',
+      '@proto.ui/prototypes-base/resizable',
+      '@proto.ui/prototypes-base/slider',
+      '@proto.ui/prototypes-base/toast',
+      '@proto.ui/prototypes-base/toggle-group',
+      '@proto.ui/prototypes-base/toolbar',
+      '@proto.ui/prototypes-base/tree',
+      '@proto.ui/prototypes-base/virtual-list',
+      '@proto.ui/prototypes-bootstrap-2-3-2/alert-dialog',
+      '@proto.ui/prototypes-bootstrap-2-3-2/async-region',
+      '@proto.ui/prototypes-bootstrap-2-3-2/autocomplete',
+      '@proto.ui/prototypes-bootstrap-2-3-2/calendar',
+      '@proto.ui/prototypes-bootstrap-2-3-2/carousel',
+      '@proto.ui/prototypes-bootstrap-2-3-2/checkbox-group',
+      '@proto.ui/prototypes-bootstrap-2-3-2/combobox',
+      '@proto.ui/prototypes-bootstrap-2-3-2/command',
+      '@proto.ui/prototypes-bootstrap-2-3-2/context-menu',
+      '@proto.ui/prototypes-bootstrap-2-3-2/data-table',
+      '@proto.ui/prototypes-bootstrap-2-3-2/date-picker',
+      '@proto.ui/prototypes-bootstrap-2-3-2/dialog',
+      '@proto.ui/prototypes-bootstrap-2-3-2/drawer',
+      '@proto.ui/prototypes-bootstrap-2-3-2/dropdown',
+      '@proto.ui/prototypes-bootstrap-2-3-2/field',
+      '@proto.ui/prototypes-bootstrap-2-3-2/fieldset',
+      '@proto.ui/prototypes-bootstrap-2-3-2/form',
+      '@proto.ui/prototypes-bootstrap-2-3-2/hover-card',
+      '@proto.ui/prototypes-bootstrap-2-3-2/image',
+      '@proto.ui/prototypes-bootstrap-2-3-2/input-otp',
+      '@proto.ui/prototypes-bootstrap-2-3-2/live-region',
+      '@proto.ui/prototypes-bootstrap-2-3-2/menubar',
+      '@proto.ui/prototypes-bootstrap-2-3-2/message-scroller',
+      '@proto.ui/prototypes-bootstrap-2-3-2/meter',
+      '@proto.ui/prototypes-bootstrap-2-3-2/navigation-menu',
+      '@proto.ui/prototypes-bootstrap-2-3-2/number-field',
+      '@proto.ui/prototypes-bootstrap-2-3-2/popover',
+      '@proto.ui/prototypes-bootstrap-2-3-2/progress',
+      '@proto.ui/prototypes-bootstrap-2-3-2/radio-group',
+      '@proto.ui/prototypes-bootstrap-2-3-2/resizable',
+      '@proto.ui/prototypes-bootstrap-2-3-2/scroll-area',
+      '@proto.ui/prototypes-bootstrap-2-3-2/select',
+      '@proto.ui/prototypes-bootstrap-2-3-2/slider',
+      '@proto.ui/prototypes-bootstrap-2-3-2/table',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tabs',
+      '@proto.ui/prototypes-bootstrap-2-3-2/toast',
+      '@proto.ui/prototypes-bootstrap-2-3-2/toggle-group',
+      '@proto.ui/prototypes-bootstrap-2-3-2/toolbar',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tooltip',
+      '@proto.ui/prototypes-bootstrap-2-3-2/transition',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tree',
+      '@proto.ui/prototypes-bootstrap-2-3-2/virtual-list',
+      '@proto.ui/prototypes-brutalist/alert-dialog',
+      '@proto.ui/prototypes-brutalist/async-region',
+      '@proto.ui/prototypes-brutalist/autocomplete',
+      '@proto.ui/prototypes-brutalist/calendar',
+      '@proto.ui/prototypes-brutalist/carousel',
+      '@proto.ui/prototypes-brutalist/checkbox-group',
+      '@proto.ui/prototypes-brutalist/combobox',
+      '@proto.ui/prototypes-brutalist/command',
+      '@proto.ui/prototypes-brutalist/context-menu',
+      '@proto.ui/prototypes-brutalist/data-table',
+      '@proto.ui/prototypes-brutalist/date-picker',
+      '@proto.ui/prototypes-brutalist/drawer',
+      '@proto.ui/prototypes-brutalist/dropdown',
+      '@proto.ui/prototypes-brutalist/fieldset',
+      '@proto.ui/prototypes-brutalist/form',
+      '@proto.ui/prototypes-brutalist/image',
+      '@proto.ui/prototypes-brutalist/input-otp',
+      '@proto.ui/prototypes-brutalist/live-region',
+      '@proto.ui/prototypes-brutalist/menubar',
+      '@proto.ui/prototypes-brutalist/message-scroller',
+      '@proto.ui/prototypes-brutalist/meter',
+      '@proto.ui/prototypes-brutalist/navigation-menu',
+      '@proto.ui/prototypes-brutalist/number-field',
+      '@proto.ui/prototypes-brutalist/popover',
+      '@proto.ui/prototypes-brutalist/progress',
+      '@proto.ui/prototypes-brutalist/resizable',
+      '@proto.ui/prototypes-brutalist/slider',
+      '@proto.ui/prototypes-brutalist/table',
+      '@proto.ui/prototypes-brutalist/toast',
+      '@proto.ui/prototypes-brutalist/toggle-group',
+      '@proto.ui/prototypes-brutalist/toolbar',
+      '@proto.ui/prototypes-brutalist/tree',
+      '@proto.ui/prototypes-brutalist/virtual-list',
+      '@proto.ui/prototypes-liquid-glass/alert-dialog',
+      '@proto.ui/prototypes-liquid-glass/async-region',
+      '@proto.ui/prototypes-liquid-glass/autocomplete',
+      '@proto.ui/prototypes-liquid-glass/calendar',
+      '@proto.ui/prototypes-liquid-glass/carousel',
+      '@proto.ui/prototypes-liquid-glass/checkbox',
+      '@proto.ui/prototypes-liquid-glass/checkbox-group',
+      '@proto.ui/prototypes-liquid-glass/combobox',
+      '@proto.ui/prototypes-liquid-glass/command',
+      '@proto.ui/prototypes-liquid-glass/context-menu',
+      '@proto.ui/prototypes-liquid-glass/data-table',
+      '@proto.ui/prototypes-liquid-glass/date-picker',
+      '@proto.ui/prototypes-liquid-glass/dialog',
+      '@proto.ui/prototypes-liquid-glass/drawer',
+      '@proto.ui/prototypes-liquid-glass/dropdown',
+      '@proto.ui/prototypes-liquid-glass/field',
+      '@proto.ui/prototypes-liquid-glass/fieldset',
+      '@proto.ui/prototypes-liquid-glass/form',
+      '@proto.ui/prototypes-liquid-glass/hover-card',
+      '@proto.ui/prototypes-liquid-glass/image',
+      '@proto.ui/prototypes-liquid-glass/input',
+      '@proto.ui/prototypes-liquid-glass/input-otp',
+      '@proto.ui/prototypes-liquid-glass/live-region',
+      '@proto.ui/prototypes-liquid-glass/menubar',
+      '@proto.ui/prototypes-liquid-glass/message-scroller',
+      '@proto.ui/prototypes-liquid-glass/meter',
+      '@proto.ui/prototypes-liquid-glass/navigation-menu',
+      '@proto.ui/prototypes-liquid-glass/number-field',
+      '@proto.ui/prototypes-liquid-glass/popover',
+      '@proto.ui/prototypes-liquid-glass/progress',
+      '@proto.ui/prototypes-liquid-glass/radio-group',
+      '@proto.ui/prototypes-liquid-glass/resizable',
+      '@proto.ui/prototypes-liquid-glass/scroll-area',
+      '@proto.ui/prototypes-liquid-glass/select',
+      '@proto.ui/prototypes-liquid-glass/separator',
+      '@proto.ui/prototypes-liquid-glass/slider',
+      '@proto.ui/prototypes-liquid-glass/switch',
+      '@proto.ui/prototypes-liquid-glass/table',
+      '@proto.ui/prototypes-liquid-glass/tabs',
+      '@proto.ui/prototypes-liquid-glass/textarea',
+      '@proto.ui/prototypes-liquid-glass/toast',
+      '@proto.ui/prototypes-liquid-glass/toggle-group',
+      '@proto.ui/prototypes-liquid-glass/toolbar',
+      '@proto.ui/prototypes-liquid-glass/tooltip',
+      '@proto.ui/prototypes-liquid-glass/transition',
+      '@proto.ui/prototypes-liquid-glass/tree',
+      '@proto.ui/prototypes-liquid-glass/virtual-list',
+      '@proto.ui/prototypes-shadcn/alert-dialog',
+      '@proto.ui/prototypes-shadcn/async-region',
+      '@proto.ui/prototypes-shadcn/autocomplete',
+      '@proto.ui/prototypes-shadcn/calendar',
+      '@proto.ui/prototypes-shadcn/carousel',
+      '@proto.ui/prototypes-shadcn/checkbox-group',
+      '@proto.ui/prototypes-shadcn/combobox',
+      '@proto.ui/prototypes-shadcn/command',
+      '@proto.ui/prototypes-shadcn/context-menu',
+      '@proto.ui/prototypes-shadcn/data-table',
+      '@proto.ui/prototypes-shadcn/date-picker',
+      '@proto.ui/prototypes-shadcn/drawer',
+      '@proto.ui/prototypes-shadcn/dropdown',
+      '@proto.ui/prototypes-shadcn/field',
+      '@proto.ui/prototypes-shadcn/fieldset',
+      '@proto.ui/prototypes-shadcn/form',
+      '@proto.ui/prototypes-shadcn/image',
+      '@proto.ui/prototypes-shadcn/input-otp',
+      '@proto.ui/prototypes-shadcn/input-shell',
+      '@proto.ui/prototypes-shadcn/live-region',
+      '@proto.ui/prototypes-shadcn/menubar',
+      '@proto.ui/prototypes-shadcn/message-scroller',
+      '@proto.ui/prototypes-shadcn/meter',
+      '@proto.ui/prototypes-shadcn/navigation-menu',
+      '@proto.ui/prototypes-shadcn/number-field',
+      '@proto.ui/prototypes-shadcn/popover',
+      '@proto.ui/prototypes-shadcn/progress',
+      '@proto.ui/prototypes-shadcn/resizable',
+      '@proto.ui/prototypes-shadcn/select',
+      '@proto.ui/prototypes-shadcn/slider',
+      '@proto.ui/prototypes-shadcn/table',
+      '@proto.ui/prototypes-shadcn/tabs',
+      '@proto.ui/prototypes-shadcn/toast',
+      '@proto.ui/prototypes-shadcn/toggle-group',
+      '@proto.ui/prototypes-shadcn/toolbar',
+      '@proto.ui/prototypes-shadcn/transition',
+      '@proto.ui/prototypes-shadcn/tree',
+      '@proto.ui/prototypes-shadcn/virtual-list',
+    ]),
+  }),
   'apps/www/src/components/BrutalistPageStyle.astro': Object.freeze({
     resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
   }),
@@ -356,7 +696,11 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/prototypes/brutalist/src/theme',
       'packages/prototypes/bootstrap-2-3-2/src/theme',
       'packages/prototypes/liquid-glass/src/theme',
+      'packages/prototypes/shadcn/src/text/typography',
     ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/canonical-motion-palette.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-base', '@proto.ui/module-feedback']),
   }),
   'apps/www/src/components/LucideIconGallery.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
@@ -366,12 +710,30 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: 'f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c',
     specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
   }),
+  'apps/www/src/components/Homepage/homepage-gallery-icons.ts': Object.freeze({
+    sourceSha256: 'ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7',
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-lucide/icons/bell',
+      '@proto.ui/prototypes-lucide/icons/chart-no-axes-column-increasing',
+      '@proto.ui/prototypes-lucide/icons/circle-question-mark',
+      '@proto.ui/prototypes-lucide/icons/layers',
+      '@proto.ui/prototypes-lucide/icons/mouse-pointer-click',
+      '@proto.ui/prototypes-lucide/icons/scan-search',
+      '@proto.ui/prototypes-lucide/icons/settings-2',
+      '@proto.ui/prototypes-lucide/icons/sliders-horizontal',
+      '@proto.ui/prototypes-lucide/icons/square-check-big',
+      '@proto.ui/prototypes-lucide/icons/text-cursor-input',
+    ]),
+  }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
+    sourceSha256: 'a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-bootstrap-2-3-2/button',
+      '@proto.ui/prototypes-bootstrap-2-3-2/select',
       '@proto.ui/prototypes-shadcn/button',
       '@proto.ui/prototypes-shadcn/select',
       '@proto.ui/prototypes-brutalist/button',
@@ -424,8 +786,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/prototypes/liquid-glass/src/theme',
     ]),
   }),
-  'apps/www/src/components/override/Search.astro': Object.freeze({
-    viteIgnoredDynamicImports: Object.freeze(['`${bundlePath}pagefind.js`']),
+  // The resource supplies `url` only after same-origin HTTP(S) validation.
+  // Neither the importer nor its URL-construction companion may drift alone.
+  'apps/www/src/components/site-search-owner.ts': Object.freeze({
+    viteIgnoredDynamicImports: Object.freeze(['url']),
+    sourceSha256: 'aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580',
+    companionSource: Object.freeze({
+      path: 'apps/www/src/components/site-pagefind-resource.ts',
+      sha256: '1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a',
+    }),
   }),
 });
 
@@ -500,6 +869,7 @@ const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.gallery.prototype-library-cards': Object.freeze([
     'apps/www/astro.config.mjs',
     'apps/www/src/components/site-navigation.ts',
+    'apps/www/src/components/PrototypeDocumentationIndex.astro',
     'packages/prototypes/base/package.json',
     'packages/prototypes/shadcn/package.json',
     'packages/prototypes/brutalist/package.json',
@@ -838,7 +1208,7 @@ export const MATRIX_CONFIGS = Object.freeze([
       ...WEBSITE_NON_INTERACTIVE_PATHS,
     }),
     requiredInlineCodeByRow: Object.freeze({
-      'www.search.input-results': Object.freeze(['@pagefind/default-ui']),
+      'www.search.input-results': Object.freeze(['Dialog', 'Command', 'InputShell']),
     }),
     closureBindingsByRow: Object.freeze({
       'www.content.document-semantics': WEBSITE_DOCUMENT_SEMANTICS_CLOSURE,
@@ -8486,29 +8856,38 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
       'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts',
     ]);
     if (!owners.has(sourcePath) || !rootDir) return false;
+    const configPath = path.join(rootDir, 'apps/www/astro.config.mjs');
     const inputs = [
-      [
-        'apps/www/astro.config.mjs',
-        [PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256, PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256],
-      ],
       [PROMOTION_RETRY_PLUGIN_PATH, PROMOTION_RETRY_PLUGIN_SHA256],
       [PROMOTION_AUDIT_PLUGIN_PATH, PROMOTION_AUDIT_PLUGIN_SHA256],
     ];
     try {
+      assertPromotionModulePath(rootDir, configPath);
+      if (!fs.lstatSync(configPath).isFile()) return false;
+      const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
+      if (configSha === WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256) {
+        inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
+      } else if (
+        ![
+          PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256,
+          PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256,
+        ].includes(configSha)
+      ) {
+        return false;
+      }
       for (const [relative, sha] of inputs) {
         const target = path.join(rootDir, relative);
         assertPromotionModulePath(rootDir, target);
         if (
           !fs.lstatSync(target).isFile() ||
-          !(Array.isArray(sha) ? sha : [sha]).includes(
-            createHash('sha256').update(fs.readFileSync(target)).digest('hex')
-          )
+          createHash('sha256').update(fs.readFileSync(target)).digest('hex') !== sha
         )
           return false;
       }
     } catch {
       return false;
     }
+    metadata.add(configPath);
     for (const [relative] of inputs) metadata.add(path.join(rootDir, relative));
     return true;
   }
@@ -9226,24 +9605,31 @@ function isReviewedPrototypePackageDependency(sourcePath, guardedImport) {
   );
 }
 
+function reviewedWebsiteImportSourceMatches(rootDir, sourcePath, sourceSha256) {
+  const target = path.join(rootDir, sourcePath);
+  try {
+    assertPromotionModulePath(rootDir, target);
+    return (
+      fs.lstatSync(target).isFile() &&
+      createHash('sha256').update(fs.readFileSync(target)).digest('hex') === sourceSha256
+    );
+  } catch {
+    return false;
+  }
+}
+
 function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir) {
   if (isReviewedPrototypePackageDependency(sourcePath, guardedImport)) return true;
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
-  if (allowance.sourceSha256) {
-    const target = path.join(rootDir, sourcePath);
-    try {
-      assertPromotionModulePath(rootDir, target);
-      if (
-        !fs.lstatSync(target).isFile() ||
-        createHash('sha256').update(fs.readFileSync(target)).digest('hex') !==
-          allowance.sourceSha256
-      )
-        return false;
-    } catch {
-      return false;
-    }
-  }
+  if (
+    allowance.sourceSha256 &&
+    !reviewedWebsiteImportSourceMatches(rootDir, sourcePath, allowance.sourceSha256)
+  )
+    return false;
+  const companion = allowance.companionSource;
+  if (companion && !reviewedWebsiteImportSourceMatches(rootDir, companion.path, companion.sha256))
+    return false;
 
   if (
     guardedImport.category === 'vite-ignored-dynamic-import' &&
@@ -9323,6 +9709,21 @@ const PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256 =
 const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
 const PROMOTION_RETRY_PLUGIN_SHA256 =
   '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';
+// This configuration admits only the four owners of the public Retry virtual ID.
+// Bind its extracted resolver and optional probe as metadata without admitting
+// the current configuration to the general package resolver profiles below.
+const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7';
+const WEBSITE_RETRY_VIRTUAL_HELPERS = [
+  [
+    'apps/www/src/utils/proto-ui-source.mjs',
+    'b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833',
+  ],
+  [
+    'apps/www/scripts/accordion-activation-probe.mjs',
+    '9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b',
+  ],
+];
 export function promotionBarePackageTargets(root, specifier, metadata) {
   const unverified = () =>
     new Error(`promotion package closure for ${specifier} remains unverified`);
@@ -11798,15 +12199,17 @@ function validateMainRows(
     }
     const inlineCode = new Set(Object.values(record).flatMap(inlineCodeValues));
     if (id === 'www.search.input-results') {
-      const ownsPagefindUi =
-        record['Current owner'].includes('`@pagefind/default-ui`') &&
+      const ownsSearchComposition =
+        ['Dialog', 'Command', 'InputShell'].every((name) =>
+          record['Current owner'].includes(`\`${name}\``)
+        ) &&
         record['Proto UI chain'].includes('P-BASE-INPUT') &&
-        inlineCode.has('new PagefindUI') &&
+        inlineCode.has('createSiteSearchComposition') &&
         state === 'blocked' &&
         /(?:^|\D)#1323\b/u.test(record['Dependency and owner']);
-      if (!ownsPagefindUi) {
+      if (!ownsSearchComposition) {
         issues.push(
-          `${context}: matrix row \`www.search.input-results\` must structurally own \`new PagefindUI\` through \`@pagefind/default-ui\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #1323`
+          `${context}: matrix row \`www.search.input-results\` must structurally own \`createSiteSearchComposition\` through \`Dialog\`, \`Command\`, \`InputShell\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #1323`
         );
       }
     }

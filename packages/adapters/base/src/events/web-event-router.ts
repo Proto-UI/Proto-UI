@@ -85,7 +85,8 @@ export function createWebProtoEventRouter(opt: {
   resolveEventRouteOwner?: (target: EventTarget | null) => object | null;
   /** Setup-time registration inventory for stateless root events. */
   rootRegistrations?: { hasRootRegistration?(type: SemanticEventType): boolean };
-  /** Setup-time global key.up demand if the adapter has the complete inventory. */
+  /** Setup-time global keyboard demand if the adapter has the complete inventory. */
+  globalKeyDown?: boolean;
   globalKeyUp?: boolean;
   globalEl?: EventTarget; // window by default
   isEnabled: () => boolean; // bridge to eventGate
@@ -647,42 +648,51 @@ export function createWebProtoEventRouter(opt: {
     }
   }
 
-  // key -> key.* (global)
-  unsubs.push(
-    listen(globalEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;
-      emit(protoGlobalBus, 'key.down', e);
-      if (rootProxy.__hasProtoListeners('key.down') && shouldRouteToCurrentRoot(e)) {
-        emit(protoRootBus, 'key.down', e);
-      }
-      if (!isCommitKey(e.key)) {
-        suppressFollowupDirectClick = false;
-        return;
-      }
-      if (!rootProxy.__hasProtoListeners('press.commit')) return;
-      if (shouldRouteToCurrentRoot(e)) {
+  const needsPressCommit = rootRegistrations?.hasRootRegistration?.('press.commit') !== false;
+  // Root key.down can also come through the global route, including Portals.
+  if (
+    opt.globalKeyDown !== false ||
+    rootRegistrations?.hasRootRegistration?.('key.down') !== false ||
+    needsPressCommit
+  ) {
+    unsubs.push(
+      listen(globalEl, 'keydown', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;
+        emit(protoGlobalBus, 'key.down', e);
+        if (rootProxy.__hasProtoListeners('key.down') && shouldRouteToCurrentRoot(e)) {
+          emit(protoRootBus, 'key.down', e);
+        }
+        if (!isCommitKey(e.key)) {
+          suppressFollowupDirectClick = false;
+          return;
+        }
+        if (!rootProxy.__hasProtoListeners('press.commit')) return;
+        if (shouldRouteToCurrentRoot(e)) {
+          emitPressCommitOnce(e);
+          return;
+        }
+        if (!isWithinRoot(e.target)) return;
+        if (!hasFocusedDescendant()) return;
         emitPressCommitOnce(e);
-        return;
-      }
-      if (!isWithinRoot(e.target)) return;
-      if (!hasFocusedDescendant()) return;
-      emitPressCommitOnce(e);
-    })
-  );
+      })
+    );
+  }
 
-  unsubs.push(
-    listen(rootEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;
-      if (!isCommitKey(e.key)) return;
-      emitPressCommitOnce(e);
-    })
-  );
+  if (needsPressCommit) {
+    unsubs.push(
+      listen(rootEl, 'keydown', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;
+        if (!isCommitKey(e.key)) return;
+        emitPressCommitOnce(e);
+      })
+    );
+  }
 
   // A committed key still uses release to retire its follow-up click suppression.
   if (
     opt.globalKeyUp !== false ||
     rootRegistrations?.hasRootRegistration?.('key.up') !== false ||
-    rootRegistrations?.hasRootRegistration?.('press.commit') !== false
+    needsPressCommit
   ) {
     unsubs.push(
       listen(globalEl, 'keyup', (e: KeyboardEvent) => {

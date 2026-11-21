@@ -26,6 +26,7 @@ import {
   gpuiScopeCapabilityDiagnostic,
 } from './gpui-capabilities';
 import { gpuiLexicalNames, gpuiExpressionChildren } from './gpui-lexical-names';
+import { gpuiDataMethods } from './gpui-data-methods';
 import { partitionModuleBindings } from './source-module-bindings';
 import type { RuleCondition } from './rule-declarations';
 import { gpuiTableFamily } from './gpui-native-table';
@@ -1519,14 +1520,20 @@ impl __PuiNativeRecordValue {
       case 'intrinsic': {
         const args = node.arguments.map((argument) => expression(argument, environment, depth));
         switch (node.name) {
+          case 'string':
+            throw new Error('GPUI does not yet support native String coercion.');
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
+          case 'object.assign':
+            throw new Error('GPUI does not yet support fresh-target Object.assign.');
           case 'object.freeze':
             return `freeze(${args[0]})`;
           case 'object.hasOwn':
             return `has_own(&(${args[0]}), &(${args[1]}))`;
           case 'array.every':
             return `array_every(${args[0]}, ${args[1]})`;
+          case 'array.includes':
+            throw new Error('GPUI does not yet support finite string array.includes.');
           case 'typeof':
             return `typeof_value(&(${args[0]}))`;
           case 'error':
@@ -2232,7 +2239,12 @@ impl __PuiNativeRecordValue {
     fields: ir.props.map((prop) => ({ name: prop.name, type: prop.type, optional: true })),
   });
   const typedMethods: string[] = [],
-    methodChecks: string[] = [];
+    methodChecks: string[] = [],
+    dataMethods: string[] = [];
+  const dataMethodBindings = gpuiDataMethods(validated.value);
+  const reachedMethodSites = admittedAnalysis.sites.filter(
+    (site) => site.operation === 'expose.method'
+  );
   const nativeInput = (type: ExpressionIR['type']): boolean =>
     isPublicValueType(type) ||
     type === 'context-key' ||
@@ -2289,6 +2301,10 @@ impl __PuiNativeRecordValue {
       };
     const portableReturn = isDataValueType(exposure.returnType);
     const returnType = exposure.returnType as DataType;
+    const checkedPortableResult = portableReturn
+      ? `let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
+        if !(${accepts('result', returnType, exposure.span)}) { value_type_error("exposed method returned invalid portable data") }`
+      : '';
     const parameters = exposure.parameters
       .map(
         (parameter, parameterIndex) =>
@@ -2315,8 +2331,7 @@ impl __PuiNativeRecordValue {
         let drive = self.owner.borrow().native_drive.clone(); if let Some(drive) = drive { drive(window, cx); }
         ${
           portableReturn
-            ? `let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
-        if !(${accepts('result', returnType, exposure.span)}) { value_type_error("exposed method returned invalid portable data") }
+            ? `${checkedPortableResult}
         serde_json::from_value(result).expect("checked exposed method result")`
             : 'result'
         }
@@ -2332,6 +2347,40 @@ impl __PuiNativeRecordValue {
     methodChecks.push(
       `        ${string(exposure.name, exposure.span)} => if !(arguments.len() <= ${exposure.parameters.length} && ${checks}) { value_type_error("invalid exposed method arguments") },`
     );
+    const sourceBinding = dataMethodBindings.get(exposure.name);
+    if (
+      !sourceBinding ||
+      !portableReturn ||
+      !exposure.parameters.every((parameter) => isDataValueType(parameter.type)) ||
+      !reachedMethodSites.some(
+        ({ span }) =>
+          span.file === exposure.span.file &&
+          span.start === exposure.span.start &&
+          span.end === exposure.span.end
+      )
+    )
+      continue;
+    const binding = moduleParts.shared.find((binding) =>
+      sourceBinding.bindingId === undefined
+        ? binding.name === sourceBinding.name && binding.bindingId === undefined
+        : binding.bindingId === sourceBinding.bindingId
+    );
+    const value = binding?.value;
+    if (
+      !binding ||
+      value?.kind !== 'function' ||
+      !reached.has(value.function) ||
+      typedFunction(value.function)
+    )
+      continue;
+    dataMethods.push(`        ${string(exposure.name, exposure.span)} => {
+            let arguments: Vec<Value> = arguments.into_iter().map(|value| value.map(Value::json).unwrap_or(Value::Undefined)).collect();
+            check_method(name, &arguments);
+            let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
+            let result = invoke(&self.owner, "expose-method", &callback, arguments);
+            ${checkedPortableResult}
+            result
+        },`);
   }
   const hooks = ir.hooks
     .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
@@ -2409,7 +2458,18 @@ impl __PuiNativeRecordValue {
   #[derive(Clone)]
   pub struct ${componentName}Handle { pub owner: OwnerRef }
   impl ${componentName}Handle {
-  ${typedMethods.join('\n')}
+  ${typedMethods.join('\n')}${
+    dataMethods.length
+      ? `
+      /// Calls this live instance's registered data-only method. None preserves an undefined argument slot.
+      pub fn call_data_method(&self, name: &str, arguments: Vec<Option<Json>>) -> Result<Json, Value> {
+          catch_authored(|| { ensure(&self.owner()); match name {
+  ${dataMethods.join('\n')}
+              _ => value_error("unknown or ineligible data method"),
+          } })
+      }`
+      : ''
+  }
       pub fn owner(&self) -> OwnerWeak { Rc::downgrade(&self.owner) }
       pub fn state(&self, name: &str) -> Result<Json, Value> { catch_authored(|| { let state=self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed State")); state.get().data() }) }
       pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App) -> Result<Json, Value> {

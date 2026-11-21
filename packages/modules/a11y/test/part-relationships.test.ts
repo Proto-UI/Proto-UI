@@ -92,6 +92,32 @@ describe('same-domain A11y part relationships', () => {
     expect(f.source.getDiagnostics()).toEqual([{ relation: 'controls', code: 'missing-target' }]);
   });
 
+  it('does not rescan all logical owners for each relationship in one publication', () => {
+    const f = fixture();
+    const sources = Array.from({ length: 8 }, () => {
+      const source = f.registry.createOwner(createA11ySemanticObjectRef(), () => {});
+      source.update(f.sourceInput);
+      return source;
+    });
+
+    const values = vi.spyOn(Map.prototype, 'values');
+    try {
+      f.target.update({ ...f.targetInput, epoch: 2 });
+      const ownerScans = values.mock.contexts.filter(
+        (owners) => owners instanceof Map && owners.has(f.sourceRef) && owners.has(f.targetRef)
+      );
+      expect(ownerScans.length).toBeLessThanOrEqual(2);
+    } finally {
+      values.mockRestore();
+    }
+    for (const source of [f.source, ...sources]) {
+      expect(source.getRelationships()[0]).toMatchObject({
+        target: f.targetRef,
+        targetEpoch: 2,
+      });
+    }
+  });
+
   it('fails closed for duplicate logical members, even while one is detached', () => {
     const f = fixture();
     const duplicate = f.registry.createOwner(createA11ySemanticObjectRef(), () => {});

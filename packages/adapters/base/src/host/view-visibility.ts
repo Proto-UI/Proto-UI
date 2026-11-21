@@ -15,6 +15,13 @@ export function installViewVisibilityRule(doc: Document): void {
     (doc.head ?? doc.documentElement).appendChild(styleEl);
   }
 
-  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where([${PUI_VIEW_PENDING_ATTR}]) { visibility: hidden !important; }\n:where([${PUI_VIEW_PENDING_ATTR}], [${PUI_VIEW_REVEALING_ATTR}]) { transition: none !important; animation: none !important; }\n:where([${PUI_VIEW_DETACHED_ATTR}]) { display: none !important; }\n`;
+  // The reveal guard suppresses transitions from the unpublished host style.
+  // An explicitly bound Presence or a fresh portal can keep authored keyframes.
+  styleEl.textContent = `${styleEl.textContent ?? ''}
+:where([${PUI_VIEW_PENDING_ATTR}]) { visibility: hidden !important; }
+:where([${PUI_VIEW_PENDING_ATTR}], [${PUI_VIEW_REVEALING_ATTR}]) { transition: none !important; }
+:where([${PUI_VIEW_PENDING_ATTR}], [${PUI_VIEW_REVEALING_ATTR}]:not([${PUI_VIEW_REVEALING_ATTR}="presence"], [${PUI_VIEW_REVEALING_ATTR}="portal"])) { animation: none !important; }
+:where([${PUI_VIEW_DETACHED_ATTR}]) { display: none !important; }
+`;
   RULES_BY_DOCUMENT.set(doc, true);
 }

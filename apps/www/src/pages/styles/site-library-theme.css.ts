@@ -1,6 +1,6 @@
-import { renderThemeCss as renderBootstrapThemeCss } from '../../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
-import { renderBrutalistThemeCss } from '../../../../../packages/prototypes/brutalist/src/theme';
-import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src/text/typography';
+import { renderThemeCss as renderBootstrapThemeCss } from '@proto.ui/prototypes-bootstrap-2-3-2/theme';
+import { renderBrutalistThemeCss } from '@proto.ui/prototypes-brutalist/theme';
+import { SHADCN_TYPOGRAPHY } from '@proto.ui/prototypes-shadcn/text';
 
 export function GET() {
   // Keep the canonical Website Shadcn --pui-* input intact while another family

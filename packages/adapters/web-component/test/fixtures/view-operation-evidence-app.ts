@@ -20,6 +20,7 @@ for (const [index, name] of cases.entries()) {
     [];
   let run!: RunHandle<any>;
   let disposals = 0;
+  let captured: ViewOperation | null = null;
   const proto = definePrototype({
     name: `view-operation-native-${index}`,
     setup(def) {
@@ -29,7 +30,7 @@ for (const [index, name] of cases.entries()) {
       def.lifecycle.onBeforeDispose(() => {
         disposals++;
       });
-      def.expose('capture', () => run.lifecycle.captureViewOperation());
+      def.expose('capture', () => (captured = run.lifecycle.captureViewOperation()));
       return (r) => r.el('span', name);
     },
   });
@@ -97,7 +98,9 @@ for (const [index, name] of cases.entries()) {
   root.append(source);
   main.append(root, destination);
   const capture = () => source.getExposes().capture();
-  const operation = capture()!;
+  const exposedOperation = capture()!;
+  // Observe the producer's identity independently of the terminal expose guard.
+  const operation = captured!;
   const initialReactions = events.splice(0);
   const checks: Array<{ label: string; actual: unknown; expected: unknown }> = [];
   const check = (label: string, actual: unknown, expected: unknown) => {
@@ -130,6 +133,17 @@ for (const [index, name] of cases.entries()) {
       check('terminal-retired', disposals, 1);
       root.append(source);
       check('old-invalid-without-intermediate-query', operation.isCurrent(), false);
+      let terminalError: unknown;
+      try {
+        exposedOperation.isCurrent();
+      } catch (error) {
+        terminalError = error;
+      }
+      check(
+        'old-exposed-call-terminal-rejected',
+        terminalError instanceof Error ? terminalError.message : terminalError,
+        '[AdapterHost] cannot invoke an exposed callable after terminal disposal'
+      );
       check('new-owner-current', capture()?.isCurrent(), true);
     } else if (name === 'aborted-transport') {
       const error = new Error('abort-before-mutation');

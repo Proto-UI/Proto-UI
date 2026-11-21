@@ -180,13 +180,14 @@ const resources = new Map([
 // styles, and independently check the actual installed adapter's DOM output.
 const infrastructureStyles = {
   'proto-ui-view-visibility':
-    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
-  'proto-ui-wc-host-display': '\n:where(.pui-host-root) { display: block; }\n',
+    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]:not([data-pui-view-revealing="presence"], [data-pui-view-revealing="portal"])) { animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
+  'proto-ui-wc-host-display':
+    '\n:where(.pui-host-root) { display: block; }\n:where([data-pui-view-revealing="portal"] *) { transition: none !important; }\n',
 };
 const infrastructureHashes = [
   'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
-  'sha256-B/uN6mebmNl6Y8KAmaGkix/y4Eiyvq/jCIEHnporMZQ=',
-  'sha256-+IRPBUpbuxn0ME6GWUx2UPIkh/vCUT0KS1CXnXBjQAY=',
+  'sha256-kUIiVlICzVrFbKV+PHF+dL/cmZ7Q0jCE2Rdj47JEk3Q=',
+  'sha256-Y71yyiCYjEH9X0DVs2lUXg4QJHz/RpOzMOMF7ueu56g=',
 ];
 assert.deepEqual(
   ['', ...Object.values(infrastructureStyles)].map(

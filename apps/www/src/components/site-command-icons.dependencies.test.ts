@@ -60,7 +60,7 @@ function runtimeClosure(entry: string) {
   return [...visited];
 }
 
-describe('website command icon dependency boundary', () => {
+describe('website fixed icon dependency boundary', () => {
   it.each([
     ['lucide-search-icon', ['search']],
     ['lucide-x-icon', ['x']],
@@ -69,6 +69,10 @@ describe('website command icon dependency boundary', () => {
     ['lucide-loader-circle-icon', ['loader-circle']],
     ['lucide-check-icon', ['check']],
     ['lucide-circle-alert-icon', ['circle-alert']],
+    ['lucide-bold-icon', ['bold']],
+    ['lucide-italic-icon', ['italic']],
+    ['lucide-underline-icon', ['underline']],
+    ['lucide-strikethrough-icon', ['strikethrough']],
   ] as const)(
     '%s reaches exactly its declared fixed glyphs, never the generic catalog',
     (id, glyphs) => {

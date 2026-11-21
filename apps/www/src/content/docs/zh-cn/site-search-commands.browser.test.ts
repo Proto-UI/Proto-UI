@@ -684,6 +684,7 @@ describe.sequential('Search family Button commands', () => {
           const id = `${family}-${theme}-${width}`;
           stage(page, id, 'navigate');
           try {
+            await installSuccessfulEmptySearchData(page);
             const response = await page.goto(`${baseUrl}${searchRoute(family)}`, {
               waitUntil: 'networkidle',
             });
@@ -3030,6 +3031,120 @@ for (const viewport of headerTriggerViewports) {
     }, 90_000);
   }
 }
+
+it('docs brutalist dark 390px keeps Close focused through delayed Pagefind failure and Space dismissal', async () => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 960 },
+    colorScheme: 'dark',
+  });
+  const page = await context.newPage();
+  const id = 'docs-brutalist-dark-390-delayed-failure-close';
+  const { promise: failure, resolve: releaseFailure } = Promise.withResolvers<void>();
+  let dataRequested = false;
+  let failedDataResponses = 0;
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('response', (response) => {
+    if (
+      new URL(response.url()).pathname.endsWith('/pagefind/pagefind.js') &&
+      response.status() === 404
+    )
+      failedDataResponses++;
+  });
+  stage(page, id, 'navigate');
+  try {
+    await page.addInitScript(() => localStorage.setItem('starlight-theme', 'dark'));
+    await installOpenCounter(page);
+    // Delay only the external index boundary. Search, its Docs focus observer,
+    // both author-slot commits and the public Close command remain real.
+    await page.route('**/pagefind/pagefind.js', async (route) => {
+      dataRequested = true;
+      await failure;
+      await route.fulfill({
+        status: 404,
+        contentType: 'text/plain',
+        body: 'Controlled delayed missing test index',
+      });
+    });
+    expect(
+      (await page.goto(`${baseUrl}${searchRoute('brutalist')}`, { waitUntil: 'networkidle' }))?.ok()
+    ).toBe(true);
+    const trigger = page.locator(
+      'site-search [data-projection-generation-state="active"] [data-open-modal]'
+    );
+    await expect.poll(() => page.locator('html').getAttribute('data-theme')).toBe('dark');
+    await expect.poll(() => trigger.getAttribute('aria-disabled')).toBe('false');
+    await trigger.click();
+    await expect
+      .poll(async () => (await page.evaluate(readSearchPublicState)).inputFocused)
+      .toBe(true);
+    await expect.poll(() => dataRequested).toBe(true);
+    expect(await (await searchPart(page, 'panel')).getAttribute('data-projection-runtime')).toBe(
+      'wc'
+    );
+    const close = await searchPart(page, 'close');
+    const status = await searchPart(page, 'status');
+    const retry = await searchPart(page, 'search-page-action');
+    await close.focus();
+    expect(await close.evaluate((node) => node === document.activeElement)).toBe(true);
+    expect(await retry.count()).toBe(0);
+    expect(failedDataResponses).toBe(0);
+    const beforeFailure = await page.evaluate(readSearchPublicState);
+    expect(beforeFailure.query).toBe('');
+    expect(beforeFailure.open).toBe(true);
+
+    stage(page, id, 'release-failure');
+    releaseFailure();
+    await expect.poll(() => status.textContent()).toBe('搜索暂不可用，请重试');
+    await expect.poll(() => retry.textContent()).toBe('重试');
+    expect(failedDataResponses).toBeGreaterThan(0);
+    expect(await close.evaluate((node) => node === document.activeElement)).toBe(true);
+    const afterFailure = await page.evaluate(readSearchPublicState);
+    expect(afterFailure.open).toBe(true);
+    expect(afterFailure.query).toBe('');
+    expect(afterFailure.inputFocused).toBe(false);
+    await capture(page, id, 'failure-close-focus');
+
+    // Locator.press would focus Close again and conceal a stolen-focus defect.
+    stage(page, id, 'native-space');
+    await page.keyboard.press('Space');
+    await expect
+      .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+      .toBe(false);
+    await expectSearchOpenerFocus(page, trigger, id, 'delayed-failure-space');
+    const spaceTargets = await page.evaluate(() => {
+      // installOpenCounter owns this in-process event record.
+      const observedWindow = window as unknown as Window & {
+        __puiSearchTimeline: Array<{
+          type: string;
+          target: { ref: string | null } | null;
+          extra: { key?: string; trusted?: boolean } | null;
+        }>;
+      };
+      return observedWindow.__puiSearchTimeline
+        .filter((event) => event.type === 'keydown:capture' && event.extra?.key === ' ')
+        .map((event) => ({ ref: event.target?.ref, trusted: event.extra?.trusted }));
+    });
+    expect(spaceTargets).toEqual([{ ref: 'close', trusted: true }]);
+    const closed = await page.evaluate(readSearchPublicState);
+    await capture(page, id, 'space-dismissed');
+    await writeFile(
+      path.join(evidenceDirectory, `${id}-focus.json`),
+      JSON.stringify(
+        { source, beforeFailure, afterFailure, closed, failedDataResponses, spaceTargets },
+        null,
+        2
+      )
+    );
+    expect(errors).toEqual([]);
+  } catch (error) {
+    await captureFailure(page, error);
+    throw error;
+  } finally {
+    releaseFailure();
+    await context.close();
+  }
+}, 60_000);
 
 // The prior Header native run encountered this real product state. Preserve it
 // independently: a missing index intentionally focuses the actual Retry Button,

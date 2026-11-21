@@ -25,6 +25,7 @@ afterEach(() => {
   dispose?.();
   dispose = undefined;
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 function root() {
   const element = document.createElement('section');
@@ -140,7 +141,7 @@ describe('adapter panel first activation', () => {
     const load = vi.fn(async () => ({ initPreviewer }));
     dispose = initPreviewerBootstrap(document, load);
     document.dispatchEvent(new Event('astro:page-load'));
-    await flush();
+    await vi.waitFor(() => expect(initPreviewer).toHaveBeenCalledOnce());
     expect(load).toHaveBeenCalledTimes(1);
     expect(initPreviewer.mock.calls[0]![0].root).toBe(wc.element);
     wc.container.style.display = 'none';
@@ -172,9 +173,8 @@ describe('adapter panel first activation', () => {
     container.style.display = 'none';
     localStorage.setItem('preferred-prototypes-adapter', 'vue2');
     resolve({ initPreviewer });
-    await flush();
+    await vi.waitFor(() => expect(element.dataset.mounting).toBeUndefined());
     expect(initPreviewer).not.toHaveBeenCalled();
-    expect(element.dataset.mounting).toBeUndefined();
     container.style.display = '';
     await vi.waitFor(() => expect(seen).toEqual(['vue2']));
   });
@@ -236,12 +236,49 @@ describe('adapter panel first activation', () => {
     }
   );
 
+  it.each(['remove', 'swap'] as const)(
+    'revokes a queued eager fallback task on %s and mounts replacement roots',
+    async (action) => {
+      vi.stubGlobal('scheduler', undefined);
+      vi.useFakeTimers();
+      const element = root();
+      delete element.dataset.lazy;
+      const initPreviewer = vi.fn(({ root: mounted }: { root: HTMLElement }) => {
+        mounted.dataset.inited = '1';
+      });
+      dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
+      document.dispatchEvent(new Event('astro:page-load'));
+      await flush();
+      expect(element.dataset.mounting).toBe('1');
+      expect(initPreviewer).not.toHaveBeenCalled();
+
+      if (action === 'swap') {
+        document.dispatchEvent(new Event('astro:before-swap'));
+        expect(element.isConnected).toBe(true);
+        await vi.runOnlyPendingTimersAsync();
+        expect(initPreviewer).not.toHaveBeenCalled();
+      }
+      element.remove();
+      const replacement = root();
+      delete replacement.dataset.lazy;
+      document.dispatchEvent(new Event('astro:page-load'));
+      document.dispatchEvent(new Event('astro:page-load'));
+      await flush();
+      await vi.runOnlyPendingTimersAsync();
+      expect(replacement.dataset.inited).toBe('1');
+      expect(element.dataset.mounting).toBeUndefined();
+      expect(initPreviewer).toHaveBeenCalledTimes(1);
+      expect(initPreviewer).toHaveBeenCalledWith(
+        expect.objectContaining({ root: replacement })
+      );
+    }
+  );
+
   it('still mounts ordinary eager previews without panels', async () => {
     root().dataset.lazy = 'false';
     const initPreviewer = vi.fn();
     dispose = initPreviewerBootstrap(document, async () => ({ initPreviewer }));
     document.dispatchEvent(new Event('astro:page-load'));
-    await flush();
-    expect(initPreviewer).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(initPreviewer).toHaveBeenCalledTimes(1));
   });
 });

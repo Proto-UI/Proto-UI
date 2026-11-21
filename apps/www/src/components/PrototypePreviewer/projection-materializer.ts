@@ -26,6 +26,7 @@ import {
   type ProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import { loadPrototypes } from './prototype-modules';
+import { previewerStartupTask } from './previewer-startup-task';
 import {
   externalProjectionPortalRoots,
   lockExternalPortalRoot,
@@ -89,17 +90,7 @@ function backgroundPreparationTask(
   const { signal } = preparation;
   signal.throwIfAborted();
   if (!preparation.isPending()) return;
-  const view = options.mount.ownerDocument.defaultView as
-    | (Window & {
-        scheduler?: {
-          postTask(
-            callback: () => void,
-            options: { priority: 'background'; signal: AbortSignal }
-          ): Promise<void>;
-        };
-      })
-    | null;
-  return view?.scheduler?.postTask(() => undefined, { priority: 'background', signal });
+  return previewerStartupTask(options.mount, signal);
 }
 
 function nextPaint(element: HTMLElement, yieldAfterPaint = false): Promise<void> {

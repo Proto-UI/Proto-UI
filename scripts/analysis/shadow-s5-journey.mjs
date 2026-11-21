@@ -129,10 +129,28 @@ export async function runS5Journey(page) {
     assert.equal(await editor(profile, 'styled').inputValue(), 'styled edited');
   }
   await action('reject');
+  const textareas = cards.flatMap((profile) =>
+    ['base', 'styled', 'tab'].map((key) => ({ profile, key, textarea: editor(profile, key) }))
+  );
+  for (const { profile, key, textarea } of textareas)
+    assert.equal(await textarea.evaluate((element) => element.rows), 3, `${profile}/${key} rows`);
+  const beforeRows = await metrics();
   await action('rows');
+  await Promise.all(
+    textareas.map(async ({ profile, key, textarea }) => {
+      await textarea.and(page.locator('textarea[rows="6"]')).waitFor({ state: 'attached' });
+      assert.equal(await textarea.evaluate((element) => element.rows), 6, `${profile}/${key} rows`);
+    })
+  );
   const taller = await metrics();
-  assert.ok(taller.split.styled.height > initial.split.styled.height);
-  for (const key of ['base', 'styled', 'tab']) parity(taller.split[key], taller.light[key]);
+  for (const profile of cards)
+    assert.ok(taller[profile].base.height > beforeRows[profile].base.height, `${profile} Base rows`);
+  // The Shadcn editor uses field-sizing: content, so rows are a native prop
+  // rather than the source of its rendered height.
+  for (const key of ['base', 'styled', 'tab']) {
+    parity(taller.split[key], taller.light[key]);
+    parity(taller.mixed[key], taller.light[key]);
+  }
   await action('custom');
   await page.waitForTimeout(200);
   for (const profile of cards)

@@ -263,6 +263,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     private _root: Element | ShadowRoot;
     private _splitResources: ShadowSplitResources | null = null;
+    private _failedCallerSlot: HTMLSlotElement | null = null;
+    private _callerProjectionRestoredFor: LogicalInstanceToken | null = null;
     private _portalConceal = createPortalConcealBarrier(this);
     private _slotProjector: SlotProjector | null = null;
     private _hostDisplay: HostDisplayController | null = null;
@@ -420,7 +422,27 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       } catch (error) {
         // Preserve the synchronous failure; the guarded terminal transaction
         // also owns partial activation and callback reentry for every profile.
-        if (initializing) void this.retireOwner().catch(() => {});
+        if (initializing) {
+          const callerProjectionRestored =
+            this._callerProjectionRestoredFor === this._instanceToken;
+          void this.retireOwner().catch(() => {});
+          if (
+            callerProjectionRestored &&
+            !textControl &&
+            !imageView &&
+            !nativeLink &&
+            !this._mountedOnce
+          ) {
+            // The failed owner is retired, but its ShadowRoot cannot be removed.
+            // Keep ordinary caller content in the flattened tree without retaining
+            // any failed view, styles or capabilities. This slot belongs to the
+            // element shell and is withdrawn before the next owner is acquired.
+            const slot = this.ownerDocument.createElement('slot');
+            this._failedCallerSlot?.remove();
+            this._root.appendChild(slot);
+            this._failedCallerSlot = slot;
+          }
+        }
         throw error;
       }
     }
@@ -473,6 +495,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         return;
       }
       this._terminalCleanupComplete = false;
+      this._failedCallerSlot?.remove();
+      this._failedCallerSlot = null;
+      this._callerProjectionRestoredFor = null;
       this._focusIntentState = {};
       this._focusTargetRetryCount = 0;
       if (this._runtimeGeneration > 0) {
@@ -646,6 +671,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._exposes = record;
       };
 
+      // Admit split effects before forwarding the mounted phase to observers.
+      let admitViewProjection: (() => void) | null = null;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
@@ -757,8 +784,13 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           router: {
             dispose: () => owner.disposeView(),
           },
+          onCallerProjectionRestored: () => {
+            if (!ownerResourcesReleased && this._instanceToken === instanceToken)
+              this._callerProjectionRestoredFor = instanceToken;
+          },
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: (event) => {
+            if (event.type === 'mount.phase' && event.phase === 'mounted') admitViewProjection?.();
             opt.diagnostics?.onLifecycleEvent?.(event);
             if (event.type === 'mount.phase') {
               focusIngressReady = event.phase === 'mounted';
@@ -881,6 +913,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           const eventPort = owner.session?.caps.getPort<EventPort>('event');
           const router = (resources.router = createWebProtoEventRouter({
             rootRegistrations: eventPort,
+            globalKeyDown: eventPort?.hasGlobalRegistration?.('key.down') !== false,
             globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
             rootEl: thisEl,
             // The eager native bridge owns focus/blur before provider construction.
@@ -1008,8 +1041,15 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           const effectsPort: EffectsPort = splitEffects
             ? {
                 queueStyle: (handle) => project(() => splitEffects.queueStyle(handle)),
-                requestFlush: () => project(() => splitEffects.requestFlush()),
-                flushNow: () => project(() => splitEffects.flushNow?.()),
+                // Validate every acquisition snapshot, but publish only the
+                // completed initial Rules projection. Intermediate setup paint
+                // is not an animated predecessor of the first admitted frame.
+                requestFlush: () => {
+                  if (!acquiringProjection) project(() => splitEffects.requestFlush());
+                },
+                flushNow: () => {
+                  if (!acquiringProjection) project(() => splitEffects.flushNow?.());
+                },
               }
             : this._textControlTarget
               ? {
@@ -1075,9 +1115,24 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 release: releaseFinalStyleSink,
               }
             : undefined;
+          const admitProjection = () => {
+            if (!acquiringProjection) return;
+            // Retire before committing the sink, which can reenter host code.
+            admitViewProjection = null;
+            acquiringProjection = false;
+            if (acquisitionFailed) throw acquisitionError;
+            splitEffects?.requestFlush();
+            if (pendingVisualFrame) {
+              const frame = pendingVisualFrame;
+              pendingVisualFrame = null;
+              deferredVisualSink!.commit(frame);
+            }
+          };
+          admitViewProjection = splitResources ? admitProjection : null;
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
+              splitSurface: Boolean(splitResources),
               surfaceProjection: this._a11yProjection,
               feedbackSurfaceProjection: this._surfaceProjection,
               instanceToken: instanceToken,
@@ -1193,14 +1248,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             createSession: createHostSession,
           });
-          acquiringProjection = false;
-          if (acquisitionFailed) throw acquisitionError;
-          if (pendingVisualFrame) {
-            const frame = pendingVisualFrame;
-            pendingVisualFrame = null;
-            deferredVisualSink!.commit(frame);
-          }
+          // Presence may defer the mounted transition; admit the completed acquisition now.
+          // Non-split views retain their existing post-attach admission boundary.
+          admitProjection();
         } catch (error) {
+          admitViewProjection = null;
           // Initial failure is retired by the guarded connection transaction,
           // so callback reentry cannot race a partly cleaned logical owner.
           if (initial) throw error;
@@ -1277,6 +1329,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const ownerModules = createWebComponentOwnerModules({
         el: thisEl,
+        splitSurface: Boolean(splitResources),
         instanceToken,
         rawPropsSource,
         getMeta: ownerGetMeta,
@@ -1453,6 +1506,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           () => {
             this._controller = null;
             this._anatomyPort = null;
+            this._callerProjectionRestoredFor = null;
             this._mountedOnce = false;
             this._pendingOwnedTokens = null;
           },

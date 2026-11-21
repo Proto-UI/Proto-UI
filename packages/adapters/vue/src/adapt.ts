@@ -687,7 +687,12 @@ export function createVueAdapter(runtime: VueRuntime) {
             const firstReveal = revealedGate !== gate;
             revealedGate = gate;
             // Keep the first authored style from transitioning from the unstyled host.
-            if (firstReveal) revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, '');
+            if (firstReveal) {
+              const presenceBound = owner.session?.caps
+                .getPort<OverlayPort>('overlay')
+                ?.hasPresenceBinding();
+              revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, presenceBound ? 'presence' : '');
+            }
             revealedRoot?.removeAttribute(PUI_VIEW_PENDING_ATTR);
             if (firstReveal && revealedRoot) {
               scheduleAfterWebLayout(
@@ -748,6 +753,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           const eventPort = hostSession?.caps.getPort<EventPort>('event');
           const router = createWebProtoEventRouter({
             rootRegistrations: eventPort,
+            globalKeyDown: eventPort?.hasGlobalRegistration?.('key.down') !== false,
             globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
             rootEl,
             instanceToken,

@@ -346,7 +346,13 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
                   `Unsupported computed Thumb color format: ${paint.background}`
                 ).not.toBeNull();
                 expect(alpha, `Ordinary Thumb fill alpha: ${paint.background}`).toBeGreaterThan(0);
-                close(axis === 'vertical' ? geometry.width : geometry.height, 6);
+                // The 10px border-box track has one 1px inward border and
+                // p-px on both sides; the borderless Thumb fills the remaining 7px.
+                // Keep this source-derived so observed track drift cannot mask it.
+                close(
+                  axis === 'vertical' ? geometry.width : geometry.height,
+                  family.thickness - 1 - 2
+                );
               };
               checkOrdinaryPaint(style, box);
               // Counterfactual observations must not erase paint/geometry checks.
@@ -423,7 +429,13 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             await applyColorScheme(page, 'light');
             await page.emulateMedia({ reducedMotion: 'reduce' });
             await capture('end-reduced-motion', await checkCorner());
-            await page.emulateMedia({ reducedMotion: 'no-preference', forcedColors: 'active' });
+            for (const colorScheme of ['light', 'dark'] as const) {
+              await applyColorScheme(page, colorScheme);
+              await page.emulateMedia({ colorScheme, reducedMotion: 'no-preference', forcedColors: 'active' });
+              await capture(`end-forced-colors-${colorScheme}`, await checkCorner());
+            }
+            await applyColorScheme(page, 'light');
+            await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference', forcedColors: 'active' });
             await capture('end-forced-colors-before-assertions', {
               viewport: await rect(viewport),
             });
@@ -578,8 +590,9 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               rect(hThumb),
             ]);
             try {
-              close(vt.y + vt.height, v.y + v.height - 2);
-              close(ht.x + ht.width, h.x + h.width - 2);
+              // Shadcn's p-px recipe has one pixel of padding at each long-axis end.
+              close(vt.y + vt.height, v.y + v.height - 1);
+              close(ht.x + ht.width, h.x + h.width - 1);
             } catch (error) {
               // These are the exact original assertion inputs, not a new layout read.
               // Any further observation is post-failure and cannot repair acceptance.

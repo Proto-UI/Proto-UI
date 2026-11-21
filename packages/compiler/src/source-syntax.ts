@@ -46,6 +46,54 @@ export function scalarInitializer(node: ts.Expression): boolean {
   );
 }
 
+/**
+ * Immutable finite data written with literal syntax: scalars, array and object
+ * literals of such data, references to other module bindings, and a static
+ * string array joined by a static separator. Admission is syntactic only; the
+ * initializer is still parsed, typed and checked as finite data, and a
+ * non-constant `join` is rejected where it is lowered. Nothing is executed at
+ * module load beyond building the literal value.
+ */
+export function staticDataInitializer(node: ts.Expression): boolean {
+  node = unwrapSourceExpression(node);
+  if (scalarInitializer(node) || node.kind === ts.SyntaxKind.NullKeyword) return true;
+  if (ts.isIdentifier(node)) return true;
+  if (ts.isArrayLiteralExpression(node))
+    return node.elements.every((element) =>
+      ts.isSpreadElement(element)
+        ? ts.isIdentifier(element.expression)
+        : staticDataInitializer(element)
+    );
+  if (ts.isObjectLiteralExpression(node))
+    return node.properties.every(
+      (property) =>
+        (ts.isPropertyAssignment(property) &&
+          (ts.isIdentifier(property.name) ||
+            ts.isStringLiteral(property.name) ||
+            ts.isNumericLiteral(property.name)) &&
+          staticDataInitializer(property.initializer)) ||
+        (ts.isSpreadAssignment(property) && ts.isIdentifier(property.expression))
+    );
+  return staticJoin(node) !== undefined;
+}
+
+/** `<static array>.join(<string literal>)`: the receiver and separator nodes. */
+export function staticJoin(
+  node: ts.Expression
+): { receiver: ts.Expression; separator: ts.StringLiteral | undefined } | undefined {
+  if (
+    !ts.isCallExpression(node) ||
+    !ts.isPropertyAccessExpression(node.expression) ||
+    node.expression.name.text !== 'join' ||
+    node.arguments.length > 1 ||
+    (node.arguments.length === 1 && !ts.isStringLiteral(node.arguments[0]))
+  )
+    return undefined;
+  const receiver = unwrapSourceExpression(node.expression.expression);
+  if (!ts.isArrayLiteralExpression(receiver) && !ts.isIdentifier(receiver)) return undefined;
+  return { receiver, separator: node.arguments[0] as ts.StringLiteral | undefined };
+}
+
 export function sourceSpan(node: ts.Node): SourceSpan {
   const file = node.getSourceFile();
   const start = node.getStart(file);

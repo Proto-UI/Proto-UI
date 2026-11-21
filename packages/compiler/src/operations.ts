@@ -87,6 +87,7 @@ export interface CallbackRule {
 export type ArgumentRole =
   | 'value'
   | 'static-key'
+  | 'finite-key'
   | 'static-keys'
   | 'prop-key'
   | 'declared-prop-keys'
@@ -155,6 +156,7 @@ const aliveContexts: readonly CallbackContext[] = [
   'control-label-target',
 ];
 const key: ArgumentRule = { role: 'static-key', types: ['string'] };
+const finiteKey: ArgumentRule = { role: 'finite-key', types: ['string'] };
 const record: ArgumentRule = { role: 'value', types: ['record'] };
 const boolean: ArgumentRule = { role: 'value', types: ['boolean'] };
 // Native watch cleanup has a fixed callable ABI. A coarse 'function' marker
@@ -283,6 +285,36 @@ const watchParameters: readonly ValueType[] = ['run', 'props', 'props', 'record'
 const rawWatchParameters: readonly ValueType[] = ['run', 'record', 'record', 'record'];
 const optionalRecord: ArgumentRule = { ...record, optional: true };
 const capabilityConfig: ArgumentRule = { role: 'value', types: ['record', 'module-config'] };
+const partKeyType: ValueType = {
+  kind: 'value-union',
+  members: ['string', 'state:string', 'borrowed:string', 'observed:string'],
+};
+const partTargetType: ValueType = {
+  kind: 'object',
+  fields: [
+    { name: 'kind', type: { kind: 'literal', value: 'part' } },
+    { name: 'family', type: 'anatomy-family' },
+    { name: 'role', type: 'string' },
+    { name: 'key', type: partKeyType },
+  ],
+};
+const relationSpecType: ValueType = {
+  kind: 'object',
+  fields: [
+    {
+      name: 'target',
+      type: {
+        kind: 'value-union',
+        members: [partKeyType, 'a11y-ref', 'a11y-ref-list', { kind: 'array', element: { kind: 'union', members: [] } }, partTargetType],
+      },
+    },
+    {
+      name: 'mode',
+      optional: true,
+      type: { kind: 'union', members: [{ kind: 'literal', value: 'replace' }, { kind: 'literal', value: 'append' }] },
+    },
+  ],
+};
 const textSnapshot: DataType = {
   kind: 'record',
   fields: [
@@ -1501,12 +1533,23 @@ export const OPERATION_RULES = {
     [{ role: 'value', types: ['string', 'state:string', 'observed:string'] }],
     [effect('declare', 'accessibility')]
   ),
+  'accessible.part': rule(
+    'accessible',
+    'part',
+    setup,
+    'void',
+    [
+      { role: 'value', types: ['anatomy-family'] },
+      { role: 'value', valueSchema: { kind: 'object', fields: [{ name: 'key', type: partKeyType }] } },
+    ],
+    [effect('declare', 'accessibility')]
+  ),
   'accessible.relation': rule(
     'accessible',
     'relation',
     setup,
     'void',
-    [key, capabilityConfig],
+    [key, { role: 'value', valueSchema: relationSpecType }],
     [effect('declare', 'accessibility')]
   ),
   'accessible.tree': rule(
@@ -1550,7 +1593,7 @@ export const OPERATION_RULES = {
     'anatomy.has',
     runtime,
     'boolean',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.parts': rule(
@@ -1566,7 +1609,7 @@ export const OPERATION_RULES = {
     'anatomy.partsOf',
     runtime,
     'anatomy-parts',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.version': rule(
@@ -1590,7 +1633,7 @@ export const OPERATION_RULES = {
     'anatomy.order.partsOf',
     runtime,
     'anatomy-parts',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.indexOfSelf': rule(
@@ -1598,7 +1641,7 @@ export const OPERATION_RULES = {
     'anatomy.order.indexOfSelf',
     runtime,
     'number',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.prevOfSelf': rule(
@@ -1606,7 +1649,7 @@ export const OPERATION_RULES = {
     'anatomy.order.prevOfSelf',
     runtime,
     'nullable:anatomy-part',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomy.order.nextOfSelf': rule(
@@ -1614,7 +1657,7 @@ export const OPERATION_RULES = {
     'anatomy.order.nextOfSelf',
     runtime,
     'nullable:anatomy-part',
-    [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }],
+    [{ role: 'value', types: ['anatomy-family'] }, finiteKey],
     [effect('read', 'view')]
   ),
   'anatomyPart.hasExpose': rule(
@@ -2367,6 +2410,30 @@ export function privilegedCaptureType(id: string): ValueType | undefined {
   return lookup(id.split(':')[0])?.result;
 }
 
+/** Stable declaration names on the privileged Focus result, independent of expose aliases. */
+export function privilegedStateMembers(operation: string): HookCaptureIR['states'] {
+  return operation === 'hook.asFocusable'
+    ? Object.entries(capabilityMembers.focus).map(([name, type]) => ({ name, type }))
+    : [];
+}
+
+function projectedCaptureStateType(type: ValueType): ValueType {
+  return typeof type === 'string' && type.startsWith('observed:')
+    ? type
+    : (`borrowed:${stateValue(type)}` as ValueType);
+}
+
+export function captureStateHandlesType(capture: HookCaptureIR | undefined): ValueType {
+  const fields = (capture?.states ?? []).map((state) => ({
+    name: state.name,
+    type: projectedCaptureStateType(state.type),
+    readonly: true,
+    optional: !state.definite,
+  }));
+  const record: ValueType = { kind: 'object', fields };
+  return fields.some((field) => !field.optional) ? record : joinValueTypes([record, 'void']);
+}
+
 export function operationResultType(
   operation: string,
   receiver?: ValueType,
@@ -2377,8 +2444,9 @@ export function operationResultType(
   switch (contract.resultFrom) {
     case 'capture-state': {
       const state = bindings.capture?.states.find((state) => state.name === bindings.captureKey);
-      const primitive = stateValue(state?.type);
-      return primitive ? joinValueTypes([`borrowed:${primitive}`, 'void']) : 'void';
+      return state && stateValue(state.type)
+        ? joinValueTypes([projectedCaptureStateType(state.type), 'void'])
+        : 'void';
     }
     case 'capture-method': {
       const method = bindings.capture?.methods.find(
@@ -2727,6 +2795,10 @@ export function validateOperationArguments(
         reject('argument-type', 'The entry override is only admitted by focus scope activation.');
     }
     switch (requirement.role) {
+      case 'finite-key':
+        if (!finiteStringKeys(argument))
+          reject('static-key', 'A finite set of nonempty string keys is required.');
+        break;
       case 'declared-event-key': {
         const keys = finiteStringKeys(argument);
         if (

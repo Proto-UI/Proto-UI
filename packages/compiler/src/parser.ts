@@ -15,6 +15,7 @@ import {
   validateOperationPhase,
   isTemplateChildType,
   capabilityMemberType,
+  captureStateHandlesType,
   capabilityBinaryType,
   stateValue,
   stateDeclarationData,
@@ -35,6 +36,8 @@ import {
   sourceName,
   sourceSpan,
   scalarInitializer,
+  staticDataInitializer,
+  staticJoin,
   isSourceFunction,
   CORE_FUNCTIONS,
   type FunctionNode,
@@ -622,6 +625,10 @@ class Frontend {
           if (optional) return 'void';
           throw new TypeError(`Cannot read ${property} on a nullish value.`);
         }
+        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'stateHandles')
+          return captureStateHandlesType(this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture);
+        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'render')
+          return joinValueTypes([this.hooks.get(owner.hookId)?.setup.returnType ?? 'void', 'void']);
         const capability = capabilityMemberType(owner, property, optional);
         if (capability !== undefined) return capability;
         if (owner === 'props') {
@@ -948,6 +955,7 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
+    nodes = lowerObjectPatterns(nodes);
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
@@ -1230,6 +1238,8 @@ class Frontend {
     const value = this.expressionValue(module, node, scope, phase, argumentRule, expectedType);
     if (value.kind === 'intrinsic' && value.name === 'array.every')
       this.invalidateFlow(scope, true);
+    if (value.kind === 'intrinsic' && ['object.assign', 'string'].includes(value.name))
+      this.invalidateFlow(scope, true, true);
     this.flow.observe(value);
     return value;
   }
@@ -1262,6 +1272,50 @@ class Frontend {
       );
       if (constant && value.kind === 'literal')
         return { ...value, type: { kind: 'literal', value: value.value } };
+      if (constant && value.kind === 'array' && value.elements.length > 0 &&
+        value.elements.every((element) => element.kind === 'literal' && typeof element.value === 'string')) {
+        const elements = value.elements.map((element) => {
+          if (element.kind !== 'literal') return element;
+          return { ...element, type: { kind: 'literal' as const, value: element.value } };
+        });
+        return {
+          ...value,
+          elements,
+          type: {
+            kind: 'array',
+            element: parseDataType({ kind: 'union', members: elements.map((element) => element.type) }),
+          },
+        };
+      }
+      if (asserted && value.type === 'unknown') {
+        // Only contiguous erased assertions can retain this operand's proof.
+        // Every inner assertion has already passed its ordinary checks above.
+        let operand = node.expression,
+          original = value;
+        for (;;) {
+          if (ts.isParenthesizedExpression(operand)) {
+            operand = operand.expression;
+            continue;
+          }
+          if (!ts.isAsExpression(operand) && !ts.isTypeAssertionExpression(operand)) break;
+          const span = sourceSpan(operand);
+          if (
+            original.kind === 'narrow' &&
+            original.span.file === span.file &&
+            original.span.start === span.start &&
+            original.span.end === span.end
+          )
+            original = original.value;
+          operand = operand.expression;
+        }
+        if (
+          original !== value &&
+          typeof original.type === 'string' &&
+          !isDataValueType(original.type) &&
+          sameType(original.type, asserted)
+        )
+          return original;
+      }
       if (asserted && canNarrowValue(value.type, asserted) && !sameType(value.type, asserted))
         return { kind: 'narrow', value, type: asserted, span: sourceSpan(node) };
       if (
@@ -1318,6 +1372,20 @@ class Frontend {
       return { kind: 'literal', value: null, type: 'null', span };
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
       return { kind: 'literal', value: node.text, type: literalType(node.text), span };
+    const joined = staticJoin(node);
+    if (joined) {
+      // Folded at compile time: a join of finite literal strings is itself a
+      // literal, so nothing is evaluated when the artifact loads.
+      const parts = this.staticStrings(this.expression(module, joined.receiver, scope, phase));
+      if (!parts)
+        rejectNode(
+          node,
+          'PUI1004',
+          'join() is admitted only on a static array of string literals.'
+        );
+      const value = parts.join(joined.separator ? joined.separator.text : ',');
+      return { kind: 'literal', value, type: literalType(value), span };
+    }
     if (ts.isNumericLiteral(node)) {
       const value = Number(node.text);
       if (!Number.isFinite(value)) rejectNode(node, 'PUI1006', 'Numeric literals must be finite.');
@@ -1416,7 +1484,7 @@ class Frontend {
           );
           return { kind: 'reference', name: helper.name, type: functionValueType(helper.fn), span };
         }
-        if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
+        if (resolved.module && moduleDataNode(resolved.node)) {
           const binding = this.moduleValue(
             resolved.module,
             resolved.name,
@@ -1528,9 +1596,20 @@ class Frontend {
       const elements = node.elements.flatMap((element) => {
         if (!ts.isSpreadElement(element)) return [this.expression(module, element, scope, phase)];
         const spread = this.expression(module, element.expression, scope, phase);
-        if (spread.kind !== 'array')
+        const array = this.staticArray(spread);
+        // Inline arrays are evaluated here once. Replaying a shared initializer
+        // is safe only for primitive literals: records, nested arrays and reads
+        // would otherwise recreate identities or repeat evaluation.
+        if (
+          !array ||
+          (spread.kind !== 'array' &&
+            !array.elements.every((item) => {
+              while (item.kind === 'narrow') item = item.value;
+              return item.kind === 'literal';
+            }))
+        )
           rejectNode(element, 'PUI1004', 'Array spread currently requires a checked static array.');
-        return spread.elements;
+        return array.elements;
       });
       const elementTypes = elements.map((element) => element.type);
       if (!elementTypes.every(isDataValueType)) {
@@ -1947,6 +2026,31 @@ class Frontend {
         : undefined;
   }
 
+  /** Follow checked module identities, never source names or type-only views. */
+  private staticArray(value: ExpressionIR): Extract<ExpressionIR, { kind: 'array' }> | undefined {
+    while (value.kind === 'narrow') value = value.value;
+    if (value.kind === 'reference') {
+      const bound = this.moduleBindings.find((binding) => binding.name === value.name)?.value;
+      if (!bound) return undefined;
+      return this.staticArray(bound);
+    }
+    return value.kind === 'array' ? value : undefined;
+  }
+
+  /** The literal strings of a static array, following module data references. */
+  private staticStrings(value: ExpressionIR): string[] | undefined {
+    const array = this.staticArray(value);
+    if (!array) return undefined;
+    const out: string[] = [];
+    for (const element of array.elements) {
+      let item = element;
+      while (item.kind === 'narrow') item = item.value;
+      if (item.kind !== 'literal' || typeof item.value !== 'string') return undefined;
+      out.push(item.value);
+    }
+    return out;
+  }
+
   private moduleValue(
     module: SourceModule,
     name: string,
@@ -1955,18 +2059,42 @@ class Frontend {
     const id = `${module.file.fileName}#${name}`;
     const previous = this.moduleValues.get(id);
     if (previous) return previous;
-    const initial = this.expression(module, value, new Map(), 'setup');
-    if (initial.type !== 'boolean' && initial.type !== 'number' && initial.type !== 'string')
+    // Discovery unwraps declarations for dispatch. Recover only parentheses and
+    // a verified const assertion around an array, not arbitrary erased views.
+    let initializer = value;
+    while (ts.isArrayLiteralExpression(value) && initializer.parent &&
+      (ts.isParenthesizedExpression(initializer.parent) ||
+        ((ts.isAsExpression(initializer.parent) || ts.isTypeAssertionExpression(initializer.parent)) &&
+          ts.isTypeReferenceNode(initializer.parent.type) &&
+          ts.isIdentifier(initializer.parent.type.typeName) &&
+          initializer.parent.type.typeName.text === 'const')) &&
+      initializer.parent.expression === initializer)
+      initializer = initializer.parent;
+    const initial = this.expression(module, initializer, new Map(), 'setup');
+    const scalar =
+      initial.type === 'boolean' || initial.type === 'number' || initial.type === 'string';
+    // Shared mutable storage stays scalar; an immutable binding may hold any
+    // finite data written as a literal (finiteness is checked below).
+    if (!scalar && (module.mutableBindings.has(name) || scalarInitializer(value)))
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
-    const annotation = ts.isVariableDeclaration(value.parent) ? value.parent.type : undefined;
-    const stored = annotation
+    const annotation = ts.isVariableDeclaration(initializer.parent) ? initializer.parent.type : undefined;
+    const declared = annotation
       ? parseSourceValueType(module, annotation, this.substitutions)
       : initial.type;
-    if (!isDataValueType(stored))
+    if (!isDataValueType(declared))
       rejectNode(
         annotation ?? value,
         'PUI1006',
         'Shared module storage requires finite data; owner closures and capabilities cannot escape into module storage.'
+      );
+    // Immutable module data is shared by every instance, so every field
+    // reached through it is read-only whatever the literal's inferred type.
+    const stored = scalar ? declared : deepReadonly(declared);
+    if (stored === undefined)
+      rejectNode(
+        value,
+        'PUI1006',
+        'Module data must be scalars, scalar arrays or records of such data.'
       );
     if (!assignable(initial.type, stored))
       rejectNode(
@@ -2020,7 +2148,7 @@ class Frontend {
       name = node.text;
     if (!binding && (module.declarations.has(name) || module.imports.has(name))) {
       const resolved = this.graph.resolveBinding(module, name);
-      if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
+      if (resolved.module && moduleDataNode(resolved.node)) {
         const value = this.moduleValue(
           resolved.module,
           resolved.name,
@@ -2300,6 +2428,19 @@ class Frontend {
     expectedType?: ValueType
   ): ExpressionIR {
     const span = sourceSpan(node);
+    if (
+      ts.isIdentifier(node.expression) && node.expression.text === 'String' &&
+      !scope.has('String') && !module.declarations.has('String') && !module.imports.has('String')
+    ) {
+      if (node.questionDotToken)
+        rejectNode(node, 'PUI1006', 'String does not admit optional calls.');
+      const args = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
+      return {
+        kind: 'intrinsic', name: 'string', arguments: args,
+        type: this.checkedValue(node, () => intrinsicResult('string', args.map((arg) => arg.type))),
+        span,
+      };
+    }
     if (ts.isPropertyAccessExpression(node.expression)) {
       const owner = node.expression.expression,
         property = node.expression.name.text;
@@ -2316,8 +2457,24 @@ class Frontend {
               ? 'object.freeze'
               : owner.text === 'Object' && property === 'hasOwn'
                 ? 'object.hasOwn'
-                : undefined;
+                : owner.text === 'Object' && property === 'assign'
+                  ? 'object.assign'
+                  : undefined;
         if (name) {
+          if (name === 'object.assign' && (node.questionDotToken || node.expression.questionDotToken))
+            rejectNode(node, 'PUI1006', 'Object.assign does not admit optional calls.');
+          if (name === 'object.assign') {
+            const operands = node.arguments.map((argument) => {
+              while (ts.isParenthesizedExpression(argument)) argument = argument.expression;
+              return argument;
+            });
+            if (
+              !operands.length ||
+              (!ts.isObjectLiteralExpression(operands[0]) && !ts.isNewExpression(operands[0])) ||
+              operands.slice(1).some((operand) => !ts.isObjectLiteralExpression(operand))
+            )
+              rejectNode(node, 'PUI1006', 'Object.assign requires a direct fresh target and record literal sources.');
+          }
           const args = node.arguments.map((argument) =>
             this.expression(
               module,
@@ -2335,9 +2492,33 @@ class Frontend {
             type: this.checkedValue(node, () =>
               intrinsicResult(
                 name,
-                args.map((arg) => arg.type)
+                args.map((arg) => arg.type),
+                args
               )
             ),
+            span,
+          };
+        }
+      }
+      if (property === 'includes') {
+        const array = this.expression(module, owner, scope, phase);
+        if (typeof array.type !== 'string' && array.type.kind === 'array') {
+          if (node.arguments.length !== 1 || node.questionDotToken || node.expression.questionDotToken)
+            rejectNode(node, 'PUI1006', 'Finite string includes requires one search argument and no optional call.');
+          let search = node.arguments[0];
+          // An erased comparison view grants no provenance. Retain the actual operand in IR.
+          while (ts.isParenthesizedExpression(search)) search = search.expression;
+          if (ts.isAsExpression(search) || ts.isTypeAssertionExpression(search)) {
+            const asserted = parseSourceValueType(module, search.type, this.substitutions);
+            const members = valueAlternatives(asserted);
+            if (members.length && members.every((type) =>
+              typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
+            )) search = search.expression;
+          }
+          const value = this.expression(module, search, scope, phase);
+          return {
+            kind: 'intrinsic', name: 'array.includes', arguments: [array, value],
+            type: this.checkedValue(node, () => intrinsicResult('array.includes', [array.type, value.type])),
             span,
           };
         }
@@ -3074,7 +3255,7 @@ class Frontend {
     ]);
     for (const loaded of this.graph.modules.values())
       for (const [name, declaration] of loaded.declarations) {
-        if (ts.isCallExpression(declaration)) {
+        if (ts.isCallExpression(declaration) && !staticJoin(declaration)) {
           if (
             ts.isIdentifier(declaration.expression) &&
             this.graph.resolveCoreImport(loaded, declaration.expression.text) === 'createContextKey'
@@ -3184,4 +3365,159 @@ export function parsePrototype(
       ],
     };
   }
+}
+
+/** A module declaration that is lowered as a shared module value. */
+function moduleDataNode(node: ts.Node): boolean {
+  if (!ts.isExpression(node)) return false;
+  if (scalarInitializer(node)) return true;
+  return !ts.isIdentifier(node) && !isSourceFunction(node) && staticDataInitializer(node);
+}
+
+/**
+ * The type immutable module data is stored as: every record becomes an object
+ * view whose fields are read-only at every depth, so no instance can write
+ * through data all instances share. Arrays of records have no read-only element
+ * form in the IR and are not admitted as module data.
+ */
+function deepReadonly(type: ValueType): ValueType | undefined {
+  if (typeof type === 'string') return type;
+  if (type.kind === 'literal') return type;
+  if (type.kind === 'record' || type.kind === 'object') {
+    if (type.kind === 'object' && type.index !== undefined) return undefined;
+    const fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[] = [];
+    for (const field of type.fields) {
+      const inner = deepReadonly(field.type);
+      if (inner === undefined) return undefined;
+      fields.push({
+        name: field.name,
+        type: inner,
+        ...(field.optional ? { optional: true } : {}),
+        readonly: true,
+      });
+    }
+    return { kind: 'object', fields };
+  }
+  if (type.kind === 'array')
+    return valueAlternatives(type.element).every(
+      (member) => typeof member === 'string' || member.kind === 'literal'
+    )
+      ? type
+      : undefined;
+  if (type.kind === 'union') {
+    const members = type.members.map(deepReadonly);
+    return members.every(
+      (member) => (member !== undefined && typeof member === 'string') || member?.kind === 'literal'
+    )
+      ? type
+      : undefined;
+  }
+  return undefined;
+}
+
+const loweredPatterns = new WeakMap<ts.Statement, ts.Statement>();
+
+/**
+ * `const { a, b: c } = source` declares `a` and `c` as reads of `source.a` and
+ * `source.b`. A source that is not a plain identifier is evaluated once into a
+ * compiler-named binding first, so its effects and its value are not repeated.
+ * Each synthesized node keeps the source range it came from, so diagnostics,
+ * binding identities and provenance still point at the authored pattern.
+ * Defaults, rest elements, nested and computed patterns keep an explicit
+ * diagnostic until they have their own definition.
+ */
+function lowerObjectPatterns(nodes: readonly ts.Statement[]): readonly ts.Statement[] {
+  if (!nodes.some(hasObjectPattern)) return nodes;
+  return nodes.map((node) => {
+    if (!hasObjectPattern(node)) return node;
+    const cached = loweredPatterns.get(node);
+    if (cached) return cached;
+    const statement = node as ts.VariableStatement;
+    const factory = ts.factory;
+    const ranged = <T extends ts.Node>(created: T, from: ts.TextRange): T =>
+      ts.setTextRange(created, from);
+    const declarations: ts.VariableDeclaration[] = [];
+    for (const declaration of statement.declarationList.declarations) {
+      const pattern = declaration.name;
+      if (!ts.isObjectBindingPattern(pattern)) {
+        declarations.push(declaration);
+        continue;
+      }
+      if (!declaration.initializer)
+        rejectNode(declaration, 'PUI1004', 'A destructuring declaration requires an initializer.');
+      const init = declaration.initializer;
+      let source: () => ts.Expression;
+      if (ts.isIdentifier(init) && !declaration.type) {
+        source = () => ranged(factory.createIdentifier(init.text), init);
+      } else {
+        const name = `__puiPattern${declaration.pos}`;
+        declarations.push(
+          ranged(
+            factory.createVariableDeclaration(
+              ranged(factory.createIdentifier(name), pattern),
+              undefined,
+              declaration.type,
+              init
+            ),
+            declaration
+          )
+        );
+        source = () => ranged(factory.createIdentifier(name), init);
+      }
+      for (const element of pattern.elements) {
+        if (element.dotDotDotToken)
+          rejectNode(
+            element,
+            'PUI1004',
+            'Rest elements in a destructuring pattern are not admitted.'
+          );
+        if (element.initializer)
+          rejectNode(element, 'PUI1004', 'Defaults in a destructuring pattern are not admitted.');
+        if (!ts.isIdentifier(element.name))
+          rejectNode(element, 'PUI1004', 'Nested destructuring patterns are not admitted.');
+        const key = element.propertyName;
+        if (key && !ts.isIdentifier(key) && !ts.isStringLiteral(key))
+          rejectNode(key, 'PUI1004', 'A destructured key must be a static name.');
+        const field = key ? key.text : element.name.text;
+        const read = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(field)
+          ? factory.createPropertyAccessExpression(source(), field)
+          : factory.createElementAccessExpression(source(), factory.createStringLiteral(field));
+        declarations.push(
+          ranged(
+            factory.createVariableDeclaration(
+              ranged(factory.createIdentifier(element.name.text), element.name),
+              undefined,
+              undefined,
+              ranged(read, element)
+            ),
+            element
+          )
+        );
+      }
+    }
+    const list = ranged(
+      factory.createVariableDeclarationList(
+        declarations,
+        statement.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let)
+      ),
+      statement.declarationList
+    );
+    const lowered = ranged(factory.createVariableStatement(statement.modifiers, list), statement);
+    (lowered as { parent: ts.Node }).parent = statement.parent;
+    // TypeScript exports this helper at runtime but omits it from its public declarations.
+    (ts as typeof ts & {
+      setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T;
+    }).setParentRecursive(lowered, true);
+    loweredPatterns.set(node, lowered);
+    return lowered;
+  });
+}
+
+function hasObjectPattern(node: ts.Statement): boolean {
+  return (
+    ts.isVariableStatement(node) &&
+    node.declarationList.declarations.some((declaration) =>
+      ts.isObjectBindingPattern(declaration.name)
+    )
+  );
 }

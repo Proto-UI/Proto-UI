@@ -82,7 +82,7 @@ export function initDocumentationTypography(doc: Document = document) {
             error
           );
       });
-  const refresh = () => {
+  const reconcile = () => {
     if (!alive) return;
     const snapshot = controller.getSnapshot();
     if (snapshot.phase === 'preparing' || snapshot.phase === 'destroyed') return;
@@ -99,6 +99,17 @@ export function initDocumentationTypography(doc: Document = document) {
     )
       void observe(controller.request(selection, { force: sourceChanged }));
   };
+  let refreshTask: number | undefined;
+  const refresh = () => {
+    if (!alive || refreshTask !== undefined) return;
+    // Framework commits can deliver many observer batches before the next
+    // browser task. Reconcile the current source inventory once for that burst,
+    // rather than walking the whole documentation subtree for every delivery.
+    refreshTask = view.setTimeout(() => {
+      refreshTask = undefined;
+      reconcile();
+    }, 0);
+  };
   const preference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
     if (!alive || !isRuntimeId(next)) return;
@@ -114,6 +125,11 @@ export function initDocumentationTypography(doc: Document = document) {
   const observer = new view.MutationObserver((records) => {
     if (!root.isConnected) void handle.destroy();
     else if (
+      // A queued reconciliation inventories both sides of any source move at
+      // execution time. Preparation also reconciles when its transaction settles.
+      // Neither case needs to rescan private owners for each intervening record.
+      refreshTask === undefined &&
+      controller.getSnapshot().phase !== 'preparing' &&
       records.some(
         (record) =>
           root.contains(record.target) &&
@@ -147,6 +163,10 @@ export function initDocumentationTypography(doc: Document = document) {
     destroy() {
       return (destruction ??= (async () => {
         alive = false;
+        if (refreshTask !== undefined) {
+          view.clearTimeout(refreshTask);
+          refreshTask = undefined;
+        }
         observer.disconnect();
         compact.removeEventListener('change', refresh);
         doc.removeEventListener(PREFERRED_ADAPTER_EVENT, preference);

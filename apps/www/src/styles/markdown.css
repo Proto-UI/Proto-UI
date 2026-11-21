@@ -129,6 +129,21 @@
     overflow-wrap: anywhere;
   }
 
+  /* Prose tokens (identifiers, paths, version strings) have no break
+     opportunity. With enlarged host text one token can exceed the reading
+     column and widen the whole document, because no prose ancestor scrolls.
+     Prose text may break inside a token that cannot fit; code keeps its own
+     token and scroll behavior. */
+  .docs-content-flow > :is(p, blockquote, h1, h2, h3, h4, h5, h6),
+  .docs-content-flow > :is(ul, ol, dl) :is(li, dt, dd) {
+    overflow-wrap: break-word;
+  }
+
+  .docs-content-flow > :is(p, blockquote, h1, h2, h3, h4, h5, h6) pre,
+  .docs-content-flow > :is(ul, ol, dl) :is(li, dt, dd) pre {
+    overflow-wrap: normal;
+  }
+
   /* Decorate prose links without changing embedded demos or navigation controls. */
   .docs-content-flow
     > :is(p, ul, ol, dl, blockquote, table, .docs-table-scroll, .starlight-aside)
@@ -189,20 +204,42 @@
     @apply border-transparent;
   }
 
-  /* Starlight pagination links: flatten card style */
+  /* Match the native fallback box to the enhanced pagination Surface. */
   footer .pagination-links,
   main[data-pagefind-body] footer .pagination-links {
     @apply mt-6 flex items-center justify-between gap-2;
   }
   footer .pagination-links a:not([data-site-link-enhanced]),
   main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]) {
-    @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors;
+    @apply inline-flex items-center justify-center whitespace-normal text-sm font-medium transition-colors;
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-    @apply h-7 rounded-md gap-1.5 px-3 shadow-none;
+    @apply min-h-9 rounded-md gap-1.5 px-3 py-1 shadow-none;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40;
     @apply border border-border;
-    @apply flex-none w-fit;
-    font-size: 0.8125rem;
+    @apply min-w-0 w-fit;
+    flex: 0 1 auto;
+    max-width: calc(50% - 0.25rem);
+    margin-bottom: 1px;
+  }
+  footer .pagination-links a:not([data-site-link-enhanced]):only-child,
+  main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]):only-child {
+    max-width: 100%;
+  }
+  [data-site-library-family='brutalist']
+    :is(footer, main[data-pagefind-body] footer)
+    .pagination-links
+    a:not([data-site-link-enhanced]) {
+    margin-bottom: 0.25rem;
+  }
+  @media (forced-colors: active) {
+    footer .pagination-links a:not([data-site-link-enhanced]):focus-visible,
+    main[data-pagefind-body]
+      footer
+      .pagination-links
+      a:not([data-site-link-enhanced]):focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
+    }
   }
   footer .pagination-links a svg,
   main[data-pagefind-body] footer .pagination-links a svg {
@@ -228,38 +265,21 @@
     > span:first-of-type
     .link-title {
     @apply block;
-    font-size: 0.8125rem;
-    line-height: 1.25rem;
+    overflow-wrap: anywhere;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  [data-site-library-family='bootstrap-2-3-2']
+    :is(footer, main[data-pagefind-body] footer)
+    .pagination-links
+    a:not([data-site-link-enhanced])
+    > span:first-of-type
+    .link-title {
+    font-size: 11.9px;
+    line-height: 20px;
   }
   main[data-pagefind-body] .pagination-links a:not([data-site-link-enhanced]):hover {
     @apply shadow-none;
-  }
-
-  @media (max-width: 40rem) {
-    footer .pagination-links a:not([data-site-link-enhanced]),
-    main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]) {
-      width: auto;
-      min-width: 0;
-      max-width: calc(50% - 0.25rem);
-      height: auto;
-      min-height: 1.75rem;
-      white-space: normal;
-    }
-
-    footer .pagination-links a:not([data-site-link-enhanced]):only-child,
-    main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]):only-child {
-      max-width: 100%;
-    }
-
-    footer .pagination-links a:not([data-site-link-enhanced]) > span:first-of-type .link-title,
-    main[data-pagefind-body]
-      footer
-      .pagination-links
-      a:not([data-site-link-enhanced])
-      > span:first-of-type
-      .link-title {
-      overflow-wrap: anywhere;
-    }
   }
 
   main[data-pagefind-body] ul {

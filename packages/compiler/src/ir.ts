@@ -299,9 +299,12 @@ export type ExpressionIR = ExpressionBase &
         kind: 'intrinsic';
         name:
           | 'number.isFinite'
+          | 'string'
           | 'object.freeze'
+          | 'object.assign'
           | 'object.hasOwn'
           | 'array.every'
+          | 'array.includes'
           | 'typeof'
           | 'error';
         arguments: ExpressionIR[];
@@ -416,7 +419,7 @@ export interface AuthoredHookIR {
   span: SourceSpan;
 }
 export interface HookCaptureIR {
-  states: { name: string; type: ValueType; valueType?: DataType }[];
+  states: { name: string; type: ValueType; valueType?: DataType; definite?: boolean }[];
   methods: { name: string; type: Extract<ValueType, { kind: 'callable' }> }[];
   children: { id: string; name: string }[];
 }

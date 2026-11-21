@@ -143,6 +143,64 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(second).toBe(first);
   });
 
+  it('keeps an authored subscribe result inside the owner boundary', () => {
+    const invoke = vi.fn((call: () => void) => call());
+    const reader = createScopedExposesReader(() => invoke);
+    const cancel = vi.fn();
+    const handle = {
+      [EXPOSE_STATE_EXTERNAL_HANDLE]: true,
+      get: () => false,
+      subscribe: () => cancel,
+      unsubscribe: (off: () => void) => off(),
+      spec: { kind: 'bool' },
+    } as const;
+    const state = reader.read({ active: handle }).active as typeof handle;
+    state.subscribe()();
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(invoke).toHaveBeenCalledTimes(2);
+    const disposeSubscription = state.subscribe();
+    reader.invalidate();
+    // Only a Module-issued cancellation may revoke a resource after the
+    // reader retires. An authored subscribe result stays owner-bound.
+    expect(() => disposeSubscription()).toThrow(/terminal disposal/);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(invoke).toHaveBeenCalledTimes(3);
+    expect(() => state.get()).toThrow(/terminal disposal/);
+    expect(() => state.subscribe()).toThrow(/terminal disposal/);
+  });
+
+  it('preserves an issued subscribe result identity through another public return', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const cancel = vi.fn();
+    const handle = {
+      [EXPOSE_STATE_EXTERNAL_HANDLE]: true,
+      get: () => false,
+      subscribe: () => cancel,
+      unsubscribe: (off: () => void) => off(),
+      spec: { kind: 'bool' },
+    } as const;
+    const raw = {
+      state: handle,
+      echo: (value: () => void) => value,
+      nest: (value: () => void) => ({ off: value }),
+    };
+    const api = reader.read(raw) as typeof raw;
+    const issued = api.state.subscribe();
+    const echoed = api.echo(issued);
+    const nested = api.nest(issued).off;
+    echoed();
+    expect(cancel).toHaveBeenCalledTimes(1);
+    reader.invalidate();
+    // The identity survives the retirement, but an authored result keeps the
+    // owner boundary. A Module-issued cancellation is not wrapped at all.
+    expect(() => echoed()).toThrow(/terminal disposal/);
+    expect(() => nested()).toThrow(/terminal disposal/);
+    expect(echoed).toBe(issued);
+    expect(nested).toBe(issued);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(() => api.echo(issued)).toThrow(/terminal disposal/);
+  });
+
   it('omits branded signal declarations from the public record without removing author values', () => {
     const reader = createScopedExposesReader(() => null);
     const authorValue = { __pui_expose: 'event', spec: { payload: 'json' } };
