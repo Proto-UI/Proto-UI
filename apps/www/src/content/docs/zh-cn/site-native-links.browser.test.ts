@@ -1547,8 +1547,10 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
     'keeps %s pagination height stable through native link enhancement',
     async (_family, route, width, textSize) => {
       const context = await browser.newContext({ viewport: { width, height: 844 } });
+      const page = await context.newPage();
+      let phase = 'navigation';
+      let failure: string | undefined;
       try {
-        const page = await context.newPage();
         await page.addInitScript((size) => {
           document.addEventListener(
             'DOMContentLoaded',
@@ -1560,10 +1562,58 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               }
               const links = [...footer.querySelectorAll('a')];
               const hrefs = links.map((link) => link.getAttribute('href'));
-              const samples: Array<{ height: number; enhanced: number; ownsLinks: boolean }> = [];
-              const capture = () => {
+              const rect = (value: DOMRect) => ({
+                x: value.x, y: value.y, width: value.width, height: value.height,
+                top: value.top, right: value.right, bottom: value.bottom, left: value.left,
+              });
+              const measure = (element: Element | null) => {
+                if (!element) return null;
+                const style = getComputedStyle(element);
+                const range = document.createRange();
+                range.selectNodeContents(element);
+                const canvas = document.createElement('canvas');
+                const drawing = canvas.getContext('2d');
+                if (drawing) drawing.font = style.font;
+                const metrics = drawing?.measureText(element.textContent ?? '');
+                return {
+                  tag: element.localName,
+                  text: element.textContent,
+                  rect: rect(element.getBoundingClientRect()),
+                  lineRects: Array.from(range.getClientRects(), rect),
+                  style: Object.fromEntries([
+                    'width', 'min-width', 'max-width', 'box-sizing', 'display', 'direction',
+                    'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+                    'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+                    'border-left-width', 'border-right-width', 'gap', 'flex-direction',
+                    'flex-shrink', 'font', 'font-family', 'font-size', 'font-weight',
+                    'font-style', 'font-stretch', 'line-height', 'letter-spacing',
+                    'word-spacing', 'white-space', 'overflow-wrap', 'word-break',
+                  ].map((property) => [property, style.getPropertyValue(property)])),
+                  fontMetrics: metrics ? {
+                    width: metrics.width,
+                    actualBoundingBoxAscent: metrics.actualBoundingBoxAscent,
+                    actualBoundingBoxDescent: metrics.actualBoundingBoxDescent,
+                    fontBoundingBoxAscent: metrics.fontBoundingBoxAscent,
+                    fontBoundingBoxDescent: metrics.fontBoundingBoxDescent,
+                  } : null,
+                };
+              };
+              const samples: unknown[] = [];
+              const capture = (phase: string) => {
                 const current = [...footer.querySelectorAll('a')];
                 samples.push({
+                  phase,
+                  at: performance.now(),
+                  fonts: document.fonts.status,
+                  footer: measure(footer),
+                  links: current.map((link) => ({
+                    rel: link.rel,
+                    href: link.getAttribute('href'),
+                    anchor: measure(link),
+                    surface: measure(link.querySelector('[data-site-link-content]')),
+                    text: measure(link.querySelector('[data-site-link-text]')),
+                    title: measure(link.querySelector('.link-title')),
+                  })),
                   height: footer.getBoundingClientRect().height,
                   enhanced: current.filter((link) => link.hasAttribute('data-site-link-enhanced'))
                     .length,
@@ -1573,20 +1623,25 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
                   ),
                 });
               };
-              capture();
-              new ResizeObserver(capture).observe(footer);
-              new MutationObserver(capture).observe(footer, {
+              capture('DOMContentLoaded-before-enhancement');
+              new ResizeObserver(() => capture('footer-resize')).observe(footer);
+              new MutationObserver(() => capture('enhancement-marker-mutation')).observe(footer, {
                 attributes: true,
                 subtree: true,
                 attributeFilter: ['data-site-link-enhanced'],
               });
-              Object.assign(window, { __paginationLayout: samples });
+              Object.assign(window, {
+                __paginationLayout: samples,
+                __capturePaginationLayout: capture,
+              });
             },
             { once: true }
           );
         }, textSize);
         await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded' });
+        phase = 'native-link-count';
         expect(await page.locator('footer .pagination-links a').count()).toBe(2);
+        phase = 'waiting-for-enhancement';
         await page
           .locator('footer .pagination-links a:not([data-site-link-enhanced])')
           .first()
@@ -1595,12 +1650,17 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           await new Promise<void>((resolve) =>
             requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
           );
+          if ('__capturePaginationLayout' in window &&
+              typeof window.__capturePaginationLayout === 'function') {
+            window.__capturePaginationLayout('enhanced-two-animation-frames');
+          }
           return (
             window as unknown as {
               __paginationLayout: Array<{ height: number; enhanced: number; ownsLinks: boolean }>;
             }
           ).__paginationLayout;
         });
+        phase = 'stability-assertions';
         expect(samples[0]?.enhanced).toBe(0);
         expect(samples.some(({ enhanced }) => enhanced === 2)).toBe(true);
         expect(samples.every(({ ownsLinks }) => ownsLinks)).toBe(true);
@@ -1608,8 +1668,37 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           Math.max(...samples.map(({ height }) => height)) -
             Math.min(...samples.map(({ height }) => height))
         ).toBeLessThanOrEqual(1);
+        phase = 'passed';
+      } catch (error) {
+        failure = safeError(error, baseUrl);
+        throw error;
       } finally {
-        await context.close();
+        try {
+          const samples = await page.evaluate((terminalPhase) => {
+            const diagnostics = window as unknown as {
+              __paginationLayout?: unknown[];
+              __capturePaginationLayout?: (phase: string) => void;
+            };
+            diagnostics.__capturePaginationLayout?.(terminalPhase);
+            return diagnostics.__paginationLayout ?? [];
+          }, `${failure ? 'failure' : 'terminal'}:${phase}`).catch((error) => ({
+            diagnosticError: safeError(error, baseUrl),
+          }));
+          await mkdir(evidenceDirectory, { recursive: true });
+          await writeFile(
+            path.join(evidenceDirectory, `docs-pagination-layout-${_family.toLowerCase().replaceAll(' ', '-')}.json`),
+            JSON.stringify({
+              schemaVersion: 1, source: evidenceSource, family: _family,
+              route, viewport: { width, height: 844 }, textSize, phase, failure,
+              capturedAt: new Date().toISOString(), samples,
+            }, null, 2)
+          );
+        } catch (diagnosticError) {
+          if (!failure) throw diagnosticError;
+          console.error('Pagination layout diagnostic capture failed', safeError(diagnosticError, baseUrl));
+        } finally {
+          await context.close();
+        }
       }
     },
     60_000
