@@ -10,6 +10,15 @@
     font-family: var(--site-shadcn-font-sans);
   }
 
+  /* Native content must select the same family font before enhancement.
+     The bank and self-hosted face are shared with the public Brutalist Text
+     projection, so wrapping a title does not change its glyph metrics. */
+  [data-site-family-scope][data-site-library-family='brutalist'],
+  [data-site-control-family='brutalist'] {
+    --font-sans: var(--site-brutalist-font-sans);
+    font-family: var(--site-brutalist-font-sans);
+  }
+
   /* These are generic authored theme boundaries, not component-name paint.
      Each real projection supplies its own family map, including escaped portal
      surfaces. Defaults stay below author utilities; explicit authored inline font-family also wins. */
