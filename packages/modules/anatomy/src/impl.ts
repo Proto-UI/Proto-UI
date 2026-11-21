@@ -573,8 +573,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     isCurrentPart: (family: AnatomyFamily, part: AnatomyPartView): boolean => {
       const claim = CLAIM_BY_PART_VIEW.get(part);
       if (!claim || claim.family !== family) return false;
-      const domain = this.resolveCurrentDomain(family, false);
-      return !!domain.rootInstance && domain.claims.includes(claim);
+      return this.findCurrentPartRoot(family, claim) !== null;
     },
     resolvePartTarget: (part: AnatomyPartView): unknown | null => {
       const claim = CLAIM_BY_PART_VIEW.get(part);
@@ -594,14 +593,14 @@ export class AnatomyModuleImpl extends ModuleBase {
     ): unknown | null => {
       const claim = CLAIM_BY_PART_VIEW.get(part);
       if (!claim || claim.family !== family) return null;
-      const domain = this.resolveCurrentDomain(family, false);
-      if (!domain.rootInstance || !domain.claims.includes(claim)) return null;
+      const root = this.findCurrentPartRoot(family, claim);
+      if (!root) return null;
       const getParent = this.getParentGetter();
       let current = getParent(claim.instance);
       while (current) {
         const ancestor = CENTER.getClaim(current, family);
         if (ancestor?.role === role) return current;
-        if (current === domain.rootInstance) return null;
+        if (current === root) return null;
         current = getParent(current);
       }
       return null;
@@ -1291,6 +1290,20 @@ export class AnatomyModuleImpl extends ModuleBase {
       claims,
       profile: rootClaim?.profile ?? null,
     };
+  }
+
+  private findCurrentPartRoot(
+    family: AnatomyFamily,
+    claim: ClaimRecord
+  ): AnatomyInstanceToken | null {
+    const instance = this.getSelfToken();
+    const getParent = this.getParentGetter();
+    const root = this.findDomainRoot(instance, family, getParent);
+    return root &&
+      CENTER.getClaim(claim.instance, family) === claim &&
+      this.findDomainRoot(claim.instance, family, getParent) === root
+      ? root
+      : null;
   }
 
   private findDomainRoot(
