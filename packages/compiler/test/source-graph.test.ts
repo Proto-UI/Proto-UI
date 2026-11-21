@@ -30,12 +30,30 @@ describe('static local source graph', () => {
   });
 
   it('reports an internal failure past the load boundary as a compiler defect', async () => {
+    const files: Record<string, string> = {};
+    Object.defineProperty(files, 'entry.proto.ts', {
+      get() {
+        throw new TypeError('snapshot read failed internally');
+      },
+    });
     const result = await compileFile('entry.proto.ts', {
-      sourceSnapshot: { entry: 'entry.proto.ts', files: {} },
+      sourceSnapshot: { entry: 'entry.proto.ts', files },
     });
     expect(result).toMatchObject({
       ok: false,
       diagnostics: [{ code: 'PUI1999', category: 'compiler-defect', message: expect.stringContaining('Compiler defect:') }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.diagnostics[0]?.message).toContain('snapshot read failed internally');
+  });
+
+  it('keeps a closed snapshot with no entry as invalid input', async () => {
+    const missing = await compileFile('entry.proto.ts', {
+      sourceSnapshot: { entry: 'entry.proto.ts', files: {} },
+    });
+    expect(missing).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1003', category: 'invalid-input', message: expect.stringContaining('no entry') }],
     });
   });
 
