@@ -1,4 +1,4 @@
-import { recordPreviewerQueue } from './previewer-readiness-diagnostics';
+import { recordPreviewerQueue, recordPreviewerDrain, recordPreviewerRenderPhase } from './previewer-readiness-diagnostics';
 
 type InitialRenderTicket = {
   admit(): void;
@@ -31,10 +31,13 @@ function documentQueue(document: Document): DocumentQueue {
       recordPreviewerQueue(document, queue.active, queue.pending.size);
       if (queue.scheduled || !queue.pending.size) return;
       queue.scheduled = true;
+      recordPreviewerDrain(document, 'scheduled');
       // Admission continues without idle callbacks or a visible animation frame.
       // Each refill starts in a browser task rather than a completion microtask.
       setTimeout(() => {
         queue.scheduled = false;
+        recordPreviewerDrain(document, 'entered');
+        recordPreviewerQueue(document, queue.active, queue.pending.size);
         for (const ticket of queue.pending) {
           if (queue.active >= BACKGROUND_INITIAL_RENDER_LIMIT) break;
           ticket.admit();
@@ -76,6 +79,7 @@ export function createInitialRenderAdmission(root: HTMLElement, signal: AbortSig
     if (state === 'active') queue!.active -= 1;
     queue?.pending.delete(ticket);
     state = 'foreground';
+    recordPreviewerRenderPhase(root, 'admission', 'permit-foreground');
     detach();
     resolve?.();
     queue?.drain();
@@ -86,6 +90,7 @@ export function createInitialRenderAdmission(root: HTMLElement, signal: AbortSig
     if (state === 'queued') {
       queue!.pending.delete(ticket);
       state = 'finished';
+      recordPreviewerRenderPhase(root, 'admission', 'permit-queued-aborted');
       reject?.(signal.reason);
       queue!.drain();
     }
@@ -98,6 +103,7 @@ export function createInitialRenderAdmission(root: HTMLElement, signal: AbortSig
       queue!.pending.delete(ticket);
       queue!.active += 1;
       state = 'active';
+      recordPreviewerRenderPhase(root, 'admission', 'permit-acquired');
       recordPreviewerQueue(root.ownerDocument, queue!.active, queue!.pending.size);
       resolve!();
     },
@@ -126,6 +132,7 @@ export function createInitialRenderAdmission(root: HTMLElement, signal: AbortSig
         reject = onReject;
       });
       state = 'queued';
+      recordPreviewerRenderPhase(root, 'admission', 'permit-queued');
       signal.addEventListener('abort', abort, { once: true });
       queue.observed.set(root, ticket);
       queue.observer.observe(root);
@@ -139,6 +146,7 @@ export function createInitialRenderAdmission(root: HTMLElement, signal: AbortSig
       if (state === 'active') queue!.active -= 1;
       queue?.pending.delete(ticket);
       state = 'finished';
+      recordPreviewerRenderPhase(root, 'admission', 'permit-released');
       detach();
       queue?.drain();
     },

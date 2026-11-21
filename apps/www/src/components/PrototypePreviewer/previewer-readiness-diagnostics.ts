@@ -2,7 +2,52 @@ type RuntimeCounters = { dependenciesCompleted: number; admissionsCompleted: num
 type ReadinessDiagnostics = {
   runtimes: Record<string, RuntimeCounters>;
   queue: { active: number; pending: number; peakActive: number; peakPending: number; samples: number };
+  renderPhases?: RenderPhaseReceipt[];
+  drain?: { scheduled: number; entered: number; lastScheduledAt: number; lastEnteredAt: number };
 };
+
+type RenderPhaseReceipt = {
+  runtime: string;
+  previewerId: string | null;
+  phase: string;
+  startedAt: number;
+  updatedAt: number;
+  transitions: { phase: string; at: number }[];
+};
+
+const renderPhases = new WeakMap<HTMLElement, RenderPhaseReceipt>();
+
+export function recordPreviewerDrain(document: Document, phase: 'scheduled' | 'entered'): void {
+  const view = document.defaultView;
+  const diagnostics = view?.__puiMatrixReadinessDiagnostics;
+  if (!diagnostics) return;
+  const drain = (diagnostics.drain ??= {
+    scheduled: 0, entered: 0, lastScheduledAt: 0, lastEnteredAt: 0,
+  });
+  drain[phase] += 1;
+  if (phase === 'scheduled') drain.lastScheduledAt = view!.performance.now();
+  else drain.lastEnteredAt = view!.performance.now();
+}
+
+/** Opt-in observations only: no readiness, ownership or admission decisions. */
+export function recordPreviewerRenderPhase(host: HTMLElement, runtime: string, phase: string): void {
+  const diagnostics = host.ownerDocument.defaultView?.__puiMatrixReadinessDiagnostics;
+  if (!diagnostics) return;
+  const at = host.ownerDocument.defaultView!.performance.now();
+  let receipt = renderPhases.get(host);
+  if (!receipt) {
+    receipt = {
+      runtime,
+      previewerId: host.closest<HTMLElement>('[data-previewer-id]')?.dataset.previewerId ?? null,
+      phase, startedAt: at, updatedAt: at, transitions: [],
+    };
+    renderPhases.set(host, receipt);
+    (diagnostics.renderPhases ??= []).push(receipt);
+  }
+  receipt.phase = phase;
+  receipt.updatedAt = at;
+  receipt.transitions.push({ phase, at });
+}
 
 declare global {
   interface Window {

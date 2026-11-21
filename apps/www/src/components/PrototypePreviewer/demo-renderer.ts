@@ -5,6 +5,7 @@ import {
   observeOwnedDemoRefs,
 } from './demo-ref-observer';
 import { planMaterialStages, withMaterialStages } from './demo-material-stages';
+import { recordPreviewerRenderPhase } from './previewer-readiness-diagnostics';
 import { appendDemoPublicInstanceHook, createDemoPublicInstances } from './demo-public-instances';
 import { createDynamicChildrenModel, type DynamicChildEntry } from './demo-dynamic-children';
 import { createDynamicCommitQueue } from './demo-dynamic-commit-queue';
@@ -1166,9 +1167,12 @@ async function renderDemoReact(
   // Demo setup reads DOM refs and Proto exposes immediately after initial
   // mount. A fixed number of animation frames is not a readiness guarantee
   // when Demo Matrix mounts many React roots concurrently.
+  recordPreviewerRenderPhase(host, opt.runtime, 'react-mount-entered');
   flushReact(() => root.render(renderTree()));
 
+  recordPreviewerRenderPhase(host, opt.runtime, 'react-awaiting-two-frames');
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  recordPreviewerRenderPhase(host, opt.runtime, 'react-frames-completed');
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   const initialRefCollection = collectOwnedDemoRefs(host, owner);
   publishDemoRefs(refs, initialRefCollection.refs);
@@ -1431,6 +1435,7 @@ async function renderDemoVue(
     },
   });
 
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue-mount-entered');
   app.mount(host);
   let cleanup: void | (() => void);
   if (
@@ -1461,7 +1466,9 @@ async function renderDemoVue(
     return EMPTY_DEMO_RENDER;
   }
 
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue-awaiting-frame');
   await new Promise((resolve) => requestAnimationFrame(resolve));
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue-frame-completed');
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   const initialRefCollection = collectOwnedDemoRefs(host, owner);
   publishDemoRefs(refs, initialRefCollection.refs);
@@ -1755,6 +1762,7 @@ async function renderDemoVue2(
   // Vue2 replaces this point with the authored root; no extra wrapper remains.
   const mountPoint = host.ownerDocument.createElement('div');
   host.appendChild(mountPoint);
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue2-mount-entered');
   const app = new Root().$mount(mountPoint);
   let cleanup: void | (() => void);
   if (
@@ -1785,8 +1793,11 @@ async function renderDemoVue2(
     return EMPTY_DEMO_RENDER;
   }
 
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue2-awaiting-next-tick');
   await nextVue2(Vue);
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue2-awaiting-frame');
   await new Promise((resolve) => requestAnimationFrame(resolve));
+  recordPreviewerRenderPhase(host, opt.runtime, 'vue2-frame-completed');
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   refreshComponentRefs(app);
   const initialRefCollection = collectOwnedDemoRefs(host, owner);
@@ -1944,6 +1955,9 @@ function hasLiquidSurface(node: DemoChild): boolean {
 }
 export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResult> {
   if (opt.isCurrent?.() === false) return EMPTY_DEMO_RENDER;
+  const observationHost = opt.host;
+  let renderFailed = false;
+  recordPreviewerRenderPhase(observationHost, opt.runtime, 'render-entered');
   const stages = planMaterialStages(opt.demo.root);
   let lease = claimHostMount(opt.host);
   let scene: ReturnType<
@@ -2001,6 +2015,8 @@ export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResu
         throw unsupportedRuntime(opt.runtime);
     }
   } catch (error) {
+    renderFailed = true;
+    recordPreviewerRenderPhase(observationHost, opt.runtime, 'render-failed');
     try {
       runCleanupSteps([
         () => scene?.dispose(),
@@ -2013,5 +2029,7 @@ export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResu
       // including a falsy thrown value from demo setup or instance creation.
     }
     throw error;
+  } finally {
+    if (!renderFailed) recordPreviewerRenderPhase(observationHost, opt.runtime, 'render-returned');
   }
 }

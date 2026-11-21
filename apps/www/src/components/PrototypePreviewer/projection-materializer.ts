@@ -1,5 +1,5 @@
 import { loadDemo } from './demo-modules';
-import { recordPreviewerCompletion } from './previewer-readiness-diagnostics';
+import { recordPreviewerCompletion, recordPreviewerRenderPhase } from './previewer-readiness-diagnostics';
 import { prepareDemoRuntime, renderDemo } from './demo-renderer';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import {
@@ -469,7 +469,9 @@ async function prepareProjectionCandidate(
     // that update before activation exposes the generation.
     composition.setLocked(false);
     reconcileCandidateExternalPortals();
+    recordPreviewerRenderPhase(host, runtimeId, 'projection-awaiting-reveal-paint');
     await nextPaint(host, options.yieldAfterPaint);
+    recordPreviewerRenderPhase(host, runtimeId, 'projection-reveal-paint-completed');
     options.backgroundPreparation?.signal.throwIfAborted();
     reconcileCandidateExternalPortals();
 
@@ -480,6 +482,7 @@ async function prepareProjectionCandidate(
         if (disposed) {
           throw new Error('[PrototypePreviewer] cannot activate a disposed projection generation.');
         }
+        recordPreviewerRenderPhase(host, runtimeId, 'projection-activating');
         for (const generationHost of generationHosts(options.mount, options.ownerId)) {
           setGenerationVisibility(generationHost, generationHost === host);
         }
