@@ -12,6 +12,7 @@ import {
   liquidMaterialSubjectSelector,
 } from './liquid-material-observation';
 import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
+import { createRuntimeTabsScrollProbe } from './runtime-tabs-scroll-probe.mjs';
 
 // Each case gets a fresh context and a terminal receipt, including failed states.
 // This is official sandboxed browser evidence, not native/packed/full Finf admission.
@@ -1683,7 +1684,7 @@ async function alertDialogJourney({ page, previewer, capture }: Journey) {
   await expect.poll(() => hasFocus(trigger)).toBe(true);
 }
 
-async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
+async function runtimeTabsJourney({ page, previewer, capture, family }: Journey) {
   await selectRealRuntime(page, previewer, 'wc', '[data-demo-ref="form"]', 1);
   const hoverFacts = async () =>
     (await runtimeControls(previewer)).getByRole('tab').evaluateAll((tabs) =>
@@ -1787,6 +1788,10 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
       await expect.poll(async () => hasFocus(await runtimeTab(previewer, 'wc'))).toBe(true);
       expect(await publications()).toEqual(expectedEvents);
       expect(await finalSurface!.evaluate((element) => element.isConnected)).toBe(true);
+      const scrollProbeList = (await runtimeControls(previewer)).getByRole('tablist');
+      const scrollProbe = await scrollProbeList.evaluateHandle(createRuntimeTabsScrollProbe);
+      let narrowFailure: { error: unknown } | undefined;
+      try {
       await page.setViewportSize({ width: 320, height: 1000 });
       const list = (await runtimeControls(previewer)).getByRole('tablist');
       await page.keyboard.press('End');
@@ -1805,6 +1810,29 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
       expect(await publications()).toEqual(expectedEvents);
       expect(await finalSurface!.evaluate((element) => element.isConnected)).toBe(true);
       await waitForRealRuntime(previewer, 'wc', '[data-demo-ref="form"]', 1);
+      } catch (error) {
+        narrowFailure = { error };
+      } finally {
+        try {
+          const trace = await scrollProbe.evaluate((probe) => probe.stop());
+          await writeJson(`${family}-runtime-tabs-scroll.json`, {
+            revision,
+            tree,
+            family,
+            assertionPassed: narrowFailure === undefined,
+            trace,
+          });
+        } catch (error) {
+          narrowFailure ??= { error };
+        } finally {
+          try {
+            await scrollProbe.dispose();
+          } catch (error) {
+            narrowFailure ??= { error };
+          }
+        }
+      }
+      if (narrowFailure) throw narrowFailure.error;
     } finally {
       await finalSurface?.dispose();
     }
