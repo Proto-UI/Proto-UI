@@ -1450,6 +1450,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                     }
                     if (typeof member !== 'string' && member.kind === 'capture' && key === 'stateHandles')
                       return captureStateHandlesType(hooks.find((hook) => hook.id === member.hookId)?.capture as HookCaptureIR | undefined);
+                    if (typeof member !== 'string' && member.kind === 'capture' && key === 'render') {
+                      const hook = hooks.find((hook) => hook.id === member.hookId);
+                      return joinValueTypes([hook ? valueType(object(hook.setup).returnType, location) : 'void', 'void']);
+                    }
                     const capability = capabilityMemberType(member, key, node.optional as boolean);
                     if (capability !== undefined) return capability;
                     if (member === 'props' && props.has(key)) return props.get(key)!;
@@ -1462,6 +1466,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             }
             if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'stateHandles') {
               type = captureStateHandlesType(hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined);
+              break;
+            }
+            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'render') {
+              const hook = hooks.find((hook) => hook.id === owner.hookId);
+              type = joinValueTypes([hook ? valueType(object(hook.setup).returnType, location) : 'void', 'void']);
               break;
             }
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);
