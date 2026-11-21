@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "title": "Native candidate source binding receipt",
+  "recordedAt": "2026-11-21T20:08:57.332413+00:00",
+  "scope": "Local source binding and coverage controls; no new native browser, optical or acceptance result is asserted.",
+  "sourceRevision": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+  "sourceTree": "0815a6206b45d34619140a76bd470c982b913b69",
+  "generator": {
+    "command": [
+      "node",
+      "scripts/coverage-matrices/prototype-coverage.mjs",
+      "--refresh-candidate",
+      "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+      "--write"
+    ],
+    "sourceBefore": {
+      "head": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+      "tree": "0815a6206b45d34619140a76bd470c982b913b69",
+      "status": ""
+    },
+    "startedAt": "2026-11-21T19:58:25.124783+00:00",
+    "status": "completed",
+    "finishedAt": "2026-11-21T19:58:47.168960+00:00",
+    "durationSeconds": 22.043906359000175,
+    "exitCode": 0,
+    "sourceAfter": {
+      "head": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+      "tree": "0815a6206b45d34619140a76bd470c982b913b69",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n"
+    },
+    "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+  },
+  "formatting": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "prettier",
+      "--write",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "exitCode": 0,
+    "jsonValueUnchanged": true,
+    "beforeSha256": "f126982169167f3afd5417ff2eda533f9b7263c803bea76afdb8575673340c05",
+    "afterSha256": "6c75914c7aaab4c8366d23ab5d06dd65e773357c4626a3ffcade454eaef08758"
+  },
+  "coverageGate": {
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+    "sourceRevision": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+    "sourceBefore": {
+      "head": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+      "tree": "0815a6206b45d34619140a76bd470c982b913b69",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "onlyExpectedDerivedChanges": true,
+      "sourceBindingCount": 5955,
+      "sourceBindingDigest": "feeb23371ca09bad4deec176e51ffed849f6382128d87a9800dbbaf035cfc2f9",
+      "generatedHashes": {
+        "internal/coverage-matrices/finf-delivery-checklist.md": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "internal/coverage-matrices/prototype-coverage-matrix.json": "6c75914c7aaab4c8366d23ab5d06dd65e773357c4626a3ffcade454eaef08758",
+        "internal/coverage-matrices/prototype-coverage-matrix.md": "1641074f64887c8011ff5d6f363d56e08022e54187239d91c1fa68c32f04c5de"
+      }
+    },
+    "environment": {
+      "NODE_OPTIONS": null,
+      "COVERAGE_BASE_REVISION": null,
+      "COVERAGE_HEAD_REVISION": null,
+      "COVERAGE_MERGE_REVISION": null
+    },
+    "startedAt": "2026-11-21T19:59:58.212608+00:00",
+    "status": "completed",
+    "qualification": "Exact committed source inputs at e3bba6; generated projections are the only working-tree changes. No native/browser acceptance is claimed.",
+    "finishedAt": "2026-11-21T20:07:06.264042+00:00",
+    "durationSeconds": 428.05118030799895,
+    "exitCode": 0,
+    "sourceAfter": {
+      "head": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+      "tree": "0815a6206b45d34619140a76bd470c982b913b69",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "onlyExpectedDerivedChanges": true,
+      "sourceBindingCount": 5955,
+      "sourceBindingDigest": "feeb23371ca09bad4deec176e51ffed849f6382128d87a9800dbbaf035cfc2f9",
+      "generatedHashes": {
+        "internal/coverage-matrices/finf-delivery-checklist.md": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "internal/coverage-matrices/prototype-coverage-matrix.json": "6c75914c7aaab4c8366d23ab5d06dd65e773357c4626a3ffcade454eaef08758",
+        "internal/coverage-matrices/prototype-coverage-matrix.md": "1641074f64887c8011ff5d6f363d56e08022e54187239d91c1fa68c32f04c5de"
+      }
+    },
+    "sourceStable": true,
+    "logSha256": "9316c932035880842be326c8c1fc5fe4526c42ae1b3dee30eaef3f92d3f3ef5f",
+    "matrixCount": 2,
+    "node": {
+      "tests": 4491,
+      "suites": 0,
+      "pass": 4490,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 1,
+      "todo": 0,
+      "durationMs": 268201.415741,
+      "skipReceipt": "﹣ portable suite does not run Linux media integration (0.084997ms) # NOT RUN here: node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs; required separately in Linux CI"
+    }
+  },
+  "portfolioAudit": {
+    "sourceRevision": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+    "previousCandidateRevision": "85153d83969c65a812185e44e045fa0fe7e803c9",
+    "candidateRevision": "e3bba6b2e0f52250ad711a65e192f5ca739ae91c",
+    "candidateObjectProofMatchesCommit": true,
+    "unchangedTopLevelExceptCandidate": true,
+    "candidateChangedKeys": [
+      "revision",
+      "sourceBindings",
+      "sourceBindingsObject",
+      "sourceObjectProof"
+    ],
+    "sourceBindingInventory": {
+      "before": 5955,
+      "after": 5955,
+      "samePathsAndOrder": true,
+      "additions": [],
+      "removals": [],
+      "currentWorktreeHashMismatches": [],
+      "renewals": [
+        {
+          "path": "internal/website/self-hosting-coverage-matrix.md",
+          "previousSha256": "e365b7502a6335f2593eec83a430773795382c9d455d04b2085af7151331008f",
+          "currentSha256": "8fbe8f4d01366730d92efdd1440cbd9c01004450ed7e9b373264e5bf1a04d8f4"
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+          "previousSha256": "2c77c92425d2ff6a7fa5ded9e85b2e870c78b23e6c5477575dc9c5e8c3f521d9",
+          "currentSha256": "c2cf7628ade330299623f979acb4b6ce8c6ae060534b079ab89a07832b19e39d"
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+          "previousSha256": "8356520dd8363d76acda198cb31711ec5a7b9356842676e15ef1a4fb149f6738",
+          "currentSha256": "7d8dd37707ba371054467ec828b62b40f1a3fb593f9f0e7ea6b5669765485669"
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+          "previousSha256": "8d3c11194ee267c1b463d2da0477a6273d90e2f3cb2b5d0e766aa8b61951f7c5",
+          "currentSha256": "e437eb2de9c711c59eac46244b2689bffac59791a5bfc4332a3b26db600c52b7"
+        }
+      ]
+    },
+    "unchangedCountsAndAcceptance": {
+      "consumerRows": 141,
+      "websiteRows": 78,
+      "websiteStates": {
+        "blocked": 40,
+        "infrastructure-exempt": 17,
+        "native/static": 14,
+        "research": 7
+      },
+      "harnessRows": 63,
+      "harnessStates": {
+        "app-local-proto": 7,
+        "blocked": 11,
+        "infrastructure-exempt": 8,
+        "native/static": 2,
+        "ready": 22,
+        "research": 13
+      },
+      "candidateEntities": 585,
+      "candidateDraft": 585,
+      "candidateActive": 0,
+      "gpuiRows": 456,
+      "gpuiStates": {
+        "required-unassessed": 456
+      },
+      "allOtherCandidateFieldsDeepEqual": true,
+      "historicalMainReferencesAndGatesDeepEqual": true
+    },
+    "generatedOutputs": [
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+        "beforeSha256": "5ccd78d048d7d5efa4af1c8fa55f917acbcbb5d33ee6069390490c6a3bccf743",
+        "afterSha256": "6c75914c7aaab4c8366d23ab5d06dd65e773357c4626a3ffcade454eaef08758",
+        "changed": true
+      },
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+        "beforeSha256": "d92562cbe433736932fae17fc4f58daee0c181e949fccfb5ef07678dc1703dde",
+        "afterSha256": "1641074f64887c8011ff5d6f363d56e08022e54187239d91c1fa68c32f04c5de",
+        "changed": true
+      },
+      {
+        "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+        "beforeSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "afterSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "changed": false
+      }
+    ],
+    "qualification": "Only candidate source identity/object proof and four reviewed source hashes change; source mapping, states, ownership and acceptance remain unchanged."
+  },
+  "historicalFailure": {
+    "sourceRevision": "a423a2ba78023a22f89e4a70f42839a0dc7838a3",
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+    "startedAt": "2026-11-21T19:50:07.814693+00:00",
+    "finishedAt": "2026-11-21T19:52:47.426080+00:00",
+    "durationSeconds": 159.6109426059993,
+    "exitCode": 1,
+    "sourceStable": true,
+    "findingCount": 8,
+    "nodeStageStarted": false,
+    "cause": "Existing exact-body raw-import policy retained the previous hover diagnostic page hash after the reviewed page-body change.",
+    "logSha256": "435fffb122acff6d812afb25b3a31e54c60891f7bd9c36c3f89e2368379179ca",
+    "reviewRecord": "internal/records/2026-11-22-hover-import-binding-renewal.json"
+  },
+  "previousNativeCycle": {
+    "runId": 44937449914,
+    "attempt": 1,
+    "sourceRevision": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914",
+    "status": "completed",
+    "conclusion": "failure",
+    "updatedAt": "2026-11-21T19:53:21Z",
+    "jobs": {
+      "total": 98,
+      "completed": 98,
+      "success": 42,
+      "failure": 56,
+      "cancelled": 0,
+      "timed_out": 0
+    },
+    "qualification": "Historical native job conclusions only; individual test timeouts remain in their original receipts, and this run is not rebound to the current source."
+  },
+  "evidence": {
+    "localDirectory": "/workspace/scratch/fbd6f62bb640/native-correction-e3bba6-coverage",
+    "files": [
+      "portfolio-refresh.json",
+      "portfolio-refresh.log",
+      "generated-format.json",
+      "generated-checks.json",
+      "portfolio-invariants.json",
+      "full-coverage-gate.json",
+      "full-coverage-gate.log"
+    ]
+  },
+  "acceptanceBoundary": "This receipt renews candidate source identity, object proof and four reviewed source hashes only. All source mappings, owners, states, historical/main references and acceptance gates remain unchanged. The final commit containing these projections still requires its own clean native full-cycle result."
+}
