@@ -681,6 +681,21 @@ test('a Base subject directory owns shared implementation citations only once', 
     )
   );
 });
+test('a cross-directory inherited Input entry is mapped without admitting its passive shell', () => {
+  const data = sameSourceCandidate();
+  const cell = data.candidateSource.projectionRows.find((row) => row.base.family === 'input')
+    .families.shadcn;
+  assert(cell.entityIds.includes('P-SHADCN-INPUT-SHELL-CONTROL'));
+  assert(cell.sourceFiles.includes('packages/prototypes/shadcn/src/input-shell/control.proto.ts'));
+  assert(!cell.entityIds.includes('P-SHADCN-INPUT-SHELL'));
+  assert(!cell.sourceFiles.includes('packages/prototypes/shadcn/src/input-shell/root.proto.ts'));
+  assert.deepEqual(validate(data), []);
+
+  cell.entityIds = cell.entityIds.filter((id) => id !== 'P-SHADCN-INPUT-SHELL-CONTROL');
+  assert(validate(data).some((issue) => issue.includes('Projection cell atomic mapping mismatch')));
+  cell.entityIds.push('P-SHADCN-INPUT-SHELL-CONTROL', 'P-SHADCN-INPUT-SHELL');
+  assert(validate(data).some((issue) => issue.includes('Projection cell inventory mismatch')));
+});
 for (const scenario of ['file-only', 'two-directories']) {
   test(`ambiguous Base source citations fail closed: ${scenario}`, (t) => {
     mockRead(t, {

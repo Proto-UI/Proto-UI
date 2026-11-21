@@ -277,6 +277,49 @@ function prototypeSources(lib, catalog, repoRoot, reader, includeCatalogEntries)
   return { sourceFiles: [...sourceFiles].sort(), entitySources };
 }
 
+function projectionInventoryForBase(inventory, base, lib, catalog) {
+  const direct = inventory[lib]?.[base.family];
+  const entityIds = new Set(direct?.entityIds ?? []);
+  const sourceFiles = new Set(direct?.sourceFiles ?? []);
+  const baseIds = new Set(base.entityIds);
+  // Physical source ownership and inherited protocol are distinct axes. For
+  // example InputShellControl lives in input-shell/ but explicitly inherits
+  // Base Input. Include that real entry in the Base projection without also
+  // claiming the passive Shell Root, or changing either physical inventory.
+  for (const family of Object.values(inventory[lib] ?? {})) {
+    for (const id of family.entityIds) {
+      if (entityIds.has(id)) continue;
+      const entity = catalog.get(id);
+      if (
+        !(entity?.inherits?.prototypes ?? []).some((parent) =>
+          baseIds.has(typeof parent === 'string' ? parent : parent?.id)
+        )
+      )
+        continue;
+      entityIds.add(id);
+      const citations = sourcePathsOf(entity);
+      for (const file of family.sourceFiles) {
+        if (
+          citations.some(
+            (source) =>
+              source === file || file.startsWith(source.endsWith('/') ? source : `${source}/`)
+          )
+        )
+          sourceFiles.add(file);
+      }
+    }
+  }
+  if (!direct && entityIds.size === 0) return undefined;
+  const ids = [...entityIds].sort();
+  return {
+    ...direct,
+    entityIds: ids,
+    entityCount: ids.length,
+    sourceFiles: [...sourceFiles].sort(),
+    lifecycle: lifecycleOf(ids.map((id) => catalog.get(id)?.status)),
+  };
+}
+
 function shadcnStyleSource(repoRoot) {
   const bytes = fs.readFileSync(path.join(repoRoot, SHADCN_STYLE_MANIFEST));
   const manifest = JSON.parse(bytes);
@@ -930,7 +973,7 @@ export function refreshCandidateSource(data, repoRoot, identity) {
     issue: data.tracker,
     families: Object.fromEntries(
       familyKeys.map((lib) => {
-        const f = prototypeInventory[lib][base.family];
+        const f = projectionInventoryForBase(prototypeInventory, base, lib, byId);
         return [
           lib,
           {
@@ -1341,7 +1384,7 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
       ), `Projection Base identity mismatch: ${p.id}`);
     for (const lib of familyKeys) {
       const cell = p.families[lib];
-      const expected = data.prototypeInventory[lib][p.base.family];
+      const expected = projectionInventoryForBase(data.prototypeInventory, p.base, lib, catalog);
       require(Boolean(cell) &&
         setEqual(cell.entityIds ?? [], expected?.entityIds ?? []) &&
         setEqual(cell.sourceFiles ?? [], expected?.sourceFiles ?? []) &&
