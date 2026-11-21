@@ -193,20 +193,40 @@ export function createWebComponentPortalMount() {
       let binding: WebPortalDestinationBinding | null = null;
       let materialEpoch: WebPortalMaterialEpoch | null = null;
       const ownsProjection = () => projected && el.parentNode === projectionBody;
-      let revealGeneration = 0;
+      let cancelReveal: (() => void) | null = null;
+      const endReveal = () => {
+        const cancel = cancelReveal;
+        cancelReveal = null;
+        cancel?.();
+        if (
+          projectionEpochs.get(el) === epoch &&
+          el.getAttribute(PUI_VIEW_REVEALING_ATTR) === 'portal'
+        )
+          el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+      };
       const beginReveal = () => {
-        const generation = ++revealGeneration;
+        endReveal();
+        if (!isCurrent()) return;
+        const doc = el.ownerDocument;
+        if (doc.visibilityState !== 'visible') return;
+        let cancelLayout = () => {};
+        const cancel = () => {
+          cancelLayout();
+          doc.removeEventListener('visibilitychange', onVisibility);
+        };
+        const finish = () => {
+          if (cancelReveal === cancel) endReveal();
+        };
+        const onVisibility = () => {
+          if (doc.visibilityState !== 'visible') finish();
+        };
+        cancelReveal = cancel;
+        doc.addEventListener('visibilitychange', onVisibility);
         // Reuse the host reveal barrier, allowing authored Presence keyframes.
         // Descendant theme reconciliation must settle before transitions resume.
         el.setAttribute(PUI_VIEW_REVEALING_ATTR, 'portal');
-        scheduleAfterWebLayout(
-          el,
-          () => {
-            if (isCurrent() && generation === revealGeneration && ownsProjection())
-              el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
-          },
-          queueMicrotask
-        );
+        if (cancelReveal === cancel)
+          cancelLayout = scheduleAfterWebLayout(el, finish, queueMicrotask);
       };
       let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;
@@ -339,9 +359,8 @@ export function createWebComponentPortalMount() {
       }
       const restore = (restoreToOrigin = true) => {
         if (revoke !== restore) return;
-        revealGeneration++;
-        if (projectionEpochs.get(el) === epoch) el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
         revoke = null;
+        endReveal();
         offDestination();
         unbindAdoption?.();
         const wasProjected = projected;
