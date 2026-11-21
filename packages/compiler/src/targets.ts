@@ -714,6 +714,17 @@ export function checkTargetOperations(
       case 'rule':
         operation('rule.declare', value.span);
         break;
+      case 'intrinsic':
+        if (
+          value.name === 'object.assign' &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+        )
+          diagnostic(
+            'PUI4003',
+            `Object.assign is not implemented by ${selected.id}.`,
+            value.span
+          );
+        break;
       case 'context-key':
         if (!capabilities.has('context-scope'))
           diagnostic(

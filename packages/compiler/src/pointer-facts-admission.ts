@@ -86,6 +86,15 @@ export function unsupportedCheckedHelperParameters(
   );
 }
 
+/** Qt's direct experiment has no accepted native assignment implementation. */
+export function unsupportedObjectAssign(ir: PrototypeIR, target: string): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(ir, target, 'emitted-declarations', (value) =>
+    value.kind === 'intrinsic' && value.name === 'object.assign'
+      ? 'Object.assign intrinsics'
+      : undefined
+  );
+}
+
 /** Ordinary calls use native closures; the remaining structural additions do not. */
 export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnostic[] {
   function supportedType(type: ValueType): boolean {
@@ -100,6 +109,8 @@ export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnost
     return false;
   }
   return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) => {
+    if (value.kind === 'intrinsic' && value.name === 'object.assign')
+      return 'Object.assign intrinsics';
     if (value.kind === 'operation' && value.operation.startsWith('capture.'))
       return 'Authored hook capture lookup';
     if (value.kind === 'member' && value.property === 'stateHandles' &&

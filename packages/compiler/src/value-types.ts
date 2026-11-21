@@ -3,6 +3,7 @@ import { memberDataType } from './expression-types';
 import {
   isDataValueType,
   isCapabilityAssignable,
+  type ExpressionIR,
   type FunctionIR,
   type ParameterIR,
   type ValueType,
@@ -322,7 +323,35 @@ export function arrayEveryCallbackParameters(
   ];
 }
 
-export function intrinsicResult(name: string, args: readonly ValueType[]): ValueType {
+export function intrinsicResult(
+  name: string,
+  args: readonly ValueType[],
+  expressions?: readonly ExpressionIR[]
+): ValueType {
+  if (name === 'object.assign') {
+    if (!args.length || !expressions || expressions.length !== args.length)
+      throw new TypeError('Object.assign requires a checked fresh target and own-data records.');
+    const fields = new Map<string, ValueType>();
+    const copyRecord = (value: ExpressionIR, type: ValueType): void => {
+      if (
+        value.kind !== 'record' ||
+        typeof type === 'string' ||
+        type.kind !== 'record' ||
+        !isDataValueType(type) ||
+        value.entries.some((entry) => entry.key === '__proto__' || !isDataValueType(entry.value.type))
+      )
+        throw new TypeError('Object.assign requires direct finite own-data record literals without __proto__.');
+      for (const entry of value.entries) fields.set(entry.key, entry.value.type);
+    };
+    const target = expressions[0];
+    const error = target.kind === 'intrinsic' && target.name === 'error' && args[0] === 'exception';
+    if (!error) copyRecord(target, args[0]);
+    for (let index = 1; index < expressions.length; index++)
+      copyRecord(expressions[index], args[index]);
+    return error
+      ? 'exception'
+      : objectValueType([...fields].map(([name, type]) => ({ name, type })));
+  }
   if (
     name === 'array.includes' &&
     args.length === 2 &&
