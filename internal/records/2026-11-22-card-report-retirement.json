@@ -1,0 +1,391 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T21:18:59.972366+00:00",
+  "baselineHead": "8f38fdcc7b0b6ab19e27e3a6d1137731bcdfb861",
+  "authorization": "Parent-authorized human-assisted reconciliation of retired native Card report inventory; no product or browser test edits.",
+  "rootCause": {
+    "retirementCommit": "19da90383954ee1fc6255bcc18f35b9b2b04292e",
+    "subject": "Public bilingual library overview routes and two same-file Gallery JavaScript cases deliberately removed; workflow validator and synthetic control retained stale ten-case inventory.",
+    "classification": "obsolete route inventory drift, not test selection omission or eight native product failures"
+  },
+  "authority": {
+    "nativeDefinition": "T-SHADCN-CARD-0001 (draft), implementation shadcn-card-native consumes CASE-NATIVE only",
+    "separateGalleryOwner": "CASE-4 remains owned by required module apps/www/src/components/library-card-snapshot.test.ts, unchanged",
+    "prototype": "P-SHADCN-CARD remains draft; passive/native-child/card-foreground criteria unchanged",
+    "retirementRecord": "internal/records/2026-11-16-retired-overview-ci-owners.md"
+  },
+  "changedFiles": [
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/proto-ui/.github/workflows/finf-representative-features-evidence.yml",
+      "bytes": 13687,
+      "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9",
+      "repositoryPath": ".github/workflows/finf-representative-features-evidence.yml"
+    },
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+      "bytes": 64453,
+      "sha256": "d249f207a538f94ea938b13d36d5414fe90849f192a34bd09d67bfc51fa1d540",
+      "repositoryPath": "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts"
+    }
+  ],
+  "preservedFiles": [
+    {
+      "unchangedFromHead": true,
+      "path": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts",
+      "bytes": 14094,
+      "sha256": "40203e0e8357de726e930a2ba81ae74116275f88bd7adb0f4e414bbf45ab5e09",
+      "repositoryPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts"
+    },
+    {
+      "unchangedFromHead": true,
+      "path": "/workspace/scratch/fbd6f62bb640/proto-ui/apps/www/src/components/library-card-snapshot.test.ts",
+      "bytes": 8176,
+      "sha256": "49c194433d8b2271b07c011ae1b441bab7a42d0693185b8bfa010be89046d1c9",
+      "repositoryPath": "apps/www/src/components/library-card-snapshot.test.ts"
+    },
+    {
+      "unchangedFromHead": true,
+      "path": "/workspace/scratch/fbd6f62bb640/proto-ui/spec/tests/T-SHADCN-CARD-0001.yaml",
+      "bytes": 4756,
+      "sha256": "250ab0b0955d4b0f820159281c16445799f9040ea0c2f43c4b75dc0d7eed5eb6",
+      "repositoryPath": "spec/tests/T-SHADCN-CARD-0001.yaml"
+    },
+    {
+      "unchangedFromHead": true,
+      "path": "/workspace/scratch/fbd6f62bb640/proto-ui/spec/prototypes/P-SHADCN-CARD.yaml",
+      "bytes": 4779,
+      "sha256": "eb7da54408fd69bfd687cdd4bad671729be43a8a565ce2cf70b489b0ae8b70cc",
+      "repositoryPath": "spec/prototypes/P-SHADCN-CARD.yaml"
+    }
+  ],
+  "nativeEvidence": {
+    "runId": 44945602403,
+    "attempt": 1,
+    "jobId": 136974962086,
+    "jobConclusion": "failure",
+    "vitestSuccess": true,
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "pending": 0,
+    "rawLog": {
+      "path": "/workspace/scratch/fbd6f62bb640/ci-native-cycle-44945602403-attempt-1/job-136974962086.log",
+      "bytes": 57452,
+      "sha256": "0b8282ad5003a78a7d5407b54fa0a927e2861357aff7931202e0a36b7ed440bc"
+    },
+    "artifact": {
+      "path": "/workspace/scratch/fbd6f62bb640/ci-native-cycle-44945602403-attempt-1/production-artifact-14725201116.zip",
+      "bytes": 644833,
+      "sha256": "dd6f99ed05a2440c182950bc8ffc6a7f3af9e4d9d1b26e55a51fd94042b3b9f4"
+    },
+    "report": {
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/native-vitest.json",
+      "bytes": 3560,
+      "sha256": "98a0335ce2bf3c79d22ae5ba6352ea3ab367566fcde3030387775bbb4dc1e267"
+    },
+    "captures": [
+      {
+        "receipt": "shadcn-card/new-york-react.json",
+        "runtime": "react",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 32987,
+        "pngSha256": "a230ffd9f0cb0ec1b8068c1f25ce749603b22dc1e90b6bb02130a2e961820b47"
+      },
+      {
+        "receipt": "shadcn-card/new-york-vue.json",
+        "runtime": "vue",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 32987,
+        "pngSha256": "a230ffd9f0cb0ec1b8068c1f25ce749603b22dc1e90b6bb02130a2e961820b47"
+      },
+      {
+        "receipt": "shadcn-card/new-york-vue2.json",
+        "runtime": "vue2",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 32987,
+        "pngSha256": "a230ffd9f0cb0ec1b8068c1f25ce749603b22dc1e90b6bb02130a2e961820b47"
+      },
+      {
+        "receipt": "shadcn-card/new-york-wc.json",
+        "runtime": "wc",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 32987,
+        "pngSha256": "a230ffd9f0cb0ec1b8068c1f25ce749603b22dc1e90b6bb02130a2e961820b47"
+      },
+      {
+        "receipt": "shadcn-card/rhea-default-light-react.json",
+        "runtime": "react",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 136542,
+        "pngSha256": "7e5a267bd170d25f0e1721b16e3245600cac57796e0e9eab9b11421d28bcb860"
+      },
+      {
+        "receipt": "shadcn-card/rhea-default-light-vue.json",
+        "runtime": "vue",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 136382,
+        "pngSha256": "026fe9398a4b5c2aab4b52a6ddbdd5a7897e35ab9764ded8a32ce8f3764594b5"
+      },
+      {
+        "receipt": "shadcn-card/rhea-default-light-vue2.json",
+        "runtime": "vue2",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 136557,
+        "pngSha256": "12563ce48a74cb3d437f8289863593ed1b23c6f87c62531c28150d00aabc64c5"
+      },
+      {
+        "receipt": "shadcn-card/rhea-default-light-wc.json",
+        "runtime": "wc",
+        "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+        "sourceTree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+        "dirty": false,
+        "pngBytes": 138028,
+        "pngSha256": "5bec1ec58a759b983440bf7caeba07f3d04cbbafc14e74196c6253a771081aa1"
+      }
+    ],
+    "originalFailure": "After eight actual native passes, assertShadcnCardReport rejected 8 !== 10; historical failed job is retained, not rewritten."
+  },
+  "controlRuns": [
+    {
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+        "-t",
+        "Shadcn Card official evidence carrier",
+        "--maxWorkers",
+        "1",
+        "--minWorkers",
+        "1"
+      ],
+      "phase": "new current-registration controls against original guard",
+      "exitCode": 1,
+      "passed": 1,
+      "failed": 2,
+      "skipped": 82,
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/before-guard-fix.log",
+      "bytes": 3472,
+      "sha256": "f2a78de394980b8ca9591c85bf51fce11fd7ffa2951d49b57bc1591bbb35e352"
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+        "-t",
+        "Shadcn Card official evidence carrier",
+        "--maxWorkers",
+        "1",
+        "--minWorkers",
+        "1"
+      ],
+      "phase": "reconciled guard",
+      "exitCode": 0,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 82,
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/after-guard-fix.log",
+      "bytes": 1212,
+      "sha256": "68c2a0ca6f2b757662e469ab10dde9d2c3d0753d6008a7fe2c566d59c5f2f2c3"
+    },
+    {
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts",
+        "--maxWorkers",
+        "1",
+        "--minWorkers",
+        "1"
+      ],
+      "cwd": "/workspace/scratch/fbd6f62bb640/proto-ui",
+      "startedAt": "2026-11-21T21:17:47.639361+00:00",
+      "finishedAt": "2026-11-21T21:17:53.249059+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/complete-control-file.log",
+      "logBytes": 1662,
+      "logSha256": "a85a32f8d9248b707daf51dfbbeb6dbb17d9ac7fdaea5e1b9364591411ddfd93"
+    }
+  ],
+  "guardReplay": {
+    "before": {
+      "accepted": false,
+      "name": "AssertionError",
+      "message": "Expected values to be strictly equal:\n\n8 !== 10\n"
+    },
+    "after": {
+      "accepted": true
+    }
+  },
+  "negativeControls": [
+    "missing existing native journey",
+    "duplicate identity",
+    "renamed journey",
+    "pending journey",
+    "unsuccessful aggregate",
+    "historical ten-case report with both retired Gallery titles"
+  ],
+  "boundaries": [
+    "Exact current eight identities, same one file, all-passed and zero-failed/zero-pending checks remain.",
+    "Actual current Card source and actual harness RUNTIMES evaluated only for registration; hooks and browser bodies are not executed. Synthetic statuses are a report-control input only.",
+    "The original historical job remains failure. Replaying its report validates this finite guard correction, not a new candidate native cycle.",
+    "No browser or product assertions, thresholds, timeout, CI selection, generated bindings, package budgets, Gallery SSR owner or lifecycle changed."
+  ],
+  "retainedFiles": [
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/retirement.diff",
+      "bytes": 6316,
+      "sha256": "fa3cda75c28b80a1e40076677ac210803cab4f7c47a5bf999214bc62292400ca"
+    },
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/before-workflow.yml",
+      "bytes": 13737,
+      "sha256": "0554221c5370f9ac77a15c31f767ad5ceec8669cad312f90b33bbf2841b96a0c"
+    },
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/after-workflow.yml",
+      "bytes": 13687,
+      "sha256": "2991e8240f17cbec416f4b74b3874a9f8f77c726178543204408a3eea8a6aae9"
+    },
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/correction.patch",
+      "bytes": 7409,
+      "sha256": "ac01ff7f836ac19264d851e1e160cb3983a34a41df5bd76f411980afc0b19155"
+    },
+    {
+      "path": "/workspace/scratch/fbd6f62bb640/card-report-retirement-correction/native-report-replay.json",
+      "bytes": 183,
+      "sha256": "a7dd052b3c29dc7d154eee0f550425531d3993751844f99a50f9d960eebdd992"
+    }
+  ],
+  "retirementPatch": "commit 19da90383954ee1fc6255bcc18f35b9b2b04292e\nAuthor: cyjin.yl <cyjin.yl@gmail.com>\nDate:   Sat Nov 7 01:33:55 2026 +0800\n\n    docs(www): remove library overview pages and retarget real demos\n    \n    Delete the bilingual library and per-family overview routes, their bespoke\n    renderer, obsolete coverage and overview-only typography roles. Route all\n    library navigation and references to real component demos instead.\n    \n    Rewrite the Bootstrap Button page around one shared four-runtime prototype\n    with real installation and host examples. Fix the affected test type errors\n    without suppressing diagnostics.\n    \n    Signed-off-by: cyjin-yl <cyjin.yl@gmail.com>\n\ndiff --git a/apps/www/src/content/docs/en/ui-libraries/index.mdx b/apps/www/src/content/docs/en/ui-libraries/index.mdx\ndeleted file mode 100644\nindex 70e3aff09..000000000\n--- a/apps/www/src/content/docs/en/ui-libraries/index.mdx\n+++ /dev/null\n@@ -1,16 +0,0 @@\n----\n-title: 'UI Libraries'\n-description: 'Choose a component or icon library by visual language, use case, and provenance.'\n----\n-\n-import UiLibraryGallery from '@/components/UiLibraryGallery.astro';\n-\n-Proto UI is not one component library. It is a foundation for choosing the visual language that fits your product while keeping reusable interaction protocols underneath.\n-\n-The 0.3 release scope is Base, Shadcn, Brutalist (Neo-Brutalism), and Lucide. Bootstrap 2.3.2, Liquid Glass, and other UI libraries remain **WIP / Experimental**, tracked for 0.4 rather than promised as stable 0.3 coverage. A library being in the release scope does not itself promote its draft prototypes or prove acceptance.\n-\n-The entries below use each component library’s own prototypes. Lucide uses a neutral carrier for its icons. Credits distinguish the design references and icon sources from the Proto UI implementation.\n-\n-<UiLibraryGallery locale=\"en\" />\n-\n-[Prototype documentation coverage](/en/build/prototypes/documentation-coverage/)\ndiff --git a/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts b/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts\nindex e4c3cf402..8f2763e9f 100644\n--- a/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts\n+++ b/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts\n@@ -11,7 +11,6 @@ import { captureCurrentViewport } from './library-card-capture';\n const route = '/en/ui-libraries/shadcn/card/';\n const compatibilityRoute = (runtime: (typeof RUNTIMES)[number]) =>\n   `/en/test/shadcn-card-compat/${runtime}/`;\n-const galleryRoute = '/zh-cn/ui-libraries/';\n const directory =\n   process.env.PUI_SHADCN_CARD_EVIDENCE_DIR ?? path.join(os.tmpdir(), 'shadcn-card-evidence');\n let browser: Browser;\n@@ -36,7 +35,7 @@ beforeAll(async () => {\n     expect(binding.dirty).toBe(false);\n   }\n   await mkdir(directory, { recursive: true });\n-  baseUrl = await startServer([route, galleryRoute, ...RUNTIMES.map(compatibilityRoute)]);\n+  baseUrl = await startServer([route, ...RUNTIMES.map(compatibilityRoute)]);\n   browser = await chromium.launch({\n     executablePath: process.env.CHROME_PATH,\n     headless: true,\n@@ -315,48 +314,3 @@ describe.each(RUNTIMES)('Shadcn Card ordinary Rhea native %s', (runtime) => {\n     }\n   }, 60_000);\n });\n-\n-it.each([false, true])(\n-  'gallery keeps distinct Card ink with JavaScript=%s',\n-  async (javaScriptEnabled) => {\n-    const context = await browser.newContext({\n-      javaScriptEnabled,\n-      viewport: { width: 1080, height: 900 },\n-    });\n-    try {\n-      const page = await context.newPage();\n-      await page.goto(baseUrl + galleryRoute, { waitUntil: 'networkidle' });\n-      const root = page.locator('[data-library=\"shadcn\"] [data-library-part=\"shadcn-card\"]');\n-      await root.evaluate((element, css) => element.setAttribute('style', css), colors);\n-      const facts = await root.evaluate((element) => ({\n-        background: getComputedStyle(element).backgroundColor,\n-        color: getComputedStyle(element).color,\n-        heading: getComputedStyle(element.querySelector('h2 [data-library-part=\"shadcn-text\"]')!)\n-          .color,\n-        body: getComputedStyle(\n-          element.querySelector('.library-card__content p [data-library-part=\"shadcn-text\"]')!\n-        ).color,\n-        caption: getComputedStyle(element.querySelector('.library-card__kind')!).color,\n-      }));\n-      const capture = await captureCurrentViewport(\n-        page,\n-        path.join(directory, `gallery-js-${javaScriptEnabled}.png`)\n-      );\n-      await writeFile(\n-        path.join(directory, `gallery-js-${javaScriptEnabled}.json`),\n-        JSON.stringify({ ...binding, javaScriptEnabled, facts, capture }, null, 2)\n-      );\n-      expect(facts).toEqual({\n-        background: 'rgb(212, 230, 250)',\n-        color: 'rgb(82, 24, 71)',\n-        heading: 'rgb(82, 24, 71)',\n-        body: 'rgb(82, 24, 71)',\n-        caption: 'rgb(93, 100, 107)',\n-      });\n-      expect(await root.locator('[data-library-action]').getAttribute('href')).toBeTruthy();\n-    } finally {\n-      await context.close();\n-    }\n-  },\n-  60_000\n-);\ndiff --git a/apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx b/apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx\ndeleted file mode 100644\nindex b2c77c3f8..000000000\n--- a/apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx\n+++ /dev/null\n@@ -1,16 +0,0 @@\n----\n-title: 'UI Libraries'\n-description: '按视觉风格、适用场景与来源选择组件库或图标库。'\n----\n-\n-import UiLibraryGallery from '@/components/UiLibraryGallery.astro';\n-\n-Proto UI 不是一套单一组件库，而是一套让你在共用交互协议之上，按产品气质选择视觉语言的基础设施。\n-\n-0.3 发布范围为 Base、Shadcn、Brutalist（Neo-Brutalism）和 Lucide。Bootstrap 2.3.2、Liquid Glass 及其他 UI libraries 均为 **WIP / 实验性**，归入 0.4 工作流，不作为稳定的 0.3 覆盖承诺。纳入发布范围不等于自动提升 draft 原型的生命周期，也不代表已经通过验收。\n-\n-下面的入口直接使用各组件库自身的原型；Lucide 用中性容器展示图标。来源信息区分设计参考、图标来源与 Proto UI 的原型实现。\n-\n-<UiLibraryGallery locale=\"zh-cn\" />\n-\n-[原型文档覆盖索引](/zh-cn/build/prototypes/documentation-coverage/)\n",
+  "nativeReport": {
+    "numTotalTestSuites": 9,
+    "numPassedTestSuites": 9,
+    "numFailedTestSuites": 0,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 8,
+    "numPassedTests": 8,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "snapshot": {
+      "added": 0,
+      "failure": false,
+      "filesAdded": 0,
+      "filesRemoved": 0,
+      "filesRemovedList": [],
+      "filesUnmatched": 0,
+      "filesUpdated": 0,
+      "matched": 0,
+      "total": 0,
+      "unchecked": 0,
+      "uncheckedKeysByFile": [],
+      "unmatched": 0,
+      "updated": 0,
+      "didUpdate": false
+    },
+    "startTime": 1795294653452,
+    "success": true,
+    "testResults": [
+      {
+        "assertionResults": [
+          {
+            "ancestorTitles": ["Shadcn Card New York compatibility native wc"],
+            "fullName": "Shadcn Card New York compatibility native wc preserves distinct card paint, inherited content ink and native navigation",
+            "status": "passed",
+            "title": "preserves distinct card paint, inherited content ink and native navigation",
+            "duration": 4937.320015000005,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card New York compatibility native react"],
+            "fullName": "Shadcn Card New York compatibility native react preserves distinct card paint, inherited content ink and native navigation",
+            "status": "passed",
+            "title": "preserves distinct card paint, inherited content ink and native navigation",
+            "duration": 1756.8329090000043,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card New York compatibility native vue"],
+            "fullName": "Shadcn Card New York compatibility native vue preserves distinct card paint, inherited content ink and native navigation",
+            "status": "passed",
+            "title": "preserves distinct card paint, inherited content ink and native navigation",
+            "duration": 1490.7107220000034,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card New York compatibility native vue2"],
+            "fullName": "Shadcn Card New York compatibility native vue2 preserves distinct card paint, inherited content ink and native navigation",
+            "status": "passed",
+            "title": "preserves distinct card paint, inherited content ink and native navigation",
+            "duration": 1469.7473219999956,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card ordinary Rhea native wc"],
+            "fullName": "Shadcn Card ordinary Rhea native wc preserves default light Rhea paint, passive content and native navigation",
+            "status": "passed",
+            "title": "preserves default light Rhea paint, passive content and native navigation",
+            "duration": 3310.418537999998,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card ordinary Rhea native react"],
+            "fullName": "Shadcn Card ordinary Rhea native react preserves default light Rhea paint, passive content and native navigation",
+            "status": "passed",
+            "title": "preserves default light Rhea paint, passive content and native navigation",
+            "duration": 3181.9328569999925,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card ordinary Rhea native vue"],
+            "fullName": "Shadcn Card ordinary Rhea native vue preserves default light Rhea paint, passive content and native navigation",
+            "status": "passed",
+            "title": "preserves default light Rhea paint, passive content and native navigation",
+            "duration": 3027.2631739999924,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": ["Shadcn Card ordinary Rhea native vue2"],
+            "fullName": "Shadcn Card ordinary Rhea native vue2 preserves default light Rhea paint, passive content and native navigation",
+            "status": "passed",
+            "title": "preserves default light Rhea paint, passive content and native navigation",
+            "duration": 2968.183002000005,
+            "failureMessages": [],
+            "meta": {}
+          }
+        ],
+        "startTime": 1795294743278,
+        "endTime": 1795294765421.183,
+        "status": "passed",
+        "message": "",
+        "name": "/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts"
+      }
+    ]
+  }
+}

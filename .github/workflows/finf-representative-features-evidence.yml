@@ -215,8 +215,9 @@ jobs:
           // CARD_REPORT_VALIDATOR_BEGIN
           function assertShadcnCardReport(report) {
             assert.equal(report.success, true);
-            assert.equal(report.numTotalTests, 10);
-            assert.equal(report.numPassedTests, 10);
+            // The retired public gallery cases are not part of this native demo inventory.
+            assert.equal(report.numTotalTests, 8);
+            assert.equal(report.numPassedTests, 8);
             assert.equal(report.numFailedTests, 0);
             assert.equal(report.numPendingTests, 0);
             assert.equal(report.testResults.length, 1);
@@ -230,7 +231,6 @@ jobs:
               `Shadcn Card New York compatibility native ${runtime} > preserves distinct card paint, inherited content ink and native navigation`,
               `Shadcn Card ordinary Rhea native ${runtime} > preserves default light Rhea paint, passive content and native navigation`,
             ]);
-            expected.push('gallery keeps distinct Card ink with JavaScript=false', 'gallery keeps distinct Card ink with JavaScript=true');
             assert.equal(JSON.stringify(actual), JSON.stringify(expected.sort()));
           }
           // CARD_REPORT_VALIDATOR_END

@@ -1438,6 +1438,15 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
   const capture = workflow.jobs['representative-features'].steps.find(
     (step: { id?: string }) => step.id === 'capture'
   );
+  function cardReportValidator() {
+    const match = capture.run.match(
+      /\/\/ CARD_REPORT_VALIDATOR_BEGIN([\s\S]*?)\/\/ CARD_REPORT_VALIDATOR_END/
+    );
+    if (!match) throw new Error('Actual Card report validator absent');
+    return vm.runInNewContext(`${match[1]}\nassertShadcnCardReport`, { assert }) as (
+      report: unknown
+    ) => void;
+  }
 
   it('owns the exact Card suite once and rejects missing or duplicate whole-inventory registration', () => {
     const all = inventory.discoverBrowserSuites(process.cwd());
@@ -1461,14 +1470,7 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
   });
 
   it('executes the actual workflow report guard and rejects incomplete, duplicate, renamed or nonpassing journeys', () => {
-    const match = capture.run.match(
-      /\/\/ CARD_REPORT_VALIDATOR_BEGIN([\s\S]*?)\/\/ CARD_REPORT_VALIDATOR_END/
-    );
-    expect(match).not.toBeNull();
-    if (!match) throw new Error('Actual Card report validator absent');
-    const validate = vm.runInNewContext(`${match[1]}\nassertShadcnCardReport`, { assert }) as (
-      report: unknown
-    ) => void;
+    const validate = cardReportValidator();
     const assertions = ['wc', 'react', 'vue', 'vue2'].flatMap((runtime) => [
       {
         ancestorTitles: [`Shadcn Card New York compatibility native ${runtime}`],
@@ -1481,16 +1483,10 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
         status: 'passed',
       },
     ]);
-    for (const enabled of [false, true])
-      assertions.push({
-        ancestorTitles: [],
-        title: `gallery keeps distinct Card ink with JavaScript=${enabled}`,
-        status: 'passed',
-      });
     const valid = {
       success: true,
-      numTotalTests: 10,
-      numPassedTests: 10,
+      numTotalTests: 8,
+      numPassedTests: 8,
       numFailedTests: 0,
       numPendingTests: 0,
       testResults: [{ name: `/work/repo/${cardFile}`, assertionResults: assertions }],
@@ -1509,6 +1505,74 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     pending.testResults[0]!.assertionResults[0]!.status = 'pending';
     expect(() => validate(pending)).toThrow();
     expect(() => validate({ ...valid, success: false })).toThrow();
+    const retiredGallery = structuredClone(valid);
+    retiredGallery.numTotalTests = retiredGallery.numPassedTests = 10;
+    for (const enabled of [false, true])
+      retiredGallery.testResults[0]!.assertionResults.push({
+        ancestorTitles: [],
+        title: `gallery keeps distinct Card ink with JavaScript=${enabled}`,
+        status: 'passed',
+      });
+    expect(() => validate(retiredGallery)).toThrow();
+  });
+
+  it('binds the report inventory to actual Card registration without executing hooks or browser bodies', () => {
+    const cardSource = ts.createSourceFile(
+      cardFile,
+      readFileSync(cardFile, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    const harnessFile = path.join(path.dirname(cardFile), 'browser-harness.ts');
+    const harnessSource = ts.createSourceFile(
+      harnessFile,
+      readFileSync(harnessFile, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    const runtimeDeclaration = harnessSource.statements
+      .filter(ts.isVariableStatement)
+      .flatMap((statement) => [...statement.declarationList.declarations])
+      .find((declaration) => declaration.name.getText(harnessSource) === 'RUNTIMES');
+    if (!runtimeDeclaration?.initializer) throw new Error('Actual runtime inventory absent');
+    const runtimes = execute(`(${runtimeDeclaration.initializer.getText(harnessSource)})`, {});
+    const ancestors: string[] = [];
+    const assertions: Array<{ ancestorTitles: string[]; title: string; status: string }> = [];
+    const registerHook = vi.fn();
+    // Evaluate only registration: dependencies are absent and hook/test bodies are never invoked.
+    execute(
+      cardSource.statements
+        .filter((statement) => !ts.isImportDeclaration(statement))
+        .map((statement) => statement.getText(cardSource))
+        .join('\n'),
+      {
+        process: { env: { PUI_SHADCN_CARD_EVIDENCE_DIR: '/unused-card-registration' } },
+        RUNTIMES: runtimes,
+        beforeAll: registerHook,
+        afterAll: registerHook,
+        describe: {
+          each: (values: string[]) => (title: string, register: (value: string) => void) => {
+            for (const value of values) {
+              ancestors.push(title.replace('%s', value));
+              register(value);
+              ancestors.pop();
+            }
+          },
+        },
+        it: (title: string) =>
+          assertions.push({ ancestorTitles: [...ancestors], title, status: 'passed' }),
+      }
+    );
+    expect(registerHook).toHaveBeenCalledTimes(2);
+    // A synthetic passing status exercises report identity binding, not native acceptance.
+    cardReportValidator()({
+      success: true,
+      numTotalTests: assertions.length,
+      numPassedTests: assertions.length,
+      numFailedTests: 0,
+      numPendingTests: 0,
+      testResults: [{ name: `/work/repo/${cardFile}`, assertionResults: assertions }],
+    });
   });
 });
 
