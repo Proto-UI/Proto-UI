@@ -627,6 +627,8 @@ class Frontend {
         }
         if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'stateHandles')
           return captureStateHandlesType(this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture);
+        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'render')
+          return joinValueTypes([this.hooks.get(owner.hookId)?.setup.returnType ?? 'void', 'void']);
         const capability = capabilityMemberType(owner, property, optional);
         if (capability !== undefined) return capability;
         if (owner === 'props') {

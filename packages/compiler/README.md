@@ -61,6 +61,8 @@ const written = await writeProjectCompilation(result.value, '/absolute/path/to/o
 if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
 ```
 
+The synthesized authored-hook result exposes `render` as the checked setup render callable or `undefined`. Reading or forwarding this field does not execute the fragment. Callable analysis retains its declaration environment, and serialized IR independently checks the projected type. A void hook setup contributes no render field; returning that missing field from the caller preserves the caller's existing default-render behavior. This compiler slice follows the draft asHook result contracts and does not promote their lifecycle.
+
 ## Host support follows invocation
 
 Creating a closure does not execute its body. The compiler first removes unused values only when their evaluation is proved inert. It then follows known ordinary calls, returned callables, registrations and outward callable values to choose host support. An effectful helper that ignores a callback still executes; transporting that callback does not acquire its host capability.
