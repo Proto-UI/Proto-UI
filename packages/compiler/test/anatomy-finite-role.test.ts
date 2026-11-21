@@ -14,6 +14,8 @@ const queries = [
 ] as const;
 const source = `${prefix}
 type Role='root'|'content';
+export default definePrototype({name:'finite-runtime-role',setup(def){
+  def.anatomy.claim(FAMILY,{role:'root'});
 function inspect(run:RunHandle<{}>,role:Role){
   return {
     has:run.anatomy.has(FAMILY,role),
@@ -24,8 +26,6 @@ function inspect(run:RunHandle<{}>,role:Role){
     next:run.anatomy.order.nextOfSelf(FAMILY,role)!==null,
   };
 }
-export default definePrototype({name:'finite-runtime-role',setup(def){
-  def.anatomy.claim(FAMILY,{role:'root'});
   let current:RunHandle<{}>|null=null;
   def.lifecycle.onCreated(run=>{current=run;});
   def.expose.method('inspect',(role:Role)=>current?inspect(current,role):null);
@@ -56,6 +56,19 @@ afterEach(async () => {
 });
 
 describe('finite runtime Anatomy role selectors', () => {
+  it('admits a module helper with the actual Collapsible role-parameter shape', () => {
+    const parsed = parsePrototype(`${prefix}
+      function count(run:RunHandle<{}>,role:'root'|'content'){
+        return run.anatomy.partsOf(FAMILY,role)?.length??0;
+      }
+      export default definePrototype({name:'module-role-helper',setup(def){
+        def.anatomy.claim(FAMILY,{role:'root'});
+        def.lifecycle.onMounted(run=>{count(run,'root');count(run,'content');});
+      }});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    expect(validateIR(JSON.parse(JSON.stringify(parsed.value)))).toMatchObject({ ok: true });
+  });
+
   it('retains the helper formal union through source and serialized IR admission', () => {
     const ir = portable();
     expect(queryOperations(ir).map(operation => operation.operation).sort()).toEqual([...queries].sort());
