@@ -255,7 +255,15 @@ for (const runtime of RUNTIMES) {
         }
         const outline = await observe(subject('outline'));
         expect(outline.border).toBe(1);
-        expect(outline.borderColor).toEqual(outline.inputColor);
+        // `transition-colors` animates border-color across the scheme flip, so
+        // a single observation can land mid-transition; wait for the settled
+        // `border-input` paint instead of asserting a transitional frame.
+        await expect
+          .poll(async () => {
+            const facts = await observe(subject('outline'));
+            return JSON.stringify(facts.borderColor) === JSON.stringify(facts.inputColor);
+          })
+          .toBe(true);
         // Upstream `style-rhea.css` `.cn-toggle-variant-outline` has no shadow
         // layer; the New York `shadow-xs` paint is not part of this profile.
         expect(outline.shadow).toBe('none');
