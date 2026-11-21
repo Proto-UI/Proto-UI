@@ -184,8 +184,7 @@ function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRul
   return rules;
 }
 
-function verifiedShadowSplitBaseRule(artifact: ShadowStyleArtifactV1): CompiledStyleRule | null {
-  const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
+function verifiedShadowSplitBaseRule(rules: readonly CompiledStyleRule[]): CompiledStyleRule | null {
   const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
   const baseRule = rules.find(({ selector }) => selector.replace(/\s/g, '') === baseSelector);
   return baseRule && hasValidDeclarationReceipt(baseRule) ? baseRule : null;
@@ -197,7 +196,8 @@ export function hasVerifiedShadowSplitBaseRecipe(
   recipe: string,
   version: string
 ): boolean {
-  const baseRule = verifiedShadowSplitBaseRule(artifact);
+  const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
+  const baseRule = verifiedShadowSplitBaseRule(rules);
   return (
     !!baseRule &&
     baseRule.declarations.replace(/\s/g, '').includes(`--pui-split-${recipe}-recipe:${version};`)
@@ -390,7 +390,7 @@ export function createShadowSplitEffectsPort({
     throw invalid('projection-owned');
   }
   const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
-  const baseRule = verifiedShadowSplitBaseRule(artifact);
+  const baseRule = verifiedShadowSplitBaseRule(rules);
   if (!baseRule) {
     throw invalid('sizing-recipe');
   }
