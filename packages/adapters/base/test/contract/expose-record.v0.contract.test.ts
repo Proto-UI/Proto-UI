@@ -143,7 +143,7 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(second).toBe(first);
   });
 
-  it('allows an already-issued State unsubscribe during terminal notification', () => {
+  it('keeps an authored subscribe result inside the owner boundary', () => {
     const invoke = vi.fn((call: () => void) => call());
     const reader = createScopedExposesReader(() => invoke);
     const cancel = vi.fn();
@@ -160,16 +160,16 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(invoke).toHaveBeenCalledTimes(2);
     const disposeSubscription = state.subscribe();
     reader.invalidate();
-    // The Expose State module clears remaining subscriptions at disposal.
-    // An issued cancellation must not reenter the dead callback scope.
-    expect(disposeSubscription).not.toThrow();
+    // Only a Module-issued cancellation may revoke a resource after the
+    // reader retires. An authored subscribe result stays owner-bound.
+    expect(() => disposeSubscription()).toThrow(/terminal disposal/);
     expect(cancel).toHaveBeenCalledTimes(1);
     expect(invoke).toHaveBeenCalledTimes(3);
     expect(() => state.get()).toThrow(/terminal disposal/);
     expect(() => state.subscribe()).toThrow(/terminal disposal/);
   });
 
-  it('preserves issued State cancellation through another public return', () => {
+  it('preserves an issued subscribe result identity through another public return', () => {
     const reader = createScopedExposesReader(() => (call) => call());
     const cancel = vi.fn();
     const handle = {
@@ -191,8 +191,10 @@ describe('adapter-base contract: expose record (v0)', () => {
     echoed();
     expect(cancel).toHaveBeenCalledTimes(1);
     reader.invalidate();
-    echoed();
-    nested();
+    // The identity survives the retirement, but an authored result keeps the
+    // owner boundary. A Module-issued cancellation is not wrapped at all.
+    expect(() => echoed()).toThrow(/terminal disposal/);
+    expect(() => nested()).toThrow(/terminal disposal/);
     expect(echoed).toBe(issued);
     expect(nested).toBe(issued);
     expect(cancel).toHaveBeenCalledTimes(1);
