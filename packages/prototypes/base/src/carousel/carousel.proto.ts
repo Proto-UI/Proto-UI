@@ -268,7 +268,7 @@ function setupViewport(def: DefHandle<CarouselViewportProps, CarouselViewportExp
   });
   def.rule({
     when: (w) => w.state(dragging).eq(true),
-    intent: (i) => i.feedback.style.use(tw('select-none cursor-grabbing')),
+    intent: (i) => i.feedback.style.use(tw('select-none cursor-move')),
   });
   const input = asAxisInput<CarouselViewportProps>();
   input.configure({ anatomy: CAROUSEL_FAMILY, inputRole: 'viewport', geometryRole: 'viewport' });

@@ -15,6 +15,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { build, transform } from 'esbuild';
+import { renderBrutalistThemeCss } from '../../packages/prototypes/brutalist/src/theme.ts';
+import { renderThemeCss as renderBootstrapThemeCss } from '../../packages/prototypes/bootstrap-2-3-2/src/theme.ts';
+import { renderThemeCss as renderLiquidGlassThemeCss } from '../../packages/prototypes/liquid-glass/src/theme.ts';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const requested = path.resolve(
@@ -44,12 +47,27 @@ const [theme, tokens] = await Promise.all([
   readFile(path.join(root, 'apps/www/src/styles/shadcn-theme.css'), 'utf8'),
   readFile(path.join(root, 'apps/www/src/styles/proto-ui-tokens.generated.css'), 'utf8'),
 ]);
+// Use each public family's variable bank on the document owner so portals
+// inherit the same palette as their trigger. Base and Shadcn use the base bank.
+const familyTheme = [
+  ['brutalist', renderBrutalistThemeCss],
+  ['bootstrap-2-3-2', renderBootstrapThemeCss],
+  ['liquid-glass', renderLiquidGlassThemeCss],
+]
+  .map(([family, render]) =>
+    render({
+      variablePrefix: 'pui-',
+      lightSelector: `:root[data-evidence-family="${family}"]`,
+      darkSelector: `:root[data-evidence-family="${family}"][data-theme="dark"]`,
+    })
+  )
+  .join('\n');
 const css = (
   await transform(
     `
 @layer reset, theme, proto-ui, consumer;
-@layer reset { *,::before,::after { box-sizing:border-box; } body { margin:0; font:14px/1.5 system-ui,sans-serif; color:#172033; background:#f5f7fb; } }
-@layer theme { ${theme} }
+@layer reset { :root { color-scheme:light; } *,::before,::after { box-sizing:border-box; } body { margin:0; font:14px/1.5 system-ui,sans-serif; color:#172033; background:#f5f7fb; } }
+@layer theme { ${theme}\n${familyTheme} }
 ${tokens}
 @layer consumer {
   #evidence { padding:20px; max-width:1200px; }
@@ -93,6 +111,7 @@ const metadata = {
   javascriptSha256: hash(javascript),
   cssSha256: hash(css),
   themeSha256: hash(theme),
+  familyThemeSha256: hash(familyTheme),
   generatedTokensSha256: hash(tokens),
   builderSha256: hash(await readFile(fileURLToPath(import.meta.url))),
   javascriptBytes: Buffer.byteLength(javascript),
@@ -296,6 +315,8 @@ async function bootstrap(metadata) {
       timeline.length = 0;
       sequence = 0;
       mounted = controlValues();
+      document.documentElement.dataset.evidenceFamily = mounted.family;
+      document.documentElement.dataset.theme = 'light';
       render();
       const result = await api.mount(
         mounted.runtime,
@@ -417,7 +438,7 @@ const options = (items, selected) =>
         `<option value="${value}"${value === selected ? ' selected' : ''}>${value}</option>`
     )
     .join('');
-const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Proto UI component capability acceptance</title></head><body>
+const html = `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Proto UI component capability acceptance</title></head><body>
 <main id="evidence"><h1>Proto UI · component capabilities</h1><p id="scope">Real components, production CSS, visible native input.</p>
 <div id="controls">
 <label>Runtime<select id="runtime">${options(['wc', 'react', 'vue', 'vue2'], 'wc')}</select></label>

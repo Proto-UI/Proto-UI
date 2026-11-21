@@ -14,6 +14,18 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { build } from 'esbuild';
+import {
+  BRUTALIST_THEME,
+  renderBrutalistThemeCss,
+} from '../../packages/prototypes/brutalist/src/theme.ts';
+import {
+  THEME as BOOTSTRAP_THEME,
+  renderThemeCss as renderBootstrapThemeCss,
+} from '../../packages/prototypes/bootstrap-2-3-2/src/theme.ts';
+import {
+  THEME as LIQUID_GLASS_THEME,
+  renderThemeCss as renderLiquidGlassThemeCss,
+} from '../../packages/prototypes/liquid-glass/src/theme.ts';
 
 const select = (key, defaults) => process.env[key]?.split(',').filter(Boolean) ?? defaults;
 const runtimes = select('PUI_BROWSER_RUNTIMES', ['wc', 'react', 'vue', 'vue2']);
@@ -90,6 +102,36 @@ const [theme, tokens] = await Promise.all([
   readFile('apps/www/src/styles/shadcn-theme.css', 'utf8'),
   readFile('apps/www/src/styles/proto-ui-tokens.generated.css', 'utf8'),
 ]);
+// The document owns the selected theme, so real portalled content inherits
+// the same official family palette as the fixture. No component paint is
+// supplied by the consumer. The Shadcn bank remains the base fallback.
+const themeRenderers = {
+  brutalist: renderBrutalistThemeCss,
+  'bootstrap-2-3-2': renderBootstrapThemeCss,
+  'liquid-glass': renderLiquidGlassThemeCss,
+};
+const themeManifests = {
+  brutalist: BRUTALIST_THEME.light,
+  'bootstrap-2-3-2': BOOTSTRAP_THEME.light,
+  'liquid-glass': LIQUID_GLASS_THEME.light,
+};
+const familyThemeCss = Object.entries(themeRenderers)
+  .map(([family, render]) =>
+    render({
+      variablePrefix: 'pui-',
+      lightSelector: `:root[data-evidence-family="${family}"]`,
+      darkSelector: `:root[data-evidence-family="${family}"][data-theme="dark"]`,
+      includeSelection: false,
+    })
+  )
+  .join('\n');
+report.source.styleSha256 = Object.fromEntries(
+  Object.entries({
+    'apps/www/src/styles/shadcn-theme.css': theme,
+    'apps/www/src/styles/proto-ui-tokens.generated.css': tokens,
+    'rendered-official-family-themes': familyThemeCss,
+  }).map(([file, content]) => [file, createHash('sha256').update(content).digest('hex')])
+);
 const { chromium } = createRequire(new URL('../../apps/www/package.json', import.meta.url))(
   'playwright-core'
 );
@@ -99,18 +141,21 @@ const browser = await chromium.launch({
   args: ['--no-sandbox'],
 });
 report.environment.browser = browser.version();
-const page = await browser.newPage({ viewport: report.environment.viewport });
+const page = await browser.newPage({
+  viewport: report.environment.viewport,
+  colorScheme: 'light',
+});
 page.setDefaultTimeout(6000);
 const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
 await page.setContent(
-  '<!doctype html><html><head><meta charset="utf-8"></head><body><main id="evidence"><h1>Proto UI · component capabilities</h1><p id="scope"></p><div id="fixture"></div></main></body></html>'
+  '<!doctype html><html data-theme="light"><head><meta charset="utf-8"></head><body><main id="evidence"><h1>Proto UI · component capabilities</h1><p id="scope"></p><div id="fixture"></div></main></body></html>'
 );
 await page.addStyleTag({
   content: `
   @layer reset, theme, proto-ui, consumer;
   @layer reset { *,::before,::after { box-sizing: border-box; } body { margin:0; font:16px/1.5 system-ui,sans-serif; color:#172033; background:#f5f7fb; } }
-  @layer theme { ${theme} }
+  @layer theme { ${theme}\n${familyThemeCss} }
   ${tokens}
   @layer consumer { #evidence { width:100%; padding:40px; } h1 { margin:0 0 8px; font-size:24px; } #scope { margin:0 0 28px; color:#4b5563; } #fixture { width:760px; max-width:100%; min-height:360px; padding:20px; background:white; border:1px solid #dce2eb; border-radius:12px; } }
 `,
@@ -120,6 +165,47 @@ const settle = () =>
   page.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
   );
+// Static evidence waits for real framework commits and finite presentation
+// work. Do not cancel animations, remove transitions, or force an owner state.
+// Infinite decorative animation is outside this bounded completion check.
+const settlePaint = async () => {
+  await page.evaluate(() => PuiCapabilities.settle());
+  await page.evaluate(async () => {
+    const deadline = performance.now() + 3000;
+    const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+    let quietFrames = 0;
+    while (quietFrames < 2) {
+      if (performance.now() >= deadline)
+        throw new Error('Finite presentation did not settle within 3000ms');
+      const animations = document.getAnimations().filter((animation) => {
+        const timing = animation.effect?.getComputedTiming();
+        return (
+          (animation.playState === 'running' || animation.pending) &&
+          timing &&
+          Number.isFinite(timing.endTime)
+        );
+      });
+      if (animations.length) {
+        quietFrames = 0;
+        let timer;
+        try {
+          await Promise.race([
+            Promise.allSettled(animations.map((animation) => animation.finished)),
+            new Promise((_, reject) => {
+              timer = setTimeout(
+                () => reject(new Error('Finite presentation completion timed out')),
+                Math.max(0, deadline - performance.now())
+              );
+            }),
+          ]);
+        } finally {
+          clearTimeout(timer);
+        }
+      } else quietFrames++;
+      await frame();
+    }
+  });
+};
 const read = (id, key) =>
   page.evaluate(({ id, key }) => PuiCapabilities.read(id, key), { id, key });
 const update = (id, patch) =>
@@ -142,6 +228,23 @@ const until = (id, key, expected) =>
     { id, key, expected }
   );
 const mount = async (runtime, family, kind, options = {}) => {
+  const activeTheme = await page.evaluate(
+    ({ family, names }) => {
+      document.documentElement.dataset.evidenceFamily = family;
+      document.documentElement.dataset.theme = 'light';
+      const style = getComputedStyle(document.documentElement);
+      return Object.fromEntries(
+        names.map((name) => [name, style.getPropertyValue(`--pui-${name}`).trim()])
+      );
+    },
+    { family, names: Object.keys(themeManifests[family] ?? {}) }
+  );
+  if (themeManifests[family])
+    assert.deepEqual(
+      activeTheme,
+      themeManifests[family],
+      `${family} uses its official light theme`
+    );
   await page.evaluate(
     ({ runtime, family, kind, options }) => PuiCapabilities.mount(runtime, family, kind, options),
     { runtime, family, kind, options }
@@ -151,7 +254,8 @@ const mount = async (runtime, family, kind, options = {}) => {
   }, `${family} / ${runtime} / ${kind} — native Chromium, light theme`);
   await settle();
 };
-const capture = async (name) => {
+const capture = async (name, { settled = true } = {}) => {
+  if (settled) await settlePaint();
   const file = `${name}.png`;
   await page.screenshot({ path: path.join(output, file), fullPage: true });
   return file;
@@ -262,6 +366,8 @@ async function resizable(runtime, family, prefix) {
 
 async function carousel(runtime, family, prefix) {
   await mount(runtime, family, 'carousel');
+  assert.equal(await page.getByRole('button', { name: 'Previous slide', exact: true }).count(), 1);
+  assert.equal(await page.getByRole('button', { name: 'Next slide', exact: true }).count(), 1);
   await until('root', 'slideCount', 6);
   near(await read('root', 'visibleSlides'), 2, 0.08, 'wide multiple-item viewport');
   const viewport = await rect('viewport');
@@ -326,6 +432,7 @@ async function carousel(runtime, family, prefix) {
     narrowVisible,
     pictures,
     checks: [
+      'public control-label accessible names',
       'native continuous drag',
       'entering item paint',
       'release snap',
@@ -336,6 +443,137 @@ async function carousel(runtime, family, prefix) {
       'native vertical snap',
     ],
   };
+}
+
+async function numberFieldIme(runtime, family) {
+  // CDP drives Chromium's native IME path; these are not dispatched DOM events
+  // or a physical operating-system IME. insertText calls ImeCommitText:
+  // https://chromedevtools.github.io/devtools-protocol/tot/Input/
+  // https://chromium.googlesource.com/chromium/src/+/refs/heads/main/content/browser/devtools/protocol/input_handler.cc
+  const evidence = {
+    runtime,
+    family,
+    input: 'Chromium CDP imeSetComposition + insertText; physical IME not claimed',
+    cases: [],
+  };
+  (report.numberFieldIme ??= []).push(evidence);
+  const client = await page.context().newCDPSession(page);
+  try {
+    for (const controlled of [false, true]) {
+      const result = { controlled, status: 'running', nativeEvents: [], componentEvents: [] };
+      evidence.cases.push(result);
+      await mount(runtime, family, 'number-field', controlled ? { value: 20.5 } : {});
+      const input = page.locator('#fixture input').first();
+      await input.click();
+      await input.press('Control+A');
+      await input.evaluate((element) => {
+        const events = [];
+        const record = (event) =>
+          events.push({
+            type: event.type,
+            isTrusted: event.isTrusted,
+            isComposing: typeof event.isComposing === 'boolean' ? event.isComposing : null,
+            data: typeof event.data === 'string' ? event.data : null,
+            inputType: typeof event.inputType === 'string' ? event.inputType : null,
+            value: element.value,
+          });
+        const types = [
+          'compositionstart',
+          'compositionupdate',
+          'beforeinput',
+          'input',
+          'compositionend',
+        ];
+        for (const type of types) element.addEventListener(type, record, true);
+        window.__puiNumberFieldIme = {
+          events,
+          dispose: () => {
+            for (const type of types) element.removeEventListener(type, record, true);
+          },
+        };
+      });
+      const text = controlled ? '3,5' : '1234,5';
+      const proposed = controlled ? 3.5 : 1234.5;
+      const accepted = controlled ? 20.5 : proposed;
+      const valueEvents = async (type) =>
+        (await allEvents()).filter((event) => event.id === 'root' && event.type === type);
+      try {
+        for (const candidate of [controlled ? '3' : '12', text]) {
+          await client.send('Input.imeSetComposition', {
+            text: candidate,
+            selectionStart: candidate.length,
+            selectionEnd: candidate.length,
+          });
+          await page.evaluate(() => PuiCapabilities.settle());
+          assert.equal(await input.inputValue(), candidate, 'native IME candidate stays visible');
+          assert.equal(
+            await read('root', 'draft'),
+            candidate,
+            'composition updates only the draft'
+          );
+          assert.equal(await read('root', 'getValue'), 20.5, 'composition does not accept a value');
+          assert.deepEqual(await valueEvents('valueChange'), [], 'no composing value proposal');
+          assert.deepEqual(await valueEvents('valueCommit'), [], 'no premature composition commit');
+        }
+        await client.send('Input.insertText', { text });
+        await page.evaluate(() => PuiCapabilities.settle());
+        assert.equal(
+          await read('root', 'getValue'),
+          accepted,
+          'native composition end honors owner'
+        );
+        assert.ok(
+          (await valueEvents('valueChange')).some((event) => event.detail.value === proposed),
+          'completed composition proposes the localized number'
+        );
+        assert.deepEqual(
+          await valueEvents('valueCommit'),
+          [],
+          'composition end preserves edit boundary'
+        );
+        await input.press('Enter');
+        await page.evaluate(() => PuiCapabilities.settle());
+        assert.equal(await read('root', 'getValue'), accepted);
+        assert.equal(
+          await input.inputValue(),
+          controlled ? '20,5' : '1.234,5',
+          'Enter formats the accepted value after native composition'
+        );
+        assert.deepEqual(
+          (await valueEvents('valueCommit')).map((event) => event.detail.value),
+          [accepted],
+          'commit reports the accepted owner value, including refusal'
+        );
+        const native = await page.evaluate(() => window.__puiNumberFieldIme.events);
+        assert.ok(
+          native.length && native.every((event) => event.isTrusted),
+          'trusted native events'
+        );
+        const start = native.findIndex((event) => event.type === 'compositionstart');
+        const end = native.findIndex((event) => event.type === 'compositionend');
+        assert.ok(start >= 0 && end > start, 'native composition lifecycle observed');
+        assert.ok(
+          native.slice(start + 1, end).some((event) => event.type === 'input' && event.isComposing),
+          'native composing input observed between composition boundaries'
+        );
+        result.status = 'passed';
+      } catch (error) {
+        result.status = 'failed';
+        result.error = error.stack ?? String(error);
+        throw error;
+      } finally {
+        result.nativeEvents = await page.evaluate(() => {
+          const recorder = window.__puiNumberFieldIme;
+          recorder?.dispose();
+          delete window.__puiNumberFieldIme;
+          return recorder?.events ?? [];
+        });
+        result.componentEvents = await allEvents();
+      }
+    }
+  } finally {
+    await client.detach();
+  }
 }
 
 async function numberField(runtime, family, prefix) {
@@ -390,6 +628,7 @@ async function numberField(runtime, family, prefix) {
     0.001,
     'RTL label drag increases in the logical direction'
   );
+  await numberFieldIme(runtime, family);
   return {
     during,
     pictures,
@@ -400,8 +639,122 @@ async function numberField(runtime, family, prefix) {
       'controlled refusal',
       'live contact cancellation',
       'native RTL label drag',
+      'trusted native CDP composition preview and localized commit',
+      'native composition controlled refusal',
     ],
   };
+}
+
+async function calendarRangePaint(family) {
+  await settlePaint();
+  const paint = await page.evaluate((family) => {
+    const sample = (day) => {
+      const element = document.querySelector(`.cap-date-2026-10-${day}`);
+      if (!element) throw new Error(`Missing visible calendar day ${day}`);
+      const style = getComputedStyle(element);
+      const box = element.getBoundingClientRect();
+      return {
+        background: style.backgroundColor,
+        image: style.backgroundImage,
+        color: style.color,
+        radius: style.borderTopLeftRadius,
+        opacity: style.opacity,
+        width: box.width,
+        height: box.height,
+      };
+    };
+    // Resolve semantic colors in the same inherited scope as the real day.
+    // This probe neither styles the component nor injects expected state.
+    const day = document.querySelector('.cap-date-2026-10-12');
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none';
+    day.parentElement.append(probe);
+    const resolve = (color) => {
+      probe.style.backgroundColor = '';
+      probe.style.backgroundColor = color;
+      if (!probe.style.backgroundColor) throw new Error(`Invalid theme expression: ${color}`);
+      return getComputedStyle(probe).backgroundColor;
+    };
+    const middleToken = family === 'shadcn' ? 'accent' : 'secondary';
+    const middleInk =
+      family === 'shadcn'
+        ? 'accent-foreground'
+        : family === 'liquid-glass'
+          ? 'secondary-foreground'
+          : 'foreground';
+    const expected = {
+      endpoint: resolve(`var(--pui-${family === 'brutalist' ? 'main' : 'primary'})`),
+      endpointInk: resolve(
+        `var(--pui-${family === 'brutalist' ? 'main-foreground' : 'primary-foreground'})`
+      ),
+      middle: resolve(
+        family === 'brutalist'
+          ? 'color-mix(in oklab, var(--pui-main) 20%, transparent)'
+          : `var(--pui-${middleToken})`
+      ),
+      middleInk: resolve(`var(--pui-${middleInk})`),
+      transparent: resolve('transparent'),
+    };
+    probe.remove();
+    return {
+      expected,
+      start: sample('10'),
+      middle: sample('12'),
+      end: sample('14'),
+      unselected: sample('09'),
+    };
+  }, family);
+  for (const [name, value] of Object.entries(paint).filter(([name]) => name !== 'expected')) {
+    assert.ok(value.width > 0 && value.height > 0, `${name} day has a real painted box`);
+    assert.equal(value.opacity, '1', `${name} day is opaque after finite transitions`);
+  }
+  if (family === 'base')
+    return { ...paint, contract: 'headless; selection colors are consumer-owned' };
+  assert.equal(paint.middle.background, paint.expected.middle, 'interior uses its family fill');
+  assert.equal(paint.middle.color, paint.expected.middleInk, 'interior uses its family foreground');
+  assert.equal(paint.middle.radius, '0px', 'range interior projects the square segment recipe');
+  assert.notEqual(paint.middle.background, paint.expected.transparent, 'interior fill is resolved');
+  assert.notEqual(
+    paint.middle.background,
+    paint.unselected.background,
+    'interior differs from unselected day'
+  );
+  for (const [name, endpoint] of [
+    ['start', paint.start],
+    ['end', paint.end],
+  ]) {
+    assert.equal(
+      endpoint.color,
+      paint.expected.endpointInk,
+      `${name} uses the selected foreground`
+    );
+    assert.notEqual(
+      endpoint.background,
+      paint.expected.transparent,
+      `${name} selected fill is resolved`
+    );
+    assert.notEqual(
+      endpoint.background,
+      paint.middle.background,
+      `${name} differs from the range interior`
+    );
+    assert.notEqual(
+      endpoint.background,
+      paint.unselected.background,
+      `${name} differs from an unselected day`
+    );
+    if (family === 'bootstrap-2-3-2') {
+      // Bootstrap's selected .btn-primary recipe has distinct resting and
+      // interactive gradient fills; both retain the official foreground.
+      assert.match(
+        endpoint.image,
+        /^linear-gradient\(/,
+        `${name} retains the selected Bootstrap gradient`
+      );
+    } else
+      assert.equal(endpoint.background, paint.expected.endpoint, `${name} uses its family fill`);
+  }
+  return { ...paint, contract: 'family semantic fill/foreground and segment distinction' };
 }
 
 async function calendar(runtime, family, prefix) {
@@ -414,6 +767,7 @@ async function calendar(runtime, family, prefix) {
   assert.equal(await read('date-2026-10-12', 'rangeMiddle'), true);
   assert.equal(await read('date-2026-10-14', 'rangeEnd'), true);
   assert.equal(await page.locator('.cap-date-2026-10-12').getAttribute('aria-selected'), 'true');
+  const rangePaint = await calendarRangePaint(family);
   const pictures = [await capture(`${prefix}-range`)];
   await mount(runtime, family, 'calendar', { mode: 'multiple' });
   for (const day of ['03', '08', '12']) await page.locator(`.cap-date-2026-10-${day}`).click();
@@ -422,10 +776,13 @@ async function calendar(runtime, family, prefix) {
   assert.deepEqual(await read('root', 'getValues'), ['2026-10-03', '2026-10-12']);
   pictures.push(await capture(`${prefix}-multiple`));
   return {
+    rangePaint,
     pictures,
     checks: [
       'native range selection',
-      'endpoint and interior day paint',
+      family === 'base'
+        ? 'headless day visibility'
+        : 'computed family endpoint and interior day paint',
       'inclusive aria selection',
       'multiple toggle',
     ],
@@ -436,23 +793,53 @@ async function datePicker(runtime, family, prefix) {
   await mount(runtime, family, 'date-picker', { mode: 'range' });
   await page.locator('.cap-trigger').click();
   await until('root', 'open', true);
+  await until('content', 'transitionState', 'entered');
   await page.locator('.cap-date-2026-10-10').click();
   assert.equal(await read('root', 'open'), true, 'incomplete range keeps picker open');
+  await page.waitForFunction(
+    () => document.querySelector('.cap-value')?.textContent.trim() === '2026-10-10 …'
+  );
   const pictures = [await capture(`${prefix}-pending`)];
   await page.locator('.cap-date-2026-10-14').click();
   await until('root', 'open', false);
   assert.deepEqual(await read('root', 'getRange'), { from: '2026-10-10', to: '2026-10-14' });
+  await until('content', 'transitionState', 'closed');
+  await until('content', 'isPresent', false);
+  // Portals are outside #fixture. A headless content host may use
+  // display:contents, so also check a formerly visible date descendant.
+  await page.locator('.cap-content').waitFor({ state: 'hidden' });
+  await page.locator('.cap-date-2026-10-10').waitFor({ state: 'hidden' });
+  await page.waitForFunction(
+    () => document.querySelector('.cap-value')?.textContent.trim() === '2026-10-10 – 2026-10-14'
+  );
+  const closedPaint = {
+    contentVisible: await page.locator('.cap-content').isVisible(),
+    dayVisible: await page.locator('.cap-date-2026-10-10').isVisible(),
+    value: await page.locator('.cap-value').textContent(),
+  };
+  assert.equal(closedPaint.contentVisible, false, 'closed popup is no longer painted');
+  assert.equal(closedPaint.dayVisible, false, 'closed popup descendants are no longer painted');
   pictures.push(await capture(`${prefix}-complete`));
+  // Reopen through the real trigger to inspect the completed range retained
+  // in the Date Picker's own styled day projections.
+  await page.locator('.cap-trigger').click();
+  await until('content', 'transitionState', 'entered');
+  const rangePaint = await calendarRangePaint(family);
+  pictures.push(await capture(`${prefix}-reopened-range`));
   await mount(runtime, family, 'date-picker', { mode: 'range', range: { from: '2026-10-10' } });
   await page.locator('.cap-trigger').click();
+  await until('content', 'transitionState', 'entered');
   await page.locator('.cap-date-2026-10-14').click();
   assert.equal(await read('root', 'open'), true, 'refused controlled completion keeps popup open');
   assert.equal((await read('root', 'getRange')).to, undefined);
   return {
+    closedPaint,
+    rangePaint,
     pictures,
     checks: [
       'native popup and partial range',
-      'accepted completion closes',
+      'accepted completion ends presence and hides popup descendants',
+      'retained range reopens with family day paint',
       'controlled refusal remains open',
     ],
   };
@@ -489,7 +876,11 @@ try {
           console.log(`PASS ${prefix}`);
         } catch (error) {
           await page.mouse.up().catch(() => {});
-          const screenshot = await capture(`${prefix}-failure`).catch(() => null);
+          // Preserve the actual failed frame even if finite completion itself
+          // failed. A failure screenshot is never labelled settled evidence.
+          const screenshot = await capture(`${prefix}-failure`, { settled: false }).catch(
+            () => null
+          );
           report.cases.push({
             runtime,
             family,
