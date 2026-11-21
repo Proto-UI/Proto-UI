@@ -577,6 +577,8 @@ interface Parameter {
   origin: object;
 }
 interface Binding {
+  /** Derived from the validated declaration scope, never supplied by IR metadata. */
+  moduleBinding?: boolean;
   uninitializedParameter?: boolean;
   uninitializedLexical?: boolean;
   type: ValueType;
@@ -1050,6 +1052,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       if (func.captures !== undefined) {
         const ids = new Set<string>();
+        let lexicalCaptureCount = 0;
+        for (const binding of captures.values()) if (!binding.moduleBinding) ++lexicalCaptureCount;
         for (const item of array(func.captures)) {
           const capture = object(item, ['bindingId', 'name', 'storage']);
           const id = text(capture.bindingId),
@@ -1058,13 +1062,14 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           if (
             ids.has(id) ||
             !binding ||
+            binding.moduleBinding ||
             binding.bindingId !== id ||
             capture.storage !== (lexicalStoredType(binding.type) ? 'cell' : 'value')
           )
             bad('Capture must identify the resolved lexical binding.', location);
           ids.add(id);
         }
-        if (ids.size !== captures.size)
+        if (ids.size !== lexicalCaptureCount)
           bad('Capture metadata must include every captured binding.', location);
       }
       const priorCaptures = provenCaptures.get(func);
@@ -1470,6 +1475,17 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                           | HookCaptureIR
                           | undefined
                       );
+                    if (
+                      typeof member !== 'string' &&
+                      member.kind === 'capture' &&
+                      key === 'render'
+                    ) {
+                      const hook = hooks.find((hook) => hook.id === member.hookId);
+                      return joinValueTypes([
+                        hook ? valueType(object(hook.setup).returnType, location) : 'void',
+                        'void',
+                      ]);
+                    }
                     const capability = capabilityMemberType(member, key, node.optional as boolean);
                     if (capability !== undefined) return capability;
                     if (member === 'props' && props.has(key)) return props.get(key)!;
@@ -1484,6 +1500,14 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               type = captureStateHandlesType(
                 hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined
               );
+              break;
+            }
+            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'render') {
+              const hook = hooks.find((hook) => hook.id === owner.hookId);
+              type = joinValueTypes([
+                hook ? valueType(object(hook.setup).returnType, location) : 'void',
+                'void',
+              ]);
               break;
             }
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);
@@ -1590,8 +1614,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const args = array(node.arguments).map((argument) =>
               expression(argument, scope, phase, context, true)
             );
-            type = valueAction(location, () => intrinsicResult(text(node.name), args));
+            type = valueAction(location, () =>
+              intrinsicResult(text(node.name), args, node.arguments as ExpressionIR[])
+            );
             if (node.name === 'array.every') invalidateFlow(scope, true);
+            if (node.name === 'object.assign' || node.name === 'string')
+              invalidateFlow(scope, true, true);
             break;
           }
           case 'object-spread': {
@@ -1893,6 +1921,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         scope.set(declaration.name, {
           type: valueType(initializer.type),
           origin: declaration,
+          moduleBinding: scope === moduleScope,
           uninitializedLexical: true,
           ...(declaration.bindingId !== undefined
             ? { bindingId: text(declaration.bindingId) }
@@ -1949,6 +1978,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 ...alias,
                 type,
                 origin: alias?.origin ?? node,
+                moduleBinding: scope === moduleScope,
                 uninitializedLexical: false,
                 stateData: stateDeclarationData(val as unknown as ExpressionIR) ?? alias?.stateData,
                 predicate:

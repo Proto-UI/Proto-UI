@@ -1538,6 +1538,8 @@ impl __PuiNativeRecordValue {
             if (!scalar) throw new Error('GPUI supports String() only for scalar data arguments.');
             return `Value::string(&(${args[0]}).scalar_text())`;
           }
+          case 'object.assign':
+            throw new Error('GPUI does not yet support fresh-target Object.assign.');
           case 'object.freeze':
             return `freeze(${args[0]})`;
           case 'object.hasOwn':

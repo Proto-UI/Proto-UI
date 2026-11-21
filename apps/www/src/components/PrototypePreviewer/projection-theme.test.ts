@@ -5,6 +5,7 @@ import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src
 import {
   applyProjectionThemeSurfaceStyle,
   resolveProjectionThemeSurfaceStyle,
+  scheduleProjectionThemeRead,
   watchProjectionThemeSurfaceStyle,
   type ProjectionThemeSurfaceStyle,
   WEBSITE_SHADCN_THEME_TOKENS,
@@ -17,6 +18,106 @@ afterEach(() => {
 });
 
 describe('Website projection theme inputs', () => {
+  it('samples each publication scope before releasing writes for the batch', async () => {
+    const parent = document.createElement('section');
+    const a = parent.appendChild(document.createElement('div'));
+    const b = parent.appendChild(document.createElement('div'));
+    document.body.append(parent);
+    for (const name of WEBSITE_SHADCN_THEME_TOKENS) {
+      a.style.setProperty(`--pui-${name}`, `a-${name}`);
+      b.style.setProperty(`--pui-${name}`, `b-${name}`);
+    }
+    const order: string[] = [];
+    const first = scheduleProjectionThemeRead(a, () => {
+      order.push('read a');
+      return resolveProjectionThemeSurfaceStyle('shadcn', a);
+    }).then((theme) => {
+      order.push('write a');
+      b.style.setProperty('--pui-radius', 'after-a');
+      return theme;
+    });
+    const second = scheduleProjectionThemeRead(b, () => {
+      order.push('read b');
+      return resolveProjectionThemeSurfaceStyle('shadcn', b);
+    }).then((theme) => {
+      order.push('write b');
+      return theme;
+    });
+    try {
+      expect(order).toEqual([]);
+      const [themeA, themeB] = await Promise.all([first, second]);
+      expect(order).toEqual(['read a', 'read b', 'write a', 'write b']);
+      expect(themeA['--pui-radius']).toBe('a-radius');
+      expect(themeB['--pui-radius']).toBe('b-radius');
+      expect(b.style.getPropertyValue('--pui-radius')).toBe('after-a');
+    } finally {
+      parent.remove();
+    }
+  });
+
+  it.each([false, true])(
+    'schedules one urgent publication task and handles rejection (%s)',
+    async (rejected) => {
+      const scope = document.documentElement;
+      const view = scope.ownerDocument.defaultView!;
+      const previous = Object.getOwnPropertyDescriptor(view, 'scheduler');
+      const postTask = vi.fn((callback: () => void) =>
+        rejected
+          ? Promise.reject(new Error('scheduler unavailable'))
+          : Promise.resolve().then(callback)
+      );
+      Object.defineProperty(view, 'scheduler', { configurable: true, value: { postTask } });
+      const firstRead = vi.fn(() => 'first');
+      const secondRead = vi.fn(() => 'second');
+      try {
+        const pending = [
+          scheduleProjectionThemeRead(scope, firstRead),
+          scheduleProjectionThemeRead(scope, secondRead),
+        ];
+        await expect(Promise.all(pending)).resolves.toEqual(['first', 'second']);
+        expect(postTask).toHaveBeenCalledOnce();
+        expect(postTask).toHaveBeenCalledWith(expect.any(Function), {
+          priority: 'user-blocking',
+        });
+        expect(firstRead).toHaveBeenCalledOnce();
+        expect(secondRead).toHaveBeenCalledOnce();
+      } finally {
+        if (previous) Object.defineProperty(view, 'scheduler', previous);
+        else Reflect.deleteProperty(view, 'scheduler');
+      }
+    }
+  );
+
+  it('samples within a microtask when the document has no priority scheduler', async () => {
+    const scope = document.documentElement;
+    const view = scope.ownerDocument.defaultView!;
+    const previous = Object.getOwnPropertyDescriptor(view, 'scheduler');
+    Object.defineProperty(view, 'scheduler', { configurable: true, value: undefined });
+    const read = vi.fn(() => 'current theme');
+    try {
+      const pending = scheduleProjectionThemeRead(scope, read);
+      await Promise.resolve();
+      const atCheckpoint = read.mock.calls.length;
+      await expect(pending).resolves.toBe('current theme');
+      expect(atCheckpoint).toBe(1);
+    } finally {
+      if (previous) Object.defineProperty(view, 'scheduler', previous);
+      else Reflect.deleteProperty(view, 'scheduler');
+    }
+  });
+
+  it('leaves other queued publications readable when a theme read fails', async () => {
+    const scope = document.documentElement;
+    const invalid = scheduleProjectionThemeRead(scope, () => {
+      throw new Error('theme read failed');
+    });
+    const pending = scheduleProjectionThemeRead(scope, () => 'next scope value');
+    await Promise.all([
+      expect(invalid).rejects.toThrow('theme read failed'),
+      expect(pending).resolves.toBe('next scope value'),
+    ]);
+  });
+
   it('copies only the explicit Website Shadcn input and fails closed on a missing token', () => {
     for (const name of WEBSITE_SHADCN_THEME_TOKENS) {
       document.documentElement.style.setProperty(`--pui-${name}`, `value-${name}`);

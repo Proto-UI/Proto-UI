@@ -4,6 +4,8 @@ import {
   resolveWebPortalDestinationBinding,
   subscribeWebPortalDestinations,
   notifyWebPortalProjection,
+  PUI_VIEW_REVEALING_ATTR,
+  scheduleAfterWebLayout,
   type WebPortalDestinationBinding,
   type WebPortalMaterialEpoch,
 } from '@proto.ui/adapter-base';
@@ -191,6 +193,41 @@ export function createWebComponentPortalMount() {
       let binding: WebPortalDestinationBinding | null = null;
       let materialEpoch: WebPortalMaterialEpoch | null = null;
       const ownsProjection = () => projected && el.parentNode === projectionBody;
+      let cancelReveal: (() => void) | null = null;
+      const endReveal = () => {
+        const cancel = cancelReveal;
+        cancelReveal = null;
+        cancel?.();
+        if (
+          projectionEpochs.get(el) === epoch &&
+          el.getAttribute(PUI_VIEW_REVEALING_ATTR) === 'portal'
+        )
+          el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+      };
+      const beginReveal = () => {
+        endReveal();
+        if (!isCurrent()) return;
+        const doc = el.ownerDocument;
+        if (doc.visibilityState !== 'visible') return;
+        let cancelLayout = () => {};
+        const cancel = () => {
+          cancelLayout();
+          doc.removeEventListener('visibilitychange', onVisibility);
+        };
+        const finish = () => {
+          if (cancelReveal === cancel) endReveal();
+        };
+        const onVisibility = () => {
+          if (doc.visibilityState !== 'visible') finish();
+        };
+        cancelReveal = cancel;
+        doc.addEventListener('visibilitychange', onVisibility);
+        // Reuse the host reveal barrier, allowing authored Presence keyframes.
+        // Descendant theme reconciliation must settle before transitions resume.
+        el.setAttribute(PUI_VIEW_REVEALING_ATTR, 'portal');
+        if (cancelReveal === cancel)
+          cancelLayout = scheduleAfterWebLayout(el, finish, queueMicrotask);
+      };
       let unbindAdoption: (() => void) | null = null;
       let observer: MutationObserver | null = null;
       let observedDocument: Document | null = null;
@@ -243,6 +280,7 @@ export function createWebComponentPortalMount() {
         binding = resolveWebPortalDestinationBinding(marker, el);
         if (!isCurrent()) return false;
         projectionBody = binding.destination;
+        beginReveal();
         projectionBody.appendChild(el);
         if (isCurrent() && ownsProjection()) notifyWebPortalProjection(el);
         return isCurrent() && ownsProjection();
@@ -322,6 +360,7 @@ export function createWebComponentPortalMount() {
       const restore = (restoreToOrigin = true) => {
         if (revoke !== restore) return;
         revoke = null;
+        endReveal();
         offDestination();
         unbindAdoption?.();
         const wasProjected = projected;
@@ -399,6 +438,7 @@ export function createWebComponentPortalMount() {
           return;
         }
         materialEpoch = acquiredMaterial;
+        beginReveal();
         if (el.parentNode !== projectionBody)
           relocate(el, projectionBody!, () => projectionBody!.appendChild(el));
         if (isCurrent() && ownsProjection()) {

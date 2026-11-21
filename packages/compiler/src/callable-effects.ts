@@ -38,6 +38,7 @@ type Atom =
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
 interface CaptureContents {
+  render?: Known;
   methods: Map<string, Known>;
   children: Map<string, readonly (Installation | undefined)[]>;
 }
@@ -139,7 +140,11 @@ export function traceSetupOperations(
   setup: FunctionIR,
   moduleBindings: readonly StatementIR[],
   trace: {
-    operation(value: TracedOperation, introduced: readonly CapturedState[], definite: boolean): void;
+    operation(
+      value: TracedOperation,
+      introduced: readonly CapturedState[],
+      definite: boolean
+    ): void;
     hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>): void;
   },
   hooks: readonly AuthoredHookIR[] = []
@@ -166,7 +171,11 @@ function analyzeCallableFlow(
     hooks: readonly AuthoredHookIR[];
   },
   trace?: {
-    operation(value: TracedOperation, introduced: readonly CapturedState[], definite: boolean): void;
+    operation(
+      value: TracedOperation,
+      introduced: readonly CapturedState[],
+      definite: boolean
+    ): void;
     hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>): void;
     owned?: HookContributionObserver;
   },
@@ -284,6 +293,7 @@ function analyzeCallableFlow(
       const methods = new Set(contents.flatMap((value) => [...value.methods.keys()]));
       const children = new Set(contents.flatMap((value) => [...value.children.keys()]));
       result.captures.set(capture, {
+        render: merge(contents.map((value) => value.render ?? UNDEFINED)),
         methods: new Map(
           [...methods].map((name) => [
             name,
@@ -303,8 +313,8 @@ function analyzeCallableFlow(
   function writeCaptureMethod(capture: Capture, name: string, value: Known): void {
     const prior = captureContents(capture);
     store.captures.set(capture, {
+      ...prior,
       methods: new Map(prior.methods).set(name, value),
-      children: prior.children,
     });
   }
   function recordChild(capture: Capture | undefined, name: string, value: Installation): void {
@@ -313,7 +323,7 @@ function analyzeCallableFlow(
       possible = prior.children.get(name) ?? [undefined];
     // Runtime getAsHook(name) returns the first matching direct child entry.
     store.captures.set(capture, {
-      methods: prior.methods,
+      ...prior,
       children: new Map(prior.children).set(name, [
         ...new Set(possible.map((child) => child ?? value)),
       ]),
@@ -477,6 +487,7 @@ function analyzeCallableFlow(
         case 'capture':
           return [
             'capture',
+            (captureContents(value).render ?? UNDEFINED).map((child) => visit(child, depth + 1)),
             [...captureContents(value).methods].map(([name, method]) => [
               name,
               method.map((child) => visit(child, depth + 1)),
@@ -758,6 +769,12 @@ function analyzeCallableFlow(
       else if (value.kind === 'cell')
         pending.push(...cellValue(value).map((value) => ({ value, type })));
       else if (value.kind === 'capture') {
+        pending.push(
+          ...(captureContents(value).render ?? UNDEFINED).map((value) => ({
+            value,
+            type: undefined,
+          }))
+        );
         for (const method of captureContents(value).methods.values())
           pending.push(...method.map((value) => ({ value, type: undefined })));
         for (const children of captureContents(value).children.values())
@@ -779,8 +796,7 @@ function analyzeCallableFlow(
       !(rule.callback.acceptsValue && type && !carriesCallable(type)) &&
       rule.callback.parameterPolicy !== 'declared-method'
     ) {
-      if (values.some((value) => value.kind === 'unknown' && !value.data))
-        opaque(ir.setup.span);
+      if (values.some((value) => value.kind === 'unknown' && !value.data)) opaque(ir.setup.span);
       const signature = rule.callback;
       const origin: Execution =
         signature.contextFrom === 'caller'
@@ -808,7 +824,11 @@ function analyzeCallableFlow(
 
   function property(values: Known, name: string): Known {
     return values.flatMap((value) =>
-      value.kind === 'record' ? (fields(value).get(name) ?? UNDEFINED) : UNKNOWN
+      value.kind === 'record'
+        ? (fields(value).get(name) ?? UNDEFINED)
+        : value.kind === 'capture' && name === 'render'
+          ? (captureContents(value).render ?? UNDEFINED)
+          : UNKNOWN
     );
   }
 
@@ -993,6 +1013,8 @@ function analyzeCallableFlow(
             parameters
           );
         }
+        if (value.name === 'object.assign')
+          return isDataValueType(value.type) ? dataFact(value.type) : args[0];
         return value.name === 'object.freeze' ? args[0] : UNKNOWN;
       }
       case 'lexical-cell': {
@@ -1091,12 +1113,14 @@ function analyzeCallableFlow(
         }
         const stateMembers = trace ? privilegedStateMembers(value.operation) : [];
         const handle: Known | undefined = stateMembers.length
-          ? [{
-              kind: 'record',
-              fields: new Map<string, Known>(stateMembers.map((state) => [
-                state.name, [{ kind: 'named-state', state }],
-              ])),
-            }]
+          ? [
+              {
+                kind: 'record',
+                fields: new Map<string, Known>(
+                  stateMembers.map((state) => [state.name, [{ kind: 'named-state', state }]])
+                ),
+              },
+            ]
           : undefined;
         for (const child of privilegedHookCaptures(value))
           recordChild(captureFrames.at(-1), child.name, {
@@ -1216,6 +1240,7 @@ function analyzeCallableFlow(
               captureFrames.pop();
               installingHooks.delete(hook.id);
               if (!reachable) return [];
+              store.captures.set(capture, { ...captureContents(capture), render: returned });
               if (!trace) scheduleRender(returned);
               const handle = hook.projectHandle
                 ? call(

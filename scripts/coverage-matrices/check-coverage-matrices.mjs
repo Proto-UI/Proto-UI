@@ -285,10 +285,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts': Object.freeze({
-    specifiers: Object.freeze([
-      '@proto.ui/adapter-base',
-      '@proto.ui/adapter-base/web-material',
-    ]),
+    specifiers: Object.freeze(['@proto.ui/adapter-base', '@proto.ui/adapter-base/web-material']),
     resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
   }),
   'packages/adapters/base/src/material/program-pool.ts': Object.freeze({
@@ -342,10 +339,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({
     sourceSha256: '02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee',
-    specifiers: Object.freeze([
-      '@proto.ui/core',
-      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
-    ]),
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/prototypes-bootstrap-2-3-2/surface']),
   }),
   // Exact demo compositions delegating geometry/materialization to the public Web
   // attachment. Their authored-controller owner remains blocked. Bootstrap and
@@ -437,7 +431,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '2ae76ee72be64dcec48ae013d16d880a8e8b8f92fc4dbb315e550b00315c801e',
+    sourceSha256: '8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({

@@ -60,6 +60,36 @@ cases:
       - P-BASE-TABS-CONTENT-A11Y-LABELLEDBY-TARGET
     expectation: cross-adapter-tabs-structured-relationship-migration
 implementations:
+  - id: compiler-a11y-part-admission
+    kind: runtime-test
+    status: planned
+    path: packages/compiler/test/a11y-part-admission.test.ts
+    required: false
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER
+    notes:
+      - Candidate source and serialized-IR regression; not executed in this preparation and not evidence of stable admission.
+  - id: compiler-a11y-part-native
+    kind: adapter-test
+    status: planned
+    path: packages/compiler/test/a11y-part-native.test.ts
+    required: false
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-HOST-ID-OWNERSHIP
+    notes:
+      - Candidate generated React, Vue, Vue2 and Web Component DOM regressions; unexecuted. Browser pre-visibility ordering remains outstanding.
+  - id: compiler-a11y-part-linked-consumer
+    kind: adapter-test
+    status: planned
+    path: packages/compiler/test/artifact-linking-consumer.test.ts
+    required: false
+    consumesCases:
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
+      - T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
+    notes:
+      - Candidate independently compiled React endpoints with explicit family linking; no fresh execution or full Collapsible conformance claim.
   - id: runtime-a11y-part-relationship-contract
     kind: runtime-test
     status: passing
@@ -145,6 +175,9 @@ sources:
   - path: packages/adapters/vue/test/tabs.test.ts
   - path: packages/adapters/vue2/test/tabs.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added planned compiler source/IR, generated DOM and linked-library regression mappings without claiming execution or changing draft lifecycle.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Implemented all six required paths, with explicit Runtime/host ownership assertions, exact-key Tabs migration and honest React simulation versus browser evidence boundaries.

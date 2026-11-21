@@ -348,6 +348,7 @@ const VUE2_DEFERRED_OPERATIONS: ReadonlySet<Operation> = new Set([
 
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
+  'accessible.part',
   'eventControl.requestDefaultActionPrevention',
   'hook.asControlLabel',
   'controlLabel.label',
@@ -406,7 +407,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '19.2.6',
     mode: 'source',
     implemented: true,
-    operations: webOperations,
+    operations: [...webOperations, 'props.watchRaw'],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [...reactDependencies, ...floatingUiDependency],
     helpers: [
@@ -723,6 +724,22 @@ export function checkTargetOperations(
         break;
       case 'rule':
         operation('rule.declare', value.span);
+        break;
+      case 'intrinsic':
+        if (
+          value.name === 'string' &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+        )
+          diagnostic(
+            'PUI4003',
+            `String coercion is not implemented by ${selected.id}.`,
+            value.span
+          );
+        if (
+          value.name === 'object.assign' &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+        )
+          diagnostic('PUI4003', `Object.assign is not implemented by ${selected.id}.`, value.span);
         break;
       case 'context-key':
         if (!capabilities.has('context-scope'))

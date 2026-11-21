@@ -6,6 +6,10 @@ The independent prototype/projection portfolio is [documented here](../../intern
 
 The [#834 browser study](https://github.com/Proto-UI/Proto-UI/issues/834) uses the [current source reference](test/fixtures/website-markup-provenance-current.json) for its sampled routes. The [original reference](test/fixtures/website-markup-provenance-source.json) preserves the earlier review baseline. The suite rejects changed bytes before launching the Website. Review any changes to the sampled inputs and their ownership before updating the current reference. Both references record unverified source admission. The served build and transitive source closure require separate evidence.
 
+The current reference records source review at `4d9a621618a63bace047776fbdf9eb7a20685cbc`. Relative to its previous `009612b25e3ba425fc2f5016ae28a7309092f808` snapshot, three inventoried files changed: eager bootstrap work now yields through an abortable task and rechecks its pending owner; initial projected preparation carries an abort signal retired on destruction; the Shadcn Toggle manifest names four concrete Lucide icons instead of the generic icon. The sampled Dialog manifest, highlighted-code producer/receiver, raw code and Copy paths are unchanged. The source review renews only those three hashes and the snapshot revision, retaining the inventory and `sourceAdmission: unverified`. The changed startup timing and cancellation still require a fresh browser study with original response, runtime-switch, Copy and teardown observations; old native results do not certify this snapshot. The original reference remains historical and unchanged.
+
+The bounded #1561 update layers contributor head `8a00ca38a49dfddce82e6d91b6257e869e74e360` on main `46e30a1f3509ba1ce480bc2a971ba227c20c77a7` and renews only the current reference's `previewer-client.ts` digest to `512567c5f376fbc5a55448aae4589fc2d56814c78216d930ea069e5a63149219`. Its initial pending appearance read now uses `scheduleProjectionThemeRead`, reads family and theme together, and guards destruction/generation ownership before reading and publishing. The original reference remains historical; the current reference retains its prior snapshot revision, other source hashes and unverified admission. The browser probe reads the current reference, hashes its listed working-tree files, writes `source-binding.json`, checks an optional expected candidate revision and rejects source-binding issues before starting the Website or browser. Renewing this one source binding permits that preflight to evaluate the layered candidate; it supplies no fresh browser result or served/transitive-source proof. Changed startup timing still needs the source-bound browser study.
+
 Explicit repository source paths are literal identities, including bracketed Astro route names such as `[runtime].astro`; they are never glob-expanded. Wildcard operators (`*`, `?`, `{`, `}`) and parent traversal remain inadmissible. A Source-scan binding for a literal route still requires an existing file, its reviewed SHA-256 and a unique binding; brackets do not waive those checks.
 
 ## Verified GPUI rows and portable native source proofs
@@ -54,16 +58,9 @@ The modeled executable-navigation profile currently covers proven native Locatio
 
 ## Exact Retry virtual-module inputs
 
-The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from
-`apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three
-`runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal
-`virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance.
-Other owners, near-match IDs, HTML and public assets remain outside this profile.
+The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three `runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal `virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance. Other owners, near-match IDs, HTML and public assets remain outside this profile.
 
-Every current-profile input below must be a regular file at its exact authored
-path, with no repository-local symlink component, and match its raw-byte SHA-256.
-Successful admission includes all five files as promotion evidence metadata;
-recording a helper elsewhere cannot replace this conjunction.
+Every current-profile input below must be a regular file at its exact authored path, with no repository-local symlink component, and match its raw-byte SHA-256. Successful admission includes all five files as promotion evidence metadata; recording a helper elsewhere cannot replace this conjunction.
 
 | Input | SHA-256 |
 | --- | --- |
@@ -73,20 +70,9 @@ recording a helper elsewhere cannot replace this conjunction.
 | `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
 | `apps/www/scripts/accordion-activation-probe.mjs` | `9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b` |
 
-This current config remains unrecognized by `promotionBarePackageTargets` for
-general bare-package promotion. Its extracted resolver and optional activation
-probe are bound as source inputs, without certifying general resolver parity,
-probe activation, transformed Adapter bytes, installed framework bytes, emitted
-URLs, or runtime behavior. The virtual edge remains terminal in source traversal;
-the separate production module-graph checks retain their existing responsibility.
+This current config remains unrecognized by `promotionBarePackageTargets` for general bare-package promotion. Its extracted resolver and optional activation probe are bound as source inputs, without certifying general resolver parity, probe activation, transformed Adapter bytes, installed framework bytes, emitted URLs, or runtime behavior. The virtual edge remains terminal in source traversal; the separate production module-graph checks retain their existing responsibility.
 
-Historical Retry configs retain their original Retry/contrast helper requirements.
-Their exact inert inputs are retained in
-`test/fixtures/promotion-resolver-finf-retry-audit.txt` (`428f9cbe…f8ac`) and
-`test/fixtures/promotion-resolver-shadcn-card-retry-audit.txt` (`4ac9f16e…625a`).
-General resolver fixtures and parity controls select historical bytes explicitly;
-current virtual-module fixtures copy the five current inputs separately. The
-full control file is `node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs`.
+Historical Retry configs retain their original Retry/contrast helper requirements. Their exact inert inputs are retained in `test/fixtures/promotion-resolver-finf-retry-audit.txt` (`428f9cbe…f8ac`) and `test/fixtures/promotion-resolver-shadcn-card-retry-audit.txt` (`4ac9f16e…625a`). General resolver fixtures and parity controls select historical bytes explicitly; current virtual-module fixtures copy the five current inputs separately. The full control file is `node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs`.
 
 ## Document bases and runtime graph entries
 

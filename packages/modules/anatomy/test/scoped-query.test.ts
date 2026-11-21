@@ -21,6 +21,7 @@ function fixture() {
     ),
   });
   const parents = new Map<object, object | null>();
+  const parentReads = new Set<object>();
   const all: AnatomyModuleImpl[] = [];
   function add(role: string, parent: object | null = null) {
     const token = {};
@@ -30,7 +31,10 @@ function fixture() {
       makeCaps({
         sys,
         instance: token,
-        getParent: (i) => parents.get(i as object) ?? null,
+        getParent: (i) => {
+          parentReads.add(i as object);
+          return parents.get(i as object) ?? null;
+        },
         getPrototype: () => ({ name: role, setup() {} }),
         getRootTarget: () => ({ privateHost: true }),
       }),
@@ -42,7 +46,13 @@ function fixture() {
     all.push(impl);
     return { token, impl, sys };
   }
-  return { family, parents, add, dispose: () => all.reverse().forEach((i) => i.dispose()) };
+  return {
+    family,
+    parents,
+    parentReads,
+    add,
+    dispose: () => all.reverse().forEach((i) => i.dispose()),
+  };
 }
 
 describe('author-safe scoped logical descendant query', () => {
@@ -108,6 +118,37 @@ describe('author-safe scoped logical descendant query', () => {
       expect(root.impl.descendantsOf(f.family, otherAncestor!, 'text')).toHaveLength(1);
       other.impl.dispose();
       expect(root.impl.descendantsOf(f.family, otherAncestor!, 'text')).toEqual([]);
+    } finally {
+      f.dispose();
+    }
+  });
+
+  it('checks a live part through its current logical ancestry', () => {
+    const f = fixture();
+    try {
+      const root = f.add('root');
+      const row = f.add('item', root.token);
+      const text = f.add('text', row.token);
+      const otherRoot = f.add('root');
+      const otherRow = f.add('item', otherRoot.token);
+      const [part] = requiredParts(root.impl, f.family, 'text');
+
+      f.parentReads.clear();
+      expect(root.impl.port.isCurrentPart(f.family, part!)).toBe(true);
+      expect(root.impl.port.resolveAncestorInstance(f.family, part!, 'item')).toBe(row.token);
+      expect(f.parentReads.has(otherRow.token)).toBe(false);
+
+      f.parents.set(text.token, otherRow.token);
+      expect(root.impl.port.isCurrentPart(f.family, part!)).toBe(false);
+      expect(root.impl.port.resolveAncestorInstance(f.family, part!, 'item')).toBeNull();
+      expect(otherRoot.impl.port.isCurrentPart(f.family, part!)).toBe(true);
+      expect(otherRoot.impl.port.resolveAncestorInstance(f.family, part!, 'item')).toBe(
+        otherRow.token
+      );
+
+      text.impl.dispose();
+      expect(otherRoot.impl.port.isCurrentPart(f.family, part!)).toBe(false);
+      expect(otherRoot.impl.port.resolveAncestorInstance(f.family, part!, 'item')).toBeNull();
     } finally {
       f.dispose();
     }

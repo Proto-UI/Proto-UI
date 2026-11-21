@@ -629,6 +629,8 @@ class Frontend {
           return captureStateHandlesType(
             this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture
           );
+        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'render')
+          return joinValueTypes([this.hooks.get(owner.hookId)?.setup.returnType ?? 'void', 'void']);
         const capability = capabilityMemberType(owner, property, optional);
         if (capability !== undefined) return capability;
         if (owner === 'props') {
@@ -1243,6 +1245,8 @@ class Frontend {
     const value = this.expressionValue(module, node, scope, phase, argumentRule, expectedType);
     if (value.kind === 'intrinsic' && value.name === 'array.every')
       this.invalidateFlow(scope, true);
+    if (value.kind === 'intrinsic' && ['object.assign', 'string'].includes(value.name))
+      this.invalidateFlow(scope, true, true);
     this.flow.observe(value);
     return value;
   }
@@ -2446,6 +2450,31 @@ class Frontend {
     expectedType?: ValueType
   ): ExpressionIR {
     const span = sourceSpan(node);
+    if (
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'String' &&
+      !scope.has('String') &&
+      !module.declarations.has('String') &&
+      !module.imports.has('String')
+    ) {
+      if (node.questionDotToken)
+        rejectNode(node, 'PUI1006', 'String does not admit optional calls.');
+      const args = node.arguments.map((argument) =>
+        this.expression(module, argument, scope, phase)
+      );
+      return {
+        kind: 'intrinsic',
+        name: 'string',
+        arguments: args,
+        type: this.checkedValue(node, () =>
+          intrinsicResult(
+            'string',
+            args.map((arg) => arg.type)
+          )
+        ),
+        span,
+      };
+    }
     if (ts.isPropertyAccessExpression(node.expression)) {
       const owner = node.expression.expression,
         property = node.expression.name.text;
@@ -2462,8 +2491,31 @@ class Frontend {
               ? 'object.freeze'
               : owner.text === 'Object' && property === 'hasOwn'
                 ? 'object.hasOwn'
-                : undefined;
+                : owner.text === 'Object' && property === 'assign'
+                  ? 'object.assign'
+                  : undefined;
         if (name) {
+          if (
+            name === 'object.assign' &&
+            (node.questionDotToken || node.expression.questionDotToken)
+          )
+            rejectNode(node, 'PUI1006', 'Object.assign does not admit optional calls.');
+          if (name === 'object.assign') {
+            const operands = node.arguments.map((argument) => {
+              while (ts.isParenthesizedExpression(argument)) argument = argument.expression;
+              return argument;
+            });
+            if (
+              !operands.length ||
+              (!ts.isObjectLiteralExpression(operands[0]) && !ts.isNewExpression(operands[0])) ||
+              operands.slice(1).some((operand) => !ts.isObjectLiteralExpression(operand))
+            )
+              rejectNode(
+                node,
+                'PUI1006',
+                'Object.assign requires a direct fresh target and record literal sources.'
+              );
+          }
           const args = node.arguments.map((argument) =>
             this.expression(
               module,
@@ -2481,7 +2533,8 @@ class Frontend {
             type: this.checkedValue(node, () =>
               intrinsicResult(
                 name,
-                args.map((arg) => arg.type)
+                args.map((arg) => arg.type),
+                args
               )
             ),
             span,

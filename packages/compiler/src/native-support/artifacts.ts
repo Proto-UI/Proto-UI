@@ -52,6 +52,35 @@ const ownerTypes = [
 ];
 const familyUnits = [
   {
+    feature: 'part-relationships',
+    file: 'part-relationships-v1',
+    names: [
+      'createNativePartRelationships',
+      'nativePartKey',
+      'nativePartWriteTokens',
+      'nativePartReleaseProjection',
+      'nativePartProject',
+      'nativePartReleaseBinding',
+      'nativePartReleaseReservation',
+      'nativePartId',
+      'publishNativePartRelationships',
+      'partRelationshipRecords',
+      'partRelationshipIds',
+      'partRelationshipTokens',
+      'partRelationshipScopes',
+      'partRelationshipPublication',
+    ],
+    types: ['Owner', 'NativeAnatomyFamily'],
+    localTypes: [
+      'NativePartKey',
+      'NativePartTarget',
+      'NativePartRelationships',
+      'NativePartProjection',
+      'NativePartRecord',
+      'NativePartTokens',
+    ],
+  },
+  {
     feature: 'focus',
     file: 'focus-ownership-v2',
     names: ['activeScopes', 'ScopeEntryIntent', 'noteNativeFocusRequest'],
@@ -130,10 +159,12 @@ const file = (path: string, contents: string) => ({
 
 /** Full v1 ABI remains readable while current compilation selects v2 closures. */
 export function fullNativeModuleTemplate(options: { controlLabel?: boolean } = {}): string {
-  return specializeNativeTemplate(DOM_MODULE_TEMPLATE, legacyFullPlan(options), 'createNativeAdapterModules', [
+  return specializeNativeTemplate(
+    DOM_MODULE_TEMPLATE,
+    legacyFullPlan(options),
     'createNativeAdapterModules',
-    'noteNativeFocusRequest',
-  ]);
+    ['createNativeAdapterModules', 'noteNativeFocusRequest']
+  );
 }
 export function fullNativeInteractionTemplate(
   semanticEvents: readonly string[],
@@ -169,18 +200,24 @@ export function plannedNativeInteractionArtifacts(
     shared.push(
       file(
         'control-label-types-v1',
-        selectSupportDeclarations(DOM_MODULE_TEMPLATE, [
-          'NativeAnatomyFamily',
-          'NativeControlLabelAnatomyPair',
-          'NativeControlLabelRequest',
-          'NativeControlLabelHandle',
-          'NativeControlLabel',
-        ], true)
+        selectSupportDeclarations(
+          DOM_MODULE_TEMPLATE,
+          [
+            'NativeAnatomyFamily',
+            'NativeControlLabelAnatomyPair',
+            'NativeControlLabelRequest',
+            'NativeControlLabelHandle',
+            'NativeControlLabel',
+          ],
+          true
+        )
       ),
       {
         ...nativeControlLabelArtifact,
-        contents: mapSupportImports(nativeControlLabelArtifact.contents,
-          new Map([['./adapter-modules-v1', './control-label-types-v1']]))
+        contents: mapSupportImports(
+          nativeControlLabelArtifact.contents,
+          new Map([['./adapter-modules-v1', './control-label-types-v1']])
+        ),
       }
     );
   }
@@ -200,8 +237,14 @@ export function plannedNativeInteractionArtifacts(
     const typeImports = unit.types.length
       ? `import type { ${unit.types.join(', ')} } from './ownership-v2';\n`
       : '';
-    shared.push(file(unit.file, typeImports + extra + rewrite(body)));
-    const names = unit.names.map((name) =>
+    const identityImports =
+      unit.feature === 'part-relationships'
+        ? "import { ancestor, hostIdState } from './ownership-v2';\n"
+        : '';
+    shared.push(file(unit.file, typeImports + identityImports + extra + rewrite(body)));
+    const names = (
+      unit.feature === 'part-relationships' ? ['createNativePartRelationships'] : unit.names
+    ).map((name) =>
       ['ScopeEntryIntent', 'NativeTableRecord'].includes(name) ? 'type ' + name : name
     );
     imports += `import { ${names.join(', ')}${unit.feature === 'focus' ? ', focusState' : ''} } from './${unit.file}';\n`;

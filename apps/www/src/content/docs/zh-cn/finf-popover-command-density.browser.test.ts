@@ -24,6 +24,8 @@ import {
   applyColorScheme,
 } from './browser-harness';
 
+import { mountPopoverNova, type PopoverNovaFixtureHandle } from './popover-nova-fixture';
+
 const route = '/en/ui-libraries/shadcn/popover/';
 const demoId = 'demo-shadcn-popover';
 const output =
@@ -277,12 +279,78 @@ async function clickTopInset(
   receipt.completed = true;
   await probe?.mark(`${stage}.afterPointer`);
 }
-async function panelFor(page: Page, trigger: Locator) {
+async function panelFor(page: Page, trigger: Locator, settlements: unknown[]) {
   await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
   const id = await trigger.getAttribute('aria-controls');
   if (!id) throw new Error('Trigger must identify its Content.');
   const panel = page.locator(`[id=${JSON.stringify(id)}][role="dialog"]`);
   await panel.waitFor({ state: 'visible' });
+  // Content's open recipe retains pui-enter with fill: both. Visibility (and
+  // reduced motion) does not prove that its initial scale(0.95) has finished.
+  // Observe the native endpoint and two real frames; never finish/cancel motion
+  // or let a screenshot advance it before the density and hit assertions.
+  const receipt: { panelId: string; latest?: unknown } = { panelId: id };
+  settlements.push(receipt);
+  await expect
+    .poll(
+      async () => {
+        const sample = await panel.evaluate(async (element) => {
+          const read = () => {
+            const rect = element.getBoundingClientRect();
+            const css = getComputedStyle(element);
+            const animations = element.getAnimations({ subtree: true }).map((animation) => ({
+              name: 'animationName' in animation ? String(animation.animationName) : null,
+              playState: animation.playState,
+              pending: animation.pending,
+            }));
+            return {
+              connected: element.isConnected,
+              rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+              transform: css.transform,
+              opacity: css.opacity,
+              animations,
+              endpoint:
+                element.isConnected &&
+                rect.width > 0 &&
+                rect.height > 0 &&
+                css.opacity === '1' &&
+                (css.transform === 'none' || new DOMMatrixReadOnly(css.transform).isIdentity) &&
+                animations.some(
+                  (animation) =>
+                    animation.name === 'pui-enter' &&
+                    animation.playState === 'finished' &&
+                    !animation.pending
+                ) &&
+                animations.every(
+                  (animation) => !animation.pending && animation.playState === 'finished'
+                ),
+            };
+          };
+          const firstFrame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => firstFrame.resolve());
+          await firstFrame.promise;
+          const before = read();
+          const secondFrame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => secondFrame.resolve());
+          await secondFrame.promise;
+          const after = read();
+          return {
+            before,
+            after,
+            settled:
+              before.endpoint &&
+              after.endpoint &&
+              (Object.keys(before.rect) as Array<keyof typeof before.rect>).every(
+                (key) => Math.abs(before.rect[key] - after.rect[key]) < 0.01
+              ),
+          };
+        });
+        receipt.latest = sample;
+        return sample.settled;
+      },
+      { timeout: 1_000, message: 'Popover entry must finish at stable unscaled geometry.' }
+    )
+    .toBe(true);
   return panel;
 }
 
@@ -294,6 +362,7 @@ for (const runtime of RUNTIMES)
       async () => {
         let context: BrowserContext | undefined, page: Page | undefined;
         let domProbe: PopoverDomProbe | undefined;
+        let fixture: PopoverNovaFixtureHandle | undefined;
         let stage = 'created',
           result = 'failed',
           failure: string | undefined;
@@ -301,7 +370,9 @@ for (const runtime of RUNTIMES)
           screenshots: unknown[] = [],
           errors: string[] = [],
           deniedRequests: string[] = [],
+          entrySettlements: unknown[] = [],
           pointerInputs: unknown[] = [];
+        observations.entrySettlements = entrySettlements;
         try {
           context = await browser.newContext({
             viewport: { width: 1280, height: 1000 },
@@ -342,11 +413,18 @@ for (const runtime of RUNTIMES)
           expect(
             (await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' }))?.status()
           ).toBe(200);
-          const previewer = page.locator('[data-previewer-id]').first();
+          let previewer = page.locator('[data-previewer-id]').first();
           await previewer.scrollIntoViewIfNeeded();
           await selectRuntime(page, previewer, runtime, '[data-demo-ref="root"]', 1);
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
+          fixture = await mountPopoverNova(page, runtime);
+          observations.profiles = await fixture.evaluate((view) => ({
+            public: view.publicProfile,
+            fixture: view.fixtureProfile,
+          }));
+          expect(observations.profiles).toEqual({ public: 'rhea', fixture: 'nova' });
+          previewer = page.locator('[data-popover-nova-fixture]');
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
           domProbe = await startPopoverDomProbe(page, trigger);
           stage = 'default-trigger';
@@ -360,7 +438,7 @@ for (const runtime of RUNTIMES)
               expect(hit.belongsToControl).toBe(true);
           await capture('trigger', observations.trigger);
           await clickTopInset(page, trigger, pointerInputs, stage, domProbe);
-          const panel = await panelFor(page, trigger),
+          const panel = await panelFor(page, trigger, entrySettlements),
             close = panel.getByRole('button', { name: 'Close', exact: true });
           stage = 'default-close';
           const defaultClose = await metrics(close);
@@ -401,7 +479,7 @@ for (const runtime of RUNTIMES)
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           await panel.waitFor({ state: 'hidden' });
           await clickTopInset(page, trigger, pointerInputs, stage, domProbe);
-          await panelFor(page, trigger);
+          await panelFor(page, trigger, entrySettlements);
           observations.reopenedClose = await metrics(close);
           assertDensity(observations.reopenedClose as Awaited<ReturnType<typeof metrics>>);
           await page.keyboard.press('Escape');
@@ -422,7 +500,7 @@ for (const runtime of RUNTIMES)
           assertDensity(scaledTrigger);
           expect(scaledTrigger.rootFont).toBe('32px');
           await clickTopInset(page, trigger, pointerInputs, stage, domProbe);
-          await panelFor(page, trigger);
+          await panelFor(page, trigger, entrySettlements);
           await domProbe.mark('root32.afterPanelVisible');
           const scaledClose = await metrics(close);
           observations.root32Close = scaledClose;
@@ -480,7 +558,11 @@ for (const runtime of RUNTIMES)
               browser: browser.version(),
             });
           } finally {
-            await context?.close();
+            try {
+              await fixture?.evaluate((view) => view.destroy()).finally(() => fixture?.dispose());
+            } finally {
+              await context?.close();
+            }
           }
         }
       },

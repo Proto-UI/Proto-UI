@@ -76,6 +76,45 @@ describe('Web A11y opaque semantic-object references', () => {
     project.dispose?.();
     expect(target.getAttribute('aria-label')).toBe('Consumer name');
   });
+  it('acquires matching scalar attributes without writing and still restores changed values', () => {
+    const target = document.createElement('div');
+    target.setAttribute('role', 'button');
+    target.setAttribute('aria-label', 'Search');
+    target.setAttribute('aria-hidden', 'false');
+    const project = createWebA11yProjector(target);
+    const objectRef = createA11ySemanticObjectRef();
+    const set = vi.spyOn(target, 'setAttribute');
+    const remove = vi.spyOn(target, 'removeAttribute');
+    try {
+      project({
+        ...semanticSnapshot(objectRef),
+        role: 'button',
+        name: { kind: 'text', value: 'Search' },
+        states: { hidden: false },
+      });
+      expect(set).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+      project({
+        ...semanticSnapshot(objectRef),
+        role: 'link',
+        name: { kind: 'text', value: 'New name' },
+        states: { hidden: true },
+      });
+      expect(target.getAttribute('role')).toBe('link');
+      expect(target.getAttribute('aria-label')).toBe('New name');
+      expect(target.getAttribute('aria-hidden')).toBe('true');
+      expect(target.hasAttribute('hidden')).toBe(true);
+    } finally {
+      set.mockRestore();
+      remove.mockRestore();
+      project.dispose?.();
+    }
+    expect(target.getAttribute('role')).toBe('button');
+    expect(target.getAttribute('aria-label')).toBe('Search');
+    expect(target.getAttribute('aria-hidden')).toBe('false');
+    expect(target.hasAttribute('hidden')).toBe(false);
+  });
+
   it('projects ordered targets atomically across missing, removal, rematerialization, and disposal', () => {
     // T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-a11y' });
@@ -519,6 +558,41 @@ describe('Web A11y opaque semantic-object references', () => {
       sourceProjector.dispose?.();
     }
   });
+
+  it.each([undefined, 1])(
+    'keeps settled scalar attributes in place during a same-view replay (epoch %s)',
+    (viewEpoch) => {
+      const target = document.createElement('div');
+      target.setAttribute('role', 'group');
+      document.body.append(target);
+      const project = createWebA11yProjector(target);
+      const snapshot = {
+        ...semanticSnapshot(createA11ySemanticObjectRef()),
+        viewEpoch,
+        role: 'button',
+      } satisfies A11ySemanticObjectSnapshot;
+      project(snapshot);
+      const set = vi.spyOn(target, 'setAttribute');
+      const remove = vi.spyOn(target, 'removeAttribute');
+      try {
+        project({ ...snapshot });
+        expect(target.getAttribute('role')).toBe('button');
+        expect(set).not.toHaveBeenCalled();
+        expect(remove).not.toHaveBeenCalled();
+
+        target.setAttribute('role', 'region');
+        project({ ...snapshot });
+        expect(target.getAttribute('role')).toBe('button');
+        project.dispose?.();
+        expect(target.getAttribute('role')).toBe('region');
+      } finally {
+        set.mockRestore();
+        remove.mockRestore();
+        project.dispose?.();
+        target.remove();
+      }
+    }
+  );
 
   it('keeps shared scalar attributes until every projector releases them', () => {
     const registry = createWebA11yProjectionRegistry();
@@ -1188,6 +1262,51 @@ describe('part-relationship host observation', () => {
 
 describe('part-relationship identity observation ownership', () => {
   const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+  it('skips unrelated DOM edits and still observes the insertion and removal of a nested duplicate ID', async () => {
+    const doc = document.implementation.createHTMLDocument('unrelated-observer');
+    const source = doc.createElement('button');
+    const target = doc.createElement('div');
+    target.id = 'target';
+    doc.body.append(source, target);
+    const registry = createWebA11yProjectionRegistry();
+    const ref = createA11ySemanticObjectRef();
+    const targetProjector = createWebA11yProjector(target, undefined, registry);
+    const sourceProjector = createWebA11yProjector(source, undefined, registry);
+    try {
+      targetProjector({ ...semanticSnapshot(ref), viewEpoch: 1 });
+      sourceProjector(semanticSnapshot(createA11ySemanticObjectRef(), { controls: [ref] }));
+      await flush();
+      expect(source.getAttribute('aria-controls')).toBe('target');
+      const query = vi.spyOn(doc, 'querySelectorAll');
+      try {
+        const unrelated = doc.createElement('section');
+        unrelated.append(doc.createElement('span'), 'unrelated text');
+        doc.body.append(unrelated);
+        await flush();
+        unrelated.remove();
+        await flush();
+        expect(query).not.toHaveBeenCalled();
+        expect(source.getAttribute('aria-controls')).toBe('target');
+
+        const container = doc.createElement('section');
+        const duplicate = doc.createElement('span');
+        duplicate.id = 'target';
+        container.append(duplicate);
+        doc.body.append(container);
+        await flush();
+        expect(source.getAttribute('aria-controls')).toBeNull();
+        container.remove();
+        await flush();
+        expect(source.getAttribute('aria-controls')).toBe('target');
+      } finally {
+        query.mockRestore();
+      }
+    } finally {
+      sourceProjector.dispose?.();
+      targetProjector.dispose?.();
+    }
+  });
 
   it.each([false, true])(
     'PUI-549-REVIEW-LIVE-EXPLICIT-ID: preserves an author rewrite, replay before delivery=%s',

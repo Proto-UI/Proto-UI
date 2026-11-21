@@ -121,7 +121,7 @@ export function formatJavaScriptValueType(
   if (typeof type === 'string') return atom(type);
   switch (type.kind) {
     case 'capture':
-      return '{ readonly stateHandles?: Readonly<Record<string, unknown>>; readonly getState?: (name: string) => unknown; readonly getMethod?: (name: string) => unknown; readonly getAsHook?: (name: string) => unknown; readonly getAsHookHandle?: (name: string) => unknown }';
+      return '{ readonly stateHandles?: Readonly<Record<string, unknown>>; readonly getState?: (name: string) => unknown; readonly getMethod?: (name: string) => unknown; readonly getAsHook?: (name: string) => unknown; readonly getAsHookHandle?: (name: string) => unknown; readonly render?: unknown }';
     case 'cell':
       return formatJavaScriptValueType(type.value, atom);
     case 'value-union':
@@ -170,8 +170,12 @@ export function emitJavaScriptMember(
   const type = value.object.type;
   const refinement = type === 'exception' ? '{readonly [key: string]: unknown}' : undefined;
   const object = emit(value.object);
-  if (typeof type !== 'string' && type.kind === 'capture' && value.property === 'stateHandles') {
-    const code = `(${object})${value.optional ? '?.' : ''}["stateHandles"]`;
+  if (
+    typeof type !== 'string' &&
+    type.kind === 'capture' &&
+    (value.property === 'stateHandles' || value.property === 'render')
+  ) {
+    const code = `(${object})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
     return read(
       value,
       typed
@@ -310,12 +314,16 @@ export function emitJavaScriptValue(
     case 'intrinsic': {
       const args = value.arguments.map(emit);
       switch (value.name) {
+        case 'string':
+          return `String(${args.join(', ')})`;
         case 'number.isFinite':
           return `Number.isFinite(${args.join(', ')})`;
         case 'string':
           return `String(${args[0]})`;
         case 'object.freeze':
           return `Object.freeze(${args.join(', ')})`;
+        case 'object.assign':
+          return `Object.assign(${args.join(', ')})`;
         case 'object.hasOwn':
           return `Object.hasOwn(${args.join(', ')})`;
         case 'array.every':

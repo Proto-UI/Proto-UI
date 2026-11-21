@@ -1327,8 +1327,10 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
             : {}),
           ...(id === 'www.search.input-results'
             ? {
-                'Current owner': 'Public `Dialog`, `Command` and `InputShell` composition plus website query/session orchestration',
-                'Proto UI chain': '`P-BASE-INPUT` draft dependency plus public `Dialog`, `Command` and `InputShell`',
+                'Current owner':
+                  'Public `Dialog`, `Command` and `InputShell` composition plus website query/session orchestration',
+                'Proto UI chain':
+                  '`P-BASE-INPUT` draft dependency plus public `Dialog`, `Command` and `InputShell`',
                 Lifecycle: '`P-BASE-INPUT=draft`; native consumer acceptance remains unverified',
                 State: 'blocked',
                 'Dependency and owner': '#1323; owner: website search',
@@ -2873,7 +2875,6 @@ test('restricts Lucide component allowances to the Lucide package family', () =>
 
 test('accepts Lucide package root and subpath imports in reviewed Lucide components', () => {
   const root = createRoot();
-  writeValidMatrices(root);
   for (const [sourcePath, specifier] of [
     ['apps/www/src/components/LucideIconGallery.astro', '@proto.ui/prototypes-lucide'],
     ['apps/www/src/components/StaticLucideIcon.astro', '@proto.ui/prototypes-lucide/check'],
@@ -2882,6 +2883,7 @@ test('accepts Lucide package root and subpath imports in reviewed Lucide compone
     fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
     fs.writeFileSync(absolutePath, ['---', `import icon from '${specifier}';`, '---'].join('\n'));
   }
+  writeValidMatrices(root);
   assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
 });
 
@@ -6995,6 +6997,7 @@ test('accepts reviewed fingerprints embedded in Website source bindings', () => 
       '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
       '| --- | --- | --- |',
       `| \`${sourcePath}\` | \`www.shell.primary-nav\`, \`www.shell.header-separators\` | \`${digest}\` |`,
+      `| \`apps/www/src/components/LucideIconGallery.astro\` | \`www.gallery.lucide-card-grid\`, \`www.gallery.prototype-library-cards\` | \`${sourceScanDigest(root, 'apps/www/src/components/LucideIconGallery.astro')}\` |`,
     ].join('\n'),
   });
   writeMatrix(
@@ -7286,20 +7289,18 @@ test('detects computed Harness addEventListener calls', () => {
 function writeSearchCompositionOwnershipFixture(root, overrides = {}) {
   const searchPath = 'apps/www/src/components/override/Search.astro';
   fs.mkdirSync(path.dirname(path.join(root, searchPath)), { recursive: true });
-  fs.writeFileSync(
-    path.join(root, searchPath),
-    '<div id="search"></div>',
-    'utf8'
-  );
+  fs.writeFileSync(path.join(root, searchPath), '<div id="search"></div>', 'utf8');
   writeValidMatrices(
     root,
     {
       ID: 'www.search.input-results',
       Path: `\`${searchPath}\``,
       'Target class': 'site-composition',
-      'Current owner': 'Public `Dialog`, `Command` and `InputShell` composition plus website query/session orchestration',
+      'Current owner':
+        'Public `Dialog`, `Command` and `InputShell` composition plus website query/session orchestration',
       State: 'blocked',
-      'Proto UI chain': '`P-BASE-INPUT` draft dependency plus public `Dialog`, `Command` and `InputShell`',
+      'Proto UI chain':
+        '`P-BASE-INPUT` draft dependency plus public `Dialog`, `Command` and `InputShell`',
       Lifecycle: '`P-BASE-INPUT=draft`; native consumer acceptance remains unverified',
       'Dependency and owner':
         '[#1323](https://github.com/Proto-UI/Proto-UI/issues/1323); owner: website search',
@@ -7323,7 +7324,10 @@ test('accepts Search composition ownership under the current criterion tracker',
 for (const [criterion, overrides] of [
   ['public composition owner', { 'Current owner': 'Website query engine' }],
   ['Input owner', { 'Proto UI chain': 'P-ACTIVE-BUTTON' }],
-  ['composition evidence', { Evidence: 'Reviewed interaction dependencies `Dialog`, `Command`, `InputShell`' }],
+  [
+    'composition evidence',
+    { Evidence: 'Reviewed interaction dependencies `Dialog`, `Command`, `InputShell`' },
+  ],
   ['blocked state', { State: 'research' }],
   ['current tracker', { 'Dependency and owner': '#420; owner: website search' }],
 ]) {
@@ -17693,7 +17697,15 @@ for (const [source, specifiers] of [
   ['surface-recipes.ts', ['@proto.ui/prototypes-base/surface']],
   [
     'site-shadcn-controls.ts',
-    ['@proto.ui/prototypes-brutalist/button', '@proto.ui/prototypes-brutalist/select'],
+    [
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-bootstrap-2-3-2/button',
+      '@proto.ui/prototypes-bootstrap-2-3-2/select',
+      '@proto.ui/prototypes-shadcn/button',
+      '@proto.ui/prototypes-shadcn/select',
+      '@proto.ui/prototypes-brutalist/button',
+      '@proto.ui/prototypes-brutalist/select',
+    ],
   ],
   [
     'documentation-image-controls.ts',
@@ -17713,14 +17725,18 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    // Search and native-link sources now admit exact reviewed importer bytes rather than a synthetic body.
-    const nativeLinkSource = source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
-    const content =
-      source === 'site-search-commands.ts' || nativeLinkSource
-        ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
-        : source.endsWith('.astro')
-          ? `<script>${code}</script>`
-          : code;
+    // Source-bound allowances require the exact reviewed importer, not a synthetic body.
+    const nativeLinkSource =
+      source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
+    const sourceBound =
+      source === 'site-search-commands.ts' ||
+      nativeLinkSource ||
+      source === 'site-shadcn-controls.ts';
+    const content = sourceBound
+      ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
+      : source.endsWith('.astro')
+        ? `<script>${code}</script>`
+        : code;
     for (const file of [relative, copy]) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
@@ -17733,7 +17749,7 @@ for (const [source, specifiers] of [
       );
       assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copy}\``), message);
     }
-    if (nativeLinkSource) {
+    if (sourceBound) {
       fs.writeFileSync(path.join(root, relative), `${content}\n// Unreviewed importer bytes.\n`);
       const changed = validationMessage(root);
       for (const specifier of specifiers) {
@@ -18713,8 +18729,8 @@ for (const relative of [
     fs.writeFileSync(target, exact);
     writeSelfHostedPromotion(root, revision, { websiteBindings });
     assert.ok(
-      collectCoverageMatrixIssues({ rootDir: root, ...promotionOptions(revision) }).some(
-        (issue) => issue.includes(`promoted dependency \`${relative}\` differs from evidence Commit`)
+      collectCoverageMatrixIssues({ rootDir: root, ...promotionOptions(revision) }).some((issue) =>
+        issue.includes(`promoted dependency \`${relative}\` differs from evidence Commit`)
       )
     );
   });
@@ -19128,7 +19144,9 @@ test('Homepage gallery glyph imports require the reviewed file and bytes', () =>
   const foreign = 'apps/www/src/components/copied-homepage-gallery-icons.ts';
   const exact = collectCoverageMatrixIssues({ rootDir: root });
   assert.ok(
-    !exact.some((issue) => issue.includes(`in \`${relative}\` escapes the website consumer-wall allowlist`))
+    !exact.some((issue) =>
+      issue.includes(`in \`${relative}\` escapes the website consumer-wall allowlist`)
+    )
   );
   fs.writeFileSync(path.join(root, foreign), reviewed);
   assert.ok(validationMessage(root).includes(rawImport(bell, foreign)));
@@ -19294,7 +19312,6 @@ for (const [relative, specifier] of [
   });
 }
 
-
 for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
   test(`virtual-list demo import boundary: ${family} exact bytes, foreign importer and adjacent imports`, () => {
     const root = createRoot();
@@ -19303,9 +19320,14 @@ for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-
     const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url));
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, reviewed);
-    writeValidMatrices(root, {}, {}, {
-      websiteBindings: [[relative, ['www.demo.authored-controllers']]],
-    });
+    writeValidMatrices(
+      root,
+      {},
+      {},
+      {
+        websiteBindings: [[relative, ['www.demo.authored-controllers']]],
+      }
+    );
     const allowed = [
       '@proto.ui/prototypes-base/virtual-list/web',
       '@proto.ui/prototypes-base/virtual-list',
@@ -19406,7 +19428,10 @@ for (const scenario of [
       if (scenario === 'changed-importer') fs.appendFileSync(target, '\n// changed importer');
     }
     if (scenario !== 'missing-companion') {
-      fs.copyFileSync(new URL(`../../../${companion}`, import.meta.url), path.join(root, companion));
+      fs.copyFileSync(
+        new URL(`../../../${companion}`, import.meta.url),
+        path.join(root, companion)
+      );
     }
     if (scenario === 'changed-companion') {
       fs.appendFileSync(path.join(root, companion), '\n// changed companion');
