@@ -1131,7 +1131,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         if (!keys.length || keys.some(key => typeof key !== 'string' || !key.length)) throw new Error('[Props] raw watchers require nonempty keys.');
         const watcher: ${p}RawWatcher = { keys: [...keys], callback, active: true };
         rawWatchers.push(watcher);
-        return () => { watcher.active = false; };
+        return () => { ensurePhase('setup'); watcher.active = false; };
       },
       watchRawAll(callback: ${p}RawWatcher['callback']) {
         ensurePhase('setup');
@@ -1212,7 +1212,7 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
       propsWindow = { raw: nextRawSnapshot, resolved: nextResolved };
       try {
       if (rawAllWatchers.length || rawWatchers.length) {
-        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(nextRawSnapshot, key) || !Object.is(previousRaw[key], nextRawSnapshot[key]));
+        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => !Object.is(previousRaw[key], nextRawSnapshot[key]));
         if (changedRaw.length) for (let groupIndex = 0; groupIndex < 2; ++groupIndex) for (const watcher of groupIndex === 0 ? rawAllWatchers : rawWatchers) {
           if (!watcher.active) continue;
           const changedKeysMatched = watcher.keys ? watcher.keys.filter(key => changedRaw.includes(key)) : changedRaw;
