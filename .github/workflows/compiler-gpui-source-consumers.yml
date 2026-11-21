@@ -44,7 +44,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential clang cmake pkg-config libasound2-dev libfontconfig1-dev libssl-dev libudev-dev libvulkan-dev libwayland-dev libxcb1-dev libxcb-composite0-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libxkbcommon-x11-dev
+          sudo apt-get install -y build-essential clang cmake ninja-build pkg-config python3 libasound2-dev libfontconfig1-dev libfreetype6-dev libssl-dev libudev-dev libvulkan-dev libwayland-dev libx11-xcb-dev libxcb1-dev libxcb-composite0-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
       - uses: actions/cache@v4
         with:
           path: |
@@ -68,6 +68,66 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
+      - name: Check generated workspace consumer against retained Verdant GPUI
+        shell: bash
+        env:
+          WORKSPACE_GPUI_REVISION: e5f2f9db75e97613232b5c1946333e61fa3828ab
+        run: |
+          set -euo pipefail
+          export GPUI_WORKSPACE="$RUNNER_TEMP/gpui-evidence/workspace"
+          trap 'status=$?; printf "%s\n" "$status" > "$RUNNER_TEMP/gpui-evidence/workspace-step-exit.txt"' EXIT
+
+          node --import tsx packages/compiler/test/fixtures/gpui-ordinary-values/produce-workspace.mjs \
+            "$GPUI_WORKSPACE" "$WORKSPACE_GPUI_REVISION" \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/workspace-producer.log"
+
+          # Configure the embedding host; preserve all emitted component/SDK bytes.
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile, writeFile } from 'node:fs/promises';
+          const manifest = `${process.env.GPUI_WORKSPACE}/Cargo.toml`;
+          const text = await readFile(manifest, 'utf8');
+          const original = 'git = "https://github.com/zed-industries/zed"';
+          assert.equal(text.split(original).length, 2);
+          await writeFile(manifest, text.replace(
+            original, 'git = "https://github.com/cyjin-yl/z3rm"'
+          ));
+          NODE
+
+          # Resolve this fresh workspace and retain the resulting Cargo.lock.
+          cargo +1.98.1 metadata --format-version 1 \
+            --manifest-path "$GPUI_WORKSPACE/Cargo.toml" \
+            > "$RUNNER_TEMP/gpui-evidence/workspace-metadata.json" \
+            2> "$RUNNER_TEMP/gpui-evidence/workspace-resolution.log"
+
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile, writeFile } from 'node:fs/promises';
+          const directory = `${process.env.RUNNER_TEMP}/gpui-evidence`;
+          const metadata = JSON.parse(
+            await readFile(`${directory}/workspace-metadata.json`, 'utf8')
+          );
+          const gpui = metadata.packages.filter(pkg => pkg.name === 'gpui');
+          assert.equal(gpui.length, 1, 'Expected one shared resolved GPUI package');
+          const revision = process.env.WORKSPACE_GPUI_REVISION;
+          assert.equal(gpui[0].source,
+            `git+https://github.com/cyjin-yl/z3rm?rev=${revision}#${revision}`);
+          await writeFile(`${directory}/workspace-gpui-resolution.json`,
+            JSON.stringify(gpui, null, 2) + '\n');
+          NODE
+
+          set +e
+          cargo +1.98.1 check --locked \
+            --manifest-path "$GPUI_WORKSPACE/Cargo.toml" --lib \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/workspace-check.log"
+          statuses=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${statuses[0]}" \
+            > "$RUNNER_TEMP/gpui-evidence/workspace-cargo-exit.txt"
+          if (( statuses[0] != 0 )); then
+            exit "${statuses[0]}"
+          fi
+          exit "${statuses[1]}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

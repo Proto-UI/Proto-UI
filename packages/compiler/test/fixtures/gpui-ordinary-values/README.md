@@ -82,7 +82,9 @@ attachment, local samples, movement outside the initial bounds, modifiers, relea
 before a downstream child's stopped bubble, restart after cancellation, detach,
 disposal, cross-window isolation and loss of ownership. Run the complete consumer
 command above; these are framework dispatch checks, not OS-device certification.
-No new Cargo feature or dependency is required on the published pin.
+No new Cargo feature is required on the published pin. A workspace-selected modern
+GPUI revision uses the existing `gpui-modern-element-api` SDK feature for its element
+ABI; this move module introduces no additional ABI feature or dependency.
 
 The pinned published GPUI revision lacks `Window::resolve_focus_entry`, `focus_tree_generation` and `observe_focus_tree`. Default compilation rejects physical FocusEntry operations and Scope's `entryFallback: 'entry'` with a specific diagnostic. Manual SDK entry points also reject them. Ordinary focus, logical scope navigation and roving do not need those APIs and are exercised here. The disabled `experimental-focus-tree` feature preserves research source for a separately verified local upstream patch; enabling it against the pinned published dependency is not supported.
 
