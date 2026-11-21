@@ -18,6 +18,7 @@ function fixture(
 ) {
   const shaderSources: string[] = [],
     writes = new Map<string, unknown>();
+  const programWrites = new Map<unknown, Map<string, unknown>>();
   const programs: { attribute: number }[] = [];
   let currentProgram: (typeof programs)[number] | null = null;
   const gl: any = {
@@ -88,6 +89,8 @@ function fixture(
     gl[name] = vi.fn((location: { program: unknown; name: string }, value: unknown) => {
       expect(location.program).toBe(currentProgram);
       writes.set(location.name, value);
+      if (!programWrites.has(location.program)) programWrites.set(location.program, new Map());
+      programWrites.get(location.program)!.set(location.name, value);
     });
   const canvas = document.createElement('canvas');
   vi.spyOn(canvas, 'getContext').mockReturnValue(gl);
@@ -114,7 +117,7 @@ function fixture(
     fill: [1, 1, 1, 1] as const,
     foreground: [0, 0, 0, 1] as const,
   };
-  return { program, frame, writes, shaderSources, gl, canvas, programs };
+  return { program, frame, writes, programWrites, shaderSources, gl, canvas, programs };
 }
 describe('fixed V2 optical ABI (spy, no GPU execution claim)', () => {
   it('uses the unmodified shader modules and the established regular rest/press mapping', () => {
@@ -1576,6 +1579,143 @@ function profiles(frame: OpticalFrame): OpticalFrame[] {
     { ...frame, contact, tint: 'style-fill' },
   ];
 }
+
+const fixedUniforms = {
+  u_tex: 0,
+  u_specular: 1,
+  u_revealType: 0,
+  u_stack: 1,
+  u_shadow: 2,
+  u_bevelWidth: 0.22,
+  u_frost: 0,
+  u_time: 0,
+  u_revealProgress: 1,
+  u_tiltX: 0,
+  u_tiltY: 0,
+  u_stackMapping: [0, 0, 0, 0],
+  u_stackRegion: [0, 0, 0, 0],
+  u_shadowMapping: [0, 0, 0, 0],
+};
+function expectFixedUniforms(f: ReturnType<typeof fixture>, program: unknown) {
+  const calls: Array<[{ program: unknown; name: string }, unknown]> = [
+    'uniform1i',
+    'uniform1f',
+    'uniform4fv',
+  ].flatMap((method) =>
+    f.gl[method].mock.calls.filter(
+      ([location]: [{ program: unknown; name: string }]) =>
+        location.program === program && Object.hasOwn(fixedUniforms, location.name)
+    )
+  );
+  expect(calls).toHaveLength(14);
+  expect(Object.fromEntries(calls.map(([location, value]) => [location.name, value]))).toEqual(
+    fixedUniforms
+  );
+}
+
+describe('fixed per-program uniform lifetime (GL state spy, not GPU evidence)', () => {
+  it.each(['cpu', 'gpu'] as const)(
+    'initializes fixed uniforms once per linked profile with the %s preparation path',
+    (backend) => {
+      const f = fixture(
+        null,
+        backend === 'gpu'
+          ? () => ({
+              filter: () => ({ texture: {} as WebGLTexture, release() {} }),
+              dispose() {},
+            })
+          : null
+      );
+      f.gl.drawArrays.mockImplementation(() => {
+        const program = f.gl.useProgram.mock.calls.at(-1)[0];
+        // All constants must already belong to the drawing program, including
+        // its first draw and an interleave after another profile was current.
+        expect(Object.fromEntries(f.programWrites.get(program)!)).toMatchObject(fixedUniforms);
+      });
+      try {
+        for (let cycle = 0; cycle < 2; cycle++) {
+          const source = {
+            ...f.frame.source,
+            revision: 1 + cycle,
+            width: 4 + cycle,
+            pixels: new Uint8Array((4 + cycle) * 4 * 4).fill(255),
+          };
+          for (const [index, profile] of profiles(f.frame).entries()) {
+            const frame: OpticalFrame = {
+              ...profile,
+              source,
+              geometry: { ...profile.geometry, width: 2 + cycle },
+              pressed: cycle === 1,
+              contact: profile.contact ? { ...profile.contact, strength: cycle } : undefined,
+              fill: cycle ? [0.9, 0.9, 0.9, 1] : f.frame.fill,
+            };
+            f.program.render(frame);
+            const program = f.programs[index],
+              values = f.programWrites.get(program)!;
+            expectFixedUniforms(f, program);
+            expect(values.get('u_resolution')).toEqual([2 + cycle, 2]);
+            expect(values.get('u_textureResolution')).toEqual([4 + cycle, 4]);
+            expect(values.get('u_boxSize')).toEqual([2 + cycle, 2]);
+            expect(values.get('u_refraction')).toBe(cycle ? 0.018 : 0.008);
+            expect(values.get('u_contactShape')).toBe(profile.contact ? cycle : 0);
+            expect(values.get('u_tint')).toEqual(
+              profile.tint ? frame.fill : [1.05, 1.05, 1.06, 0.45]
+            );
+            if (profile.tint)
+              expect(values.get('u_styleTintLuminanceBound')).toBe(
+                styleTintEnvelope(frame.fill, frame.foreground).luminanceBound
+              );
+          }
+        }
+        expect(f.program.inspect()).toMatchObject({
+          renders: 8,
+          programBuilds: 4,
+          cpuSourcePreparations: backend === 'cpu' ? 2 : 0,
+          gpuSourcePreparations: backend === 'gpu' ? 2 : 0,
+        });
+      } finally {
+        f.program.dispose();
+      }
+    }
+  );
+
+  it.each(['clear', 'draw-error', 'readback-error', 'context-loss', 'link-error'] as const)(
+    'reinitializes fixed uniforms after %s retires the linked programs',
+    (reason) => {
+      const f = fixture();
+      try {
+        for (const frame of profiles(f.frame)) f.program.render(frame);
+        if (reason === 'clear') f.program.clear();
+        else if (reason === 'context-loss') {
+          f.gl.isContextLost.mockReturnValue(true);
+          expect(() => f.program.render(f.frame)).toThrow('webgl-unavailable');
+          f.gl.isContextLost.mockReturnValue(false);
+        } else if (reason === 'link-error') {
+          f.program.clear();
+          f.gl.getProgramParameter = () => false;
+          expect(() => f.program.render(f.frame)).toThrow('program-link');
+          f.gl.getProgramParameter = () => true;
+        } else {
+          f.gl.getError = vi.fn().mockReturnValueOnce(reason === 'draw-error' ? 1282 : 0);
+          if (reason === 'readback-error') f.gl.getError.mockReturnValueOnce(1282);
+          f.gl.getError.mockReturnValue(0);
+          expect(() => f.program.render(f.frame)).toThrow(
+            reason === 'draw-error' ? 'gpu-frame-failed' : 'gpu-readback-failed'
+          );
+        }
+        const rebuiltStart = f.programs.length;
+        for (let cycle = 0; cycle < 2; cycle++)
+          for (const [index, frame] of profiles(f.frame).entries()) {
+            f.program.render({ ...frame, pressed: cycle === 1 });
+            expectFixedUniforms(f, f.programs[rebuiltStart + index]);
+          }
+        expect(f.programs).toHaveLength(rebuiltStart + 4);
+      } finally {
+        f.program.dispose();
+      }
+    }
+  );
+});
 
 describe('bounded shared optical pipelines (GL state spy, not GPU evidence)', () => {
   it('interleaves all four profiles without recompiling, reuploading or mixing program state', () => {

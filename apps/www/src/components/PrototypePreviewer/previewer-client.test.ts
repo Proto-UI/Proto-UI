@@ -58,16 +58,20 @@ vi.mock('./demo-renderer', () => ({ renderDemo: demoSpies.render }));
 vi.mock('./runtimes/host-mount', () => ({
   releaseHostMount: (host: HTMLElement) => hostMountSpies.release(host),
 }));
-vi.mock('../site-shadcn-controls', () => ({
-  initSiteShadcnControls: () => {},
-  selectValue: (root: HTMLElement) => root.dataset.value ?? '',
-  setSelectValue: (root: HTMLElement, value: string) => {
-    root.dataset.value = value;
-  },
-  setSiteSelectDisabled: (root: HTMLElement, disabled: boolean) => {
-    root.dataset.disabled = String(disabled);
-  },
-}));
+vi.mock('../site-shadcn-controls', async (original) => {
+  const current = await original<typeof import('../site-shadcn-controls')>();
+  return {
+    ...current,
+    initSiteShadcnControls: () => {},
+    selectValue: (root: HTMLElement) => root.dataset.value ?? '',
+    setSelectValue: (root: HTMLElement, value: string) => {
+      root.dataset.value = value;
+    },
+    setSiteSelectDisabled: (root: HTMLElement, disabled: boolean) => {
+      root.dataset.disabled = String(disabled);
+    },
+  };
+});
 
 import { initPreviewer } from './previewer-client';
 import { initAdapterSelects } from '../adapter-preference';
