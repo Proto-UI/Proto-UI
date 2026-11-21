@@ -151,6 +151,21 @@ jobs:
             "$RUNNER_TEMP/liquid-frame-budget/program-clear" \
             "$GITHUB_WORKSPACE/regression-source" \
             2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/program-clear.log"
+      - name: Verify candidate release lifecycle and existing material guards
+        working-directory: candidate
+        timeout-minutes: 8
+        env:
+          PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-frame-budget/candidate-release
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_MATERIAL_EVIDENCE_DIR"
+          timeout --signal=TERM --kill-after=20s 7m \
+            corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts \
+            --testNamePattern 'V2 optical paint through four real Web Adapter runtimes|bounded release lifecycle' \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile.json="$PROTO_UI_MATERIAL_EVIDENCE_DIR/vitest.json" \
+            2>&1 | tee "$PROTO_UI_MATERIAL_EVIDENCE_DIR/browser.log"
       - name: Retain comparison and propagate evidence failures
         if: always()
         working-directory: candidate

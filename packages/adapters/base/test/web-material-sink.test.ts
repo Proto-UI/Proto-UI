@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import { createWebMaterialSink } from '../src/material/sink';
 import type { CanvasBackdropFrame, CanvasBackdropLease } from '../src/material/source';
+import type { OpticalFrame } from '../src/material/program';
 import { inspectWebOpticalResources } from '../src/material/program-pool';
 const optical = vi.hoisted(() => ({
   render: vi.fn((_frame: unknown) => 'data:image/png;base64,AA=='),
@@ -531,7 +532,15 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
     const writer = createWebPointerContactWriter(f.host);
     const send = (
       x: number,
-      reason: 'down' | 'move' | 'up' | 'cancel' | 'lostcapture' | 'blur' = 'move',
+      reason:
+        | 'down'
+        | 'move'
+        | 'up'
+        | 'cancel'
+        | 'lostcapture'
+        | 'blur'
+        | 'replaced'
+        | 'unmount' = 'move',
       session = 1
     ) =>
       writer.publish({
@@ -545,6 +554,267 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
       });
     return { ...f, frame, send, flushFrame };
   }
+  describe('finite release footprint', () => {
+    function releaseFixture(releasedAt = 100) {
+      let now = releasedAt;
+      vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+      const f = setup('rest');
+      const latest = () => optical.render.mock.calls.at(-1)![0] as OpticalFrame;
+      expect(latest()).toMatchObject({ geometry: { paintOutset: 9 }, contact: { strength: 0 } });
+      f.send(0.8, 'down');
+      f.flushFrame();
+      expect(latest()).toMatchObject({ geometry: { paintOutset: 9 }, contact: { strength: 1 } });
+      const heldRenders = optical.render.mock.calls.length;
+      f.send(0.8, 'up');
+      f.flushFrame();
+      return {
+        ...f,
+        latest,
+        heldRenders,
+        advance(elapsed: number) {
+          now = releasedAt + elapsed;
+          f.flushFrame();
+        },
+      };
+    }
+    it.each([0, 1_000_000])(
+      'keeps the profile footprint while release motion settles at 240 ms from clock %s',
+      (releasedAt) => {
+        const f = releaseFixture(releasedAt);
+        try {
+          expect(f.latest()).toMatchObject({
+            geometry: { paintOutset: 9 },
+            contact: { strength: 1 },
+          });
+          expect(optical.render).toHaveBeenCalledTimes(f.heldRenders);
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+          let previousStrength = 1;
+          for (const elapsed of [80, 239.5]) {
+            f.advance(elapsed);
+            expect(f.latest().contact!.strength).toBeGreaterThan(0);
+            expect(f.latest().contact!.strength).toBeLessThan(previousStrength);
+            previousStrength = f.latest().contact!.strength;
+            expect(f.latest().geometry.paintOutset).toBe(9);
+            expect(f.host.dataset.materialContact).toBe('release');
+          }
+          f.advance(240);
+          expect(f.latest()).toMatchObject({
+            geometry: { paintOutset: 9 },
+            contact: { strength: 0 },
+          });
+          expect(f.host.dataset.materialContact).toBe('rest');
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+          const renders = optical.render.mock.calls.length;
+          f.advance(1_000);
+          expect(optical.render).toHaveBeenCalledTimes(renders);
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+    it.each(['cancel', 'lostcapture', 'blur', 'replaced', 'unmount'] as const)(
+      'withdraws release motion on %s and rejects a late up from that session',
+      (reason) => {
+        const f = releaseFixture();
+        try {
+          f.advance(80);
+          expect(f.latest().contact!.strength).toBeGreaterThan(0);
+          f.send(0.8, reason);
+          expect(f.latest()).toMatchObject({
+            geometry: { paintOutset: 9 },
+            contact: { strength: 0 },
+          });
+          expect(f.host.dataset.materialContact).toBe('rest');
+          f.send(0.8, 'up');
+          f.advance(90);
+          expect(f.latest()).toMatchObject({
+            geometry: { paintOutset: 9 },
+            contact: { strength: 0 },
+          });
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+    it('uses the replacement session release deadline without inheriting the old completion', () => {
+      const f = releaseFixture();
+      try {
+        f.advance(80);
+        f.send(0.2, 'down', 2);
+        f.flushFrame();
+        expect(f.latest()).toMatchObject({
+          geometry: { paintOutset: 9 },
+          contact: { x: 0.2, strength: 1 },
+        });
+        f.advance(100);
+        f.send(0.2, 'up', 2);
+        f.flushFrame();
+        f.advance(240);
+        expect(f.latest().contact!.strength).toBeGreaterThan(0);
+        expect(f.latest().geometry.paintOutset).toBe(9);
+        expect(f.host.dataset.materialContactSession).toBe('2');
+        f.advance(340);
+        expect(f.latest()).toMatchObject({
+          geometry: { paintOutset: 9 },
+          contact: { strength: 0 },
+        });
+        expect(f.host.dataset.materialContact).toBe('rest');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it.each(['source', 'preference', 'view'] as const)(
+      'retires release motion on %s invalidation without revival by queued work',
+      (invalidation) => {
+        const f = releaseFixture();
+        try {
+          f.advance(80);
+          expect(f.latest().contact!.strength).toBeGreaterThan(0);
+          if (invalidation === 'source') {
+            f.source(false);
+            expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+            f.source(true, 3);
+          } else if (invalidation === 'preference') {
+            f.motion('reduce');
+            f.motion('no-preference');
+          } else {
+            f.sink.release(1);
+            expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+            expect(f.sourceListeners.size).toBe(0);
+            expect(f.preferenceListeners.size).toBe(0);
+          }
+          const renders = optical.render.mock.calls.length;
+          f.advance(90);
+          if (invalidation === 'view') {
+            expect(optical.render).toHaveBeenCalledTimes(renders);
+            expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('');
+            expect(f.host.dataset.materialContact).toBeUndefined();
+          } else {
+            expect(f.latest()).toMatchObject({
+              geometry: { paintOutset: 9 },
+              contact: { strength: 0 },
+            });
+            expect(f.host.dataset.materialContact).toBe('rest');
+            expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+          }
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+    it('continues release after the same-clock held frame finishes its existing decode', () => {
+      let now = 0;
+      vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+      const f = setup('rest');
+      const completions: Array<() => void> = [];
+      decoding.prepare.mockImplementation((_doc, _source, ready) => {
+        completions.push(ready);
+        return () => {};
+      });
+      optical.render.mockClear();
+      try {
+        f.send(0.8, 'down');
+        f.flushFrame();
+        f.send(0.8, 'up');
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledOnce();
+        expect(completions).toHaveLength(1);
+        expect(f.host.dataset.materialContact).toBe('rest');
+        const scheduled = vi.mocked(window.requestAnimationFrame).mock.calls.length;
+        now = 80;
+        f.flushFrame();
+        expect(window.requestAnimationFrame).toHaveBeenCalledTimes(scheduled);
+        completions.shift()!();
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledTimes(2);
+        const released = optical.render.mock.calls.at(-1)![0] as OpticalFrame;
+        expect(released.geometry.paintOutset).toBe(9);
+        expect(released.contact!.strength).toBeGreaterThan(0);
+        expect(released.contact!.strength).toBeLessThan(1);
+        completions.shift()!();
+        expect(f.host.dataset.materialContact).toBe('release');
+        now = 240;
+        f.flushFrame();
+        expect(optical.render.mock.calls.at(-1)![0]).toMatchObject({
+          geometry: { paintOutset: 9 },
+          contact: { strength: 0 },
+        });
+        completions.shift()!();
+        expect(f.host.dataset.materialContact).toBe('rest');
+        const renders = optical.render.mock.calls.length;
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledTimes(renders);
+        expect(completions).toHaveLength(0);
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it('cancels a queued same-clock continuation before a stale held decode completes', () => {
+      let now = 0;
+      vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+      const f = setup('rest');
+      const neutral = f.host.style.getPropertyValue('--pui-material-image');
+      const completions: Array<() => void> = [];
+      decoding.prepare.mockImplementation((_doc, _source, ready) => {
+        completions.push(ready);
+        return () => {};
+      });
+      try {
+        f.send(0.8, 'down');
+        f.flushFrame();
+        expect(f.host.dataset.materialContact).toBe('rest');
+        expect(completions).toHaveLength(1);
+        f.send(0.8, 'up');
+        f.flushFrame();
+        const obsoleteHeld = completions.shift()!;
+        now = 80;
+        f.send(0.8, 'cancel');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(neutral);
+        obsoleteHeld();
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(neutral);
+        expect(f.host.dataset.materialContact).toBe('rest');
+        completions.shift()!();
+        const renders = optical.render.mock.calls.length;
+        f.flushFrame();
+        f.flushFrame();
+        expect(optical.render).toHaveBeenCalledTimes(renders);
+        expect(f.host.dataset.materialContact).toBe('rest');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it.each(['clipping', 'overlap'] as const)(
+      'rechecks expanded-source %s during the release tail',
+      (obstruction) => {
+        const f = releaseFixture();
+        try {
+          f.advance(80);
+          expect(f.latest().contact!.strength).toBeGreaterThan(0);
+          if (obstruction === 'clipping') f.host.style.overflow = 'hidden';
+          else {
+            const sibling = document.createElement('div');
+            sibling.style.backgroundColor = 'black';
+            f.sourceFrame()!.scope.append(sibling);
+            // Outside the 40..140 layout box, inside its 31..149 paint box.
+            vi.spyOn(sibling, 'getBoundingClientRect').mockReturnValue(rect(143, 30, 3, 40));
+          }
+          optical.render.mockClear();
+          f.invalidate();
+          expect(optical.render).not.toHaveBeenCalled();
+          expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+          expect(f.host.dataset.materialReason).toBe(
+            obstruction === 'clipping'
+              ? 'source-expanded-paint-clipped'
+              : 'source-overlapping-content'
+          );
+          expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+  });
   describe('fresh-press microtask', () => {
     it('renders the newest same-turn session before RAF and still waits for normal decode', async () => {
       const f = setup('rest');

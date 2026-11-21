@@ -4,6 +4,7 @@ import { BRUTALIST_THEME } from '../../../../../packages/prototypes/brutalist/sr
 import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src/text/typography';
 import {
   applyProjectionThemeSurfaceStyle,
+  clearProjectionThemeSurfaceStyle,
   resolveProjectionThemeSurfaceStyle,
   scheduleProjectionThemeRead,
   watchProjectionThemeSurfaceStyle,
@@ -291,6 +292,102 @@ describe('Website projection theme inputs', () => {
     });
     expect(surface.style.getPropertyValue('--pui-background')).toBe('#090909');
     expect(surface.style.getPropertyValue('--pui-foreground')).toBe('');
+  });
+
+  describe('preserved inline theme stamps', () => {
+    it.each(['#aabbcc', '#111'])(
+      'keeps an existing author tuple %s even when it matches the theme',
+      (foreground) => {
+        const surface = document.createElement('div');
+        const priority = foreground === '#111' ? '' : 'important';
+        surface.style.setProperty('--pui-foreground', foreground, priority);
+        surface.style.color = 'red';
+        applyProjectionThemeSurfaceStyle(
+          surface,
+          {
+            '--pui-foreground': '#111',
+            '--pui-background': '#fff',
+          },
+          'preserve-inline'
+        );
+        expect(surface.style.getPropertyValue('--pui-foreground')).toBe(foreground);
+        expect(surface.style.getPropertyPriority('--pui-foreground')).toBe(priority);
+        expect(surface.style.getPropertyValue('--pui-background')).toBe('#fff');
+        clearProjectionThemeSurfaceStyle(surface);
+        clearProjectionThemeSurfaceStyle(surface);
+        expect(surface.style.getPropertyValue('--pui-foreground')).toBe(foreground);
+        expect(surface.style.getPropertyPriority('--pui-foreground')).toBe(priority);
+        expect(surface.style.getPropertyValue('--pui-background')).toBe('');
+        expect(surface.style.color).toBe('red');
+      }
+    );
+
+    it.each(
+      (['value', 'priority', 'removal'] as const).flatMap((takeover) =>
+        [false, true].map((refresh) => ({ takeover, refresh }))
+      )
+    )(
+      'leaves a stamped property after author $takeover takeover (refresh=$refresh)',
+      ({ takeover, refresh }) => {
+        const surface = document.createElement('div');
+        applyProjectionThemeSurfaceStyle(
+          surface,
+          { '--pui-background': '#fff' },
+          'preserve-inline'
+        );
+        if (takeover === 'value') surface.style.setProperty('--pui-background', '#abc');
+        else if (takeover === 'priority')
+          surface.style.setProperty('--pui-background', '#fff', 'important');
+        else surface.style.removeProperty('--pui-background');
+        const authored = [
+          surface.style.getPropertyValue('--pui-background'),
+          surface.style.getPropertyPriority('--pui-background'),
+        ];
+        if (refresh)
+          applyProjectionThemeSurfaceStyle(
+            surface,
+            { '--pui-background': '#090909' },
+            'preserve-inline'
+          );
+        expect([
+          surface.style.getPropertyValue('--pui-background'),
+          surface.style.getPropertyPriority('--pui-background'),
+        ]).toEqual(authored);
+        clearProjectionThemeSurfaceStyle(surface);
+        expect([
+          surface.style.getPropertyValue('--pui-background'),
+          surface.style.getPropertyPriority('--pui-background'),
+        ]).toEqual(authored);
+      }
+    );
+
+    it('updates and retires only its explicitly written missing properties', () => {
+      const surface = document.createElement('div');
+      surface.style.setProperty('--pui-foreground', '#aabbcc');
+      applyProjectionThemeSurfaceStyle(
+        surface,
+        {
+          '--pui-foreground': '#111',
+          '--pui-background': '#fff',
+          '--pui-border': '#ccc',
+        },
+        'preserve-inline'
+      );
+      applyProjectionThemeSurfaceStyle(
+        surface,
+        {
+          '--pui-foreground': '#eee',
+          '--pui-background': '#090909',
+        },
+        'preserve-inline'
+      );
+      expect(surface.style.getPropertyValue('--pui-foreground')).toBe('#aabbcc');
+      expect(surface.style.getPropertyValue('--pui-background')).toBe('#090909');
+      expect(surface.style.getPropertyValue('--pui-border')).toBe('');
+      clearProjectionThemeSurfaceStyle(surface);
+      expect(surface.style.getPropertyValue('--pui-foreground')).toBe('#aabbcc');
+      expect(surface.style.getPropertyValue('--pui-background')).toBe('');
+    });
   });
 
   it('watches color-mode changes without self-looping and returns idempotent cleanup', async () => {

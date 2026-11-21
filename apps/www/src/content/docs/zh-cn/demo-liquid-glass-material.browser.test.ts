@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, BrowserContext, CDPSession, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -506,6 +506,1480 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
         baseActivation: true,
       });
     }
+  }, 150000);
+
+  it('preserves authored theme tokens through a real WC portal and native observer cleanup', async () => {
+    if (!evidence)
+      throw new Error('Theme ownership artifacts require PROTO_UI_MATERIAL_EVIDENCE_DIR');
+    const directory = path.join(evidence, 'theme-ownership');
+    await mkdir(directory, { recursive: true });
+    const files = [
+      'pnpm-lock.yaml',
+      'apps/www/src/components/PrototypePreviewer/projection-composition.ts',
+      'apps/www/src/components/PrototypePreviewer/projection-theme.ts',
+      'apps/www/src/components/PrototypePreviewer/projection-families.ts',
+      'apps/www/src/components/PrototypePreviewer/demo-renderer.ts',
+      'apps/www/src/components/PrototypePreviewer/demo-types.ts',
+      'apps/www/src/components/PrototypePreviewer/prototype-modules.ts',
+      'apps/www/src/components/PrototypePreviewer/wc-registry.ts',
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      'apps/www/src/content/docs/demo-liquid-glass-dropdown-menu.demo.ts',
+      'packages/prototypes/liquid-glass/src/dropdown/content.proto.ts',
+      'packages/prototypes/liquid-glass/src/theme.ts',
+      'packages/prototypes/base/src/dropdown/content.proto.ts',
+      'packages/adapters/web-component/src/adapt.ts',
+      'packages/adapters/web-component/src/props.ts',
+      'packages/adapters/web-component/src/shadow-profile.ts',
+      'packages/adapters/web-component/src/portal-mount.ts',
+      'packages/adapters/web-component/src/runtime/modules.ts',
+      'packages/adapters/base/src/material/sink.ts',
+      'apps/www/src/pages/en/test/liquid-glass-material.astro',
+      'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+      'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
+      '.github/workflows/liquid-glass-frame-budget.yml',
+    ];
+    const identity = async () => ({
+      head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+      tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim(),
+      status: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(),
+      selectedSourceHashes: Object.fromEntries(
+        await Promise.all(
+          files.map(async (file) => [
+            file,
+            createHash('sha256')
+              .update(await readFile(file))
+              .digest('hex'),
+          ])
+        )
+      ),
+    });
+    const report: Record<string, any> = {
+      schemaVersion: 1,
+      scope:
+        'Candidate-only WC projection theme ownership; not a latency sample or cross-adapter portal certification.',
+      inputBoundary:
+        'Real Playwright pointer clicks and Escape key. Theme changes and the distinct CSS value/priority overwrite are explicit programmatic consumer inputs; no synthetic pointer/key event, manual reparent, forced stamp or observer delivery.',
+      ownershipLimit:
+        'A different value or priority is observable. An external write of the same value and priority is indistinguishable and is not claimed here.',
+      physicalLifetime:
+        'The default non-split WC Dropdown uses its persistent Custom Element as the presentation target. Its real portal unmount invokes revoke with restoreToOrigin=true and restores that same element at its retained origin marker. This does not require other adapters to retain a physical node.',
+      opticalBoundary:
+        'The authored foreground can legitimately reject optical admission. Material quality/reason/source and document resource observations are retained; optical success and document-wide zero resources are not this ownership oracle.',
+      cleanupOwnership:
+        'The Website caller explicitly stops its theme watcher before rendered.destroy. Only the latter owns the composition marker observer and supplementary stamps. Harness host removal occurs after product cleanup assertions.',
+      nativeObserverObservation:
+        'A temporary wrapper of the real MutationObserver.prototype.disconnect records the actual caller stack and disposal phase, preserving native this/arguments/return/exception. It does not replace observers or callbacks, consume mutation records, or make this a timing measurement.',
+      sharedObserverBoundary:
+        'The marker observer is Document-shared. Physical disconnect is expected here only because a freshly navigated standalone material fixture has no existing projection composition and this case creates exactly one. A remaining registration in a multi-scope document need not disconnect its shared observer.',
+      checkpoints: [],
+      failures: [],
+      console: [],
+      pageErrors: [],
+      sourceAtStart: await identity(),
+    };
+    const failure = (stage: string, error: unknown) =>
+      report.failures.push({
+        stage,
+        name: error instanceof Error ? error.name : typeof error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    const onConsole = (message: any) =>
+      report.console.push({
+        type: message.type(),
+        text: message.text(),
+        location: message.location(),
+      });
+    const onError = (error: Error) =>
+      report.pageErrors.push({
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    page.on('console', onConsole);
+    page.on('pageerror', onError);
+    let fixture: import('playwright-core').JSHandle<any> | undefined;
+    let stage = 'source-preflight';
+    const snapshot = () => fixture!.evaluate((value) => value.snapshot());
+    const checkpoint = async (name: string) => {
+      const value = await snapshot();
+      report.checkpoints.push({ name, ...value });
+      return value;
+    };
+    const screenshot = async (name: string) => {
+      const target = await fixture!.evaluateHandle((value) => value.surface as HTMLElement);
+      try {
+        const element = target.asElement();
+        if (!element) throw new Error('Normalized Content presentation surface is unavailable.');
+        const buffer = await element.screenshot({
+          path: path.join(directory, `${name}.png`),
+          timeout: 5000,
+        });
+        (report.screenshots ??= []).push({
+          file: `${name}.png`,
+          sha256: createHash('sha256').update(buffer).digest('hex'),
+          note: 'Captured after the named checkpoint; not its exact render timestamp.',
+        });
+      } finally {
+        await target.dispose();
+      }
+    };
+    const authored = (value: any) => {
+      expect(value.surface.inline['--pui-foreground']).toEqual({ value: '#aabbcc', priority: '' });
+      expect(value.authoredTreeUnchanged).toBe(true);
+      expect(value.canonicalDemoUnchanged).toBe(true);
+      expect(value.surface.id).toBe(value.retainedSurfaceId);
+      expect(value.surface.owner).toBe('liquid-theme-native-owner');
+      expect(value.surface.generation).toBe('1');
+      expect(value.surface.prototype).toBe('liquid-glass-dropdown-content');
+    };
+    try {
+      expect(report.sourceAtStart.status).toBe('');
+      if (process.env.CANDIDATE_SHA)
+        expect(report.sourceAtStart.head).toBe(process.env.CANDIDATE_SHA);
+      await preference('light', { 'prefers-reduced-motion': 'reduce' });
+      await page.setViewportSize({ width: 1200, height: 1050 });
+      await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'networkidle' });
+      await page.waitForFunction(() => document.documentElement.dataset.materialReady, undefined, {
+        timeout: 30000,
+      });
+      await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+      stage = 'mount-real-composition';
+      fixture = await page.evaluateHandle(async () => {
+        type DemoChild = import('../../../components/PrototypePreviewer/demo-types').DemoChild;
+        type DemoSpec = import('../../../components/PrototypePreviewer/demo-types').DemoSpec;
+        type DemoSetupContext =
+          import('../../../components/PrototypePreviewer/demo-types').DemoSetupContext;
+        const load = new Function('url', 'return import(url)') as (url: string) => Promise<any>;
+        const { createProjectionComposition } = (await load(
+          '/src/components/PrototypePreviewer/projection-composition.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/projection-composition');
+        const { renderDemo } = (await load(
+          '/src/components/PrototypePreviewer/demo-renderer.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/demo-renderer');
+        const { collectPrototypeIds } = (await load(
+          '/src/components/PrototypePreviewer/demo-types.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/demo-types');
+        const { loadPrototypes } = (await load(
+          '/src/components/PrototypePreviewer/prototype-modules.ts'
+        )) as typeof import('../../../components/PrototypePreviewer/prototype-modules');
+        const { resolveProjectionThemeSurfaceStyle, watchProjectionThemeSurfaceStyle } =
+          (await load(
+            '/src/components/PrototypePreviewer/projection-theme.ts'
+          )) as typeof import('../../../components/PrototypePreviewer/projection-theme');
+        const { default: canonical } = (await load(
+          '/src/content/docs/demo-liquid-glass-dropdown-menu.demo.ts'
+        )) as { default: DemoSpec };
+        const canonicalBefore = JSON.stringify(canonical.root);
+        const findProto = (
+          node: DemoChild,
+          prototypeId: string
+        ): Extract<DemoChild, { kind: 'proto' }> | undefined => {
+          if (typeof node === 'string' || node.kind === 'text') return undefined;
+          if (node.kind === 'proto' && node.prototypeId === prototypeId) return node;
+          for (const child of node.children ?? []) {
+            const found = findProto(child, prototypeId);
+            if (found) return found;
+          }
+          return undefined;
+        };
+        const originalRoot = findProto(canonical.root, 'liquid-glass-dropdown-root');
+        if (!originalRoot) throw new Error('Canonical Liquid Dropdown Root is missing.');
+        const root = structuredClone(originalRoot);
+        const content = findProto(root, 'liquid-glass-dropdown-content');
+        const trigger = findProto(root, 'liquid-glass-dropdown-trigger');
+        if (!content || !trigger) throw new Error('Canonical Liquid Dropdown parts are missing.');
+        root.ref = 'theme-owner-root';
+        content.ref = 'theme-owner-content';
+        trigger.ref = 'theme-owner-trigger';
+        content.surfaceStyle = [
+          ...(Array.isArray(content.surfaceStyle)
+            ? content.surfaceStyle
+            : content.surfaceStyle
+              ? [content.surfaceStyle]
+              : []),
+          { '--pui-foreground': '#aabbcc', color: 'var(--pui-foreground)' },
+        ];
+        const declaredBefore = JSON.stringify(content.surfaceStyle);
+        const host = document.createElement('div');
+        // A construction failure can precede the returned JSHandle. Preserve a
+        // test-owned abort receipt and release every actually acquired owner.
+        const abortSteps: Array<() => void | Promise<void>> = [];
+        const observerDisconnections: Array<Record<string, unknown>> = [];
+        let observationPhase = 'mount';
+        const observerPrototype = MutationObserver.prototype;
+        const originalDisconnect = observerPrototype.disconnect;
+        const observedDisconnect: MutationObserver['disconnect'] = function (
+          this: MutationObserver,
+          ...args: Parameters<MutationObserver['disconnect']>
+        ) {
+          const entry = {
+            at: performance.now(),
+            phase: observationPhase,
+            stack: new Error('Native observer disconnect callsite').stack,
+          };
+          try {
+            const result = Reflect.apply(originalDisconnect, this, args);
+            observerDisconnections.push({ ...entry, outcome: 'returned' });
+            return result;
+          } catch (error) {
+            observerDisconnections.push({ ...entry, outcome: 'threw', error: String(error) });
+            throw error;
+          }
+        };
+        observerPrototype.disconnect = observedDisconnect;
+        const restoreDisconnect = () => {
+          if (observerPrototype.disconnect !== observedDisconnect)
+            throw new Error('Native disconnect observation was replaced by another writer.');
+          observerPrototype.disconnect = originalDisconnect;
+        };
+        abortSteps.push(restoreDisconnect);
+        (window as any).liquidThemeOwnershipAbort = async () => {
+          const errors: string[] = [];
+          for (const cleanup of [...abortSteps].reverse()) {
+            try {
+              await cleanup();
+            } catch (error) {
+              errors.push(String(error));
+            }
+          }
+          delete (window as any).liquidThemeOwnershipAbort;
+          return {
+            acquiredCleanupSteps: abortSteps.length,
+            errors,
+            hostConnected: host.isConnected,
+          };
+        };
+        abortSteps.push(() => host.remove());
+        host.dataset.themeOwnershipCase = '';
+        host.dataset.theme = 'light';
+        host.style.cssText = 'margin:24px;padding:32px;max-width:900px;min-height:160px;';
+        document.body.append(host);
+        const palettes = {
+          light: resolveProjectionThemeSurfaceStyle('liquid-glass', host),
+          dark: {} as Record<string, string>,
+        };
+        host.dataset.theme = 'dark';
+        palettes.dark = resolveProjectionThemeSurfaceStyle('liquid-glass', host);
+        host.dataset.theme = 'light';
+        const observerPrecondition = {
+          route: location.pathname,
+          preexistingProjectionScopes: document.querySelectorAll('[data-projection-scope]').length,
+          preexistingProjectionOwnerSurfaces: document.querySelectorAll(
+            '[class*="pui-projection-owner-"]'
+          ).length,
+        };
+        if (
+          observerPrecondition.preexistingProjectionScopes ||
+          observerPrecondition.preexistingProjectionOwnerSurfaces
+        )
+          throw new Error(
+            'Shared observer scenario precondition: this fresh standalone document already has a projection composition.'
+          );
+        let context: DemoSetupContext | undefined;
+        const composition = createProjectionComposition({
+          ownerId: 'liquid-theme-native-owner',
+          generation: 1,
+          runtimeId: 'wc',
+          projectionFamilyId: 'liquid-glass',
+          componentId: 'dropdown-menu',
+          childDemo: {
+            type: 'demo',
+            root,
+            setup(value) {
+              context = value;
+            },
+          },
+          themeSurfaceStyle: palettes.light,
+          controlIds: [],
+          controls: {
+            runtime: {
+              label: 'Runtime',
+              options: [{ value: 'wc', label: 'WC' }],
+              onValueChange() {},
+            },
+            family: {
+              label: 'Family',
+              options: [{ value: 'liquid-glass', label: 'Liquid' }],
+              onValueChange() {},
+            },
+            component: {
+              label: 'Component',
+              options: [{ value: 'dropdown-menu', label: 'Dropdown' }],
+              onValueChange() {},
+            },
+          },
+        });
+        const projected = findProto(composition.demo.root, 'liquid-glass-dropdown-content')!;
+        const projectedRoot = findProto(composition.demo.root, 'liquid-glass-dropdown-root')!;
+        const ownerMarker = projected.className
+          ?.split(/\s+/)
+          .find((value) => value.startsWith('pui-projection-owner-'));
+        const generationMarker = projected.className
+          ?.split(/\s+/)
+          .find((value) => value.startsWith('pui-projection-generation-'));
+        const marker = (node: typeof projected) =>
+          node.className
+            ?.split(/\s+/)
+            .find((value) => value.startsWith('pui-projection-prototype-'));
+        const contentMarker = marker(projected),
+          rootMarker = marker(projectedRoot);
+        if (!ownerMarker || !generationMarker || !contentMarker || !rootMarker)
+          throw new Error('Projection-owned presentation markers are missing.');
+        const ids = new Set<string>();
+        collectPrototypeIds(composition.demo.root, ids);
+        await loadPrototypes([...ids]);
+        const rendered = await renderDemo({ runtime: 'wc', host, demo: composition.demo });
+        abortSteps.push(() => rendered.destroy());
+        const surfaces = (prototypeMarker: string) =>
+          Array.from(document.getElementsByClassName(prototypeMarker)).filter(
+            (element): element is HTMLElement =>
+              element instanceof HTMLElement &&
+              element.classList.contains(ownerMarker) &&
+              element.classList.contains(generationMarker)
+          );
+        const candidates = surfaces(contentMarker),
+          roots = surfaces(rootMarker);
+        if (candidates.length !== 1 || roots.length !== 1)
+          throw new Error(
+            'Expected exactly one normalized WC Content and Root presentation surface.'
+          );
+        const surface = candidates[0]!,
+          rootSurface = roots[0]!;
+        const publicRef = context?.refs['theme-owner-content'];
+        // Preview WC uses its standard, non-split Dropdown profile. Do not apply
+        // this physical-node oracle to a split target or another renderer.
+        if (!publicRef || publicRef !== surface)
+          throw new Error(
+            'WC scenario precondition: public Content ref is not this standard persistent presentation surface.'
+          );
+        const originParent = surface.parentNode;
+        if (!originParent || !rootSurface.contains(surface))
+          throw new Error(
+            'WC scenario precondition: Content does not start beneath its declared Root.'
+          );
+        const identities = new WeakMap<Node, number>();
+        let nextIdentity = 0;
+        const id = (node: Node | null | undefined) => {
+          if (!node) return null;
+          if (!identities.has(node)) identities.set(node, ++nextIdentity);
+          return identities.get(node)!;
+        };
+        const retainedSurfaceId = id(surface);
+        const properties = ['--pui-foreground', '--pui-background', '--pui-border'];
+        const describe = (element: HTMLElement) => {
+          const computed = getComputedStyle(element),
+            rect = element.getBoundingClientRect();
+          return {
+            id: id(element),
+            tag: element.tagName,
+            connected: element.isConnected,
+            parent: id(element.parentNode),
+            owner: element.dataset.projectionOwner,
+            generation: element.dataset.projectionGeneration,
+            prototype: element.dataset.projectionPrototype,
+            classes: [...element.classList],
+            role: element.getAttribute('role'),
+            inline: Object.fromEntries(
+              properties.map((property) => [
+                property,
+                {
+                  value: element.style.getPropertyValue(property),
+                  priority: element.style.getPropertyPriority(property),
+                },
+              ])
+            ),
+            computed: Object.fromEntries(
+              [...properties, 'color', 'display', 'visibility'].map((property) => [
+                property,
+                computed.getPropertyValue(property).trim(),
+              ])
+            ),
+            bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            material: {
+              quality: element.dataset.materialQuality,
+              reason: element.dataset.materialReason,
+              frame: element.dataset.materialFrame,
+              contact: element.dataset.materialContact,
+              session: element.dataset.materialSession,
+              source: element.dataset.materialSource,
+              sourceRevision: element.dataset.materialSourceRevision,
+            },
+          };
+        };
+        const trace: unknown[] = [],
+          themeEvents: unknown[] = [],
+          inputs: Array<Record<string, unknown>> = [];
+        let overflow = false,
+          mutationRecords = 0,
+          destroyed = false,
+          themeStopped = false;
+        const snapshot = () => ({
+          at: performance.now(),
+          theme: host.dataset.theme,
+          retainedSurfaceId,
+          surface: describe(surface),
+          root: describe(rootSurface),
+          publicRef: { id: id(publicRef), sameAsSurface: publicRef === surface },
+          originParentId: id(originParent),
+          currentSurfaceIds: surfaces(contentMarker).map(id),
+          rootContainsSurface: rootSurface.contains(surface),
+          restoredToOrigin: surface.parentNode === originParent,
+          ownedConnectedNodes: document.getElementsByClassName(ownerMarker).length,
+          authoredTreeUnchanged: JSON.stringify(projected.surfaceStyle) === declaredBefore,
+          canonicalDemoUnchanged: JSON.stringify(canonical.root) === canonicalBefore,
+          themeCallbackCount: themeEvents.length,
+          destroyed,
+          themeStopped,
+          documentResourceObservation: (window as any).liquidMaterialFixture.metrics(),
+          canvases: Array.from(host.querySelectorAll('canvas[data-material-backdrop]')).map(
+            (canvas) => ({
+              id: id(canvas),
+              connected: canvas.isConnected,
+              width: (canvas as HTMLCanvasElement).width,
+              height: (canvas as HTMLCanvasElement).height,
+            })
+          ),
+        });
+        const record = (kind: string, details?: unknown) => {
+          if (trace.length >= 400) {
+            overflow = true;
+            return;
+          }
+          trace.push({ kind, details, snapshot: snapshot() });
+        };
+        const belongs = (node: Node) =>
+          node === host ||
+          (node instanceof Element &&
+            (node.classList.contains(ownerMarker) ||
+              node.querySelector(`.${ownerMarker}`) !== null));
+        const observer = new MutationObserver((records) => {
+          const relevant = records.filter(
+            (entry) =>
+              belongs(entry.target) || [...entry.addedNodes, ...entry.removedNodes].some(belongs)
+          );
+          if (!relevant.length) return;
+          mutationRecords += relevant.length;
+          if (mutationRecords > 2000) {
+            overflow = true;
+            return;
+          }
+          record(
+            'native-mutation-delivery',
+            relevant.map((entry) => ({
+              type: entry.type,
+              target: id(entry.target),
+              attribute: entry.attributeName,
+              oldValue: entry.oldValue,
+              currentValue:
+                entry.type === 'attributes'
+                  ? (entry.target as Element).getAttribute(entry.attributeName!)
+                  : null,
+              added: [...entry.addedNodes].map(id),
+              removed: [...entry.removedNodes].map(id),
+            }))
+          );
+        });
+        observer.observe(document.body, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeOldValue: true,
+          attributeFilter: [
+            'style',
+            'class',
+            'data-theme',
+            'data-projection-owner',
+            'data-projection-generation',
+          ],
+        });
+        abortSteps.push(() => observer.disconnect());
+        const input = (event: Event) => {
+          if (event.type === 'keydown' && (event as KeyboardEvent).key !== 'Escape') return;
+          if (
+            event.type !== 'keydown' &&
+            !(
+              event.target instanceof Node &&
+              (host.contains(event.target) || surface.contains(event.target))
+            )
+          )
+            return;
+          const value = {
+            type: event.type,
+            trusted: event.isTrusted,
+            at: performance.now(),
+            target: event.target instanceof Node ? id(event.target) : null,
+            key: event instanceof KeyboardEvent ? event.key : null,
+          };
+          inputs.push(value);
+          record('native-input', value);
+        };
+        for (const name of ['pointerdown', 'pointerup', 'click', 'keydown'])
+          document.addEventListener(name, input, true);
+        const stopInputs = () => {
+          for (const name of ['pointerdown', 'pointerup', 'click', 'keydown'])
+            document.removeEventListener(name, input, true);
+        };
+        abortSteps.push(stopInputs);
+        const stopTheme = watchProjectionThemeSurfaceStyle('liquid-glass', host, (theme) => {
+          themeEvents.push({ at: performance.now(), theme });
+          composition.setThemeSurfaceStyle(theme);
+          record('real-theme-watcher');
+        });
+        abortSteps.push(stopTheme);
+        observationPhase = 'running';
+        const twoRaf = () =>
+          new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Theme ownership RAF deadline')), 2000);
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                clearTimeout(timer);
+                resolve();
+              })
+            );
+          });
+        const stopCallerTheme = () => {
+          if (themeStopped) return;
+          observationPhase = 'caller-theme-watcher-stop';
+          record('before-caller-theme-watcher-stop');
+          stopTheme();
+          themeStopped = true;
+          record('after-caller-theme-watcher-stop');
+          observationPhase = 'after-caller-theme-watcher-stop';
+        };
+        const destroy = async () => {
+          if (destroyed) return;
+          observationPhase = 'rendered-destroy';
+          record('before-real-destroy');
+          try {
+            await rendered.destroy();
+          } finally {
+            destroyed = true;
+            await twoRaf();
+            record('after-real-destroy');
+            observationPhase = 'after-rendered-destroy';
+          }
+        };
+        return {
+          host,
+          surface,
+          palettes,
+          observerPrecondition,
+          snapshot,
+          twoRaf,
+          stopCallerTheme,
+          destroy,
+          record,
+          finish() {
+            observationPhase = 'harness-cleanup';
+            observer.disconnect();
+            stopInputs();
+            const final = snapshot();
+            const hostConnectedBeforeHarnessRemoval = host.isConnected;
+            host.remove();
+            restoreDisconnect();
+            delete (window as any).liquidThemeOwnershipAbort;
+            return {
+              trace,
+              themeEvents,
+              inputs,
+              mutationRecords,
+              overflow,
+              final,
+              observerDisconnections,
+              hostConnectedBeforeHarnessRemoval,
+              nativeDisconnectRestored: observerPrototype.disconnect === originalDisconnect,
+            };
+          },
+        };
+      });
+      report.palettes = await fixture.evaluate((value) => value.palettes);
+      report.observerPrecondition = await fixture.evaluate((value) => value.observerPrecondition);
+      const light = report.palettes.light,
+        dark = report.palettes.dark;
+      stage = 'mounted-light';
+      const mounted = await checkpoint(stage);
+      authored(mounted);
+      expect(mounted.publicRef.sameAsSurface).toBe(true);
+      expect(mounted.rootContainsSurface).toBe(true);
+      expect(mounted.surface.inline['--pui-background'].value).toBe('');
+      expect(mounted.root.inline['--pui-background'].value).toBe(light['--pui-background']);
+      const trigger = page.locator('[data-demo-ref="theme-owner-trigger"]');
+      const waitDetached = () =>
+        expect
+          .poll(
+            async () => {
+              const value = await snapshot();
+              return (
+                value.surface.connected &&
+                !value.rootContainsSurface &&
+                !value.restoredToOrigin &&
+                value.surface.role === 'menu' &&
+                value.currentSurfaceIds.length === 1 &&
+                value.currentSurfaceIds[0] === value.retainedSurfaceId
+              );
+            },
+            { timeout: 10000 }
+          )
+          .toBe(true);
+      stage = 'native-open-light';
+      await trigger.click();
+      await waitDetached();
+      await expect
+        .poll(async () => (await snapshot()).surface.inline['--pui-background'].value)
+        .toBe(light['--pui-background']);
+      const opened = await checkpoint(stage);
+      authored(opened);
+      expect(opened.surface.computed.color).toBe('rgb(170, 187, 204)');
+      await screenshot('open-light');
+      stage = 'detached-dark-via-watcher';
+      await fixture.evaluate((value) => {
+        value.host.dataset.theme = 'dark';
+      });
+      await expect
+        .poll(async () => ({
+          surface: (await snapshot()).surface.inline['--pui-background'].value,
+          root: (await snapshot()).root.inline['--pui-background'].value,
+        }))
+        .toEqual({ surface: dark['--pui-background'], root: dark['--pui-background'] });
+      const darkened = await checkpoint(stage);
+      authored(darkened);
+      expect(darkened.themeCallbackCount).toBeGreaterThan(mounted.themeCallbackCount);
+      expect(darkened.surface.computed.color).toBe('rgb(170, 187, 204)');
+      await screenshot('open-dark');
+      stage = 'native-escape-reattach';
+      // No theme setter, marker write or explicit stamp is allowed between
+      // Escape and this observation: the real browser observer must clear it.
+      await page.keyboard.press('Escape');
+      await expect
+        .poll(
+          async () => {
+            const value = await snapshot();
+            return (
+              value.surface.connected &&
+              value.rootContainsSurface &&
+              value.restoredToOrigin &&
+              value.surface.inline['--pui-background'].value === ''
+            );
+          },
+          { timeout: 10000 }
+        )
+        .toBe(true);
+      const reattached = await checkpoint(stage);
+      authored(reattached);
+      expect(reattached.currentSurfaceIds).toEqual([reattached.retainedSurfaceId]);
+      expect(reattached.surface.inline['--pui-border'].value).toBe('');
+      expect(reattached.surface.computed['--pui-background']).toBe(dark['--pui-background']);
+      stage = 'author-reclaims-one-stamp';
+      await trigger.click();
+      await waitDetached();
+      await expect
+        .poll(async () => (await snapshot()).surface.inline['--pui-background'].value)
+        .toBe(dark['--pui-background']);
+      await fixture.evaluate((value) => {
+        value.surface.style.setProperty('--pui-background', '#123456', 'important');
+        value.record('explicit-author-value-and-priority-overwrite');
+        value.host.dataset.theme = 'light';
+      });
+      await expect
+        .poll(async () => (await snapshot()).surface.inline['--pui-border'].value)
+        .toBe(light['--pui-border']);
+      const reclaimed = await checkpoint(stage);
+      authored(reclaimed);
+      expect(reclaimed.surface.inline['--pui-background']).toEqual({
+        value: '#123456',
+        priority: 'important',
+      });
+      expect(reclaimed.root.inline['--pui-background'].value).toBe(light['--pui-background']);
+      expect(reclaimed.themeCallbackCount).toBeGreaterThan(darkened.themeCallbackCount);
+      await screenshot('author-override');
+      stage = 'real-destroy-with-open-portal';
+      await fixture.evaluate((value) => value.stopCallerTheme());
+      report.callerThemeCleanup = await snapshot();
+      expect(report.callerThemeCleanup.surface.connected).toBe(true);
+      expect(report.callerThemeCleanup.surface.inline).toEqual(reclaimed.surface.inline);
+      await fixture.evaluate((value) => value.destroy());
+      const cleaned = await checkpoint(stage);
+      authored(cleaned);
+      expect(cleaned.surface.connected).toBe(false);
+      expect(cleaned.ownedConnectedNodes).toBe(0);
+      expect(cleaned.surface.inline['--pui-background']).toEqual({
+        value: '#123456',
+        priority: 'important',
+      });
+      expect(cleaned.surface.inline['--pui-border'].value).toBe('');
+      await fixture.evaluate(async (value) => {
+        value.host.dataset.theme = 'dark';
+        await value.twoRaf();
+      });
+      report.afterStoppedThemeInput = await snapshot();
+      expect(report.afterStoppedThemeInput.themeCallbackCount).toBe(cleaned.themeCallbackCount);
+      expect(report.afterStoppedThemeInput.surface.inline).toEqual(cleaned.surface.inline);
+      expect(report.checkpoints.map((value: any) => value.name)).toEqual([
+        'mounted-light',
+        'native-open-light',
+        'detached-dark-via-watcher',
+        'native-escape-reattach',
+        'author-reclaims-one-stamp',
+        'real-destroy-with-open-portal',
+      ]);
+    } catch (error) {
+      failure(stage, error);
+    } finally {
+      if (fixture) {
+        try {
+          await fixture.evaluate((value) => value.stopCallerTheme());
+        } catch (error) {
+          failure('caller-watcher-cleanup', error);
+        }
+        try {
+          await fixture.evaluate((value) => value.destroy());
+        } catch (error) {
+          failure('cleanup', error);
+        }
+        try {
+          report.native = await fixture.evaluate((value) => value.finish());
+          expect(report.native.overflow).toBe(false);
+          expect(report.native.inputs.filter((value: any) => value.type === 'click')).toHaveLength(
+            2
+          );
+          expect(
+            report.native.inputs.filter(
+              (value: any) => value.type === 'keydown' && value.key === 'Escape'
+            )
+          ).toHaveLength(1);
+          expect(report.native.inputs.every((value: any) => value.trusted === true)).toBe(true);
+          expect(report.native.hostConnectedBeforeHarnessRemoval).toBe(true);
+          expect(report.native.nativeDisconnectRestored).toBe(true);
+          expect(
+            report.native.observerDisconnections.some(
+              (value: any) =>
+                value.phase === 'caller-theme-watcher-stop' &&
+                value.outcome === 'returned' &&
+                value.stack?.includes('/projection-theme.ts')
+            )
+          ).toBe(true);
+          expect(
+            report.native.observerDisconnections.some(
+              (value: any) =>
+                value.phase === 'rendered-destroy' &&
+                value.outcome === 'returned' &&
+                value.stack?.includes('/projection-composition.ts')
+            )
+          ).toBe(true);
+        } catch (error) {
+          failure('archive-native-observation', error);
+        }
+        try {
+          await fixture.dispose();
+        } catch (error) {
+          failure('dispose-browser-handle', error);
+        }
+      } else {
+        try {
+          report.mountFailureCleanup = await page.evaluate(async () => {
+            const abort = (window as any).liquidThemeOwnershipAbort;
+            return abort
+              ? await abort()
+              : { acquiredCleanupSteps: 0, errors: [], available: false };
+          });
+          expect(report.mountFailureCleanup.errors).toEqual([]);
+        } catch (error) {
+          failure('incomplete-mount-cleanup', error);
+        }
+      }
+      page.off('console', onConsole);
+      page.off('pageerror', onError);
+      try {
+        report.sourceAtEnd = await identity();
+        report.sourceStable =
+          JSON.stringify(report.sourceAtStart) === JSON.stringify(report.sourceAtEnd);
+        expect(report.sourceStable).toBe(true);
+        expect(report.pageErrors).toEqual([]);
+      } catch (error) {
+        failure('final-source-and-page-errors', error);
+      }
+      report.completedAt = new Date().toISOString();
+      observations.push({
+        themeOwnership: 'theme-ownership/report.json',
+        checkpoints: report.checkpoints.length,
+        failures: report.failures,
+      });
+      await writeFile(
+        path.join(directory, 'console.json'),
+        JSON.stringify({ console: report.console, pageErrors: report.pageErrors }, null, 2)
+      );
+      await writeFile(path.join(directory, 'report.json'), JSON.stringify(report, null, 2));
+    }
+    expect(report.failures).toEqual([]);
+  }, 90000);
+});
+
+describe.sequential('bounded release lifecycle', () => {
+  it('retains complete paint geometry, finishes real release tails and rejects late completions', async () => {
+    if (!evidence)
+      throw new Error('Release lifecycle artifacts require PROTO_UI_MATERIAL_EVIDENCE_DIR');
+    const directory = path.join(evidence, 'release-lifecycle');
+    await mkdir(directory, { recursive: true });
+    const files = [
+      'pnpm-lock.yaml',
+      'packages/adapters/base/src/material/sink.ts',
+      'packages/adapters/base/src/material/program.ts',
+      'packages/adapters/base/src/material/program-pool.ts',
+      'packages/adapters/base/src/material/source.ts',
+      'packages/adapters/base/src/material/source-refresh-task.ts',
+      'packages/adapters/base/src/material/contact-motion.ts',
+      'packages/adapters/base/src/material/contact-profile.ts',
+      'packages/adapters/base/src/material/contact-carrier.ts',
+      'packages/adapters/base/src/material/image-prepare.ts',
+      'packages/adapters/base/src/events/pointer-contact.ts',
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      'apps/www/src/pages/en/test/liquid-glass-material.astro',
+      'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+      'apps/www/src/content/docs/zh-cn/material-paint-observation.ts',
+      'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
+      '.github/workflows/liquid-glass-frame-budget.yml',
+    ];
+    const identity = async () => ({
+      head: execFileSync('git', ['rev-parse', 'HEAD'], {
+        encoding: 'utf8',
+      }).trim(),
+      tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {
+        encoding: 'utf8',
+      }).trim(),
+      status: execFileSync('git', ['status', '--porcelain'], {
+        encoding: 'utf8',
+      }).trim(),
+      hashes: Object.fromEntries(
+        await Promise.all(
+          files.map(async (file) => [
+            file,
+            createHash('sha256')
+              .update(await readFile(file))
+              .digest('hex'),
+          ])
+        )
+      ),
+    });
+    const report: Record<string, any> = {
+      schemaVersion: 1,
+      scope:
+        'Candidate-only real-browser lifecycle acceptance; not matched latency or input-to-photon evidence.',
+      clock:
+        'Unmodified performance.now and native RAF. Exact same-clock branches have separate deterministic unit controls.',
+      controlledDecode:
+        'Only the next actual PNG Image.decode promise delivery is gated; native invocation and settlement are recorded separately. No fake image, completion or decode duration.',
+      cancellation:
+        'Trusted Playwright down/up; pointercancel and window blur below are explicitly synthetic DOM lifecycle delivery, not OS-generated cancellation.',
+      releaseProfileMs: 240,
+      observationDeadlineMs: 2000,
+      cases: [],
+      failures: [],
+      console: [],
+      pageErrors: [],
+      sourceAtStart: await identity(),
+    };
+    const onConsole = (message: any) =>
+      report.console.push({
+        type: message.type(),
+        text: message.text(),
+        location: message.location(),
+      });
+    const onError = (error: Error) =>
+      report.pageErrors.push({
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    page.on('console', onConsole);
+    page.on('pageerror', onError);
+    const resources = () => page.evaluate(() => (window as any).liquidMaterialFixture.metrics());
+    const twoRaf = () =>
+      page.evaluate(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Post-action RAF deadline')), 2000);
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                clearTimeout(timer);
+                resolve();
+              })
+            );
+          })
+      );
+    const zeroResources = (value: Record<string, number>) => {
+      for (const key of [
+        'contexts',
+        'consumers',
+        'pendingImages',
+        'decodedImages',
+        'pendingSourceRefreshTasks',
+      ])
+        expect(value[key], `released resource ${key}`).toBe(0);
+    };
+    const archiveImage = async (name: string, css: string) => {
+      const encoded = /data:image\/png;base64,([A-Za-z0-9+/=]+)/.exec(css)?.[1];
+      const bytes = encoded ? Buffer.from(encoded, 'base64') : Buffer.from(css);
+      const sha256 = createHash('sha256').update(bytes).digest('hex');
+      if (encoded) await writeFile(path.join(directory, `${name}.png`), bytes);
+      return {
+        sha256,
+        bytes: bytes.length,
+        png: encoded ? `${name}.png` : null,
+      };
+    };
+    const checkpoint = (label: string) =>
+      page.evaluate((label) => (window as any).__liquidReleaseProbe.snapshot(label), label);
+    const prepare = async (runtime: string, theme = 'light') => {
+      await preference(theme);
+      await page.setViewportSize({ width: 1000, height: 1050 });
+      await page.goto(`${baseUrl}${ROUTE}?theme=${theme}`, {
+        waitUntil: 'networkidle',
+      });
+      await page.waitForFunction(() => document.documentElement.dataset.materialReady, undefined, {
+        timeout: 60000,
+      });
+      await page.evaluate(() => (window as any).liquidMaterialFixture.pause(true));
+      await page.waitForFunction(
+        () => (window as any).liquidMaterialFixture.metrics().pendingImages === 0
+      );
+      const selector = `[data-material-host="${runtime}"] [data-demo-ref="regular"]`;
+      const target = page.locator(selector);
+      await target.hover();
+      await page.waitForFunction(
+        (selector) => {
+          const node = document.querySelector<HTMLElement>(selector);
+          return (
+            node?.dataset.materialQuality === 'self-optical' &&
+            node.dataset.materialContact === 'rest' &&
+            (window as any).liquidMaterialFixture.metrics().pendingImages === 0
+          );
+        },
+        selector,
+        { timeout: 2000 }
+      );
+      await twoRaf();
+      await page.evaluate(
+        ({ selector, observeSource }) => {
+          const target = document.querySelector<HTMLElement>(selector)!;
+          const observe = Function(
+            `return (${observeSource})`
+          )() as typeof observeOwnedMaterialPaint;
+          const images: string[] = [],
+            imageIds = new Map<string, number>();
+          const state: any = {
+            snapshots: [],
+            inputs: [],
+            images,
+            truncated: false,
+          };
+          const snapshot = (label: string) => {
+            const { image, ...paint } = observe(target);
+            if (!imageIds.has(image)) {
+              imageIds.set(image, images.length);
+              images.push(image);
+            }
+            const entry = {
+              at: performance.now(),
+              label,
+              connected: target.isConnected,
+              frame: target.dataset.materialFrame ?? null,
+              contact: target.dataset.materialContact ?? null,
+              session: target.dataset.materialContactSession ?? null,
+              sourceRevision: target.dataset.materialSourceRevision ?? null,
+              reason: target.dataset.materialReason ?? null,
+              imageId: imageIds.get(image),
+              imageNone: image === 'none',
+              paint,
+              resources: (window as any).liquidMaterialFixture.metrics(),
+            };
+            if (state.snapshots.length < 1200) state.snapshots.push(entry);
+            else state.truncated = true;
+            return entry;
+          };
+          const input = (event: Event) =>
+            state.inputs.push({
+              type: event.type,
+              at: performance.now(),
+              timestamp: event.timeStamp,
+              trusted: event.isTrusted,
+              pointerId: event instanceof PointerEvent ? event.pointerId : null,
+            });
+          for (const name of ['pointerdown', 'pointerup', 'pointercancel'])
+            target.addEventListener(name, input, true);
+          window.addEventListener('blur', input, true);
+          const observer = new MutationObserver(() => snapshot('mutation'));
+          observer.observe(target, {
+            attributes: true,
+            attributeFilter: [
+              'data-material-frame',
+              'data-material-contact',
+              'data-material-quality',
+              'data-material-reason',
+              'data-material-source-revision',
+            ],
+          });
+          let raf = 0;
+          const tick = () => {
+            snapshot('raf');
+            raf = requestAnimationFrame(tick);
+          };
+          raf = requestAnimationFrame(tick);
+          (window as any).__liquidReleaseProbe = {
+            state,
+            snapshot,
+            stop() {
+              cancelAnimationFrame(raf);
+              observer.disconnect();
+              for (const name of ['pointerdown', 'pointerup', 'pointercancel'])
+                target.removeEventListener(name, input, true);
+              window.removeEventListener('blur', input, true);
+              snapshot('stop');
+              delete (window as any).__liquidReleaseProbe;
+              return state;
+            },
+          };
+          snapshot('initial');
+        },
+        { selector, observeSource: observeOwnedMaterialPaint.toString() }
+      );
+      return { selector, target };
+    };
+    const ownedRest = async (selector: string, afterFrame: number) => {
+      await page.waitForFunction(
+        ({ selector, afterFrame }) => {
+          const node = document.querySelector<HTMLElement>(selector);
+          return (
+            node?.dataset.materialQuality === 'self-optical' &&
+            node.dataset.materialContact === 'rest' &&
+            Number(node.dataset.materialFrame) > afterFrame &&
+            (window as any).liquidMaterialFixture.metrics().pendingImages === 0
+          );
+        },
+        { selector, afterFrame },
+        { timeout: 2000 }
+      );
+      const state = await checkpoint('settled-rest');
+      expect(state.paint.committed).toBe(true);
+      expect(state.paint.geometryMatches).toBe(true);
+      return state;
+    };
+    const installGate = () =>
+      page.evaluate(() => {
+        const original = HTMLImageElement.prototype.decode;
+        const state: any = {
+          armed: true,
+          ticket: null,
+          autoOpened: false,
+          restored: false,
+        };
+        let open = () => {},
+          timer: ReturnType<typeof setTimeout> | undefined;
+        const wrapped = function (this: HTMLImageElement) {
+          const actual = original.call(this);
+          if (!state.armed || !this.src.startsWith('data:image/png;base64,')) return actual;
+          state.armed = false;
+          const ticket: any = {
+            startedAt: performance.now(),
+            source: this.src,
+            nativeState: 'pending',
+            deliveredAt: null,
+          };
+          state.ticket = ticket;
+          const barrier = new Promise<void>((resolve) => {
+            open = () => {
+              ticket.openedAt ??= performance.now();
+              resolve();
+            };
+          });
+          // Consume native rejection immediately, retaining its actual error for delivery.
+          const native = actual.then(
+            () => {
+              ticket.nativeState = 'fulfilled';
+              ticket.nativeSettledAt = performance.now();
+              return { ok: true as const };
+            },
+            (error: unknown) => {
+              ticket.nativeState = 'rejected';
+              ticket.nativeSettledAt = performance.now();
+              ticket.nativeError = String(error);
+              return { ok: false as const, error };
+            }
+          );
+          timer = setTimeout(() => {
+            state.autoOpened = true;
+            open();
+          }, 2500);
+          return Promise.all([native, barrier]).then(([result]) => {
+            clearTimeout(timer);
+            ticket.deliveredAt = performance.now();
+            if (!result.ok) throw result.error;
+          });
+        };
+        HTMLImageElement.prototype.decode = wrapped;
+        (window as any).__liquidDecodeGate = {
+          state,
+          open() {
+            open();
+          },
+          restore() {
+            open();
+            clearTimeout(timer);
+            if (HTMLImageElement.prototype.decode !== wrapped)
+              throw new Error('Decode gate ownership changed');
+            HTMLImageElement.prototype.decode = original;
+            state.restored = true;
+            return state;
+          },
+        };
+      });
+    const finish = async (entry: Record<string, any>) => {
+      const trace = await page.evaluate(() => (window as any).__liquidReleaseProbe?.stop() ?? null);
+      if (trace) {
+        const images = trace.images as string[];
+        trace.images = await Promise.all(
+          images.map((css, i) => archiveImage(`${entry.name}-image-${i}`, css))
+        );
+        entry.trace = trace;
+        expect(trace.truncated, 'bounded release trace overflow').toBe(false);
+      }
+    };
+    let pointerDown = false;
+    const down = async () => {
+      await page.mouse.down();
+      pointerDown = true;
+    };
+    const up = async () => {
+      await page.mouse.up();
+      pointerDown = false;
+    };
+    const runCase = async (name: string, work: (entry: Record<string, any>) => Promise<void>) => {
+      const entry: Record<string, any> = { name };
+      report.cases.push(entry);
+      try {
+        await work(entry);
+      } catch (error) {
+        entry.failure =
+          error instanceof Error
+            ? { name: error.name, message: error.message, stack: error.stack }
+            : String(error);
+        report.failures.push({ name, error: entry.failure });
+      } finally {
+        try {
+          await page.evaluate(() => {
+            const gate = (window as any).__liquidDecodeGate;
+            if (gate) gate.restore();
+          });
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-gate-restore`,
+            error: String(error),
+          });
+        }
+        try {
+          if (pointerDown) await up();
+          await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+          entry.cleanupImmediate = await resources();
+          await twoRaf();
+          entry.cleanupAfterTwoRaf = await resources();
+          zeroResources(entry.cleanupImmediate);
+          zeroResources(entry.cleanupAfterTwoRaf);
+          for (const key of [
+            'renders',
+            'sourceRefreshTasksScheduled',
+            'sourceRefreshTasksCancelled',
+            'sourceRefreshTasksRun',
+          ])
+            expect(entry.cleanupAfterTwoRaf[key], `post-disposal ${key}`).toBe(
+              entry.cleanupImmediate[key]
+            );
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-cleanup`,
+            error: String(error),
+          });
+        }
+        try {
+          entry.gate = await page.evaluate(() => {
+            const gate = (window as any).__liquidDecodeGate;
+            const value = gate?.state ?? null;
+            delete (window as any).__liquidDecodeGate;
+            return value;
+          });
+          if (entry.gate?.ticket?.source) {
+            entry.gate.ticket.image = await archiveImage(
+              `${name}-gated-native`,
+              entry.gate.ticket.source
+            );
+            delete entry.gate.ticket.source;
+          }
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-gate-evidence`,
+            error: String(error),
+          });
+        }
+        // Preserve the complete trace even when a cleanup/resource assertion failed.
+        try {
+          await finish(entry);
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-trace-evidence`,
+            error: String(error),
+          });
+        }
+        await writeFile(path.join(directory, 'report.json'), JSON.stringify(report, null, 2));
+      }
+    };
+    try {
+      expect(report.sourceAtStart.status).toBe('');
+      if (process.env.CANDIDATE_SHA)
+        expect(report.sourceAtStart.head).toBe(process.env.CANDIDATE_SHA);
+      for (const [runtime, theme] of [
+        ...RUNTIMES.map((runtime) => [runtime, 'light'] as const),
+        ['wc', 'dark'] as const,
+      ]) {
+        await runCase(`natural-${theme}-${runtime}`, async (entry) => {
+          entry.mode = 'natural native decode and trusted pointer input';
+          const { selector, target } = await prepare(runtime, theme);
+          entry.before = await checkpoint('before-down');
+          expect(entry.before.paint.committed).toBe(true);
+          expect(entry.before.paint.geometryMatches).toBe(true);
+          await target.screenshot({
+            path: path.join(directory, `${entry.name}-rest.png`),
+          });
+          await down();
+          await page.waitForFunction(
+            (selector) =>
+              document.querySelector<HTMLElement>(selector)?.dataset.materialContact === 'held' &&
+              (window as any).liquidMaterialFixture.metrics().pendingImages === 0,
+            selector,
+            { timeout: 2000 }
+          );
+          entry.held = await checkpoint('decoded-held');
+          await target.screenshot({
+            path: path.join(directory, `${entry.name}-held.png`),
+          });
+          await up();
+          entry.afterUp = await checkpoint('after-trusted-up');
+          entry.rest = await ownedRest(selector, Number(entry.held.frame));
+          await target.screenshot({
+            path: path.join(directory, `${entry.name}-returned.png`),
+          });
+          await page.waitForTimeout(270);
+          entry.quietStart = await resources();
+          await twoRaf();
+          entry.quietEnd = await resources();
+          expect(entry.quietEnd.renders).toBe(entry.quietStart.renders);
+          const observed = await page.evaluate(() => (window as any).__liquidReleaseProbe.state);
+          const upEvent = observed.inputs.find((input: any) => input.type === 'pointerup');
+          expect(observed.inputs.map((input: any) => input.type)).toEqual([
+            'pointerdown',
+            'pointerup',
+          ]);
+          const releases = observed.snapshots.filter(
+            (sample: any) => sample.at >= upEvent.at && sample.contact === 'release'
+          );
+          expect(releases.length).toBeGreaterThan(0);
+          expect(
+            observed.inputs
+              .filter((input: any) => input.type === 'pointerdown' || input.type === 'pointerup')
+              .every((input: any) => input.trusted)
+          ).toBe(true);
+          expect(entry.rest.session).toBe(entry.held.session);
+          for (const sample of [entry.before, entry.held, ...releases, entry.rest]) {
+            expect(sample.paint.committed).toBe(true);
+            expect(sample.paint.geometryMatches).toBe(true);
+            expect(sample.paint.carrierGeometry).toEqual(entry.before.paint.carrierGeometry);
+            expect(sample.sourceRevision).toBe(entry.before.sourceRevision);
+          }
+        });
+      }
+      for (const action of ['up', 'cancel', 'blur', 'source-revoke', 'dispose']) {
+        await runCase(`controlled-pending-${action}`, async (entry) => {
+          entry.mode =
+            'Controlled delivery of one real native decode promise; excluded from latency evidence';
+          const { selector } = await prepare('wc');
+          entry.before = await checkpoint('before-gated-down');
+          await installGate();
+          await down();
+          await page.waitForFunction(
+            () =>
+              (window as any).__liquidDecodeGate.state.ticket !== null &&
+              (window as any).liquidMaterialFixture.metrics().pendingImages > 0,
+            undefined,
+            { timeout: 2000 }
+          );
+          entry.pending = await checkpoint('native-decode-delivery-pending');
+          expect(entry.pending.resources.pendingImages).toBeGreaterThan(0);
+          if (action === 'up') await up();
+          else if (action === 'cancel')
+            await page.evaluate((selector) => {
+              const id = (window as any).__liquidReleaseProbe.state.inputs.find(
+                (input: any) => input.type === 'pointerdown'
+              ).pointerId;
+              document.querySelector(selector)!.dispatchEvent(
+                new PointerEvent('pointercancel', {
+                  bubbles: true,
+                  pointerId: id,
+                  pointerType: 'mouse',
+                  isPrimary: true,
+                })
+              );
+            }, selector);
+          else if (action === 'blur')
+            await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+          else if (action === 'source-revoke')
+            await page.evaluate(() => (window as any).liquidMaterialFixture.source('wc', false));
+          else await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+          entry.afterAction = await checkpoint(`after-${action}`);
+          await page.evaluate(() => (window as any).__liquidDecodeGate.open());
+          await page.waitForFunction(
+            () => (window as any).__liquidDecodeGate.state.ticket.deliveredAt !== null,
+            undefined,
+            { timeout: 2000 }
+          );
+          if (action !== 'up') await up(); // Explicit late up must not revive cancelled ownership.
+          await twoRaf();
+          entry.afterLateDelivery = await checkpoint('after-native-completion-delivery');
+          const gate = await page.evaluate(() => (window as any).__liquidDecodeGate.state);
+          expect(gate.autoOpened).toBe(false);
+          expect(gate.ticket.openedAt).toBeGreaterThanOrEqual(entry.afterAction.at);
+          expect(gate.ticket.nativeSettledAt).toBeGreaterThanOrEqual(gate.ticket.startedAt);
+          if (action === 'up') expect(gate.ticket.nativeState).toBe('fulfilled');
+          if (action === 'dispose') {
+            zeroResources(entry.afterAction.resources);
+            zeroResources(entry.afterLateDelivery.resources);
+            expect(entry.afterLateDelivery.connected).toBe(false);
+          } else if (action === 'source-revoke') {
+            for (const sample of [entry.afterAction, entry.afterLateDelivery]) {
+              expect(sample.paint.quality).toBe('opaque-fallback');
+              expect(sample.paint.carrier).toBe(null);
+              expect(sample.paint.committed).toBe(false);
+              expect(sample.imageNone).toBe(true);
+            }
+            await page.evaluate(() => (window as any).liquidMaterialFixture.source('wc', true));
+            entry.recovered = await ownedRest(selector, Number(entry.before.frame));
+          } else {
+            entry.rest = await ownedRest(selector, Number(entry.before.frame));
+            expect(entry.rest.sourceRevision).toBe(entry.before.sourceRevision);
+            expect(Number(entry.rest.session)).toBe(Number(entry.before.session) + 1);
+            if (action === 'up') {
+              const observed = await page.evaluate(
+                () => (window as any).__liquidReleaseProbe.state
+              );
+              expect(
+                observed.snapshots.some(
+                  (sample: any) =>
+                    sample.at >= gate.ticket.deliveredAt && sample.contact === 'release'
+                )
+              ).toBe(true);
+            }
+            if (action !== 'up') {
+              const observed = await page.evaluate(
+                () => (window as any).__liquidReleaseProbe.state
+              );
+              const rejected = observed.snapshots.filter(
+                (sample: any) =>
+                  sample.at >= entry.afterAction.at &&
+                  (sample.contact === 'held' || sample.contact === 'release')
+              );
+              expect(rejected).toEqual([]);
+            }
+          }
+        });
+      }
+      await runCase('full-footprint-negative-guards', async (entry) => {
+        const { target } = await prepare('wc');
+        entry.before = await checkpoint('expanded-idle');
+        await target.evaluate((host) => {
+          const root = host.closest('[data-material-scene]')!;
+          const r = host.getBoundingClientRect(),
+            s = root.getBoundingClientRect();
+          const block = document.createElement('div');
+          block.dataset.releaseFootprintGuard = '';
+          Object.assign(block.style, {
+            position: 'absolute',
+            left: `${r.right - s.left + 2}px`,
+            top: `${r.top - s.top + r.height / 2}px`,
+            width: '2px',
+            height: '2px',
+            background: 'red',
+          });
+          root.append(block);
+        });
+        entry.obstruction = await target.evaluate((host) => {
+          const block = document.querySelector('[data-release-footprint-guard]')!;
+          const h = host.getBoundingClientRect(),
+            b = block.getBoundingClientRect();
+          return {
+            hostRight: h.right,
+            obstructionLeft: b.left,
+            obstructionRight: b.right,
+          };
+        });
+        expect(entry.obstruction.obstructionLeft).toBeGreaterThanOrEqual(
+          entry.obstruction.hostRight
+        );
+        expect(entry.obstruction.obstructionRight).toBeLessThanOrEqual(
+          entry.obstruction.hostRight + entry.before.paint.paintOutset
+        );
+        await expect
+          .poll(() => target.getAttribute('data-material-reason'), {
+            timeout: 2000,
+          })
+          .toBe('source-overlapping-content');
+        entry.outsideHostOverlap = await checkpoint('outside-host-inside-full-footprint');
+        expect(entry.outsideHostOverlap.paint.quality).toBe('opaque-fallback');
+        expect(entry.outsideHostOverlap.paint.committed).toBe(false);
+        expect(entry.outsideHostOverlap.paint.carrier).toBe(null);
+        expect(entry.outsideHostOverlap.imageNone).toBe(true);
+        await page.screenshot({
+          path: path.join(directory, 'full-footprint-idle-overlap.png'),
+        });
+        await page.locator('[data-release-footprint-guard]').evaluate((node) => node.remove());
+        entry.recovered = await ownedRest(
+          '[data-material-host="wc"] [data-demo-ref="regular"]',
+          Number(entry.before.frame)
+        );
+        await target.evaluate((host) => {
+          (host as HTMLElement).style.overflow = 'hidden';
+        });
+        await expect
+          .poll(() => target.getAttribute('data-material-reason'), {
+            timeout: 2000,
+          })
+          .toBe('source-expanded-paint-clipped');
+        entry.clipped = await checkpoint('expanded-footprint-clipped');
+        expect(entry.clipped.paint.quality).toBe('opaque-fallback');
+        expect(entry.clipped.paint.committed).toBe(false);
+        expect(entry.clipped.paint.carrier).toBe(null);
+        expect(entry.clipped.imageNone).toBe(true);
+        await page.screenshot({
+          path: path.join(directory, 'full-footprint-clipped.png'),
+        });
+      });
+    } finally {
+      page.off('console', onConsole);
+      page.off('pageerror', onError);
+      report.sourceAtEnd = await identity();
+      report.sourceStable =
+        JSON.stringify(report.sourceAtStart) === JSON.stringify(report.sourceAtEnd);
+      await writeFile(path.join(directory, 'report.json'), JSON.stringify(report, null, 2));
+      await writeFile(
+        path.join(directory, 'console.json'),
+        JSON.stringify({ console: report.console, pageErrors: report.pageErrors }, null, 2)
+      );
+      observations.push({
+        releaseLifecycle: 'release-lifecycle/report.json',
+        sourceStable: report.sourceStable,
+        failures: report.failures,
+      });
+    }
+    expect(report.sourceStable).toBe(true);
+    expect(report.pageErrors).toEqual([]);
+    expect(report.cases).toHaveLength(11);
+    expect(report.failures).toEqual([]);
   }, 150000);
 });
 
