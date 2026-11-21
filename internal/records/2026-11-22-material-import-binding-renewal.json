@@ -1,0 +1,1329 @@
+{
+  "schemaVersion": 1,
+  "sourceCheckpoint": "d68296e1163b42e31082e4a01721361db331954c",
+  "change": {
+    "path": "scripts/coverage-matrices/library-card-imports.mjs",
+    "kind": "renew only the existing reviewed sink exact-body hash",
+    "oldSinkSha256": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+    "newSinkSha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+    "oldPolicySha256": "0752ed42e3fbc5fcacf85b0df9cfe53b55331a73117a6a1a82e13f660d7cff56",
+    "newPolicySha256": "3f4c2d0ae8fb804baa81ace960ad4d844cb86e7759c235639a272c3d2acd11f8",
+    "allowlistEntriesAdded": 0,
+    "importEdgesAdded": 0,
+    "acceptancePromotions": 0
+  },
+  "finiteImportReview": {
+    "sourcePath": "packages/adapters/base/src/material/sink.ts",
+    "oldRevision": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+    "newRevision": "d68296e1163b42e31082e4a01721361db331954c",
+    "oldSha256": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+    "newSha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+    "guardPath": "scripts/coverage-matrices/library-card-imports.mjs",
+    "guardSha256": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+    "guardMatchesOld": true,
+    "guardMatchesCurrent": false,
+    "allowedSpecifierCount": 19,
+    "allowedSpecifiers": [
+      "./initial-paint-bridge",
+      "./paint-mutations",
+      "../events/pointer-contact",
+      "./contact-motion",
+      "./contact-carrier",
+      "./contact-profile",
+      "./style-tint-profile",
+      "./image-prepare",
+      "./geometry-watch",
+      "@proto.ui/core",
+      "@proto.ui/module-feedback",
+      "@proto.ui/module-feedback/internal/shared-policy",
+      "./source",
+      "./preferences",
+      "./program",
+      "./program-inputs",
+      "./source-refresh-task",
+      "./program-pool",
+      "./style"
+    ],
+    "staticImportDeclarationCount": 19,
+    "allDeclarationsTypeFlagsLiteralBytesAndOrderUnchanged": true,
+    "allAllowedSpecifiersHaveSameLiteralDeclaration": true,
+    "staticImportsBefore": [
+      {
+        "kind": "import",
+        "specifier": "./initial-paint-bridge",
+        "literalBytes": "'./initial-paint-bridge'",
+        "typeOnly": false,
+        "declarationBytes": "import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./paint-mutations",
+        "literalBytes": "'./paint-mutations'",
+        "typeOnly": false,
+        "declarationBytes": "import { withOwnedCarrierMarker } from './paint-mutations';"
+      },
+      {
+        "kind": "import",
+        "specifier": "../events/pointer-contact",
+        "literalBytes": "'../events/pointer-contact'",
+        "typeOnly": false,
+        "declarationBytes": "import { observeWebPointerContact } from '../events/pointer-contact';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./contact-motion",
+        "literalBytes": "'./contact-motion'",
+        "typeOnly": false,
+        "declarationBytes": "import { createContactMotion } from './contact-motion';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./contact-carrier",
+        "literalBytes": "'./contact-carrier'",
+        "typeOnly": false,
+        "declarationBytes": "import { createContactCarrier, inspectContactCarrier } from './contact-carrier';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./contact-profile",
+        "literalBytes": "'./contact-profile'",
+        "typeOnly": false,
+        "declarationBytes": "import { contactProfile, contactPaintOutset } from './contact-profile';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./style-tint-profile",
+        "literalBytes": "'./style-tint-profile'",
+        "typeOnly": false,
+        "declarationBytes": "import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./image-prepare",
+        "literalBytes": "'./image-prepare'",
+        "typeOnly": false,
+        "declarationBytes": "import { prepareOpticalImage } from './image-prepare';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./geometry-watch",
+        "literalBytes": "'./geometry-watch'",
+        "typeOnly": false,
+        "declarationBytes": "import { observeMaterialGeometry } from './geometry-watch';"
+      },
+      {
+        "kind": "import",
+        "specifier": "@proto.ui/core",
+        "literalBytes": "'@proto.ui/core'",
+        "typeOnly": true,
+        "declarationBytes": "import type { EffectsPort } from '@proto.ui/core';"
+      },
+      {
+        "kind": "import",
+        "specifier": "@proto.ui/module-feedback",
+        "literalBytes": "'@proto.ui/module-feedback'",
+        "typeOnly": true,
+        "declarationBytes": "import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';"
+      },
+      {
+        "kind": "import",
+        "specifier": "@proto.ui/module-feedback/internal/shared-policy",
+        "literalBytes": "'@proto.ui/module-feedback/internal/shared-policy'",
+        "typeOnly": false,
+        "declarationBytes": "import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared-policy';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./source",
+        "literalBytes": "'./source'",
+        "typeOnly": false,
+        "declarationBytes": "import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./preferences",
+        "literalBytes": "'./preferences'",
+        "typeOnly": false,
+        "declarationBytes": "import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./program",
+        "literalBytes": "'./program'",
+        "typeOnly": true,
+        "declarationBytes": "import type { OpticalGeometry, OpticalFrame } from './program';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./program-inputs",
+        "literalBytes": "'./program-inputs'",
+        "typeOnly": false,
+        "declarationBytes": "import { validateOpticalFrameInputs } from './program-inputs';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./source-refresh-task",
+        "literalBytes": "'./source-refresh-task'",
+        "typeOnly": false,
+        "declarationBytes": "import { createSourceRefreshTask } from './source-refresh-task';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./program-pool",
+        "literalBytes": "'./program-pool'",
+        "typeOnly": false,
+        "declarationBytes": "import { acquireWebOpticalProgram } from './program-pool';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./style",
+        "literalBytes": "'./style'",
+        "typeOnly": false,
+        "declarationBytes": "import {\n  resolveMaterialStyle,\n  resolvePaletteColor,\n  rgbaCss,\n  type MaterialPaletteSource,\n} from './style';"
+      }
+    ],
+    "staticImportsAfter": [
+      {
+        "kind": "import",
+        "specifier": "./initial-paint-bridge",
+        "literalBytes": "'./initial-paint-bridge'",
+        "typeOnly": false,
+        "declarationBytes": "import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./paint-mutations",
+        "literalBytes": "'./paint-mutations'",
+        "typeOnly": false,
+        "declarationBytes": "import { withOwnedCarrierMarker } from './paint-mutations';"
+      },
+      {
+        "kind": "import",
+        "specifier": "../events/pointer-contact",
+        "literalBytes": "'../events/pointer-contact'",
+        "typeOnly": false,
+        "declarationBytes": "import { observeWebPointerContact } from '../events/pointer-contact';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./contact-motion",
+        "literalBytes": "'./contact-motion'",
+        "typeOnly": false,
+        "declarationBytes": "import { createContactMotion } from './contact-motion';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./contact-carrier",
+        "literalBytes": "'./contact-carrier'",
+        "typeOnly": false,
+        "declarationBytes": "import { createContactCarrier, inspectContactCarrier } from './contact-carrier';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./contact-profile",
+        "literalBytes": "'./contact-profile'",
+        "typeOnly": false,
+        "declarationBytes": "import { contactProfile, contactPaintOutset } from './contact-profile';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./style-tint-profile",
+        "literalBytes": "'./style-tint-profile'",
+        "typeOnly": false,
+        "declarationBytes": "import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./image-prepare",
+        "literalBytes": "'./image-prepare'",
+        "typeOnly": false,
+        "declarationBytes": "import { prepareOpticalImage } from './image-prepare';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./geometry-watch",
+        "literalBytes": "'./geometry-watch'",
+        "typeOnly": false,
+        "declarationBytes": "import { observeMaterialGeometry } from './geometry-watch';"
+      },
+      {
+        "kind": "import",
+        "specifier": "@proto.ui/core",
+        "literalBytes": "'@proto.ui/core'",
+        "typeOnly": true,
+        "declarationBytes": "import type { EffectsPort } from '@proto.ui/core';"
+      },
+      {
+        "kind": "import",
+        "specifier": "@proto.ui/module-feedback",
+        "literalBytes": "'@proto.ui/module-feedback'",
+        "typeOnly": true,
+        "declarationBytes": "import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';"
+      },
+      {
+        "kind": "import",
+        "specifier": "@proto.ui/module-feedback/internal/shared-policy",
+        "literalBytes": "'@proto.ui/module-feedback/internal/shared-policy'",
+        "typeOnly": false,
+        "declarationBytes": "import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared-policy';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./source",
+        "literalBytes": "'./source'",
+        "typeOnly": false,
+        "declarationBytes": "import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./preferences",
+        "literalBytes": "'./preferences'",
+        "typeOnly": false,
+        "declarationBytes": "import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./program",
+        "literalBytes": "'./program'",
+        "typeOnly": true,
+        "declarationBytes": "import type { OpticalGeometry, OpticalFrame } from './program';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./program-inputs",
+        "literalBytes": "'./program-inputs'",
+        "typeOnly": false,
+        "declarationBytes": "import { validateOpticalFrameInputs } from './program-inputs';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./source-refresh-task",
+        "literalBytes": "'./source-refresh-task'",
+        "typeOnly": false,
+        "declarationBytes": "import { createSourceRefreshTask } from './source-refresh-task';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./program-pool",
+        "literalBytes": "'./program-pool'",
+        "typeOnly": false,
+        "declarationBytes": "import { acquireWebOpticalProgram } from './program-pool';"
+      },
+      {
+        "kind": "import",
+        "specifier": "./style",
+        "literalBytes": "'./style'",
+        "typeOnly": false,
+        "declarationBytes": "import {\n  resolveMaterialStyle,\n  resolvePaletteColor,\n  rgbaCss,\n  type MaterialPaletteSource,\n} from './style';"
+      }
+    ],
+    "dynamicImportsBefore": [],
+    "dynamicImportsAfter": [],
+    "currentFinitePolicyEntries": 122,
+    "policyMismatches": [
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/sink.ts",
+        "policySha256": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+        "currentSha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+        "matches": false
+      }
+    ],
+    "policyChecks": [
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/geometry-watch.ts",
+        "policySha256": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+        "currentSha256": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/contact-motion.ts",
+        "policySha256": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe",
+        "currentSha256": "3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/initial-paint-bridge.ts",
+        "policySha256": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+        "currentSha256": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/initial-paint-receipt.ts",
+        "policySha256": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+        "currentSha256": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/preferences.ts",
+        "policySha256": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+        "currentSha256": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/sink.ts",
+        "policySha256": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+        "currentSha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+        "matches": false
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/initial-paint-experiment.ts",
+        "policySha256": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+        "currentSha256": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "apps/www/src/components/library-liquid-scene.ts",
+        "policySha256": "d8ccbb061715254ca258abef8e686561aa87cafd9327d84d7a789e8759740a0b",
+        "currentSha256": "d8ccbb061715254ca258abef8e686561aa87cafd9327d84d7a789e8759740a0b",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "apps/www/src/components/library-liquid-card-client.ts",
+        "policySha256": "a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0",
+        "currentSha256": "a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "apps/www/src/components/UiLibraryGallery.astro",
+        "policySha256": "a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb",
+        "currentSha256": "a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "packages/adapters/base/src/material/style-tint-profile.ts",
+        "policySha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+        "currentSha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "apps/www/src/components/library-card-client.ts",
+        "policySha256": "7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8",
+        "currentSha256": "7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8",
+        "matches": true
+      },
+      {
+        "policy": "libraryCard",
+        "path": "apps/www/src/components/library-card-prototypes.ts",
+        "policySha256": "a3b68f1d7e9d8b00a683d826cedd549b73d9fba686c0dbe6a79d13772fbafabf",
+        "currentSha256": "a3b68f1d7e9d8b00a683d826cedd549b73d9fba686c0dbe6a79d13772fbafabf",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts",
+        "policySha256": "a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6",
+        "currentSha256": "a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-detail-probe.ts",
+        "policySha256": "ccc7d8268a06ebd987313ffedbbe816cac468b8d2a8886ca405b000210cbdce0",
+        "currentSha256": "ccc7d8268a06ebd987313ffedbbe816cac468b8d2a8886ca405b000210cbdce0",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts",
+        "policySha256": "bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3",
+        "currentSha256": "bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts",
+        "policySha256": "aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56",
+        "currentSha256": "aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+        "policySha256": "e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83",
+        "currentSha256": "e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/pages/en/test/liquid-glass-portal.astro",
+        "policySha256": "85a63e6869403d278042fa3800c99418eb8e5691e429c302aacd594e181e4cc7",
+        "currentSha256": "85a63e6869403d278042fa3800c99418eb8e5691e429c302aacd594e181e4cc7",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro",
+        "policySha256": "3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b",
+        "currentSha256": "3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b",
+        "matches": true
+      },
+      {
+        "policy": "diagnostic",
+        "path": "apps/www/src/pages/en/test/liquid-glass-toggle.astro",
+        "policySha256": "0d0902bb724042377375f7d016e55538d05f5665e4e1b65be20770edfdb1b2f0",
+        "currentSha256": "0d0902bb724042377375f7d016e55538d05f5665e4e1b65be20770edfdb1b2f0",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "apps/www/src/components/site-startup-paint.ts",
+        "policySha256": "714685626c3aae0ac056e2732d3d518206ecd70d0e9d26f3d3a35dcc3bbb7c36",
+        "currentSha256": "714685626c3aae0ac056e2732d3d518206ecd70d0e9d26f3d3a35dcc3bbb7c36",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "apps/www/src/components/snapshot-prototype-style.ts",
+        "policySha256": "e75d13528751e109f129fbb10a0cc5b53ee17c8817a87434acd58b6e5703a83e",
+        "currentSha256": "e75d13528751e109f129fbb10a0cc5b53ee17c8817a87434acd58b6e5703a83e",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/as-trigger/src/caps.ts",
+        "policySha256": "ee382c6c18df35aa1e072127d1b678edbbb2d53639705275d454a56d52f1374d",
+        "currentSha256": "ee382c6c18df35aa1e072127d1b678edbbb2d53639705275d454a56d52f1374d",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/as-trigger/src/create.ts",
+        "policySha256": "3e53f07a0537a57d7e8c61bfcd4dcfb86d1cfcbc568ed4fcc44b6173f9b14506",
+        "currentSha256": "3e53f07a0537a57d7e8c61bfcd4dcfb86d1cfcbc568ed4fcc44b6173f9b14506",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/as-trigger/src/impl.ts",
+        "policySha256": "d51d08bbd493ad9c79f65474ba19e5a9d63065104e0b8a6ad8982c3e339a1a3f",
+        "currentSha256": "d51d08bbd493ad9c79f65474ba19e5a9d63065104e0b8a6ad8982c3e339a1a3f",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/as-trigger/src/index.ts",
+        "policySha256": "211372846fcfeb3dff2ae0801dadfec2022b04021470714f5bc4fbf5b47d2692",
+        "currentSha256": "211372846fcfeb3dff2ae0801dadfec2022b04021470714f5bc4fbf5b47d2692",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/as-trigger/src/types.ts",
+        "policySha256": "7fbe5abc9f5e15ac2ec899509669de03e391a11a1ba1358e4230e4dc997fb512",
+        "currentSha256": "7fbe5abc9f5e15ac2ec899509669de03e391a11a1ba1358e4230e4dc997fb512",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/context/src/caps.ts",
+        "policySha256": "8b66595545138f7b62ad4067943deebe2dc70bf678d86e5ebf2faec89a3d37f6",
+        "currentSha256": "8b66595545138f7b62ad4067943deebe2dc70bf678d86e5ebf2faec89a3d37f6",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/context/src/center.ts",
+        "policySha256": "a575fd7e9e6b55cd9edc6f0cf1445e125d282dab04940f3890ec38593cde4a42",
+        "currentSha256": "a575fd7e9e6b55cd9edc6f0cf1445e125d282dab04940f3890ec38593cde4a42",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/context/src/create.ts",
+        "policySha256": "4320f9fe60635efa72a792f019395427a7f9062a81ab06c71f09554b67907d96",
+        "currentSha256": "4320f9fe60635efa72a792f019395427a7f9062a81ab06c71f09554b67907d96",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/context/src/impl.ts",
+        "policySha256": "8c44abb7f4579e84c3931375ea0d8db15bef8965166de5ad3a2f5181e3ca0e4c",
+        "currentSha256": "8c44abb7f4579e84c3931375ea0d8db15bef8965166de5ad3a2f5181e3ca0e4c",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/context/src/index.ts",
+        "policySha256": "db974e7a2f288a9f64450ba4a64c297f2c62b3e13959a49c80f85ed53295073b",
+        "currentSha256": "db974e7a2f288a9f64450ba4a64c297f2c62b3e13959a49c80f85ed53295073b",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/context/src/types.ts",
+        "policySha256": "5d21011af103f05a1c35e58f064781ec7fe00078036f581169180ee4ddaae065",
+        "currentSha256": "5d21011af103f05a1c35e58f064781ec7fe00078036f581169180ee4ddaae065",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/event/src/caps.ts",
+        "policySha256": "ad4562557b557f8083a5e543c670a2815a9a7e8fa43ff694453708a4498dc95a",
+        "currentSha256": "ad4562557b557f8083a5e543c670a2815a9a7e8fa43ff694453708a4498dc95a",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/event/src/create.ts",
+        "policySha256": "dfe7d953c9763325d4581f7edba433a48a17ef795be465b935c5d903b15edccd",
+        "currentSha256": "dfe7d953c9763325d4581f7edba433a48a17ef795be465b935c5d903b15edccd",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/event/src/impl.ts",
+        "policySha256": "84fc4386e0cb897554179824f31c0f7b212e5603af5ec3f9642385224850d28c",
+        "currentSha256": "84fc4386e0cb897554179824f31c0f7b212e5603af5ec3f9642385224850d28c",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/event/src/index.ts",
+        "policySha256": "a61f750766ae01f8176c61acc62b9cf04a9f0821c15eb0fb121b4934ebec132c",
+        "currentSha256": "a61f750766ae01f8176c61acc62b9cf04a9f0821c15eb0fb121b4934ebec132c",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/event/src/kernel.ts",
+        "policySha256": "f83c6f2673a9004604357a1516e0a8f2ed484f941dca82f730218eefec8b808b",
+        "currentSha256": "f83c6f2673a9004604357a1516e0a8f2ed484f941dca82f730218eefec8b808b",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/event/src/types.ts",
+        "policySha256": "d62695f83cd5b7233a77fc8445fa0ffd871cab719b85b9d0196422eab909493e",
+        "currentSha256": "d62695f83cd5b7233a77fc8445fa0ffd871cab719b85b9d0196422eab909493e",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/caps.ts",
+        "policySha256": "d799cf851eadf7fbf0568adaaf1cf3338edad9bfe84dcf622b1ab7746ebdc7c2",
+        "currentSha256": "d799cf851eadf7fbf0568adaaf1cf3338edad9bfe84dcf622b1ab7746ebdc7c2",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/create.ts",
+        "policySha256": "4812506a51f80f2366c336a22b9378242e00fef6c2f7d6fa254e8cfd5c797148",
+        "currentSha256": "4812506a51f80f2366c336a22b9378242e00fef6c2f7d6fa254e8cfd5c797148",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/index.ts",
+        "policySha256": "57307c4d4de4fae32758e64e0696c374908de7ab9b3261aa5e7c616518d2f81e",
+        "currentSha256": "57307c4d4de4fae32758e64e0696c374908de7ab9b3261aa5e7c616518d2f81e",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/material/deferred-view-sink.ts",
+        "policySha256": "62783dde17a56d2c15aa6ef48ec81ee7c877b2bd88cf5a3118bf8bac89cb1a30",
+        "currentSha256": "62783dde17a56d2c15aa6ef48ec81ee7c877b2bd88cf5a3118bf8bac89cb1a30",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/material/final-style-sink.ts",
+        "policySha256": "e9002c58cce0166af9d819985a93295686c130bfec0ab4bff2182a305c863fbd",
+        "currentSha256": "e9002c58cce0166af9d819985a93295686c130bfec0ab4bff2182a305c863fbd",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/material/owned-slot.ts",
+        "policySha256": "f274a962f3fdfa15af2515c81274068d5fdeddc13f4fd2f2b1cd68473c00911b",
+        "currentSha256": "f274a962f3fdfa15af2515c81274068d5fdeddc13f4fd2f2b1cd68473c00911b",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/material/runtime-cap.ts",
+        "policySha256": "d1b699a04108672de6624bffcb8c4d23316e688312fe094f293764aafb96b5c4",
+        "currentSha256": "d1b699a04108672de6624bffcb8c4d23316e688312fe094f293764aafb96b5c4",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/material/shared-sink.ts",
+        "policySha256": "d1e4e725533e41f9d30209e2a0c86f32f88b09314b2c4e8008419aa9b4ca134b",
+        "currentSha256": "d1e4e725533e41f9d30209e2a0c86f32f88b09314b2c4e8008419aa9b4ca134b",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/motion/projector.ts",
+        "policySha256": "17f055f39d0df0395e621fbfdc59c912ad60ba00e4374807702f6d81c5091aab",
+        "currentSha256": "17f055f39d0df0395e621fbfdc59c912ad60ba00e4374807702f6d81c5091aab",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/motion/sampler.ts",
+        "policySha256": "df9a89d4849580aa854b850b2eb837198dd891a5459ca476069c13233b0bfc24",
+        "currentSha256": "df9a89d4849580aa854b850b2eb837198dd891a5459ca476069c13233b0bfc24",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/motion/sink.ts",
+        "policySha256": "09db7c8830988669b593c980fe788ed0f2f9d18b0c09665e9774afaca189898c",
+        "currentSha256": "09db7c8830988669b593c980fe788ed0f2f9d18b0c09665e9774afaca189898c",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/motion/targets.ts",
+        "policySha256": "22577a87737f05377274832a7bd4a82b2400313cf5b60412ce46361b7369d69a",
+        "currentSha256": "22577a87737f05377274832a7bd4a82b2400313cf5b60412ce46361b7369d69a",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/presence/controller.ts",
+        "policySha256": "8594e2fea1a9cb140974adba6e3abe8450e2b4314d51bc2256c3e2e075e6a02d",
+        "currentSha256": "8594e2fea1a9cb140974adba6e3abe8450e2b4314d51bc2256c3e2e075e6a02d",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/presence/projector.ts",
+        "policySha256": "e704d451ae2f3aeab7c5fb26f49b90aebac49191784a051059bfdd1a04b22e90",
+        "currentSha256": "e704d451ae2f3aeab7c5fb26f49b90aebac49191784a051059bfdd1a04b22e90",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/presence/sink.ts",
+        "policySha256": "00302081dcb0087aa1d56f73c24e5e2dcb1d411d423b7147867a4699965906e5",
+        "currentSha256": "00302081dcb0087aa1d56f73c24e5e2dcb1d411d423b7147867a4699965906e5",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/style/owned-decoration-cap.ts",
+        "policySha256": "08ade8287b973f8e3f4f1456c4c3320aff523751d8fe08fe83b152174403cc93",
+        "currentSha256": "08ade8287b973f8e3f4f1456c4c3320aff523751d8fe08fe83b152174403cc93",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/style/owned-decoration-registry.ts",
+        "policySha256": "2d20664473d59e002bd3b8383551d876f0ffc987063b5ab325aab3eee59f3d67",
+        "currentSha256": "2d20664473d59e002bd3b8383551d876f0ffc987063b5ab325aab3eee59f3d67",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/feedback/src/types.ts",
+        "policySha256": "26b604199f2bf9616abf5e327ca74c8344ce473bc8472eb0e8f8aed6ae7397ce",
+        "currentSha256": "26b604199f2bf9616abf5e327ca74c8344ce473bc8472eb0e8f8aed6ae7397ce",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/rule-meta/src/caps.ts",
+        "policySha256": "7ecec29ad71a7950beb7541e37663658d61896beec60667459071d63f5067e2c",
+        "currentSha256": "7ecec29ad71a7950beb7541e37663658d61896beec60667459071d63f5067e2c",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/rule-meta/src/create.ts",
+        "policySha256": "633880a0f819cd108100199d8aefdca6397b2a0bfae4d3b49c9ae863e4207a7c",
+        "currentSha256": "633880a0f819cd108100199d8aefdca6397b2a0bfae4d3b49c9ae863e4207a7c",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/rule-meta/src/index.ts",
+        "policySha256": "cdfe80728758c31636d5bc79d50b7313e371d77b107e455104b6fa842fa54584",
+        "currentSha256": "cdfe80728758c31636d5bc79d50b7313e371d77b107e455104b6fa842fa54584",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/rule-meta/src/keyed-lease.ts",
+        "policySha256": "523668e8ff5ded706747dc8008d23bb6aadbffcff4f3f942f2bc186935186544",
+        "currentSha256": "523668e8ff5ded706747dc8008d23bb6aadbffcff4f3f942f2bc186935186544",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/modules/rule-meta/src/types.ts",
+        "policySha256": "69c5a8cc4f4d9f126ae0f7f6dc288fa53d2d5bcda4132b964a3b247ef528b410",
+        "currentSha256": "69c5a8cc4f4d9f126ae0f7f6dc288fa53d2d5bcda4132b964a3b247ef528b410",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/index.ts",
+        "policySha256": "ad2935929a1d467d78e03c367a67758fc2b421565892b98094b3076c47fa9e19",
+        "currentSha256": "ad2935929a1d467d78e03c367a67758fc2b421565892b98094b3076c47fa9e19",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/execute/callback-scope.ts",
+        "policySha256": "aee82651cc5b2d773ab6260b7ccc081d09927e4a5aaec8d30fed135a35605c77",
+        "currentSha256": "aee82651cc5b2d773ab6260b7ccc081d09927e4a5aaec8d30fed135a35605c77",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/execute/index.ts",
+        "policySha256": "e35ce91a8e54cec527f41a4e8437786bcb2ac09bc500619efc7bbf15f1e70045",
+        "currentSha256": "e35ce91a8e54cec527f41a4e8437786bcb2ac09bc500619efc7bbf15f1e70045",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/execute/prototype.ts",
+        "policySha256": "bb1513f8ecb6df6cb81998c262d3007f712c52146ac2d9a083563ec18b2bafc2",
+        "currentSha256": "bb1513f8ecb6df6cb81998c262d3007f712c52146ac2d9a083563ec18b2bafc2",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/execute/types.ts",
+        "policySha256": "1555687b46e2b9ae8bec0535bd08da2a84bc1d347f3f61f90f0da1e7e85f52e0",
+        "currentSha256": "1555687b46e2b9ae8bec0535bd08da2a84bc1d347f3f61f90f0da1e7e85f52e0",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/execute/with-host.ts",
+        "policySha256": "bab51f974ff50e0d4320561bcfc7a6390439fe365694b1bb6bac81e53bae1c25",
+        "currentSha256": "bab51f974ff50e0d4320561bcfc7a6390439fe365694b1bb6bac81e53bae1c25",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/host.ts",
+        "policySha256": "2247e60b269e0925d8d7d7bba03da532936a2fccb10e05018d354878380ab2b2",
+        "currentSha256": "2247e60b269e0925d8d7d7bba03da532936a2fccb10e05018d354878380ab2b2",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/index.ts",
+        "policySha256": "bd5a14147c10794856da7d28e857ea7a11c6275bc37bb7478447d1d4614d4a47",
+        "currentSha256": "bd5a14147c10794856da7d28e857ea7a11c6275bc37bb7478447d1d4614d4a47",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/instance.ts",
+        "policySha256": "137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b",
+        "currentSha256": "137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/instance/session.ts",
+        "policySha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "currentSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/as-hook.ts",
+        "policySha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+        "currentSha256": "808a8a3e295b63ed788bc1d78b74d7d0b004b8fc160f591d0c88f8f24373a063",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/event/index.ts",
+        "policySha256": "bd9a4201fde6d05cb21aa186bf2995a86e629f48e96fccb8d33cd47e301c2694",
+        "currentSha256": "bd9a4201fde6d05cb21aa186bf2995a86e629f48e96fccb8d33cd47e301c2694",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/event/runtime-event-callbacks.ts",
+        "policySha256": "6baaf9cf91684ecb678ac18efdceb9ebda77f01e3461df9a239284b9bbc84b39",
+        "currentSha256": "6baaf9cf91684ecb678ac18efdceb9ebda77f01e3461df9a239284b9bbc84b39",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/handles/def.ts",
+        "policySha256": "b9d2c7e28189a34a1ef3c32abe678fc198dfc625f33821a87f9e7b7171f88c4d",
+        "currentSha256": "b9d2c7e28189a34a1ef3c32abe678fc198dfc625f33821a87f9e7b7171f88c4d",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/handles/index.ts",
+        "policySha256": "ff41af2a8b6135a92a4872b65f5a9312d1db8cf63cfa440309257e96b4f3dce7",
+        "currentSha256": "ff41af2a8b6135a92a4872b65f5a9312d1db8cf63cfa440309257e96b4f3dce7",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/handles/run.ts",
+        "policySha256": "05ed799675b9939eeffaf1e069c274b21898e1ce7f575972b83416911d129792",
+        "currentSha256": "05ed799675b9939eeffaf1e069c274b21898e1ce7f575972b83416911d129792",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/index.ts",
+        "policySha256": "7f51bc2d559f077bb3dc6e83df1245d19d0b6ee41e223565489528ea069bd3d8",
+        "currentSha256": "7f51bc2d559f077bb3dc6e83df1245d19d0b6ee41e223565489528ea069bd3d8",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/kernel.ts",
+        "policySha256": "cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026",
+        "currentSha256": "cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/lifecycle-events.ts",
+        "policySha256": "b42be9af540da4dd0371eef254e96450e6918a29eda25e73483638bd9f6f7cf8",
+        "currentSha256": "b42be9af540da4dd0371eef254e96450e6918a29eda25e73483638bd9f6f7cf8",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/view-intent.ts",
+        "policySha256": "8e1a8521a635a195f714822403ec296bff49d4db1c3a27794201cd47e8c25c1b",
+        "currentSha256": "8e1a8521a635a195f714822403ec296bff49d4db1c3a27794201cd47e8c25c1b",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/kernel/view-operation.ts",
+        "policySha256": "d8c903194791e6c1203d7369f7cd474022979c3d11e73c0ecdf56545ebeeec72",
+        "currentSha256": "d8c903194791e6c1203d7369f7cd474022979c3d11e73c0ecdf56545ebeeec72",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/caps/index.ts",
+        "policySha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+        "currentSha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/caps/types.ts",
+        "policySha256": "76fe06e4424f4b3c3526e404f9e760f1dac0a6eab49cad02bed6e42af5415944",
+        "currentSha256": "76fe06e4424f4b3c3526e404f9e760f1dac0a6eab49cad02bed6e42af5415944",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/index.ts",
+        "policySha256": "e85bff4d04fd25cfd169d02c162a7b5df94d0e83eccea1e6d84f71acb1be9256",
+        "currentSha256": "e85bff4d04fd25cfd169d02c162a7b5df94d0e83eccea1e6d84f71acb1be9256",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/module-orchestrator/graph.ts",
+        "policySha256": "7e21fb940567d33f92ffbcd489b0d70dfdff0055722d0d2f346a6d1776aff580",
+        "currentSha256": "7e21fb940567d33f92ffbcd489b0d70dfdff0055722d0d2f346a6d1776aff580",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/module-orchestrator/index.ts",
+        "policySha256": "664d6c957291d9d7e7dd8bb48e25d7101f23bbfc8da9ccd6de3902ecebe48f45",
+        "currentSha256": "664d6c957291d9d7e7dd8bb48e25d7101f23bbfc8da9ccd6de3902ecebe48f45",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/module-orchestrator/runtime-module-orchestrator.ts",
+        "policySha256": "8f4059cf3213c00192bbf17c0c139fee3aaeb12034666e04821bfcf77f14f0fe",
+        "currentSha256": "8f4059cf3213c00192bbf17c0c139fee3aaeb12034666e04821bfcf77f14f0fe",
+        "matches": true
+      },
+      {
+        "policy": "startupPrerender",
+        "path": "packages/runtime/src/orchestrator/module-orchestrator/types.ts",
+        "policySha256": "bfcb6ae9d5e17c32ae4023d3407e512aaa43ef43db85952ff4b62b16a63c77c9",
+        "currentSha256": "bfcb6ae9d5e17c32ae4023d3407e512aaa43ef43db85952ff4b62b16a63c77c9",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/runtime-tabs.ts",
+        "policySha256": "f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178",
+        "currentSha256": "f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/code-example-tabs.ts",
+        "policySha256": "88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058",
+        "currentSha256": "88747166dab1887b8f2a7309c6d869715958356167d6eb3743ec05bb0024a058",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/code-example-tree.ts",
+        "policySha256": "1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336",
+        "currentSha256": "1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/pages/styles/site-library-theme.css.ts",
+        "policySha256": "6e97d6eaca3627a636340869e7c350e6596364640ffee004f3a99c5cde94e2f8",
+        "currentSha256": "6e97d6eaca3627a636340869e7c350e6596364640ffee004f3a99c5cde94e2f8",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/Homepage/homepage-ghost-theme.ts",
+        "policySha256": "106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4",
+        "currentSha256": "106a0a26ccbf02a304e08abf82760b5ee7209877cf77512d37627d4ffe11e7f4",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts",
+        "policySha256": "6ec435217573ac35458cd1ea79b27a9cc95f5137e942cf72b7118a825978cb7a",
+        "currentSha256": "6ec435217573ac35458cd1ea79b27a9cc95f5137e942cf72b7118a825978cb7a",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/shadow-split-s2.ts",
+        "policySha256": "6ef1cb15c224e47045993911e1e6b7c14ad0f93f65df5014c86282118a3a83be",
+        "currentSha256": "6ef1cb15c224e47045993911e1e6b7c14ad0f93f65df5014c86282118a3a83be",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts",
+        "policySha256": "3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108",
+        "currentSha256": "3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts",
+        "policySha256": "4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514",
+        "currentSha256": "4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts",
+        "policySha256": "fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf",
+        "currentSha256": "fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "packages/adapters/base/src/material/program-inputs.ts",
+        "policySha256": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+        "currentSha256": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts",
+        "policySha256": "32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2",
+        "currentSha256": "32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts",
+        "policySha256": "57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894",
+        "currentSha256": "57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/drawer-command-disabled.shared.ts",
+        "policySha256": "b046d82b1709a4c0411d0ee26aaa7fbba4412fcc7c5b173b7d160cd151fb3dbe",
+        "currentSha256": "b046d82b1709a4c0411d0ee26aaa7fbba4412fcc7c5b173b7d160cd151fb3dbe",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts",
+        "policySha256": "02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee",
+        "currentSha256": "02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts",
+        "policySha256": "f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4",
+        "currentSha256": "f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts",
+        "policySha256": "dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2",
+        "currentSha256": "dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts",
+        "policySha256": "f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8",
+        "currentSha256": "f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts",
+        "policySha256": "97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6",
+        "currentSha256": "97f079a40171dbce4a49bf09b0dd346b210a46f300a47931989b23428201b7e6",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts",
+        "policySha256": "8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b",
+        "currentSha256": "8bbb5fbfb4e58cf6e64ba2d96a7523790e2f35f7254987a89af4fb02569f1f7b",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.ts",
+        "policySha256": "249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86",
+        "currentSha256": "249b335382c69683b873c9b0ec7b63287e532ee1b16c709bad7595d47e1d7a86",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/content/docs/demo-shadcn-input-shell.demo.ts",
+        "policySha256": "64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88",
+        "currentSha256": "64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/site-link-recipes.ts",
+        "policySha256": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+        "currentSha256": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/site-native-controls.ts",
+        "policySha256": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+        "currentSha256": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/site-search-commands.ts",
+        "policySha256": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "currentSha256": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/site-search-composition.ts",
+        "policySha256": "8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7",
+        "currentSha256": "8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts",
+        "policySha256": "b078e1e9e43782d87e5966b88ec6fe01b31d43ab70357c17e2f1e3baa30b6f06",
+        "currentSha256": "b078e1e9e43782d87e5966b88ec6fe01b31d43ab70357c17e2f1e3baa30b6f06",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/Homepage/home-action-icons.ts",
+        "policySha256": "f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c",
+        "currentSha256": "f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/Homepage/homepage-gallery-icons.ts",
+        "policySha256": "ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7",
+        "currentSha256": "ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/site-shadcn-controls.ts",
+        "policySha256": "a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f",
+        "currentSha256": "a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f",
+        "matches": true
+      },
+      {
+        "policy": "inlineWebsiteRawImport",
+        "path": "apps/www/src/components/site-search-owner.ts",
+        "policySha256": "aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580",
+        "currentSha256": "aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580",
+        "matches": true
+      }
+    ],
+    "qualification": "Read-only exact-byte/import review. The sink body correction has separate product/control evidence; this review supports only renewal of the one existing exact-body hash with no new dependency admission."
+  },
+  "failedGate": {
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+    "startedAt": "2026-11-21T21:07:26.127862+00:00",
+    "finishedAt": "2026-11-21T21:10:03.790730+00:00",
+    "seconds": 157.663,
+    "exitCode": 1,
+    "before": {
+      "head": "d68296e1163b42e31082e4a01721361db331954c",
+      "tree": "55f16c71b0d37db3954e76fadf9fe24ddf770fd0",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "outputs": [
+        {
+          "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+          "sha256": "adbedf8b4cf3479f3ba0219f3e935a016584ae226c885c0993fce9a2f5cab430"
+        },
+        {
+          "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+          "sha256": "1c65c8341187ef729941ff972b808d4a20fa11318a5a8c90f2acfe4122fb1810"
+        },
+        {
+          "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+          "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+        }
+      ],
+      "reviewedSource": [
+        {
+          "path": "packages/adapters/base/src/material/sink.ts",
+          "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+        },
+        {
+          "path": "packages/adapters/base/test/web-material-sink.test.ts",
+          "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+          "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+        },
+        {
+          "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+          "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+        }
+      ]
+    },
+    "after": {
+      "head": "d68296e1163b42e31082e4a01721361db331954c",
+      "tree": "55f16c71b0d37db3954e76fadf9fe24ddf770fd0",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "outputs": [
+        {
+          "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+          "sha256": "adbedf8b4cf3479f3ba0219f3e935a016584ae226c885c0993fce9a2f5cab430"
+        },
+        {
+          "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+          "sha256": "1c65c8341187ef729941ff972b808d4a20fa11318a5a8c90f2acfe4122fb1810"
+        },
+        {
+          "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+          "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+        }
+      ],
+      "reviewedSource": [
+        {
+          "path": "packages/adapters/base/src/material/sink.ts",
+          "sha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816"
+        },
+        {
+          "path": "packages/adapters/base/test/web-material-sink.test.ts",
+          "sha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+          "sha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700"
+        },
+        {
+          "path": "packages/compiler/test/scroll-reveal-consumers.test.ts",
+          "sha256": "3163c6028b4d48b666bbc15deaf216afdf0c74ca269d5cf913d1a0e78789224e"
+        }
+      ]
+    },
+    "sourceAndGeneratedStable": true,
+    "generatorParsedJsonUnchangedByPrettier": true,
+    "logSha256": "90981f0190673c73f207276208e3c7e4b18403c8ef35dec78f4a3d99af3bea01",
+    "logBytes": 3602,
+    "scope": "Actual full local gate on clean source checkpoint plus only generated projections; generated worktree changes do not constitute clean final-head native evidence."
+  },
+  "failedGateLog": "[coverage-matrices] Coverage matrix validation failed with 19 issues:\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./initial-paint-bridge` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./paint-mutations` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `../events/pointer-contact` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./contact-motion` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./contact-carrier` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./contact-profile` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./style-tint-profile` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./image-prepare` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./geometry-watch` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/core` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/module-feedback` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/module-feedback/internal/shared-policy` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./source` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./preferences` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./program` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./program-inputs` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./source-refresh-task` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./program-pool` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `./style` in `packages/adapters/base/src/material/sink.ts` escapes the website consumer-wall allowlist\n",
+  "priorGenerator": {
+    "command": [
+      "node",
+      "scripts/coverage-matrices/prototype-coverage.mjs",
+      "--refresh-candidate",
+      "d68296e1163b42e31082e4a01721361db331954c",
+      "--write"
+    ],
+    "startedAt": "2026-11-21T21:05:41.278854+00:00",
+    "finishedAt": "2026-11-21T21:06:03.436571+00:00",
+    "seconds": 22.158,
+    "exitCode": 0,
+    "sourceHead": "d68296e1163b42e31082e4a01721361db331954c",
+    "sourceTree": "55f16c71b0d37db3954e76fadf9fe24ddf770fd0",
+    "beforeStatusPorcelain": "",
+    "afterStatusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+    "outputs": [
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+        "bytes": 3673267,
+        "sha256": "c4ad8bc722e6ef3371b8c0bffca3c51b07ce041064a5930059fb4e77bda19ad2",
+        "changed": true
+      },
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+        "bytes": 159357,
+        "sha256": "1c65c8341187ef729941ff972b808d4a20fa11318a5a8c90f2acfe4122fb1810",
+        "changed": true
+      },
+      {
+        "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+        "bytes": 50877,
+        "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "changed": false
+      }
+    ],
+    "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+    "preflightNote": "First local wrapper stopped before generator execution on an incorrect third-output path. This actual run uses the generator-defined path; no earlier generator execution or source write occurred."
+  },
+  "preservedOutputs": [
+    {
+      "path": "failed-final-prototype-coverage-matrix.json",
+      "bytes": 3614443,
+      "sha256": "adbedf8b4cf3479f3ba0219f3e935a016584ae226c885c0993fce9a2f5cab430"
+    },
+    {
+      "path": "failed-final-prototype-coverage-matrix.md",
+      "bytes": 159357,
+      "sha256": "1c65c8341187ef729941ff972b808d4a20fa11318a5a8c90f2acfe4122fb1810"
+    }
+  ],
+  "nextEvidence": "The clean source checkpoint containing this finite hash renewal must be regenerated and pass the actual complete coverage gate. Existing e775 native evidence stays bound to e775."
+}

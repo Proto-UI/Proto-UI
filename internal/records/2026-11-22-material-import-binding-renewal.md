@@ -1,0 +1,11 @@
+# Material sink finite import binding renewal
+
+The complete local coverage command at clean source checkpoint `d68296e1163b42e31082e4a01721361db331954c`, with only its real generated projections present, failed after **157.663 seconds**, exit 1. It reported **19 raw-import findings** for the material sink, before the Node control stage started. The original failed log and generated output hashes are retained in [the machine-readable record](2026-11-22-material-import-binding-renewal.json); the failure is not rewritten as successful validation.
+
+The sink refusal-cache correction changed its exact file body from SHA-256 `c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4` to `768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816`. The separate finite policy in `scripts/coverage-matrices/library-card-imports.mjs` still referenced the prior body. The candidate portfolio's 5,955 bindings do not directly include this optional material sink; refreshing that portfolio alone could not renew this independent guard.
+
+Independent source review found all **19 static import declarations** unchanged: literal specifiers, type-only flags, complete declaration bytes and order match e775 exactly. There is no dynamic-import change. The broader audit checked **122 source-hash entries** across the three finite import-policy modules and the checker's inline guards; this sink entry was the sole current mismatch. The earlier Website review paragraph retains its historical hash and is not rewritten.
+
+This change renews only the existing sink `sourceSha256`. It adds no allowed file, import edge, directory exemption, owner or acceptance promotion. The derived interactive-source entry continues to use the same finite policy value. All imports, bound owners, validation logic and product/test source remain unchanged by this renewal.
+
+After archiving the failed projections, only those two generated files were restored to the source checkpoint. The clean source commit containing this one-hash renewal must go through the actual generator and complete coverage gate again. Local type and unit controls retain their original source boundaries; the final corrected candidate still requires its own native cycle. The earlier e775 native failures remain attached to e775.
