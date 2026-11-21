@@ -46,6 +46,38 @@ function geometry(surface: HTMLElement, target: HTMLElement) {
 }
 const unavailable = { kind: 'rejected', reason: 'unavailable' };
 
+/** Finish mounting's end-follow work before injecting request-specific geometry. */
+async function mountSettledScrollFamily(profile: (typeof nativeOwnerProfiles)[number]) {
+  let next = 0;
+  const pending = new Map<number, FrameRequestCallback>();
+  const request = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    pending.set(++next, callback);
+    return next;
+  });
+  const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+    pending.delete(id);
+  });
+  try {
+    const owner = await mountScrollFamily(profile);
+    // act also flushes mounting effects that can register another surface's frame.
+    // Bound the fixture: a continuously rescheduling owner must fail, not hang.
+    for (let round = 0; round < 8; ++round) {
+      await owner.act(() => {
+        const batch = [...pending.entries()];
+        for (const [id, callback] of batch) {
+          if (!pending.delete(id)) continue;
+          callback(performance.now());
+        }
+      });
+      if (!pending.size) return owner;
+    }
+    throw new Error('scroll-family mounting did not finish its animation-frame work');
+  } finally {
+    request.mockRestore();
+    cancel.mockRestore();
+  }
+}
+
 for (const profile of nativeOwnerProfiles)
   describe(`C-SCROLL-TARGET-REVEAL-0001 ordinary ${profile}`, () => {
     it('reveals a real current part with minimal vertical movement and preserves unrelated host state', async () => {
@@ -112,7 +144,7 @@ for (const profile of nativeOwnerProfiles)
     });
 
     it('rejects an item owned by another surface, a sibling, self and another family before physical movement', async () => {
-      const owner = await mountScrollFamily(profile);
+      const owner = await mountSettledScrollFamily(profile);
       const surface = owner.physical('surface');
       geometry(surface, owner.physical('direct'));
       const exposed = owner.handles.surface.getExposes();
@@ -163,7 +195,7 @@ for (const profile of nativeOwnerProfiles)
     });
 
     it('rechecks target availability after geometry getters synchronously detach the physical target', async () => {
-      const owner = await mountScrollFamily(profile);
+      const owner = await mountSettledScrollFamily(profile);
       const surface = owner.physical('surface');
       const target = owner.physical('direct'),
         parent = target.parentNode!,
