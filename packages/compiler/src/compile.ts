@@ -74,8 +74,8 @@ export function compilePrototype(source: string, options: CompileOptions = {}): 
 /** Read the declared project and explicitly exported package sources without executing input. */
 export async function compileFile(entry: string, options: FileCompileOptions = {}): Promise<CompileResult<Compilation>> {
   const fallback: SourceSpan = {file:'<input>',start:0,end:0,line:1,column:1,endLine:1,endColumn:1};
+  let snapshot = options.sourceSnapshot;
   try {
-    let snapshot = options.sourceSnapshot;
     if (!snapshot) {
       const root = await realpath(options.root ?? process.cwd());
       const graph = new FileSourceGraph(root);
@@ -83,16 +83,43 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
       if (loaded.failures.length) throw loaded.failures[0];
       snapshot = loaded;
     }
+  } catch (error) {
+    // Declared loader failures are ordinary Errors. TypeError, ReferenceError
+    // and RangeError are not part of that contract, so they stay defects and
+    // keep their stacks instead of being relabeled as bad source.
+    if (error instanceof CompilerRejection) return {ok:false,diagnostics:[error.diagnostic]};
+    if (isDeclaredInputError(error)) return {ok:false,diagnostics:[inputDiagnostic(error,fallback)]};
+    return {ok:false,diagnostics:[defectDiagnostic(error,fallback)]};
+  }
+  try {
     const fileName = sourceName(snapshot.entry);
     const source = snapshot.files[fileName];
-    if (typeof source !== 'string') throw new Error(`Closed source snapshot has no entry ${fileName}.`);
+    if (typeof source !== 'string')
+      return {ok:false,diagnostics:[inputDiagnostic(new Error(`Closed source snapshot has no entry ${fileName}.`),fallback)]};
     const result = compilePrototype(source, {fileName,files:snapshot.files,sourceImports:snapshot.sourceImports,exportName:options.exportName,componentName:options.componentName,profile:options.profile,nativeSdkPath:options.nativeSdkPath,gpuiDependency:options.gpuiDependency});
     if (result.ok && snapshot.sourceResolution) result.value.output.provenance.sourceResolution = snapshot.sourceResolution;
     return result;
   } catch (error) {
     if (error instanceof CompilerRejection) return {ok:false,diagnostics:[error.diagnostic]};
-    return {ok:false,diagnostics:[{code:'PUI1003',category:'invalid-input',message:error instanceof Error ? error.message:String(error),span:fallback}]};
+    return {ok:false,diagnostics:[defectDiagnostic(error,fallback)]};
   }
+}
+
+function isDeclaredInputError(error: unknown): error is Error {
+  return error instanceof Error
+    && !(error instanceof TypeError)
+    && !(error instanceof ReferenceError)
+    && !(error instanceof RangeError);
+}
+function inputDiagnostic(error: unknown, span: SourceSpan) {
+  return {code:'PUI1003' as const,category:'invalid-input' as const,message:error instanceof Error ? error.message : String(error),span};
+}
+function defectDiagnostic(error: unknown, span: SourceSpan) {
+  return {code:'PUI1999' as const,category:'compiler-defect' as const,message:defectMessage(error),span};
+}
+function defectMessage(error: unknown): string {
+  if (error instanceof Error) return `Compiler defect: ${error.stack ?? error.message}`;
+  return `Compiler defect: ${String(error)}`;
 }
 
 export function compilationArtifacts(compilation: Compilation, options: { sourcePath?: string; manifestPath?: string } = {}): OutputArtifact[] {
