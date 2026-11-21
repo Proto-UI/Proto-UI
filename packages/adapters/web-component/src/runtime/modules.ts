@@ -2597,6 +2597,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               ? { preventScroll: options.preventScroll }
               : undefined
           );
+          // Native focus scrolling does not reach every custom-element scroll
+          // container (observed: a flex custom-element list with overflow-x
+          // auto never moves for a focused custom-element member). An explicit
+          // nearest reveal is a no-op where native focus already scrolled.
+          if (options?.preventScroll !== true)
+            target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
           const applied = isWebFocusTargetActive(target);
           // Native focus can synchronously issue a newer request. Only the
           // still-current intent owns success or retry-budget accounting.
