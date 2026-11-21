@@ -23,7 +23,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "1f5ae6257c394894840badc6c3952d2819d9d937f661f552b5b76fa6960270e6"
+      "sha256": "512567c5f376fbc5a55448aae4589fc2d56814c78216d930ea069e5a63149219"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
