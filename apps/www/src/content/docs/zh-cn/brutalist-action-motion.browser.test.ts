@@ -220,6 +220,14 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
                   const observed = await menu.evaluate(async (node) => {
                     const panel = document.getElementById(node.getAttribute('aria-controls') ?? '');
                     if (!panel) throw new Error('Missing owned menu panel');
+                    type MenuPlacementFrame = {
+                      released: boolean;
+                      idle: boolean;
+                      connected: boolean;
+                      expanded: string | null;
+                      rects: number[][];
+                      placement: string[];
+                    };
                     const snapshot = () => {
                       const css = getComputedStyle(panel);
                       return {
@@ -245,7 +253,7 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
                         ].map((name) => css.getPropertyValue(name)),
                       };
                     };
-                    const frames = [];
+                    const frames: MenuPlacementFrame[] = [];
                     for (let index = 0; index < 3; index++) {
                       const { promise, resolve } = Promise.withResolvers<void>();
                       requestAnimationFrame(() => resolve());
@@ -1111,7 +1119,7 @@ async function captureItemPair(
           )
           .concat(alpha);
       };
-      const background = (node: Element) => {
+      const background = (node: (typeof nodes)[number]) => {
         const layers: number[][] = [];
         let opaqueBackingFound = false;
         for (let current: Element | null = node; current; ) {

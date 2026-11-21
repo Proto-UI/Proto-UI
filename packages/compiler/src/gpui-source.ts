@@ -1523,6 +1523,8 @@ impl __PuiNativeRecordValue {
             throw new Error('GPUI does not yet support native String coercion.');
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
+          case 'object.assign':
+            throw new Error('GPUI does not yet support fresh-target Object.assign.');
           case 'object.freeze':
             return `freeze(${args[0]})`;
           case 'object.hasOwn':
