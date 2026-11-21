@@ -694,11 +694,11 @@ function createDocumentMaterialSink(
           JSON.stringify(last.material.slot) === JSON.stringify(frame.material.slot)
         );
       };
-      const nextPaintLease = JSON.stringify([
+      const paintConditions = [
         frame.view,
         sourceEpoch,
         palette.revision,
-        opticalGeometry,
+        { ...geometry, bounds: admission.bounds },
         policy.effectiveMotion,
         resolved.fill,
         resolved.foreground,
@@ -706,7 +706,8 @@ function createDocumentMaterialSink(
         candidate.variant,
         candidate.tint,
         selectedProfile,
-      ]);
+      ];
+      const nextPaintLease = JSON.stringify([paintConditions, paintOutset]);
       const installPaint = (image: string, currentCss: CSSStyleDeclaration) => {
         if (tracksContact) {
           carrier ??= withOwnedCarrierMarker(host, () => createContactCarrier(host));
@@ -759,8 +760,12 @@ function createDocumentMaterialSink(
       // Carrier/transport refusal is independent of changing source pixels or
       // pointer-move samples. Only a new style/geometry/profile/session can
       // make that failed admission useful to retry; GPU failures remain uncached.
+      // Stopping rejected contact changes its paint extent, not those inputs.
+      // Keep that internal transition out of the failure identity while paint
+      // and pending leases still bind the complete current extent.
       const retryKey = JSON.stringify([
-        lease,
+        paintConditions,
+        motionFrame.session,
         externalStyleRevision,
         tokens,
         candidate.deformation?.phase,

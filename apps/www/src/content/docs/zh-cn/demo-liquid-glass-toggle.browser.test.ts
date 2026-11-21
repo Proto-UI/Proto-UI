@@ -434,13 +434,10 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           }));
           try {
             for (const direction of ['ltr', 'rtl'] as const) {
-              await bare.evaluate(
-                (host, dir) => {
-                  host.setAttribute('dir', dir);
-                  (host as HTMLElement).style.fontSize = '28px';
-                },
-                direction
-              );
+              await bare.evaluate((host, dir) => {
+                host.setAttribute('dir', dir);
+                (host as HTMLElement).style.fontSize = '28px';
+              }, direction);
               await capture(
                 `${runtime}-${theme}-no-provider-${direction}-large-text`,
                 bare,
@@ -449,14 +446,11 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
               );
             }
           } finally {
-            await bare.evaluate(
-              (host, original) => {
-                if (original.dir === null) host.removeAttribute('dir');
-                else host.setAttribute('dir', original.dir);
-                (host as HTMLElement).style.fontSize = original.fontSize;
-              },
-              originalGeometryStyle
-            );
+            await bare.evaluate((host, original) => {
+              if (original.dir === null) host.removeAttribute('dir');
+              else host.setAttribute('dir', original.dir);
+              (host as HTMLElement).style.fontSize = original.fontSize;
+            }, originalGeometryStyle);
           }
           expect(await subject('disabled').getAttribute('aria-pressed')).toBe('true');
 
@@ -517,8 +511,15 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           await expect.poll(() => target.getAttribute('aria-pressed')).toBe('true');
           await expect.poll(() => state(page, runtime, 'regular', 'pressed')).toBe(false);
           await expect.poll(() => target.getAttribute('data-material-phase')).toBe('rest');
+          // Semantic release precedes the finite physical contact tail. Retain
+          // that observation, then compare stationary rasters only after the
+          // provider has committed rest; the original poll/case limits remain.
+          await capture(`${runtime}-${theme}-released`, target, observations);
+          await expect.poll(() => target.getAttribute('data-material-contact')).toBe('rest');
           const active = await capture(`${runtime}-${theme}-active`, target, observations);
           optical(active);
+          expect(active.receipt.contact).toBe('rest');
+          expect(active.paint.paintOutset).toBe(0);
           expect(active.underline).toBe('none');
           expect(active.borderColor).toEqual(active.ringColor);
           expect(active.background).toEqual(inactive.background);

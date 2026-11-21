@@ -1593,6 +1593,111 @@ describe('independent-review R2: failed carrier must become idle', () => {
       f.sink.release(1);
     }
   );
+  it.each(['carrier stylesheet', 'image transport'] as const)(
+    'retains %s refusal through contact shutdown but retries changed geometry and sessions',
+    async (failure) => {
+      let refused = true;
+      if (failure === 'carrier stylesheet') {
+        carrierControl.create = (host) => {
+          host.setAttribute('data-pui-material-carrier', 'contact-v1');
+          return {
+            valid: () => !refused,
+            release() {
+              host.removeAttribute('data-pui-material-carrier');
+            },
+          };
+        };
+      } else {
+        decoding.prepare.mockImplementation((_doc, _source, ready, failed) => {
+          if (refused) failed();
+          else ready();
+          return () => {};
+        });
+      }
+      const f = fixture();
+      let frames: FrameRequestCallback[] = [];
+      vi.mocked(window.requestAnimationFrame).mockImplementation((fn) => {
+        frames.push(fn);
+        return frames.length;
+      });
+      const turn = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const pending = frames;
+        frames = [];
+        pending.forEach((fn) => fn(performance.now()));
+      };
+      const base = f.frame(1);
+      const frame: VisualFeedbackFrame = {
+        ...base,
+        material: {
+          ...base.material,
+          candidates: [
+            {
+              intent: 'liquid-glass',
+              deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+            },
+          ],
+        },
+      };
+      const writer = createWebPointerContactWriter(f.host);
+      const send = (session: number, reason: 'down' | 'move') =>
+        writer.publish({
+          active: true,
+          session,
+          x: 0.5,
+          y: 0.5,
+          deltaX: 0,
+          deltaY: 0,
+          reason,
+        });
+      try {
+        f.sink.commit(frame);
+        await turn();
+        expect(optical.render).toHaveBeenCalledTimes(1);
+        send(1, 'down');
+        await turn();
+        // Failed admission stops contact. Its already queued RAF must not
+        // reinterpret that internal shutdown as a repaired carrier/transport.
+        expect(optical.render).toHaveBeenCalledTimes(2);
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        for (let revision = 2; revision < 7; revision++) {
+          f.source(true, revision);
+          send(1, 'move');
+          await turn();
+        }
+        expect(optical.render).toHaveBeenCalledTimes(2);
+
+        // Actual placement changes remain a retry condition even when the
+        // host dimensions are unchanged. Source revisions alone did not.
+        vi.mocked(f.host.getBoundingClientRect).mockReturnValue(rect(60, 30, 100, 40));
+        f.source(true, 7);
+        await turn();
+        expect(optical.render).toHaveBeenCalledTimes(3);
+        f.source(true, 8);
+        await turn();
+        expect(optical.render).toHaveBeenCalledTimes(3);
+        send(2, 'down');
+        await turn();
+        expect(optical.render).toHaveBeenCalledTimes(4);
+
+        refused = false;
+        f.source(true, 9);
+        f.sink.commit({ ...frame, revision: 2 });
+        await turn();
+        expect(optical.render).toHaveBeenCalledTimes(4);
+        f.host.className = 'author-fixed-carrier-style';
+        // An ordinary commit observes the actual author edit; no private
+        // failure key or motion state is injected into this control.
+        f.sink.commit({ ...frame, revision: 3 });
+        await turn();
+        expect(optical.render).toHaveBeenCalledTimes(5);
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe('');
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
 });
 
 it('holds an image-transport failure across source revisions and retries changed preferences', () => {

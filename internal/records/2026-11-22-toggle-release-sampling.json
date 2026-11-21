@@ -1,0 +1,1368 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-21T20:49:49.061377+00:00",
+  "classification": "test-premise-drift: semantic rest was sampled during the finite physical release tail",
+  "nativeObservation": {
+    "runId": 44945602403,
+    "jobId": 136972650738,
+    "artifactId": 14723988152,
+    "sourceSha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+    "metadataSha256": "4dfd1ea3de3cbd9aeefb3deee1815ce70c279d5ea69719d182d92755466d5c87",
+    "toggleLateRasterFailures": [
+      {
+        "runtime": "wc",
+        "theme": "light",
+        "records": [
+          {
+            "name": "wc-light-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 172,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "12",
+              "sourceRevision": "15",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "162efda0ab7990c763dfc4656494f1c38451a6278cf09eac7a49929925d9eeef"
+          },
+          {
+            "name": "wc-light-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "14",
+              "sourceRevision": "15",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "f6e8cd82ab6e0800986fbbff5f73a69c61f879a1cf4a66527fdce886829f285a"
+          },
+          {
+            "name": "wc-light-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "17",
+              "sourceRevision": "15",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "e17473ef5b505a845efcd9b6fe7c24d66e404feb50550c17ea5662d36538cccb"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "wc",
+        "theme": "dark",
+        "records": [
+          {
+            "name": "wc-dark-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 172,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "13",
+              "sourceRevision": "16",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "8d1bdf89d0466739c5ead33133a03a6af81a22331f3626f8de1a786bdd9a7c2e"
+          },
+          {
+            "name": "wc-dark-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "15",
+              "sourceRevision": "16",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "b062e292532c6d931531c3208efc4a7d5f0001aa48c1840838d6b72d8702d616"
+          },
+          {
+            "name": "wc-dark-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "17",
+              "sourceRevision": "16",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "7616a5800ac7dc5e51870ca31e4be73711ac96f6072a5834fb1dc8969bd55f65"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "react",
+        "theme": "light",
+        "records": [
+          {
+            "name": "react-light-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 784,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "12",
+              "sourceRevision": "16",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "7af04eccdeb6cd4ffca418a0ae4dbbe69c9ae5877d4f1fc93e9aaee5fc345006"
+          },
+          {
+            "name": "react-light-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "14",
+              "sourceRevision": "16",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "c8708a04adc39ce5cc4638779f31c801c47c12c3cc7f83378a38efb8519db573"
+          },
+          {
+            "name": "react-light-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "18",
+              "sourceRevision": "16",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "29457ade5022cd521259dc0196c500930c44b1a3398038231ca115387fd5925b"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "react",
+        "theme": "dark",
+        "records": [
+          {
+            "name": "react-dark-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 784,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "12",
+              "sourceRevision": "17",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "33828742ab294e95c53374b44e7738995be10723638215734b6ef42b6deeef9d"
+          },
+          {
+            "name": "react-dark-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "14",
+              "sourceRevision": "17",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "17931cd17c2b8394eece1ce505c753f828791e6feac54954612c60cd6c4a264d"
+          },
+          {
+            "name": "react-dark-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 482.84375,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "18",
+              "sourceRevision": "17",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "78b4ce2eda59f71108454f62d300798263ecc46a023fb60f9aad82c436ac830f"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "vue",
+        "theme": "light",
+        "records": [
+          {
+            "name": "vue-light-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 172,
+                "top": 974.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "8",
+              "sourceRevision": "12",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "1c28d794203f373961c0d002b53e38dc14cd9dad50c9c1f50235a48a988bb8ec"
+          },
+          {
+            "name": "vue-light-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "10",
+              "sourceRevision": "12",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "2090fd788b699a0cafeb852b99a229a1e98e7b264581c284257150e665f08fc6"
+          },
+          {
+            "name": "vue-light-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "13",
+              "sourceRevision": "12",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "82e8f9a09308513bfe0051933bb418aaa06e88efb518282e748994ecef4a9398"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "vue",
+        "theme": "dark",
+        "records": [
+          {
+            "name": "vue-dark-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 172,
+                "top": 974.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "8",
+              "sourceRevision": "11",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "3d855edb46688b95db1c882b2900c9f319351163432542ddd468a5a1a4a37b54"
+          },
+          {
+            "name": "vue-dark-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "10",
+              "sourceRevision": "11",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "67194a74af5e66922f37575ff9d45cd3125abfed5fb9f6571dff1d21ba87f723"
+          },
+          {
+            "name": "vue-dark-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 172,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "13",
+              "sourceRevision": "11",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "58ade9259cc1dbed558d07ae0b32ba338db6ee93b1e5ed5cd3a960dd2a1d91a9"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "vue2",
+        "theme": "light",
+        "records": [
+          {
+            "name": "vue2-light-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 784,
+                "top": 974.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "4",
+              "sourceRevision": "8",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "3709d32b4114e733684b8f4ddf4d3a47076c6230c6cf2d90a0d3d20856f610fd"
+          },
+          {
+            "name": "vue2-light-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "6",
+              "sourceRevision": "8",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "0a387061b523cbc53c122fdc9ad2e2bb39b43841a668d550127765f8baf1f023"
+          },
+          {
+            "name": "vue2-light-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "10",
+              "sourceRevision": "8",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "b163bd2f894e0c4876c28690bf76d9456a848d959ae1dae295743aa126a03203"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      },
+      {
+        "runtime": "vue2",
+        "theme": "dark",
+        "records": [
+          {
+            "name": "vue2-dark-inactive",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [89, 38],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 0,
+              "hostGeometry": {
+                "left": 784,
+                "top": 974.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.9531,
+                "height": 38
+              },
+              "expectedCarrierGeometry": {
+                "left": -1,
+                "top": -1,
+                "width": 88.953125,
+                "height": 38
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "5",
+              "sourceRevision": "9",
+              "contactSession": "0",
+              "contact": "rest",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "8530e11d0b6755dfe9b7daff8a8fb538cb74a0e3d03d4241f97ecbecc5373ce7"
+          },
+          {
+            "name": "vue2-dark-pressed",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "false",
+            "phase": "pressed",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "7",
+              "sourceRevision": "9",
+              "contactSession": "1",
+              "contact": "held",
+              "backend": "self-optical",
+              "profile": "liquidgl-v2-contact-canvas-1",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-xs bg-secondary text-secondary-foreground border-border"
+            },
+            "fileSha256": "d457e0ddb6dfe9ac8927274da3efa6ae8a5514ad132a73f14d1c6bf79ca92a53"
+          },
+          {
+            "name": "vue2-dark-active",
+            "sha": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+            "tree": "a0f99b2ff699fe21a9ecf586cbcaf06addc61be9",
+            "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "active": "true",
+            "phase": "rest",
+            "hostSize": [88.953125, 38],
+            "rasterSize": [107, 56],
+            "paint": {
+              "committed": true,
+              "carrier": "contact-v1",
+              "geometryMatches": true,
+              "paintOutset": 9,
+              "hostGeometry": {
+                "left": 784,
+                "top": 439.25,
+                "width": 88.953125,
+                "height": 38
+              },
+              "carrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953,
+                "height": 56
+              },
+              "expectedCarrierGeometry": {
+                "left": -10,
+                "top": -10,
+                "width": 106.953125,
+                "height": 56
+              },
+              "quality": "self-optical",
+              "source": "visible-app-canvas",
+              "blur": "none",
+              "canvas": 0,
+              "carrierPosition": "absolute",
+              "carrierBackgroundSize": "100% 100%",
+              "carrierBackgroundRepeat": "no-repeat"
+            },
+            "receipt": {
+              "frame": "11",
+              "sourceRevision": "9",
+              "contactSession": "1",
+              "contact": "release",
+              "backend": "self-optical",
+              "profile": "pui-regular-style-tint-contact-5",
+              "styleTokens": "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-md bg-primary text-primary-foreground border-ring ring-1 ring-inset ring-border"
+            },
+            "fileSha256": "519c893ad761dc79d5fb41648b9507631c187872770b6777a90eed45ede18345"
+          }
+        ],
+        "observedCause": "active sample still has receipt.contact=release and valid expanded carrier; host dimensions unchanged, raster equality is reached before true contact rest."
+      }
+    ]
+  },
+  "nativeAuditSha256": "3c128f1d351f4f5eed26fd6cf27c640c4f76822f99b99b71e5661be4bb3c8c30",
+  "sourceAudit": {
+    "sourceFile": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts",
+    "previousHead": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+    "previousSha256": "10dd14b5e207cb9d15350c9eea501d34a606bf97d0817088b53937eef2b8b7a2",
+    "currentSha256": "031fe7399a652f2bbc9dc8ef2a210786c01103a6160353c4d7d58d8fa140a25f",
+    "allPreviousSourceBytesPreservedInOrder": true,
+    "onlyAddedLines": 7,
+    "previousExpectOccurrences": 243,
+    "currentExpectOccurrences": 246,
+    "defaultPollAnd120SecondCaseLimitUnchanged": true,
+    "releaseObservationRetained": true,
+    "sourceBindingReferences": [],
+    "scope": "Pre-commit-formatting source audit; the following formatting audit binds the final bytes. No native acceptance is claimed."
+  },
+  "localControls": [
+    {
+      "name": "contact-and-toggle",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/adapters/base/test/web-material-contact-motion.test.ts",
+        "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+        "packages/prototypes/liquid-glass/test/toggle.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1"
+      ],
+      "startedAt": "2026-11-21T20:46:47.520030+00:00",
+      "finishedAt": "2026-11-21T20:46:56.349063+00:00",
+      "seconds": 8.829,
+      "exitCode": 0,
+      "beforeHead": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+      "patchBeforeSha256": "a330a4724cecc3ae736c9581ef1a69cbe346c1ced2b20f77af583bff19f2133c",
+      "patchAfterSha256": "a330a4724cecc3ae736c9581ef1a69cbe346c1ced2b20f77af583bff19f2133c",
+      "logSha256": "da96eedc1db32abcc03aa6ff630bee465c094d56e2289668435ac8376ecc2040",
+      "logBytes": 166540
+    },
+    {
+      "name": "public-toggle-mdx",
+      "command": ["node", "--test", "scripts/docs/test/liquid-toggle-mdx.test.mjs"],
+      "startedAt": "2026-11-21T20:46:56.364567+00:00",
+      "finishedAt": "2026-11-21T20:46:56.917962+00:00",
+      "seconds": 0.553,
+      "exitCode": 0,
+      "beforeHead": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+      "patchBeforeSha256": "a330a4724cecc3ae736c9581ef1a69cbe346c1ced2b20f77af583bff19f2133c",
+      "patchAfterSha256": "a330a4724cecc3ae736c9581ef1a69cbe346c1ced2b20f77af583bff19f2133c",
+      "logSha256": "1768eb4761612d06d36ece35a165787a9a3eff6a4370812cbe48ff78dd10b936",
+      "logBytes": 284
+    }
+  ],
+  "unchangedBoundaries": [
+    "All previous browser test source bytes and assertions remain in order.",
+    "The default bounded poll and 120 second case timeout remain unchanged.",
+    "Original host geometry, raster dimensions, contrast, state/input and fallback assertions remain.",
+    "No sink, contact-release duration, product semantics or acceptance threshold is changed by this test correction.",
+    "The recorded e775 native failure remains a failure; these local controls do not establish a new native pass."
+  ],
+  "nextEvidence": "Require the complete corrected candidate native cycle before ready-for-review; do not rebind e775 observations.",
+  "commitHookFormatting": {
+    "beforeFormattingSha256": "031fe7399a652f2bbc9dc8ef2a210786c01103a6160353c4d7d58d8fa140a25f",
+    "afterFormattingSha256": "07104c98b357d8d53573569fd99e194511ed0f0d9034fe8f620798d26ca25700",
+    "description": "Commit Prettier hook reflowed two existing bare.evaluate calls; intended seven lines remain unchanged.",
+    "originalParsedAstAfterRemovingIntendedAdditionsEqual": true,
+    "comparison": "TypeScript parsed AST, canonical print with comments removed and LF newlines",
+    "originalCanonicalAstSha256": "1d5f72c93eb84502d469fb9bfd53f6972cf3310f7a6d332c2f2d096c4f92b1c5",
+    "parseErrors": 0,
+    "originalAssertExpressionsUnaffectedByFormatting": true,
+    "independentSourceReviewConfirmed": true,
+    "scope": "Formatting verification; local type receipt predates these whitespace-only reflows, final native cycle remains required."
+  }
+}

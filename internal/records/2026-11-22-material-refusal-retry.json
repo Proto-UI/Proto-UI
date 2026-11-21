@@ -1,0 +1,1065 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-21T20:58:04.721530+00:00",
+  "mode": "human-assisted",
+  "modeSource": "current-user",
+  "authority": [
+    "C-FEEDBACK-MATERIAL-0001-OWNERSHIP (draft)",
+    "C-FEEDBACK-MATERIAL-0001-SAFETY (draft)",
+    "C-FEEDBACK-MATERIAL-0001-CONTACT (draft)",
+    "T-WEB-LIQUID-OPTICAL-0001-CASE-VIEW (draft)",
+    "original independent-review R2 retry assertions"
+  ],
+  "scope": [
+    "packages/adapters/base/src/material/sink.ts",
+    "packages/adapters/base/test/web-material-sink.test.ts"
+  ],
+  "source": [
+    {
+      "path": "packages/adapters/base/src/material/sink.ts",
+      "a8bfSha256": "5cbe6fdff1d85b015190f242498bb42704589732ef95aa7d3f1a980f077dde79",
+      "e775Sha256": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+      "fixedSha256": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+      "fixedBytes": 44543
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-sink.test.ts",
+      "a8bfSha256": "7098492cb4cee18d20de6bdfa4941a2d3cd709cdf26f899ec9a74710bd1da02f",
+      "e775Sha256": "6595eba13d3e191a1b11c9e0f3412e034dcf6cc2572bb8eae9a545ad8b32a85f",
+      "fixedSha256": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0",
+      "fixedBytes": 106742
+    }
+  ],
+  "patchSha256": "1eec4bb514a615978160a925a3084e9c877c445e7ba7a7e8f229bad7239bf234",
+  "originalTestsUnchangedExceptAddedBlock": true,
+  "cause": "The effective-motion-frame change makes ordinary()/fallback() contact shutdown change paintOutset from 9 to 0. The failure key previously reused the full transient paint lease, so the already queued RAF treated self-induced extent contraction as repaired conditions and rendered again in the same failed session. Matched a8bf/e775 replay shows paintOutset is the sole changed field for the extra attempt.",
+  "repair": "Separate stable host/source/style/profile conditions from the current paint extent. Paint/pending leases still bind extent. Failure identity retains stable conditions and exact motion session, author styles/classes/revision, tokens and semantic phase. Source pixel revisions, same-session pointer moves and view revision alone do not unblock refusal. Real placement, new sessions and author changes still can.",
+  "tests": {
+    "matchedHistoricalReplay": "trace-executions-node.json",
+    "beforeFixNewControls": "candidate-new-controls-red.json",
+    "afterFixFocused": "candidate-fixed-focused-002.json",
+    "wholeFile": "candidate-fixed-whole-file.json",
+    "wholeFileComparison": "whole-file-baseline-comparison.json",
+    "focused": "18 passed / 131 skipped, default timeout unchanged",
+    "wholeFileResult": "19 failed / 130 passed (149), same 19 failed identities as baseline, original R2 later author-edit failure retained in complete-file ordering",
+    "newControls": "Carrier and image-transport refusal each stay idle through stopped-contact RAF, source revisions and pointer moves; placement-only geometry/new-session/author edits each retry; synthetic GPU/decode with real sink/source admission, no native optical claim."
+  },
+  "preservedUnsuccessfulAttempts": [
+    "pnpm ambient 11.25 engine refusal before test startup, trace-executions.json; direct installed Vitest via Node24 used afterward, no dependency install succeeded or source changed",
+    "candidate-fixed-focused.log: new test reused frame revision and was correctly rejected; fixture corrected to increasing ordinary revisions and added a no-author-change revision control, original identity guard untouched"
+  ],
+  "budgetBoundary": "Existing e775 report contains no sink.ts closure input among the eleven probes; no budget edit or unclean canonical budget measurement was performed. Final exact-head strict measurement remains required.",
+  "notClaimed": [
+    "Whole sink suite green",
+    "Historical full-file R2 failure removed",
+    "Native optical or visual acceptance of this patch",
+    "Independently approved or committed candidate"
+  ],
+  "retainedEvidence": {
+    "trace-executions-node.json": {
+      "sha256": "dc4a2ab4a608652765f355e350bef02559bfb45419b24b838076aff5b2e4eba5",
+      "bytes": 1742,
+      "content": [
+        {
+          "variant": "baseline",
+          "cwd": "/workspace/scratch/fbd6f62bb640/native-closeout-baseline",
+          "head": "a8bf56087e5836e3c14c153cafbd796bd98bff37",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "packages/adapters/base/test/web-material-sink.test.ts",
+            "--config",
+            "/workspace/scratch/fbd6f62bb640/native-final-44945602403-material/sink-r2-causal-audit/baseline.config.mts",
+            "-t",
+            "independent-review R2",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1"
+          ],
+          "startedAt": "2026-11-21T20:48:30.505248+00:00",
+          "elapsedSeconds": 1.7264454870019108,
+          "exitCode": 0,
+          "gitStatusBefore": "",
+          "gitStatusAfter": "",
+          "trackedStatusUnchanged": true,
+          "log": "baseline-node-trace.log"
+        },
+        {
+          "variant": "candidate",
+          "cwd": "/workspace/scratch/fbd6f62bb640/proto-ui",
+          "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+          "command": [
+            "node",
+            "node_modules/vitest/vitest.mjs",
+            "run",
+            "packages/adapters/base/test/web-material-sink.test.ts",
+            "--config",
+            "/workspace/scratch/fbd6f62bb640/native-final-44945602403-material/sink-r2-causal-audit/candidate.config.mts",
+            "-t",
+            "independent-review R2",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1"
+          ],
+          "startedAt": "2026-11-21T20:48:32.258196+00:00",
+          "elapsedSeconds": 1.2365783280001779,
+          "exitCode": 1,
+          "gitStatusBefore": " M apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts\n",
+          "gitStatusAfter": " M apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts\n",
+          "trackedStatusUnchanged": true,
+          "log": "candidate-node-trace.log"
+        }
+      ]
+    },
+    "matched-replay-differences.json": {
+      "sha256": "24e6ede871855b7893180b3e210348bcadc0cfae03c7ed84745aa3c8fbfc963b",
+      "bytes": 28504,
+      "content": [
+        {
+          "variant": "baseline",
+          "unblockedRetryTransitions": [
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 0,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 0,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["geometry", "session"],
+              "reason": "contact-carrier-style-unavailable"
+            },
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  1,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  "author-fixed-carrier-style",
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["external"],
+              "reason": "contact-carrier-style-unavailable"
+            },
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 0,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 0,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["geometry", "session"],
+              "reason": "contact-carrier-style-unavailable"
+            },
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  1,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  "author-fixed-carrier-style",
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["external"],
+              "reason": "contact-carrier-style-unavailable"
+            }
+          ]
+        },
+        {
+          "variant": "candidate",
+          "unblockedRetryTransitions": [
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 0,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 0,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["geometry", "session"],
+              "reason": "contact-carrier-style-unavailable"
+            },
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 0,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["geometry"],
+              "reason": "contact-carrier-style-unavailable"
+            },
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 0,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 0,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["geometry", "session"],
+              "reason": "contact-carrier-style-unavailable"
+            },
+            {
+              "before": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 9,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "after": {
+                "view": 1,
+                "sourceEpoch": 1,
+                "paletteRevision": 1,
+                "geometry": {
+                  "width": 100,
+                  "height": 40,
+                  "radius": 12,
+                  "dpr": 1,
+                  "axisAligned": true,
+                  "paintOutset": 0,
+                  "bounds": [0.1, 0.125, 0.25, 0.16666666666666666]
+                },
+                "conditions": [
+                  "press",
+                  [1, 1, 1, 1],
+                  [0.09019607843137255, 0.09019607843137255, 0.09019607843137255, 1],
+                  true,
+                  null,
+                  null,
+                  "liquidgl-v2-contact-canvas-1"
+                ],
+                "session": 1,
+                "external": [
+                  0,
+                  ["bg-background", "text-foreground", "rounded-lg"],
+                  "rest",
+                  null,
+                  [
+                    ["border-bottom-left-radius", "12px", ""],
+                    ["border-bottom-right-radius", "12px", ""],
+                    ["border-top-left-radius", "12px", ""],
+                    ["border-top-right-radius", "12px", ""],
+                    ["color", "rgb(23, 23, 23)", ""]
+                  ]
+                ]
+              },
+              "changedFields": ["geometry"],
+              "reason": "contact-carrier-style-unavailable"
+            }
+          ]
+        }
+      ]
+    },
+    "candidate-new-controls-red.json": {
+      "sha256": "bcbd23a247ae590792d8fc336d36c7cc947b15db661ee9402f846b390163b7fd",
+      "bytes": 664,
+      "content": {
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "packages/adapters/base/test/web-material-sink.test.ts",
+          "-t",
+          "independent-review R2",
+          "--maxWorkers",
+          "1",
+          "--minWorkers",
+          "1"
+        ],
+        "startedAt": "2026-11-21T20:54:07.170385+00:00",
+        "elapsedSeconds": 1.8852549080002063,
+        "exitCode": 1,
+        "sourceSha256": {
+          "packages/adapters/base/src/material/sink.ts": "c3672a3850e123cfe34e786ef467ba7efd8905e776825fcc89ed7d5ff66ca1a4",
+          "packages/adapters/base/test/web-material-sink.test.ts": "5252a7eb48b439743ac34e00744e2c4616eb0c570ba0a8ca48d6fe812aff6274"
+        },
+        "log": "candidate-new-controls-red.log"
+      }
+    },
+    "candidate-fixed-focused-002.json": {
+      "sha256": "5f61d3ff49acc27d50ae3bbedba72f3445ed4947b63e621c24714c232246e0d4",
+      "bytes": 718,
+      "content": {
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "packages/adapters/base/test/web-material-sink.test.ts",
+          "-t",
+          "independent-review R2|contact paint extent|holds an image-transport failure",
+          "--maxWorkers",
+          "1",
+          "--minWorkers",
+          "1"
+        ],
+        "startedAt": "2026-11-21T20:55:24.287490+00:00",
+        "elapsedSeconds": 2.055030338000506,
+        "exitCode": 0,
+        "sourceSha256": {
+          "packages/adapters/base/src/material/sink.ts": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+          "packages/adapters/base/test/web-material-sink.test.ts": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+        },
+        "log": "candidate-fixed-focused-002.log"
+      }
+    },
+    "candidate-fixed-whole-file.json": {
+      "sha256": "95286d3449f29437021bfb477b610100f97204cd43b5d1fd9c2c8a56534ddd52",
+      "bytes": 625,
+      "content": {
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "packages/adapters/base/test/web-material-sink.test.ts",
+          "--maxWorkers",
+          "1",
+          "--minWorkers",
+          "1"
+        ],
+        "startedAt": "2026-11-21T20:56:00.678907+00:00",
+        "elapsedSeconds": 2.9297039689990925,
+        "exitCode": 1,
+        "sourceSha256": {
+          "packages/adapters/base/src/material/sink.ts": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+          "packages/adapters/base/test/web-material-sink.test.ts": "4b626f2d0b414812faa1402ca84a1085d2dc2accfbbba9869ded26d758ee0df0"
+        },
+        "log": "candidate-fixed-whole-file.log"
+      }
+    },
+    "whole-file-baseline-comparison.json": {
+      "sha256": "040fe77065aba1da7900d45eae71ed86c8dbf7bb77d35a67a08dd4ededb852c7",
+      "bytes": 9697,
+      "content": {
+        "baseline": {
+          "file": "/workspace/scratch/fbd6f62bb640/material-sink-main-baseline.log",
+          "sha256": "00e400fc577f66eba3d9733e898900bc90257d56a53c0deace4a4ffaf967a68e",
+          "failures": [
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > fresh-press microtask > renders the newest same-turn session before RAF and still waits for normal decode",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > atomically replaces cancel held paint with admitted neutral while its successor decodes",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > atomically replaces lostcapture held paint with admitted neutral while its successor decodes",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > atomically replaces blur held paint with admitted neutral while its successor decodes",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later source revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later palette revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later geometry revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later preference revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later author revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rebuilds neutral carrier origin for current left/top borders 5/7 without changing outer bounds",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rebuilds neutral carrier origin for current left/top borders 2.5/3.25 without changing outer bounds",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rebuilds neutral carrier origin for current left/top borders 0/8 without changing outer bounds",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rejects neutral bridge completion after a new pointer session replaces cancellation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > re-admits neutral after cancellation reenters a held render without installing stale work",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > bounds retained decoded ownership to current plus one neutral and releases each exactly once",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > restores the tinted neutral contact profile and rejects an obsolete held completion",
+            "packages/adapters/base/test/web-material-sink.test.ts > independent-review R2: failed carrier must become idle > marker-only negative control does not retry without external changes and recovers after a real edit",
+            "packages/adapters/base/test/web-material-sink.test.ts > independent-review R2: failed carrier must become idle > real stylesheet refused by computed-style admission does not retry without external changes and recovers after a real edit",
+            "packages/adapters/base/test/web-material-sink.test.ts > warm rest source task admission (mock GPU/decode, not performance evidence) > cancels queued tasks across context loss and reads a restored source immediately"
+          ],
+          "terminal": [
+            "⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯",
+            "Test Files 1 failed (1)",
+            "Tests 19 failed | 115 passed (134)",
+            "Duration 2.84s (transform 683ms, setup 0ms, collect 842ms, tests 1.23s, environment 335ms, prepare 77ms)"
+          ]
+        },
+        "fixed": {
+          "file": "/workspace/scratch/fbd6f62bb640/native-final-44945602403-material/sink-r2-causal-audit/candidate-fixed-whole-file.log",
+          "sha256": "bbfcb30b4ade8a9a74a310a2a4dace7e05c8884901693ae48e1330253309fb6b",
+          "failures": [
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > fresh-press microtask > renders the newest same-turn session before RAF and still waits for normal decode",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > atomically replaces cancel held paint with admitted neutral while its successor decodes",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > atomically replaces lostcapture held paint with admitted neutral while its successor decodes",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > atomically replaces blur held paint with admitted neutral while its successor decodes",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later source revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later palette revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later geometry revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later preference revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > withdraws an already restored neutral bridge on later author revocation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rebuilds neutral carrier origin for current left/top borders 5/7 without changing outer bounds",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rebuilds neutral carrier origin for current left/top borders 2.5/3.25 without changing outer bounds",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rebuilds neutral carrier origin for current left/top borders 0/8 without changing outer bounds",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > rejects neutral bridge completion after a new pointer session replaces cancellation",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > re-admits neutral after cancellation reenters a held render without installing stale work",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > bounds retained decoded ownership to current plus one neutral and releases each exactly once",
+            "packages/adapters/base/test/web-material-sink.test.ts > continuous contact scheduler (mock GPU/decode, not optical evidence) > restores the tinted neutral contact profile and rejects an obsolete held completion",
+            "packages/adapters/base/test/web-material-sink.test.ts > independent-review R2: failed carrier must become idle > marker-only negative control does not retry without external changes and recovers after a real edit",
+            "packages/adapters/base/test/web-material-sink.test.ts > independent-review R2: failed carrier must become idle > real stylesheet refused by computed-style admission does not retry without external changes and recovers after a real edit",
+            "packages/adapters/base/test/web-material-sink.test.ts > warm rest source task admission (mock GPU/decode, not performance evidence) > cancels queued tasks across context loss and reads a restored source immediately"
+          ],
+          "terminal": [
+            "⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯",
+            "Test Files 1 failed (1)",
+            "Tests 19 failed | 130 passed (149)",
+            "Duration 2.49s (transform 537ms, setup 0ms, collect 645ms, tests 1.27s, environment 240ms, prepare 72ms)"
+          ]
+        },
+        "comparison": {
+          "remainingSameNames": 19,
+          "onlyBaseline": [],
+          "onlyFixed": []
+        }
+      }
+    },
+    "trace-executions.json": {
+      "sha256": "03d0ccb4891459be38a123a0f992c51741ea563aa2d046c888bad641d6de3419",
+      "bytes": 1599,
+      "content": [
+        {
+          "variant": "baseline",
+          "cwd": "/workspace/scratch/fbd6f62bb640/native-closeout-baseline",
+          "command": [
+            "pnpm",
+            "exec",
+            "vitest",
+            "run",
+            "packages/adapters/base/test/web-material-sink.test.ts",
+            "--config",
+            "/workspace/scratch/fbd6f62bb640/native-final-44945602403-material/sink-r2-causal-audit/baseline.config.mts",
+            "-t",
+            "independent-review R2",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1"
+          ],
+          "startedAt": "2026-11-21T20:47:57.436979+00:00",
+          "elapsedSeconds": 1.526597389998642,
+          "exitCode": 1,
+          "gitStatusBefore": "",
+          "gitStatusAfter": "",
+          "trackedStatusUnchanged": true,
+          "log": "baseline-trace.log"
+        },
+        {
+          "variant": "candidate",
+          "cwd": "/workspace/scratch/fbd6f62bb640/proto-ui",
+          "command": [
+            "pnpm",
+            "exec",
+            "vitest",
+            "run",
+            "packages/adapters/base/test/web-material-sink.test.ts",
+            "--config",
+            "/workspace/scratch/fbd6f62bb640/native-final-44945602403-material/sink-r2-causal-audit/candidate.config.mts",
+            "-t",
+            "independent-review R2",
+            "--maxWorkers",
+            "1",
+            "--minWorkers",
+            "1"
+          ],
+          "startedAt": "2026-11-21T20:47:58.990304+00:00",
+          "elapsedSeconds": 1.1400522139992972,
+          "exitCode": 1,
+          "gitStatusBefore": " M apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts\n",
+          "gitStatusAfter": " M apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts\n",
+          "trackedStatusUnchanged": true,
+          "log": "candidate-trace.log"
+        }
+      ]
+    },
+    "candidate-fixed-focused.json": {
+      "sha256": "66e117159b053db0b32161f63d5f3e32ac1ea82960bd00dbc5d3eb61d30b99d0",
+      "bytes": 714,
+      "content": {
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "packages/adapters/base/test/web-material-sink.test.ts",
+          "-t",
+          "independent-review R2|contact paint extent|holds an image-transport failure",
+          "--maxWorkers",
+          "1",
+          "--minWorkers",
+          "1"
+        ],
+        "startedAt": "2026-11-21T20:54:47.777343+00:00",
+        "elapsedSeconds": 2.016075101997558,
+        "exitCode": 1,
+        "sourceSha256": {
+          "packages/adapters/base/src/material/sink.ts": "768a9e6a995752fd9e022e2a146fe01025e109f3ef3a91f47764b633e46ff816",
+          "packages/adapters/base/test/web-material-sink.test.ts": "5252a7eb48b439743ac34e00744e2c4616eb0c570ba0a8ca48d6fe812aff6274"
+        },
+        "log": "candidate-fixed-focused.log"
+      }
+    }
+  },
+  "nativeBeforeCorrection": {
+    "runId": 44945602403,
+    "attempt": 1,
+    "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+    "materialJobId": 136972650738,
+    "generalRuntimeJobId": 136972196605,
+    "generalFirstErrorComparison": {
+      "runId": 44945602403,
+      "currentFailedIdentities": 494,
+      "sameFirstErrorLineCount": 492,
+      "changedFirstErrorLines": [
+        {
+          "file": "packages/adapters/base/test/web-material-sink.test.ts",
+          "fullName": "independent-review R2: failed carrier must become idle marker-only negative control does not retry without external changes and recovers after a real edit",
+          "occurrence": 0,
+          "previousFirstError": "AssertionError: expected \"spy\" to be called 2 times, but got 3 times",
+          "currentFirstError": "AssertionError: expected [ 1, 2, 2, 2, 2, 2 ] to deeply equal [ 1, 1, 1, 1, 1, 1 ]"
+        },
+        {
+          "file": "packages/adapters/base/test/web-material-sink.test.ts",
+          "fullName": "independent-review R2: failed carrier must become idle real stylesheet refused by computed-style admission does not retry without external changes and recovers after a real edit",
+          "occurrence": 0,
+          "previousFirstError": "AssertionError: expected \"spy\" to be called 2 times, but got 3 times",
+          "currentFirstError": "AssertionError: expected [ 1, 2, 2, 2, 2, 2 ] to deeply equal [ 1, 1, 1, 1, 1, 1 ]"
+        }
+      ],
+      "newSince031ByFile": {
+        "apps/www/src/components/header-ghost-appearance.test.ts": 3,
+        "apps/www/src/components/header-select-elevation.test.ts": 4,
+        "apps/www/src/components/override/Search.commands.test.ts": 53,
+        "apps/www/src/components/site-command-icons.test.ts": 21,
+        "apps/www/src/components/site-contents-command.test.ts": 29,
+        "apps/www/src/components/site-copy-command.test.ts": 14,
+        "apps/www/src/components/site-header-surface.test.ts": 10,
+        "apps/www/src/components/site-typography.test.ts": 5,
+        "apps/www/test/shadcn-rhea-demo-policy.test.ts": 1,
+        "packages/prototypes/base/test/collection-nested-feedback.test.ts": 3,
+        "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": 4,
+        "packages/prototypes/base/test/selection-reset-lifecycle.test.ts": 4,
+        "packages/prototypes/bootstrap-2-3-2/test/historical-overlays-collections-r91.test.ts": 1,
+        "packages/prototypes/shadcn/test/collection-profiles-r91.test.ts": 1
+      },
+      "qualification": "First-error equality does not certify identical full causes; full native failure messages remain in the detailed comparison and raw Vitest report."
+    }
+  },
+  "combinedFrozenTypeCheck": {
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+    "nodeOptions": "--max-old-space-size=4096",
+    "startedAt": "2026-11-21T20:57:40.844096+00:00",
+    "finishedAt": "2026-11-21T21:01:18.241546+00:00",
+    "seconds": 217.397,
+    "exitCode": 0,
+    "before": {
+      "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+      "inputCount": 8557,
+      "sha256": "f552716a308c6a6f2975d49d0d22c16fd218611638d90b899bbfb9e033c074b0"
+    },
+    "after": {
+      "head": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+      "inputCount": 8557,
+      "sha256": "f552716a308c6a6f2975d49d0d22c16fd218611638d90b899bbfb9e033c074b0"
+    },
+    "typeInputsStable": true,
+    "logSha256": "cf8b889118a62e44daaa798052d503fd809bfa6690ab8dfaee1ff941d3509ee8",
+    "logBytes": 10228,
+    "scope": "Actual local type check of frozen input bytes, not native browser evidence. Tracked records may be prepared concurrently; they are outside type input selection.",
+    "result": {
+      "files": 1259,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 31
+    },
+    "inputSelection": "Tracked .ts/.tsx/.mts/.astro/.vue, package.json, pnpm-lock.yaml, pnpm-workspace.yaml and tsconfig-prefixed basenames; this is selected-input stability, not an independently resolved compiler dependency graph."
+  }
+}
