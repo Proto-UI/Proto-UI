@@ -1,0 +1,610 @@
+{
+  "recordedAt": "2026-11-21T22:43:58.789773+00:00",
+  "kind": "bounded published demo layout adjustment; native validation pending",
+  "baseHead": "f0b502704b825b5b644639522555d13e3d64231e",
+  "priorComparedHead": "e775cd5448b3ab13ebe08b051121fda3508de5e9",
+  "baseTree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+  "worktree": "/workspace/scratch/fbd6f62bb640/select-footprint-fix",
+  "branch": "fix/regression-select-footprint-20261122",
+  "changes": [
+    {
+      "file": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "line": 43,
+      "before": "sideOffset: 8",
+      "after": "sideOffset: 16",
+      "scope": "shared helper for popup placement of existing demo stages"
+    },
+    {
+      "file": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "line": 111,
+      "before": "Uncontrolled selection: text-sm mb-2",
+      "after": "Uncontrolled selection: text-sm mb-4",
+      "scope": "uncontrolled scene heading only"
+    }
+  ],
+  "recipe": {
+    "priorAndBaseIdentical": true,
+    "originalBlob": "321b4a0a4be6e497304c8118cf998feab47fecd4",
+    "originalSha256": "02942f7dee26c8dd7e3b0a3e02e17a28cdc1d3f65d5e49dfbf9845567639540a",
+    "adjustedBlob": "07c0688df97b2e133a6fa5ceae0698e80fee5871",
+    "adjustedSha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09"
+  },
+  "originalAssertions": {
+    "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+    "byteIdentical": true,
+    "sha256": "bd20d31dc560991e5cd3856563e1be143bd0b12e9eb1883069274b0b0e73f5b1",
+    "blob": "ad2c6a26aa9dfc8d927afa49b6e8e136a48cb7fa",
+    "preserved": "All native assertions, deadlines, scene ownership, selection/RTL/long-label flows. No fallback acceptance added."
+  },
+  "nativeEvidence": {
+    "runId": 44956263999,
+    "attempt": 1,
+    "head": "f0b502704b825b5b644639522555d13e3d64231e",
+    "jobId": 137005017717,
+    "artifactId": 14728171685,
+    "observedLiquidCases": 8,
+    "publicTriggerState": "opaque-fallback / source-overlapping-content before and after open",
+    "popupSurfaceState": "self-optical / rendered",
+    "failedAssertion": "original trigger self-optical poll at line 328",
+    "provenanceFile": "/workspace/scratch/fbd6f62bb640/native-ready-44956263999-browser/select-scene-provenance.json",
+    "provenanceSha256": "e37cecfbc0730ba21e63c31fdfe3168694d806ab825e75b6cd4bdec011fcb77e",
+    "sourceProvenance": [
+      {
+        "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+        "blob": "321b4a0a4be6e497304c8118cf998feab47fecd4",
+        "sha256": "02942f7dee26c8dd7e3b0a3e02e17a28cdc1d3f65d5e49dfbf9845567639540a",
+        "priorBlob": "321b4a0a4be6e497304c8118cf998feab47fecd4",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/apps/www/src/content/docs/demo-liquid-glass-select.demo.ts"
+      },
+      {
+        "path": "apps/www/src/content/docs/en/ui-libraries/liquid-glass/select.mdx",
+        "blob": "4fc2ed40520ad175dbc6a56757ed582dfedc2dc1",
+        "sha256": "5b9d37393e870419a3c4de2ba802843ff5c199b36b5b63c050029b01a0de7986",
+        "priorBlob": "4fc2ed40520ad175dbc6a56757ed582dfedc2dc1",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/apps/www/src/content/docs/en/ui-libraries/liquid-glass/select.mdx"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/select.mdx",
+        "blob": "73f7d22ca60c704831e90ed6b8e6314a0965c2c1",
+        "sha256": "033474dbe819b25683c64283f859c07931449f3789ac1d9c50b1bcafd206f14b",
+        "priorBlob": "73f7d22ca60c704831e90ed6b8e6314a0965c2c1",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/select.mdx"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+        "blob": "ad2c6a26aa9dfc8d927afa49b6e8e136a48cb7fa",
+        "sha256": "bd20d31dc560991e5cd3856563e1be143bd0b12e9eb1883069274b0b0e73f5b1",
+        "priorBlob": "2c63ae3fc157ac563dfa7914434125bb50478292",
+        "sameAsE775": false,
+        "savedFile": "select-source-f0/apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/demo-material-stages.ts",
+        "blob": "48d2e75df953e573a2ea7114155517b3a35d275c",
+        "sha256": "c8f0d7053f2f33ef0df78213322aba50a62c4fc56eabe0d55383e5f21f1ecc96",
+        "priorBlob": "48d2e75df953e573a2ea7114155517b3a35d275c",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/apps/www/src/components/PrototypePreviewer/demo-material-stages.ts"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/select/content.proto.ts",
+        "blob": "0050a0d746360441291418c4148833aeddbb5e1a",
+        "sha256": "745a00595f21e42a002b58885e4af9510a13e1b2437d36535284bc7f3adb448a",
+        "priorBlob": "0050a0d746360441291418c4148833aeddbb5e1a",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/packages/prototypes/liquid-glass/src/select/content.proto.ts"
+      },
+      {
+        "path": "packages/prototypes/base/src/select/content.proto.ts",
+        "blob": "6284f26b06104cccc362495dff81dba16dc7b11e",
+        "sha256": "683f0c32b5f0e2c8943d3a7b44717b74f18d265a32cdbb15e1d139665022504d",
+        "priorBlob": "6284f26b06104cccc362495dff81dba16dc7b11e",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/packages/prototypes/base/src/select/content.proto.ts"
+      },
+      {
+        "path": "packages/adapters/base/src/material/contact-profile.ts",
+        "blob": "d84b08103e2e61c4437a8f8a82f4dde068063db5",
+        "sha256": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+        "priorBlob": "d84b08103e2e61c4437a8f8a82f4dde068063db5",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/packages/adapters/base/src/material/contact-profile.ts"
+      },
+      {
+        "path": "packages/adapters/base/src/material/source.ts",
+        "blob": "4267d1e6fa7fccaded5d7878b0656eb9bd102d9c",
+        "sha256": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2",
+        "priorBlob": "4267d1e6fa7fccaded5d7878b0656eb9bd102d9c",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/packages/adapters/base/src/material/source.ts"
+      },
+      {
+        "path": "packages/adapters/base/src/material/sink.ts",
+        "blob": "3f8cc27dcfff26d21ddcafbe0e7ec9a01b895231",
+        "sha256": "54343c0d85e82be947292bab14cd7e8a990166a1f91d0982ef8f6eaf579c7782",
+        "priorBlob": "b6649f531e7bf356178ae1b351acc655be761838",
+        "sameAsE775": false,
+        "savedFile": "select-source-f0/packages/adapters/base/src/material/sink.ts"
+      },
+      {
+        "path": ".github/workflows/select-draft-projections-evidence.yml",
+        "blob": "142ce45d0e9d16c317e127207e1244f00c187746",
+        "sha256": "f9886bd848c6e2405a1ac966b2935cab226da5c555eb584621a4769482b1f71c",
+        "priorBlob": "142ce45d0e9d16c317e127207e1244f00c187746",
+        "sameAsE775": true,
+        "savedFile": "select-source-f0/.github/workflows/select-draft-projections-evidence.yml"
+      }
+    ],
+    "measurements": [
+      {
+        "runtime": "react",
+        "theme": "dark",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "react",
+        "theme": "light",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "vue",
+        "theme": "dark",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "vue",
+        "theme": "light",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "vue2",
+        "theme": "dark",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "vue2",
+        "theme": "light",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "wc",
+        "theme": "dark",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      },
+      {
+        "runtime": "wc",
+        "theme": "light",
+        "source": "f0b502704b825b5b644639522555d13e3d64231e",
+        "triggerPublicState": {
+          "quality": "opaque-fallback",
+          "reason": "source-overlapping-content"
+        },
+        "triggerBounds": {
+          "left": 480,
+          "top": 500.5,
+          "right": 573.8125,
+          "bottom": 538.5,
+          "width": 93.8125,
+          "height": 38
+        },
+        "precedingLabelBoxBounds": {
+          "left": 480,
+          "top": 472.5,
+          "right": 912,
+          "bottom": 492.5,
+          "width": 432,
+          "height": 20
+        },
+        "popupSurfaceBounds": {
+          "left": 480,
+          "top": 546.5,
+          "right": 672,
+          "bottom": 925.5,
+          "width": 192,
+          "height": 379
+        },
+        "popupSurfacePublicState": {
+          "quality": "self-optical",
+          "reason": "rendered"
+        },
+        "titleGap": 8.0,
+        "popupGap": 8.0,
+        "derivedConservativeOutset": 9,
+        "derivedAdmissionPaintRect": {
+          "left": 471,
+          "top": 491.5,
+          "right": 582.8125,
+          "bottom": 547.5
+        },
+        "derivedTitleIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        },
+        "derivedPopupIntersection": {
+          "width": 102.8125,
+          "height": 1.0
+        }
+      }
+    ]
+  },
+  "admissionSemantics": {
+    "source": "packages/adapters/base/src/material/source.ts",
+    "sourceLines": [136, 137, 173, 182, 257, 269],
+    "ordinaryCandidateBounds": "contact-carrier.ts:190-195 uses getBoundingClientRect (border box), returning null for visibility:hidden. This is not a text-glyph-only or pixel-alpha overlap test.",
+    "scopeFiltering": "source.ts excludes canvas, host, host descendants/ancestors; excludes display:none and opacity:0; checks authored pseudo paint before bounds.",
+    "privatePaintBounds": "contact-carrier.ts:196-213 uses a registered owner carrier before-pseudo footprint; unresolved registered bounds fail conservatively to infinite bounds.",
+    "strictIntersection": "positive area overlap: left < right, right > left, top < bottom, bottom > top",
+    "fullFootprint": "sink.ts:636-642 uses full contactPaintOutset for wantsContact during rest/held/release; contact-profile.ts:38-39 computes ceil(max(width,height)*0.08+1)."
+  },
+  "geometryReasoning": {
+    "measuredTriggerSize": [93.8125, 38],
+    "calculatedOutset": 9,
+    "previousGaps": {
+      "heading": 8,
+      "popup": 8
+    },
+    "recordedIntersectionHeight": {
+      "heading": 1,
+      "popup": 1
+    },
+    "adjustedNominalGaps": {
+      "uncontrolledHeading": 16,
+      "popup": 16
+    },
+    "predictedClearanceForMeasuredSize": 7,
+    "boundary": "The 7px clearance is a derivation for the recorded 93.8125x38 trigger and unchanged geometry. It is not a claim that every font size, label width, viewport, direction, collision outcome, or later stage is now optical."
+  },
+  "causalBoundary": "The public snapshots and current formula prove that the recorded title and open popup boxes intersect the conservative admission footprint. The public snapshot is a separate read from the failure event and does not record the private loop first-hit node; the exact internal first-hit cause is not claimed. The fallback is a true product public state, not a material-paint-observation geometry calculation.",
+  "validation": {
+    "diffCheck": "passed",
+    "nativeAfterChange": "not executed; root will use existing select-draft-projections-evidence workflow on its own exact candidate",
+    "sourceScope": "No public prototype, handlers, behavior, source admission or native browser test edited. Disabled/controlled/RTL headings unchanged."
+  },
+  "diffSha256": "540fe8f8a5438b916dbde78642041ad19297414ec6f52ef8e9023f1198d780b8"
+}

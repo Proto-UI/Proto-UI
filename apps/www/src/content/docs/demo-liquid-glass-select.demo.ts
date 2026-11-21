@@ -40,7 +40,7 @@ function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
         kind: 'proto',
         prototypeId: 'liquid-glass-select-content',
         ref: `${ref}Content`,
-        props: { align: 'start', sideOffset: 8, collisionPadding: 12 },
+        props: { align: 'start', sideOffset: 16, collisionPadding: 12 },
         children: [
           {
             kind: 'proto',
@@ -108,7 +108,7 @@ export default {
     className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
     children: [
       materialStage('uncontrolledStage', [
-        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-2' },
+        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-4' },
         select('uncontrolled', { defaultValue: 'alpha' }),
       ]),
       materialStage('disabledStage', [
