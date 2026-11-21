@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "sourcePath": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+  "previousRevision": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+  "reviewedRevision": "a423a2ba78023a22f89e4a70f42839a0dc7838a3",
+  "previousSha256": "f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7",
+  "reviewedSha256": "e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83",
+  "review": {
+    "staticModuleSpecifiers": 15,
+    "modulePathsTypeFlagsOrderAndLiteralBytesUnchanged": true,
+    "rawProtoImports": 8,
+    "rawImportDeclarationsAndLiteralBytesUnchanged": true,
+    "rawSpecifiers": [
+      "../../../../../../packages/prototypes/liquid-glass/src/theme",
+      "@proto.ui/prototypes-liquid-glass/button",
+      "@proto.ui/prototypes-liquid-glass/toggle",
+      "@proto.ui/prototypes-liquid-glass/form",
+      "@proto.ui/prototypes-liquid-glass/accordion",
+      "@proto.ui/prototypes-liquid-glass/collapsible",
+      "@proto.ui/prototypes-liquid-glass/select",
+      "@proto.ui/prototypes-liquid-glass/dropdown"
+    ],
+    "bodyDelta": "Only the previously reviewed local overlap-paint helper named import and its application destination call/comment.",
+    "helperPath": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+    "helperSha256": "b3610d4249358f84f24a535efcf4a2a82122df4fe2e637f1cc6f635fa7f19fd3"
+  },
+  "correction": {
+    "policyPath": "scripts/coverage-matrices/diagnostic-imports.mjs",
+    "existingFingerprintRenewals": 1,
+    "newAllowlistEntries": 0,
+    "newRawImportEdges": 0,
+    "validationImplementationChanged": false,
+    "consumerOwnershipOrStateChanged": false
+  },
+  "retainedFailedGate": {
+    "sourceRevision": "a423a2ba78023a22f89e4a70f42839a0dc7838a3",
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+    "startedAt": "2026-11-21T19:50:07.814693+00:00",
+    "finishedAt": "2026-11-21T19:52:47.426080+00:00",
+    "durationSeconds": 159.6109426059993,
+    "exitCode": 1,
+    "issues": 8,
+    "nodeTestStageStarted": false,
+    "sourceStable": true,
+    "logSha256": "435fffb122acff6d812afb25b3a31e54c60891f7bd9c36c3f89e2368379179ca"
+  },
+  "generatedOutputPreservation": {
+    "archivedTargets": 3,
+    "restoredOnlyGeneratedTargetsToCommittedA423": true,
+    "archiveReceipt": "native-correction-a423a2-coverage/archived-generated.json"
+  },
+  "validationBoundary": "New source checkpoint and actual generator/full coverage gate pending. No browser, optical or lifecycle acceptance is supplied; historical a423 failure and WIP/Experimental status are retained."
+}

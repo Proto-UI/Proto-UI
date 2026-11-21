@@ -38,7 +38,7 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-hover.astro': Object.freeze({
-    sourceSha256: 'f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7',
+    sourceSha256: 'e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83',
     specifiers: Object.freeze([
       '../../../../../../packages/prototypes/liquid-glass/src/theme',
       '@proto.ui/prototypes-liquid-glass/button',
