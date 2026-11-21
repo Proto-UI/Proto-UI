@@ -294,16 +294,25 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     resolvedPaths: Object.freeze([
       'packages/adapters/base/src/material/image-prepare',
       'packages/adapters/base/src/material/program',
+      'packages/adapters/base/src/material/source-refresh-task',
     ]),
   }),
   'packages/adapters/base/src/material/program.ts': Object.freeze({
     resolvedPaths: Object.freeze([
       'packages/adapters/base/src/material/contact-profile',
       'packages/adapters/base/src/material/liquidgl-kernel.generated',
+      'packages/adapters/base/src/material/prefilter',
+      'packages/adapters/base/src/material/program-inputs',
       'packages/adapters/base/src/material/style',
       'packages/adapters/base/src/material/style-tint-profile',
       'packages/adapters/base/src/material/source',
     ]),
+  }),
+  // Pure input admission extracted by the merged material performance work.
+  // Its exact body and two literal edges remain source-reviewed independently.
+  'packages/adapters/base/src/material/program-inputs.ts': Object.freeze({
+    sourceSha256: '5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db',
+    specifiers: Object.freeze(['./program', './style-tint-profile']),
   }),
   // Continuous contact is still the exact opt-in optical host closure (#420).
   // These reviewed edges admit neither sibling modules nor foreign consumers.
@@ -12737,7 +12746,7 @@ const WEBSITE_STARTUP_EVENT_SHA256 =
   STARTUP_PRERENDER_IMPORT_ALLOWLIST[WEBSITE_STARTUP_EVENT_SOURCE].sourceSha256;
 const WEBSITE_OPTICAL_HOST_SOURCE = 'packages/adapters/base/src/material/program-pool.ts';
 const WEBSITE_OPTICAL_HOST_SHA256 =
-  '9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658';
+  '921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854';
 function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   const headingIndexes = findExactLineIndexes(lines, '## Source-scan bindings').filter(
     (index) => index > afterIndex

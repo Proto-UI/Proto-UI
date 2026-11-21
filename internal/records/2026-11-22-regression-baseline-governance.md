@@ -42,6 +42,14 @@ Strict default, CI and snapshot enforcement is a governance change. Any six-entr
 
 ## Validation and acceptance boundary
 
+### Integration during preparation
+
+The independently reviewed numeric transaction is commit `c15081a47`; the first generated candidate projection is `8c2b9b39c`, bound to source checkpoint `8917def4b1789b351d4ddba32a979195f3ebe935`. Its prototype test run was interrupted with exit 130 to reconcile new main changes, and is not a passed suite. Main advanced to `d31b159811348138e321b865193d3d2c73c00263` during preparation and was merged in `0cf1cb9039fb57c85747025432c76c6836197f47`.
+
+[The integration comparison](2026-11-22-regression-main-integration.json) retains that exact before/upstream/after mapping. All 18 directly recorded browser source hashes and seven original native test files were unchanged; the relocated Popover helper differs from upstream only in five type-import paths. Ten related Previewer/material product files and the upstream Toggle transition test nevertheless changed, so the earlier 61 source-control passes and 197 unrun native assertions cannot become a new execution receipt. The upstream Shadow and React adapter differences were format-only, as checked by [the syntax comparison](2026-11-22-regression-main-syntax-equality.json); they are not a fix claim for historical Shadow failures.
+
+The merge preserved upstream historical evidence bytes rather than applying a formatter to those archived measurements. Conflict resolutions were checked separately. A final generated projection and clean budget result must bind the resulting source; historical snapshots remain identifiable by their own commits.
+
 Local controls exercise overloaded shards, malformed timings, continuation after prerequisite failure, retained original assertion failures, source drift, truncated reports, duplicate/missing evidence, partial reruns and actual pinned-Vitest reporter behavior. Independent review checks the implementation and cost attribution; it is not a GitHub approval or native execution result.
 
 The accompanying focused records state their actual pass/fail/unrun results. The final PR must link the dispatched run with the same head SHA, retain every terminal outcome and identify any product, fixture, measurement-capability or resource diagnosis from concrete evidence. A completely ended red cycle supplies useful failure evidence but does not satisfy the existing green-baseline or scheduled-recovery policy.

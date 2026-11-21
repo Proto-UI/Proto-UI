@@ -790,7 +790,8 @@
     "sourceMatrixCheck": {
       "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
       "exitCode": 0,
-      "result": "[coverage-matrices] OK (2 matrices)"
+      "result": "[coverage-matrices] OK (2 matrices)",
+      "scope": "Before the latest-main merge; superseded by the separately recorded post-merge check."
     },
     "newBoundaryRegressions": {
       "command": "node --test --test-name-pattern='diagnostic import review rejects|relocated Playwright fixtures' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
@@ -825,6 +826,212 @@
         "The Shadcn retained-source resolver omits the upstream storage root.",
         "The separately recorded candidate source proof predates the current package, catalog, implementation and consumer source."
       ]
+    },
+    "interruptedPrototypeRevalidation": {
+      "command": "node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs",
+      "candidateRevision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+      "exitCode": 130,
+      "result": "Explicitly interrupted to integrate newly advanced main before continuing exact-source verification; no terminal pass is claimed.",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "intermediateCandidateRefresh": {
+      "command": "node scripts/coverage-matrices/prototype-coverage.mjs --refresh-candidate 8917def4b1789b351d4ddba32a979195f3ebe935 --write",
+      "initialResult": "Failed with Projection cell atomic mapping mismatch: P-BASE-INPUT -> shadcn; original assertion preserved and explicit inherited-identity resolver corrected.",
+      "finalExitCode": 0,
+      "finalResult": "Prototype coverage: 71 comparison rows, 22 Base projection rows, 141 consumer rows, 101 migrated links verified.",
+      "sourceBindings": 5944,
+      "catalogIdentities": 585,
+      "catalogLifecycle": "all draft",
+      "gpuiRequiredUnassessedCells": 456,
+      "mainAndAcceptanceUnchanged": true,
+      "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "scope": "Intermediate candidate at the earlier implementation checkpoint; must be refreshed after the latest-main source reconciliation."
+    },
+    "mergedMaterialBoundaryRegressions": {
+      "command": "node --test --test-name-pattern='private Liquid Card import stays source-bound|merged material helper edges|Finf optical host binding|Finf continuous optical closure' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "exitCode": 0,
+      "tests": 14,
+      "passed": 14,
+      "failed": 0,
+      "logSha256": "aeaadc15af9b0f27e094b168e85700810ef98bd1b37840dd6afd7bcde7932ef1",
+      "assertions": "Exact imported paths/bodies pass; changed bytes, copied foreign importers, adjacent imports, sibling modules, symlinks and dynamic CSS remain rejected."
+    },
+    "mergedMaterialSourceMatrixCheck": {
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "productSourceRevision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+      "bindingScope": "Reviewed local matrix/import-manifest repair after the merge; before subsequent #1663 source continuation.",
+      "exitCode": 0,
+      "result": "[coverage-matrices] OK (2 matrices)",
+      "logSha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
     }
+  },
+  "mergedMainReview": {
+    "upstreamMain": "d31b159811348138e321b865193d3d2c73c00263",
+    "mergeRevision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+    "precedingImplementationCheckpoint": "8917def4b1789b351d4ddba32a979195f3ebe935",
+    "findingCountBeforeReview": 25,
+    "findingClassification": {
+      "newProgramEdges": 2,
+      "sinkEdgesRequiringRenewedBodyReview": 19,
+      "newPureInputHelperEdges": 2,
+      "newPoolEdge": 1,
+      "staleExactHostFingerprint": 1
+    },
+    "diagnosticLogSha256": "d7089a59865a6c4d623c6d173d302b9d998a58895e731fbb1958ae37a32f0eee",
+    "newLiteralOrResolvedImportEdges": 7,
+    "materialSources": [
+      {
+        "path": "packages/adapters/base/src/material/program-pool.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "5b01be1c18f30d623d227abb1225f97d4a04f387",
+          "sourceSha256": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "d0a16a32e16b7b7ad00c41d3a239ce1dc9a90dae",
+          "sourceSha256": "921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854"
+        },
+        "review": "Adds only the source-refresh task inspector import and diagnostic counters. Existing program-pool ownership, lease disposal and optical-host matrix owner remain unchanged. Renew the exact source/digest binding and add only the new helper edge."
+      },
+      {
+        "path": "packages/adapters/base/src/material/program.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "a94c98b787b869f29bac54194489755ccd1a9eec",
+          "sourceSha256": "844be51a9b40a16f04e53888602bcd5235117b7949359cf20042203e477d156d"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "766708bcd04ad2126766f909fd7ee6b71f368e73",
+          "sourceSha256": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa"
+        },
+        "review": "Extracts the existing pure input-admission guards; introduces a bounded four-entry/four-MiB prepared-source cache with source/scope/buffer/revision identity and stale eviction; retains per-frame geometry, alpha, tint and contrast guards. CPU processing remains the default. Packed CPU passes retain per-pass rounding; private GPU prefilter is opt-in and its ordinary import is type-only. GL unbinding precedes resource deletion. This is source-boundary review, not optical equivalence or performance acceptance."
+      },
+      {
+        "path": "packages/adapters/base/src/material/sink.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "bec336871055aab4b015825979fe83d22b0be89f",
+          "sourceSha256": "e5de14a554483dc0877673b8ea6618a4162e26b58a113a232e8102379a000ae9"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "3451f55c7033560edfa72ecf7f5275e31417fbd0",
+          "sourceSha256": "a7fedd80467728e4caf13414141c49deddfb29ecec1f50ec7c2e318a1d585e41"
+        },
+        "review": "Adds source input validation and a cancellable refresh-task dependency. Deferred refresh applies only to an already-decoded neutral sample from the same owned lease while current guards hold; contact, pressed, animated and initial paints remain immediate. Deferred execution reads current state and releases captured closures before running or cancellation. Source/input changes, fallback, restoration and disposal cancel stale work. Renew the exact sink body and its finite nineteen literal imports without widening the Card consumer wall."
+      },
+      {
+        "path": "packages/adapters/base/src/material/source.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "db2f7fe95d85b3ec4b6656e846e59873ce4a0deb",
+          "sourceSha256": "7480e587d4f777d7df9a790196840b56a25c006c7ed2fc79b93e272ed588a9e6"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "4ab4a9a51b5984f3223d8c76a1b2a42919d4f24c",
+          "sourceSha256": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6"
+        },
+        "review": "Removes a redundant second Canvas dimension reset while retaining origin-clean recovery, and uses the owned ImageData byte view instead of copying it. Source identity, revision, disposal and opacity guards remain in place. No new import edge or controller owner."
+      },
+      {
+        "path": "packages/adapters/base/src/material/program-inputs.ts",
+        "previous": null,
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "de380e61d479ec244016a61dc50cf3d91127a502",
+          "sourceSha256": "5609c82ee7111411f926092e10ebe188566cbfc5e19d6e715ef85080cf4099db"
+        },
+        "review": "New pure finite-geometry, source-opacity, contact and tint-envelope admission helper extracted from the program. Its only imports are the OpticalFrame type from program and styleTintEnvelope from the already reviewed tint profile. Bind the exact helper bytes and these two literal imports."
+      },
+      {
+        "path": "packages/adapters/base/src/material/prefilter.ts",
+        "previous": null,
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "abfd224e81eb33994f167ab789729de445d2afaf",
+          "sourceSha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f"
+        },
+        "review": "New private opt-in GPU prefilter with finite seven-tap passes, capability/precision and geometry/opaque-input checks. It owns and releases its program, buffers, textures, framebuffer and vertex-array object, restores GL state in finally blocks, and detaches outputs before release. It has no imports and is not enabled by the ordinary CPU provider. Source review does not establish displayed optical or browser acceptance."
+      },
+      {
+        "path": "packages/adapters/base/src/material/source-refresh-task.ts",
+        "previous": null,
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "dc7404002e33eed0139a2e02c1c40a225b18528f",
+          "sourceSha256": "800bdac054de45c6e157bcd6a10ddb76f1f44e74b026f5449513eeeba22b08f7"
+        },
+        "review": "New per-document task counters and cancelable latest-task right. Captured callbacks are detached before cancellation/invocation; scheduler.postTask with AbortController and the timer fallback share the same consumable right. Disposal retires the task, late callbacks are inert, and absent scheduling backends return false for the caller to retain synchronous behavior. No imports or new application command owner."
+      }
+    ],
+    "upstreamWebsiteBindings": [
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "f33c7e063f5fbbc51519e8900a75b3fd86ae0cc5",
+          "sourceSha256": "4df442ee2d0db4db61fbc2aee0a7fadbb2cbe359b2ab23760eb7cb9772376e54"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "ff09f43b6e8fba963045cd7d906b6604362b6989",
+          "sourceSha256": "47e8678bee11d9ce281419fc9acb16e0e285847ed3277bad2f8294fcba259af5"
+        }
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "afe25a7d6e225ad9dc09bd06f31c62909e7e3b4d",
+          "sourceSha256": "c60e2c5fe947a1f8f7855b167b42754be51023f32086086463292e478a30f2b1"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "09f6ce1e311c5dd78a8bc4b91d13afefee15eb89",
+          "sourceSha256": "0f4ab1ce59f374c1f39f732fc8d3b7418f7bffcb65369f69a3279e55bc43eeed"
+        }
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts",
+        "previous": {
+          "revision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+          "gitBlob": "cc8a2e5d1ac7d9f9a41ff9a1e3910f60ed754cf5",
+          "sourceSha256": "9a23bd1970b0355b1adc54a6f0de6011ffbe4784e55d12956c05ae144fdc4f2f"
+        },
+        "reviewed": {
+          "revision": "0cf1cb9039fb57c85747025432c76c6836197f47",
+          "gitBlob": "009b1af4d12372bf6e59be6d2e72058e6c3d3dd4",
+          "sourceSha256": "03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4"
+        }
+      }
+    ],
+    "upstreamWebsiteReview": "Retain the upstream independent renderer/scene ownership review and exact historical provenance. Renderer changes only the material presentation option; the scene separates preview from diagnostics and retains its host owner. Liquid Button adds gap-6 after the already reviewed removal of a redundant listener, preserving public activation state. Original d095fa0a source comparisons above remain historical facts and are not overwritten.",
+    "sourceScopeLimit": "The exact program-pool and sink bindings and new program-inputs binding are renewed. The finite program import policy remains edge-only. The hashes of all seven reviewed material bodies preserve source-review provenance; this does not promote their optics, lifecycle or consumer acceptance.",
+    "retainedMatrixRows": 78,
+    "rowStatesChanged": false
+  },
+  "portfolioReconciliation": {
+    "baselinePortfolioRevision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+    "reviewedConsumerLedgersRevision": "8917def4b1789b351d4ddba32a979195f3ebe935",
+    "consumerFieldDifferences": 323,
+    "issueLinkOnlyDifferences": 225,
+    "otherReviewedFieldDifferences": 98,
+    "consumerRows": {
+      "website": 78,
+      "harness": 63
+    },
+    "consumerIdentityOrStateChanges": false,
+    "consumerReview": "Reviewed current owner, implementation/path, lifecycle, exemption, user-job, evidence, SSR and review-dependency fields against the live ledgers. The 225 issue-link-only updates preserve tracker references. The remaining 98 differences describe already recorded source ownership and evidence requirements. Refresh only the derived consumer projection; no receipt, status or acceptance is manufactured.",
+    "resolverRepairs": [
+      "A Base identity with multiple cited physical families can anchor only to its one explicit populated family directory; file-only and multiple-directory ambiguity still fail.",
+      "Retained Shadcn source paths resolve under the manifest upstream directory and keep the original content checksums and inert .ts.txt artifacts.",
+      "The Git source reader includes the two exact consumer ledgers and retained-style fixture directories required by candidate bindings.",
+      "A styled projection includes identities in other physical folders only when their catalog explicitly inherits the Base identity. The InputShell Control therefore maps to Base Input; passive Shell Root remains outside it. Original atomic mapping checks remain intact."
+    ],
+    "protectedFields": "Historical main evidence, reference pins, comparison criteria, migration identities, gates and acceptance receipts remain unchanged.",
+    "postMergeConsumerLedgerDifferences": 0
   }
 }
