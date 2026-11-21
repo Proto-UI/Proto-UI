@@ -1481,16 +1481,10 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
         status: 'passed',
       },
     ]);
-    for (const enabled of [false, true])
-      assertions.push({
-        ancestorTitles: [],
-        title: `gallery keeps distinct Card ink with JavaScript=${enabled}`,
-        status: 'passed',
-      });
     const valid = {
       success: true,
-      numTotalTests: 10,
-      numPassedTests: 10,
+      numTotalTests: 8,
+      numPassedTests: 8,
       numFailedTests: 0,
       numPendingTests: 0,
       testResults: [{ name: `/work/repo/${cardFile}`, assertionResults: assertions }],
