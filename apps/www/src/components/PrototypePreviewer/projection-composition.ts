@@ -373,7 +373,12 @@ function pushNestedOwnedThemeSurfaces(
         Object.prototype.hasOwnProperty.call(themeEntry, property)
       )
     ) {
-      api.setSurfaceStyle(node.ref, style ?? {});
+      // Committed snapshots freeze author styles: rebuild the trailing theme
+      // block with the new values instead of mutating the stored entry.
+      const pushed = Array.isArray(style)
+        ? [...style.slice(0, -1), { ...themeEntry, ...theme }]
+        : { ...themeEntry, ...theme };
+      api.setSurfaceStyle(node.ref, pushed as DemoSurfaceStyle);
     }
   }
   const nested = inheritTheme || node.kind === 'proto';
@@ -1182,7 +1187,11 @@ export function createProjectionComposition(
             const nested = inheritTheme || node.kind === 'proto';
             for (const child of node.children ?? []) apply(child, nested);
           };
-          for (const child of value.children) apply(child.node);
+          for (const child of value.children) {
+            apply(child.node);
+            if (context.api.setSurfaceStyle)
+              pushNestedOwnedThemeSurfaces(child.node, context.api, themeSurfaceStyle ?? {});
+          }
         }
       };
       applyActiveDynamicTheme = applyDynamicTheme;
