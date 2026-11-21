@@ -22,8 +22,8 @@ type Geometry = {
    * translated surface is repainted; they are measured positions, not the
    * accepted contact basis.
    */
-  basisSpan: number;
-  basisDeltaSpan: number;
+  basisSpan?: number;
+  basisDeltaSpan?: number;
 };
 // Summing independently transformed part extents may differ by a few floating
 // point ULPs after redistribution. Ignore only arithmetic noise, not CSS-pixel
@@ -134,6 +134,10 @@ function geometryOf(
     }
     if (!Number.isFinite(deltaSpan) || deltaSpan <= 0) return null;
   }
+  const reverse = (horizontal && config.direction === 'rtl') !== config.reverse;
+  if (config.contactBasis !== 'cancel-on-extent-change') {
+    return { origin, span, deltaSpan, sign: reverse ? -1 : 1 };
+  }
   const layoutExtent = (element: HTMLElement): number => {
     const style = element.ownerDocument.defaultView!.getComputedStyle(element);
     const value = Number.parseFloat(horizontal ? style.width : style.height);
@@ -151,7 +155,6 @@ function geometryOf(
     }
     if (!Number.isFinite(basisDeltaSpan) || basisDeltaSpan <= 0) return null;
   }
-  const reverse = (horizontal && config.direction === 'rtl') !== config.reverse;
   return { origin, span, deltaSpan, sign: reverse ? -1 : 1, basisSpan, basisDeltaSpan };
 }
 
@@ -327,8 +330,8 @@ export function createWebAxisInputHost(
         }
         if (
           binding.config.contactBasis === 'cancel-on-extent-change' &&
-          (!sameExtent(live.basisSpan, current.geometry.basisSpan) ||
-            !sameExtent(live.basisDeltaSpan, current.geometry.basisDeltaSpan))
+          (!sameExtent(live.basisSpan!, current.geometry.basisSpan!) ||
+            !sameExtent(live.basisDeltaSpan!, current.geometry.basisDeltaSpan!))
         ) {
           restart('basis-changed');
           return false;
