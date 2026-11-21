@@ -1,0 +1,696 @@
+{
+  "runId": 44799728866,
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44799728866",
+  "artifactId": 14661455801,
+  "artifactZipSha256": "2ff06ac9c5ac875ce4dd7bc71c78607b39e9b515fff839511aab62a51bd3b47a",
+  "baselineSha": "543c8a2990239dec7c08458a902da3f5a97b49dd",
+  "candidateSha": "9d5a3881deb193c4d4aa30fe88ee08bed401e8e8",
+  "measurement": "Three repetitions on one sequential baseline/candidate CI runner. Source-bound application timing, not physical presentation.",
+  "environment": {
+    "node": "v24.22.3",
+    "browser": "157.0.8103.78",
+    "platform": "linux",
+    "arch": "x64",
+    "osRelease": "7.0.0-1017-azure",
+    "cpus": 4,
+    "headless": true,
+    "gpuClassification": "software"
+  },
+  "gpu": [
+    {
+      "vendorId": 65535,
+      "deviceId": 65535,
+      "vendorString": "Google Inc. (Google)",
+      "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "driverVendor": "SwANGLE",
+      "driverVersion": "5.0.0"
+    }
+  ],
+  "metrics": [
+    {
+      "mode": "static-idle",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 6004.20000000007,
+        "rafIntervalMs": {
+          "n": 357,
+          "mean": 16.6658263305322,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000004366,
+          "p99": 16.80000000000291,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": null,
+        "materialCommits": 0,
+        "materialCommitsPerSecond": 0.0,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": null,
+        "meanEncodeMs": null
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 6003.499999999884,
+        "rafIntervalMs": {
+          "n": 357,
+          "mean": 16.666386554621855,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728,
+          "p99": 16.80000000000109,
+          "maximum": 16.80000000000109
+        },
+        "materialCommitIntervalMs": null,
+        "materialCommits": 0,
+        "materialCommitsPerSecond": 0.0,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": null,
+        "meanEncodeMs": null
+      },
+      "meanRenderReductionPercent": null
+    },
+    {
+      "mode": "static-contact",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 12622.20000000007,
+        "rafIntervalMs": {
+          "n": 756,
+          "mean": 16.666137566137568,
+          "p50": 16.69999999999709,
+          "p95": 16.799999999999272,
+          "p99": 16.80000000000291,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": {
+          "n": 408,
+          "mean": 30.729901960784712,
+          "p50": 33.29999999993015,
+          "p95": 33.7649999999383,
+          "p99": 34.49300000000163,
+          "maximum": 36.0
+        },
+        "materialCommits": 411,
+        "materialCommitsPerSecond": 32.56167704520588,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 16.866666666658904,
+          "p50": 15.599999999976717,
+          "p95": 19.55999999999767,
+          "p99": 19.911999999999534,
+          "maximum": 20.0
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 17.16666666662786,
+          "p50": 16.0,
+          "p95": 19.869999999937136,
+          "p99": 20.21399999993155,
+          "maximum": 20.29999999993015
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 8.366388888888954,
+          "p50": 8.400000000023283,
+          "p95": 9.099999999976717,
+          "p99": 10.12299999997137,
+          "maximum": 10.699999999953434
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 411,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "renderMilliseconds": 2672.5000000012806,
+          "encodeMilliseconds": 207.7000000019325,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 411,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 6.502433090027447,
+        "meanEncodeMs": 0.50535279805823
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 6952.300000000047,
+        "rafIntervalMs": {
+          "n": 416,
+          "mean": 16.66610576923077,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728,
+          "p99": 16.800000000000182,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": {
+          "n": 408,
+          "mean": 16.844117647059164,
+          "p50": 16.699999999953434,
+          "p95": 17.264999999938297,
+          "p99": 29.74200000002172,
+          "maximum": 33.300000000046566
+        },
+        "materialCommits": 411,
+        "materialCommitsPerSecond": 59.117126706269474,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 12.533333333325572,
+          "p50": 11.800000000046566,
+          "p95": 13.780000000004657,
+          "p99": 13.95600000000093,
+          "maximum": 14.0
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 12.766666666643383,
+          "p50": 12.099999999976717,
+          "p95": 13.989999999955762,
+          "p99": 14.1579999999539,
+          "maximum": 14.199999999953434
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 5.010555555556655,
+          "p50": 5.0,
+          "p95": 5.599999999976717,
+          "p99": 6.882000000027479,
+          "maximum": 8.5
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 411,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "sourcePreparationMilliseconds": 2.099999999976717,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 895.3999999992084,
+          "contrastMilliseconds": 25.09999999916181,
+          "renderMilliseconds": 1287.3000000003958,
+          "encodeMilliseconds": 228.6000000013737,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 411,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 3.132116788322131,
+        "meanEncodeMs": 0.5562043795653862
+      },
+      "meanRenderReductionPercent": 51.83161833490069
+    },
+    {
+      "mode": "dynamic-idle",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 6001.800000000047,
+        "rafIntervalMs": {
+          "n": 267,
+          "mean": 22.28426966292136,
+          "p50": 16.69999999999891,
+          "p95": 50.0,
+          "p99": 50.099999999998545,
+          "maximum": 50.099999999998545
+        },
+        "materialCommitIntervalMs": {
+          "n": 42,
+          "mean": 133.3095238095238,
+          "p50": 133.14999999996508,
+          "p95": 135.79499999993132,
+          "p99": 137.09800000001908,
+          "maximum": 138
+        },
+        "materialCommits": 45,
+        "materialCommitsPerSecond": 7.497750674797502,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": {
+          "n": 45,
+          "mean": 53.91111111111111,
+          "p50": 54.0,
+          "p95": 56.0,
+          "p99": 58.0,
+          "maximum": 58
+        },
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 180,
+          "programBuilds": 0,
+          "sourceUploads": 180,
+          "sourcePreparations": 180,
+          "renderMilliseconds": 2071.6000000002095,
+          "encodeMilliseconds": 92.40000000025611,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 180,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 11.508888888890054,
+        "meanEncodeMs": 0.5133333333347562
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 6001.400000000023,
+        "rafIntervalMs": {
+          "n": 357,
+          "mean": 16.66638655462184,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728,
+          "p99": 16.800000000000583,
+          "maximum": 16.80000000000291
+        },
+        "materialCommitIntervalMs": {
+          "n": 42,
+          "mean": 133.36428571428684,
+          "p50": 133.30000000004657,
+          "p95": 134.80000000004657,
+          "p99": 136.03599999999162,
+          "maximum": 136.19999999995343
+        },
+        "materialCommits": 45,
+        "materialCommitsPerSecond": 7.498250408238048,
+        "contactListenerToHeldMs": null,
+        "contactEventTimestampToHeldMs": null,
+        "dragOpportunityMs": null,
+        "dragInputs": 0,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 180,
+          "programBuilds": 0,
+          "sourceUploads": 180,
+          "sourcePreparations": 180,
+          "sourcePreparationMilliseconds": 392.50000000034925,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 387.099999998929,
+          "contrastMilliseconds": 12.300000000512227,
+          "renderMilliseconds": 945.0000000020955,
+          "encodeMilliseconds": 85.50000000011642,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 180,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 5.250000000011641,
+        "meanEncodeMs": 0.47500000000064674
+      },
+      "meanRenderReductionPercent": 54.383085537652065
+    },
+    {
+      "mode": "dynamic-contact",
+      "baseline": {
+        "rounds": 3,
+        "durationMs": 19724.799999999814,
+        "rafIntervalMs": {
+          "n": 880,
+          "mean": 22.366590909090906,
+          "p50": 16.69999999999891,
+          "p95": 50.0,
+          "p99": 50.10000000000218,
+          "maximum": 66.70000000000073
+        },
+        "materialCommitIntervalMs": {
+          "n": 463,
+          "mean": 42.45032397408182,
+          "p50": 28.5,
+          "p95": 80.20000000006985,
+          "p99": 86.09000000002328,
+          "maximum": 94.40000000002328
+        },
+        "materialCommits": 466,
+        "materialCommitsPerSecond": 23.62508111615856,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 20.36666666669771,
+          "p50": 20.800000000046566,
+          "p95": 20.980000000004658,
+          "p99": 20.996000000000933,
+          "maximum": 21.0
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 20.700000000031043,
+          "p50": 21.099999999976717,
+          "p95": 21.280000000039582,
+          "p99": 21.29600000004517,
+          "maximum": 21.300000000046566
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 20.63555555555795,
+          "p50": 13.600000000093132,
+          "p95": 55.714999999955765,
+          "p99": 64.54200000002879,
+          "maximum": 69.90000000002328
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": {
+          "n": 148,
+          "mean": 54.1554054054054,
+          "p50": 53.0,
+          "p95": 60.650000000000006,
+          "p99": 68.0,
+          "maximum": 72
+        },
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 913,
+          "programBuilds": 0,
+          "sourceUploads": 743,
+          "sourcePreparations": 743,
+          "renderMilliseconds": 9736.499999999302,
+          "encodeMilliseconds": 443.1999999997206,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 913,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 10.66429353778675,
+        "meanEncodeMs": 0.4854326396492011
+      },
+      "candidate": {
+        "rounds": 3,
+        "durationMs": 9373.5,
+        "rafIntervalMs": {
+          "n": 557,
+          "mean": 16.78581687612208,
+          "p50": 16.69999999999891,
+          "p95": 16.799999999999272,
+          "p99": 16.80000000000291,
+          "maximum": 33.30000000000109
+        },
+        "materialCommitIntervalMs": {
+          "n": 409,
+          "mean": 22.70391198043987,
+          "p50": 16.800000000046566,
+          "p95": 42.300000000046566,
+          "p99": 44.759999999939474,
+          "maximum": 47.90000000002328
+        },
+        "materialCommits": 412,
+        "materialCommitsPerSecond": 43.953699258548035,
+        "contactListenerToHeldMs": {
+          "n": 3,
+          "mean": 13.533333333364377,
+          "p50": 13.400000000023283,
+          "p95": 14.029999999981374,
+          "p99": 14.085999999977648,
+          "maximum": 14.099999999976717
+        },
+        "contactEventTimestampToHeldMs": {
+          "n": 3,
+          "mean": 13.76666666668219,
+          "p50": 13.600000000093132,
+          "p95": 14.229999999946449,
+          "p99": 14.285999999933411,
+          "maximum": 14.29999999993015
+        },
+        "dragOpportunityMs": {
+          "n": 360,
+          "mean": 10.05861111111428,
+          "p50": 5.300000000046566,
+          "p95": 31.0,
+          "p99": 33.750999999968364,
+          "maximum": 36.40000000002328
+        },
+        "dragInputs": 360,
+        "dragUnmatched": 0,
+        "longTasksMs": null,
+        "resourceDelta": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 623,
+          "programBuilds": 0,
+          "sourceUploads": 352,
+          "sourcePreparations": 352,
+          "sourcePreparationMilliseconds": 776.6000000004424,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1347.0999999979977,
+          "contrastMilliseconds": 37.29999999853317,
+          "renderMilliseconds": 2717.80000000156,
+          "encodeMilliseconds": 336.9000000015367,
+          "pendingImages": 3,
+          "decodedImages": 0,
+          "imagePreparations": 623,
+          "peakPendingImages": 0
+        },
+        "meanRenderIncludingEncodeMs": 4.3624398073861315,
+        "meanEncodeMs": 0.5407704654920332
+      },
+      "meanRenderReductionPercent": 59.093025788077604
+    }
+  ],
+  "publicButtonStates": {
+    "baseline": [
+      {
+        "name": "public-light",
+        "buttons": [
+          {
+            "text": "Back",
+            "quality": "self-optical",
+            "reason": "rendered",
+            "committed": true
+          },
+          {
+            "text": "Continue",
+            "quality": "opaque-fallback",
+            "reason": "source-overlapping-content",
+            "committed": false
+          },
+          {
+            "text": "Unavailable",
+            "quality": "opaque-fallback",
+            "reason": "no-active-material-candidate",
+            "committed": false
+          }
+        ]
+      },
+      {
+        "name": "public-dark",
+        "buttons": [
+          {
+            "text": "Back",
+            "quality": "self-optical",
+            "reason": "rendered",
+            "committed": true
+          },
+          {
+            "text": "Continue",
+            "quality": "opaque-fallback",
+            "reason": "source-overlapping-content",
+            "committed": false
+          },
+          {
+            "text": "Unavailable",
+            "quality": "opaque-fallback",
+            "reason": "no-active-material-candidate",
+            "committed": false
+          }
+        ]
+      },
+      {
+        "name": "public-small",
+        "buttons": [
+          {
+            "text": "Back",
+            "quality": "self-optical",
+            "reason": "rendered",
+            "committed": true
+          },
+          {
+            "text": "Continue",
+            "quality": "opaque-fallback",
+            "reason": "source-overlapping-content",
+            "committed": false
+          },
+          {
+            "text": "Unavailable",
+            "quality": "opaque-fallback",
+            "reason": "no-active-material-candidate",
+            "committed": false
+          }
+        ]
+      }
+    ],
+    "candidate": [
+      {
+        "name": "public-light",
+        "buttons": [
+          {
+            "text": "Back",
+            "quality": "self-optical",
+            "reason": "rendered",
+            "committed": true
+          },
+          {
+            "text": "Continue",
+            "quality": "opaque-fallback",
+            "reason": "source-overlapping-content",
+            "committed": false
+          },
+          {
+            "text": "Unavailable",
+            "quality": "opaque-fallback",
+            "reason": "no-active-material-candidate",
+            "committed": false
+          }
+        ]
+      },
+      {
+        "name": "public-dark",
+        "buttons": [
+          {
+            "text": "Back",
+            "quality": "self-optical",
+            "reason": "rendered",
+            "committed": true
+          },
+          {
+            "text": "Continue",
+            "quality": "opaque-fallback",
+            "reason": "source-overlapping-content",
+            "committed": false
+          },
+          {
+            "text": "Unavailable",
+            "quality": "opaque-fallback",
+            "reason": "no-active-material-candidate",
+            "committed": false
+          }
+        ]
+      },
+      {
+        "name": "public-small",
+        "buttons": [
+          {
+            "text": "Back",
+            "quality": "self-optical",
+            "reason": "rendered",
+            "committed": true
+          },
+          {
+            "text": "Continue",
+            "quality": "opaque-fallback",
+            "reason": "source-overlapping-content",
+            "committed": false
+          },
+          {
+            "text": "Unavailable",
+            "quality": "opaque-fallback",
+            "reason": "no-active-material-candidate",
+            "committed": false
+          }
+        ]
+      }
+    ]
+  },
+  "latencyBracket": [
+    {
+      "round": 1,
+      "mode": "static-contact",
+      "listenerToIndependentRafProbeMs": 5.199999999953434,
+      "independentRafProbeToMaterialCommitMs": 6.599999999976717,
+      "caveat": "The independent RAF callback is not the sink renderer entry; this is not an exact queue/render/decode partition."
+    },
+    {
+      "round": 1,
+      "mode": "dynamic-contact",
+      "listenerToIndependentRafProbeMs": 7.800000000046566,
+      "independentRafProbeToMaterialCommitMs": 6.299999999930151,
+      "caveat": "The independent RAF callback is not the sink renderer entry; this is not an exact queue/render/decode partition."
+    },
+    {
+      "round": 2,
+      "mode": "static-contact",
+      "listenerToIndependentRafProbeMs": 5.700000000069849,
+      "independentRafProbeToMaterialCommitMs": 6.099999999976717,
+      "caveat": "The independent RAF callback is not the sink renderer entry; this is not an exact queue/render/decode partition."
+    },
+    {
+      "round": 2,
+      "mode": "dynamic-contact",
+      "listenerToIndependentRafProbeMs": 7.400000000023283,
+      "independentRafProbeToMaterialCommitMs": 6,
+      "caveat": "The independent RAF callback is not the sink renderer entry; this is not an exact queue/render/decode partition."
+    },
+    {
+      "round": 3,
+      "mode": "static-contact",
+      "listenerToIndependentRafProbeMs": 8.0,
+      "independentRafProbeToMaterialCommitMs": 6.0,
+      "caveat": "The independent RAF callback is not the sink renderer entry; this is not an exact queue/render/decode partition."
+    },
+    {
+      "round": 3,
+      "mode": "dynamic-contact",
+      "listenerToIndependentRafProbeMs": 7.400000000023283,
+      "independentRafProbeToMaterialCommitMs": 5.700000000069849,
+      "caveat": "The independent RAF callback is not the sink renderer entry; this is not an exact queue/render/decode partition."
+    }
+  ],
+  "fieldPaths": {
+    "renderAverage": "sum(windows[mode].summary.resourceDelta.renderMilliseconds) / sum(windows[mode].summary.resourceDelta.renders)",
+    "materialRate": "sum(windows[mode].sample.commits where quality == self-optical) * 1000 / sum(sample.end - sample.start)",
+    "rafIntervals": "diff adjacent sample.raf.timestamp within each window; pool values from three windows; linear-interpolated quantiles",
+    "contactLatency": "for each pointerdown, first later self-optical held sample.commits entry with session greater than input.session; subtract input.time or input.timestamp",
+    "longTasks": "windows[mode].sample.longtasks; values are browser PerformanceObserver longtask durations",
+    "gpu": "environment.gpu.devices, environment.gpu.auxAttributes.glRenderer",
+    "publicOptical": "public[*].paints[*].committed && quality == self-optical; restrict actual buttons via host.role == button"
+  }
+}

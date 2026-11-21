@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-11-20T22:57:59Z",
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 1611,
+  "candidateTree": "7a24ac88591151b2fa374a6eeafa492f878fe8dc",
+  "baseline": "fb5cba877df8fff62322933abbfd36c6f4e3c14f",
+  "branch": "perf/liquid-glass-frame-budget",
+  "workflowId": 425344976,
+  "workflowPath": ".github/workflows/liquid-glass-frame-budget.yml",
+  "remoteWriteRequests": 1,
+  "command": "/usr/bin/gh workflow run 425344976 --repo Proto-UI/Proto-UI --ref perf/liquid-glass-frame-budget --field baseline_sha=fb5cba877df8fff62322933abbfd36c6f4e3c14f",
+  "remoteResult": "Execution runtime replaced without PID, stdout or dispatch acknowledgement; subsequent read-only pending-call query interrupted. External execution status remains unknown.",
+  "retrySent": false,
+  "observedMatchedWorkflowRuns": [],
+  "observedOtherRuns": [
+    {
+      "id": 44823537125,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44823537125"
+    }
+  ],
+  "branchReadback": {
+    "head": "c71b850d86495561bdf69db31d70f78d382fa749",
+    "draft": true,
+    "state": "open"
+  },
+  "latencyResult": null,
+  "limits": [
+    "A requested remote command is not an acknowledged GitHub workflow dispatch.",
+    "No visible run does not prove the pending external request was cancelled; do not blindly repeat the write.",
+    "The ordinary CI result is not matched native browser evidence.",
+    "No older revision latency or screenshots are relabeled as c71b850 results.",
+    "The submitted command names a branch, not an immutable SHA. If the delayed request executes after a documentation-only descendant is published, bind its eventual results to the actual reported SHA and source hashes; do not relabel them as c71b850."
+  ],
+  "intendedCandidate": "c71b850d86495561bdf69db31d70f78d382fa749"
+}

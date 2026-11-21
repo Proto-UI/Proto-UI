@@ -1,6 +1,6 @@
 ---
 title: 'Liquid Glass Button'
-description: 'Real Base Button projection through four Web adapters.'
+description: '用透明层次呈现常规操作，以克制的染色突出主要操作。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -10,9 +10,9 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-V2 Liquid Glass 意图已接入可选 Web 自实现光学 provider。Previewer 的可见动态应用 canvas 就是被采样的背景本体。当前不捕获任意 DOM 或浏览器 compositor：介入的其他绘制、跨 scope portal、来源或偏好不可用时保留可读回退。减弱动态效果使用静态光学路径。此 draft provider 仍需 exact-head 浏览器证据后才能接纳；native、Apple 私有实现、group/morph 与完整 Compiler 等价性仍未验证。
+Liquid Glass Button 用柔和的边缘高光与背景折射，将操作控件与内容区分开。常规按钮适合返回等次要操作；强调按钮通过染色突出当前主要操作，两者保持相同尺寸。
 
-用页面顶部的运行时选择器切换同一真实原型。点击 Back 可观察事件计数。
+预览背景保持静止，让注意力集中在按钮的悬停、按下和键盘焦点上。点击 Back 可观察激活次数，也可以用页面顶部的运行时选择器比较同一组件在四种 Web 适配器中的表现。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -60,16 +60,22 @@ V2 Liquid Glass 意图已接入可选 Web 自实现光学 provider。Previewer �
 </div>
 
 <div data-adapter-panel="react" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add react liquid-glass-button" manager="npm" />
+  <InstallCommandCard
+    command="npx @proto.ui/cli@latest add react liquid-glass-button"
+    manager="npm"
+  />
 </div>
 
 <div data-adapter-panel="vue" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add vue liquid-glass-button" manager="npm" />
+  <InstallCommandCard
+    command="npx @proto.ui/cli@latest add vue liquid-glass-button"
+    manager="npm"
+  />
 </div>
 
 ## 用法
 
-Liquid Glass Button 通过自实现 Web provider 投射 V2 光学意图。以下示例展示支持的 variant 与 disabled 状态。
+同一组操作通常只突出一个主要按钮，其余使用常规样式。以下示例展示常规、强调和禁用状态。
 
 ### 常规
 
@@ -81,7 +87,7 @@ Liquid Glass Button 通过自实现 Web provider 投射 V2 光学意图。以下
     runtimes={['wc']}
     hasCode={true}
     code={`
-<div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
   <wc-liquid-glass-button>Back</wc-liquid-glass-button>
 </div>
     `}
@@ -100,7 +106,7 @@ import { LiquidGlassButton } from '../proto-ui/components/react';
 
 export function Demo() {
   return (
-    <div className="flex flex-wrap items-center gap-3 liquid-functional-demo">
+    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
       <LiquidGlassButton>Back</LiquidGlassButton>
     </div>
   );
@@ -118,7 +124,7 @@ export function Demo() {
     hasCode={true}
     code={`
 <template>
-  <div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
     <LiquidGlassButton>Back</LiquidGlassButton>
   </div>
 </template>
@@ -140,7 +146,7 @@ import { LiquidGlassButton } from '../proto-ui/components/vue';
     runtimes={['wc']}
     hasCode={true}
     code={`
-<div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
   <wc-liquid-glass-button variant="prominent">Continue</wc-liquid-glass-button>
 </div>
     `}
@@ -159,7 +165,7 @@ import { LiquidGlassButton } from '../proto-ui/components/react';
 
 export function Demo() {
   return (
-    <div className="flex flex-wrap items-center gap-3 liquid-functional-demo">
+    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
       <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
     </div>
   );
@@ -177,7 +183,7 @@ export function Demo() {
     hasCode={true}
     code={`
 <template>
-  <div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
     <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
   </div>
 </template>
@@ -199,7 +205,7 @@ import { LiquidGlassButton } from '../proto-ui/components/vue';
     runtimes={['wc']}
     hasCode={true}
     code={`
-<div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
   <wc-liquid-glass-button disabled>Unavailable</wc-liquid-glass-button>
 </div>
     `}
@@ -218,7 +224,7 @@ import { LiquidGlassButton } from '../proto-ui/components/react';
 
 export function Demo() {
   return (
-    <div className="flex flex-wrap items-center gap-3 liquid-functional-demo">
+    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
       <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
     </div>
   );
@@ -236,7 +242,7 @@ export function Demo() {
     hasCode={true}
     code={`
 <template>
-  <div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
     <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
   </div>
 </template>
@@ -248,10 +254,19 @@ import { LiquidGlassButton } from '../proto-ui/components/vue';
   />
 </div>
 
+## 材质与无障碍
+
+默认的 regular 材质用于可读的功能控件。仅为主要操作使用 `variant="prominent"`，避免在玻璃容器内再叠加玻璃按钮。这些取舍参考 Apple 的 [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)、[Color](https://developer.apple.com/design/human-interface-guidelines/color) 与 [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) 指南。
+
+`material="auto"` 在宿主支持时启用光学效果；`material="opaque"` 使用不透明表面。网页预览采样的是它实际显示的 canvas 背景。普通 DOM 背景或遮挡内容不在该来源内时，按钮保留可读的不透明样式。
+
+减弱动态效果会关闭弹性形变并保留静态材质；减少透明度、增强对比度或强制颜色模式会使用可读回退。禁用按钮保留文字和轮廓，不响应激活。
+
 ## API
 
-- variant: regular / prominent; material: auto / opaque
-- disabled: boolean, default false
+- variant: regular / prominent，默认 regular
+- material: auto / opaque，默认 auto
+- disabled: boolean，默认 false
 - 激活、焦点、键盘与禁用逻辑继承 Base Button，视觉层没有第二个状态拥有者。
 
-目前已登记 Button。其他 Base 部件正在逐项补齐，不会借用其他族冒充；通用 Compiler 与 GPUI/Flutter/Qt 完整呈现尚未验证。源码包仍为 private/unreleased。
+Liquid Glass 仍为 WIP / 实验性家族，源码包尚未发布。这里展示独立实现的 Web 效果；原生平台呈现、组件间融合与完整 Compiler 支持仍在开发中。

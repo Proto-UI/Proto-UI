@@ -3,7 +3,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex flex-wrap items-center gap-3 liquid-functional-demo',
+    className: 'flex flex-wrap items-center gap-6 liquid-functional-demo',
     children: [
       {
         kind: 'proto',

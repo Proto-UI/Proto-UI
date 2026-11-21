@@ -1,0 +1,110 @@
+{
+  "runId": 44820362423,
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44820362423",
+  "artifactId": 14671354977,
+  "archiveSha256": "a592611f9bf43c963204e49966fae9541f8e517cfd0b743f1ed7ab1fb56b4cf0",
+  "archiveBytes": 3490253,
+  "conclusion": "success",
+  "baseline": "a514f3a3b1ea2f9087351a97d9b3c3f67a715df0",
+  "candidate": "fb5cba877df8fff62322933abbfd36c6f4e3c14f",
+  "meaning": "Preserved concurrent source-refresh scheduling experiment. Both revisions complete 12 windows and 120 fresh presses. Application latency improves in this run but the 10 ms target is not reached. This is distinct from both 1d/a514 and the upcoming CPU-default comparison.",
+  "limitations": [
+    "The historical four-host source-progress probe records initial source/instrument hashes only, without final sourceAtEnd/instrumentAtEnd validation. Do not relabel it as full end-to-end source-stability evidence.",
+    "The separate frame-budget measurement does verify source stability at the start/end.",
+    "Software SwiftShader; application commits are not physical presentation, 120 Hz or input-to-photon.",
+    "PNG, logs and environment text are available in the uploaded Actions artifact under its 30-day retention; they are hash-bound here but not all copied into the repository."
+  ],
+  "retainedOriginalFiles": {
+    "baseline-report.json.gz": {
+      "original": "baseline/report.json",
+      "sha256": "247bdd6181a44d9463fff31079b46104bba5891da476701a6514954ad1c5daf9",
+      "originalSha256": "d2049609de21fa87cfff5ce6fffab44209055692506c38306a3080b3fcfdab5b",
+      "encoding": "gzip; mtime=0; decompressed bytes exactly equal original"
+    },
+    "candidate-report.json.gz": {
+      "original": "candidate/report.json",
+      "sha256": "45365ee5d6f3cba03072c24cb063467ef3d488aab8732de4bba8da5ae0484f0f",
+      "originalSha256": "f9c3d6d7339bb8187684fe0b25866f076fa7075407fd180c5c2301f300d308aa",
+      "encoding": "gzip; mtime=0; decompressed bytes exactly equal original"
+    },
+    "baseline-progress-report.json.gz": {
+      "original": "baseline-progress/report.json",
+      "sha256": "6ae95497265e746c3558732dd4fb661d519345a6d54339ae8868274b0a73f24a",
+      "originalSha256": "0296642b32adbfbebfe96ad007a9a2d0bdbd9634b0a7e140bc6da862668b68e8",
+      "encoding": "gzip; mtime=0; decompressed bytes exactly equal original"
+    },
+    "candidate-progress-report.json.gz": {
+      "original": "candidate-progress/report.json",
+      "sha256": "689ba791686fbf1d49e70fca8569088864a748d06bc9d642293155599efe5c50",
+      "originalSha256": "6f1784a49548e6b9b564592ce58ab998a1f494ad0f6e22775868d73c606d0326",
+      "encoding": "gzip; mtime=0; decompressed bytes exactly equal original"
+    },
+    "comparison.json": {
+      "original": "comparison.json",
+      "sha256": "7e5619c16822c121aef36df05a482aab31614f26e9c9844d729f45fe51b7ccb0"
+    },
+    "gpu-prefilter.json": {
+      "original": "gpu-prefilter/gpu-prefilter.json",
+      "sha256": "5da097a6c2ec08d24852f3bc756c2401ed7a6e2afa0362a1354c71fce8b7eb26"
+    },
+    "program-clear.json": {
+      "original": "program-clear/program-clear.json",
+      "sha256": "1f9542e8fe061ce6db620fad03d5cc25040e1be51d32e85e6a5d6498e9b149a2"
+    }
+  },
+  "derivedSummary": {
+    "file": "summary.json",
+    "sha256": "d89fafa7c8e3dab843896814473a61c02522412369702bcd045aebab43ec5c92"
+  },
+  "originalFileSha256": {
+    "baseline/original-1440-layout.png": "84f1a07a5061202f82950807f9f77cae2ca8c225c782709d6d5be484c7fa7f0a",
+    "baseline/public-dark.png": "c4f4f1196381a80a56c76b30f4e9a01595c7a145acc7d9362afdcec97efc4593",
+    "baseline/matched-1000-optical.png": "92a3c7394320b81f642913919bcdf168fb2550aba0e8e362b7b67356ce757f66",
+    "baseline/public-dark-viewport.png": "c60918e04c03f70545684f96e5fbb4cca5c743e7027b066e0289c65e4d76c384",
+    "baseline/public-light-viewport.png": "3df7d650f40dbe8ac0b36a324bf8e20869c3ea8238b6373359334a7a775aea67",
+    "baseline/public-light.png": "32194aaa367b4ee6944c085ddbfba84fdc3ed546e0a97506c7ab38d448e66b86",
+    "baseline/public-small-viewport.png": "c35ed79fa8e52b7ff83b1b7e095e5e8159c739cbc4abcf45e7b83fc797b7679c",
+    "baseline/public-small.png": "654ac393f51a35c79d34dc28a9e91ad46cfe408b7e7c61942da0cb70e6c00298",
+    "baseline/report.json": "d2049609de21fa87cfff5ce6fffab44209055692506c38306a3080b3fcfdab5b",
+    "baseline/scene-dark-on-light.png": "14fbc1b44823ef4b37ddb8bf163c77a87155a7ac19210bcf47fc4724864e6ea0",
+    "baseline/scene-light-on-dark.png": "a5f9c97bdf78ef13ba2e6a1a25fc736817ebea094ad160839e3310058b5f508d",
+    "baseline/smoke-react-held.png": "6f22fabfa51e5ccaca89607a0a9fe46b8200ce6287a45676875c0182be396a79",
+    "baseline/smoke-vue-held.png": "68cbef30675341f103112a2402055985291e33d1a212cf6d0132d19f93161db6",
+    "baseline/smoke-vue2-held.png": "2c404f2aa2dd5623461bb43182f551a467ec4e0c11fb9b14e568f6f3cff9e973",
+    "baseline/smoke-wc-held.png": "07bb3dde0d240e03391765140b673e9efb080f79434b27760d7146ed4489f47e",
+    "baseline-progress/dynamic-idle.png": "6106f8888cf437f3913adf19708250e4fffed8157b108dae5c191ef88edd9964",
+    "baseline-progress/report.json": "0296642b32adbfbebfe96ad007a9a2d0bdbd9634b0a7e140bc6da862668b68e8",
+    "baseline-progress/dynamic-wc-drag.png": "2cd88f6eac1195a72cbb514d8414f4cd6331eb624b9136a1371a73e06b3120ef",
+    "baseline-progress.log": "bf0d92f518974376ab368b52f6ed2ed1fa84e5320e1116e6916372a0b4fe451a",
+    "baseline.log": "1925de9eccd52f14c574b844f82bc238985a966b8c98b8b632fdaa2f979d7049",
+    "browser.txt": "04ce1829b69f68a11eb8ef036a6ab18a63411689e39b9b3331c0d884b707983a",
+    "candidate/original-1440-layout.png": "7ded712b0f9a15f99c3516fc3d1ba33281797b798566b158df7412b465373b9b",
+    "candidate/public-dark-viewport.png": "c60918e04c03f70545684f96e5fbb4cca5c743e7027b066e0289c65e4d76c384",
+    "candidate/matched-1000-optical.png": "5084ce9b029a5c2e2def42c4fee5c817cb09e38d4325659875d0225c43bfbcdf",
+    "candidate/public-dark.png": "c4f4f1196381a80a56c76b30f4e9a01595c7a145acc7d9362afdcec97efc4593",
+    "candidate/public-light-viewport.png": "ce4bb6bd3d6ff79c785190bdb123f3ca836aa0531c5c1278a6e7d9d1b652c3c1",
+    "candidate/public-light.png": "32194aaa367b4ee6944c085ddbfba84fdc3ed546e0a97506c7ab38d448e66b86",
+    "candidate/public-small-viewport.png": "c35ed79fa8e52b7ff83b1b7e095e5e8159c739cbc4abcf45e7b83fc797b7679c",
+    "candidate/public-small.png": "654ac393f51a35c79d34dc28a9e91ad46cfe408b7e7c61942da0cb70e6c00298",
+    "candidate/report.json": "f9c3d6d7339bb8187684fe0b25866f076fa7075407fd180c5c2301f300d308aa",
+    "candidate/scene-dark-on-light.png": "14fbc1b44823ef4b37ddb8bf163c77a87155a7ac19210bcf47fc4724864e6ea0",
+    "candidate/scene-light-on-dark.png": "a5f9c97bdf78ef13ba2e6a1a25fc736817ebea094ad160839e3310058b5f508d",
+    "candidate/smoke-react-held.png": "6f22fabfa51e5ccaca89607a0a9fe46b8200ce6287a45676875c0182be396a79",
+    "candidate/smoke-vue-held.png": "68cbef30675341f103112a2402055985291e33d1a212cf6d0132d19f93161db6",
+    "candidate/smoke-vue2-held.png": "2c404f2aa2dd5623461bb43182f551a467ec4e0c11fb9b14e568f6f3cff9e973",
+    "candidate/smoke-wc-held.png": "07bb3dde0d240e03391765140b673e9efb080f79434b27760d7146ed4489f47e",
+    "candidate-progress/dynamic-wc-drag.png": "2cd88f6eac1195a72cbb514d8414f4cd6331eb624b9136a1371a73e06b3120ef",
+    "candidate-progress/dynamic-idle.png": "68ab60e116a62e2be51e871d854e71d2764a7e32c355ff8c8beb907787b92211",
+    "candidate-progress/report.json": "6f1784a49548e6b9b564592ce58ab998a1f494ad0f6e22775868d73c606d0326",
+    "candidate-progress.log": "74de2fa2b65a309f22498d86205d88911829d119f71cd283f88b5e658a785ee5",
+    "candidate.log": "992403253cad9c289f33db69ac1acc41fdcf85415201501ed602a61665b49c6b",
+    "comparison.json": "7e5619c16822c121aef36df05a482aab31614f26e9c9844d729f45fe51b7ccb0",
+    "comparison.md": "1b674f39864623f55eb619a0cdb2305e317b04ceaf5de33bab8704f01b22ab12",
+    "font-environment.txt": "42c199555ae5397a83bffbfa7d8ad652a67783f50a6f9bcd145586d9a95fcd26",
+    "gpu-prefilter.log": "59740c00ce5b94fc6b6c0b7e81d9c37c0b2a9b1eb085738e58d588d6bcfeb797",
+    "gpu-prefilter/gpu-prefilter.json": "5da097a6c2ec08d24852f3bc756c2401ed7a6e2afa0362a1354c71fce8b7eb26",
+    "node.txt": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+    "program-clear/program-clear.json": "1f9542e8fe061ce6db620fad03d5cc25040e1be51d32e85e6a5d6498e9b149a2",
+    "program-clear.log": "df0d959f4e0e1048697a619ab315e38ab8633f1fea85069163f09dfdec14f2c4"
+  }
+}

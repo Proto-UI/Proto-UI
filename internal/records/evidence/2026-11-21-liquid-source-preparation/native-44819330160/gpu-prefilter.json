@@ -1,0 +1,1786 @@
+{
+  "schemaVersion": 1,
+  "started": "2026-11-20T21:26:37.825Z",
+  "source": {
+    "sha": "a514f3a3b1ea2f9087351a97d9b3c3f67a715df0",
+    "helper": "packages/adapters/base/src/material/prefilter.ts",
+    "helperSha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+    "probeSha256": "7f3559359c75e97d635567ab0783663da37dc9d97965035ca447d8ea990373b8",
+    "bundleSha256": "c4c1da4117744c8c58b3f032be1ceb1c77bd2607c3c9faec9a19e4d6cc4579e2",
+    "bundleInputs": {
+      "packages/adapters/base/src/material/prefilter.ts": {
+        "bytes": 12637,
+        "imports": [],
+        "format": "esm"
+      }
+    }
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "headless": true,
+    "browser": "157.0.8103.78",
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "amdSwitchable": false,
+        "canSupportThreadedTextureMailbox": false,
+        "directRenderingVersion": "",
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_robust_resource_initialization GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_translated_shader_source GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_rgba8 GL_ARM_shader_framebuffer_fetch GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clear_texture GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_semaphore_fd GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_paletted_texture GL_OES_copy_image GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 GL_QCOM_texture_lod_bias ",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glResetNotificationStrategy": 33362,
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+        "glWsExtensions": "EGL_EXT_create_context_robustness EGL_ANGLE_surface_orientation EGL_KHR_create_context EGL_KHR_image EGL_KHR_image_base EGL_EXT_image_gl_colorspace EGL_KHR_gl_colorspace EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_get_all_proc_addresses EGL_KHR_fence_sync EGL_KHR_wait_sync EGL_ANGLE_create_context_webgl_compatibility EGL_CHROMIUM_create_context_bind_generates_resource EGL_KHR_swap_buffers_with_damage EGL_EXT_pixel_format_float EGL_KHR_surfaceless_context EGL_ANGLE_display_texture_share_group EGL_ANGLE_display_semaphore_share_group EGL_ANGLE_create_context_client_arrays EGL_ANGLE_program_cache_control EGL_ANGLE_robust_resource_initialization EGL_ANGLE_create_context_extensions_enabled EGL_ANDROID_blob_cache EGL_ANDROID_recordable EGL_ANGLE_create_context_backwards_compatible EGL_KHR_no_config_context EGL_IMG_context_priority EGL_KHR_create_context_no_error EGL_KHR_reusable_sync EGL_EXT_buffer_age EGL_ANGLE_create_surface_swap_interval EGL_ANGLE_vulkan_image EGL_KHR_partial_update EGL_ANGLE_global_fence_sync EGL_ANGLE_memory_usage_report ",
+        "glWsVendor": "Google Inc. (Google)",
+        "glWsVersion": "1.5 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+        "hardwareSupportsVulkan": false,
+        "inProcessGpu": false,
+        "initializationTime": 0.024715,
+        "isAsan": false,
+        "isClangCoverage": false,
+        "jpegDecodeAcceleratorSupported": false,
+        "maxMsaaSamples": "4",
+        "optimus": false,
+        "passthroughCmdDecoder": true,
+        "pixelShaderVersion": "3.00",
+        "processCrashCount": 0,
+        "sandboxed": false,
+        "skiaBackendType": "None",
+        "subpixelFontRendering": true,
+        "targetCpuBits": 64,
+        "vertexShaderVersion": "3.00",
+        "visibilityCallbackCallCount": 0
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      },
+      "driverBugWorkarounds": [],
+      "videoDecoding": [],
+      "videoEncoding": []
+    }
+  },
+  "failures": [],
+  "evidence": {
+    "supported": true,
+    "precision": {
+      "precision": 23,
+      "rangeMin": 127,
+      "rangeMax": 127
+    },
+    "cases": [
+      {
+        "width": 1,
+        "height": 1,
+        "pattern": "black",
+        "seed": 1905462251,
+        "comparedBytes": 4,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332",
+        "expectedSha256": "e3820096cb82366b860b8a4e668453a7aaaf423af03bdf289fa308ea03a79332",
+        "filterAndReadbackMs": 17.599999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 1,
+        "pattern": "white",
+        "seed": 1905462354,
+        "comparedBytes": 4,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+        "expectedSha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+        "filterAndReadbackMs": 1.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 1,
+        "pattern": "checker",
+        "seed": 1905462457,
+        "comparedBytes": 4,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "7a7bf454c5f3cb1b9d9a20f81417f98d976fe3b3dd52c1b9968f02e89e7e8a2f",
+        "expectedSha256": "7a7bf454c5f3cb1b9d9a20f81417f98d976fe3b3dd52c1b9968f02e89e7e8a2f",
+        "filterAndReadbackMs": 1.2000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 1,
+        "pattern": "rounding",
+        "seed": 1905462560,
+        "comparedBytes": 4,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "cbd77db7fb2d3209f8730e44c6f6ae57f3c662fc051eafb130e09e596ce63dea",
+        "expectedSha256": "cbd77db7fb2d3209f8730e44c6f6ae57f3c662fc051eafb130e09e596ce63dea",
+        "filterAndReadbackMs": 1.2000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 1,
+        "pattern": "impulse",
+        "seed": 1905462663,
+        "comparedBytes": 4,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+        "expectedSha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+        "filterAndReadbackMs": 1.2999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 1,
+        "pattern": "seeded",
+        "seed": 1905462766,
+        "comparedBytes": 4,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "53815649d5881b28edba7d7901543fff03826fd5bef4cfcdbd57b76f78307603",
+        "expectedSha256": "53815649d5881b28edba7d7901543fff03826fd5bef4cfcdbd57b76f78307603",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 9,
+        "pattern": "black",
+        "seed": 1905464755,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "d574fbbbc44a56d8ec9bf06a4221e0c975b101e434c87e030572be6660dfb538",
+        "expectedSha256": "d574fbbbc44a56d8ec9bf06a4221e0c975b101e434c87e030572be6660dfb538",
+        "filterAndReadbackMs": 0.8000000000465661,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 9,
+        "pattern": "white",
+        "seed": 1905464858,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "c38236f1e6d5ba2e8616b0c8a115bf8bf0814ddae740ac6cbea93d063417cd0e",
+        "expectedSha256": "c38236f1e6d5ba2e8616b0c8a115bf8bf0814ddae740ac6cbea93d063417cd0e",
+        "filterAndReadbackMs": 1,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 9,
+        "pattern": "checker",
+        "seed": 1905464961,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "19cc3933b9cf7911f16a1c99e39ac6df80cec1a20a401f4fc6aaa792a0021cd6",
+        "expectedSha256": "19cc3933b9cf7911f16a1c99e39ac6df80cec1a20a401f4fc6aaa792a0021cd6",
+        "filterAndReadbackMs": 1,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 9,
+        "pattern": "rounding",
+        "seed": 1905465064,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "ee3e1056ccb8d35e0591521bc0e5778dd134b5918d5533f83758f49586189c80",
+        "expectedSha256": "ee3e1056ccb8d35e0591521bc0e5778dd134b5918d5533f83758f49586189c80",
+        "filterAndReadbackMs": 1.2000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 9,
+        "pattern": "impulse",
+        "seed": 1905465167,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "10f212faf0058791de00374946725ffaf9c4146fd27211243f264d46f089ee5c",
+        "expectedSha256": "10f212faf0058791de00374946725ffaf9c4146fd27211243f264d46f089ee5c",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 9,
+        "pattern": "seeded",
+        "seed": 1905465270,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "3f28519663c4d8707752f120141929333a1d5147157855779b710621e45d4eca",
+        "expectedSha256": "3f28519663c4d8707752f120141929333a1d5147157855779b710621e45d4eca",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 9,
+        "height": 1,
+        "pattern": "black",
+        "seed": 1905463027,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "d574fbbbc44a56d8ec9bf06a4221e0c975b101e434c87e030572be6660dfb538",
+        "expectedSha256": "d574fbbbc44a56d8ec9bf06a4221e0c975b101e434c87e030572be6660dfb538",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 9,
+        "height": 1,
+        "pattern": "white",
+        "seed": 1905463130,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "c38236f1e6d5ba2e8616b0c8a115bf8bf0814ddae740ac6cbea93d063417cd0e",
+        "expectedSha256": "c38236f1e6d5ba2e8616b0c8a115bf8bf0814ddae740ac6cbea93d063417cd0e",
+        "filterAndReadbackMs": 1,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 9,
+        "height": 1,
+        "pattern": "checker",
+        "seed": 1905463233,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "19cc3933b9cf7911f16a1c99e39ac6df80cec1a20a401f4fc6aaa792a0021cd6",
+        "expectedSha256": "19cc3933b9cf7911f16a1c99e39ac6df80cec1a20a401f4fc6aaa792a0021cd6",
+        "filterAndReadbackMs": 1,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 9,
+        "height": 1,
+        "pattern": "rounding",
+        "seed": 1905463336,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "4e398fc071373e9873f22ec30a5817bf6e717d2037969e76c1159a2113e9cdae",
+        "expectedSha256": "4e398fc071373e9873f22ec30a5817bf6e717d2037969e76c1159a2113e9cdae",
+        "filterAndReadbackMs": 0.9000000000232831,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 9,
+        "height": 1,
+        "pattern": "impulse",
+        "seed": 1905463439,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "10f212faf0058791de00374946725ffaf9c4146fd27211243f264d46f089ee5c",
+        "expectedSha256": "10f212faf0058791de00374946725ffaf9c4146fd27211243f264d46f089ee5c",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 9,
+        "height": 1,
+        "pattern": "seeded",
+        "seed": 1905463542,
+        "comparedBytes": 36,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "76f5078f44b7ae23f071efb79772eceff183e69269caeae0156c1a3184d8b478",
+        "expectedSha256": "76f5078f44b7ae23f071efb79772eceff183e69269caeae0156c1a3184d8b478",
+        "filterAndReadbackMs": 0.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2,
+        "height": 3,
+        "pattern": "black",
+        "seed": 1905462974,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "c773395b224984566fc1c2a1bc01ed83f5e89ea97e9c035b75d1a1c5ef48ff48",
+        "expectedSha256": "c773395b224984566fc1c2a1bc01ed83f5e89ea97e9c035b75d1a1c5ef48ff48",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2,
+        "height": 3,
+        "pattern": "white",
+        "seed": 1905463077,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "44a5f7891570e5631e8c91c85186e6633f4ab5364f644040b2a00126a07985b6",
+        "expectedSha256": "44a5f7891570e5631e8c91c85186e6633f4ab5364f644040b2a00126a07985b6",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2,
+        "height": 3,
+        "pattern": "checker",
+        "seed": 1905463180,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "5fccad46b74dfc84bca7fffde81a21847976be28821c6631f38a390c3a408bfc",
+        "expectedSha256": "5fccad46b74dfc84bca7fffde81a21847976be28821c6631f38a390c3a408bfc",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2,
+        "height": 3,
+        "pattern": "rounding",
+        "seed": 1905463283,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "a030dd99d02fcf0d22bb8fa1664f3a48e634b3d728f8d7cab4d827f83a6bfd46",
+        "expectedSha256": "a030dd99d02fcf0d22bb8fa1664f3a48e634b3d728f8d7cab4d827f83a6bfd46",
+        "filterAndReadbackMs": 1,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2,
+        "height": 3,
+        "pattern": "impulse",
+        "seed": 1905463386,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "07f001d01f19d33a29cf88402d8fe40b3ac628f8a00851dac4920b9202e6cefb",
+        "expectedSha256": "07f001d01f19d33a29cf88402d8fe40b3ac628f8a00851dac4920b9202e6cefb",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2,
+        "height": 3,
+        "pattern": "seeded",
+        "seed": 1905463489,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "ee5c1fe4cada84e3bfde63881fd731fb311f13ad64a3ee73b99a8526482db3cd",
+        "expectedSha256": "ee5c1fe4cada84e3bfde63881fd731fb311f13ad64a3ee73b99a8526482db3cd",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2,
+        "pattern": "black",
+        "seed": 1905462758,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "c773395b224984566fc1c2a1bc01ed83f5e89ea97e9c035b75d1a1c5ef48ff48",
+        "expectedSha256": "c773395b224984566fc1c2a1bc01ed83f5e89ea97e9c035b75d1a1c5ef48ff48",
+        "filterAndReadbackMs": 0.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2,
+        "pattern": "white",
+        "seed": 1905462861,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "44a5f7891570e5631e8c91c85186e6633f4ab5364f644040b2a00126a07985b6",
+        "expectedSha256": "44a5f7891570e5631e8c91c85186e6633f4ab5364f644040b2a00126a07985b6",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2,
+        "pattern": "checker",
+        "seed": 1905462964,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "6d756c67452da64c95cda78b4f2cfd551eace52c9a51efa0359862775c93d0b8",
+        "expectedSha256": "6d756c67452da64c95cda78b4f2cfd551eace52c9a51efa0359862775c93d0b8",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2,
+        "pattern": "rounding",
+        "seed": 1905463067,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "24970ef227dff5eabbac7545b64c70afcbbde09b508a3647baf29906c0fac5a4",
+        "expectedSha256": "24970ef227dff5eabbac7545b64c70afcbbde09b508a3647baf29906c0fac5a4",
+        "filterAndReadbackMs": 0.8000000000465661,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2,
+        "pattern": "impulse",
+        "seed": 1905463170,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "18493c7f3b46d48c4ae50b9e69d27b638dd0b241830c14b95525bfdcfa349909",
+        "expectedSha256": "18493c7f3b46d48c4ae50b9e69d27b638dd0b241830c14b95525bfdcfa349909",
+        "filterAndReadbackMs": 0.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2,
+        "pattern": "seeded",
+        "seed": 1905463273,
+        "comparedBytes": 24,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "a79ded2d85f5f78e22a07e9ea178a9243cb431fc73dbd89b74e66942e1fc1e49",
+        "expectedSha256": "a79ded2d85f5f78e22a07e9ea178a9243cb431fc73dbd89b74e66942e1fc1e49",
+        "filterAndReadbackMs": 0.8000000000465661,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 7,
+        "height": 7,
+        "pattern": "black",
+        "seed": 1905464711,
+        "comparedBytes": 196,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "e829a6b35ca44e3f8f327f6d41f3330a1c2f363e0418fd78621383dbfcd82769",
+        "expectedSha256": "e829a6b35ca44e3f8f327f6d41f3330a1c2f363e0418fd78621383dbfcd82769",
+        "filterAndReadbackMs": 1,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 7,
+        "height": 7,
+        "pattern": "white",
+        "seed": 1905464814,
+        "comparedBytes": 196,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "3d0b3dca249bd1df25779d65db277be994634971b1c8fdcc971fcf7c400fa8c0",
+        "expectedSha256": "3d0b3dca249bd1df25779d65db277be994634971b1c8fdcc971fcf7c400fa8c0",
+        "filterAndReadbackMs": 0.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 7,
+        "height": 7,
+        "pattern": "checker",
+        "seed": 1905464917,
+        "comparedBytes": 196,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "a023bb550104ab6730f250242bea8b7fd1f954d3879d377069bf1dc5ff3c4df8",
+        "expectedSha256": "a023bb550104ab6730f250242bea8b7fd1f954d3879d377069bf1dc5ff3c4df8",
+        "filterAndReadbackMs": 0.8000000000465661,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 7,
+        "height": 7,
+        "pattern": "rounding",
+        "seed": 1905465020,
+        "comparedBytes": 196,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "b17f404b99b482380faab74937ca98b719f438cd6a247b926fb16437749abf7c",
+        "expectedSha256": "b17f404b99b482380faab74937ca98b719f438cd6a247b926fb16437749abf7c",
+        "filterAndReadbackMs": 0.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 7,
+        "height": 7,
+        "pattern": "impulse",
+        "seed": 1905465123,
+        "comparedBytes": 196,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "868b51868660a76629f3c2eb170a6375cbf7f1e1c7910082bf80a5f422779f50",
+        "expectedSha256": "868b51868660a76629f3c2eb170a6375cbf7f1e1c7910082bf80a5f422779f50",
+        "filterAndReadbackMs": 0.9000000000232831,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 7,
+        "height": 7,
+        "pattern": "seeded",
+        "seed": 1905465226,
+        "comparedBytes": 196,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "746b7e9c5545e98ef5c80468c82658e2af79066516d9c4ca89d3067559e5c20b",
+        "expectedSha256": "746b7e9c5545e98ef5c80468c82658e2af79066516d9c4ca89d3067559e5c20b",
+        "filterAndReadbackMs": 0.6999999999534339,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 31,
+        "height": 13,
+        "pattern": "black",
+        "seed": 1905468917,
+        "comparedBytes": 1612,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "58ac4a02aee1f533a76de3ed277af8c1a6a32be60c526802c1ce0df61e787ee3",
+        "expectedSha256": "58ac4a02aee1f533a76de3ed277af8c1a6a32be60c526802c1ce0df61e787ee3",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 31,
+        "height": 13,
+        "pattern": "white",
+        "seed": 1905469020,
+        "comparedBytes": 1612,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "4ead8cec3b5310aaa946a2a51f8c37c155a659450302bbaafca8057d16ee7d8c",
+        "expectedSha256": "4ead8cec3b5310aaa946a2a51f8c37c155a659450302bbaafca8057d16ee7d8c",
+        "filterAndReadbackMs": 0.9000000000232831,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 31,
+        "height": 13,
+        "pattern": "checker",
+        "seed": 1905469123,
+        "comparedBytes": 1612,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "0c31ce2edc911604e531132763a792d6cf2894cc2cff34c299212c6448c8ce82",
+        "expectedSha256": "0c31ce2edc911604e531132763a792d6cf2894cc2cff34c299212c6448c8ce82",
+        "filterAndReadbackMs": 0.8999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 31,
+        "height": 13,
+        "pattern": "rounding",
+        "seed": 1905469226,
+        "comparedBytes": 1612,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "a0a3f2becbbaf79a4ea89ef3c1a830f68c364f216ef112b7adf0f2ba9f863555",
+        "expectedSha256": "a0a3f2becbbaf79a4ea89ef3c1a830f68c364f216ef112b7adf0f2ba9f863555",
+        "filterAndReadbackMs": 0.9000000000232831,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 31,
+        "height": 13,
+        "pattern": "impulse",
+        "seed": 1905469329,
+        "comparedBytes": 1612,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "25ff68d0b35e619f1e93f7738f2ca3e7c4ddefc43b5a37249dc76a5358a24b9d",
+        "expectedSha256": "25ff68d0b35e619f1e93f7738f2ca3e7c4ddefc43b5a37249dc76a5358a24b9d",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 31,
+        "height": 13,
+        "pattern": "seeded",
+        "seed": 1905469432,
+        "comparedBytes": 1612,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "fad54486c17653db20e43187052daffeffb36233dfcbb09ba8964fe8ce4691ed",
+        "expectedSha256": "fad54486c17653db20e43187052daffeffb36233dfcbb09ba8964fe8ce4691ed",
+        "filterAndReadbackMs": 0.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 256,
+        "height": 128,
+        "pattern": "black",
+        "seed": 1905526737,
+        "comparedBytes": 131072,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "79f042779e26c42049ef191e897a78aa250d61f146ec0fb795a1eed9e5412eb1",
+        "expectedSha256": "79f042779e26c42049ef191e897a78aa250d61f146ec0fb795a1eed9e5412eb1",
+        "filterAndReadbackMs": 4.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 256,
+        "height": 128,
+        "pattern": "white",
+        "seed": 1905526840,
+        "comparedBytes": 131072,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "b5a41c3758763bbec72769fab4a2533bf2db0b6312d93d25a695f9e4b9e02260",
+        "expectedSha256": "b5a41c3758763bbec72769fab4a2533bf2db0b6312d93d25a695f9e4b9e02260",
+        "filterAndReadbackMs": 5.100000000034925,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 256,
+        "height": 128,
+        "pattern": "checker",
+        "seed": 1905526943,
+        "comparedBytes": 131072,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "2390a603d6755452f041163b95dbb611578212edd8a18f8f77ac8fbe0f7efe86",
+        "expectedSha256": "2390a603d6755452f041163b95dbb611578212edd8a18f8f77ac8fbe0f7efe86",
+        "filterAndReadbackMs": 3.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 256,
+        "height": 128,
+        "pattern": "rounding",
+        "seed": 1905527046,
+        "comparedBytes": 131072,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "9412c4672214ecd57d22a8914a8e7e2f7a7b7a016075cf6d92f8cb752289b835",
+        "expectedSha256": "9412c4672214ecd57d22a8914a8e7e2f7a7b7a016075cf6d92f8cb752289b835",
+        "filterAndReadbackMs": 4.2999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 256,
+        "height": 128,
+        "pattern": "impulse",
+        "seed": 1905527149,
+        "comparedBytes": 131072,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "4404cbcee968cbe2f2d31c3ffad8e0bb9eeffde63ab05b2eb1ff9990d644c7f3",
+        "expectedSha256": "4404cbcee968cbe2f2d31c3ffad8e0bb9eeffde63ab05b2eb1ff9990d644c7f3",
+        "filterAndReadbackMs": 4.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 256,
+        "height": 128,
+        "pattern": "seeded",
+        "seed": 1905527252,
+        "comparedBytes": 131072,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "fed4c727be5d2a2fd33dc07cff40e06c8e196ec902133bbf3a5843d0781c80f4",
+        "expectedSha256": "fed4c727be5d2a2fd33dc07cff40e06c8e196ec902133bbf3a5843d0781c80f4",
+        "filterAndReadbackMs": 4.099999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 513,
+        "height": 257,
+        "pattern": "black",
+        "seed": 1905592043,
+        "comparedBytes": 527364,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "c42de9402c325a613e4ee1199308db7bc8bce3c2a93dfd1db11e55688f5fea2e",
+        "expectedSha256": "c42de9402c325a613e4ee1199308db7bc8bce3c2a93dfd1db11e55688f5fea2e",
+        "filterAndReadbackMs": 12.199999999953434,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 513,
+        "height": 257,
+        "pattern": "white",
+        "seed": 1905592146,
+        "comparedBytes": 527364,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "631b35391305d570e2c7b6a825ff1d775da06194a672b5ccdce83a7c61008bd2",
+        "expectedSha256": "631b35391305d570e2c7b6a825ff1d775da06194a672b5ccdce83a7c61008bd2",
+        "filterAndReadbackMs": 8.099999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 513,
+        "height": 257,
+        "pattern": "checker",
+        "seed": 1905592249,
+        "comparedBytes": 527364,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "54d8ef6ae55231ec7b0c7c1f68db6e005100537c1633f6e8bb60878a709da082",
+        "expectedSha256": "54d8ef6ae55231ec7b0c7c1f68db6e005100537c1633f6e8bb60878a709da082",
+        "filterAndReadbackMs": 7.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 513,
+        "height": 257,
+        "pattern": "rounding",
+        "seed": 1905592352,
+        "comparedBytes": 527364,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "8df5b79e12c3db1688dcf69526b8b6d95157fe55ecbf4e542986c96bf3fdf0c1",
+        "expectedSha256": "8df5b79e12c3db1688dcf69526b8b6d95157fe55ecbf4e542986c96bf3fdf0c1",
+        "filterAndReadbackMs": 7.599999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 513,
+        "height": 257,
+        "pattern": "impulse",
+        "seed": 1905592455,
+        "comparedBytes": 527364,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "8fe86d7580aad5a74e5e6fd34e43aa738051a253866f29937b1938c3aa3cfec0",
+        "expectedSha256": "8fe86d7580aad5a74e5e6fd34e43aa738051a253866f29937b1938c3aa3cfec0",
+        "filterAndReadbackMs": 7.099999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 513,
+        "height": 257,
+        "pattern": "seeded",
+        "seed": 1905592558,
+        "comparedBytes": 527364,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "5a7e7bf3cd177109af41ca3ed29cf631f936896188c450917c19d71e7e276f1f",
+        "expectedSha256": "5a7e7bf3cd177109af41ca3ed29cf631f936896188c450917c19d71e7e276f1f",
+        "filterAndReadbackMs": 6.2999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1024,
+        "height": 512,
+        "pattern": "black",
+        "seed": 1905721425,
+        "comparedBytes": 2097152,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "4864c4fc6d5e101b5a904a4148be1bab747cdf6f49e52551f314d0b63cfb6961",
+        "expectedSha256": "4864c4fc6d5e101b5a904a4148be1bab747cdf6f49e52551f314d0b63cfb6961",
+        "filterAndReadbackMs": 29.199999999953434,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1024,
+        "height": 512,
+        "pattern": "white",
+        "seed": 1905721528,
+        "comparedBytes": 2097152,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "4bda3a28f4ffe603c0ec1258c0034d65a1a0d35ab7bd523a834608adabf03cc5",
+        "expectedSha256": "4bda3a28f4ffe603c0ec1258c0034d65a1a0d35ab7bd523a834608adabf03cc5",
+        "filterAndReadbackMs": 22,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1024,
+        "height": 512,
+        "pattern": "checker",
+        "seed": 1905721631,
+        "comparedBytes": 2097152,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "2503ff563f00fb325e80b20a5e60f7fddf40ed378afd7f255a3233f962e3d882",
+        "expectedSha256": "2503ff563f00fb325e80b20a5e60f7fddf40ed378afd7f255a3233f962e3d882",
+        "filterAndReadbackMs": 22.29999999998836,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1024,
+        "height": 512,
+        "pattern": "rounding",
+        "seed": 1905721734,
+        "comparedBytes": 2097152,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "2cf9946df74a8df7396ec41ea68631aeaae6d5ccc78dc15f61e770a49b40e7e1",
+        "expectedSha256": "2cf9946df74a8df7396ec41ea68631aeaae6d5ccc78dc15f61e770a49b40e7e1",
+        "filterAndReadbackMs": 21.899999999965075,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1024,
+        "height": 512,
+        "pattern": "impulse",
+        "seed": 1905721837,
+        "comparedBytes": 2097152,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "38de4b7d96c00cc402ebc793afac83e5a560f7fbdd97f21d1aa34569d541c42f",
+        "expectedSha256": "38de4b7d96c00cc402ebc793afac83e5a560f7fbdd97f21d1aa34569d541c42f",
+        "filterAndReadbackMs": 21.79999999998836,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1024,
+        "height": 512,
+        "pattern": "seeded",
+        "seed": 1905721940,
+        "comparedBytes": 2097152,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "63494cef8d084e25e41f450a96aff27c0ea9a184803e25a1c7bae727b1b0dca0",
+        "expectedSha256": "63494cef8d084e25e41f450a96aff27c0ea9a184803e25a1c7bae727b1b0dca0",
+        "filterAndReadbackMs": 22.100000000034925,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 1,
+        "pattern": "black",
+        "seed": 1905660810,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "1f6ae7657fcc3027fc979c20db3b0b75eb9ce6e02465f81a30f0abc3633935c2",
+        "expectedSha256": "1f6ae7657fcc3027fc979c20db3b0b75eb9ce6e02465f81a30f0abc3633935c2",
+        "filterAndReadbackMs": 1.7999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 1,
+        "pattern": "white",
+        "seed": 1905660913,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f",
+        "expectedSha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f",
+        "filterAndReadbackMs": 1.3999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 1,
+        "pattern": "checker",
+        "seed": 1905661016,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "08ed8f69fe07ae91b6d630242ab693483fc511288ae1993a4c9519ef9d87c939",
+        "expectedSha256": "08ed8f69fe07ae91b6d630242ab693483fc511288ae1993a4c9519ef9d87c939",
+        "filterAndReadbackMs": 1.599999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 1,
+        "pattern": "rounding",
+        "seed": 1905661119,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "2d363cf95ef0bc9f0fe64d785d6156453f12aad166b28af8e01f018358b44c41",
+        "expectedSha256": "2d363cf95ef0bc9f0fe64d785d6156453f12aad166b28af8e01f018358b44c41",
+        "filterAndReadbackMs": 1.599999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 1,
+        "pattern": "impulse",
+        "seed": 1905661222,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "0c9afd667f14e1a81b8cb4515a05b3bfd254539c59b2466aa46764e550b56a79",
+        "expectedSha256": "0c9afd667f14e1a81b8cb4515a05b3bfd254539c59b2466aa46764e550b56a79",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 1,
+        "pattern": "seeded",
+        "seed": 1905661325,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "366a67f27f75d4674121ef1549fde5b3df5452009fa274e6e8b37df66cb44d16",
+        "expectedSha256": "366a67f27f75d4674121ef1549fde5b3df5452009fa274e6e8b37df66cb44d16",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 2048,
+        "pattern": "black",
+        "seed": 1906102962,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "1f6ae7657fcc3027fc979c20db3b0b75eb9ce6e02465f81a30f0abc3633935c2",
+        "expectedSha256": "1f6ae7657fcc3027fc979c20db3b0b75eb9ce6e02465f81a30f0abc3633935c2",
+        "filterAndReadbackMs": 1.2999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 2048,
+        "pattern": "white",
+        "seed": 1906103065,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f",
+        "expectedSha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f",
+        "filterAndReadbackMs": 1.400000000023283,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 2048,
+        "pattern": "checker",
+        "seed": 1906103168,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "08ed8f69fe07ae91b6d630242ab693483fc511288ae1993a4c9519ef9d87c939",
+        "expectedSha256": "08ed8f69fe07ae91b6d630242ab693483fc511288ae1993a4c9519ef9d87c939",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 2048,
+        "pattern": "rounding",
+        "seed": 1906103271,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "77aaf779c22bd71b9efd73eeec4b0655a49a63d6d0e83ade4cdd6cb5cc73cb8b",
+        "expectedSha256": "77aaf779c22bd71b9efd73eeec4b0655a49a63d6d0e83ade4cdd6cb5cc73cb8b",
+        "filterAndReadbackMs": 1.2999999999883585,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 2048,
+        "pattern": "impulse",
+        "seed": 1906103374,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "0c9afd667f14e1a81b8cb4515a05b3bfd254539c59b2466aa46764e550b56a79",
+        "expectedSha256": "0c9afd667f14e1a81b8cb4515a05b3bfd254539c59b2466aa46764e550b56a79",
+        "filterAndReadbackMs": 1.400000000023283,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 1,
+        "height": 2048,
+        "pattern": "seeded",
+        "seed": 1906103477,
+        "comparedBytes": 8192,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "37e4d516a1a0568248e26ee621f69908d675acd8d027d9328ab842ed776cf35d",
+        "expectedSha256": "37e4d516a1a0568248e26ee621f69908d675acd8d027d9328ab842ed776cf35d",
+        "filterAndReadbackMs": 1.3999999999650754,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 3,
+        "pattern": "black",
+        "seed": 1905661436,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "749d6826357551b8b89e34053e343b12fc92c759b7688dcbf3cd0ccf9f10d500",
+        "expectedSha256": "749d6826357551b8b89e34053e343b12fc92c759b7688dcbf3cd0ccf9f10d500",
+        "filterAndReadbackMs": 1.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 3,
+        "pattern": "white",
+        "seed": 1905661539,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "1df8949b2e345ab8c00cb81fb6b83686e20a4080f969e5cd8b8d520a07cdaba2",
+        "expectedSha256": "1df8949b2e345ab8c00cb81fb6b83686e20a4080f969e5cd8b8d520a07cdaba2",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 3,
+        "pattern": "checker",
+        "seed": 1905661642,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "6c63ad913a47a76ffe6a90ee732d4ecc3fa5f1da0ba6e8007ec8e237c8c277b3",
+        "expectedSha256": "6c63ad913a47a76ffe6a90ee732d4ecc3fa5f1da0ba6e8007ec8e237c8c277b3",
+        "filterAndReadbackMs": 1.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 3,
+        "pattern": "rounding",
+        "seed": 1905661745,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "60e9c16e09008cbac4b7cbe5c2d7b2b896e51c72902b66954517041ab1a29f76",
+        "expectedSha256": "60e9c16e09008cbac4b7cbe5c2d7b2b896e51c72902b66954517041ab1a29f76",
+        "filterAndReadbackMs": 1.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 3,
+        "pattern": "impulse",
+        "seed": 1905661848,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "e89a58a57f0e7fce2213614a959c21ae46b6728c1ead7743e86bb8ada319a8ba",
+        "expectedSha256": "e89a58a57f0e7fce2213614a959c21ae46b6728c1ead7743e86bb8ada319a8ba",
+        "filterAndReadbackMs": 1.599999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 2048,
+        "height": 3,
+        "pattern": "seeded",
+        "seed": 1905661951,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "f57401ed0b9ac01757517bfb2aab76516d120544ef02abba4efd15595b0c316e",
+        "expectedSha256": "f57401ed0b9ac01757517bfb2aab76516d120544ef02abba4efd15595b0c316e",
+        "filterAndReadbackMs": 1.7000000000116415,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2048,
+        "pattern": "black",
+        "seed": 1906103156,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "749d6826357551b8b89e34053e343b12fc92c759b7688dcbf3cd0ccf9f10d500",
+        "expectedSha256": "749d6826357551b8b89e34053e343b12fc92c759b7688dcbf3cd0ccf9f10d500",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2048,
+        "pattern": "white",
+        "seed": 1906103259,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "1df8949b2e345ab8c00cb81fb6b83686e20a4080f969e5cd8b8d520a07cdaba2",
+        "expectedSha256": "1df8949b2e345ab8c00cb81fb6b83686e20a4080f969e5cd8b8d520a07cdaba2",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2048,
+        "pattern": "checker",
+        "seed": 1906103362,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "9a00e6bf651e0cf41572ba2da70fb61399534679ec68c05d5c19aac5a4c89941",
+        "expectedSha256": "9a00e6bf651e0cf41572ba2da70fb61399534679ec68c05d5c19aac5a4c89941",
+        "filterAndReadbackMs": 1.5,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2048,
+        "pattern": "rounding",
+        "seed": 1906103465,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "790efc722041f05edfcee126bd8a38ab1af8ae71b24071efcaac6e22a27715ff",
+        "expectedSha256": "790efc722041f05edfcee126bd8a38ab1af8ae71b24071efcaac6e22a27715ff",
+        "filterAndReadbackMs": 1.400000000023283,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2048,
+        "pattern": "impulse",
+        "seed": 1906103568,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "242f52611200a07f3cce8556e5e86b90286da54dda4020bd38fac045e8ed7ff7",
+        "expectedSha256": "242f52611200a07f3cce8556e5e86b90286da54dda4020bd38fac045e8ed7ff7",
+        "filterAndReadbackMs": 1.599999999976717,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      },
+      {
+        "width": 3,
+        "height": 2048,
+        "pattern": "seeded",
+        "seed": 1906103671,
+        "comparedBytes": 24576,
+        "mismatches": 0,
+        "firstMismatch": null,
+        "actualSha256": "719452dac214361b67614e2318f79464d68b6490c9d2a74a172c112d9744f5b9",
+        "expectedSha256": "719452dac214361b67614e2318f79464d68b6490c9d2a74a172c112d9744f5b9",
+        "filterAndReadbackMs": 1.6000000000349246,
+        "liveTexturesWithOutput": 3,
+        "outputReleased": true,
+        "liveTexturesAfterRelease": 2
+      }
+    ],
+    "capabilityRefusals": [
+      {
+        "name": "highp-22",
+        "returnedNull": true,
+        "allocations": 0
+      },
+      {
+        "name": "highp-null",
+        "returnedNull": true,
+        "allocations": 0
+      },
+      {
+        "name": "query-unavailable",
+        "returnedNull": true,
+        "allocations": 0
+      },
+      {
+        "name": "vao-unavailable",
+        "returnedNull": true,
+        "allocations": 0
+      }
+    ],
+    "stateRestoration": [
+      {
+        "case": "construction",
+        "changed": []
+      },
+      {
+        "case": "1x1/black",
+        "changed": []
+      },
+      {
+        "case": "1x1/white",
+        "changed": []
+      },
+      {
+        "case": "1x1/checker",
+        "changed": []
+      },
+      {
+        "case": "1x1/rounding",
+        "changed": []
+      },
+      {
+        "case": "1x1/impulse",
+        "changed": []
+      },
+      {
+        "case": "1x1/seeded",
+        "changed": []
+      },
+      {
+        "case": "1x9/black",
+        "changed": []
+      },
+      {
+        "case": "1x9/white",
+        "changed": []
+      },
+      {
+        "case": "1x9/checker",
+        "changed": []
+      },
+      {
+        "case": "1x9/rounding",
+        "changed": []
+      },
+      {
+        "case": "1x9/impulse",
+        "changed": []
+      },
+      {
+        "case": "1x9/seeded",
+        "changed": []
+      },
+      {
+        "case": "9x1/black",
+        "changed": []
+      },
+      {
+        "case": "9x1/white",
+        "changed": []
+      },
+      {
+        "case": "9x1/checker",
+        "changed": []
+      },
+      {
+        "case": "9x1/rounding",
+        "changed": []
+      },
+      {
+        "case": "9x1/impulse",
+        "changed": []
+      },
+      {
+        "case": "9x1/seeded",
+        "changed": []
+      },
+      {
+        "case": "2x3/black",
+        "changed": []
+      },
+      {
+        "case": "2x3/white",
+        "changed": []
+      },
+      {
+        "case": "2x3/checker",
+        "changed": []
+      },
+      {
+        "case": "2x3/rounding",
+        "changed": []
+      },
+      {
+        "case": "2x3/impulse",
+        "changed": []
+      },
+      {
+        "case": "2x3/seeded",
+        "changed": []
+      },
+      {
+        "case": "3x2/black",
+        "changed": []
+      },
+      {
+        "case": "3x2/white",
+        "changed": []
+      },
+      {
+        "case": "3x2/checker",
+        "changed": []
+      },
+      {
+        "case": "3x2/rounding",
+        "changed": []
+      },
+      {
+        "case": "3x2/impulse",
+        "changed": []
+      },
+      {
+        "case": "3x2/seeded",
+        "changed": []
+      },
+      {
+        "case": "7x7/black",
+        "changed": []
+      },
+      {
+        "case": "7x7/white",
+        "changed": []
+      },
+      {
+        "case": "7x7/checker",
+        "changed": []
+      },
+      {
+        "case": "7x7/rounding",
+        "changed": []
+      },
+      {
+        "case": "7x7/impulse",
+        "changed": []
+      },
+      {
+        "case": "7x7/seeded",
+        "changed": []
+      },
+      {
+        "case": "31x13/black",
+        "changed": []
+      },
+      {
+        "case": "31x13/white",
+        "changed": []
+      },
+      {
+        "case": "31x13/checker",
+        "changed": []
+      },
+      {
+        "case": "31x13/rounding",
+        "changed": []
+      },
+      {
+        "case": "31x13/impulse",
+        "changed": []
+      },
+      {
+        "case": "31x13/seeded",
+        "changed": []
+      },
+      {
+        "case": "256x128/black",
+        "changed": []
+      },
+      {
+        "case": "256x128/white",
+        "changed": []
+      },
+      {
+        "case": "256x128/checker",
+        "changed": []
+      },
+      {
+        "case": "256x128/rounding",
+        "changed": []
+      },
+      {
+        "case": "256x128/impulse",
+        "changed": []
+      },
+      {
+        "case": "256x128/seeded",
+        "changed": []
+      },
+      {
+        "case": "513x257/black",
+        "changed": []
+      },
+      {
+        "case": "513x257/white",
+        "changed": []
+      },
+      {
+        "case": "513x257/checker",
+        "changed": []
+      },
+      {
+        "case": "513x257/rounding",
+        "changed": []
+      },
+      {
+        "case": "513x257/impulse",
+        "changed": []
+      },
+      {
+        "case": "513x257/seeded",
+        "changed": []
+      },
+      {
+        "case": "1024x512/black",
+        "changed": []
+      },
+      {
+        "case": "1024x512/white",
+        "changed": []
+      },
+      {
+        "case": "1024x512/checker",
+        "changed": []
+      },
+      {
+        "case": "1024x512/rounding",
+        "changed": []
+      },
+      {
+        "case": "1024x512/impulse",
+        "changed": []
+      },
+      {
+        "case": "1024x512/seeded",
+        "changed": []
+      },
+      {
+        "case": "2048x1/black",
+        "changed": []
+      },
+      {
+        "case": "2048x1/white",
+        "changed": []
+      },
+      {
+        "case": "2048x1/checker",
+        "changed": []
+      },
+      {
+        "case": "2048x1/rounding",
+        "changed": []
+      },
+      {
+        "case": "2048x1/impulse",
+        "changed": []
+      },
+      {
+        "case": "2048x1/seeded",
+        "changed": []
+      },
+      {
+        "case": "1x2048/black",
+        "changed": []
+      },
+      {
+        "case": "1x2048/white",
+        "changed": []
+      },
+      {
+        "case": "1x2048/checker",
+        "changed": []
+      },
+      {
+        "case": "1x2048/rounding",
+        "changed": []
+      },
+      {
+        "case": "1x2048/impulse",
+        "changed": []
+      },
+      {
+        "case": "1x2048/seeded",
+        "changed": []
+      },
+      {
+        "case": "2048x3/black",
+        "changed": []
+      },
+      {
+        "case": "2048x3/white",
+        "changed": []
+      },
+      {
+        "case": "2048x3/checker",
+        "changed": []
+      },
+      {
+        "case": "2048x3/rounding",
+        "changed": []
+      },
+      {
+        "case": "2048x3/impulse",
+        "changed": []
+      },
+      {
+        "case": "2048x3/seeded",
+        "changed": []
+      },
+      {
+        "case": "3x2048/black",
+        "changed": []
+      },
+      {
+        "case": "3x2048/white",
+        "changed": []
+      },
+      {
+        "case": "3x2048/checker",
+        "changed": []
+      },
+      {
+        "case": "3x2048/rounding",
+        "changed": []
+      },
+      {
+        "case": "3x2048/impulse",
+        "changed": []
+      },
+      {
+        "case": "3x2048/seeded",
+        "changed": []
+      }
+    ],
+    "afterDispose": {
+      "Texture": {
+        "created": 88,
+        "deleted": 88,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Framebuffer": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Program": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Shader": {
+        "created": 2,
+        "deleted": 2,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Buffer": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "VertexArray": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      }
+    },
+    "retainedOutputs": {
+      "expectedA": "5e2dba55c26d47c5e09d2617d2f00cd69303c40a108a946b6f580d6e56ab7485",
+      "expectedB": "c6130b212e0709950fa510ce309c6f8a2a215ef026560f9e6ef8f3e54c2779de",
+      "actualAAfterB": "5e2dba55c26d47c5e09d2617d2f00cd69303c40a108a946b6f580d6e56ab7485",
+      "liveTexturesWithBoth": 4,
+      "aReleased": true,
+      "liveTexturesAfterReleaseA": 3,
+      "actualBAfterReleaseA": "c6130b212e0709950fa510ce309c6f8a2a215ef026560f9e6ef8f3e54c2779de",
+      "bReleasedByDispose": true
+    },
+    "contextLoss": {
+      "observed": true,
+      "filterRejected": true,
+      "rejection": "Error: webgl-unavailable",
+      "disposeThrew": false,
+      "outputReleaseThrew": false
+    },
+    "errors": [],
+    "limitations": [
+      "One real browser/renderer; not all GPUs and not physical FPS or input latency.",
+      "Capability refusal cases substitute only capability reports on the real context; they are not observations of low-precision or missing-VAO hardware.",
+      "Case durations include validation readback and are correctness observations, not a throughput benchmark."
+    ],
+    "disposedFilterRejected": true,
+    "disposedFilterRejection": "Error: gpu-prefilter-disposed"
+  },
+  "ended": "2026-11-20T21:26:39.645Z"
+}

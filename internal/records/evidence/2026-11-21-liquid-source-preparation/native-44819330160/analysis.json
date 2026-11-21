@@ -1,0 +1,3693 @@
+{
+  "schemaVersion": 1,
+  "run": 44819330160,
+  "artifact": 14670244941,
+  "archiveSha256": "8e719fd7e36e14e443623d2a171fef5aa8ac5fbde1b95fadc854294e3c80c334",
+  "sameProbeWorkloadBrowserLockfileAndFixture": true,
+  "rawFileSha256": {
+    "comparison.json": "9e8b524533d8e2ec91c54a1c8a5375932ebabb631f0b826419d1848ddd35540e",
+    "baseline/report.json": "3450b4785bd8331fd6c038efcbbb76c73ed02bcab486084a76d004947e084aac",
+    "candidate/report.json": "d7d7a1e73756a5aef8d7e7d738a2ea10d55f22715826c0754749f5935529bca2",
+    "gpu-prefilter/gpu-prefilter.json": "2836b90fa5341aa2511340b75d97cdc4c1d1babf182c83e2c8b2d4e11a2b523e",
+    "program-clear/program-clear.json": "0b4ba86a57da91a7418dd504c0b659c76c831503adcba616d75d6e886fdd17bf"
+  },
+  "limitations": [
+    "Same runner sequential baseline/candidate, one complete run; not a statistical population guarantee.",
+    "GPU submit counters measure application-side calls, not GPU execution.",
+    "renderMilliseconds includes encode; do not add encode to render.",
+    "Document-wide counters show association, not exclusive event-queue causality. armed-to-listener includes time before event creation.",
+    "Unattributed listener-to-commit remainder includes scheduling, decode and other work; it is not a separate decode timer.",
+    "Application commit follows decode but precedes compositor presentation; RAF callbacks are not displayed frames. Software SwiftShader, no physical 120Hz/input-to-photon claim."
+  ],
+  "baseline": {
+    "source": {
+      "sha": "1d860891a59aca6ed71ac251e08977cde303b81c",
+      "tree": "6286abf19fd599bc87c25ed850d61690812d28fe",
+      "changes": "",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hashes": {
+        "apps/www/src/components/PrototypePreviewer/demo-renderer.ts": "47e8678bee11d9ce281419fc9acb16e0e285847ed3277bad2f8294fcba259af5",
+        "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": "7a9c10b0a326e7b65282afcbd4cf47cad58f9b310e127dfbef52f5b2ea547963",
+        "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts": "03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4",
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/button.mdx": "19c6603345b89af3639e26f8b0b8ebd32a746839f3a2605ac47299ab9f1d338a",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+        "apps/www/src/content/docs/zh-cn/material-paint-observation.ts": "90c3c9c8b2f20ae6354de16ca5944370931a47f30270ccd198de095561ca39a1",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/button.mdx": "7e38d49c8960a0fae06adfd77139d251230c1163f1d93c42516e72f5baab1cf5",
+        "apps/www/src/pages/en/test/liquid-glass-material.astro": "38eda9a1fd180efb8a33b91ba2859b64c2a502abdcd0b11ffead61d56b0c0f7c",
+        "packages/adapters/base/src/material/contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+        "packages/adapters/base/src/material/contact-motion.ts": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6",
+        "packages/adapters/base/src/material/contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+        "packages/adapters/base/src/material/geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+        "packages/adapters/base/src/material/image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+        "packages/adapters/base/src/material/index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+        "packages/adapters/base/src/material/initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+        "packages/adapters/base/src/material/initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+        "packages/adapters/base/src/material/initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+        "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+        "packages/adapters/base/src/material/paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+        "packages/adapters/base/src/material/preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+        "packages/adapters/base/src/material/program-pool.ts": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+        "packages/adapters/base/src/material/program.ts": "c084788bfc4974d09274ab832ab98c81ef4fd33f218b45eb5ea2f4ce476e2a29",
+        "packages/adapters/base/src/material/sink.ts": "29f3e965758ef6192998c892889b1157bd96bd39c82d532b52b0ff2c27005ecd",
+        "packages/adapters/base/src/material/source.ts": "b6510c697814f0d9627fe757cfaf075dbacaabb4d1897af79af704fa6cf9152e",
+        "packages/adapters/base/src/material/style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+        "packages/adapters/base/src/material/style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+        "packages/adapters/web-component/src/adapt.ts": "92e7c4a54b1d0544a92e4700d0573f3e0a1daf5b61d0fb789a23b8f2997dedda",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8"
+      }
+    },
+    "probe": {
+      "sha256": "3978eab211f6822f3bea2c9ff51d0297e523422d69be590b948fc42b5f68aaf2"
+    },
+    "environment": {
+      "node": "v24.22.3",
+      "platform": "linux",
+      "arch": "x64",
+      "osRelease": "7.0.0-1017-azure",
+      "cpus": 4,
+      "headless": true,
+      "browser": "157.0.8103.78",
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "auxAttributes": {
+          "amdSwitchable": false,
+          "canSupportThreadedTextureMailbox": false,
+          "directRenderingVersion": "",
+          "displayType": "ANGLE_SWIFTSHADER",
+          "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_robust_resource_initialization GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_translated_shader_source GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_rgba8 GL_ARM_shader_framebuffer_fetch GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clear_texture GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_semaphore_fd GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_paletted_texture GL_OES_copy_image GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 GL_QCOM_texture_lod_bias ",
+          "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+          "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "glResetNotificationStrategy": 33362,
+          "glVendor": "Google Inc. (Google)",
+          "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+          "glWsExtensions": "EGL_EXT_create_context_robustness EGL_ANGLE_surface_orientation EGL_KHR_create_context EGL_KHR_image EGL_KHR_image_base EGL_EXT_image_gl_colorspace EGL_KHR_gl_colorspace EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_get_all_proc_addresses EGL_KHR_fence_sync EGL_KHR_wait_sync EGL_ANGLE_create_context_webgl_compatibility EGL_CHROMIUM_create_context_bind_generates_resource EGL_KHR_swap_buffers_with_damage EGL_EXT_pixel_format_float EGL_KHR_surfaceless_context EGL_ANGLE_display_texture_share_group EGL_ANGLE_display_semaphore_share_group EGL_ANGLE_create_context_client_arrays EGL_ANGLE_program_cache_control EGL_ANGLE_robust_resource_initialization EGL_ANGLE_create_context_extensions_enabled EGL_ANDROID_blob_cache EGL_ANDROID_recordable EGL_ANGLE_create_context_backwards_compatible EGL_KHR_no_config_context EGL_IMG_context_priority EGL_KHR_create_context_no_error EGL_KHR_reusable_sync EGL_EXT_buffer_age EGL_ANGLE_create_surface_swap_interval EGL_ANGLE_vulkan_image EGL_KHR_partial_update EGL_ANGLE_global_fence_sync EGL_ANGLE_memory_usage_report ",
+          "glWsVendor": "Google Inc. (Google)",
+          "glWsVersion": "1.5 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+          "hardwareSupportsVulkan": false,
+          "inProcessGpu": false,
+          "initializationTime": 0.041535,
+          "isAsan": false,
+          "isClangCoverage": false,
+          "jpegDecodeAcceleratorSupported": false,
+          "maxMsaaSamples": "4",
+          "optimus": false,
+          "passthroughCmdDecoder": true,
+          "pixelShaderVersion": "3.00",
+          "processCrashCount": 0,
+          "sandboxed": false,
+          "skiaBackendType": "None",
+          "subpixelFontRendering": true,
+          "targetCpuBits": 64,
+          "vertexShaderVersion": "3.00",
+          "visibilityCallbackCallCount": 0
+        },
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        },
+        "driverBugWorkarounds": [],
+        "videoDecoding": [],
+        "videoEncoding": []
+      },
+      "gpuClassification": "software"
+    },
+    "failures": [],
+    "windows": 12,
+    "freshPressLatency": {
+      "static": {
+        "planned": 60,
+        "attempted": 60,
+        "resolved": 60,
+        "unresolvedAttempted": 0,
+        "notAttempted": 0,
+        "listenerToHeldCommitMs": {
+          "count": 60,
+          "mean": 7.471666666669383,
+          "p50": 5.899999999994179,
+          "p95": 11.80999999998894,
+          "p99": 15.655000000006094,
+          "max": 18.900000000023283
+        },
+        "eventTimestampToHeldCommitMs": {
+          "count": 60,
+          "mean": 7.783333333335759,
+          "p50": 6.099999999976717,
+          "p95": 12.199999999982538,
+          "p99": 16.1779999999955,
+          "max": 19.60000000000582
+        },
+        "eventTimestampToListenerMs": {
+          "count": 60,
+          "mean": 0.3116666666663756,
+          "p50": 0.29999999998835847,
+          "p95": 0.3999999999956344,
+          "p99": 1.3559999999849186,
+          "max": 2.2999999999883585
+        },
+        "armedToListenerSourcePreparationTrials": 0,
+        "listenerToHeldSourcePreparationTrials": 0,
+        "sourceWorkAttribution": "Document-wide counters; armed-to-listener includes time before event creation and does not prove event-queue causality.",
+        "listenerOver10Ms": 18,
+        "eventTimestampOver10Ms": 19,
+        "invalidEventTimestamps": 0,
+        "releaseFailures": 0,
+        "untrustedInputTrials": 0,
+        "pointerIdentityFailures": 0,
+        "nonOpticalTrials": 0,
+        "phaseBins": {
+          "0": 10,
+          "1": 14,
+          "2": 12,
+          "3": 11,
+          "4": 13
+        }
+      },
+      "dynamic": {
+        "planned": 60,
+        "attempted": 60,
+        "resolved": 60,
+        "unresolvedAttempted": 0,
+        "notAttempted": 0,
+        "listenerToHeldCommitMs": {
+          "count": 60,
+          "mean": 9.481666666662688,
+          "p50": 6.599999999976717,
+          "p95": 12.574999999999996,
+          "p99": 38.764000000003435,
+          "max": 39
+        },
+        "eventTimestampToHeldCommitMs": {
+          "count": 60,
+          "mean": 10.366666666667637,
+          "p50": 6.899999999994179,
+          "p95": 16.09499999999382,
+          "p99": 40.81699999999312,
+          "max": 43
+        },
+        "eventTimestampToListenerMs": {
+          "count": 60,
+          "mean": 0.8850000000049476,
+          "p50": 0.3000000000029104,
+          "p95": 1.8250000000174609,
+          "p99": 13.48300000000678,
+          "max": 29
+        },
+        "armedToListenerSourcePreparationTrials": 1,
+        "listenerToHeldSourcePreparationTrials": 2,
+        "sourceWorkAttribution": "Document-wide counters; armed-to-listener includes time before event creation and does not prove event-queue causality.",
+        "listenerOver10Ms": 25,
+        "eventTimestampOver10Ms": 25,
+        "invalidEventTimestamps": 0,
+        "releaseFailures": 0,
+        "untrustedInputTrials": 0,
+        "pointerIdentityFailures": 0,
+        "nonOpticalTrials": 0,
+        "phaseBins": {
+          "0": 7,
+          "1": 12,
+          "2": 12,
+          "3": 8,
+          "4": 12,
+          "late": 9
+        }
+      }
+    },
+    "cleanup": {
+      "contexts": 0,
+      "consumers": 0,
+      "lost": false,
+      "pendingImages": 0,
+      "decodedImages": 0,
+      "imagePreparations": 1279,
+      "peakPendingImages": 4
+    },
+    "windowPools": {
+      "static-idle": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 0,
+          "decodedImages": 0,
+          "encodeMilliseconds": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "renders": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparations": 0,
+          "sourceUploads": 0
+        },
+        "renders": 0,
+        "sourcePreparations": 0,
+        "cpuPreparations": null,
+        "gpuPreparations": null,
+        "meanRenderIncludingEncodeMs": null,
+        "meanReadbackMs": null,
+        "meanEncodeMs": null,
+        "meanContrastMs": null,
+        "meanSourcePreparationMs": null,
+        "meanGpuSubmitMs": null,
+        "rafP95ByRound": [
+          16.700000000000728,
+          16.700000000000728,
+          16.799999999999272
+        ],
+        "materialP95ByRound": [
+          null,
+          null,
+          null
+        ]
+      },
+      "static-contact": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 22.699999999866122,
+          "decodedImages": 0,
+          "encodeMilliseconds": 217.0999999998312,
+          "imagePreparations": 411,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 840.5000000003783,
+          "renderMilliseconds": 1233.9999999996217,
+          "renders": 411,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 411,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparations": 0,
+          "sourceUploads": 0
+        },
+        "renders": 411,
+        "sourcePreparations": 0,
+        "cpuPreparations": null,
+        "gpuPreparations": null,
+        "meanRenderIncludingEncodeMs": 3.0024330900234104,
+        "meanReadbackMs": 2.045012165451042,
+        "meanEncodeMs": 0.5282238442818278,
+        "meanContrastMs": 0.0552311435519857,
+        "meanSourcePreparationMs": null,
+        "meanGpuSubmitMs": null,
+        "rafP95ByRound": [
+          16.700000000000728,
+          16.799999999999546,
+          16.799999999999272
+        ],
+        "materialP95ByRound": [
+          20.650000000001455,
+          17.199999999989814,
+          17
+        ]
+      },
+      "dynamic-idle": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 9.900000000023283,
+          "decodedImages": 0,
+          "encodeMilliseconds": 87.19999999998254,
+          "imagePreparations": 180,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 365.29999999978463,
+          "renderMilliseconds": 928.2000000001863,
+          "renders": 180,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 0,
+          "sourcePreparationMilliseconds": 391.79999999995925,
+          "sourcePreparations": 180,
+          "sourceUploads": 180
+        },
+        "renders": 180,
+        "sourcePreparations": 180,
+        "cpuPreparations": null,
+        "gpuPreparations": null,
+        "meanRenderIncludingEncodeMs": 5.156666666667702,
+        "meanReadbackMs": 2.029444444443248,
+        "meanEncodeMs": 0.4844444444443474,
+        "meanContrastMs": 0.05500000000012935,
+        "meanSourcePreparationMs": 2.1766666666664403,
+        "meanGpuSubmitMs": null,
+        "rafP95ByRound": [
+          16.799999999999272,
+          16.799999999999272,
+          16.71000000000058
+        ],
+        "materialP95ByRound": [
+          141.6899999999805,
+          133.970000000007,
+          134.175
+        ]
+      },
+      "dynamic-contact": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 33.399999999819556,
+          "decodedImages": 0,
+          "encodeMilliseconds": 331.1999999997497,
+          "imagePreparations": 608,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1103.2999999999593,
+          "renderMilliseconds": 2260.100000000035,
+          "renders": 608,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 344,
+          "sourcePreparationMilliseconds": 560.8000000001048,
+          "sourcePreparations": 264,
+          "sourceUploads": 333
+        },
+        "renders": 608,
+        "sourcePreparations": 264,
+        "cpuPreparations": null,
+        "gpuPreparations": null,
+        "meanRenderIncludingEncodeMs": 3.7172697368421628,
+        "meanReadbackMs": 1.8146381578946698,
+        "meanEncodeMs": 0.5447368421048515,
+        "meanContrastMs": 0.05493421052601901,
+        "meanSourcePreparationMs": 2.124242424242821,
+        "meanGpuSubmitMs": null,
+        "rafP95ByRound": [
+          16.799999999999272,
+          16.700000000000728,
+          16.799999999999272
+        ],
+        "materialP95ByRound": [
+          41.82999999999883,
+          41.12499999998545,
+          40.949999999989814
+        ]
+      }
+    },
+    "topDynamicPresses": [
+      {
+        "blockIndex": 5,
+        "trialIndex": 43,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 18,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 43.0,
+        "eventTimestampToListenerMs": 29,
+        "listenerToHeldCommitMs": 14,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 4,
+          "programBuilds": 0,
+          "sourceUploads": 4,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 8.5,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 7.7000000000116415,
+          "contrastMilliseconds": 0.09999999997671694,
+          "renderMilliseconds": 20.000000000029104,
+          "encodeMilliseconds": 1.900000000023283,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 4,
+          "decodedImages": 0,
+          "imagePreparations": 4,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.7999999999883585,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 2.8000000000174623,
+          "encodeMilliseconds": 0.6000000000058208,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -4,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 11.199999999982538
+      },
+      {
+        "blockIndex": 2,
+        "trialIndex": 24,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.4,
+        "requestedSourceJitterMs": 41,
+        "actualPhaseBin": "4",
+        "eventTimestampToHeldCommitMs": 39.29999999998836,
+        "eventTimestampToListenerMs": 0.29999999998835847,
+        "listenerToHeldCommitMs": 39,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 5,
+          "programBuilds": 0,
+          "sourceUploads": 5,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 8.10000000000582,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 8.799999999988358,
+          "contrastMilliseconds": 0.29999999998835847,
+          "renderMilliseconds": 21.899999999965075,
+          "encodeMilliseconds": 2.2999999999883585,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 3,
+          "decodedImages": 1,
+          "imagePreparations": 5,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 17.100000000034925
+      },
+      {
+        "blockIndex": 5,
+        "trialIndex": 44,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.4,
+        "requestedSourceJitterMs": 55,
+        "actualPhaseBin": "3",
+        "eventTimestampToHeldCommitMs": 38.79999999998836,
+        "eventTimestampToListenerMs": 0.1999999999825377,
+        "listenerToHeldCommitMs": 38.60000000000582,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 5,
+          "programBuilds": 0,
+          "sourceUploads": 5,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 8.5,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 8.699999999953434,
+          "contrastMilliseconds": 0.10000000000582077,
+          "renderMilliseconds": 21.800000000017462,
+          "encodeMilliseconds": 2.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 3,
+          "decodedImages": 1,
+          "imagePreparations": 5,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 16.79999999998836
+      },
+      {
+        "blockIndex": 1,
+        "trialIndex": 11,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.6,
+        "requestedSourceJitterMs": 44,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 14.89999999999418,
+        "eventTimestampToListenerMs": 2.7000000000116415,
+        "listenerToHeldCommitMs": 12.199999999982538,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -4,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 2.3999999999941792,
+          "contrastMilliseconds": 0.10000000000582077,
+          "renderMilliseconds": 3.5,
+          "encodeMilliseconds": 0.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.699999999982538
+      },
+      {
+        "blockIndex": 5,
+        "trialIndex": 54,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.4,
+        "requestedSourceJitterMs": 62,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 14.0,
+        "eventTimestampToListenerMs": 2.3000000000174623,
+        "listenerToHeldCommitMs": 11.699999999982538,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -4,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.8999999999941792,
+          "contrastMilliseconds": 0.10000000000582077,
+          "renderMilliseconds": 2.8000000000174623,
+          "encodeMilliseconds": 0.39999999999417923,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.899999999965075
+      },
+      {
+        "blockIndex": 2,
+        "trialIndex": 22,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.2,
+        "requestedSourceJitterMs": 88,
+        "actualPhaseBin": "4",
+        "eventTimestampToHeldCommitMs": 13.10000000000582,
+        "eventTimestampToListenerMs": 0.6000000000058208,
+        "listenerToHeldCommitMs": 12.5,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -1,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 2.2999999999883585,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 3.6000000000058208,
+          "encodeMilliseconds": 0.7000000000116415,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.89999999999418
+      },
+      {
+        "blockIndex": 2,
+        "trialIndex": 38,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 75,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 13.0,
+        "eventTimestampToListenerMs": 1.8000000000174623,
+        "listenerToHeldCommitMs": 11.199999999982538,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -4,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.7999999999883585,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 2.7000000000116415,
+          "encodeMilliseconds": 0.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.499999999970896
+      },
+      {
+        "blockIndex": 1,
+        "trialIndex": 12,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.2,
+        "requestedSourceJitterMs": 81,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 12.60000000000582,
+        "eventTimestampToListenerMs": 0.3000000000174623,
+        "listenerToHeldCommitMs": 12.299999999988358,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -1,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.8999999999941792,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 2.900000000023283,
+          "encodeMilliseconds": 0.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -1,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 9.399999999965075
+      }
+    ],
+    "preHandlerSourcePresses": [
+      {
+        "blockIndex": 5,
+        "trialIndex": 43,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 18,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 43.0,
+        "eventTimestampToListenerMs": 29,
+        "listenerToHeldCommitMs": 14,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 4,
+          "programBuilds": 0,
+          "sourceUploads": 4,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 8.5,
+          "sourcePreparationCacheHits": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 7.7000000000116415,
+          "contrastMilliseconds": 0.09999999997671694,
+          "renderMilliseconds": 20.000000000029104,
+          "encodeMilliseconds": 1.900000000023283,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": 4,
+          "decodedImages": 0,
+          "imagePreparations": 4,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 1,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.7999999999883585,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 2.8000000000174623,
+          "encodeMilliseconds": 0.6000000000058208,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "pendingImages": -4,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 11.199999999982538
+      }
+    ],
+    "sourceOverlapGroups": {
+      "noSourcePreparation": {
+        "eventToCommit": {
+          "count": 57,
+          "mean": 8.787719298247044,
+          "p50": 6.800000000017462,
+          "p95": 13.020000000001163,
+          "p99": 14.395999999997438,
+          "max": 14.89999999999418
+        },
+        "indices": [
+          {
+            "blockIndex": 1,
+            "trialIndex": 0
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 1
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 2
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 3
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 4
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 5
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 6
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 7
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 8
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 9
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 10
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 11
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 12
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 13
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 14
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 15
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 16
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 17
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 18
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 19
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 20
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 21
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 22
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 23
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 25
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 26
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 27
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 28
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 29
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 30
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 31
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 32
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 33
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 34
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 35
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 36
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 37
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 38
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 39
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 40
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 41
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 42
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 45
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 46
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 47
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 48
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 49
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 50
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 51
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 52
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 53
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 54
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 55
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 56
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 57
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 58
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 59
+          }
+        ]
+      },
+      "preHandlerSource": {
+        "eventToCommit": {
+          "count": 1,
+          "mean": 43.0,
+          "p50": 43.0,
+          "p95": 43.0,
+          "p99": 43.0,
+          "max": 43.0
+        },
+        "indices": [
+          {
+            "blockIndex": 5,
+            "trialIndex": 43
+          }
+        ]
+      },
+      "postHandlerSource": {
+        "eventToCommit": {
+          "count": 2,
+          "mean": 39.04999999998836,
+          "p50": 39.04999999998836,
+          "p95": 39.27499999998836,
+          "p99": 39.294999999988356,
+          "max": 39.29999999998836
+        },
+        "indices": [
+          {
+            "blockIndex": 2,
+            "trialIndex": 24
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 44
+          }
+        ]
+      }
+    },
+    "runtimeSmoke": [
+      {
+        "runtime": "wc",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      },
+      {
+        "runtime": "react",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      },
+      {
+        "runtime": "vue",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      },
+      {
+        "runtime": "vue2",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      }
+    ],
+    "public": [
+      {
+        "name": "public-light",
+        "theme": "light",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "route": "/zh-cn/ui-libraries/liquid-glass/button/",
+        "optical": 2,
+        "actualTheme": "light",
+        "screenshot": "public-light.png",
+        "screenshotSha256": "32194aaa367b4ee6944c085ddbfba84fdc3ed546e0a97506c7ab38d448e66b86"
+      },
+      {
+        "name": "public-dark",
+        "theme": "dark",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "route": "/zh-cn/ui-libraries/liquid-glass/button/",
+        "optical": 2,
+        "actualTheme": "dark",
+        "screenshot": "public-dark.png",
+        "screenshotSha256": "c4f4f1196381a80a56c76b30f4e9a01595c7a145acc7d9362afdcec97efc4593"
+      },
+      {
+        "name": "public-small",
+        "theme": "light",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "route": "/zh-cn/ui-libraries/liquid-glass/button/",
+        "optical": 2,
+        "actualTheme": "light",
+        "screenshot": "public-small.png",
+        "screenshotSha256": "654ac393f51a35c79d34dc28a9e91ad46cfe408b7e7c61942da0cb70e6c00298"
+      }
+    ],
+    "publicAcceptance": null,
+    "scopedThemeAcceptance": null,
+    "scopedThemes": [
+      {
+        "pageTheme": "light",
+        "localTheme": "dark",
+        "before": {
+          "pageTheme": "light",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "33efce384f55663cd75b063d56b653b7799b9b3aa5238bf824fd0504c944815e"
+        },
+        "overridden": {
+          "pageTheme": "light",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "33efce384f55663cd75b063d56b653b7799b9b3aa5238bf824fd0504c944815e"
+        },
+        "screenshot": "scene-dark-on-light.png",
+        "restored": {
+          "pageTheme": "light",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "33efce384f55663cd75b063d56b653b7799b9b3aa5238bf824fd0504c944815e"
+        }
+      },
+      {
+        "pageTheme": "dark",
+        "localTheme": "light",
+        "before": {
+          "pageTheme": "dark",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "54b6454521afc207e5f78986f5dae1acc7225cb94d3e7d7646985017936298ec"
+        },
+        "overridden": {
+          "pageTheme": "dark",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "54b6454521afc207e5f78986f5dae1acc7225cb94d3e7d7646985017936298ec"
+        },
+        "screenshot": "scene-light-on-dark.png",
+        "restored": {
+          "pageTheme": "dark",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "54b6454521afc207e5f78986f5dae1acc7225cb94d3e7d7646985017936298ec"
+        }
+      }
+    ]
+  },
+  "candidate": {
+    "source": {
+      "sha": "a514f3a3b1ea2f9087351a97d9b3c3f67a715df0",
+      "tree": "c41eba853ddebc3d6c8e848dab03c237b0420cb1",
+      "changes": "",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hashes": {
+        "apps/www/src/components/PrototypePreviewer/demo-renderer.ts": "47e8678bee11d9ce281419fc9acb16e0e285847ed3277bad2f8294fcba259af5",
+        "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": "0f4ab1ce59f374c1f39f732fc8d3b7418f7bffcb65369f69a3279e55bc43eeed",
+        "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts": "03933609410cf5461f57bea0c089e9c4f198fbcb5438baf9c5779de91ec15de4",
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/button.mdx": "19c6603345b89af3639e26f8b0b8ebd32a746839f3a2605ac47299ab9f1d338a",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+        "apps/www/src/content/docs/zh-cn/material-paint-observation.ts": "90c3c9c8b2f20ae6354de16ca5944370931a47f30270ccd198de095561ca39a1",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/button.mdx": "7e38d49c8960a0fae06adfd77139d251230c1163f1d93c42516e72f5baab1cf5",
+        "apps/www/src/pages/en/test/liquid-glass-material.astro": "38eda9a1fd180efb8a33b91ba2859b64c2a502abdcd0b11ffead61d56b0c0f7c",
+        "packages/adapters/base/src/material/contact-carrier.ts": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+        "packages/adapters/base/src/material/contact-motion.ts": "fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6",
+        "packages/adapters/base/src/material/contact-profile.ts": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+        "packages/adapters/base/src/material/geometry-watch.ts": "258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966",
+        "packages/adapters/base/src/material/image-prepare.ts": "7a03b9c6e05054997f3d2341b5aea2f52de23d41dce1aeefadde8825b334aab5",
+        "packages/adapters/base/src/material/index.ts": "9dae5bb10f07130364c43e02cf1e77cae0cbd71f60a9a2d8efe089fb064a5118",
+        "packages/adapters/base/src/material/initial-paint-bridge.ts": "b9753d61a404049a90dbe9e9ef3ede552ec7895c91183b0608a249ec9d9ee1da",
+        "packages/adapters/base/src/material/initial-paint-experiment.ts": "ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952",
+        "packages/adapters/base/src/material/initial-paint-receipt.ts": "26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6",
+        "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+        "packages/adapters/base/src/material/paint-mutations.ts": "bb1d4671a4da268cb08f818f4945989f6f0118612315a5c98c5a3fbbcb8c1f06",
+        "packages/adapters/base/src/material/preferences.ts": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+        "packages/adapters/base/src/material/prefilter.ts": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+        "packages/adapters/base/src/material/program-pool.ts": "9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658",
+        "packages/adapters/base/src/material/program.ts": "25706f5254d6f6d6c31413d53baf7b46aafdd15c463648ccdf48ce0031ffa5b2",
+        "packages/adapters/base/src/material/sink.ts": "29f3e965758ef6192998c892889b1157bd96bd39c82d532b52b0ff2c27005ecd",
+        "packages/adapters/base/src/material/source.ts": "d938aae6d43a9c62e0fdb649e5c17a0d63873f50cf5bb7952384c0d855feffd6",
+        "packages/adapters/base/src/material/style-tint-profile.ts": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+        "packages/adapters/base/src/material/style.ts": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+        "packages/adapters/web-component/src/adapt.ts": "92e7c4a54b1d0544a92e4700d0573f3e0a1daf5b61d0fb789a23b8f2997dedda",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8"
+      }
+    },
+    "probe": {
+      "sha256": "3978eab211f6822f3bea2c9ff51d0297e523422d69be590b948fc42b5f68aaf2"
+    },
+    "environment": {
+      "node": "v24.22.3",
+      "platform": "linux",
+      "arch": "x64",
+      "osRelease": "7.0.0-1017-azure",
+      "cpus": 4,
+      "headless": true,
+      "browser": "157.0.8103.78",
+      "gpu": {
+        "devices": [
+          {
+            "vendorId": 65535,
+            "deviceId": 65535,
+            "vendorString": "Google Inc. (Google)",
+            "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "driverVendor": "SwANGLE",
+            "driverVersion": "5.0.0"
+          }
+        ],
+        "auxAttributes": {
+          "amdSwitchable": false,
+          "canSupportThreadedTextureMailbox": false,
+          "directRenderingVersion": "",
+          "displayType": "ANGLE_SWIFTSHADER",
+          "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_robust_resource_initialization GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_translated_shader_source GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_rgba8 GL_ARM_shader_framebuffer_fetch GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clear_texture GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_semaphore_fd GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_paletted_texture GL_OES_copy_image GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 GL_QCOM_texture_lod_bias ",
+          "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+          "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "glResetNotificationStrategy": 33362,
+          "glVendor": "Google Inc. (Google)",
+          "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+          "glWsExtensions": "EGL_EXT_create_context_robustness EGL_ANGLE_surface_orientation EGL_KHR_create_context EGL_KHR_image EGL_KHR_image_base EGL_EXT_image_gl_colorspace EGL_KHR_gl_colorspace EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_get_all_proc_addresses EGL_KHR_fence_sync EGL_KHR_wait_sync EGL_ANGLE_create_context_webgl_compatibility EGL_CHROMIUM_create_context_bind_generates_resource EGL_KHR_swap_buffers_with_damage EGL_EXT_pixel_format_float EGL_KHR_surfaceless_context EGL_ANGLE_display_texture_share_group EGL_ANGLE_display_semaphore_share_group EGL_ANGLE_create_context_client_arrays EGL_ANGLE_program_cache_control EGL_ANGLE_robust_resource_initialization EGL_ANGLE_create_context_extensions_enabled EGL_ANDROID_blob_cache EGL_ANDROID_recordable EGL_ANGLE_create_context_backwards_compatible EGL_KHR_no_config_context EGL_IMG_context_priority EGL_KHR_create_context_no_error EGL_KHR_reusable_sync EGL_EXT_buffer_age EGL_ANGLE_create_surface_swap_interval EGL_ANGLE_vulkan_image EGL_KHR_partial_update EGL_ANGLE_global_fence_sync EGL_ANGLE_memory_usage_report ",
+          "glWsVendor": "Google Inc. (Google)",
+          "glWsVersion": "1.5 (ANGLE 2.1.29101 git hash: c56e2a4a9b8c)",
+          "hardwareSupportsVulkan": false,
+          "inProcessGpu": false,
+          "initializationTime": 0.014456,
+          "isAsan": false,
+          "isClangCoverage": false,
+          "jpegDecodeAcceleratorSupported": false,
+          "maxMsaaSamples": "4",
+          "optimus": false,
+          "passthroughCmdDecoder": true,
+          "pixelShaderVersion": "3.00",
+          "processCrashCount": 0,
+          "sandboxed": false,
+          "skiaBackendType": "None",
+          "subpixelFontRendering": true,
+          "targetCpuBits": 64,
+          "vertexShaderVersion": "3.00",
+          "visibilityCallbackCallCount": 0
+        },
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "disabled_off",
+          "rasterization": "disabled_software",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "disabled_software",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_software",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "unavailable_software"
+        },
+        "driverBugWorkarounds": [],
+        "videoDecoding": [],
+        "videoEncoding": []
+      },
+      "gpuClassification": "software"
+    },
+    "failures": [],
+    "windows": 12,
+    "freshPressLatency": {
+      "static": {
+        "planned": 60,
+        "attempted": 60,
+        "resolved": 60,
+        "unresolvedAttempted": 0,
+        "notAttempted": 0,
+        "listenerToHeldCommitMs": {
+          "count": 60,
+          "mean": 7.488333333329259,
+          "p50": 5.900000000023283,
+          "p95": 11.719999999957507,
+          "p99": 12.95099999999045,
+          "max": 13.599999999976717
+        },
+        "eventTimestampToHeldCommitMs": {
+          "count": 60,
+          "mean": 7.76166666666104,
+          "p50": 6.2000000000116415,
+          "p95": 12.024999999999999,
+          "p99": 13.327999999995225,
+          "max": 13.799999999988358
+        },
+        "eventTimestampToListenerMs": {
+          "count": 60,
+          "mean": 0.2733333333317811,
+          "p50": 0.29999999998835847,
+          "p95": 0.40000000002328306,
+          "p99": 0.5820000000047724,
+          "max": 0.7000000000116415
+        },
+        "armedToListenerSourcePreparationTrials": 0,
+        "listenerToHeldSourcePreparationTrials": 0,
+        "sourceWorkAttribution": "Document-wide counters; armed-to-listener includes time before event creation and does not prove event-queue causality.",
+        "listenerOver10Ms": 18,
+        "eventTimestampOver10Ms": 18,
+        "invalidEventTimestamps": 0,
+        "releaseFailures": 0,
+        "untrustedInputTrials": 0,
+        "pointerIdentityFailures": 0,
+        "nonOpticalTrials": 0,
+        "phaseBins": {
+          "0": 10,
+          "1": 15,
+          "2": 12,
+          "3": 12,
+          "4": 11
+        }
+      },
+      "dynamic": {
+        "planned": 60,
+        "attempted": 60,
+        "resolved": 60,
+        "unresolvedAttempted": 0,
+        "notAttempted": 0,
+        "listenerToHeldCommitMs": {
+          "count": 60,
+          "mean": 11.569999999995343,
+          "p50": 10.89999999999418,
+          "p95": 42.79999999999127,
+          "p99": 54.38199999998142,
+          "max": 66.29999999998836
+        },
+        "eventTimestampToHeldCommitMs": {
+          "count": 60,
+          "mean": 11.991666666661816,
+          "p50": 11.14999999999418,
+          "p95": 43.00499999999884,
+          "p99": 54.681999999969776,
+          "max": 66.59999999997672
+        },
+        "eventTimestampToListenerMs": {
+          "count": 60,
+          "mean": 0.4216666666664726,
+          "p50": 0.29999999998835847,
+          "p95": 1.0300000000017446,
+          "p99": 1.7409999999916177,
+          "max": 1.8000000000465661
+        },
+        "armedToListenerSourcePreparationTrials": 0,
+        "listenerToHeldSourcePreparationTrials": 4,
+        "sourceWorkAttribution": "Document-wide counters; armed-to-listener includes time before event creation and does not prove event-queue causality.",
+        "listenerOver10Ms": 31,
+        "eventTimestampOver10Ms": 31,
+        "invalidEventTimestamps": 0,
+        "releaseFailures": 0,
+        "untrustedInputTrials": 0,
+        "pointerIdentityFailures": 0,
+        "nonOpticalTrials": 0,
+        "phaseBins": {
+          "0": 9,
+          "1": 7,
+          "2": 9,
+          "3": 8,
+          "4": 13,
+          "late": 14
+        }
+      }
+    },
+    "cleanup": {
+      "contexts": 0,
+      "consumers": 0,
+      "lost": false,
+      "pendingImages": 0,
+      "decodedImages": 0,
+      "imagePreparations": 1286,
+      "peakPendingImages": 4
+    },
+    "windowPools": {
+      "static-idle": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "cpuSourcePreparations": 0,
+          "decodedImages": 0,
+          "encodeMilliseconds": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "prefilterProgramBuilds": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "renders": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparations": 0,
+          "sourceUploads": 0
+        },
+        "renders": 0,
+        "sourcePreparations": 0,
+        "cpuPreparations": 0,
+        "gpuPreparations": 0,
+        "meanRenderIncludingEncodeMs": null,
+        "meanReadbackMs": null,
+        "meanEncodeMs": null,
+        "meanContrastMs": null,
+        "meanSourcePreparationMs": null,
+        "meanGpuSubmitMs": null,
+        "rafP95ByRound": [
+          16.700000000000273,
+          16.700000000000728,
+          16.700000000000728
+        ],
+        "materialP95ByRound": [
+          null,
+          null,
+          null
+        ]
+      },
+      "static-contact": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 23.999999999592546,
+          "cpuSourcePreparationMilliseconds": 0,
+          "cpuSourcePreparations": 0,
+          "decodedImages": 0,
+          "encodeMilliseconds": 214.59999999951106,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "imagePreparations": 411,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "prefilterProgramBuilds": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 741.1999999996042,
+          "renderMilliseconds": 1119.1999999988475,
+          "renders": 411,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 411,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparations": 0,
+          "sourceUploads": 0
+        },
+        "renders": 411,
+        "sourcePreparations": 0,
+        "cpuPreparations": 0,
+        "gpuPreparations": 0,
+        "meanRenderIncludingEncodeMs": 2.7231143552283394,
+        "meanReadbackMs": 1.8034063260331001,
+        "meanEncodeMs": 0.5221411192202216,
+        "meanContrastMs": 0.05839416058295024,
+        "meanSourcePreparationMs": null,
+        "meanGpuSubmitMs": null,
+        "rafP95ByRound": [
+          16.800000000000182,
+          16.700000000000728,
+          16.700000000000728
+        ],
+        "materialP95ByRound": [
+          17.02499999999418,
+          16.900000000023283,
+          17
+        ]
+      },
+      "dynamic-idle": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 9.700000000186265,
+          "cpuSourcePreparationMilliseconds": 0,
+          "cpuSourcePreparations": 0,
+          "decodedImages": 0,
+          "encodeMilliseconds": 91.70000000001164,
+          "gpuSourcePreparationSubmitMilliseconds": 143.69999999989523,
+          "gpuSourcePreparations": 180,
+          "imagePreparations": 180,
+          "peakPendingImages": 0,
+          "pendingImages": 0,
+          "prefilterProgramBuilds": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 774.1999999996624,
+          "renderMilliseconds": 1074.2000000000698,
+          "renders": 180,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "sourcePreparationMilliseconds": 143.9999999999418,
+          "sourcePreparations": 180,
+          "sourceUploads": 180
+        },
+        "renders": 180,
+        "sourcePreparations": 180,
+        "cpuPreparations": 0,
+        "gpuPreparations": 180,
+        "meanRenderIncludingEncodeMs": 5.967777777778166,
+        "meanReadbackMs": 4.301111111109235,
+        "meanEncodeMs": 0.5094444444445091,
+        "meanContrastMs": 0.05388888888992369,
+        "meanSourcePreparationMs": 0.7999999999996766,
+        "meanGpuSubmitMs": 0.7983333333327512,
+        "rafP95ByRound": [
+          16.7999999999995,
+          16.700000000000728,
+          16.799999999999272
+        ],
+        "materialP95ByRound": [
+          135.525,
+          134.3399999999994,
+          134.7400000000227
+        ]
+      },
+      "dynamic-contact": {
+        "rounds": 3,
+        "resourceDeltaSum": {
+          "consumers": 0,
+          "contexts": 0,
+          "contrastMilliseconds": 32.70000000059372,
+          "cpuSourcePreparationMilliseconds": 0,
+          "cpuSourcePreparations": 0,
+          "decodedImages": 0,
+          "encodeMilliseconds": 311.50000000040745,
+          "gpuSourcePreparationSubmitMilliseconds": 218.29999999969732,
+          "gpuSourcePreparations": 268,
+          "imagePreparations": 611,
+          "peakPendingImages": 0,
+          "pendingImages": 3,
+          "prefilterProgramBuilds": 0,
+          "programBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1778.5000000004657,
+          "renderMilliseconds": 2547.9999999998836,
+          "renders": 611,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheHits": 343,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "sourcePreparationMilliseconds": 218.29999999969732,
+          "sourcePreparations": 268,
+          "sourceUploads": 268
+        },
+        "renders": 611,
+        "sourcePreparations": 268,
+        "cpuPreparations": 0,
+        "gpuPreparations": 268,
+        "meanRenderIncludingEncodeMs": 4.170212765957256,
+        "meanReadbackMs": 2.9108019639942153,
+        "meanEncodeMs": 0.5098199672674426,
+        "meanContrastMs": 0.0535188216048997,
+        "meanSourcePreparationMs": 0.8145522388048407,
+        "meanGpuSubmitMs": 0.8145522388048407,
+        "rafP95ByRound": [
+          16.80000000000109,
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "materialP95ByRound": [
+          45.224999999962165,
+          45.12999999998719,
+          45.1999999999709
+        ]
+      }
+    },
+    "topDynamicPresses": [
+      {
+        "blockIndex": 5,
+        "trialIndex": 48,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 82,
+        "actualPhaseBin": "4",
+        "eventTimestampToHeldCommitMs": 66.59999999997672,
+        "eventTimestampToListenerMs": 0.29999999998835847,
+        "listenerToHeldCommitMs": 66.29999999998836,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 5,
+          "programBuilds": 0,
+          "sourceUploads": 4,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 12.499999999941792,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 4,
+          "gpuSourcePreparationSubmitMilliseconds": 12.499999999941792,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 29.70000000001164,
+          "contrastMilliseconds": 0.20000000001164153,
+          "renderMilliseconds": 49.100000000034925,
+          "encodeMilliseconds": 3.2999999999883585,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 3,
+          "decodedImages": 1,
+          "imagePreparations": 5,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 17.199999999953434
+      },
+      {
+        "blockIndex": 2,
+        "trialIndex": 22,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.2,
+        "requestedSourceJitterMs": 88,
+        "actualPhaseBin": "3",
+        "eventTimestampToHeldCommitMs": 46.399999999965075,
+        "eventTimestampToListenerMs": 0.29999999998835847,
+        "listenerToHeldCommitMs": 46.09999999997672,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 5,
+          "programBuilds": 0,
+          "sourceUploads": 4,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 3.199999999953434,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 4,
+          "gpuSourcePreparationSubmitMilliseconds": 3.199999999953434,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 21.09999999991851,
+          "contrastMilliseconds": 0.09999999997671694,
+          "renderMilliseconds": 29.100000000034925,
+          "encodeMilliseconds": 2.599999999976717,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 3,
+          "decodedImages": 1,
+          "imagePreparations": 5,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 16.999999999941792
+      },
+      {
+        "blockIndex": 2,
+        "trialIndex": 28,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 68,
+        "actualPhaseBin": "4",
+        "eventTimestampToHeldCommitMs": 43.09999999997672,
+        "eventTimestampToListenerMs": 0.29999999998835847,
+        "listenerToHeldCommitMs": 42.79999999998836,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 5,
+          "programBuilds": 0,
+          "sourceUploads": 4,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 3.2000000000116415,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 4,
+          "gpuSourcePreparationSubmitMilliseconds": 3.2000000000116415,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 18.79999999998836,
+          "contrastMilliseconds": 0.20000000001164153,
+          "renderMilliseconds": 26.20000000006985,
+          "encodeMilliseconds": 2.5000000000582077,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 3,
+          "decodedImages": 1,
+          "imagePreparations": 5,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 16.59999999991851
+      },
+      {
+        "blockIndex": 5,
+        "trialIndex": 44,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.4,
+        "requestedSourceJitterMs": 55,
+        "actualPhaseBin": "4",
+        "eventTimestampToHeldCommitMs": 43.0,
+        "eventTimestampToListenerMs": 0.19999999995343387,
+        "listenerToHeldCommitMs": 42.800000000046566,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 5,
+          "programBuilds": 0,
+          "sourceUploads": 4,
+          "sourcePreparations": 4,
+          "sourcePreparationMilliseconds": 2.89999999984866,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 4,
+          "gpuSourcePreparationSubmitMilliseconds": 2.89999999984866,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 18.899999999906868,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 26.199999999895226,
+          "encodeMilliseconds": 2.599999999976717,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 3,
+          "decodedImages": 1,
+          "imagePreparations": 5,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 16.60000000015134
+      },
+      {
+        "blockIndex": 5,
+        "trialIndex": 43,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 18,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 13.700000000011642,
+        "eventTimestampToListenerMs": 1.8000000000465661,
+        "listenerToHeldCommitMs": 11.899999999965075,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": -3,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.7000000000116415,
+          "contrastMilliseconds": 0.09999999997671694,
+          "renderMilliseconds": 3.099999999976717,
+          "encodeMilliseconds": 0.5999999999767169,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.799999999988358
+      },
+      {
+        "blockIndex": 1,
+        "trialIndex": 2,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.2,
+        "requestedSourceJitterMs": 74,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 13.0,
+        "eventTimestampToListenerMs": 1.6999999999534339,
+        "listenerToHeldCommitMs": 11.300000000046566,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": -3,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.8000000000465661,
+          "contrastMilliseconds": 0.09999999997671694,
+          "renderMilliseconds": 2.7000000000116415,
+          "encodeMilliseconds": 0.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.600000000034925
+      },
+      {
+        "blockIndex": 1,
+        "trialIndex": 12,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.2,
+        "requestedSourceJitterMs": 81,
+        "actualPhaseBin": "late",
+        "eventTimestampToHeldCommitMs": 13.0,
+        "eventTimestampToListenerMs": 1.6000000000349246,
+        "listenerToHeldCommitMs": 11.399999999965075,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": -4,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.7999999999883585,
+          "contrastMilliseconds": 0.1000000000349246,
+          "renderMilliseconds": 2.7999999999883585,
+          "encodeMilliseconds": 0.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 8.599999999976717
+      },
+      {
+        "blockIndex": 1,
+        "trialIndex": 13,
+        "mode": "dynamic",
+        "requestedPhaseFraction": 0.8,
+        "requestedSourceJitterMs": 118,
+        "actualPhaseBin": "4",
+        "eventTimestampToHeldCommitMs": 12.899999999965075,
+        "eventTimestampToListenerMs": 0.29999999998835847,
+        "listenerToHeldCommitMs": 12.599999999976717,
+        "armedToListenerResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 0,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 0,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 0,
+          "encodeMilliseconds": 0,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 0,
+          "imagePreparations": 0,
+          "peakPendingImages": 0
+        },
+        "listenerToHeldResources": {
+          "contexts": 0,
+          "consumers": 0,
+          "renders": 1,
+          "programBuilds": 0,
+          "sourceUploads": 0,
+          "sourcePreparations": 0,
+          "sourcePreparationMilliseconds": 0,
+          "sourcePreparationCacheHits": 1,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 0,
+          "gpuSourcePreparationSubmitMilliseconds": 0,
+          "prefilterProgramBuilds": 0,
+          "readbackAllocations": 0,
+          "readbackMilliseconds": 1.8999999999650754,
+          "contrastMilliseconds": 0,
+          "renderMilliseconds": 3,
+          "encodeMilliseconds": 0.7000000000116415,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0,
+          "pendingImages": 0,
+          "decodedImages": 1,
+          "imagePreparations": 1,
+          "peakPendingImages": 0
+        },
+        "unattributedListenerToCommitMs": 9.599999999976717
+      }
+    ],
+    "preHandlerSourcePresses": [],
+    "sourceOverlapGroups": {
+      "noSourcePreparation": {
+        "eventToCommit": {
+          "count": 56,
+          "mean": 9.292857142853402,
+          "p50": 7.699999999982538,
+          "p95": 12.924999999973807,
+          "p99": 13.315000000005242,
+          "max": 13.700000000011642
+        },
+        "indices": [
+          {
+            "blockIndex": 1,
+            "trialIndex": 0
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 1
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 2
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 3
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 4
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 5
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 6
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 7
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 8
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 9
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 10
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 11
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 12
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 13
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 14
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 15
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 16
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 17
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 18
+          },
+          {
+            "blockIndex": 1,
+            "trialIndex": 19
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 20
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 21
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 23
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 24
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 25
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 26
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 27
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 29
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 30
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 31
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 32
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 33
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 34
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 35
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 36
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 37
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 38
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 39
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 40
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 41
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 42
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 43
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 45
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 46
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 47
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 49
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 50
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 51
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 52
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 53
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 54
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 55
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 56
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 57
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 58
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 59
+          }
+        ]
+      },
+      "preHandlerSource": {
+        "eventToCommit": {
+          "count": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null,
+          "max": null
+        },
+        "indices": []
+      },
+      "postHandlerSource": {
+        "eventToCommit": {
+          "count": 4,
+          "mean": 49.77499999997963,
+          "p50": 44.749999999970896,
+          "p95": 63.56999999997497,
+          "p99": 65.99399999997637,
+          "max": 66.59999999997672
+        },
+        "indices": [
+          {
+            "blockIndex": 2,
+            "trialIndex": 22
+          },
+          {
+            "blockIndex": 2,
+            "trialIndex": 28
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 44
+          },
+          {
+            "blockIndex": 5,
+            "trialIndex": 48
+          }
+        ]
+      }
+    },
+    "runtimeSmoke": [
+      {
+        "runtime": "wc",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      },
+      {
+        "runtime": "react",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      },
+      {
+        "runtime": "vue",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      },
+      {
+        "runtime": "vue2",
+        "beforeQuality": "self-optical",
+        "heldQuality": "self-optical",
+        "afterQuality": "self-optical",
+        "geometryMatches": true,
+        "activations": "1 activations"
+      }
+    ],
+    "public": [
+      {
+        "name": "public-light",
+        "theme": "light",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "route": "/zh-cn/ui-libraries/liquid-glass/button/",
+        "optical": 2,
+        "actualTheme": "light",
+        "screenshot": "public-light.png",
+        "screenshotSha256": "32194aaa367b4ee6944c085ddbfba84fdc3ed546e0a97506c7ab38d448e66b86"
+      },
+      {
+        "name": "public-dark",
+        "theme": "dark",
+        "viewport": {
+          "width": 1440,
+          "height": 1050
+        },
+        "route": "/zh-cn/ui-libraries/liquid-glass/button/",
+        "optical": 2,
+        "actualTheme": "dark",
+        "screenshot": "public-dark.png",
+        "screenshotSha256": "c4f4f1196381a80a56c76b30f4e9a01595c7a145acc7d9362afdcec97efc4593"
+      },
+      {
+        "name": "public-small",
+        "theme": "light",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "route": "/zh-cn/ui-libraries/liquid-glass/button/",
+        "optical": 2,
+        "actualTheme": "light",
+        "screenshot": "public-small.png",
+        "screenshotSha256": "654ac393f51a35c79d34dc28a9e91ad46cfe408b7e7c61942da0cb70e6c00298"
+      }
+    ],
+    "publicAcceptance": {
+      "passed": true
+    },
+    "scopedThemeAcceptance": {
+      "passed": true
+    },
+    "scopedThemes": [
+      {
+        "pageTheme": "light",
+        "localTheme": "dark",
+        "before": {
+          "pageTheme": "light",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "33efce384f55663cd75b063d56b653b7799b9b3aa5238bf824fd0504c944815e"
+        },
+        "overridden": {
+          "pageTheme": "light",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "54b6454521afc207e5f78986f5dae1acc7225cb94d3e7d7646985017936298ec"
+        },
+        "screenshot": "scene-dark-on-light.png",
+        "restored": {
+          "pageTheme": "light",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "33efce384f55663cd75b063d56b653b7799b9b3aa5238bf824fd0504c944815e"
+        }
+      },
+      {
+        "pageTheme": "dark",
+        "localTheme": "light",
+        "before": {
+          "pageTheme": "dark",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "54b6454521afc207e5f78986f5dae1acc7225cb94d3e7d7646985017936298ec"
+        },
+        "overridden": {
+          "pageTheme": "dark",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "33efce384f55663cd75b063d56b653b7799b9b3aa5238bf824fd0504c944815e"
+        },
+        "screenshot": "scene-light-on-dark.png",
+        "restored": {
+          "pageTheme": "dark",
+          "width": 512,
+          "height": 260,
+          "pngSha256": "54b6454521afc207e5f78986f5dae1acc7225cb94d3e7d7646985017936298ec"
+        }
+      }
+    ]
+  },
+  "gpuCorrectness": {
+    "failures": [],
+    "source": {
+      "sha": "a514f3a3b1ea2f9087351a97d9b3c3f67a715df0",
+      "helper": "packages/adapters/base/src/material/prefilter.ts",
+      "helperSha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+      "probeSha256": "7f3559359c75e97d635567ab0783663da37dc9d97965035ca447d8ea990373b8",
+      "bundleSha256": "c4c1da4117744c8c58b3f032be1ceb1c77bd2607c3c9faec9a19e4d6cc4579e2",
+      "bundleInputs": {
+        "packages/adapters/base/src/material/prefilter.ts": {
+          "bytes": 12637,
+          "imports": [],
+          "format": "esm"
+        }
+      }
+    },
+    "caseCount": 84,
+    "comparedBytes": 16938336,
+    "mismatches": 0,
+    "shaMatches": true,
+    "precision": {
+      "precision": 23,
+      "rangeMin": 127,
+      "rangeMax": 127
+    },
+    "stateRestorationChecks": 85,
+    "changedStateChecks": [],
+    "capabilityRefusals": [
+      {
+        "name": "highp-22",
+        "returnedNull": true,
+        "allocations": 0
+      },
+      {
+        "name": "highp-null",
+        "returnedNull": true,
+        "allocations": 0
+      },
+      {
+        "name": "query-unavailable",
+        "returnedNull": true,
+        "allocations": 0
+      },
+      {
+        "name": "vao-unavailable",
+        "returnedNull": true,
+        "allocations": 0
+      }
+    ],
+    "retainedOutputs": {
+      "expectedA": "5e2dba55c26d47c5e09d2617d2f00cd69303c40a108a946b6f580d6e56ab7485",
+      "expectedB": "c6130b212e0709950fa510ce309c6f8a2a215ef026560f9e6ef8f3e54c2779de",
+      "actualAAfterB": "5e2dba55c26d47c5e09d2617d2f00cd69303c40a108a946b6f580d6e56ab7485",
+      "liveTexturesWithBoth": 4,
+      "aReleased": true,
+      "liveTexturesAfterReleaseA": 3,
+      "actualBAfterReleaseA": "c6130b212e0709950fa510ce309c6f8a2a215ef026560f9e6ef8f3e54c2779de",
+      "bReleasedByDispose": true
+    },
+    "contextLoss": {
+      "observed": true,
+      "filterRejected": true,
+      "rejection": "Error: webgl-unavailable",
+      "disposeThrew": false,
+      "outputReleaseThrew": false
+    },
+    "afterDispose": {
+      "Texture": {
+        "created": 88,
+        "deleted": 88,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Framebuffer": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Program": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Shader": {
+        "created": 2,
+        "deleted": 2,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "Buffer": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      },
+      "VertexArray": {
+        "created": 1,
+        "deleted": 1,
+        "doubleDeletes": 0,
+        "live": 0
+      }
+    },
+    "limitations": [
+      "One real browser/renderer; not all GPUs and not physical FPS or input latency.",
+      "Capability refusal cases substitute only capability reports on the real context; they are not observations of low-precision or missing-VAO hardware.",
+      "Case durations include validation readback and are correctness observations, not a throughput benchmark."
+    ]
+  },
+  "programClear": {
+    "failures": [],
+    "probeSha256": "fb6d52bd2fb5f2a94b7caa83ac457a4b1906abde18feca03f60cd46d968a7d89",
+    "sources": [
+      {
+        "label": "before",
+        "sha": "19d175f454468fa27364c8283e084f3bb7a1016b",
+        "tree": "d8403f0f516765ab9725e4d7fc48e6af9fcb8a69",
+        "bundleSha256": "921f6986a95a1faaca1b2b78534c4306987320ae2745068563f9ef9c2534da57",
+        "inputs": {
+          "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": {
+            "sha256": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+            "blob": "63543476cd7cc3f35556b71e94b81d421871e222"
+          },
+          "packages/adapters/base/src/material/contact-profile.ts": {
+            "sha256": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+            "blob": "d84b08103e2e61c4437a8f8a82f4dde068063db5"
+          },
+          "packages/core/src/handles.ts": {
+            "sha256": "1136fa1f99728541ba9fd2bd1c5987bac675e505d65e4272dac1a397d487b6a5",
+            "blob": "15ef2f2677a037a2091b83c3c37973487ea89c8e"
+          },
+          "packages/core/src/spec/feedback/placeholder.ts": {
+            "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052",
+            "blob": "dd90ff5e5f46517d375ccf2b147c0885b436cb71"
+          },
+          "packages/core/src/spec/feedback/application-role.ts": {
+            "sha256": "4dcbb148476982d560f1957bb5cc49f4e53fc9cdb0027b2b14681d647711abe1",
+            "blob": "e138cffe82feae1480bd4fd7f0e5234d6b7820d4"
+          },
+          "packages/core/src/spec/feedback/semantic-merge.ts": {
+            "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "blob": "2000e3fb91fd0f2f40fef252105facb52b774993"
+          },
+          "packages/core/src/spec/feedback/tokens.ts": {
+            "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3",
+            "blob": "3d8eb3e1f9af9eeda621e25ce9f1ffdad80a5804"
+          },
+          "packages/core/src/spec/feedback/root-effect.ts": {
+            "sha256": "38c07aca4122c82f2cb0ac5dac470e52c784a1f2553d99f036a5684d5601cdbb",
+            "blob": "eac47be3da2e5573c9bfd94abc976fea0fc13722"
+          },
+          "packages/core/src/internal.ts": {
+            "sha256": "96c57e2fc6a68a197118b0f5143de1415423bd5fb8c86ab42994bc8a7d4b1855",
+            "blob": "66e6dc82f121e46da9e91069883abab326665cd6"
+          },
+          "packages/core/src/prototype.ts": {
+            "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc",
+            "blob": "98f09837478e1cdb668a88f826a31792f42c08b1"
+          },
+          "packages/core/src/anatomy.ts": {
+            "sha256": "7223692e13cd0374df56bd0a4c00fc5f37ef8b10ef6e97e10fc1aaa8960ea5aa",
+            "blob": "9ad879e3560ddb8d00ad2808532c0033b3fd40cd"
+          },
+          "packages/core/src/spec/feedback/recorder.ts": {
+            "sha256": "d0622791924858f06da45c936bf847752ab1451a2adf2f9539cafef4f8229edb",
+            "blob": "bb99d51b1606d96bdb41177551363e0ab8757d12"
+          },
+          "packages/core/src/spec/feedback/style.ts": {
+            "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc",
+            "blob": "cc3fd2b507de4e9b2d87268dc77b28224cc6760f"
+          },
+          "packages/core/src/spec/feedback/index.ts": {
+            "sha256": "5615a1d8614eafa79cd3c245317d433208f81262bc2bf19d153e460f5d1105a3",
+            "blob": "9d4f5ba12ec60cabe96843dbe21c834034d05ddc"
+          },
+          "packages/core/src/spec/template.ts": {
+            "sha256": "4e2e9f13e9a273ad42140591bfa43d4bb0204578bdc40d95b596146bc34de7f4",
+            "blob": "f4a469c3c60548a2081b99d1047636b8bba676eb"
+          },
+          "packages/core/src/spec/owned-template-blueprint.ts": {
+            "sha256": "bf0308e95a26d83cdc730e2a3b0e29c9557da8eaa658de9a99ac9b27a2cb332b",
+            "blob": "0bd2e688b08006aab57931aeaa52373dbd762558"
+          },
+          "packages/core/src/spec/index.ts": {
+            "sha256": "24f03a4f1c9ea9b526a2defa35239fc920e34d2b48e41c106f409f1167694bb3",
+            "blob": "1a08c1367b78a7ae75d311525fa6d1fbbe1f990f"
+          },
+          "packages/core/src/effects/types.ts": {
+            "sha256": "dcaeed5ba405406d18ad15e7c86e9a1f76fa2e988b719b5f733e7b6fed75c471",
+            "blob": "871a3a298d5517b797da2a6f60a3089fe1ddbb26"
+          },
+          "packages/core/src/effects/index.ts": {
+            "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+            "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+          },
+          "packages/core/src/module/types.ts": {
+            "sha256": "07feee9d49bd7ae7e78cf2329edb6ded3d8b909c9a4c261ae8fc04df26a912df",
+            "blob": "1432584f5e7bd6af3fc79d2869d9ee0f25fae6e8"
+          },
+          "packages/core/src/module/index.ts": {
+            "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+            "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+          },
+          "packages/core/src/errors/codes.ts": {
+            "sha256": "1e35e7e6a995ef0b484ea4fb3852f2aaa8579340316f15e27ff4d048d567268f",
+            "blob": "c9aa31ad8d8d163f0b9f24ede17a260e014347a9"
+          },
+          "packages/core/src/errors/index.ts": {
+            "sha256": "652c62a961d7e676deda59136735193f362515d55132038ea572724e4b3f4b9d",
+            "blob": "6492fac9dd5d7b861b7fb0662898e76e76c21472"
+          },
+          "packages/core/src/state.ts": {
+            "sha256": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f",
+            "blob": "23c28110fb5d45c29a430d4685a7888278976ae5"
+          },
+          "packages/core/src/context.ts": {
+            "sha256": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+            "blob": "5c0b015319482d9bfa4772f04721a14608760dad"
+          },
+          "packages/core/src/a11y.ts": {
+            "sha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+            "blob": "fcd467d6218f61aa38485193d6c9f54318a361d4"
+          },
+          "packages/core/src/focus.ts": {
+            "sha256": "1d9b84a5fb1e58187ccf7e3a90bf66c3d270e4c0f610b7c784d7b3d75cef7941",
+            "blob": "bc4aa539f34dfe51647075321fe70e487e28395b"
+          },
+          "packages/core/src/boundary.ts": {
+            "sha256": "41008ba239136e46494041787d6b8ca265fb1cdcf02ccfec0fa7e3396cc6de63",
+            "blob": "ef9face05ce2a81df5743692a11e953b366f9dc6"
+          },
+          "packages/core/src/hit-participation.ts": {
+            "sha256": "d2e293f4887dc8d2717f8f7858e07fd95d5906706d7f40e012d8c13ef5f93a43",
+            "blob": "d6e034ac1c08cfebb63c8a0e0307ecbaacc78a7d"
+          },
+          "packages/core/src/overlay.ts": {
+            "sha256": "020ed59cd9fe99ed3ece6a9e48b3f702b2449cace10ba1d289fca4b3924405d2",
+            "blob": "a41e9a0fc18e339af7941e54eaaec6316d65eadc"
+          },
+          "packages/core/src/positioning.ts": {
+            "sha256": "d0336ed3c5ecf5ac1082116029374443ece6e5db746ad2f73d60d375097265d4",
+            "blob": "4a33fbfaa4d024c6a201b582aa649357d1984707"
+          },
+          "packages/core/src/scroll.ts": {
+            "sha256": "7baf541113e190a230ab5b80ae59844b35705e7c49698440d23870d4b5729c79",
+            "blob": "815a6563e21dbf6d49c07de8ce0f04f32a365fe6"
+          },
+          "packages/core/src/move.ts": {
+            "sha256": "4fc461f2f14b893649b3e6f34a42edf24fe65c54e70a31e5269625586e698d30",
+            "blob": "8db67f37b54d8c48dbf71def8ae2ce208cb410d6"
+          },
+          "packages/core/src/collection.ts": {
+            "sha256": "a4a451c037b2114c7f9c94c814c2f09abc584890e24004d55e8b49fe8792c4bc",
+            "blob": "4f055258656fece360b4c1f5285276aa2526bca2"
+          },
+          "packages/core/src/delay.ts": {
+            "sha256": "b2111d833c7d46e48e06a4816eb1b8638afccb1b98cd630b1e36aea611b8dbfe",
+            "blob": "e3feb8e3d771aa4c41f4cf1a7ddf0be6c41185e5"
+          },
+          "packages/core/src/text-control.ts": {
+            "sha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+            "blob": "9639fd2c82cee28d8d8c7c85a0569cec5bb26677"
+          },
+          "packages/core/src/caps/token.ts": {
+            "sha256": "f1e92dece196a380477006d905f5b2abc528f8eba41caa7aeaee1edf88e9df79",
+            "blob": "63ad39e723c724fb30ad25c83775e6672f99dfdf"
+          },
+          "packages/core/src/caps/host.ts": {
+            "sha256": "b2542e965a6c0f548003662f931b505f063118cd4036cfbabf27767462e9e81d",
+            "blob": "002173ba9da01775590c00937d868180950355f8"
+          },
+          "packages/core/src/caps/index.ts": {
+            "sha256": "a0833fa73b44034da91bff352029f01181427cdb21fdc3be50fdbf7bafa387ef",
+            "blob": "a5ea97b480b78043bed8741059e49be6f29b8485"
+          },
+          "packages/core/src/image-view.ts": {
+            "sha256": "3a6df9612b0982a50ec02d2544342dc88d431ea91a49d5207704cbc723a18673",
+            "blob": "d7bbb6a1697b737d2c1fc7a535f07902aac26740"
+          },
+          "packages/core/src/control-label.ts": {
+            "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6",
+            "blob": "12ac5bb0c2b9c720bd305ea1e135fa9b5548b1e1"
+          },
+          "packages/core/src/material.ts": {
+            "sha256": "28b285b8a0347fb3fdebfec9b3eebe0002f48a6817559dd9d9ce08f10eb1f78c",
+            "blob": "0a44bacc2f46b7fa3b48a35e8ebcf90b964a9d9f"
+          },
+          "packages/core/src/axis-input.ts": {
+            "sha256": "d8e836c770dacb40e2fe3d98c028a35be24648152b862f188d7409e0d53de0a0",
+            "blob": "c0adb122871b7eb42ee38cd0b12e050e24b5b283"
+          },
+          "packages/core/src/context-menu-input.ts": {
+            "sha256": "0c276fd43a01dd4539284e1e0242d71695c122a1f6b16acdf2f8144c6da36da5",
+            "blob": "33e876b2ff3987a671395055bb38b26cd1a0269a"
+          },
+          "packages/core/src/native-link.ts": {
+            "sha256": "3b9b67e934ff43b09bdd01c0c208a9fcd975d02ce0f36f842cf07844e6ad29c4",
+            "blob": "b739e62ec353c8496e30782c54a1cc488f45bd7e"
+          },
+          "packages/core/src/resident-motion.ts": {
+            "sha256": "11cda0d9f4490745959ce1f5365965b9613c4d95cef22cb97494f9518abbc909",
+            "blob": "a49f85ef907da055ab4a1a6810d899b8101b96e6"
+          },
+          "packages/core/src/presence-presentation.ts": {
+            "sha256": "8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398",
+            "blob": "befcce3e43ec967f3358d3c7c89feaadab0daa05"
+          },
+          "packages/core/src/index.ts": {
+            "sha256": "f52052991bb9960ed6af61908ee8cdbfd1459e71193b45d545354d7daaebd024",
+            "blob": "966968b8fc399f7c391e51a892b32c496eb5609b"
+          },
+          "packages/adapters/base/src/material/style.ts": {
+            "sha256": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+            "blob": "6f677310e3829889afc038c726228bc3e19ec286"
+          },
+          "packages/adapters/base/src/material/style-tint-profile.ts": {
+            "sha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+            "blob": "d84b4869afdc86fae962801b46a18579ed1daf47"
+          },
+          "packages/adapters/base/src/material/prefilter.ts": {
+            "sha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+            "blob": "abfd224e81eb33994f167ab789729de445d2afaf"
+          },
+          "packages/adapters/base/src/material/program.ts": {
+            "sha256": "1f3da22261d3a1a2c295ecd6adfc1983928730f8467c33fe23ec60eee2a48115",
+            "blob": "82007f149b28119767ba441605319e50432234ae"
+          }
+        }
+      },
+      {
+        "label": "after",
+        "sha": "a514f3a3b1ea2f9087351a97d9b3c3f67a715df0",
+        "tree": "c41eba853ddebc3d6c8e848dab03c237b0420cb1",
+        "bundleSha256": "c94814e7b9828649ff435e1c769f9c38cb8ea04160966325f7f45b2b973d3be1",
+        "inputs": {
+          "packages/adapters/base/src/material/liquidgl-kernel.generated.ts": {
+            "sha256": "61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44",
+            "blob": "63543476cd7cc3f35556b71e94b81d421871e222"
+          },
+          "packages/adapters/base/src/material/contact-profile.ts": {
+            "sha256": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+            "blob": "d84b08103e2e61c4437a8f8a82f4dde068063db5"
+          },
+          "packages/core/src/handles.ts": {
+            "sha256": "1136fa1f99728541ba9fd2bd1c5987bac675e505d65e4272dac1a397d487b6a5",
+            "blob": "15ef2f2677a037a2091b83c3c37973487ea89c8e"
+          },
+          "packages/core/src/spec/feedback/placeholder.ts": {
+            "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052",
+            "blob": "dd90ff5e5f46517d375ccf2b147c0885b436cb71"
+          },
+          "packages/core/src/spec/feedback/application-role.ts": {
+            "sha256": "4dcbb148476982d560f1957bb5cc49f4e53fc9cdb0027b2b14681d647711abe1",
+            "blob": "e138cffe82feae1480bd4fd7f0e5234d6b7820d4"
+          },
+          "packages/core/src/spec/feedback/semantic-merge.ts": {
+            "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+            "blob": "2000e3fb91fd0f2f40fef252105facb52b774993"
+          },
+          "packages/core/src/spec/feedback/tokens.ts": {
+            "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3",
+            "blob": "3d8eb3e1f9af9eeda621e25ce9f1ffdad80a5804"
+          },
+          "packages/core/src/spec/feedback/root-effect.ts": {
+            "sha256": "38c07aca4122c82f2cb0ac5dac470e52c784a1f2553d99f036a5684d5601cdbb",
+            "blob": "eac47be3da2e5573c9bfd94abc976fea0fc13722"
+          },
+          "packages/core/src/internal.ts": {
+            "sha256": "96c57e2fc6a68a197118b0f5143de1415423bd5fb8c86ab42994bc8a7d4b1855",
+            "blob": "66e6dc82f121e46da9e91069883abab326665cd6"
+          },
+          "packages/core/src/prototype.ts": {
+            "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc",
+            "blob": "98f09837478e1cdb668a88f826a31792f42c08b1"
+          },
+          "packages/core/src/anatomy.ts": {
+            "sha256": "7223692e13cd0374df56bd0a4c00fc5f37ef8b10ef6e97e10fc1aaa8960ea5aa",
+            "blob": "9ad879e3560ddb8d00ad2808532c0033b3fd40cd"
+          },
+          "packages/core/src/spec/feedback/recorder.ts": {
+            "sha256": "d0622791924858f06da45c936bf847752ab1451a2adf2f9539cafef4f8229edb",
+            "blob": "bb99d51b1606d96bdb41177551363e0ab8757d12"
+          },
+          "packages/core/src/spec/feedback/style.ts": {
+            "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc",
+            "blob": "cc3fd2b507de4e9b2d87268dc77b28224cc6760f"
+          },
+          "packages/core/src/spec/feedback/index.ts": {
+            "sha256": "5615a1d8614eafa79cd3c245317d433208f81262bc2bf19d153e460f5d1105a3",
+            "blob": "9d4f5ba12ec60cabe96843dbe21c834034d05ddc"
+          },
+          "packages/core/src/spec/template.ts": {
+            "sha256": "4e2e9f13e9a273ad42140591bfa43d4bb0204578bdc40d95b596146bc34de7f4",
+            "blob": "f4a469c3c60548a2081b99d1047636b8bba676eb"
+          },
+          "packages/core/src/spec/owned-template-blueprint.ts": {
+            "sha256": "bf0308e95a26d83cdc730e2a3b0e29c9557da8eaa658de9a99ac9b27a2cb332b",
+            "blob": "0bd2e688b08006aab57931aeaa52373dbd762558"
+          },
+          "packages/core/src/spec/index.ts": {
+            "sha256": "24f03a4f1c9ea9b526a2defa35239fc920e34d2b48e41c106f409f1167694bb3",
+            "blob": "1a08c1367b78a7ae75d311525fa6d1fbbe1f990f"
+          },
+          "packages/core/src/effects/types.ts": {
+            "sha256": "dcaeed5ba405406d18ad15e7c86e9a1f76fa2e988b719b5f733e7b6fed75c471",
+            "blob": "871a3a298d5517b797da2a6f60a3089fe1ddbb26"
+          },
+          "packages/core/src/effects/index.ts": {
+            "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+            "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+          },
+          "packages/core/src/module/types.ts": {
+            "sha256": "07feee9d49bd7ae7e78cf2329edb6ded3d8b909c9a4c261ae8fc04df26a912df",
+            "blob": "1432584f5e7bd6af3fc79d2869d9ee0f25fae6e8"
+          },
+          "packages/core/src/module/index.ts": {
+            "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5",
+            "blob": "fcb073fefcd6bebc8afd726f830e66828ebc5e90"
+          },
+          "packages/core/src/errors/codes.ts": {
+            "sha256": "1e35e7e6a995ef0b484ea4fb3852f2aaa8579340316f15e27ff4d048d567268f",
+            "blob": "c9aa31ad8d8d163f0b9f24ede17a260e014347a9"
+          },
+          "packages/core/src/errors/index.ts": {
+            "sha256": "652c62a961d7e676deda59136735193f362515d55132038ea572724e4b3f4b9d",
+            "blob": "6492fac9dd5d7b861b7fb0662898e76e76c21472"
+          },
+          "packages/core/src/state.ts": {
+            "sha256": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f",
+            "blob": "23c28110fb5d45c29a430d4685a7888278976ae5"
+          },
+          "packages/core/src/context.ts": {
+            "sha256": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6",
+            "blob": "5c0b015319482d9bfa4772f04721a14608760dad"
+          },
+          "packages/core/src/a11y.ts": {
+            "sha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+            "blob": "fcd467d6218f61aa38485193d6c9f54318a361d4"
+          },
+          "packages/core/src/focus.ts": {
+            "sha256": "1d9b84a5fb1e58187ccf7e3a90bf66c3d270e4c0f610b7c784d7b3d75cef7941",
+            "blob": "bc4aa539f34dfe51647075321fe70e487e28395b"
+          },
+          "packages/core/src/boundary.ts": {
+            "sha256": "41008ba239136e46494041787d6b8ca265fb1cdcf02ccfec0fa7e3396cc6de63",
+            "blob": "ef9face05ce2a81df5743692a11e953b366f9dc6"
+          },
+          "packages/core/src/hit-participation.ts": {
+            "sha256": "d2e293f4887dc8d2717f8f7858e07fd95d5906706d7f40e012d8c13ef5f93a43",
+            "blob": "d6e034ac1c08cfebb63c8a0e0307ecbaacc78a7d"
+          },
+          "packages/core/src/overlay.ts": {
+            "sha256": "020ed59cd9fe99ed3ece6a9e48b3f702b2449cace10ba1d289fca4b3924405d2",
+            "blob": "a41e9a0fc18e339af7941e54eaaec6316d65eadc"
+          },
+          "packages/core/src/positioning.ts": {
+            "sha256": "d0336ed3c5ecf5ac1082116029374443ece6e5db746ad2f73d60d375097265d4",
+            "blob": "4a33fbfaa4d024c6a201b582aa649357d1984707"
+          },
+          "packages/core/src/scroll.ts": {
+            "sha256": "7baf541113e190a230ab5b80ae59844b35705e7c49698440d23870d4b5729c79",
+            "blob": "815a6563e21dbf6d49c07de8ce0f04f32a365fe6"
+          },
+          "packages/core/src/move.ts": {
+            "sha256": "4fc461f2f14b893649b3e6f34a42edf24fe65c54e70a31e5269625586e698d30",
+            "blob": "8db67f37b54d8c48dbf71def8ae2ce208cb410d6"
+          },
+          "packages/core/src/collection.ts": {
+            "sha256": "a4a451c037b2114c7f9c94c814c2f09abc584890e24004d55e8b49fe8792c4bc",
+            "blob": "4f055258656fece360b4c1f5285276aa2526bca2"
+          },
+          "packages/core/src/delay.ts": {
+            "sha256": "b2111d833c7d46e48e06a4816eb1b8638afccb1b98cd630b1e36aea611b8dbfe",
+            "blob": "e3feb8e3d771aa4c41f4cf1a7ddf0be6c41185e5"
+          },
+          "packages/core/src/text-control.ts": {
+            "sha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+            "blob": "9639fd2c82cee28d8d8c7c85a0569cec5bb26677"
+          },
+          "packages/core/src/caps/token.ts": {
+            "sha256": "f1e92dece196a380477006d905f5b2abc528f8eba41caa7aeaee1edf88e9df79",
+            "blob": "63ad39e723c724fb30ad25c83775e6672f99dfdf"
+          },
+          "packages/core/src/caps/host.ts": {
+            "sha256": "b2542e965a6c0f548003662f931b505f063118cd4036cfbabf27767462e9e81d",
+            "blob": "002173ba9da01775590c00937d868180950355f8"
+          },
+          "packages/core/src/caps/index.ts": {
+            "sha256": "a0833fa73b44034da91bff352029f01181427cdb21fdc3be50fdbf7bafa387ef",
+            "blob": "a5ea97b480b78043bed8741059e49be6f29b8485"
+          },
+          "packages/core/src/image-view.ts": {
+            "sha256": "3a6df9612b0982a50ec02d2544342dc88d431ea91a49d5207704cbc723a18673",
+            "blob": "d7bbb6a1697b737d2c1fc7a535f07902aac26740"
+          },
+          "packages/core/src/control-label.ts": {
+            "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6",
+            "blob": "12ac5bb0c2b9c720bd305ea1e135fa9b5548b1e1"
+          },
+          "packages/core/src/material.ts": {
+            "sha256": "28b285b8a0347fb3fdebfec9b3eebe0002f48a6817559dd9d9ce08f10eb1f78c",
+            "blob": "0a44bacc2f46b7fa3b48a35e8ebcf90b964a9d9f"
+          },
+          "packages/core/src/axis-input.ts": {
+            "sha256": "d8e836c770dacb40e2fe3d98c028a35be24648152b862f188d7409e0d53de0a0",
+            "blob": "c0adb122871b7eb42ee38cd0b12e050e24b5b283"
+          },
+          "packages/core/src/context-menu-input.ts": {
+            "sha256": "0c276fd43a01dd4539284e1e0242d71695c122a1f6b16acdf2f8144c6da36da5",
+            "blob": "33e876b2ff3987a671395055bb38b26cd1a0269a"
+          },
+          "packages/core/src/native-link.ts": {
+            "sha256": "3b9b67e934ff43b09bdd01c0c208a9fcd975d02ce0f36f842cf07844e6ad29c4",
+            "blob": "b739e62ec353c8496e30782c54a1cc488f45bd7e"
+          },
+          "packages/core/src/resident-motion.ts": {
+            "sha256": "11cda0d9f4490745959ce1f5365965b9613c4d95cef22cb97494f9518abbc909",
+            "blob": "a49f85ef907da055ab4a1a6810d899b8101b96e6"
+          },
+          "packages/core/src/presence-presentation.ts": {
+            "sha256": "8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398",
+            "blob": "befcce3e43ec967f3358d3c7c89feaadab0daa05"
+          },
+          "packages/core/src/index.ts": {
+            "sha256": "f52052991bb9960ed6af61908ee8cdbfd1459e71193b45d545354d7daaebd024",
+            "blob": "966968b8fc399f7c391e51a892b32c496eb5609b"
+          },
+          "packages/adapters/base/src/material/style.ts": {
+            "sha256": "03d53646813af2ede2e4bf12f4412976b51fc673e2e03935aecbb9b339953e1c",
+            "blob": "6f677310e3829889afc038c726228bc3e19ec286"
+          },
+          "packages/adapters/base/src/material/style-tint-profile.ts": {
+            "sha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+            "blob": "d84b4869afdc86fae962801b46a18579ed1daf47"
+          },
+          "packages/adapters/base/src/material/prefilter.ts": {
+            "sha256": "88532e51a79b27178f8949fd3542b2c33e6d55dd0cce445d5b261ce0a3d4f09f",
+            "blob": "abfd224e81eb33994f167ab789729de445d2afaf"
+          },
+          "packages/adapters/base/src/material/program.ts": {
+            "sha256": "25706f5254d6f6d6c31413d53baf7b46aafdd15c463648ccdf48ce0031ffa5b2",
+            "blob": "5a7db4c5701e9599c2d02dfc8ca60e807b298358"
+          }
+        }
+      }
+    ],
+    "evidence": [
+      {
+        "label": "before",
+        "first": {
+          "success": true,
+          "imageSha256": "7b307ac0e6380532ab07c6456bdd8a70682e2e9954ccf5bd9e5d30e2389d541b",
+          "imageSize": {
+            "width": 64,
+            "height": 32
+          },
+          "gpuPreparations": 1
+        },
+        "second": {
+          "success": false,
+          "error": "Error: gpu-prefilter-failed",
+          "resources": {
+            "renders": 1,
+            "programBuilds": 2,
+            "sourceUploads": 1,
+            "sourcePreparations": 1,
+            "sourcePreparationMilliseconds": 11.700000000011642,
+            "sourcePreparationCacheHits": 0,
+            "cpuSourcePreparations": 0,
+            "cpuSourcePreparationMilliseconds": 0,
+            "gpuSourcePreparations": 1,
+            "gpuSourcePreparationSubmitMilliseconds": 11.700000000011642,
+            "prefilterProgramBuilds": 2,
+            "readbackAllocations": 1,
+            "readbackMilliseconds": 92.69999999995343,
+            "contrastMilliseconds": 0.7000000000116415,
+            "renderMilliseconds": 181.5,
+            "encodeMilliseconds": 0.7999999999883585,
+            "sourcePreparationCacheEntries": 0,
+            "sourcePreparationCacheBytes": 0,
+            "sourcePreparationCpuCacheBytes": 0,
+            "sourcePreparationGpuCacheBytes": 0
+          }
+        },
+        "trace": [
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": 1
+          },
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": 2
+          },
+          {
+            "phase": "clear",
+            "call": "deleteProgram",
+            "program": 1
+          },
+          {
+            "phase": "clear",
+            "call": "deleteProgram",
+            "program": 2
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": 2
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": 3
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": 2
+          },
+          {
+            "phase": "second",
+            "call": "deleteProgram",
+            "program": 3
+          },
+          {
+            "phase": "second",
+            "call": "deleteProgram",
+            "program": 4
+          }
+        ],
+        "errors": [
+          {
+            "phase": "second",
+            "code": 1282,
+            "afterCall": 8
+          }
+        ],
+        "disposalError": null,
+        "frame": {
+          "sourceWidth": 416,
+          "sourceHeight": 161,
+          "sourceBytes": 267904,
+          "geometry": {
+            "width": 64,
+            "height": 32,
+            "radius": 16,
+            "dpr": 1,
+            "bounds": [
+              0,
+              0,
+              1,
+              1
+            ]
+          },
+          "tint": "style-fill",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "foreground": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "afterClear": {
+          "renders": 1,
+          "programBuilds": 1,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "sourcePreparationMilliseconds": 11.700000000011642,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 1,
+          "gpuSourcePreparationSubmitMilliseconds": 11.700000000011642,
+          "prefilterProgramBuilds": 1,
+          "readbackAllocations": 1,
+          "readbackMilliseconds": 92.69999999995343,
+          "contrastMilliseconds": 0.7000000000116415,
+          "renderMilliseconds": 181.5,
+          "encodeMilliseconds": 0.7999999999883585,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0
+        },
+        "lastProgramUseAfterClear": 2,
+        "afterDispose": {
+          "renders": 1,
+          "programBuilds": 2,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "sourcePreparationMilliseconds": 11.700000000011642,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 1,
+          "gpuSourcePreparationSubmitMilliseconds": 11.700000000011642,
+          "prefilterProgramBuilds": 2,
+          "readbackAllocations": 1,
+          "readbackMilliseconds": 92.69999999995343,
+          "contrastMilliseconds": 0.7000000000116415,
+          "renderMilliseconds": 181.5,
+          "encodeMilliseconds": 0.7999999999883585,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0
+        },
+        "reboundRetiredProgram": true
+      },
+      {
+        "label": "after",
+        "first": {
+          "success": true,
+          "imageSha256": "7b307ac0e6380532ab07c6456bdd8a70682e2e9954ccf5bd9e5d30e2389d541b",
+          "imageSize": {
+            "width": 64,
+            "height": 32
+          },
+          "gpuPreparations": 1
+        },
+        "second": {
+          "success": true,
+          "imageSha256": "7b307ac0e6380532ab07c6456bdd8a70682e2e9954ccf5bd9e5d30e2389d541b",
+          "imageSize": {
+            "width": 64,
+            "height": 32
+          },
+          "gpuPreparations": 2
+        },
+        "trace": [
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": 1
+          },
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "first",
+            "call": "useProgram",
+            "program": 2
+          },
+          {
+            "phase": "clear",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "clear",
+            "call": "deleteProgram",
+            "program": 1
+          },
+          {
+            "phase": "clear",
+            "call": "deleteProgram",
+            "program": 2
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": 3
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "second",
+            "call": "useProgram",
+            "program": 4
+          },
+          {
+            "phase": "dispose",
+            "call": "useProgram",
+            "program": null
+          },
+          {
+            "phase": "dispose",
+            "call": "deleteProgram",
+            "program": 3
+          },
+          {
+            "phase": "dispose",
+            "call": "deleteProgram",
+            "program": 4
+          }
+        ],
+        "errors": [],
+        "disposalError": null,
+        "frame": {
+          "sourceWidth": 416,
+          "sourceHeight": 161,
+          "sourceBytes": 267904,
+          "geometry": {
+            "width": 64,
+            "height": 32,
+            "radius": 16,
+            "dpr": 1,
+            "bounds": [
+              0,
+              0,
+              1,
+              1
+            ]
+          },
+          "tint": "style-fill",
+          "fill": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "foreground": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "afterClear": {
+          "renders": 1,
+          "programBuilds": 1,
+          "sourceUploads": 1,
+          "sourcePreparations": 1,
+          "sourcePreparationMilliseconds": 9.700000000011642,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 1,
+          "gpuSourcePreparationSubmitMilliseconds": 9.700000000011642,
+          "prefilterProgramBuilds": 1,
+          "readbackAllocations": 1,
+          "readbackMilliseconds": 77.30000000004657,
+          "contrastMilliseconds": 0.6999999999534339,
+          "renderMilliseconds": 142.59999999997672,
+          "encodeMilliseconds": 0.5,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0
+        },
+        "lastProgramUseAfterClear": null,
+        "afterDispose": {
+          "renders": 2,
+          "programBuilds": 2,
+          "sourceUploads": 2,
+          "sourcePreparations": 2,
+          "sourcePreparationMilliseconds": 15.099999999976717,
+          "sourcePreparationCacheHits": 0,
+          "cpuSourcePreparations": 0,
+          "cpuSourcePreparationMilliseconds": 0,
+          "gpuSourcePreparations": 2,
+          "gpuSourcePreparationSubmitMilliseconds": 15.099999999976717,
+          "prefilterProgramBuilds": 2,
+          "readbackAllocations": 2,
+          "readbackMilliseconds": 151.90000000002328,
+          "contrastMilliseconds": 0.6999999999534339,
+          "renderMilliseconds": 273.19999999995343,
+          "encodeMilliseconds": 1,
+          "sourcePreparationCacheEntries": 0,
+          "sourcePreparationCacheBytes": 0,
+          "sourcePreparationCpuCacheBytes": 0,
+          "sourcePreparationGpuCacheBytes": 0
+        },
+        "reboundRetiredProgram": false
+      }
+    ],
+    "limitations": [
+      "Untimed program-lifetime control on one real browser/renderer, not a performance or physical display claim.",
+      "Only application getError calls are observed; no extra call consumes the GL error."
+    ]
+  },
+  "screenshotComparison": [
+    {
+      "name": "matched-1000-optical.png",
+      "sameBytes": true,
+      "baselineSha256": "5084ce9b029a5c2e2def42c4fee5c817cb09e38d4325659875d0225c43bfbcdf",
+      "candidateSha256": "5084ce9b029a5c2e2def42c4fee5c817cb09e38d4325659875d0225c43bfbcdf"
+    },
+    {
+      "name": "original-1440-layout.png",
+      "sameBytes": false,
+      "baselineSha256": "87991728aede0c721ea687e46f1f40d045b5f4490c304fddd35f504f2ce3e39a",
+      "candidateSha256": "897a29dbe7e4e08de2a81c6d77096c64dbe282a03c21092f6a7c2f8e042b76c9"
+    },
+    {
+      "name": "public-dark-viewport.png",
+      "sameBytes": true,
+      "baselineSha256": "c60918e04c03f70545684f96e5fbb4cca5c743e7027b066e0289c65e4d76c384",
+      "candidateSha256": "c60918e04c03f70545684f96e5fbb4cca5c743e7027b066e0289c65e4d76c384"
+    },
+    {
+      "name": "public-dark.png",
+      "sameBytes": true,
+      "baselineSha256": "c4f4f1196381a80a56c76b30f4e9a01595c7a145acc7d9362afdcec97efc4593",
+      "candidateSha256": "c4f4f1196381a80a56c76b30f4e9a01595c7a145acc7d9362afdcec97efc4593"
+    },
+    {
+      "name": "public-light-viewport.png",
+      "sameBytes": true,
+      "baselineSha256": "3df7d650f40dbe8ac0b36a324bf8e20869c3ea8238b6373359334a7a775aea67",
+      "candidateSha256": "3df7d650f40dbe8ac0b36a324bf8e20869c3ea8238b6373359334a7a775aea67"
+    },
+    {
+      "name": "public-light.png",
+      "sameBytes": true,
+      "baselineSha256": "32194aaa367b4ee6944c085ddbfba84fdc3ed546e0a97506c7ab38d448e66b86",
+      "candidateSha256": "32194aaa367b4ee6944c085ddbfba84fdc3ed546e0a97506c7ab38d448e66b86"
+    },
+    {
+      "name": "public-small-viewport.png",
+      "sameBytes": true,
+      "baselineSha256": "c35ed79fa8e52b7ff83b1b7e095e5e8159c739cbc4abcf45e7b83fc797b7679c",
+      "candidateSha256": "c35ed79fa8e52b7ff83b1b7e095e5e8159c739cbc4abcf45e7b83fc797b7679c"
+    },
+    {
+      "name": "public-small.png",
+      "sameBytes": true,
+      "baselineSha256": "654ac393f51a35c79d34dc28a9e91ad46cfe408b7e7c61942da0cb70e6c00298",
+      "candidateSha256": "654ac393f51a35c79d34dc28a9e91ad46cfe408b7e7c61942da0cb70e6c00298"
+    },
+    {
+      "name": "scene-dark-on-light.png",
+      "sameBytes": false,
+      "baselineSha256": "6bf173536e76ad38cdf31cf5c0a0b76c66d7eb7c423d7c20b981a499e25f17a4",
+      "candidateSha256": "14fbc1b44823ef4b37ddb8bf163c77a87155a7ac19210bcf47fc4724864e6ea0"
+    },
+    {
+      "name": "scene-light-on-dark.png",
+      "sameBytes": false,
+      "baselineSha256": "d86dff4f2ffe25d7e27435e2c03d5577a2ff1dc18a79871f3d7390f3bed467e4",
+      "candidateSha256": "a5f9c97bdf78ef13ba2e6a1a25fc736817ebea094ad160839e3310058b5f508d"
+    },
+    {
+      "name": "smoke-react-held.png",
+      "sameBytes": true,
+      "baselineSha256": "6f22fabfa51e5ccaca89607a0a9fe46b8200ce6287a45676875c0182be396a79",
+      "candidateSha256": "6f22fabfa51e5ccaca89607a0a9fe46b8200ce6287a45676875c0182be396a79"
+    },
+    {
+      "name": "smoke-vue-held.png",
+      "sameBytes": true,
+      "baselineSha256": "68cbef30675341f103112a2402055985291e33d1a212cf6d0132d19f93161db6",
+      "candidateSha256": "68cbef30675341f103112a2402055985291e33d1a212cf6d0132d19f93161db6"
+    },
+    {
+      "name": "smoke-vue2-held.png",
+      "sameBytes": true,
+      "baselineSha256": "2c404f2aa2dd5623461bb43182f551a467ec4e0c11fb9b14e568f6f3cff9e973",
+      "candidateSha256": "2c404f2aa2dd5623461bb43182f551a467ec4e0c11fb9b14e568f6f3cff9e973"
+    },
+    {
+      "name": "smoke-wc-held.png",
+      "sameBytes": true,
+      "baselineSha256": "07bb3dde0d240e03391765140b673e9efb080f79434b27760d7146ed4489f47e",
+      "candidateSha256": "07bb3dde0d240e03391765140b673e9efb080f79434b27760d7146ed4489f47e"
+    }
+  ]
+}
