@@ -16,6 +16,37 @@ function checked(source: string): PrototypeIR {
 }
 
 describe('ordinary functions and authored hook lifecycles', () => {
+  it('captures explicitly exposed Focus facts under their stable observed names', () => {
+    const source = `${core}
+      import {asFocusable} from '@proto.ui/hooks';
+      const child=defineAsHook({name:'child',setup(def){def.state.bool('privateFlag',true);}});
+      const focusFacts=defineAsHook({name:'focus-facts',setup(def){
+        child();
+        const {focusVisible: visible}=asFocusable();
+        def.expose.state('publicVisibility',visible);
+      }});
+      export default definePrototype({name:'consumer',setup(def){
+        const result=focusFacts();
+        const {focusVisible}=result.stateHandles;
+        const byName=result.getState('focusVisible');
+        def.expose.method('read',()=>byName?.get() ?? focusVisible.get());
+      }});`;
+    const capture = checked(source).hooks.find((hook) => hook.name === 'focus-facts')?.capture;
+    expect(capture?.states).toEqual([
+      { name: 'focusVisible', type: 'observed:boolean', definite: true },
+    ]);
+    expect(capture?.children.map((child) => child.name)).toEqual(['child', 'asFocusable']);
+    for (const write of [
+      'focusVisible.setDefault(true);',
+      'if(byName)byName.setDefault(true);',
+      "def.expose.method('write',()=>focusVisible.set(true));",
+      "def.expose.method('write',()=>byName?.set(true));",
+    ]) {
+      const rejected = parsePrototype(source.replace("def.expose.method('read'", `${write}def.expose.method('read'`));
+      expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
+    }
+  });
+
   it('reads definite named states through a readonly borrowed capture record', () => {
     const ir = checked(`${core}
       const install=defineAsHook({name:'named-state',setup(def){const flag=def.state.bool('flag',true);}});

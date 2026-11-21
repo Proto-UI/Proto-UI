@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPortalConcealBarrier } from '../src/portal-conceal';
-import { createWebComponentPortalMount, isWebComponentPortaled } from '../src/portal-mount';
+import {
+  abandonWebComponentPortalProjection,
+  createWebComponentPortalMount,
+  isWebComponentPortaled,
+} from '../src/portal-mount';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import { getLogicalParent, subscribeLogicalTriggerSurface } from '../src/platform/instance-tree';
 import { dialogRoot, dialogContent, dialogClose } from '../../../prototypes/base/src/dialog';
@@ -41,9 +45,10 @@ describe('WC portal conceal rendering barrier', () => {
   it('does not add a frame dependency to ordinary or non-visible owners', () => {
     const barrier = createPortalConcealBarrier(host);
     expect(barrier.wait()).toBeNull();
-    portal.mount(host);
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    portal.mount(host);
     expect(barrier.wait()).toBeNull();
+    expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
     expect(frames.size).toBe(0);
   });
   it('separates conceal from projection revocation by a rendering opportunity', async () => {
@@ -68,6 +73,11 @@ describe('WC portal conceal rendering barrier', () => {
     'cancels on a newer intent or terminal disposal (after first frame=%s)',
     async (firstFrame) => {
       portal.mount(host);
+      // Finish projection reveal before measuring conceal's own cancellation.
+      frame();
+      frame();
+      expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      expect(frames.size).toBe(0);
       const barrier = createPortalConcealBarrier(host);
       const done = vi.fn();
       const wait = barrier.wait()!.then(done);
@@ -85,11 +95,54 @@ describe('WC portal conceal rendering barrier', () => {
     const barrier = createPortalConcealBarrier(host);
     const wait = barrier.wait()!;
     frame();
+    const stale = [...frames.values()][0]!;
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
     document.dispatchEvent(new Event('visibilitychange'));
     await wait;
+    expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+    expect(frames.size).toBe(0);
+    stale(0);
     expect(frames.size).toBe(0);
   });
+
+  it.each([false, true])(
+    'cancels a revoked reveal without affecting its replacement (after first frame=%s)',
+    (firstFrame) => {
+      portal.mount(host);
+      expect(host.getAttribute('data-pui-view-revealing')).toBe('portal');
+      if (firstFrame) frame();
+      const stale = [...frames.values()][0]!;
+
+      portal.unmount(host);
+      expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      expect(frames.size).toBe(0);
+
+      portal.mount(host);
+      stale(0);
+      expect(host.getAttribute('data-pui-view-revealing')).toBe('portal');
+      expect(frames.size).toBe(1);
+      frame();
+      frame();
+      expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      expect(frames.size).toBe(0);
+    }
+  );
+
+  it.each([false, true])(
+    'cancels pending reveal on terminal projection abandonment (after first frame=%s)',
+    (firstFrame) => {
+      portal.mount(host);
+      if (firstFrame) frame();
+      const stale = [...frames.values()][0]!;
+
+      abandonWebComponentPortalProjection(host);
+      expect(isWebComponentPortaled(host)).toBe(false);
+      expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      expect(frames.size).toBe(0);
+      stale(0);
+      expect(frames.size).toBe(0);
+    }
+  );
 
   it('cancels an in-flight conceal barrier when its owner is adopted', async () => {
     const Owner = AdaptToWebComponent(
@@ -243,6 +296,8 @@ describe('WC portal conceal rendering barrier', () => {
     expect(host.parentElement).toBe(origin);
     expect(Array.from(origin.childNodes)).toEqual([host]);
     expect(isWebComponentPortaled(host)).toBe(false);
+    expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+    expect(frames.size).toBe(0);
   });
 
   it.each([['first'], ['second']] as const)(

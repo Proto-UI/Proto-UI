@@ -510,7 +510,22 @@ fn expose_key(owner:&OwnerRef,key:Value)->String{
     let key=key.text();if key.is_empty(){throw_error("EXPOSE_KEY_INVALID","Expose key must be nonempty")}
     let owner=owner.borrow();if owner.exposes.contains_key(&key)||owner.declared_events.contains(&key){throw_error("EXPOSE_DUPLICATE",&format!("duplicate Expose key: {key}"))}key
 }
-pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,state);Value::Undefined}
+pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{
+    let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);
+    let mut owner=owner_ref.borrow_mut();
+    if let Value::Observed(_,observation)=&state {
+        let name=match *observation {
+            "focus.focused"=>Some("focused"),
+            "focus.visible"=>Some("focusVisible"),
+            "focus.ready"=>Some("focusable"),
+            _=>None,
+        };
+        if let (Some(name),Some(frame))=(name,owner.authored.frames.last_mut()) {
+            frame.states.insert(name.into(),state.clone());
+        }
+    }
+    owner.exposes.insert(key,state);Value::Undefined
+}
 pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,value);Value::Undefined}
 pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);capture_method(&owner_ref,key.clone(),callback.clone());owner_ref.borrow_mut().exposes.insert(key,callback);Value::Undefined}
 pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().declared_events.insert(key);Value::Undefined}
@@ -647,6 +662,7 @@ pub type Drive=Rc<dyn Fn(&mut Window,&mut App)>;
 pub struct NativeTranslation{x:crate::gpui_native_style::Dimension,y:crate::gpui_native_style::Dimension}
 impl NativeTranslation{const ZERO:Self=Self{x:crate::gpui_native_style::Dimension::ZERO,y:crate::gpui_native_style::Dimension::ZERO};fn is_zero(self)->bool{self.x==Self::ZERO.x&&self.y==Self::ZERO.y}}
 struct TranslatedElement{element:AnyElement,translation:NativeTranslation,owner:Option<OwnerWeak>}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for TranslatedElement{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for TranslatedElement{
     type RequestLayoutState=();type PrepaintState=();
@@ -886,6 +902,7 @@ pub fn restore_window_input(owner:&OwnerRef,focus:&FocusHandle,window:&mut Windo
 // A non-tab-stop dispatch carrier, not the component's authored Focus or Root.
 // Its listeners run only while no actual control owns native keyboard focus.
 struct WindowInput{element:AnyElement,focus:FocusHandle,owner:OwnerWeak}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl IntoElement for WindowInput{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for WindowInput{
     type RequestLayoutState=();type PrepaintState=();

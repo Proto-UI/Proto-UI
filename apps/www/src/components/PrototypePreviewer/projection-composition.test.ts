@@ -1287,7 +1287,7 @@ describe('Website projection composition', () => {
     });
     const projectedIcon = findNode(
       composition.demo,
-      (node) => node.kind === 'proto' && node.prototypeId === 'lucide-icon'
+      (node) => node.kind === 'proto' && node.prototypeId === 'lucide-bold-icon'
     );
     if (projectedIcon.kind !== 'proto' || !projectedIcon.className) {
       throw new Error('Projected Lucide marker classes required.');
@@ -1308,7 +1308,7 @@ describe('Website projection composition', () => {
     expect(svg.getAttribute('data-projection-family')).toBe('shadcn');
     expect(svg.getAttribute('data-projection-runtime')).toBe('react');
     expect(svg.getAttribute('data-projection-generation')).toBe('10');
-    expect(svg.getAttribute('data-projection-prototype')).toBe('lucide-icon');
+    expect(svg.getAttribute('data-projection-prototype')).toBe('lucide-bold-icon');
     expect(svg.style.getPropertyValue('--pui-background')).toBe('#fff');
     expect(svg.style.getPropertyValue('--pui-foreground')).toBe('#111');
 

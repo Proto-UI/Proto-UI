@@ -12,9 +12,9 @@ function countMethodRegistrations(value: unknown, counts: Map<string, number>): 
     value.forEach((child) => countMethodRegistrations(child, counts));
     return;
   }
-  const node = value as Record<string, unknown>;
+  const node = value as ExpressionIR;
   if (node.kind === 'operation' && node.operation === 'expose.method') {
-    const [key] = (node as Extract<ExpressionIR, { kind: 'operation' }>).arguments;
+    const [key] = node.arguments;
     if (key?.kind === 'literal' && typeof key.value === 'string')
       counts.set(key.value, (counts.get(key.value) ?? 0) + 1);
   }

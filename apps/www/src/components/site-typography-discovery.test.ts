@@ -85,23 +85,28 @@ describe('documentation typography discovery ownership', () => {
     expect(label.parentElement).toBe(results);
   });
 
-  it('does not inventory the page for results and actions committed inside a private component', async () => {
-    const { root, article, results, actions } = fixture();
-    await start();
-    const generation = article.dataset.typographyGeneration;
-    const inventoryReads = observeInventory(root);
-    const result = document.createElement('p');
-    result.textContent = 'A private result';
-    const action = document.createElement('button');
-    action.textContent = 'Load more';
-    results.append(result);
-    actions.append(action);
-    await settle();
-    expect(inventoryReads()).toBe(0);
-    expect(article.dataset.typographyGeneration).toBe(generation);
-    expect(result.parentElement).toBe(results);
-    expect(result.hasAttribute('data-typography-owner')).toBe(false);
-  });
+  it.each(['data-pui-root', 'data-previewer-id'])(
+    'does not inventory results and actions committed inside %s',
+    async (boundary) => {
+      const { root, article, island, results, actions } = fixture();
+      island.removeAttribute('data-pui-root');
+      island.setAttribute(boundary, '');
+      await start();
+      const generation = article.dataset.typographyGeneration;
+      const inventoryReads = observeInventory(root);
+      const result = document.createElement('p');
+      result.textContent = 'A private result';
+      const action = document.createElement('button');
+      action.textContent = 'Load more';
+      results.append(result);
+      actions.append(action);
+      await settle();
+      expect(inventoryReads()).toBe(0);
+      expect(article.dataset.typographyGeneration).toBe(generation);
+      expect(result.parentElement).toBe(results);
+      expect(result.hasAttribute('data-typography-owner')).toBe(false);
+    }
+  );
 
   it('does not rescan for an explicit typography marker that remains inside a private component', async () => {
     const { root, article, results } = fixture();
@@ -299,22 +304,45 @@ describe('documentation typography discovery ownership', () => {
     expect(inventoryReads()).toBeGreaterThan(0);
   });
 
-  it('rechecks an outside native candidate when a nested component changes its block-content eligibility', async () => {
-    const { root, flow } = fixture();
-    const paragraph = document.createElement('p');
-    const privateInline = document.createElement('span');
-    privateInline.dataset.puiRoot = '';
-    privateInline.append(document.createElement('div'));
-    paragraph.append(document.createTextNode('Native prefix '), privateInline);
-    flow.append(paragraph);
+  it('still discovers and releases an explicit native status inside a Previewer', async () => {
+    const { root, island } = fixture();
+    island.removeAttribute('data-pui-root');
+    island.dataset.previewerId = 'preview';
     await start();
-    expect(paragraph.hasAttribute('data-typography-owner')).toBe(false);
     const inventoryReads = observeInventory(root);
-    privateInline.replaceChildren(document.createTextNode('Inline private value'));
-    await vi.waitFor(() => expect(paragraph.dataset.typographyRuntime).toBe('wc'));
+    const status = document.createElement('output');
+    status.dataset.homeDemoStatus = '';
+    status.dataset.siteTypography = 'label';
+    const source = document.createTextNode('Native status');
+    status.append(source);
+    island.append(status);
+    await vi.waitFor(() => expect(status.dataset.typographyRuntime).toBe('wc'));
+    expect(status.querySelector('[data-site-typography-slot]')?.firstChild).toBe(source);
+    status.removeAttribute('data-site-typography');
+    await vi.waitFor(() => expect(status.hasAttribute('data-typography-owner')).toBe(false));
+    expect(status.firstChild).toBe(source);
     expect(inventoryReads()).toBeGreaterThan(0);
-    expect(paragraph.textContent).toBe('Native prefix Inline private value');
   });
+
+  it.each(['data-pui-root', 'data-previewer-id'])(
+    'rechecks an outer paragraph when inline %s changes block eligibility',
+    async (boundary) => {
+      const { root, flow } = fixture();
+      const paragraph = document.createElement('p');
+      const privateInline = document.createElement('span');
+      privateInline.setAttribute(boundary, '');
+      privateInline.append(document.createElement('div'));
+      paragraph.append(document.createTextNode('Native prefix '), privateInline);
+      flow.append(paragraph);
+      await start();
+      expect(paragraph.hasAttribute('data-typography-owner')).toBe(false);
+      const inventoryReads = observeInventory(root);
+      privateInline.replaceChildren(document.createTextNode('Inline private value'));
+      await vi.waitFor(() => expect(paragraph.dataset.typographyRuntime).toBe('wc'));
+      expect(inventoryReads()).toBeGreaterThan(0);
+      expect(paragraph.textContent).toBe('Native prefix Inline private value');
+    }
+  );
 
   it('does not hide source mutations inside Typography own projected slot', async () => {
     const { root, article } = fixture();

@@ -40,6 +40,10 @@ In `vue-source-v1`, an already-issued external State subscription cancellation r
 
 Public callable records require statically known named fields. Portable IR rejects typed index signatures because their dynamic fields have no implemented public projection contract. The opaque `index: unknown` view used by internal `JsonObject` and hook stores remains available inside the checked program and is not a public value contract.
 
+The React DOM source profile admits keyed `def.props.watchRaw(keys, callback)` against its adapter-supplied pre-resolution snapshot, following active `C-PROPS-0012` and `C-PROPS-0013`. Initial hydration is silent; later dispatch compares the union of raw keys with `Object.is`, runs matching raw watchers before resolved watchers, and binds `run.props.*` to that dispatch window. Keys may be undeclared, but raw values do not enter resolved props through this API. The returned cancellation remains setup-only. `props.watchRawAll` and raw-watch admission on other source profiles retain their existing target boundaries. The focused generated React consumer is `test/raw-props-watch-consumer.test.ts`.
+
+Capture metadata identifies owner-local lexical bindings, while reached module helpers and module data retain their independently validated module dependencies. Portable validation derives this distinction from the declaration scope: copying a module helper into a local alias still creates a local capture. It continues to validate every dependency and compare full capture provenance when a FunctionIR object is shared; incomplete supplied local capture metadata or forging a module dependency as a local capture remains invalid. `test/module-helper-capture-boundary.test.ts` covers this private metadata boundary without changing authored input.
+
 ## Source resolution
 
 An authored package publishes its compiler input through the `proto` condition in `package.json` exports. The source loader follows that condition, relative `.proto.ts` imports, aliases and re-exports. It records manifests, resolved files and unresolved lookup candidates so project caching and watch invalidation can detect edits, retargeted exports and a previously missing package becoming available. It does not guess `src` paths from `dist` names or execute a package to discover its definition.
@@ -61,6 +65,8 @@ const written = await writeProjectCompilation(result.value, '/absolute/path/to/o
 if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
 ```
 
+The synthesized authored-hook result exposes `render` as the checked setup render callable or `undefined`. Reading or forwarding this field does not execute the fragment. Callable analysis retains its declaration environment, and serialized IR independently checks the projected type. A void hook setup contributes no render field; returning that missing field from the caller preserves the caller's existing default-render behavior. This compiler slice follows the draft asHook result contracts and does not promote their lifecycle.
+
 ## Host support follows invocation
 
 Creating a closure does not execute its body. The compiler first removes unused values only when their evaluation is proved inert. It then follows known ordinary calls, returned callables, registrations and outward callable values to choose host support. An effectful helper that ignores a callback still executes; transporting that callback does not acquire its host capability.
@@ -68,6 +74,10 @@ Creating a closure does not execute its body. The compiler first removes unused 
 A function value whose body is proved unreachable can still have observable allocation identity. Native JavaScript emission preserves that allocation and arity while omitting the uninvoked body and defaults. Unknown callable edges invalidate this elision proof and retain the checked support conservatively. This is a compile-time decision, not a runtime fallback. Recursive provenance is bounded; analysis exhaustion cannot be treated as proof that a body is dead.
 
 `src/native-support/plan.ts` declares host helper dependencies, initialization resources and release obligations. Canonical templates are specialized by TypeScript binding analysis into ordinary ES modules. Separate ownership modules preserve logical identity when independently generated components require different support closures.
+
+The Web source profiles admit setup-only `asAccessible().part(family, { key })` and structured `relation(kind, { target: { kind: 'part', family, role, key } })` declarations. Source admission and serialized IR validate the nominal Anatomy family and string/State key fields. Reached structured relationships use a shared A11y host service, separate from Anatomy membership: matching requires the identical family, nearest logical root domain, target role and exact non-empty protocol key. Missing or duplicate matches withdraw the source contribution. Key changes, detach, remount and terminal disposal reconcile token leases and host-id reservations without putting host identity into portable state. Linked libraries share this service through the named `part-relationships-v1` support ABI and explicit family imports.
+
+This implements a compiler slice of **draft** `C-A11Y-PART-RELATIONSHIP-0001`; it does not promote that contract or the Collapsible definitions. `test/a11y-part-admission.test.ts`, `test/a11y-part-native.test.ts` and the structured-target case in `test/artifact-linking-consumer.test.ts` define focused source/IR and real generated-output regressions. Their ID/IDREF observations belong to the instance's physical accessibility Root: framework output marks that Root with `data-pui-root`, and a Web Component without a physical-control declaration binds its custom-element host. An authored `r.el(...)` child does not acquire the instance's accessibility identity. Withdrawing the last IDREF token removes its attribute; a later host-authored empty `id` remains a distinct authored value during cleanup. Test source is not an execution receipt. Browser evidence for pre-visibility commit ordering, same-epoch physical replacement, and the full unchanged Shadcn Collapsible consumer remains a separate acceptance boundary. GPUI diagnoses `accessible.part` as unavailable.
 
 Three costs have separate evidence:
 
@@ -86,6 +96,9 @@ The Web artifact-library API publishes a serializable manifest and ordinary gene
 Equal debug names or matching source text do not make two independently owned declarations identical. Two libraries share a declaration only through a resolved import/export edge. Re-exports preserve the original owner; a private declaration remains distinct. Conflicting definitions, cycles in declaration ownership, incompatible support and path collisions are rejected before output mutation.
 
 The library manifest/linker currently covers the Web source artifacts. GPUI's independently generated Rust crates use ordinary Cargo linking and explicit SDK declarations. Those native consumers do not establish support for the Web artifact-library manifest on Rust targets.
+
+An embedding Rust workspace can pass `gpuiDependency: 'workspace'` to the compiler API. The generated component and bundled SDK inherit `[workspace.dependencies].gpui`, so the host and component share native types. This mode uses the GPUI element API with a blanket `IntoElement` implementation and cached path IDs, as in Zed revision `48741fd17d0dec28be6ad664b0a06dc7202086be`. The workspace selects its required GPUI features. With `nativeSdkPath`, generate the shared SDK in the same dependency mode. Standalone generation uses the profile's original pinned GPUI revision.
+Each `gpui-source-v1` output bundles the GPUI SDK as its own `proto-ui-gpui-native` crate. Cargo admits only one package of that name in a workspace, so a consumer with several units emits the SDK once with `proto-compiler emit-gpui-sdk --output <dir>` and compiles every unit with `--native-sdk-path <dir>`. The units then link one SDK crate; its version must match the compiler that produced them.
 
 ## Artifact and SDK compatibility
 

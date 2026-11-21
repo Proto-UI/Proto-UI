@@ -57,6 +57,8 @@ describe('ordinary flow facts are tied to current binding values', () => {
     for (const transport of [
       'const mutable: {value:number}=readonly;',
       'const mutable=readonly as {value:number};',
+      'const mutable=readonly as unknown as {value:number};',
+      'const mutable=(readonly as unknown as Readonly<{value:number}>) as {value:number};',
     ])
       expect(
         parsePrototype(

@@ -978,6 +978,23 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-lucide/icons/scissors');
     registerPrototype('lucide-scissors-icon', mod.default);
   },
+  // Load each glyph only when the preview registry requests its prototype ID.
+  'lucide-bold-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/bold');
+    registerPrototype('lucide-bold-icon', mod.default);
+  },
+  'lucide-italic-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/italic');
+    registerPrototype('lucide-italic-icon', mod.default);
+  },
+  'lucide-underline-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/underline');
+    registerPrototype('lucide-underline-icon', mod.default);
+  },
+  'lucide-strikethrough-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/strikethrough');
+    registerPrototype('lucide-strikethrough-icon', mod.default);
+  },
   'lucide-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);

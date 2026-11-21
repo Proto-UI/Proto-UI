@@ -28,6 +28,41 @@ describe('adapter-base: Web layout readiness', () => {
     expect(fallback).not.toHaveBeenCalled();
   });
 
+  it.each([false, true])(
+    'cancels pending and late frame delivery (after first frame=%s)',
+    (firstFrame) => {
+      const frames = new Map<number, FrameRequestCallback>();
+      let serial = 0;
+      const task = vi.fn();
+      const target = {
+        ownerDocument: {
+          defaultView: {
+            requestAnimationFrame(callback: FrameRequestCallback) {
+              frames.set(++serial, callback);
+              return serial;
+            },
+            cancelAnimationFrame(id: number) {
+              frames.delete(id);
+            },
+          },
+        },
+      } as unknown as Element;
+      const cancel = scheduleAfterWebLayout(target, task, vi.fn());
+      if (firstFrame) {
+        const first = frames.get(1)!;
+        frames.delete(1);
+        first(1);
+      }
+      const stale = [...frames.values()][0]!;
+
+      cancel();
+      expect(frames.size).toBe(0);
+      stale(2);
+      expect(frames.size).toBe(0);
+      expect(task).not.toHaveBeenCalled();
+    }
+  );
+
   it('uses the adapter scheduler when the target realm has no animation frame', () => {
     const task = vi.fn();
     const fallback = vi.fn((callback: () => void) => callback());
@@ -36,5 +71,18 @@ describe('adapter-base: Web layout readiness', () => {
 
     expect(fallback).toHaveBeenCalledTimes(1);
     expect(task).toHaveBeenCalledTimes(1);
+  });
+
+  it('suppresses a cancelled adapter scheduler callback', () => {
+    const task = vi.fn();
+    let queued = () => {};
+    const cancel = scheduleAfterWebLayout(null, task, (callback) => {
+      queued = callback;
+    });
+
+    cancel();
+    queued();
+
+    expect(task).not.toHaveBeenCalled();
   });
 });

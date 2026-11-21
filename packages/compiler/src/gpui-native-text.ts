@@ -261,6 +261,7 @@ fn update_text_viewport(text:&mut TextModule,geometry:&Rc<TextGeometry>,bounds:B
 }
 pub struct NativeTextElement {owner:OwnerWeak,focus:FocusHandle,fill_height:bool}
 impl NativeTextElement {pub fn new(owner:&OwnerRef,focus:&FocusHandle,fill_height:bool)->Self{Self{owner:Rc::downgrade(owner),focus:focus.clone(),fill_height}}}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for NativeTextElement {type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for NativeTextElement {
     type RequestLayoutState=();type PrepaintState=Rc<TextGeometry>;

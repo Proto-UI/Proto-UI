@@ -80,6 +80,71 @@ export function pointerFactsConformance(
     });
   describe(`${name}: public author pointer sample contract`, () => {
     it.each(['host', 'root', 'global', 'press'] as const)(
+      'keeps native keydown routing for setup demand %s',
+      async (demand) => {
+        const calls: string[] = [];
+        const nativeRoot = vi.spyOn(HTMLElement.prototype, 'addEventListener');
+        const nativeWindow = vi.spyOn(window, 'addEventListener');
+        const isBubbleKeydown = (event: string, options?: boolean | AddEventListenerOptions) =>
+          event === 'keydown' &&
+          options !== true &&
+          !(typeof options === 'object' && options.capture);
+        const prototype = definePrototype({
+          name: `keydown-demand-${name}-${++serial}`,
+          setup(def) {
+            def.event.on('host:keydown', () => calls.push('host-root'));
+            def.event.onGlobal('host:keydown', () => calls.push('host-global'));
+            if (demand === 'root') def.event.on('key.down', () => calls.push('root'));
+            if (demand === 'global') def.event.onGlobal('key.down', () => calls.push('global'));
+            if (demand === 'press') def.event.on('press.commit', () => calls.push('press'));
+            return (r) => r.el('span', 'key down');
+          },
+        });
+        try {
+          const mounted = await mount(prototype);
+          try {
+            await mounted.flush();
+            expect(
+              nativeRoot.mock.calls.filter(
+                ([event, , options], index) =>
+                  nativeRoot.mock.contexts[index] === mounted.root &&
+                  isBubbleKeydown(event, options)
+              )
+            ).toHaveLength(demand === 'press' ? 2 : 1);
+            expect(
+              nativeWindow.mock.calls.filter(([event, , options]) =>
+                isBubbleKeydown(event, options)
+              )
+            ).toHaveLength(demand === 'host' ? 1 : 2);
+
+            await mounted.dispatch(
+              mounted.root,
+              new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+            );
+            await mounted.flush();
+            const expected =
+              demand === 'press'
+                ? ['press', 'host-root', 'host-global']
+                : demand === 'host'
+                  ? ['host-root', 'host-global']
+                  : ['host-root', demand, 'host-global'];
+            expect(calls).toEqual(expected);
+
+            if (demand === 'press') {
+              await mounted.dispatch(mounted.root, new MouseEvent('click', { bubbles: true }));
+              expect(calls).toEqual(expected);
+            }
+          } finally {
+            await mounted.unmount();
+          }
+        } finally {
+          nativeWindow.mockRestore();
+          nativeRoot.mockRestore();
+        }
+      }
+    );
+
+    it.each(['host', 'root', 'global', 'press'] as const)(
       'keeps native keyup routing for setup demand %s',
       async (demand) => {
         const calls: string[] = [];
