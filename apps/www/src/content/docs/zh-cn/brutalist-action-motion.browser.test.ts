@@ -208,6 +208,65 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
           await expect
             .poll(() => paint.evaluate((node) => getComputedStyle(node).transitionDuration))
             .toBe(preference === 'reduce' ? '0s' : '0.15s');
+          if (subject === 'community-anchor') {
+            const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+            let placement: unknown = null;
+            // Opener release schedules a final placement rAF. Observe its result
+            // across layout frames before installing the anchor's rest sample.
+            await itemBounded(
+              'Menu release and panel placement',
+              expect
+                .poll(async () => {
+                  const observed = await menu.evaluate(async (node) => {
+                    const panel = document.getElementById(node.getAttribute('aria-controls') ?? '');
+                    if (!panel) throw new Error('Missing owned menu panel');
+                    const snapshot = () => {
+                      const css = getComputedStyle(panel);
+                      return {
+                        released: !node.matches(':hover, :active'),
+                        idle: [node, panel].every((owner) =>
+                          owner.getAnimations({ subtree: owner === node }).every(
+                            (animation) =>
+                              !animation.pending &&
+                              (animation.playState === 'finished' || animation.playState === 'idle')
+                          )
+                        ),
+                        connected: node.isConnected && panel.isConnected,
+                        expanded: node.getAttribute('aria-expanded'),
+                        rects: [node, panel].map((owner) => {
+                          const rect = owner.getBoundingClientRect();
+                          return [rect.x, rect.y, rect.width, rect.height];
+                        }),
+                        placement: [
+                          '--site-header-panel-left',
+                          '--site-header-panel-top',
+                          '--site-header-panel-max-width',
+                          '--site-header-panel-max-height',
+                        ].map((name) => css.getPropertyValue(name)),
+                      };
+                    };
+                    const frames = [];
+                    for (let index = 0; index < 3; index++) {
+                      const { promise, resolve } = Promise.withResolvers<void>();
+                      requestAnimationFrame(() => resolve());
+                      await promise;
+                      frames.push(snapshot());
+                    }
+                    return {
+                      frames,
+                      settled:
+                        frames.every((frame) =>
+                          frame.released && frame.idle && frame.connected && frame.expanded === 'true'
+                        ) && frames.every((frame) => JSON.stringify(frame) === JSON.stringify(frames[0])),
+                    };
+                  });
+                  placement = observed;
+                  return observed.settled;
+                }, { timeout: 4_000 })
+                .toBe(true)
+            );
+            traces.push({ preference, phase: 'menu-release-placement', placement });
+          }
           const box = await control.boundingBox();
           if (!box) throw new Error('No native hit box');
           const enter = () => page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -876,6 +935,7 @@ type ItemPairFrame = {
 type ItemPairProbe = {
   frames: ItemPairFrame[];
   events: Array<{ index: number; type: string; at: number }>;
+  contrastRejection: unknown;
   error: string | null;
   started: number;
   done: Promise<void>;
@@ -1062,10 +1122,72 @@ async function captureItemPair(
             css.backdropFilter !== 'none' ||
             css.mixBlendMode !== 'normal' ||
             Number(css.opacity) !== 1
-          )
+          ) {
+            // Retain one bounded receipt even if nodes.map rejects before the
+            // first Item frame exists. Diagnostic failure preserves the error.
+            try {
+              const ancestors = [];
+              // Start at the rejected owner so its actual paint/animations are
+              // retained even when the Item's composed ancestry is very deep.
+              let ancestor: Element | null = current;
+              while (ancestor && ancestors.length < 64) {
+                const owner = ancestor;
+                const actual = getComputedStyle(owner);
+                const rect = owner.getBoundingClientRect();
+                const animations = owner.getAnimations();
+                ancestors.push({
+                  id: geometryId(owner),
+                  offending: owner === current,
+                  tag: owner.localName,
+                  attributes: Object.fromEntries(
+                    ['id', 'role', 'data-pui-style', 'data-state', 'data-transition-state']
+                      .map((name) => [name, owner.getAttribute(name)])
+                  ),
+                  rect: [rect.x, rect.y, rect.width, rect.height],
+                  paint: {
+                    color: actual.color,
+                    backgroundColor: actual.backgroundColor,
+                    backgroundImage: actual.backgroundImage,
+                    filter: actual.filter,
+                    backdropFilter: actual.backdropFilter,
+                    mixBlendMode: actual.mixBlendMode,
+                    opacity: actual.opacity,
+                    transform: actual.transform,
+                    translate: actual.translate,
+                    scale: actual.scale,
+                  },
+                  animations: animations.slice(0, 16).map((animation) => ({
+                    type: animation.constructor.name,
+                    name: animation instanceof CSSAnimation ? animation.animationName : null,
+                    property: animation instanceof CSSTransition ? animation.transitionProperty : null,
+                    target: animation.effect instanceof KeyframeEffect && animation.effect.target instanceof Element
+                      ? geometryId(animation.effect.target) : null,
+                    currentTime: typeof animation.currentTime === 'number'
+                      ? animation.currentTime : String(animation.currentTime),
+                    pending: animation.pending,
+                    playState: animation.playState,
+                    playbackRate: animation.playbackRate,
+                    startTime: typeof animation.startTime === 'number'
+                      ? animation.startTime : String(animation.startTime),
+                  })),
+                  animationsTruncated: animations.length > 16,
+                });
+                ancestor = composedParent(owner);
+              }
+              probe.contrastRejection = {
+                at: performance.now() - probe.started,
+                itemIndex: nodes.indexOf(node),
+                offendingAncestor: geometryId(current),
+                ancestors,
+                ancestorsTruncated: ancestor !== null,
+              };
+            } catch (error) {
+              probe.contrastRejection = { diagnosticError: String(error) };
+            }
             throw new Error(
               'Unsupported actual ancestor paint/effect; contrast cannot be certified'
             );
+          }
           // An opaque child does not make ancestor effects irrelevant.
           if (!opaqueBackingFound) {
             const color = rgba(css.backgroundColor);
@@ -1097,6 +1219,7 @@ async function captureItemPair(
       const probe: ItemPairProbe = {
         frames: [],
         events: [],
+        contrastRejection: null,
         error: null,
         started: performance.now(),
         done,
@@ -1216,6 +1339,7 @@ async function captureItemPair(
           return {
             frames: probe.frames,
             events: probe.events,
+            contrastRejection: probe.contrastRejection,
             measurementError: probe.error,
             actionAt,
             actionError,
