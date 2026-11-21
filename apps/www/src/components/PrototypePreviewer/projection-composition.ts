@@ -353,6 +353,33 @@ function updateRendererThemeSurfaceStyles(
   for (const child of node.children ?? []) updateRendererThemeSurfaceStyles(child, theme, nested);
 }
 
+// An outer Proto owns the generation, so stamp inherits through it and does not
+// rewrite nested copies. Those copies still have to travel with a portal, so
+// the normalized surface channel must receive the updated theme explicitly.
+function pushNestedOwnedThemeSurfaces(
+  node: DemoChild,
+  api: DemoSetupContext['api'],
+  theme: ProjectionThemeSurfaceStyle,
+  inheritTheme = false
+): void {
+  if (typeof node === 'string' || node.kind === 'text') return;
+  if (node.kind === 'proto' && inheritTheme && node.ref && api.setSurfaceStyle) {
+    const style = node.surfaceStyle;
+    const themeEntry = Array.isArray(style) ? style.at(-1) : style;
+    if (
+      themeEntry &&
+      typeof themeEntry === 'object' &&
+      Object.keys(theme).some((property) =>
+        Object.prototype.hasOwnProperty.call(themeEntry, property)
+      )
+    ) {
+      api.setSurfaceStyle(node.ref, style ?? {});
+    }
+  }
+  const nested = inheritTheme || node.kind === 'proto';
+  for (const child of node.children ?? []) pushNestedOwnedThemeSurfaces(child, api, theme, nested);
+}
+
 function copyThemeSurfaceStyle(
   theme: ProjectionThemeSurfaceStyle,
   previous?: ProjectionThemeSurfaceStyle
@@ -1476,6 +1503,8 @@ export function createProjectionComposition(
       themeSurfaceStyle = nextTheme;
       applyActiveDynamicTheme?.();
       stampActiveProjectionSurfaces?.();
+      if (activeContext?.api.setSurfaceStyle)
+        pushNestedOwnedThemeSurfaces(demo.root, activeContext.api, nextTheme);
     },
     restoreFocus(focusKey) {
       if (!activeContext) return false;

@@ -311,10 +311,12 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             const firstContent = await popup(page, trigger);
             if (family === 'liquid-glass') {
               materialEvidence.push(await selectMaterialSnapshot(previewer, 'popup-visible'));
-              // Real wrapped page positive control: missing box metadata or an
-              // unconsumed plan must fail, not silently pass via opaque fallback.
+              // Content is the transparent portal frame. Surface is the only
+              // material owner; missing box metadata or an unconsumed plan must
+              // fail, not silently pass via opaque fallback.
+              const popupSurface = firstContent.locator('[data-demo-ref$="Surface"]');
               await expect
-                .poll(() => firstContent.getAttribute('data-material-quality'), { timeout: 20000 })
+                .poll(() => popupSurface.getAttribute('data-material-quality'), { timeout: 20000 })
                 .toBe('self-optical');
               await expect
                 .poll(() => trigger.getAttribute('data-material-quality'), { timeout: 20000 })
@@ -402,7 +404,10 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             await rtl.click();
             const rtlContent = await popup(page, rtl);
             const geometry = await rtlContent.evaluate((node) => {
+              const surface = node.querySelector<HTMLElement>('[data-demo-ref$="Surface"]');
+              const painted = surface ?? node;
               const style = getComputedStyle(node);
+              const paint = getComputedStyle(painted);
               const rect = node.getBoundingClientRect();
               const selected = node.querySelector<HTMLElement>(
                 '[role="option"][aria-selected="true"]'
@@ -420,9 +425,10 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 labelLeft: label.left,
                 indicatorRight: indicator.right,
                 selectedText: selected.textContent,
-                color: style.color,
-                background: style.backgroundColor,
-                radius: style.borderRadius,
+                color: paint.color,
+                background: paint.backgroundColor,
+                backgroundImage: paint.backgroundImage,
+                radius: paint.borderRadius,
               };
             });
             await withLiquidCardFailureObservation(
@@ -435,7 +441,12 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
                 expect(geometry.indicatorRight).toBeLessThanOrEqual(geometry.labelLeft + 1);
                 expect(geometry.selectedText).toContain('VeryLongUnbrokenOptionLabels');
-                expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
+                // Surface owns paint. Optical success is a backdrop image with a
+                // transparent color; opaque fallback is a solid fill. The portal
+                // frame itself stays transparent.
+                expect(
+                  geometry.background !== 'rgba(0, 0, 0, 0)' || geometry.backgroundImage !== 'none'
+                ).toBe(true);
                 expect(Number.parseFloat(geometry.radius)).toBeGreaterThan(0);
                 expect(
                   await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
