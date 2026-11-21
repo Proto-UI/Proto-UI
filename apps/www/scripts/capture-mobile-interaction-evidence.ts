@@ -108,6 +108,118 @@ const readyHome = (page: Page, runtime = 'wc') =>
     const root = document.querySelector<HTMLElement>('[data-homepage-runtime]');
     return root?.dataset.runtimeState === 'ready' && root.dataset.runtime === runtime;
   }, runtime);
+// Geometry is diagnostic evidence, not proof that a particular box owns the
+// document scroll extent. Intersect actual ancestor boundaries before ranking.
+const captureOverflow = (page: Page) =>
+  page.evaluate(() => {
+    const measure = (node: Element) => {
+      const style = getComputedStyle(node);
+      return {
+        tag: node.localName,
+        id: node.id,
+        class: node.getAttribute('class'),
+        rect: node.getBoundingClientRect().toJSON(),
+        clientWidth: node.clientWidth,
+        clientHeight: node.clientHeight,
+        scrollWidth: node.scrollWidth,
+        scrollHeight: node.scrollHeight,
+        scrollLeft: node.scrollLeft,
+        scrollTop: node.scrollTop,
+        overflowX: style.overflowX,
+        overflowY: style.overflowY,
+        position: style.position,
+        transform: style.transform,
+        contain: style.contain,
+        clipPath: style.clipPath,
+      };
+    };
+    const candidates = [...document.querySelectorAll<HTMLElement>('body *')]
+      .filter((node) => {
+        const rect = node.getBoundingClientRect();
+        return node.checkVisibility() && rect.width > 0 && rect.height > 0 &&
+          (rect.left < -1 || rect.right > innerWidth + 1);
+      })
+      .map((node) => {
+        const rect = node.getBoundingClientRect();
+        let left = rect.left;
+        let right = rect.right;
+        let top = rect.top;
+        let bottom = rect.bottom;
+        const ancestors = [];
+        let hasBoundary = false;
+        let uncertainClip = false;
+        for (let ancestor = node.parentElement; ancestor; ancestor = ancestor.parentElement) {
+          const facts = measure(ancestor);
+          const style = getComputedStyle(ancestor);
+          const root = ancestor === document.body || ancestor === document.documentElement;
+          const paint = /(?:^|\s)(?:paint|strict|content)(?:\s|$)/.test(style.contain);
+          const clipsX = !root && (style.overflowX !== 'visible' || paint);
+          const clipsY = !root && (style.overflowY !== 'visible' || paint);
+          // Client dimensions are local CSS pixels. Scale them into the actual
+          // ancestor rectangle so ordinary scaled scrollports stay comparable.
+          const box = ancestor.getBoundingClientRect();
+          const scaleX = ancestor.offsetWidth ? box.width / ancestor.offsetWidth : 1;
+          const scaleY = ancestor.offsetHeight ? box.height / ancestor.offsetHeight : 1;
+          const clipLeft = box.left + ancestor.clientLeft * scaleX;
+          const clipTop = box.top + ancestor.clientTop * scaleY;
+          const boundary = {
+            left: clipLeft,
+            right: clipLeft + ancestor.clientWidth * scaleX,
+            top: clipTop,
+            bottom: clipTop + ancestor.clientHeight * scaleY,
+          };
+          const scrollsX = clipsX && /^(auto|scroll|overlay)$/.test(style.overflowX) &&
+            ancestor.scrollWidth > ancestor.clientWidth + 1;
+          ancestors.push({ ...facts, clipsX, clipsY, scrollsX, boundary });
+          if (clipsX) {
+            hasBoundary = true;
+            left = Math.max(left, boundary.left);
+            right = Math.min(right, boundary.right);
+          }
+          if (clipsY) {
+            top = Math.max(top, boundary.top);
+            bottom = Math.min(bottom, boundary.bottom);
+          }
+          if (style.clipPath !== 'none' || style.clip !== 'auto') uncertainClip = true;
+        }
+        const exposed = right > left && bottom > top;
+        const uncontainedPixels = exposed ? Math.max(0, -left, right - innerWidth) : 0;
+        return {
+          ...measure(node),
+          rawOverflowPixels: Math.max(0, -rect.left, rect.right - innerWidth),
+          exposedRect: { left, right, top, bottom },
+          uncontainedPixels,
+          classification: uncertainClip ? 'requires-clip-inspection' :
+            uncontainedPixels > 1 ? 'uncontained-candidate' :
+              hasBoundary ? 'ancestor-contained' : 'within-tolerance',
+          ancestors,
+        };
+      });
+    const strongest = [...candidates].sort((a, b) =>
+      b.uncontainedPixels - a.uncontainedPixels || b.rawOverflowPixels - a.rawOverflowPixels);
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      scroll: { x: scrollX, y: scrollY },
+      document: {
+        root: measure(document.documentElement),
+        body: measure(document.body),
+        scrollingElement: document.scrollingElement && measure(document.scrollingElement),
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      },
+      candidateCount: candidates.length,
+      classificationCounts: {
+        uncontained: candidates.filter((item) => item.classification === 'uncontained-candidate').length,
+        contained: candidates.filter((item) => item.classification === 'ancestor-contained').length,
+        uncertain: candidates.filter((item) => item.classification === 'requires-clip-inspection').length,
+      },
+      // Bound only after classification/ranking; syntax tokens inside a PRE
+      // cannot displace the strongest exposed candidates by DOM order.
+      strongestUncontained: strongest.filter((item) => item.uncontainedPixels > 1).slice(0, 20),
+      containedExamples: candidates.filter((item) => item.classification === 'ancestor-contained')
+        .sort((a, b) => b.rawOverflowPixels - a.rawOverflowPixels).slice(0, 5),
+      limits: 'Axis-aligned ancestor scrollport intersections; clip paths and legacy clips require inspection. Geometry ranks candidates and does not prove document-width ownership.',
+    };
+  });
 await recordLifecycle('server-start-requested');
 const base = await startServer(['/zh-cn/', '/en/ui-libraries/base/transition/']);
 await recordLifecycle('server-ready');
@@ -805,7 +917,21 @@ try {
           entry.stage = `code-${sourceKind}-controls`;
           const shell = page.locator('[data-code-shell]:visible').first();
           const toggle = shell.locator('[data-code-toggle]');
+          const captureExpansion = async (stage: 'before' | 'after') => {
+            const name = `code-${sourceKind}-${stage}-expansion`;
+            entry[name] = {
+              expanded: await shell.getAttribute('data-code-expanded'),
+              toggleVisible: await toggle.isVisible(),
+              ...await captureOverflow(page),
+            };
+            const filename = `${id}-${name}.png`;
+            await page.screenshot({ path: path.join(out, filename) });
+            (entry.screenshots as string[]).push(filename);
+            await observe(name);
+          };
+          await captureExpansion('before');
           if (await toggle.isVisible()) await toggle.click();
+          await captureExpansion('after');
           const source = shell.locator('pre');
           const copy = shell.locator('[data-copy] [data-demo-ref="copy-button"]');
           await copy.waitFor({ state: 'visible' });
@@ -820,24 +946,14 @@ try {
             documentOverflow: document.documentElement.scrollWidth - innerWidth,
           }));
           entry[`code-${sourceKind}`] = facts;
-          entry[`code-${sourceKind}-layout`] = await page.evaluate(() => ({
-            header: document.querySelector('header')?.getBoundingClientRect().toJSON(),
-            scrollY,
-            overflow: [...document.querySelectorAll<HTMLElement>('body *')]
-              .filter(
-                (e) => e.checkVisibility() && e.getBoundingClientRect().right > innerWidth + 1
-              )
-              .slice(0, 20)
-              .map((e) => ({
-                tag: e.localName,
-                class: e.className,
-                rect: e.getBoundingClientRect().toJSON(),
-                overflowX: getComputedStyle(e).overflowX,
-              })),
-          }));
+          entry[`code-${sourceKind}-layout`] = await captureOverflow(page);
           await observe(`code-${sourceKind}-layout`);
           assert.ok(
-            facts.documentOverflow <= 1 && facts.height > 0 && facts.height <= 417,
+            facts.documentOverflow <= 1,
+            'Enlarged document fits the viewport width'
+          );
+          assert.ok(
+            facts.height > 0 && facts.height <= 417,
             'Enlarged source fits its independent viewport'
           );
           if (sourceKind === 'short')
