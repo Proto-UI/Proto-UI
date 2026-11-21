@@ -74,8 +74,8 @@ export function compilePrototype(source: string, options: CompileOptions = {}): 
 /** Read the declared project and explicitly exported package sources without executing input. */
 export async function compileFile(entry: string, options: FileCompileOptions = {}): Promise<CompileResult<Compilation>> {
   const fallback: SourceSpan = {file:'<input>',start:0,end:0,line:1,column:1,endLine:1,endColumn:1};
+  let snapshot = options.sourceSnapshot;
   try {
-    let snapshot = options.sourceSnapshot;
     if (!snapshot) {
       const root = await realpath(options.root ?? process.cwd());
       const graph = new FileSourceGraph(root);
@@ -83,6 +83,13 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
       if (loaded.failures.length) throw loaded.failures[0];
       snapshot = loaded;
     }
+  } catch (error) {
+    // The declared project/entry boundary reports input problems only; an
+    // unexpected internal exception still surfaces as a defect, not source.
+    if (error instanceof CompilerRejection) return {ok:false,diagnostics:[error.diagnostic]};
+    return {ok:false,diagnostics:[{code:'PUI1003',category:'invalid-input',message:error instanceof Error ? error.message : String(error),span:fallback}]};
+  }
+  try {
     const fileName = sourceName(snapshot.entry);
     const source = snapshot.files[fileName];
     if (typeof source !== 'string') throw new Error(`Closed source snapshot has no entry ${fileName}.`);
@@ -91,8 +98,13 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
     return result;
   } catch (error) {
     if (error instanceof CompilerRejection) return {ok:false,diagnostics:[error.diagnostic]};
-    return {ok:false,diagnostics:[{code:'PUI1003',category:'invalid-input',message:error instanceof Error ? error.message:String(error),span:fallback}]};
+    return {ok:false,diagnostics:[{code:'PUI1999',category:'compiler-defect',message:defectMessage(error),span:fallback}]};
   }
+}
+
+function defectMessage(error: unknown): string {
+  if (error instanceof Error) return `Compiler defect: ${error.stack ?? error.message}`;
+  return `Compiler defect: ${String(error)}`;
 }
 
 export function compilationArtifacts(compilation: Compilation, options: { sourcePath?: string; manifestPath?: string } = {}): OutputArtifact[] {

@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { SourceGraph } from '../src/parser-module';
 import { CompilerRejection } from '../src/diagnostics';
+import { compileFile } from '../src/compile';
 import { localSourceBase, resolveLocalSource } from '../src/source-resolution';
 
 const prototype = `import {definePrototype} from '@proto.ui/core';
@@ -18,6 +19,26 @@ export const Choice=definePrototype({name:'${name}',setup(def){}});`;
 
 // These exercise the public frontend, not generated-source text or resolver wiring.
 describe('static local source graph', () => {
+  it('keeps a missing project entry as invalid input', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'pui-entry-'));
+    try {
+      const result = await compileFile(path.join(root, 'missing.proto.ts'), { root });
+      expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1003', category: 'invalid-input' }] });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('reports an internal failure past the load boundary as a compiler defect', async () => {
+    const result = await compileFile('entry.proto.ts', {
+      sourceSnapshot: { entry: 'entry.proto.ts', files: {} },
+    });
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1999', category: 'compiler-defect', message: expect.stringContaining('Compiler defect:') }],
+    });
+  });
+
   it('resolves mapped package exports through the same closed authored graph', () => {
     const result=parsePrototype(`import Subject from '@example/widgets/subject'; export default Subject;`,{sourceImports:{'@example/widgets/subject':'vendor/widgets/subject.proto.ts'},files:{'vendor/widgets/subject.proto.ts':`import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'mapped',setup(def){}});`}});
     expect(result).toMatchObject({ok:true,value:{name:'mapped'}});
