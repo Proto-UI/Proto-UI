@@ -128,6 +128,8 @@ export function createWebA11yProjectionRegistry(
   const idPrefix = options.idPrefix?.trim().replace(/\s+/g, '-') || 'pui-a11y';
   const dependentSourcesByRef = new Map<A11ySemanticObjectRef, Set<WebProjectorRecord>>();
   const recordsByRef = new Map<A11ySemanticObjectRef, Set<WebProjectorRecord>>();
+  // Remember physical bindings weakly, including idless relationship sources.
+  const projectedTargets = new WeakSet<Element>();
   const reservedIdsByDocument = new Map<Document, Map<string, IdReservation>>();
   // Current shared choice; older cap leases can retain a different ID until disposal.
   const reservedIdsByRef = new Map<A11ySemanticObjectRef, Map<Document, IdReservation>>();
@@ -153,6 +155,28 @@ export function createWebA11yProjectionRegistry(
     } else pendingIdWrites.delete(target);
   };
 
+  const rememberProjectedTarget = (target: HTMLElement): void => {
+    for (let current: Element | null = target; current; ) {
+      projectedTargets.add(current);
+      // The document observer sees an adopted Shadow host, not its internals.
+      const root = current.getRootNode();
+      current = root.nodeType === 11 && 'host' in root ? (root as ShadowRoot).host : null;
+    }
+  };
+
+  const touchesIdentity = (node: Node): boolean => {
+    if (node.nodeType !== 1) return false;
+    const element = node as Element;
+    if (projectedTargets.has(element) || element.hasAttribute('id')) return true;
+    if (!element.firstElementChild) return false;
+    const descendants = element.ownerDocument.createTreeWalker(element, 1);
+    for (let current = descendants.nextNode(); current; current = descendants.nextNode()) {
+      const child = current as Element;
+      if (projectedTargets.has(child) || child.hasAttribute('id')) return true;
+    }
+    return false;
+  };
+
   const unobserve = (record: WebProjectorRecord) => {
     const document = record.observedDocument;
     if (!document) return;
@@ -175,9 +199,16 @@ export function createWebA11yProjectionRegistry(
       const Observer = document.defaultView?.MutationObserver ?? globalThis.MutationObserver;
       if (!Observer) return;
       const observer = new Observer((mutations) => {
+        let reconcile = false;
         const ownedWrites = new Map<HTMLElement, string | null>();
         for (const mutation of mutations) {
+          if (mutation.type === 'childList') {
+            if (!reconcile)
+              reconcile = [...mutation.addedNodes, ...mutation.removedNodes].some(touchesIdentity);
+            continue;
+          }
           if (mutation.type !== 'attributes' || mutation.attributeName !== 'id') continue;
+          reconcile = true;
           const target = mutation.target as HTMLElement;
           if (!pendingIdWrites.has(target)) continue;
           ownedWrites.set(target, pendingIdWrites.get(target)!);
@@ -188,10 +219,14 @@ export function createWebA11yProjectionRegistry(
           if (!owner.snapshot || owner.disposed || owner.detached) continue;
           // Host ID writes and duplicate IDs outside the relationship are
           // host facts, not protocol State changes. Recheck before the next paint.
-          reconcileIdentityChange(owner, ownedWrites);
+          if (
+            reconcileIdentityChange(owner, ownedWrites) ||
+            owner.target?.ownerDocument !== document
+          )
+            reconcile = true;
           if (owner.objectRef) refs.add(owner.objectRef);
         }
-        reconcileDependents(refs);
+        if (reconcile) reconcileDependents(refs);
       });
       observer.observe(document, {
         subtree: true,
@@ -837,6 +872,7 @@ export function createWebA11yProjectionRegistry(
     }
     if (structuredChanged) updateDependencies(record, snapshot);
     if (nextTarget && nextScalars) {
+      if (bindingReplaced || forceStructured || reactivating) rememberProjectedTarget(nextTarget);
       const indexed = recordsByRef.get(snapshot.objectRef) ?? new Set<WebProjectorRecord>();
       indexed.add(record);
       recordsByRef.set(snapshot.objectRef, indexed);
