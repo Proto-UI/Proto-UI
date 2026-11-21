@@ -75,7 +75,7 @@ export function applyBootstrapCalendarDayPaint(
     intent: (i) => i.feedback.style.use(tw('bg-muted', bootstrapButtonPressed)),
   });
   def.rule({
-    when: (w) => w.state(state.selected).eq(true),
+    when: (w) => w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
     intent: (i) =>
       i.feedback.style.use(
         tw(
@@ -86,7 +86,7 @@ export function applyBootstrapCalendarDayPaint(
   def.rule({
     when: (w) =>
       w.all(
-        w.state(state.selected).eq(true),
+        w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
         w.state(state.disabled).eq(false),
         w.state(state.pressed).eq(false),
         w.state(state.hovered).eq(false),
@@ -97,7 +97,7 @@ export function applyBootstrapCalendarDayPaint(
   def.rule({
     when: (w) =>
       w.all(
-        w.state(state.selected).eq(true),
+        w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
         w.state(state.disabled).eq(false),
         w.state(state.pressed).eq(false),
         w.any(w.state(state.hovered).eq(true), w.state(state.focused).eq(true))
@@ -107,7 +107,7 @@ export function applyBootstrapCalendarDayPaint(
   def.rule({
     when: (w) =>
       w.all(
-        w.state(state.selected).eq(true),
+        w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
         w.any(
           w.state(state.disabled).eq(true),
           w.all(
@@ -122,13 +122,18 @@ export function applyBootstrapCalendarDayPaint(
   def.rule({
     when: (w) =>
       w.all(
-        w.state(state.selected).eq(true),
+        w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
         w.state(state.disabled).eq(false),
         w.state(state.pressed).eq(true),
         w.any(w.state(state.hovered).eq(true), w.state(state.focused).eq(true))
       ),
     intent: (i) =>
       i.feedback.style.use(tw(bootstrapButtonPressedFill.primary, bootstrapButtonPressed)),
+  });
+  def.rule({
+    when: (w) => w.state(state.rangeMiddle).eq(true),
+    intent: (i) =>
+      i.feedback.style.use(tw('rounded-none border-transparent bg-secondary text-foreground')),
   });
   def.rule({
     when: (w) => w.all(w.state(state.outside).eq(true), w.state(state.selected).eq(false)),

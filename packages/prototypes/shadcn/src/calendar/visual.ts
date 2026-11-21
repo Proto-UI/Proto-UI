@@ -11,7 +11,7 @@ import {
  * bases/base/ui/calendar.tsx and styles/style-*.css .cn-calendar;
  * new-york-v4/ui/calendar.tsx is an independently read source, not Nova.
  * --spacing(6/7/8) remains 1.5/1.75/2rem through finite spacing tokens.
- * Base is single-date: range segments, week numbers, dropdown captions,
+ * Base selection covers single, multiple and inclusive range segments. Week numbers, dropdown captions,
  * multi-month responsive layout and descendant icon recipes are not claimed.
  * The existing unscoped Nova comparison remains separately bound to the
  * 2026-10-10 base-nova/calendar.json snapshot, SHA256
@@ -158,8 +158,12 @@ export function setupCalendarDayVisual<
     });
   }
   def.rule({
-    when: (w) => w.state(state.selected).eq(true),
+    when: (w) => w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
     intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+  });
+  def.rule({
+    when: (w) => w.state(state.rangeMiddle).eq(true),
+    intent: (i) => i.feedback.style.use(tw('rounded-none bg-accent text-accent-foreground')),
   });
   // Pressed keeps the family's command vocabulary: New York has no press
   // translation; every other profile shares the modern translate-y-px.
@@ -174,7 +178,7 @@ export function setupCalendarDayVisual<
     intent: (i) => i.feedback.style.use(tw('translate-y-px')),
   });
   def.rule({
-    when: (w) => w.state(state.outside).eq(true),
+    when: (w) => w.all(w.state(state.outside).eq(true), w.state(state.selected).eq(false)),
     intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
   });
   def.rule({

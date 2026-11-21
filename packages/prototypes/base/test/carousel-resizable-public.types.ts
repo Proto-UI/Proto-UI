@@ -30,6 +30,23 @@ const invalidf0resizableHandle: f0resizableHandleProps = { value: 50 };
 f0resizableHandle.notAnExposedMethod();
 const f0resizableRootResult: boolean = f0resizableRoot.requestValue(50, true);
 const f0resizableRootValue: number = f0resizableRoot.value.get();
+const f0resizableGroupProps: f0resizableRootProps = {
+  sizes: [25, 35, 40],
+  constraints: [
+    { min: 15, max: 50, collapsible: true, collapsedSize: 0 },
+    { min: 20 },
+    { min: 10 },
+  ],
+};
+const f0resizableSizes: readonly number[] = f0resizableRoot.sizes.get();
+const f0resizablePairResult: boolean = f0resizableRoot.requestResize(1, 45, true);
+const f0resizableVectorResult: boolean = f0resizableRoot.requestSizes([25, 45, 30], true);
+const f0resizableCancelResult: boolean = f0resizableRoot.cancelResize();
+const f0resizableIndexedHandle: f0resizableHandleProps = { index: 1 };
+// @ts-expect-error Group vectors must contain numbers.
+const invalidf0resizableSizes: f0resizableRootProps = { sizes: ['25', '75'] };
+// @ts-expect-error Indexed adjacent requests require numeric indices.
+f0resizableRoot.requestResize('1', 45);
 // @ts-expect-error Resize request and commit flag are typed.
 f0resizableRoot.requestValue('50', 'yes');
 const f0resizablePanelSize: number = f0resizablePanel.size.get();
@@ -116,6 +133,23 @@ const invalidf1resizableHandle: f1resizableHandleProps = { value: 50 };
 f1resizableHandle.notAnExposedMethod();
 const f1resizableRootResult: boolean = f1resizableRoot.requestValue(50, true);
 const f1resizableRootValue: number = f1resizableRoot.value.get();
+const f1resizableGroupProps: f1resizableRootProps = {
+  sizes: [25, 35, 40],
+  constraints: [
+    { min: 15, max: 50, collapsible: true, collapsedSize: 0 },
+    { min: 20 },
+    { min: 10 },
+  ],
+};
+const f1resizableSizes: readonly number[] = f1resizableRoot.sizes.get();
+const f1resizablePairResult: boolean = f1resizableRoot.requestResize(1, 45, true);
+const f1resizableVectorResult: boolean = f1resizableRoot.requestSizes([25, 45, 30], true);
+const f1resizableCancelResult: boolean = f1resizableRoot.cancelResize();
+const f1resizableIndexedHandle: f1resizableHandleProps = { index: 1 };
+// @ts-expect-error Group vectors must contain numbers.
+const invalidf1resizableSizes: f1resizableRootProps = { sizes: ['25', '75'] };
+// @ts-expect-error Indexed adjacent requests require numeric indices.
+f1resizableRoot.requestResize('1', 45);
 // @ts-expect-error Resize request and commit flag are typed.
 f1resizableRoot.requestValue('50', 'yes');
 const f1resizablePanelSize: number = f1resizablePanel.size.get();
@@ -202,6 +236,23 @@ const invalidf2resizableHandle: f2resizableHandleProps = { value: 50 };
 f2resizableHandle.notAnExposedMethod();
 const f2resizableRootResult: boolean = f2resizableRoot.requestValue(50, true);
 const f2resizableRootValue: number = f2resizableRoot.value.get();
+const f2resizableGroupProps: f2resizableRootProps = {
+  sizes: [25, 35, 40],
+  constraints: [
+    { min: 15, max: 50, collapsible: true, collapsedSize: 0 },
+    { min: 20 },
+    { min: 10 },
+  ],
+};
+const f2resizableSizes: readonly number[] = f2resizableRoot.sizes.get();
+const f2resizablePairResult: boolean = f2resizableRoot.requestResize(1, 45, true);
+const f2resizableVectorResult: boolean = f2resizableRoot.requestSizes([25, 45, 30], true);
+const f2resizableCancelResult: boolean = f2resizableRoot.cancelResize();
+const f2resizableIndexedHandle: f2resizableHandleProps = { index: 1 };
+// @ts-expect-error Group vectors must contain numbers.
+const invalidf2resizableSizes: f2resizableRootProps = { sizes: ['25', '75'] };
+// @ts-expect-error Indexed adjacent requests require numeric indices.
+f2resizableRoot.requestResize('1', 45);
 // @ts-expect-error Resize request and commit flag are typed.
 f2resizableRoot.requestValue('50', 'yes');
 const f2resizablePanelSize: number = f2resizablePanel.size.get();
@@ -288,6 +339,23 @@ const invalidf3resizableHandle: f3resizableHandleProps = { value: 50 };
 f3resizableHandle.notAnExposedMethod();
 const f3resizableRootResult: boolean = f3resizableRoot.requestValue(50, true);
 const f3resizableRootValue: number = f3resizableRoot.value.get();
+const f3resizableGroupProps: f3resizableRootProps = {
+  sizes: [25, 35, 40],
+  constraints: [
+    { min: 15, max: 50, collapsible: true, collapsedSize: 0 },
+    { min: 20 },
+    { min: 10 },
+  ],
+};
+const f3resizableSizes: readonly number[] = f3resizableRoot.sizes.get();
+const f3resizablePairResult: boolean = f3resizableRoot.requestResize(1, 45, true);
+const f3resizableVectorResult: boolean = f3resizableRoot.requestSizes([25, 45, 30], true);
+const f3resizableCancelResult: boolean = f3resizableRoot.cancelResize();
+const f3resizableIndexedHandle: f3resizableHandleProps = { index: 1 };
+// @ts-expect-error Group vectors must contain numbers.
+const invalidf3resizableSizes: f3resizableRootProps = { sizes: ['25', '75'] };
+// @ts-expect-error Indexed adjacent requests require numeric indices.
+f3resizableRoot.requestResize('1', 45);
 // @ts-expect-error Resize request and commit flag are typed.
 f3resizableRoot.requestValue('50', 'yes');
 const f3resizablePanelSize: number = f3resizablePanel.size.get();
@@ -374,6 +442,23 @@ const invalidf4resizableHandle: f4resizableHandleProps = { value: 50 };
 f4resizableHandle.notAnExposedMethod();
 const f4resizableRootResult: boolean = f4resizableRoot.requestValue(50, true);
 const f4resizableRootValue: number = f4resizableRoot.value.get();
+const f4resizableGroupProps: f4resizableRootProps = {
+  sizes: [25, 35, 40],
+  constraints: [
+    { min: 15, max: 50, collapsible: true, collapsedSize: 0 },
+    { min: 20 },
+    { min: 10 },
+  ],
+};
+const f4resizableSizes: readonly number[] = f4resizableRoot.sizes.get();
+const f4resizablePairResult: boolean = f4resizableRoot.requestResize(1, 45, true);
+const f4resizableVectorResult: boolean = f4resizableRoot.requestSizes([25, 45, 30], true);
+const f4resizableCancelResult: boolean = f4resizableRoot.cancelResize();
+const f4resizableIndexedHandle: f4resizableHandleProps = { index: 1 };
+// @ts-expect-error Group vectors must contain numbers.
+const invalidf4resizableSizes: f4resizableRootProps = { sizes: ['25', '75'] };
+// @ts-expect-error Indexed adjacent requests require numeric indices.
+f4resizableRoot.requestResize('1', 45);
 // @ts-expect-error Resize request and commit flag are typed.
 f4resizableRoot.requestValue('50', 'yes');
 const f4resizablePanelSize: number = f4resizablePanel.size.get();

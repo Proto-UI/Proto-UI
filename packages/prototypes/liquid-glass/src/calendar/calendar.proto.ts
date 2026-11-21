@@ -145,8 +145,13 @@ export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>
       intent: (i) => i.feedback.style.use(tw('bg-background shadow-none')),
     });
     def.rule({
-      when: (w) => w.state(state.selected).eq(true),
+      when: (w) => w.all(w.state(state.selected).eq(true), w.state(state.rangeMiddle).eq(false)),
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+    });
+    def.rule({
+      when: (w) => w.state(state.rangeMiddle).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('rounded-none bg-secondary text-secondary-foreground')),
     });
     def.rule({
       when: (w) => w.all(w.state(state.today).eq(true), w.state(state.selected).eq(false)),

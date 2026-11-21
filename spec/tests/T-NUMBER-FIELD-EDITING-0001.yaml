@@ -1,0 +1,56 @@
+id: T-NUMBER-FIELD-EDITING-0001
+type: test
+title: Number Field localized nullable editing and scrub transactions
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Focused implementation and Web Component consumer evidence are bounded; native IME, assistive technology and independent multi-host acceptance remain open.
+summary: Locale grammar, nullable Field values, owner refusal and AxisInput label scrubbing share one Base owner.
+cases:
+  - id: T-NUMBER-FIELD-EDITING-0001-CASE-LOCALE
+    title: Formatting and strict localized parsing preserve numbers and reject malformed drafts
+    covers: [P-BASE-NUMBER-FIELD-LOCALE]
+    expectation: locale-round-trip-and-invalid-input-refusal
+  - id: T-NUMBER-FIELD-EDITING-0001-CASE-EMPTY
+    title: Explicit null, optional clearing, reset and Field validation retain canonical emptiness
+    covers: [P-BASE-NUMBER-FIELD-NULLABLE]
+    expectation: nullable-owner-not-zero-coercion
+  - id: T-NUMBER-FIELD-EDITING-0001-CASE-OWNER
+    title: IME, controlled refusal and acceptance preserve the actual owner
+    covers: [P-BASE-NUMBER-FIELD-OWNER]
+    expectation: composition-and-owner-reconciliation
+  - id: T-NUMBER-FIELD-EDITING-0001-CASE-SCRUB
+    title: Continuous start-relative scrubbing commits once and cancels safely in each family
+    covers: [P-BASE-NUMBER-FIELD-SCRUB]
+    expectation: continuous-neutral-input-cancel-and-retire
+implementations:
+  - id: number-field-locale-model
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/number-field-format.test.ts
+    required: true
+    consumesCases: [T-NUMBER-FIELD-EDITING-0001-CASE-LOCALE]
+  - id: number-field-capabilities-consumer
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/number-field-capabilities.test.ts
+    required: true
+    consumesCases:
+      - T-NUMBER-FIELD-EDITING-0001-CASE-EMPTY
+      - T-NUMBER-FIELD-EDITING-0001-CASE-OWNER
+      - T-NUMBER-FIELD-EDITING-0001-CASE-SCRUB
+    notes:
+      - Real runtime and TextControl integration with simulated input and synthetic geometry does not establish native layout, physical IME or assistive-technology acceptance.
+verifies:
+  prototypes: [P-BASE-NUMBER-FIELD]
+exercises:
+  prototypes:
+    - P-BASE-NUMBER-FIELD
+    - P-SHADCN-NUMBER-FIELD
+    - P-BRUTALIST-NUMBER-FIELD
+    - P-BOOTSTRAP-2-3-2-NUMBER-FIELD
+    - P-LIQUID-GLASS-NUMBER-FIELD
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define discriminating nullable, locale, IME and scrub evidence routes.
+tags: [test, number-field, locale, input, gesture]

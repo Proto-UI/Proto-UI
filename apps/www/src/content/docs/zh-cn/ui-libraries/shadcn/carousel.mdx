@@ -9,7 +9,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
-Carousel 组合当前幻灯片、视口与有界前后控制。index 支持受控，loop 可选。键盘与达到阈值的滑动共用选择请求。本切片不自动播放，也不启动定时器。
+Carousel 组合等尺寸项目条、连续滚动视口与前后控制。鼠标或触摸拖动在松手前就移动内容；滚轮、触控板和滚动条使用同一个滚动表面。拖动结束或原生滚动静止后，内容吸附到最近的可达项目边界。键盘导航使用同一索引请求。
 
 当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
 
@@ -19,13 +19,24 @@ Carousel 组合当前幻灯片、视口与有界前后控制。index 支持受�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 响应式视口与受控索引
+
+Root 的 `slidesPerView` 设置最多显示的等尺寸项目数（默认 `1`），`minSlideSize` 设置项目最小逻辑宿主像素尺寸（默认 `0`）。演示请求显示两项，最小尺寸为 `180`；缩窄视口会减少实际容量，也允许部分项目露出。所有项目始终保留布局尺寸。Root 通过实际视口公开 `visibleSlides` 和 `maxIndex`，最后一个吸附位置贴齐内容末端，避免空白。
+
+传入 `index` 进入受控模式，`indexChange` 提出新的吸附索引。拖动预览不会改变已提交的 `index`；松手时采用所有者同步接受的值，否则回到现有索引，延迟接受则在新的输入到达时再移动。Viewport 公开 `dragging`、`scrolling` 与归一化 `scrollPosition`；Slide 的 `current` 跟随已提交吸附项，`hidden` 跟随实际屏外可见性，且不会从布局移除项目。
+
+`orientation="vertical"` 需要消费者为视口设置明确的有界高度。水平 `direction="rtl"` 反转物理拖动与方向键，但保留逻辑项目顺序。取消、禁用、切换轴和移除视图会丢弃未完成的拖动。`loop` 在可达两端循环索引，不通过克隆项目实现无缝无限条；自动播放和不同尺寸项目不属于当前契约。
+
 ## API
 
-Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `index` 进入受控模式。Viewport 没有属性。Slide 的 `index` 默认 `0`。
+Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `index` 进入受控模式。Viewport 没有属性。省略 Slide 的 `index` 时采用当前 anatomy 顺序，显式索引应与项目顺序对应。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'index', type: 'number', default: '—' },
+    { name: 'slidesPerView', type: 'number', default: '1' },
+    { name: 'minSlideSize', type: 'number', default: '0' },
     { name: 'defaultIndex', type: 'number', default: '0' },
     { name: 'loop', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },

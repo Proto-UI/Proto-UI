@@ -9,7 +9,7 @@ export type AxisInputSample =
       phase: 'start' | 'move' | 'end';
       /** Position clamped to the geometry interval. */
       position: number;
-      /** Signed fractions of the start-time geometry span; intentionally not clamped. */
+      /** Signed fractions of the start-time displacement basis (geometry span by default); intentionally not clamped. */
       delta: number;
       totalDelta: number;
     }>
@@ -43,6 +43,8 @@ export type AxisInputBinding = Readonly<{
   geometryRole: string;
   /** Optional unique same-domain presentation part whose extent is excluded from travel. */
   travelRole?: string;
+  /** Sum of same-owner parts' extents for delta normalization; position is unchanged. */
+  deltaBasisRole?: string;
 }>;
 
 export type AxisInputHandle<P extends PropsBaseType = PropsBaseType> = Readonly<{
@@ -57,6 +59,8 @@ export type AxisInputHostBinding = Readonly<{
   geometryTarget: unknown;
   /** Host-private presentation geometry; never becomes an input or focus target. */
   travelTarget?: unknown;
+  /** Host-private same-owner parts; zero-sized collapsed parts are allowed. */
+  deltaBasisTargets?: readonly unknown[];
   config: AxisInputConfig;
   onSample(sample: AxisInputSample): void;
 }>;

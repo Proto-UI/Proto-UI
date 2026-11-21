@@ -19,8 +19,9 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - { id: C-CALENDAR-SELECTION-0001, since: 0.3.0-alpha.2 }
 verifies:
-  tests: []
+  tests: [{ id: T-CALENDAR-SELECTION-0001, since: 0.3.0-alpha.2 }]
 sources:
   - path: packages/prototypes/base/src/calendar/
 openQuestions:
@@ -34,6 +35,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base calendar family as draft.
+  - version: 0.3.0-alpha.2
+    change: updated
+    summary: Added the governed single/multiple/range selection contract and discriminating test mapping without lifecycle promotion.
 tags:
   - prototype
   - base

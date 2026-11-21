@@ -67,7 +67,10 @@ it('matches Calendar declared direct capture keys and nested Button handles to r
     'collectionCount',
     'direction',
     'disabled',
+    'mode',
     'month',
+    'rangeComplete',
+    'selectedCount',
     'value',
     'weekCount',
   ]);
@@ -77,6 +80,10 @@ it('matches Calendar declared direct capture keys and nested Button handles to r
   for (const name of [
     'date',
     'selected',
+    'rangeStart',
+    'rangeEnd',
+    'rangeMiddle',
+    'rangePending',
     'disabled',
     'outside',
     'hidden',

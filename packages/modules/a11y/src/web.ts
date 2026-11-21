@@ -33,6 +33,7 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   required: 'aria-required',
   selected: 'aria-selected',
   modal: 'aria-modal',
+  multiSelectable: 'aria-multiselectable',
   valueMin: 'aria-valuemin',
   valueMax: 'aria-valuemax',
   valueNow: 'aria-valuenow',
@@ -1257,6 +1258,7 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
 }
 
 function projectedStateAttributeValue(key: string, value: unknown): string | undefined {
+  if (key === 'multiSelectable') return typeof value === 'boolean' ? String(value) : undefined;
   if (key === 'autocomplete')
     return typeof value === 'string' && ['none', 'inline', 'list', 'both'].includes(value)
       ? value

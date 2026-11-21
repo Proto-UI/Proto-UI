@@ -1,0 +1,36 @@
+id: C-RESIZABLE-GROUP-0001
+type: contract
+title: Portable constrained multi-panel resizing and nested ownership
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: The current user requests the missing group semantics; this draft defines them before implementation and retains independent host/native admission as a separate obligation.
+summary: A group owns one percentage vector; each separator changes only its adjacent pair and nested roots own independent groups.
+criteria:
+  - id: C-RESIZABLE-GROUP-0001-LAYOUT
+    text: Root sizes/defaultSizes selects a vector of at least two finite nonnegative percentages with positive total. Normalize to total 100, then project within per-panel constraints. Each constraint has min (default 0), max (default 100), collapsible (default false) and collapsedSize (default 0). A collapsed panel has exactly collapsedSize; an expanded panel lies in [min,max]. Infeasible or malformed configurations retain the last valid layout and disable requests; they never publish NaN, negative sizes or a partial vector. Legacy scalar value/defaultValue/min/max/collapsible continues to describe two complementary panels.
+  - id: C-RESIZABLE-GROUP-0001-ADJACENCY
+    text: Panel index selects its own vector entry. Handle index i (default 0) resizes panels i and i+1. requestResize(i,next,commit) treats next as panel i's percentage of the complete group, preserves the adjacent pair's sum and all other entries, and projects to the closest feasible expanded/collapsed pair. Invalid indices or nonfinite proposals are rejected. requestSizes validates a complete vector; requestValue remains the scalar compatibility request for index 0. Every rendered group has N panels and N-1 indexed separators.
+  - id: C-RESIZABLE-GROUP-0001-OWNERSHIP
+    text: Supplied sizes is authoritative over scalar value. A controlled request emits immutable sizesChange/sizesCommit payloads without changing committed sizes, panel paint or accessibility until owner acceptance. Legacy valueChange/valueCommit remains available for the scalar interface. Duplicate proposals within one interaction are coalesced; completion or cancellation clears request history so a rejected gesture can retry. Disabled/readOnly rejects all requests. Synchronous owner detach/disposal or replacement stops the retired request before further callbacks. A nested uncommitted proposal preserves the original requested commit without clearing the newer proposal; a nested commit or cancellation retires the old terminal delivery, including its scalar event tail. Public scalar and vector projections always converge on the latest canonical vector after synchronous subscriptions reenter.
+  - id: C-RESIZABLE-GROUP-0001-INPUT
+    text: Pointer movement continuously requests the start panel size plus normalized total displacement; end commits once, cancellation emits no commit and clears proposal history. A changed axis, direction, index or geometry basis cancels the old contact. Arrow keys, Shift acceleration, Home/End and Enter collapse use the same constrained adjacent-pair route. Horizontal RTL reverses both presentation order and logical delta; vertical uses down as increase. Separator valueNow/valueMin/valueMax describes its primary panel's feasible size and orientation is perpendicular to the group.
+  - id: C-RESIZABLE-GROUP-0001-NESTING
+    text: Nested roots establish independent same-family Anatomy and Context domains. Panels, handles, geometry, constraints, proposals and callbacks resolve only to the nearest owning root. Resizing an inner group cannot alter its outer group or another sibling group. Removing or reparenting a handle invalidates its active contact and stale callbacks; a later contact binds the current owner.
+dependsOn:
+  contracts:
+    [
+      C-PROPS-0001,
+      C-LIFECYCLE-0008,
+      C-ANATOMY-SCOPED-QUERY-0001,
+      C-AXIS-INPUT-CONTACT-BASIS-0001,
+      C-AXIS-INPUT-DELTA-BASIS-0001,
+    ]
+verifies:
+  tests: [T-RESIZABLE-GROUP-0001]
+sources:
+  - path: packages/prototypes/base/src/resizable/
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define vector ownership, adjacent constraints, compatibility, continuous input and nested group isolation.
+tags: [resizable, layout, controlled, nesting]

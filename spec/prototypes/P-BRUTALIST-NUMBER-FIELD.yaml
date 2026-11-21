@@ -19,8 +19,10 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+inherits:
+  prototypes: [P-BASE-NUMBER-FIELD]
 verifies:
-  tests: []
+  tests: [{ id: T-NUMBER-FIELD-EDITING-0001, since: 0.3.0-alpha.2 }]
 sources:
   - path: packages/prototypes/brutalist/src/number-field/
 openQuestions:
@@ -34,6 +36,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Brutalist numberField family as draft.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Bind the actual inherited nullable/localized/scrub protocol and family consumer evidence.
 tags:
   - prototype
   - brutalist

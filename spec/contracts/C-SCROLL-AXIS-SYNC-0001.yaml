@@ -1,0 +1,30 @@
+id: C-SCROLL-AXIS-SYNC-0001
+type: contract
+title: Scroll synchronizes the active axis and logical horizontal direction
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Bounded owner-directed prerequisite for responsive Carousel; cross-host native evidence and independent admission remain pending.
+summary: Runtime axis synchronization preserves logical identity and logical start/end offsets.
+statement:
+  en: configure remains setup-only. A distinct callback-only sync operation updates only axes on the current Scroll session; it neither replaces observed facts with authored values nor changes projection/end-follow policy. Horizontal offsets run from logical start to logical end according to the actual host direction. Web RTL converts negative native scrollLeft at the host boundary.
+criteria:
+  - id: C-SCROLL-AXIS-SYNC-0001-SYNC
+    text:
+      en: sync accepts only axes, requires an alive callback, preserves omitted axes and applies a changed configuration to the current lease. Detached synchronization records the next configuration without moving a retired target; same-value synchronization is a no-op. Host facts remain authoritative.
+  - id: C-SCROLL-AXIS-SYNC-0001-RTL
+    text:
+      en: In horizontal-tb Web layout, normalized horizontal position zero is logical start and one is logical end. Snapshot, absolute/relative/page requests, end following and composed control direction consistently normalize RTL native offsets; vertical behavior is unchanged. Reversed flex flow and vertical writing modes remain outside this bounded rule.
+dependsOn:
+  contracts: [C-SCROLL-0001, C-AS-SCROLL-SURFACE-0001]
+verifies:
+  tests: [T-BASE-CAROUSEL-CONTINUOUS-0001]
+sources:
+  - path: packages/core/src/scroll.ts
+  - path: packages/modules/scroll/src/impl.ts
+  - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Defined bounded callback axis changes and logical RTL offsets without adding component policy to the Scroll host.
+tags: [scroll, direction, lifecycle]

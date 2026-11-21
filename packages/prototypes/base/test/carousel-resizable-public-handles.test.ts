@@ -53,8 +53,21 @@ it('matches actual Resizable instance exposures and authored capture state keys'
   roots.push(root);
   document.body.append(root);
   await flush();
-  expect(keys(root.getExposes())).toEqual(['readCapture', 'requestValue', 'value']);
-  expect(keys(root.getExposes().readCapture().stateHandles)).toEqual(['orientation', 'value']);
+  expect(keys(root.getExposes())).toEqual([
+    'cancelResize',
+    'readCapture',
+    'requestResize',
+    'requestSizes',
+    'requestValue',
+    'sizes',
+    'value',
+  ]);
+  expect(keys(root.getExposes().readCapture().stateHandles)).toEqual([
+    'direction',
+    'orientation',
+    'sizes',
+    'value',
+  ]);
   expect(keys(a.getExposes())).toEqual(['readCapture', 'size']);
   expect(keys(a.getExposes().readCapture().stateHandles)).toEqual(['size']);
   expect(keys(handle.getExposes())).toEqual(['disabled', 'focusVisible', 'readCapture', 'value']);
@@ -87,21 +100,39 @@ it('matches Carousel collection aliases, slide state, focus and real nested Butt
     'getCollectionCount',
     'getCollectionItems',
     'index',
+    'maxIndex',
     'readCapture',
     'requestIndex',
     'slideCount',
+    'visibleSlides',
   ]);
   expect(keys(root.getExposes().readCapture().stateHandles)).toEqual([
     'a11yLabel',
     'collectionCount',
     'count',
     'index',
+    'maxIndex',
+    'visibleSlides',
   ]);
   expect(root.getExposes().count.get()).toBe(2);
   expect(root.getExposes().slideCount.get()).toBe(2);
-  expect(keys(viewport.getExposes())).toEqual(['focusVisible', 'readCapture']);
-  expect(keys(viewport.getExposes().readCapture().stateHandles)).toEqual(['focusVisible']);
+  expect(keys(viewport.getExposes())).toEqual([
+    'dragging',
+    'focusVisible',
+    'readCapture',
+    'scrollPosition',
+    'scrolling',
+  ]);
+  expect(keys(viewport.getExposes().readCapture().stateHandles)).toEqual([
+    '@scroll/scrolling',
+    'direction',
+    'dragging',
+    'focusVisible',
+    'orientation',
+    'scrollPosition',
+  ]);
   expect(keys(slide.getExposes())).toEqual([
+    'basis',
     'collectionFirst',
     'collectionIndex',
     'collectionLast',
@@ -109,9 +140,11 @@ it('matches Carousel collection aliases, slide state, focus and real nested Butt
     'current',
     'getCollectionItem',
     'hidden',
+    'minSize',
     'readCapture',
   ]);
   expect(keys(slide.getExposes().readCapture().stateHandles)).toEqual([
+    'basis',
     'collectionFirst',
     'collectionIndex',
     'collectionLast',
@@ -119,6 +152,7 @@ it('matches Carousel collection aliases, slide state, focus and real nested Butt
     'current',
     'hidden',
     'label',
+    'minSize',
   ]);
   for (const button of [previous, next]) {
     expect(keys(button.getExposes())).toEqual([

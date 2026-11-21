@@ -22,9 +22,9 @@ import {
 export type * from '@proto.ui/prototypes-base/carousel';
 
 // twbs/bootstrap@b4c4072 less/carousel.less. Base owns the index, input,
-// availability and immediate inactive-slide withdrawal. The upstream 600ms
-// outgoing/incoming left choreography needs a retained-slide protocol; it is
-// not implemented by a transition class, timer, or an extra index owner here.
+// availability, continuous equal-slide scrolling and committed snapping. The
+// upstream 600ms outgoing/incoming left choreography is a different motion
+// profile and is not reproduced by an extra index owner or a timer here.
 export const carouselRoot = definePrototype<CarouselRootProps, CarouselRootExposes>({
   name: 'bootstrap-2-3-2-carousel-root',
   modules: asCarouselRoot.modules,

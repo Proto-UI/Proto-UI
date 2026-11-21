@@ -1,0 +1,41 @@
+id: T-RESIZABLE-GROUP-0001
+type: test
+title: Multi-panel Resizable semantic and consumer coverage
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: These cases define the requested vector and nested-group evidence; native input and independent admission remain separately assessed.
+summary: Exercises constrained vectors, adjacent resizing, controlled refusal and nested family composition.
+cases:
+  - id: T-RESIZABLE-GROUP-0001-CASE-MODEL
+    title: Feasible complete vectors and pair-local constraints
+    expectation: finite-normalized-complete-vectors-with-only-the-selected-adjacent-pair-changing
+    covers: [C-RESIZABLE-GROUP-0001-LAYOUT, C-RESIZABLE-GROUP-0001-ADJACENCY]
+  - id: T-RESIZABLE-GROUP-0001-CASE-CONSUMER
+    title: Controlled requests, cancellation, keyboard and nearest-root isolation
+    expectation: accepted-owner-paint-and-constrained-input-without-stale-or-cross-group-effects
+    covers:
+      [
+        C-RESIZABLE-GROUP-0001-OWNERSHIP,
+        C-RESIZABLE-GROUP-0001-INPUT,
+        C-RESIZABLE-GROUP-0001-NESTING,
+      ]
+verifies:
+  contracts: [C-RESIZABLE-GROUP-0001]
+implementations:
+  - id: resizable-model
+    path: packages/prototypes/base/test/resizable-model.test.ts
+    status: passing
+    kind: module-test
+    required: true
+    consumesCases: [T-RESIZABLE-GROUP-0001-CASE-MODEL]
+  - id: resizable-group
+    path: packages/prototypes/base/test/resizable-group.test.ts
+    status: passing
+    kind: runtime-test
+    required: true
+    consumesCases: [T-RESIZABLE-GROUP-0001-CASE-MODEL, T-RESIZABLE-GROUP-0001-CASE-CONSUMER]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define group coverage separately from the previous scalar-only tests.
+tags: [resizable, conformance]

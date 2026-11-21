@@ -103,6 +103,8 @@ export interface ScrollSurfaceHandle<P extends PropsBaseType = PropsBaseType> {
   endFollow: ScrollEndFollowFactsHandle<P>;
 
   configure(patch: ScrollSurfaceConfigPatch): void;
+  /** Callback-only active-axis update; projection and end-follow remain setup-owned. */
+  sync(patch: Readonly<{ axes?: ScrollAxes }>): void;
   bindComposedChrome(binding: ScrollComposedChromeBinding): void;
   request(request: ScrollSurfaceRequest): ScrollSurfaceRequestOutcome;
   getSnapshot(): ScrollSurfaceSnapshot;

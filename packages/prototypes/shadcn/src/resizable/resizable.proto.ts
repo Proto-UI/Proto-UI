@@ -4,6 +4,7 @@ import type {
   ResizablePanelProps,
   ResizablePanelExposes,
   ResizableHandleExposes,
+  ResizableHandleProps,
 } from '@proto.ui/prototypes-base/resizable';
 import { definePrototype, tw, delay, type RunHandle } from '@proto.ui/core';
 import {
@@ -21,10 +22,11 @@ import {
 export type * from '@proto.ui/prototypes-base/resizable';
 export type ShadcnResizableRootProps = ResizableRootProps & ShadcnStyleProps;
 export type ShadcnResizablePanelProps = ResizablePanelProps & ShadcnStyleProps;
-export type ShadcnResizableHandleProps = ShadcnStyleProps & {
-  /** Optional inert grip paint, not another drag/focus target. */
-  withHandle?: boolean;
-};
+export type ShadcnResizableHandleProps = ResizableHandleProps &
+  ShadcnStyleProps & {
+    /** Optional inert grip paint, not another drag/focus target. */
+    withHandle?: boolean;
+  };
 
 export const resizableRoot = definePrototype<ShadcnResizableRootProps, ResizableRootExposes>({
   name: 'shadcn-resizable-root',

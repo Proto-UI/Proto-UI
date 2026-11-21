@@ -12,6 +12,7 @@ export const asNumberFieldControl = defineAsHook<
       disabled: State<boolean>;
       focusVisible: ObservedStateHandle<boolean, NumberFieldPartProps>;
       value: State<number>;
+      empty: State<boolean>;
       readOnly: State<boolean>;
       focused: ObservedStateHandle<boolean, NumberFieldPartProps>;
     };

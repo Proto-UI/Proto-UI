@@ -6,11 +6,27 @@ since: 0.3.0-alpha.1
 lifecycleRationale:
   zh-CN: 'Draft 实现方向，稳定准入需要独立审查及浏览器/native 证据。'
   en: 'Draft implementation direction. Stable admission requires independent review and browser/native evidence.'
-summary: Base numberField protocol with shared Proto UI lifecycle and anatomy boundaries.
+summary: Portable numeric editing, nullable ownership, localized text and optional label scrubbing.
 statement:
-  zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
-  en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
+  zh-CN: Root 拥有数值、草稿、格式化和拖擦事务；Input/Control 复用 TextControl，Label 仅将通用 AxisInput 样本交给 Root。视觉家族继承同一协议，不重复数值策略。
+  en: Root owns canonical numbers, drafts, formatting and scrub transactions. Input/Control reuse TextControl; Label forwards neutral AxisInput samples to Root. Visual families inherit the protocol without duplicating numeric policy.
 criteria:
+  - id: P-BASE-NUMBER-FIELD-NULLABLE
+    text:
+      en: Explicit null value/defaultValue represents an empty number. Root and Input/Control expose empty and getValue() returning number or null; the existing numeric value readout is meaningful only when empty is false and retains its last finite value while empty. Events and Field reports carry the actual number or null. allowEmpty defaults to false for compatibility; when enabled, committing an empty draft requests null. Steps from null initialize the snapped zero within min/max. Reset restores the creation value including null. A provided null remains controlled.
+      zh-CN: 显式 null value/defaultValue 表示空值。Root 与 Input/Control 暴露 empty 和返回 number 或 null 的 getValue()；既有数值 value 仅在 empty=false 时有数值含义，空值时保留最近有限值。事件及 Field 报告传递真实 number 或 null。allowEmpty 默认 false 保持兼容，启用后空草稿提交请求 null。从 null 步进先初始化为边界内对齐的零。复位恢复初值（包括 null），显式 null 仍属受控。
+  - id: P-BASE-NUMBER-FIELD-LOCALE
+    text:
+      en: Optional locale and standard decimal/currency/percent formatOptions govern displayed text and strict localized parsing, including grouping, localized digits, signs and formatted affixes. Formatting does not change canonical precision. Without locale or options, canonical text retains the previous ungrouped decimal representation. Invalid configuration exposes formatInvalid and falls back to the legacy decimal grammar; malformed input never becomes a different number by stripping arbitrary characters. Empty, incomplete and invalid drafts remain distinguishable. Locale changes preserve ongoing IME composition and parse its final draft using the grammar at composition start.
+      zh-CN: 可选 locale 与标准 decimal/currency/percent formatOptions 决定显示和严格本地化解析，支持分组、本地数字、符号和格式前后缀。格式化不改变规范数值精度。省略 locale/options 保留原有无分组十进制表示。非法格式配置暴露 formatInvalid 并回退原十进制语法，非法输入不得通过任意删字符变成另一个数。空白、未完成与非法草稿区分；语言切换保留正在进行的 IME，并使用组合开始时的语法解析最终草稿。
+  - id: P-BASE-NUMBER-FIELD-OWNER
+    text:
+      en: Controlled proposals never optimistically replace canonical owner values. Blur/Enter canonicalize from accepted state, and valueCommit reports accepted state. Composition prevents parsing, committing and stepping until it ends. Unrelated props preserve drafts. Actual owner/bounds changes reconcile the draft; disabled/readOnly, reset and retirement cancel editing/scrub sessions without allowing stale terminal input to commit.
+      zh-CN: 受控提案不乐观覆盖作者值，失焦/Enter 从已接受状态恢复规范文本，valueCommit 报告已接受状态。组合期间不解析、提交或步进。无关属性保留草稿，作者值或边界变化同步草稿；disabled/readOnly、复位与退役取消编辑/拖擦，过期终止输入不得提交。
+  - id: P-BASE-NUMBER-FIELD-SCRUB
+    text:
+      en: Root scrub defaults to false. When enabled, Label is the only scrub surface and uses neutral horizontal AxisInput with direction. One initial Label extent maps to scrubSteps times step (scrubSteps defaults to 100). Root owns start-relative quantization, bounds, continuous valueChange and exactly one accepted-state valueCommit at a changed successful end. Pointer cancellation restores the uncontrolled starting value, preserves controlled ownership and never commits. Changed policy, independent owner updates or teardown invalidate the session. Input remains a normal text editor; no page or host owns scrub policy.
+      zh-CN: scrub 默认 false。启用后只有 Label 是拖擦表面，使用带 direction 的通用横向 AxisInput。初始 Label 一个跨度对应 scrubSteps×step（scrubSteps 默认100）。Root 负责相对起点量化、边界、连续 valueChange 和成功且变化的终点一次已接受状态 valueCommit。取消恢复非受控起值，保留受控所有权且不提交。策略变化、独立作者更新或卸载使事务失效。Input 仍是文本编辑器，页面和宿主不得拥有拖擦策略。
   - id: P-BASE-NUMBER-FIELD-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -19,8 +35,10 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-TEXT-CONTROL-0001
+    - C-AXIS-INPUT-DIRECTIONAL-0001
 verifies:
-  tests: []
+  tests: [{ id: T-NUMBER-FIELD-EDITING-0001, since: 0.3.0-alpha.2 }]
 sources:
   - path: packages/prototypes/base/src/number-field/
 openQuestions:
@@ -34,6 +52,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base numberField family as draft.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Define localized nullable editing, controlled/IME ownership and portable label scrub transactions without promoting lifecycle.
 tags:
   - prototype
   - base

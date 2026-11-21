@@ -9,13 +9,35 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
-Calendar is a single-date Gregorian control. `value` uses YYYY-MM-DD; the canonical visible `month` uses YYYY-MM. Selection and month can each be controlled. A successful `requestMonth` means a proposal was emitted, not that the owner accepted it. Refused or pending cross-month keyboard navigation keeps the current valid Tab entry; accepted navigation materializes and focuses only after canonical month changes and current availability is checked. Focus is not stolen back from an external control.
+Calendar is a Gregorian control with `single` (default), `multiple` and `range` selection modes. `value` uses YYYY-MM-DD; the canonical visible `month` uses YYYY-MM. Selection and month can each be controlled. A successful `requestMonth` means a proposal was emitted, not that the owner accepted it. Refused or pending cross-month keyboard navigation keeps the current valid Tab entry; accepted navigation materializes and focuses only after canonical month changes and current availability is checked. Focus is not stolen back from an external control.
+
+## Range and multiple selection
+
+| Mode       | Controlled / initial selection              | Request callback             |
+| ---------- | ------------------------------------------- | ---------------------------- |
+| `single`   | `value` / `defaultValue`: YYYY-MM-DD string | `onValueChange({ value })`   |
+| `multiple` | `values` / `defaultValues`: date array      | `onValuesChange({ values })` |
+| `range`    | `range` / `defaultRange`: `{ from?, to? }`  | `onRangeChange({ range })`   |
+
+Multiple selection toggles each activated day. Arrays are deduplicated, sorted by civil date and copied on input and output. `minSelected` defaults to 0; `maxSelected` is unbounded when omitted. Adding a day can build up from empty toward the minimum; removing a day must leave at least the minimum. Explicit `requestValues` replacements validate the complete array against both count limits. Range selection starts with `{ from }`; a second activation completes an inclusive `{ from, to }`, ordering reversed endpoints. Activating a day after completion starts a new range. `{}` clears a range. A same-day range is complete when `minNights=0` (the default). `minNights` and `maxNights` constrain the civil-day interval between endpoints; they do not count selected cells. Omitted maxima are unbounded. Limits must be nonnegative integers.
+
+`min`, `max` and Root `unavailable` apply to every selected date. A completed range crossing an unavailable date is rejected and retains its anchor. Put whole-date restrictions on Root `unavailable`; local Day `disabled` only disables that authored control. Root `disabled` and `readOnly` reject selection requests. Changing eligibility never silently rewrites an owner's current selection.
+
+`requestValue(date)` activates a date in the current mode. `requestValues(dates)` and `requestRange(range)` replace the corresponding selection only in that mode. A true result means a request was emitted; controlled rendering changes only after the matching owner prop is accepted. `getValues()` and `getRange()` return copies. `default*` inputs initialize once, and switching modes preserves each mode's separate selection. Root also exposes `mode`, `selectedCount` and `rangeComplete`.
+
+Day exposes `rangeStart`, `rangeEnd`, `rangeMiddle` and `rangePending` alongside `selected`. A pending anchor has start/pending; a one-day complete range has start/end; interior days have middle. Every date in a complete range is selected. The family recipes distinguish endpoints from middle segments, and Grid projects `aria-multiselectable` for range and multiple modes. Keyboard navigation is unchanged; Enter or Space activates the focused date.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-calendar-selection"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Composition and clock ownership
 
 The ten atoms are Root, Caption, Heading, Previous, Next, Grid, Weekdays, Weekday, Row and Day. Compose seven Weekday atoms with offsets 0–6 inside Weekdays, then optionally retain six indexed Rows (`index` 0–5) of Day atoms with offsets 0–41 as capacity. By default the canonical month displays the minimum complete 4, 5 or 6 weeks; Root `fixedWeeks=true` explicitly reserves six. Root exposes `weekCount`; indexed unused Rows and unused offset Days expose `hidden` and are hidden/disabled off the focus path. Unindexed rows and explicit dates remain application-authored. Weekday labels and date order follow Root `weekStartsOn` (0 = Sunday) and `locale`; full localized civil dates name the grid cells. `direction="rtl"` mirrors Left/Right navigation, leaving Up/Down and week boundaries unchanged. Navigation controls accept `a11yLabel` for icon-only accessible naming.
 
-The host supplies `today` as a civil-date string. Base never reads a clock or timezone: no `today` means no current-date marker. Today and selected are independent, including unavailable dates; today projects `aria-current="date"`. Initial month priority is explicit `month`, explicit `defaultMonth`, selected `value`/`defaultValue`, supplied `today`, then deterministic 1970-01. Later clock updates do not silently navigate. `unavailable` is a string array; invalid inputs retain their prior valid value/default. Root disabled combines with local Day/Previous/Next disabled policy; readOnly blocks selection while allowing browsing.
+The host supplies `today` as a civil-date string. Base never reads a clock or timezone: no `today` means no current-date marker. Today and selected are independent, including unavailable dates; today projects `aria-current="date"`. Initial month priority is explicit `month`, explicit `defaultMonth`, the active mode’s selected date (single value, earliest multiple value, or range start), supplied `today`, then deterministic 1970-01. Later clock updates do not silently navigate. `unavailable` is a string array; invalid inputs retain their prior valid value/default. Root disabled combines with local Day/Previous/Next disabled policy; readOnly blocks selection while allowing browsing.
 
 ## Explicit month/year caption composition
 
@@ -44,6 +66,14 @@ Calendar is workspace source. There is no public `proto-ui add` target. Passing 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'mode', type: "'single' | 'multiple' | 'range'", default: 'single' },
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'values', type: 'readonly string[]', default: 'undefined' },
+    { name: 'defaultValues', type: 'readonly string[]', default: '[]' },
+    { name: 'range', type: 'CalendarRange', default: 'undefined' },
+    { name: 'defaultRange', type: 'CalendarRange', default: '{}' },
+    { name: 'minSelected / minNights', type: 'number', default: '0' },
+    { name: 'maxSelected / maxNights', type: 'number', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'min', type: 'string', default: "''" },
     { name: 'max', type: 'string', default: "''" },

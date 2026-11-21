@@ -11,7 +11,12 @@ import type {
 } from '@proto.ui/core';
 import { createWebMoveGestureHost } from './web-move-gesture-host';
 
-type Geometry = { origin: number; span: number; sign: 1 | -1 };
+type Geometry = { origin: number; span: number; deltaSpan: number; sign: 1 | -1 };
+// Summing independently transformed part extents may differ by a few floating
+// point ULPs after redistribution. Ignore only arithmetic noise, not CSS-pixel
+// or subpixel changes to the accepted contact basis.
+const sameExtent = (a: number, b: number) =>
+  Math.abs(a - b) <= Number.EPSILON * Math.max(1, Math.abs(a), Math.abs(b)) * 16;
 type Session = { geometry: Geometry; onSample: AxisInputHostBinding['onSample']; started: boolean };
 
 function webTarget(value: unknown): HTMLElement {
@@ -57,7 +62,8 @@ function axisAligned(target: HTMLElement): boolean {
 function geometryOf(
   target: HTMLElement,
   config: AxisInputConfig,
-  travel?: HTMLElement
+  travel?: HTMLElement,
+  deltaBasis?: readonly HTMLElement[]
 ): Geometry | null {
   if (!target.isConnected) return null;
   const rect = target.getBoundingClientRect();
@@ -101,8 +107,22 @@ function geometryOf(
     span -= (before + after) * scale + handle;
     if (!Number.isFinite(origin) || !Number.isFinite(span) || span <= 0) return null;
   }
+  let deltaSpan = span;
+  if (deltaBasis) {
+    if (!deltaBasis.length || !axisAligned(target)) return null;
+    deltaSpan = 0;
+    for (const part of deltaBasis) {
+      if (!part.isConnected || part.ownerDocument !== target.ownerDocument || !axisAligned(part))
+        return null;
+      const rect = part.getBoundingClientRect();
+      const extent = horizontal ? rect.width : rect.height;
+      if (!Number.isFinite(extent) || extent < 0) return null;
+      deltaSpan += extent;
+    }
+    if (!Number.isFinite(deltaSpan) || deltaSpan <= 0) return null;
+  }
   const reverse = (horizontal && config.direction === 'rtl') !== config.reverse;
-  return { origin, span, sign: reverse ? -1 : 1 };
+  return { origin, span, deltaSpan, sign: reverse ? -1 : 1 };
 }
 
 function normalized(
@@ -113,8 +133,8 @@ function normalized(
 ): AxisInputSample | null {
   const axis = config.axis === 'horizontal' ? 'x' : 'y';
   const rawPosition = (sample.position[axis] - geometry.origin) / geometry.span;
-  const delta = (sample.delta[axis] / geometry.span) * geometry.sign;
-  const totalDelta = (sample.totalDelta[axis] / geometry.span) * geometry.sign;
+  const delta = (sample.delta[axis] / geometry.deltaSpan) * geometry.sign;
+  const totalDelta = (sample.totalDelta[axis] / geometry.deltaSpan) * geometry.sign;
   if (![rawPosition, delta, totalDelta].every(Number.isFinite)) return null;
   return Object.freeze({
     phase,
@@ -163,6 +183,7 @@ export function createWebAxisInputHost(
       let geometryTarget = webTarget(binding.geometryTarget);
       let travelTarget =
         binding.travelTarget === undefined ? undefined : webTarget(binding.travelTarget);
+      let deltaBasis = binding.deltaBasisTargets?.map(webTarget);
       let moveLease: MoveGestureHostLease | null = null;
       let session: Session | null = null;
       let pending: Geometry | null = null;
@@ -201,7 +222,7 @@ export function createWebAxisInputHost(
               )
                 return false;
             }
-            pending = geometryOf(geometryTarget, binding.config, travelTarget);
+            pending = geometryOf(geometryTarget, binding.config, travelTarget, deltaBasis);
             return !!pending && !!normalized(sample, binding.config, pending, 'start');
           },
           onStart(sample) {
@@ -222,7 +243,8 @@ export function createWebAxisInputHost(
                   currentEpoch === epoch &&
                   (!input.isConnected ||
                     !geometryTarget.isConnected ||
-                    (travelTarget && !travelTarget.isConnected))
+                    (travelTarget && !travelTarget.isConnected) ||
+                    deltaBasis?.some((part) => !part.isConnected))
                 )
                   restart('target-detached');
               });
@@ -261,12 +283,13 @@ export function createWebAxisInputHost(
         if (
           !input.isConnected ||
           !geometryTarget.isConnected ||
-          (travelTarget && !travelTarget.isConnected)
+          (travelTarget && !travelTarget.isConnected) ||
+          deltaBasis?.some((part) => !part.isConnected)
         ) {
           restart('target-detached');
           return false;
         }
-        const live = geometryOf(geometryTarget, binding.config, travelTarget);
+        const live = geometryOf(geometryTarget, binding.config, travelTarget, deltaBasis);
         if (disposed || currentEpoch !== epoch || session !== current) return false;
         if (!live) {
           restart('invalid-geometry');
@@ -274,7 +297,8 @@ export function createWebAxisInputHost(
         }
         if (
           binding.config.contactBasis === 'cancel-on-extent-change' &&
-          live.span !== current.geometry.span
+          (!sameExtent(live.span, current.geometry.span) ||
+            !sameExtent(live.deltaSpan, current.geometry.deltaSpan))
         ) {
           restart('basis-changed');
           return false;
@@ -316,13 +340,19 @@ export function createWebAxisInputHost(
           const nextGeometry = webTarget(next.geometryTarget);
           const nextTravel =
             next.travelTarget === undefined ? undefined : webTarget(next.travelTarget);
+          const nextBasis = next.deltaBasisTargets?.map(webTarget);
           const replaced =
-            input !== nextInput || geometryTarget !== nextGeometry || travelTarget !== nextTravel;
+            input !== nextInput ||
+            geometryTarget !== nextGeometry ||
+            travelTarget !== nextTravel ||
+            (nextBasis?.length ?? 0) !== (deltaBasis?.length ?? 0) ||
+            (nextBasis?.some((part, i) => part !== deltaBasis?.[i]) ?? false);
           const changed = !sameConfig(binding.config, next.config);
           binding = next;
           input = nextInput;
           geometryTarget = nextGeometry;
           travelTarget = nextTravel;
+          deltaBasis = nextBasis;
           if (replaced || changed)
             restart(
               replaced

@@ -29,6 +29,16 @@ jobs:
         run: |
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences list
+      - name: Verify component capabilities with native Chromium input
+        timeout-minutes: 12
+        env:
+          PUI_CHROME_EXECUTABLE: ${{ env.CHROME_PATH }}
+          PUI_EVIDENCE_DIR: ${{ runner.temp }}/projection-family-evidence/component-capabilities
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
+          node --import tsx scripts/analysis/component-capabilities-browser.mjs \
+            2>&1 | tee "$RUNNER_TEMP/component-capabilities.log"
       - name: Check source tokens and real four-runtime fixture
         env:
           PROTO_UI_FAMILY_EVIDENCE_DIR: ${{ runner.temp }}/projection-family-evidence

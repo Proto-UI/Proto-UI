@@ -41,7 +41,9 @@ export const resizablePanel = definePrototype<ResizablePanelProps, ResizablePane
   name: 'brutalist-resizable-panel',
   setup(def) {
     const behavior = asResizablePanel();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground p-4'));
+    // Padding belongs to the panel's content. Padding on the percentage flex
+    // item imposes a nonzero floor and prevents an actual collapsed layout.
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground'));
     const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
     if (states?.focusVisible)
       def.rule({
