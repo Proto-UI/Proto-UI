@@ -26,6 +26,7 @@ import {
 } from './projection-families';
 import {
   applyProjectionThemeSurfaceStyle,
+  clearProjectionThemeSurfaceStyle,
   type ProjectionThemeSurfaceStyle,
 } from './projection-theme';
 
@@ -93,7 +94,10 @@ export type ProjectionCompositionOptions = Readonly<{
   controls: ProjectionCompositionControls;
   /** Scope-owned controls to materialize. Defaults to all three controls. */
   controlIds?: readonly ProjectionControlId[];
-  /** Consumer-owned theme values projected directly onto every Proto surface. */
+  /**
+   * Consumer-owned theme values. Outermost Proto surfaces carry a copy.
+   * Nested surfaces inherit it; a surface that leaves that ancestor is stamped.
+   */
   themeSurfaceStyle?: ProjectionThemeSurfaceStyle;
   scopeInlineStyle?: string;
   locked?: boolean;
@@ -324,20 +328,29 @@ function mergeSurfaceStyle(
 
 function updateRendererThemeSurfaceStyles(
   node: DemoChild,
-  theme: ProjectionThemeSurfaceStyle
+  theme: ProjectionThemeSurfaceStyle,
+  inheritTheme = false
 ): void {
   if (typeof node === 'string' || node.kind === 'text') return;
   if (node.kind === 'proto') {
     const style = node.surfaceStyle;
     const themeEntry = Array.isArray(style) ? style.at(-1) : style;
-    if (!themeEntry || typeof themeEntry === 'string') {
+    if (
+      themeEntry &&
+      typeof themeEntry === 'object' &&
+      Object.keys(theme).some((property) =>
+        Object.prototype.hasOwnProperty.call(themeEntry, property)
+      )
+    ) {
+      Object.assign(themeEntry, theme);
+    } else if (!inheritTheme) {
       throw new Error(
         '[PrototypePreviewer] projected Proto surface is missing renderer-owned theme state.'
       );
     }
-    Object.assign(themeEntry, theme);
   }
-  for (const child of node.children ?? []) updateRendererThemeSurfaceStyles(child, theme);
+  const nested = inheritTheme || node.kind === 'proto';
+  for (const child of node.children ?? []) updateRendererThemeSurfaceStyles(child, theme, nested);
 }
 
 function copyThemeSurfaceStyle(
@@ -477,7 +490,7 @@ function createProjectedProto(
       markerClass('prototype', prototypeId)
     ),
     props: { ...(input.props ?? {}) },
-    surfaceStyle: mergeSurfaceStyle(input.surfaceStyle, themeSurfaceStyle),
+    surfaceStyle: mergeSurfaceStyle(input.surfaceStyle, themeSurfaceStyle) ?? {},
   };
 }
 
@@ -486,18 +499,21 @@ function cloneProjectedChild(
   coordinateAttrs: DemoBoxAttrs,
   themeSurfaceStyle: DemoSurfaceStyle | undefined,
   allowedPrototypeIds: ReadonlySet<string>,
-  componentRootPrototypeId: string | null
+  componentRootPrototypeId: string | null,
+  inheritTheme = false
 ): DemoChild {
   if (typeof node === 'string') return node;
   if (node.kind === 'text') return { ...node };
 
+  const nested = inheritTheme || node.kind === 'proto';
   const children = node.children?.map((child) =>
     cloneProjectedChild(
       child,
       coordinateAttrs,
       themeSurfaceStyle,
       allowedPrototypeIds,
-      componentRootPrototypeId
+      componentRootPrototypeId,
+      nested
     )
   );
   if (node.kind === 'box') {
@@ -525,18 +541,23 @@ function cloneProjectedChild(
       `[PrototypePreviewer] component demo Prototype "${node.prototypeId}" is not declared by the selected projection family.`
     );
   }
-  return createProjectedProto(node.prototypeId, coordinateAttrs, themeSurfaceStyle, {
-    ...node,
-    props: cloneJsonLike(node.props ?? {}),
-    // Constrain only the declared component root through the Adapter's
-    // normalized surface channel. The Website wrapper no longer reaches into
-    // arbitrary demo children with CSS selectors.
-    surfaceStyle: mergeSurfaceStyle(
-      cloneJsonLike(node.surfaceStyle),
-      node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
-    ),
-    children,
-  });
+  return createProjectedProto(
+    node.prototypeId,
+    coordinateAttrs,
+    inheritTheme ? undefined : themeSurfaceStyle,
+    {
+      ...node,
+      props: cloneJsonLike(node.props ?? {}),
+      // Constrain only the declared component root through the Adapter's
+      // normalized surface channel. The Website wrapper no longer reaches into
+      // arbitrary demo children with CSS selectors.
+      surfaceStyle: mergeSurfaceStyle(
+        cloneJsonLike(node.surfaceStyle),
+        node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
+      ),
+      children,
+    }
+  );
 }
 
 function triggerAppearance(
@@ -587,7 +608,7 @@ function createSelectControl<Value extends string>(
       ),
     ],
   } satisfies DemoBoxNode;
-  const value = createProjectedProto(selectParts.value, coordinateAttrs, themeSurfaceStyle, {
+  const value = createProjectedProto(selectParts.value, coordinateAttrs, undefined, {
     props: { placeholder: config.placeholder ?? config.label },
     // Preview controls retain their default truncation. A consumer such as
     // compact Header settings may explicitly request full-value wrapping.
@@ -601,7 +622,7 @@ function createSelectControl<Value extends string>(
       ...(config.wrapValue ? { overflowWrap: 'anywhere' } : {}),
     },
   });
-  const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, themeSurfaceStyle, {
+  const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, undefined, {
     ref: refs.trigger,
     props: {
       accessibleLabel: config.label,
@@ -628,7 +649,7 @@ function createSelectControl<Value extends string>(
     children: [value],
   });
   const items = config.options.map((option) =>
-    createProjectedProto(selectParts.item, coordinateAttrs, themeSurfaceStyle, {
+    createProjectedProto(selectParts.item, coordinateAttrs, undefined, {
       props: {
         value: option.value,
         textValue: option.label,
@@ -636,21 +657,21 @@ function createSelectControl<Value extends string>(
       },
       children: selectParts.itemText
         ? [
-            createProjectedProto(selectParts.itemText, coordinateAttrs, themeSurfaceStyle, {
+            createProjectedProto(selectParts.itemText, coordinateAttrs, undefined, {
               children: [option.label],
             }),
           ]
         : [option.label],
     })
   );
-  const content = createProjectedProto(selectParts.content, coordinateAttrs, themeSurfaceStyle, {
+  const content = createProjectedProto(selectParts.content, coordinateAttrs, undefined, {
     ...(selectParts.surface ? {} : { props: { position: 'popper', align: 'start' } }),
     children:
       selectParts.surface && selectParts.viewport
         ? [
-            createProjectedProto(selectParts.surface, coordinateAttrs, themeSurfaceStyle, {
+            createProjectedProto(selectParts.surface, coordinateAttrs, undefined, {
               children: [
-                createProjectedProto(selectParts.viewport, coordinateAttrs, themeSurfaceStyle, {
+                createProjectedProto(selectParts.viewport, coordinateAttrs, undefined, {
                   children: items,
                 }),
               ],
@@ -863,7 +884,7 @@ export function createProjectionComposition(
               loop: true,
             },
             children: options.controls.runtime.options.map((option) =>
-              createProjectedProto(tabsParts.trigger, coordinateAttrs, rendererThemeSurfaceStyle, {
+              createProjectedProto(tabsParts.trigger, coordinateAttrs, undefined, {
                 ref: runtimeTriggerRef(option.value),
                 props: {
                   value: option.value,
@@ -952,6 +973,21 @@ export function createProjectionComposition(
       prototypeMarkers.set(markerClass('prototype', prototypeId), prototypeId);
     }
     const stampProjectionSurfaces = () => {
+      const themeParent = (node: Element): Element | null => {
+        if (node.parentElement) return node.parentElement;
+        if (node.assignedSlot) return node.assignedSlot;
+        const root = node.getRootNode();
+        return root instanceof view.ShadowRoot ? root.host : null;
+      };
+      const inheritsProjectionTheme = (node: Element): boolean => {
+        let parent = themeParent(node);
+        while (parent) {
+          if (parent.classList.contains(ownerMarker) && parent.classList.contains(generationMarker))
+            return true;
+          parent = themeParent(parent);
+        }
+        return false;
+      };
       for (const element of Array.from(document.getElementsByClassName(ownerMarker))) {
         if (
           (!(element instanceof view.HTMLElement) && !(element instanceof view.SVGElement)) ||
@@ -963,7 +999,8 @@ export function createProjectionComposition(
           if (element.getAttribute(name) !== value) element.setAttribute(name, value);
         }
         if (themeSurfaceStyle) {
-          applyProjectionThemeSurfaceStyle(element, themeSurfaceStyle);
+          if (inheritsProjectionTheme(element)) clearProjectionThemeSurfaceStyle(element);
+          else applyProjectionThemeSurfaceStyle(element, themeSurfaceStyle);
         }
         for (const [prototypeMarker, prototypeId] of prototypeMarkers) {
           if (!element.classList.contains(prototypeMarker)) continue;
@@ -1103,9 +1140,9 @@ export function createProjectionComposition(
         for (const [slotRef, value] of entries) {
           const current = () =>
             activeContext === context && committedDynamic.get(slotRef) === value;
-          const apply = (node: DemoChild) => {
+          const apply = (node: DemoChild, inheritTheme = false) => {
             if (!current() || typeof node === 'string' || node.kind === 'text') return;
-            if (node.kind === 'proto') {
+            if (node.kind === 'proto' && !inheritTheme) {
               const authored = mergeSurfaceStyle(
                 node.surfaceStyle,
                 node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
@@ -1115,7 +1152,8 @@ export function createProjectionComposition(
                 mergeSurfaceStyle(authored, themeSurfaceStyle ?? {}) ?? {}
               );
             }
-            for (const nested of node.children ?? []) apply(nested);
+            const nested = inheritTheme || node.kind === 'proto';
+            for (const child of node.children ?? []) apply(child, nested);
           };
           for (const child of value.children) apply(child.node);
         }
@@ -1400,15 +1438,10 @@ export function createProjectionComposition(
                   children: controls,
                 },
                 ...options.controls.runtime.options.map((option) =>
-                  createProjectedProto(
-                    tabsParts.content,
-                    coordinateAttrs,
-                    rendererThemeSurfaceStyle,
-                    {
-                      props: { value: option.value, keepMounted: true },
-                      children: option.value === options.runtimeId ? [contentNode] : [],
-                    }
-                  )
+                  createProjectedProto(tabsParts.content, coordinateAttrs, undefined, {
+                    props: { value: option.value, keepMounted: true },
+                    children: option.value === options.runtimeId ? [contentNode] : [],
+                  })
                 ),
               ],
             }),
