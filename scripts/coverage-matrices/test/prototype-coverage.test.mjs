@@ -12,6 +12,7 @@ import {
   render,
   renderPlan,
   inheritedPrototypeIds,
+  consumerLedgerRows,
   refreshCandidateSource,
   refreshSourceInventory,
   captureGitObjectProof,

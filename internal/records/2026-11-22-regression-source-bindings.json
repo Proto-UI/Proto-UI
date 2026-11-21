@@ -863,6 +863,76 @@
       "exitCode": 0,
       "result": "[coverage-matrices] OK (2 matrices)",
       "logSha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    "finalCandidateRefresh": {
+      "command": "node scripts/coverage-matrices/prototype-coverage.mjs --refresh-candidate fc17170c7a647cd4248efd51db3c3678b9b34e0a --write",
+      "exitCode": 0,
+      "result": "Prototype coverage: 71 comparison rows, 22 Base projection rows, 141 consumer rows, 101 migrated links verified.",
+      "candidateRevision": "fc17170c7a647cd4248efd51db3c3678b9b34e0a",
+      "sourceBindingsObject": "fc17170c7a647cd4248efd51db3c3678b9b34e0a",
+      "sourceProofObjectType": "commit",
+      "sourceProofRootTree": "fcea66b8d991649cd4fcdc88195104c4147212e5",
+      "sourceBindingsCount": 5944,
+      "allWorktreeSourceHashesMatch": true,
+      "sourceScope": "Prototype catalog, six prototype package source/test/manifests, two consumer ledgers, and retained Shadcn style-source fixtures. This domain-specific proof does not replace the final PR-head CI receipt for the complete repository.",
+      "historicalMainRevision": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "changedTopLevelFields": ["candidateSource"],
+      "consumerRowsUnchanged": 141,
+      "catalogCounts": {
+        "catalogEntities": 585,
+        "catalogActive": 0,
+        "catalogDraft": 585,
+        "catalogDeprecated": 0,
+        "catalogRemoved": 0
+      },
+      "gpuiCellStates": {
+        "required-unassessed": 456
+      },
+      "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "acceptance": "Only current candidate source identity changes from the preceding derived inventory. All main evidence, reference pins, carried criteria, gates, receipts and consumer states are retained."
+    },
+    "finalFullCoverageGate": {
+      "command": "corepack pnpm@10.32.1 -s check:coverage-matrices",
+      "candidateRevision": "fc17170c7a647cd4248efd51db3c3678b9b34e0a",
+      "exitCode": 1,
+      "sourceChecker": {
+        "result": "[coverage-matrices] OK (2 matrices)",
+        "exitCode": 0
+      },
+      "nodeSuite": {
+        "tests": 4491,
+        "passed": 4489,
+        "failed": 1,
+        "skipped": 1,
+        "cancelled": 0,
+        "durationMilliseconds": 278819.572784
+      },
+      "failure": {
+        "testFile": "scripts/coverage-matrices/test/prototype-coverage.test.mjs",
+        "testName": "source inventory refresh derives consumer fields while preserving original criteria",
+        "error": "ReferenceError: consumerLedgerRows is not defined",
+        "classification": "Missing named import in the new test harness; not a product, source-binding or assertion mismatch.",
+        "repair": "Add consumerLedgerRows to the existing named imports from prototype-coverage.mjs; preserve every original assertion."
+      },
+      "skip": {
+        "testName": "portable suite does not run Linux media integration",
+        "reason": "Intentional existing portable-suite skip. The real Linux media decoder integration is required separately in Linux CI.",
+        "requiredSeparateCommand": "node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs"
+      },
+      "logSha256": "92547c62e7e19e4ba5bc1465fed4a529238d3ffbdb00930ec29abe28e88abea5",
+      "acceptance": "This aggregate run failed. A focused correction below does not rewrite this exit code or establish aggregate passing evidence. The final clean PR-head native CI must rerun the complete gate."
+    },
+    "finalFocusedRefreshControl": {
+      "command": "node --test --test-name-pattern='source inventory refresh derives consumer fields while preserving original criteria' scripts/coverage-matrices/test/prototype-coverage.test.mjs",
+      "exitCode": 0,
+      "tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "durationMilliseconds": 24601.680965,
+      "logSha256": "50b804164c42b82279c97467a3beaca8e0ade36c0b9a7e9718fe26b8dc6288c4",
+      "scope": "Only the formerly failing test after its missing named import was restored. Its source refresh, consumer fields, counts, historical preservation and final validateActual assertions all execute. No bound production source, gate implementation or acceptance assertion changed.",
+      "remainingReceipt": "The full suite was not rerun locally after this one-line harness import repair; final clean PR-head CI is required for an aggregate result."
     }
   },
   "mergedMainReview": {
