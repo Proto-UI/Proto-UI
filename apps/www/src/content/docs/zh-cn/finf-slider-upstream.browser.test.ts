@@ -71,6 +71,9 @@ afterAll(async () => {
   await browser?.close();
   await stopServer();
 });
+// Thumb ink and Track rail are owned decorations, separate from their hit owners
+// and caller slots. Select that boundary without assuming a tag or style carrier.
+const decoration = (owner: Locator) => owner.locator(':scope > [data-pui-owned-decoration]');
 const geometry = (locator: Locator) =>
   locator.evaluate((element) => {
     const rect = element.getBoundingClientRect(),
@@ -140,8 +143,10 @@ for (const runtime of RUNTIMES)
       const ref = (name: string) => previewer.locator(`[data-demo-ref="${name}"]`);
       const thumb = ref('horizontal-thumb'),
         track = ref('horizontal-track');
-      const paint = thumb.locator(':scope > div[data-pui-style]').first();
-      const rail = track.locator(':scope > div[data-pui-style]').first();
+      const paint = decoration(thumb);
+      const rail = decoration(track);
+      await expect.poll(() => paint.count()).toBe(1);
+      await expect.poll(() => rail.count()).toBe(1);
       const capture = async (
         state: string,
         crop = previewer.locator('[data-slider-case="horizontal"]')
@@ -156,9 +161,9 @@ for (const runtime of RUNTIMES)
           file,
           sha256: createHash('sha256').update(bytes).digest('hex'),
           thumb: await geometry(targetThumb),
-          paint: await geometry(targetThumb.locator(':scope > div[data-pui-style]').first()),
+          paint: await geometry(decoration(targetThumb)),
           track: await geometry(targetTrack),
-          rail: await geometry(targetTrack.locator(':scope > div[data-pui-style]').first()),
+          rail: await geometry(decoration(targetTrack)),
         });
       };
       const rem = await page.evaluate(() =>
@@ -236,11 +241,18 @@ for (const runtime of RUNTIMES)
       await page.keyboard.press('Shift+Tab');
       await expect.poll(() => thumb.getAttribute('data-focus-visible')).not.toBeNull();
       await capture('focus-visible');
+      // outline-none retains a transparent native focus fallback on the owner.
+      // The passive paint supplies the family ring and forced-colors outline.
+      expect(await geometry(thumb)).toMatchObject({
+        outlineStyle: 'solid',
+        outlineWidth: '2px',
+        outlineColor: 'rgba(0, 0, 0, 0)',
+      });
       interaction('forced-colors-active', 'page');
       await page.emulateMedia({ forcedColors: 'active' });
       await expect.poll(async () => (await geometry(paint)).outlineStyle).toBe('solid');
       expect((await geometry(paint)).outlineWidth).toBe('2px');
-      expect((await geometry(thumb)).outlineStyle).toBe('none');
+      expect(await geometry(thumb)).toMatchObject({ outlineStyle: 'solid', outlineWidth: '2px' });
       await capture('forced-colors-focus-visible');
       interaction('forced-colors-none', 'page');
       await page.emulateMedia({ forcedColors: 'none' });
@@ -265,13 +277,9 @@ for (const runtime of RUNTIMES)
       await capture('readonly', previewer.locator('[data-slider-case="readonly"]'));
       const vertical = ref('vertical-track');
       expect((await geometry(vertical)).height).toBeGreaterThanOrEqual(10 * rem);
-      expect((await geometry(vertical.locator(':scope > div[data-pui-style]').first())).width).toBe(
-        rem / 4
-      );
+      expect((await geometry(decoration(vertical))).width).toBe(rem / 4);
       await capture('vertical', previewer.locator('[data-slider-case="vertical"]'));
-      expect(
-        (await geometry(ref('field-thumb').locator(':scope > div[data-pui-style]').first())).width
-      ).toBe(rem);
+      expect((await geometry(decoration(ref('field-thumb')))).width).toBe(rem);
       interaction('click', 'field-thumb');
       await ref('field-thumb').click();
       interaction('keyboard-press', 'current-focus', 'End');
