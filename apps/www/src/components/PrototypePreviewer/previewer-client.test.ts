@@ -38,18 +38,22 @@ vi.mock('./prototype-modules', () => ({
 vi.mock('./demo-modules', () => ({
   loadDemo: async () => ({ type: 'demo', root: { kind: 'box', children: ['Custom demo'] } }),
 }));
-vi.mock('./projection-theme', () => ({
-  resolveProjectionThemeSurfaceStyle: () => ({ '--pui-background': '#fff' }),
-  applyProjectionThemeSurfaceStyle: () => {},
-  watchProjectionThemeSurfaceStyle: (
-    _family: string,
-    _root: HTMLElement,
-    callback: (theme: unknown) => void
-  ) => {
-    callback({ '--pui-background': '#fff' });
-    return vi.fn();
-  },
-}));
+vi.mock('./projection-theme', async (original) => {
+  const current = await original<typeof import('./projection-theme')>();
+  return {
+    resolveProjectionThemeSurfaceStyle: () => ({ '--pui-background': '#fff' }),
+    scheduleProjectionThemeRead: current.scheduleProjectionThemeRead,
+    applyProjectionThemeSurfaceStyle: () => {},
+    watchProjectionThemeSurfaceStyle: (
+      _family: string,
+      _root: HTMLElement,
+      callback: (theme: unknown) => void
+    ) => {
+      callback({ '--pui-background': '#fff' });
+      return vi.fn();
+    },
+  };
+});
 vi.mock('./demo-renderer', () => ({ renderDemo: demoSpies.render }));
 vi.mock('./runtimes/host-mount', () => ({
   releaseHostMount: (host: HTMLElement) => hostMountSpies.release(host),

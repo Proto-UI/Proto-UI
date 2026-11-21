@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RuntimeId } from './runtimes/ids';
 
-const control = vi.hoisted(() => ({ gates: [] as Promise<void>[], entered: 0 }));
+const control = vi.hoisted(() => ({
+  gates: [] as Promise<void>[],
+  entered: 0,
+  beforeAppearanceRead: null as ((scope: Element) => void) | null,
+}));
 // Exercise the actual renderers, Runtime Tabs and borrowed-content shell. Only
 // CDN acquisition and explicitly controlled demo-load races are substituted.
 vi.mock('./runtimes/react-runtime', async () => {
@@ -38,6 +42,19 @@ vi.mock('./demo-modules', async (original) => {
   };
 });
 
+vi.mock('./projection-theme', async (original) => {
+  const current = await original<typeof import('./projection-theme')>();
+  return {
+    ...current,
+    scheduleProjectionThemeRead<T>(scope: Element, read: () => T): Promise<T> {
+      return current.scheduleProjectionThemeRead(scope, () => {
+        control.beforeAppearanceRead?.(scope);
+        return read();
+      });
+    },
+  };
+});
+
 import { initPreviewer } from './previewer-client';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './projection-theme';
 
@@ -51,6 +68,7 @@ const roots: Root[] = [];
 beforeEach(() => {
   control.gates = [];
   control.entered = 0;
+  control.beforeAppearanceRead = null;
   localStorage.clear();
   for (const token of WEBSITE_SHADCN_THEME_TOKENS)
     document.documentElement.style.setProperty(
@@ -158,6 +176,25 @@ describe('generic preview ready publication owns an unlocked actual content fram
       expectReady(events);
     });
   }
+
+  it('samples the latest startup theme while the shell remains gated', async () => {
+    const read = vi.fn((scope: Element) => {
+      expect(scope.querySelector<HTMLElement>('.host')?.inert).toBe(true);
+      expect(scope.querySelector('[role="status"]')).not.toBeNull();
+      (scope as HTMLElement).style.setProperty('--pui-background', '#123456');
+    });
+    control.beforeAppearanceRead = read;
+    const { root, api, events } = fixture();
+    await vi.waitFor(() => expect(events).toHaveLength(2));
+    expect(read).toHaveBeenCalledOnce();
+    const surface = root.querySelector<HTMLElement>('.pui-runtime-preview-surface');
+    expect(surface?.style.getPropertyValue('--pui-background')).toBe('#123456');
+    expectReady(events);
+
+    await api.switchRuntime('vue');
+    expect(read).toHaveBeenCalledOnce();
+    expectReady(events);
+  });
 
   for (const outcome of ['resolve', 'reject'] as const) {
     it(`a stale ${outcome} cannot unlock or publish over the pending latest switch`, async () => {
