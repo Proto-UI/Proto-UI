@@ -1,0 +1,2500 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T23:41:54.147977+00:00",
+  "sourceCheckpoint": {
+    "revision": "26d359cd2642fce9aa350ceb88644cae26763282",
+    "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+    "integratedMain": "2d21cb4d6c3f726c5d6756d03739d466faa7ff10"
+  },
+  "purpose": "Bind the finite native-observation and synthetic-layout corrections to their actual local gates before a separate exact-head native cycle.",
+  "actualLocalExecution": {
+    "generator": {
+      "phase": "generator",
+      "command": [
+        "node",
+        "scripts/coverage-matrices/prototype-coverage.mjs",
+        "--refresh-candidate",
+        "26d359cd2642fce9aa350ceb88644cae26763282",
+        "--write"
+      ],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-final-closeout",
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-21T23:28:46.084380+00:00",
+      "finishedAt": "2026-11-21T23:29:08.308946+00:00",
+      "seconds": 22.225,
+      "exitCode": 0,
+      "before": {
+        "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+        "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+        "statusPorcelain": "",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "318745b54a23fc6ad3029035882d740aecdf3603b12c9bef23103a603319fdd3"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "80120af764054b4b30024134bc347a2ddb4748c67361060a1f869425d66dac76"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+            "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+            "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+            "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+            "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+            "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+            "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+            "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+            "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+            "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+            "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+            "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+            "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+            "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/src/compile.ts",
+            "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/source-graph.test.ts",
+            "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "after": {
+        "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+        "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "f1e28321b9db243bdba26695481ab1e697d4c74f2e490171c450aa2761645881",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "a6b2dddc1cc6fc79b840a205fbeb22ea123e3c82ac55ca1dde25951509f8d279"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+            "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+            "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+            "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+            "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+            "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+            "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+            "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+            "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+            "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+            "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+            "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+            "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+            "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/src/compile.ts",
+            "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/source-graph.test.ts",
+            "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": null,
+      "logBytes": 113,
+      "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+    },
+    "coverage": {
+      "phase": "coverage",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-final-closeout",
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-21T23:34:14.466328+00:00",
+      "finishedAt": "2026-11-21T23:41:41.686840+00:00",
+      "seconds": 447.221,
+      "exitCode": 0,
+      "before": {
+        "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+        "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "4108cf70ff692883cc7789dc6513809cc05aef01c67f6d084209aba8d658ffba",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "05a3bef4e7b6e007e2a42f7f8409ffc857de995fa5df041a5c64b6d737370d44"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+            "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+            "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+            "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+            "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+            "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+            "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+            "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+            "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+            "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+            "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+            "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+            "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+            "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/src/compile.ts",
+            "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/source-graph.test.ts",
+            "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "after": {
+        "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+        "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "4108cf70ff692883cc7789dc6513809cc05aef01c67f6d084209aba8d658ffba",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "05a3bef4e7b6e007e2a42f7f8409ffc857de995fa5df041a5c64b6d737370d44"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+            "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+            "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+            "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+            "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+            "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+            "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+            "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+            "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+            "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+            "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+            "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+            "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+            "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/src/compile.ts",
+            "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/source-graph.test.ts",
+            "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": true,
+      "logBytes": 484454,
+      "logSha256": "ed78b6a341916e22cfdbd7f0807f27d75002f3b676432dbcc5935e8aa64b9a47",
+      "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+    },
+    "types": {
+      "phase": "types",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-final-closeout",
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-21T23:34:14.452775+00:00",
+      "finishedAt": "2026-11-21T23:38:07.631486+00:00",
+      "seconds": 233.179,
+      "exitCode": 0,
+      "before": {
+        "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+        "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "4108cf70ff692883cc7789dc6513809cc05aef01c67f6d084209aba8d658ffba",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "05a3bef4e7b6e007e2a42f7f8409ffc857de995fa5df041a5c64b6d737370d44"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+            "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+            "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+            "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+            "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+            "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+            "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+            "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+            "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+            "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+            "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+            "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+            "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+            "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/src/compile.ts",
+            "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/source-graph.test.ts",
+            "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "after": {
+        "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+        "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "4108cf70ff692883cc7789dc6513809cc05aef01c67f6d084209aba8d658ffba",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "05a3bef4e7b6e007e2a42f7f8409ffc857de995fa5df041a5c64b6d737370d44"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+            "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+            "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+            "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+            "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+            "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+            "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+            "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+            "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+            "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+            "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+            "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+            "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+            "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+            "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/src/compile.ts",
+            "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/source-graph.test.ts",
+            "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+            "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+            "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/resizable-group.test.ts",
+            "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": true,
+      "logBytes": 10548,
+      "logSha256": "be4aa03ef0efc2d056637199c9e04d9f4bc704e055ac643dccd6cb854498fd57",
+      "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+    }
+  },
+  "coverageSummary": {
+    "matrices": 2,
+    "counts": {
+      "tests": 4491,
+      "pass": 4490,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 1,
+      "todo": 0
+    },
+    "portableSkip": "﹣ portable suite does not run Linux media integration (0.091977ms) # NOT RUN here: node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs; required separately in Linux CI"
+  },
+  "typeSummary": {
+    "files": 1259,
+    "errors": 0,
+    "warnings": 0,
+    "hints": 32
+  },
+  "integratedAxisControls": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "--pool=forks",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/fbd6f62bb640/regression-main2d-publication/integrated-axis-vitest.json",
+      "packages/adapters/base/test/web-axis-input-host.test.ts",
+      "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+      "packages/adapters/react/test/axis-input.integration.test.ts",
+      "packages/adapters/vue/test/axis-input.integration.test.ts",
+      "packages/adapters/vue2/test/axis-input.integration.test.ts",
+      "packages/adapters/web-component/test/axis-input.integration.test.ts",
+      "packages/prototypes/base/test/carousel-continuous.test.ts",
+      "packages/prototypes/base/test/resizable-group.test.ts",
+      "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+    ],
+    "cwd": "/workspace/scratch/fbd6f62bb640/regression-final-closeout",
+    "startedAt": "2026-11-21T23:27:35.489918+00:00",
+    "finishedAt": "2026-11-21T23:27:48.055220+00:00",
+    "seconds": 12.565,
+    "exitCode": 0,
+    "before": {
+      "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+      "status": "",
+      "sourceFiles": [
+        {
+          "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+          "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+          "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+          "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+          "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+          "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+          "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/prototypes/base/test/resizable-group.test.ts",
+          "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+          "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+          "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+          "matchesCommit": true
+        },
+        {
+          "path": "vitest.config.ts",
+          "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+          "matchesCommit": true
+        }
+      ]
+    },
+    "after": {
+      "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+      "status": "",
+      "sourceFiles": [
+        {
+          "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+          "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+          "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+          "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+          "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+          "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+          "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/prototypes/base/test/resizable-group.test.ts",
+          "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+          "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+          "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+          "matchesCommit": true
+        },
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+          "matchesCommit": true
+        },
+        {
+          "path": "vitest.config.ts",
+          "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+          "matchesCommit": true
+        }
+      ]
+    },
+    "selectedFiles": [
+      "packages/adapters/base/test/web-axis-input-host.test.ts",
+      "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+      "packages/adapters/react/test/axis-input.integration.test.ts",
+      "packages/adapters/vue/test/axis-input.integration.test.ts",
+      "packages/adapters/vue2/test/axis-input.integration.test.ts",
+      "packages/adapters/web-component/test/axis-input.integration.test.ts",
+      "packages/prototypes/base/test/carousel-continuous.test.ts",
+      "packages/prototypes/base/test/resizable-group.test.ts",
+      "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+    ],
+    "reportedFiles": [
+      "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+      "packages/adapters/base/test/web-axis-input-host.test.ts",
+      "packages/adapters/react/test/axis-input.integration.test.ts",
+      "packages/adapters/vue/test/axis-input.integration.test.ts",
+      "packages/adapters/vue2/test/axis-input.integration.test.ts",
+      "packages/adapters/web-component/test/axis-input.integration.test.ts",
+      "packages/prototypes/base/test/carousel-continuous.test.ts",
+      "packages/prototypes/base/test/resizable-group.test.ts",
+      "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+    ],
+    "counts": {
+      "numTotalTests": 122,
+      "numPassedTests": 122,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0
+    },
+    "checks": {
+      "cleanSourceStable": true,
+      "exactNineFilesCollectedOnce": true,
+      "actual122PassNoOmission": true,
+      "commandExitZero": true
+    },
+    "logBytes": 206950,
+    "logSha256": "56fdaae4bfc24ec5664edd661fd40068c7b127ef3bd802e014b1996e472cc8a3",
+    "reportBytes": 46966,
+    "reportSha256": "650685b6a38133bb18e1bee39da60e8dd38030c16437dc3700f828ae31adea28",
+    "dependencyBoundary": "This integrated worktree uses its own real frozen offline pnpm installation. Earlier author-worktree symlink-based red/failed-attempt/green receipts remain historical and are not relabeled clean.",
+    "acceptanceBoundary": "Actual local nine-file regression evidence, not native layout or a final complete cycle."
+  },
+  "upstreamTimingControls": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "--pool=forks",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/fbd6f62bb640/regression-main2d-integration/timing-tests.vitest.json",
+      "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+      "packages/compiler/test/transition-timing-matrix.test.ts"
+    ],
+    "cwd": "/workspace/scratch/fbd6f62bb640/regression-main2d-closeout",
+    "startedAt": "2026-11-21T23:24:28.654076+00:00",
+    "endedAt": "2026-11-21T23:27:19.208221+00:00",
+    "durationSeconds": 170.554,
+    "exitCode": 0,
+    "toolchain": {
+      "node": "v24.22.3",
+      "pnpm": "10.32.1"
+    },
+    "before": {
+      "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+      "statusPorcelain": "",
+      "fileSha256": {
+        "packages/compiler/src/compile.ts": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+        "packages/compiler/test/source-graph.test.ts": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+        "packages/compiler/test/transition-timing-matrix.test.ts": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+        "packages/prototypes/base/test/transition-timing-matrix.test.ts": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8"
+      }
+    },
+    "after": {
+      "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+      "statusPorcelain": "",
+      "fileSha256": {
+        "packages/compiler/src/compile.ts": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+        "packages/compiler/test/source-graph.test.ts": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+        "packages/compiler/test/transition-timing-matrix.test.ts": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+        "packages/prototypes/base/test/transition-timing-matrix.test.ts": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8"
+      }
+    },
+    "sourceStable": true,
+    "beforeClean": true,
+    "afterClean": true,
+    "logPath": "/workspace/scratch/fbd6f62bb640/regression-main2d-integration/timing-tests.log",
+    "logBytes": 321977,
+    "logSha256": "04bbc3f33618dde58eeba366735733d94ba8d4b4c180415bc85e591a4d963323",
+    "reportPath": "/workspace/scratch/fbd6f62bb640/regression-main2d-integration/timing-tests.vitest.json",
+    "reportBytes": 7998,
+    "reportSha256": "45d0982189cde50e5532c865d5f1a6e282179fc95adc8ad51052bf5a0c3edebd",
+    "counts": {
+      "numTotalTestSuites": 10,
+      "numPassedTestSuites": 10,
+      "numFailedTestSuites": 0,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 26,
+      "numPassedTests": 26,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "success": true
+    },
+    "files": [
+      {
+        "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+        "status": "passed",
+        "caseCount": 19,
+        "caseStatusCounts": {
+          "passed": 19
+        }
+      },
+      {
+        "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+        "status": "passed",
+        "caseCount": 7,
+        "caseStatusCounts": {
+          "passed": 7
+        }
+      }
+    ],
+    "unhandledErrors": [],
+    "exactSelectedFilesOnce": true
+  },
+  "bindingAudit": {
+    "observedAt": "2026-11-21T23:34:18.493593+00:00",
+    "sourceRevision": "26d359cd2642fce9aa350ceb88644cae26763282",
+    "sourceTree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+    "comparisonCommit": "f0b502704b825b5b644639522555d13e3d64231e",
+    "previousProjectionSourceRevision": "0aa8a1472a06c3a170b658ca683536cb2c9539d1",
+    "sourceBindingCount": 5956,
+    "previousSourceBindingCount": 5955,
+    "allPreviousBindingPathsRetainedInOrder": true,
+    "addedSourceBindings": [
+      {
+        "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+        "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8"
+      }
+    ],
+    "addedSourceMatchesIntegratedMain": "2d21cb4d6c3f726c5d6756d03739d466faa7ff10",
+    "independentlyReconstructedInventoryMatches": true,
+    "allCurrentHashesAndGitObjectsMatch": true,
+    "sourceBindingDetails": {
+      "path": "source-bindings-detail.json",
+      "bytes": 1493014,
+      "sha256": "481be00aa0b900a7c3937d904eb5a48d8ac4a92c5fe91ae54c31d92d3cdaf251"
+    },
+    "hashRenewals": [
+      {
+        "path": "internal/website/self-hosting-coverage-matrix.md",
+        "beforeSha256": "7041fa96991efb56d51cd3f7d300bdc85fd573de4ab06ad969e05857adbab6eb",
+        "afterSha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5"
+      },
+      {
+        "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+        "beforeSha256": "9cc43f41042721e18534baef6e20c089e41ec202ea3162329a5f73aa18ccebc1",
+        "afterSha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b"
+      },
+      {
+        "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+        "beforeSha256": "ec1c576c9e27ed998a4af19b816239d947336c2e93cc6e95de0bd67822043787",
+        "afterSha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0"
+      },
+      {
+        "path": "packages/prototypes/base/test/resizable-group.test.ts",
+        "beforeSha256": "ecbed53bb14018cd31b1130e2d3a5a802b99f152ef0e867740efc6bf463b5785",
+        "afterSha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15"
+      }
+    ],
+    "proof": {
+      "verifiedCommit": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "verifiedTreeCount": 322,
+      "verifiedUniqueBlobCount": 5892,
+      "verifiedUniqueBlobBytes": 16307656,
+      "missingOrUnusedProofTrees": [],
+      "boundary": "Git object integrity only, no signature or approval assertion."
+    },
+    "finitePolicies": {
+      "details": {
+        "path": "finite-policy-audit.json",
+        "bytes": 109638,
+        "sha256": "7880a60c0516755f5b3ac32295b69e0c2bd3879ba0baf1f632398d700b1fce02"
+      },
+      "counts": {
+        "importer": 122,
+        "companion": 1
+      },
+      "allDefiningPolicyBytesUnchanged": true,
+      "allCurrentBodiesMatch": true,
+      "websiteBindings": 211,
+      "websitePathOrderAndOwnersUnchanged": true
+    },
+    "generatedOutputs": [
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+        "rawGeneratedSha256": "a6b2dddc1cc6fc79b840a205fbeb22ea123e3c82ac55ca1dde25951509f8d279",
+        "formattedSha256": "05a3bef4e7b6e007e2a42f7f8409ffc857de995fa5df041a5c64b6d737370d44",
+        "bytes": 3614747
+      },
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+        "rawGeneratedSha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9",
+        "formattedSha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9",
+        "bytes": 159357
+      },
+      {
+        "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+        "rawGeneratedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "formattedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "bytes": 50877
+      }
+    ],
+    "formattedJsonEqualsActualGenerator": true,
+    "markdownOnlyCandidateRevisionChanged": true,
+    "checklistByteIdentical": true,
+    "acceptance": {
+      "allOtherProjectionFieldsUnchanged": true,
+      "allConsumerRowsByteIdenticalToF0": true,
+      "rowCounts": {
+        "comparisonRows": 71,
+        "projectionRows": 22,
+        "consumerRows": 141,
+        "migrationLedger": 101
+      },
+      "catalogStates": {
+        "draft": 585
+      },
+      "gpuiStates": {
+        "required-unassessed": 456
+      },
+      "noOwnerCriteriaOrLifecyclePromotion": true
+    },
+    "generatorReceiptSha256": "996b0d1dfba20cdb8db2ec53985f5702e9a9368fc878461e0eb2edae5c3fbfbf",
+    "start": {
+      "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "patchSha256": "4108cf70ff692883cc7789dc6513809cc05aef01c67f6d084209aba8d658ffba"
+    },
+    "end": {
+      "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+      "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "patchSha256": "4108cf70ff692883cc7789dc6513809cc05aef01c67f6d084209aba8d658ffba"
+    },
+    "outcome": "PASS",
+    "boundary": "Independent finite source-proof and policy integrity audit. Full gates, native executions, final derived-head readback and remaining product acceptance are separate."
+  },
+  "changedSourcePathsFromF0": [
+    "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+    "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+    "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+    "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+    "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+    "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+    "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+    "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+    "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+    "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+    "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+    "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+    "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+    "internal/website/self-hosting-coverage-matrix.md",
+    "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+    "packages/compiler/src/compile.ts",
+    "packages/compiler/test/source-graph.test.ts",
+    "packages/compiler/test/transition-timing-matrix.test.ts",
+    "packages/prototypes/base/test/carousel-continuous.test.ts",
+    "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+    "packages/prototypes/base/test/resizable-group.test.ts",
+    "packages/prototypes/base/test/transition-timing-matrix.test.ts"
+  ],
+  "correctionRecords": [
+    {
+      "path": "regression-final-closeout/internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+      "bytes": 10965,
+      "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd"
+    },
+    {
+      "path": "regression-final-closeout/internal/records/2026-11-22-select-demo-footprint-clearance.md",
+      "bytes": 3431,
+      "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a"
+    },
+    {
+      "path": "regression-final-closeout/internal/records/2026-11-22-select-demo-footprint-clearance.json",
+      "bytes": 20868,
+      "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef"
+    },
+    {
+      "path": "regression-final-closeout/internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+      "bytes": 5537,
+      "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b"
+    },
+    {
+      "path": "regression-final-closeout/internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+      "bytes": 43945,
+      "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1"
+    }
+  ],
+  "sourceReview": {
+    "websiteBindings": {
+      "observedAt": "2026-11-21T22:55:46.998533+00:00",
+      "head": "c02b01f5399fc6e3400f76ab6612df0b17ec33d0",
+      "ledger": "internal/website/self-hosting-coverage-matrix.md",
+      "completeBindingCount": 211,
+      "allBodyHashesMatch": true,
+      "allMatrixRowsByteIdentical": true,
+      "pathOrderAndOwnersUnchanged": true,
+      "changes": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+          "owner": "`www.demo.authored-controllers`",
+          "before": "b3610d4249358f84f24a535efcf4a2a82122df4fe2e637f1cc6f635fa7f19fd3",
+          "after": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9"
+        },
+        {
+          "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+          "owner": "`www.demo.authored-controllers`",
+          "before": "02942f7dee26c8dd7e3b0a3e02e17a28cdc1d3f65d5e49dfbf9845567639540a",
+          "after": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09"
+        }
+      ],
+      "sourceReview": "Complete bounded deltas reviewed; unchanged type-only imports, controllers and lifecycle/blocked states. No import policy expansion. Actual browser evidence remains separate."
+    },
+    "policyBoundary": "All defining importer-policy files retain their prior exact bytes; every one of the current finite bodies and Website bindings was independently hashed. No blanket refresh or new raw-import admission.",
+    "assertionBoundary": "Original assertion chains, numeric optical thresholds, case identities, authored skips and deadlines are retained. The four non-held stages of each tight negative contact fixture deliberately change from an optical premise to the exact conservative fallback premise, as recorded in the footprint correction. Retained assertion syntax is not a claim of unchanged negative-fixture semantics."
+  },
+  "upstreamIntegration": {
+    "observedAt": "2026-11-21T23:24:33.510828+00:00",
+    "source": "26d359cd2642fce9aa350ceb88644cae26763282",
+    "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+    "parents": [
+      "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+      "2d21cb4d6c3f726c5d6756d03739d466faa7ff10"
+    ],
+    "virtualMergeTree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+    "clean": true,
+    "changedPaths": [
+      "packages/compiler/src/compile.ts",
+      "packages/compiler/test/source-graph.test.ts",
+      "packages/compiler/test/transition-timing-matrix.test.ts",
+      "packages/prototypes/base/test/transition-timing-matrix.test.ts"
+    ],
+    "incomingFiles": [
+      {
+        "path": "packages/compiler/src/compile.ts",
+        "bytes": 9422,
+        "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+        "gitBlob": "df802f513861068810c35639730b894ce70ebde9",
+        "exactIncomingBytes": true
+      },
+      {
+        "path": "packages/compiler/test/source-graph.test.ts",
+        "bytes": 16136,
+        "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+        "gitBlob": "956fa7ca21f3dfbcc0a2f43cbbd827e04ddf218e",
+        "exactIncomingBytes": true
+      },
+      {
+        "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+        "bytes": 13176,
+        "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+        "gitBlob": "a95ae95c3773786b29e36696d87844dee4ca465d",
+        "exactIncomingBytes": true
+      },
+      {
+        "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+        "bytes": 7938,
+        "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+        "gitBlob": "457e37520abdd4b9bef0c39353af0b04a6c39dd8",
+        "exactIncomingBytes": true
+      }
+    ],
+    "retainedReviewedFiles": [
+      {
+        "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+        "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+        "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+        "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+        "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+        "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+        "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+        "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+        "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+        "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+        "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+        "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+        "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+        "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+        "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "internal/website/self-hosting-coverage-matrix.md",
+        "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+        "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+        "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+        "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+        "unchangedFromReviewedCeab": true
+      },
+      {
+        "path": "packages/prototypes/base/test/resizable-group.test.ts",
+        "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+        "unchangedFromReviewedCeab": true
+      }
+    ],
+    "newFiniteBindingPath": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+    "newGeneralFiles": [
+      "packages/compiler/test/transition-timing-matrix.test.ts",
+      "packages/prototypes/base/test/transition-timing-matrix.test.ts"
+    ],
+    "boundary": "Exact source integration and unchanged reviewed correction bytes. Incoming Compiler implementation/tests remain their original owner work; no new behavioral acceptance or GitHub approval is implied."
+  },
+  "previousCorrectionCheckpoint": {
+    "revision": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+    "actualLocalExecution": {
+      "generator": {
+        "phase": "generator",
+        "command": [
+          "node",
+          "scripts/coverage-matrices/prototype-coverage.mjs",
+          "--refresh-candidate",
+          "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "--write"
+        ],
+        "cwd": "/workspace/scratch/fbd6f62bb640/hover-footprint-fix",
+        "nodeOptions": "--max-old-space-size=4096",
+        "startedAt": "2026-11-21T23:12:21.697144+00:00",
+        "finishedAt": "2026-11-21T23:12:42.847372+00:00",
+        "seconds": 21.15,
+        "exitCode": 0,
+        "before": {
+          "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+          "statusPorcelain": "",
+          "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "outputs": [
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+              "sha256": "318745b54a23fc6ad3029035882d740aecdf3603b12c9bef23103a603319fdd3"
+            },
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+              "sha256": "80120af764054b4b30024134bc347a2ddb4748c67361060a1f869425d66dac76"
+            },
+            {
+              "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+              "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+            }
+          ],
+          "reviewedSource": [
+            {
+              "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+              "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+              "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+              "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+              "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+              "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+              "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+              "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+              "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+              "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+              "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+              "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+              "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+              "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+              "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/website/self-hosting-coverage-matrix.md",
+              "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCheckpoint": true
+            }
+          ]
+        },
+        "after": {
+          "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+          "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+          "trackedPatchSha256": "81cb1dac31cad9ad294082c997e9e56f51abee72cd7b410ce6dd9c16d74c4944",
+          "outputs": [
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+              "sha256": "bf742220a82b7bececb844a1a3dfd275a5b2aaf2ec0ba2fa4091a39bfbd10c82"
+            },
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+              "sha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814"
+            },
+            {
+              "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+              "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+            }
+          ],
+          "reviewedSource": [
+            {
+              "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+              "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+              "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+              "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+              "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+              "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+              "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+              "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+              "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+              "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+              "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+              "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+              "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+              "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+              "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/website/self-hosting-coverage-matrix.md",
+              "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCheckpoint": true
+            }
+          ]
+        },
+        "sourceAndGeneratedStable": null,
+        "logBytes": 113,
+        "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+        "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+      },
+      "coverage": {
+        "phase": "coverage",
+        "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+        "cwd": "/workspace/scratch/fbd6f62bb640/hover-footprint-fix",
+        "nodeOptions": "--max-old-space-size=4096",
+        "startedAt": "2026-11-21T23:13:57.334534+00:00",
+        "finishedAt": "2026-11-21T23:21:20.990979+00:00",
+        "seconds": 443.656,
+        "exitCode": 0,
+        "before": {
+          "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+          "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+          "trackedPatchSha256": "4330b5f6a5890a2b93babe9108accc2871a36df581bb38380122259438556b53",
+          "outputs": [
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+              "sha256": "30a76448979db515c710ef6090eaa914877a1e816ed4f89ed3ed4b0f3a7f3abd"
+            },
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+              "sha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814"
+            },
+            {
+              "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+              "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+            }
+          ],
+          "reviewedSource": [
+            {
+              "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+              "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+              "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+              "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+              "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+              "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+              "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+              "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+              "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+              "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+              "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+              "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+              "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+              "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+              "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/website/self-hosting-coverage-matrix.md",
+              "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCheckpoint": true
+            }
+          ]
+        },
+        "after": {
+          "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+          "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+          "trackedPatchSha256": "4330b5f6a5890a2b93babe9108accc2871a36df581bb38380122259438556b53",
+          "outputs": [
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+              "sha256": "30a76448979db515c710ef6090eaa914877a1e816ed4f89ed3ed4b0f3a7f3abd"
+            },
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+              "sha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814"
+            },
+            {
+              "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+              "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+            }
+          ],
+          "reviewedSource": [
+            {
+              "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+              "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+              "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+              "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+              "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+              "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+              "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+              "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+              "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+              "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+              "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+              "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+              "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+              "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+              "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/website/self-hosting-coverage-matrix.md",
+              "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCheckpoint": true
+            }
+          ]
+        },
+        "sourceAndGeneratedStable": true,
+        "logBytes": 484465,
+        "logSha256": "962b7ec0526c52a56bf06e60d86b32f135e98b4f75a9bc8826e77422917c4fc5",
+        "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+      },
+      "types": {
+        "phase": "types",
+        "command": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+        "cwd": "/workspace/scratch/fbd6f62bb640/hover-footprint-fix",
+        "nodeOptions": "--max-old-space-size=4096",
+        "startedAt": "2026-11-21T23:13:57.370565+00:00",
+        "finishedAt": "2026-11-21T23:17:48.987325+00:00",
+        "seconds": 231.617,
+        "exitCode": 0,
+        "before": {
+          "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+          "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+          "trackedPatchSha256": "4330b5f6a5890a2b93babe9108accc2871a36df581bb38380122259438556b53",
+          "outputs": [
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+              "sha256": "30a76448979db515c710ef6090eaa914877a1e816ed4f89ed3ed4b0f3a7f3abd"
+            },
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+              "sha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814"
+            },
+            {
+              "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+              "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+            }
+          ],
+          "reviewedSource": [
+            {
+              "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+              "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+              "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+              "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+              "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+              "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+              "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+              "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+              "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+              "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+              "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+              "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+              "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+              "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+              "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/website/self-hosting-coverage-matrix.md",
+              "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCheckpoint": true
+            }
+          ]
+        },
+        "after": {
+          "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+          "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+          "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+          "trackedPatchSha256": "4330b5f6a5890a2b93babe9108accc2871a36df581bb38380122259438556b53",
+          "outputs": [
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+              "sha256": "30a76448979db515c710ef6090eaa914877a1e816ed4f89ed3ed4b0f3a7f3abd"
+            },
+            {
+              "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+              "sha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814"
+            },
+            {
+              "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+              "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+            }
+          ],
+          "reviewedSource": [
+            {
+              "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+              "sha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+              "sha256": "c39dc91b81ca8e10cddb966134d0bbf81c51ef1a815b6cdff9948a8f16602dbd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.test.ts",
+              "sha256": "29a9180dab06245f6ceaa3d88920611d21bc174da122029ba4238344990095df",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+              "sha256": "6ba4ddb62d1bb0c786ad73cf1107b4cfbd245ccbd2048173b26dca5799e2edb9",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+              "sha256": "b9cedf54274b20dea566dbb92caad5950f04aa0ce3cd7cc9e338bb4577cce847",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts",
+              "sha256": "f17375ba4252c5bfa104c27afc2c5dc559dc739dc2e3eb823e8207f44abc31d7",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts",
+              "sha256": "ee69f4e43435acd99baf3df9f9d01372ffe0b8d27f68b0f3043a665785fd2fb8",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+              "sha256": "cd3b93aaab36f222488f91cff9e044f0998a0a6bcbe300f55c6bab2e36fc38a4",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+              "sha256": "850260e8519503926f6fcbc71d1054bc8d468864fe7b1ec97ddc8d825f070387",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.json",
+              "sha256": "014e5c30cdef1a9960f4daf42a66b0137119d6575e40e2cea7b0beb3f8debaf1",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-axis-synthetic-layout-fixtures.md",
+              "sha256": "c07d3fabd69b040d30bcb5f4140ba12cd1aeb9f83863102d7f39563d5f0c867b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-liquid-contact-footprint-observation-sync.md",
+              "sha256": "88cdcf01bde2c844e7d53c61f658954fb0729834560450adef910078bd4659cd",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.json",
+              "sha256": "e00d85313eeb83241ab49fda1f0780618c7b70e6887ba3689f89812dbe7294ef",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/records/2026-11-22-select-demo-footprint-clearance.md",
+              "sha256": "71f39668d0b00798fe71caea6f3f622bb59cec1005d2c935e1d4b13295af387a",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "internal/website/self-hosting-coverage-matrix.md",
+              "sha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCheckpoint": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCheckpoint": true
+            }
+          ]
+        },
+        "sourceAndGeneratedStable": true,
+        "logBytes": 10542,
+        "logSha256": "b286ddc66b6cef78d62475f2e3639ccdac0047a790101b116187338391065702",
+        "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+      }
+    },
+    "bindingAudit": {
+      "observedAt": "2026-11-21T23:14:00.835072+00:00",
+      "sourceRevision": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+      "sourceTree": "a3edc4508a74fefda35afe48255641589db657b4",
+      "comparisonCommit": "f0b502704b825b5b644639522555d13e3d64231e",
+      "previousProjectionSourceRevision": "0aa8a1472a06c3a170b658ca683536cb2c9539d1",
+      "sourceBindingCount": 5955,
+      "allBindingPathsAndOrderUnchanged": true,
+      "independentlyReconstructedInventoryMatches": true,
+      "allCurrentHashesAndGitObjectsMatch": true,
+      "sourceBindingDetails": {
+        "path": "source-bindings-detail.json",
+        "bytes": 1492754,
+        "sha256": "fd95a30400acc979ca2927f90b50b23d23ed279be157e84b74131b03623dc55e"
+      },
+      "hashRenewals": [
+        {
+          "path": "internal/website/self-hosting-coverage-matrix.md",
+          "beforeSha256": "7041fa96991efb56d51cd3f7d300bdc85fd573de4ab06ad969e05857adbab6eb",
+          "afterSha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5"
+        },
+        {
+          "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "beforeSha256": "9cc43f41042721e18534baef6e20c089e41ec202ea3162329a5f73aa18ccebc1",
+          "afterSha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b"
+        },
+        {
+          "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+          "beforeSha256": "ec1c576c9e27ed998a4af19b816239d947336c2e93cc6e95de0bd67822043787",
+          "afterSha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0"
+        },
+        {
+          "path": "packages/prototypes/base/test/resizable-group.test.ts",
+          "beforeSha256": "ecbed53bb14018cd31b1130e2d3a5a802b99f152ef0e867740efc6bf463b5785",
+          "afterSha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15"
+        }
+      ],
+      "proof": {
+        "verifiedCommit": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+        "verifiedTreeCount": 322,
+        "verifiedUniqueBlobCount": 5891,
+        "verifiedUniqueBlobBytes": 16299718,
+        "missingOrUnusedProofTrees": [],
+        "boundary": "Git object integrity only, no signature or approval assertion."
+      },
+      "finitePolicies": {
+        "details": {
+          "path": "finite-policy-audit.json",
+          "bytes": 109638,
+          "sha256": "f7a5d493e6e55c90f3eadb0ca2ce27d20543440b265f6a0bcd3b5dd27d48b983"
+        },
+        "counts": {
+          "importer": 122,
+          "companion": 1
+        },
+        "allDefiningPolicyBytesUnchanged": true,
+        "allCurrentBodiesMatch": true,
+        "websiteBindings": 211,
+        "websitePathOrderAndOwnersUnchanged": true
+      },
+      "generatedOutputs": [
+        {
+          "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+          "rawGeneratedSha256": "bf742220a82b7bececb844a1a3dfd275a5b2aaf2ec0ba2fa4091a39bfbd10c82",
+          "formattedSha256": "30a76448979db515c710ef6090eaa914877a1e816ed4f89ed3ed4b0f3a7f3abd",
+          "bytes": 3614347
+        },
+        {
+          "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+          "rawGeneratedSha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814",
+          "formattedSha256": "1d010e0b012ae9555f078348292a77a02208c35e4e8e78f228c0b1ed8880b814",
+          "bytes": 159357
+        },
+        {
+          "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+          "rawGeneratedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+          "formattedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+          "bytes": 50877
+        }
+      ],
+      "formattedJsonEqualsActualGenerator": true,
+      "markdownOnlyCandidateRevisionChanged": true,
+      "checklistByteIdentical": true,
+      "acceptance": {
+        "allOtherProjectionFieldsUnchanged": true,
+        "allConsumerRowsByteIdenticalToF0": true,
+        "rowCounts": {
+          "comparisonRows": 71,
+          "projectionRows": 22,
+          "consumerRows": 141,
+          "migrationLedger": 101
+        },
+        "catalogStates": {
+          "draft": 585
+        },
+        "gpuiStates": {
+          "required-unassessed": 456
+        },
+        "noOwnerCriteriaOrLifecyclePromotion": true
+      },
+      "generatorReceiptSha256": "9b57b4933332883d4de6c7d6da59eac62e77c149fe804ff60cfb36d20d0ca475",
+      "start": {
+        "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+        "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+        "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "patchSha256": "4330b5f6a5890a2b93babe9108accc2871a36df581bb38380122259438556b53"
+      },
+      "end": {
+        "head": "ceab4cacc03baf8a49fd400ee70473a5bf6d53bb",
+        "tree": "a3edc4508a74fefda35afe48255641589db657b4",
+        "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "patchSha256": "4330b5f6a5890a2b93babe9108accc2871a36df581bb38380122259438556b53"
+      },
+      "outcome": "PASS",
+      "boundary": "Independent finite source-proof and policy integrity audit. Full gates, native executions, final derived-head readback and remaining product acceptance are separate."
+    },
+    "boundary": "Immutable actual ceab local results. These are not relabeled as results for the main2d integration."
+  },
+  "historicalNativeEvidence": {
+    "runId": 44956263999,
+    "attempt": 1,
+    "head": "f0b502704b825b5b644639522555d13e3d64231e",
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44956263999",
+    "completedMetadata": {
+      "runId": 44956263999,
+      "attempt": 1,
+      "head": "f0b502704b825b5b644639522555d13e3d64231e",
+      "tree": "68bb8b5eb129c819f1f652d6537f33c7614c207e",
+      "observedAt": "2026-11-21T23:34:26.963614+00:00",
+      "status": "completed",
+      "conclusion": "failure",
+      "createdAt": "2026-11-21T22:20:44Z",
+      "updatedAt": "2026-11-21T23:30:56Z",
+      "lastJobCompletedAt": "2026-11-21T23:30:55Z",
+      "jobCount": 103,
+      "jobPages": 2,
+      "counts": {
+        "success": 67,
+        "failure": 36
+      },
+      "allJobsTerminal": true,
+      "artifactCount": 94,
+      "artifactPages": 1,
+      "checkCount": 103,
+      "checkPages": 2,
+      "jobsMatchChecks": true,
+      "annotationCount": 232,
+      "annotationLevels": {
+        "warning": 113,
+        "failure": 116,
+        "notice": 3
+      },
+      "cycleReportArtifact": {
+        "id": 14729813601,
+        "node_id": "MDg6QXJ0aWZhY3QxNDcyOTgxMzYwMQ==",
+        "name": "regression-cycle-f0b502704b825b5b644639522555d13e3d64231e-44956263999-attempt-1",
+        "size_in_bytes": 26809,
+        "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14729813601",
+        "archive_download_url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14729813601/zip",
+        "expired": false,
+        "digest": "sha256:fa9aa9fb3858433c8f27141e6a9d0f21b4847f79085c996ba474f0c2732e39db",
+        "created_at": "2026-11-21T23:30:53Z",
+        "updated_at": "2026-11-21T23:30:53Z",
+        "expires_at": "2026-12-21T23:30:52Z",
+        "workflow_run": {
+          "id": 44956263999,
+          "repository_id": 840178061,
+          "head_repository_id": 840178061,
+          "head_branch": "fix/regression-native-closeout-20261122",
+          "head_sha": "f0b502704b825b5b644639522555d13e3d64231e"
+        }
+      },
+      "cancelledOrTimedOut": [],
+      "boundary": "Complete native metadata, stable pagination and annotations. Artifact metadata is not a claim that every ZIP has been downloaded or every failed job is a product defect."
+    },
+    "metadataReceiptIdentity": {
+      "path": "ci-native-cycle-44956263999-attempt-1/final-metadata/final-inventory-summary.json",
+      "bytes": 1605,
+      "sha256": "7a3b2d02c52047ef54782bc1f5101124ec3623a843046bc4daae8aa425e505ba"
+    },
+    "boundary": "The original f0 failures retain their original source. Its 103 terminal jobs (67 success, 36 failure), source-bound domain reports and complete paged inventory are separate from this local correction. Terminal jobs do not establish unexecuted assertions or make each failed job a product defect. No f0 observation is relabeled as a pass for the new source."
+  },
+  "derivedCommitPlan": {
+    "expectedPaths": [
+      "internal/coverage-matrices/prototype-coverage-matrix.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.md",
+      "internal/records/2026-11-22-regression-final-candidate-binding.json",
+      "internal/records/2026-11-22-regression-final-candidate-binding.md"
+    ],
+    "sourceEquivalence": "Only the two actual generated outputs and these two records may differ from the checkpoint. Read back every finite binding and tested source against the containing commit.",
+    "strictBudgetRequirement": "Measure the clean containing head with the existing reviewed strict policy, retaining all nine blocking probes and both diagnostics.",
+    "nativeRequirement": "Run the existing Liquid and Select native workflows, then the complete CI workflow against the same containing head. Preserve each failure and all omitted evidence. Targeted executions cannot substitute for the complete cycle.",
+    "statusAtCreation": "The containing derived commit and its native executions do not yet exist. Their real identities and results belong in the PR and native artifacts."
+  },
+  "acceptanceBoundary": "Source binding and executable regression evidence only. No draft/GPUI promotion, product acceptance, GitHub approval, merge or release claim. Ready for review may retain diagnosed and explicitly unresolved failures."
+}
