@@ -84,6 +84,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'border-b-ring',
   'border-border',
   'border-collapse',
+  'border-current',
   'border-destructive',
   'border-destructive/40',
   'border-destructive/50',
