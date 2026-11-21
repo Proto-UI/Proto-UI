@@ -1,0 +1,484 @@
+{
+  "kind": "Reviewed product-source projection refresh and local gate; final native head is a separate receipt",
+  "candidateSourceRevision": "85153d83969c65a812185e44e045fa0fe7e803c9",
+  "generator": {
+    "command": [
+      "node",
+      "scripts/coverage-matrices/prototype-coverage.mjs",
+      "--refresh-candidate",
+      "85153d83969c65a812185e44e045fa0fe7e803c9",
+      "--write"
+    ],
+    "startedAt": "2026-11-21T18:31:40.906018+00:00",
+    "candidateRevision": "85153d83969c65a812185e44e045fa0fe7e803c9",
+    "status": "completed",
+    "finishedAt": "2026-11-21T18:32:06.095242+00:00",
+    "durationSeconds": 25.189021010999568,
+    "exitCode": 0,
+    "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+  },
+  "invariants": {
+    "candidateRevision": "85153d83969c65a812185e44e045fa0fe7e803c9",
+    "previousCommittedCandidate": "fc17170c7a647cd4248efd51db3c3678b9b34e0a",
+    "intermediateCandidate": "b418cf0d1b32bd918364b5a22e1d723394a95a47",
+    "changedTopLevelFields": ["candidateSource"],
+    "allOtherTopLevelFieldsUnchanged": true,
+    "websiteRowsUnchanged": 78,
+    "consumerRowsUnchanged": 141,
+    "draftCatalogIdentities": 585,
+    "requiredUnassessedGpuiCells": 456,
+    "shadcnStyleCoverageUnchanged": true,
+    "previousSourceBindingCount": 5944,
+    "sourceBindingCount": 5955,
+    "liveBindingHashesAllMatch": true,
+    "changedBindingsFromCommittedCandidate": [
+      {
+        "path": "internal/website/self-hosting-coverage-matrix.md",
+        "previousSha256": "eec6a612e88f3dbe7aaa1aa28e054021905de8129e01e9d644e6f8baf18a4a83",
+        "currentSha256": "e365b7502a6335f2593eec83a430773795382c9d455d04b2085af7151331008f"
+      },
+      {
+        "path": "packages/prototypes/base/package.json",
+        "previousSha256": "8c44a24175207073d5c560aede2582496cd0dd2a2048a31cac88feb4903038e9",
+        "currentSha256": "c569717cda7570638ab51ea5a63c5b058214ff3688e6d7fbf3360a1ca00f30da"
+      },
+      {
+        "path": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+        "previousSha256": "e759154d231b9615b0290e4162505c3dc8fb9eb893d8bbc749fdc5385bfbda5f",
+        "currentSha256": "fb758f9c2451369cd513cb33201cd2adfb8e9347d821f5d539b3b798e5ce4a05"
+      },
+      {
+        "path": "packages/prototypes/base/src/calendar/selection.ts",
+        "previousSha256": null,
+        "currentSha256": "3494ca74fb8f935f01c53806a59da9415e95571931a99bfc2b14768204221eb9"
+      },
+      {
+        "path": "packages/prototypes/base/src/calendar/types.ts",
+        "previousSha256": "ed0d35d1870e9dc4c59e83898d8ae282d1369ac88f1a691aa4f82d991e6bafa9",
+        "currentSha256": "2ad0b2878880673abc43ce3e1b02fd50d20564d4f6b71bc9cd38125995ab6fe8"
+      },
+      {
+        "path": "packages/prototypes/base/src/carousel/carousel.proto.ts",
+        "previousSha256": "f3717c3125f64db2353c9dd5d6c98dfa386f7eb71081f7fe5c362613c7c7940c",
+        "currentSha256": "222d2f2115662622a8944119c68eeaae2ea53200a0ac3a785eea35724f206f43"
+      },
+      {
+        "path": "packages/prototypes/base/src/carousel/model.ts",
+        "previousSha256": null,
+        "currentSha256": "7bcf7ef1c5f4bb97a1d44df8e3a8955722fe22016c47b86181feea48cfe402e3"
+      },
+      {
+        "path": "packages/prototypes/base/src/carousel/types.ts",
+        "previousSha256": "4c9cdef1d8d046b59bfb1a8e05beebd92d3543c37a4d7653949bdf93542c3da3",
+        "currentSha256": "279418f475f2b14c8a16148101a1f8e9f2ac68909c13390cac416979b6b77306"
+      },
+      {
+        "path": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+        "previousSha256": "4a6737d3622c2d5564b233d133af7a52760db83d61d7e129786b01e0ce354556",
+        "currentSha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/control.proto.ts",
+        "previousSha256": "2f09cfa90d57038fa97d524a89982080e32fdb06a935bd020acdd3fd261456a7",
+        "currentSha256": "530bde5ced9b817295fb09406add75c4738f81b120ffeb43e3f3cd6343d4f353"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/decrement.proto.ts",
+        "previousSha256": "6a09f8b3c80db0edf9d8bb1db339a2d97918c30650bf521c5f70391a0009a973",
+        "currentSha256": "4f722e334673fcc8bc4212c582e8505a65c1c81f4ea436ad009361df4394aa55"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/format.ts",
+        "previousSha256": null,
+        "currentSha256": "ec4f77e83463a6ad7c07657ba88055a376e590b4bb3c197ae19216485e007ee3"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/increment.proto.ts",
+        "previousSha256": "3223bfc211e961b6b2bf07011b170880562cf6c493853f0c4d2e9a76e4cfd60d",
+        "currentSha256": "5bfed680db4278b56c936b396bdff95869def7d22b87044c9ce83b7aa45b34e1"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/input.proto.ts",
+        "previousSha256": "c1df4e4659d372a352004d77c80242e36ebdc0158e553865f5f479095de4e123",
+        "currentSha256": "806c7661fbaa8a6272d4d5024adfc390cbfd633f7b0367cfdcc30ec9794e59ca"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/label.proto.ts",
+        "previousSha256": "0f5ac325ccaeeb40ee0cf0a02476f6a06f93d723873e860f6e40864d17f068bb",
+        "currentSha256": "824911de8f46a3076b707a0e0755dac22c401c17eaa8c082902e7d6b513f2ed6"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/root.proto.ts",
+        "previousSha256": "05e67c05dc46df2cc6d7bc9fec35e46d99b4325e372f9dc8d4738c4a3fff349f",
+        "currentSha256": "607493090d0f8b50116a4607830efff88caa7fbc34658c5f59467769d950ac88"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/shared.ts",
+        "previousSha256": "f9da5f6837adf52b5f2771e59a0606c4725ef91e4474c393e355bff545ebf2f3",
+        "currentSha256": "362d04d1da5d7c9d75da71aea53fce35304a44d479be08646ea101d98c1d2202"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/types.ts",
+        "previousSha256": "788f9673072b56073fc552c47a3a2994738cd8fbfd8f877c2308a93f642d78db",
+        "currentSha256": "3b1b50512427fcf105dbb06dda00d8983b4439d0c5f667fc342e00493b4b462d"
+      },
+      {
+        "path": "packages/prototypes/base/src/resizable/model.ts",
+        "previousSha256": "ffe4ad9205c13b7d8c2e5e3c7cb045ea358ef4c2a431bc1ebff5a959a307648f",
+        "currentSha256": "2e63e74b7101966b64c98e302f30ae9207f1cdf34ccb739483fc5d28842aac3e"
+      },
+      {
+        "path": "packages/prototypes/base/src/resizable/resizable.proto.ts",
+        "previousSha256": "2e4d31d96722c4fc2182239eb95e0470026a03d11e661b892d2035047018e88b",
+        "currentSha256": "64813753ef5c364e845cb7d29b326b5f45734bca3649f5dcc534d36a7f0dc62c"
+      },
+      {
+        "path": "packages/prototypes/base/src/resizable/types.ts",
+        "previousSha256": "cf42e54c428a19f5bc77cf94306c7b3fe3ceeea83a6eb16a6a2952e66137e3fb",
+        "currentSha256": "efc769ee786a833229f23577d217727bc624d27e837fa8cf72dcdb25455c90e5"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-family-recipes.test.ts",
+        "previousSha256": "8af3a9bce8bba5d9f913e007479c88ef229956e3953d7cd8b82825db64e5e493",
+        "currentSha256": "241acf664f024240f726cec3858c627a0818abc35051b5d68a897f89f1004c3c"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-public-handles.test.ts",
+        "previousSha256": "453f483056de4aa5b868e779718b301dee7a99f3058f5f7a78f6206d296e0c14",
+        "currentSha256": "1b30a75bf4f71029df436ec08c683495981fe0e2e8e67ab257e46dcd8841650b"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-selection.test.ts",
+        "previousSha256": null,
+        "currentSha256": "4f36a47ee587143d3f2dd475a570a48b452e35953b3bd8cf52558d406fb117b5"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-selection.types.ts",
+        "previousSha256": null,
+        "currentSha256": "341a45529ce6f1768d7488761d7a6436acc2f20fbf220b6eabbbd413231cdba3"
+      },
+      {
+        "path": "packages/prototypes/base/test/calendar-variable-weeks.test.ts",
+        "previousSha256": "a2825f91795c974c2c97a59ab70f749bbe12c551214004f35a9e278d6d8d1673",
+        "currentSha256": "001b45553365a96e99304fb7ef2e0b910f3558558e06505ad9074e8c4cc6e7a6"
+      },
+      {
+        "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+        "previousSha256": null,
+        "currentSha256": "9cc43f41042721e18534baef6e20c089e41ec202ea3162329a5f73aa18ccebc1"
+      },
+      {
+        "path": "packages/prototypes/base/test/carousel-resizable-public-handles.test.ts",
+        "previousSha256": "43c8530263a6adefd2f0b551094b3aa89eb0bcbf64de7e5f4a3c8c761ace029f",
+        "currentSha256": "5e5516523efd9c30bb7f7c7d0e2a508d0380d70a613c61b31d8d9ee231d3f219"
+      },
+      {
+        "path": "packages/prototypes/base/test/carousel-resizable-public.types.ts",
+        "previousSha256": "1e883efb9ca74f92201d92af79ce4c3a94e01e298529ef9a2fc21e72820b0900",
+        "currentSha256": "01775666cce57c982fc1626d1a294241d5743b2a67a71ed6b5a4fa09ba5f9066"
+      },
+      {
+        "path": "packages/prototypes/base/test/number-field-capabilities.test.ts",
+        "previousSha256": null,
+        "currentSha256": "bec43e0fbf5330e4b91fc6e72b3e04eab0d1731f191793921d79cc0807cc39a4"
+      },
+      {
+        "path": "packages/prototypes/base/test/number-field-format.test.ts",
+        "previousSha256": null,
+        "currentSha256": "39ef8fce231cbe923537529e5ad66a517bb0c496085b099ecf1e3c6ed665e05d"
+      },
+      {
+        "path": "packages/prototypes/base/test/numeric-parts-public.types.ts",
+        "previousSha256": "2f3741742d623a50fc2f0e78b9762dca3773b430982a176ad12b473e4ebe8ebf",
+        "currentSha256": "aedfd701250dd9d6a4fbc8b189c43c3f1950234a37478decd0260de381a0685b"
+      },
+      {
+        "path": "packages/prototypes/base/test/resizable-group.test.ts",
+        "previousSha256": null,
+        "currentSha256": "ecbed53bb14018cd31b1130e2d3a5a802b99f152ef0e867740efc6bf463b5785"
+      },
+      {
+        "path": "packages/prototypes/base/test/resizable-model.test.ts",
+        "previousSha256": null,
+        "currentSha256": "512defab4e5af44c6aab1209962aad4190cbf1042cb83e78f7ab9a519cf6647e"
+      },
+      {
+        "path": "packages/prototypes/base/test/review-toast-resizable.test.ts",
+        "previousSha256": "a682d580b7dc7a3fe91137a1874ead6df06c257bfd40967ac1d7aae8a9864b87",
+        "currentSha256": "9b25bcaa6afc136176d0f484971cc1f9479a40d497def0133871ee41c1160d10"
+      },
+      {
+        "path": "packages/prototypes/base/test/tsconfig.calendar-public.json",
+        "previousSha256": "0b16b4aa6522e926439afec3cb18a30dff5a4934e6989d8943e6208839d75d7b",
+        "currentSha256": "5342f5a327c27a6fcd17bacaa58c6dfca83a8ad10245739b7469deace50a2e41"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts",
+        "previousSha256": "08c700483edb1daa176f0e2fcbc89c2fc2ab6e400216511749b9b921d84362cd",
+        "currentSha256": "39e454fd37aad4c9ceafd87ab470cc938d0e1a120829a18fbf7af0927e9253d7"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/carousel/carousel.proto.ts",
+        "previousSha256": "62ee4134ffefc57ac9b4b2709afdb50e0455975c81aa3b4f777034d50299a43c",
+        "currentSha256": "c1d44a584294c73af0acbde6d566b8833ae369ad9a88f7db89a8b5e107004ff2"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+        "previousSha256": "dd71a340a7f42440b91b48ac0012c8284683522632ed3c47630308e9578eba07",
+        "currentSha256": "4bcf6a578db5c0f1d4ec3e88a1b94e4d232f69a82e1999fd0645242fdc8a7deb"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts",
+        "previousSha256": "3bdcce4fd5a5b5d96f86eee0402236707d1ad28545371f67b45a7033ab1ca345",
+        "currentSha256": "5f20111f95dfa41f99bc7cccce03ebdbf706186458e45fd5ff452f20815e0ed1"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/resizable/resizable.proto.ts",
+        "previousSha256": "ca9465f6c9cf87400eab181b98b44cdc6e1027f6166e2ccaefad6e840fadf446",
+        "currentSha256": "d50989852e5f3c4f1d18534f956168b0ece578fc57889196cc692f587db9cbf6"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+        "previousSha256": "9dc25880e12dfb2740b1a227e0dedc4af47ae71c3484a63641ef3b1a74f1ce8d",
+        "currentSha256": "fa790adcf8e2ed093b2d6cc4f28b66ca0882a210b0c62158ef495e8c9bed1f1a"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts",
+        "previousSha256": "ce6375684838415552368076938258b43838cfbd94fa3e0b1dbe6ab1684d50f8",
+        "currentSha256": "0ccf04c714b5b400ed650e774393426a06a3f8710965a626dd18cb88ff4e9e2e"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/resizable/resizable.proto.ts",
+        "previousSha256": "4b0fad2129bb3fb419961cfe6e916731c00ddaa457de3559b8f23b1043bb41e4",
+        "currentSha256": "3aeedb7c9d4d60c72c99032e60619522d696dd6b245d1da86e6779de33ab9bc1"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/calendar/visual.ts",
+        "previousSha256": "9e8655461929866936f460c4693b5b64bd0856de6dabf564c747d5f7876fa995",
+        "currentSha256": "d6f9b21d2ecb3b376ef22d42b75e6880d0a79ca0e949364344eca95ff5599c10"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/carousel/carousel.proto.ts",
+        "previousSha256": "fe377d191f2bdd573a05a3477a7c583dd277ffae36093dab6a5a440b9c9e5f5f",
+        "currentSha256": "c59050cf4e96396aeb022a565e3e701adbdefc3b2d5ab9d1761a6e765069ec44"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/resizable/resizable.proto.ts",
+        "previousSha256": "47828a60461fa9d49ad3e5a22a6deb69e7dacbe024a0c94aa3c133adc579f449",
+        "currentSha256": "410f613152cbd1de36aeef700d63c6b4dde2ff9650388c0f02ecfeb89b07fa6d"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+        "previousSha256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+        "currentSha256": "2c77c92425d2ff6a7fa5ded9e85b2e870c78b23e6c5477575dc9c5e8c3f521d9"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+        "previousSha256": null,
+        "currentSha256": "8356520dd8363d76acda198cb31711ec5a7b9356842676e15ef1a4fb149f6738"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+        "previousSha256": "6d2e6dab2d844541e71baed7a8966d18aecdf2f4fcdd2e223b74b06ea84cea01",
+        "currentSha256": "8bc0de8a6966d2fef277e14ca5f9d92096f73543c769422394f4ece9b12a4148"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+        "previousSha256": "31d9b18a5a84458478eeb9e8f46a490dbd7e97a136ac6f2a924f81e83114d682",
+        "currentSha256": "8d3c11194ee267c1b463d2da0477a6273d90e2f3cb2b5d0e766aa8b61951f7c5"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-CALENDAR.yaml",
+        "previousSha256": "390661597e31fe2efe8786a9c9a1fb61435bfb8fac7fe5191cfa07a152610f0b",
+        "currentSha256": "c82f7284a66de7a053ea6967d3870d94cb695bb5b0ddf9fb6aaefbc468e22a8c"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-CAROUSEL.yaml",
+        "previousSha256": "333115185835b3f9f41f68209455281c8072cddad7d59acc955cc69d86322b18",
+        "currentSha256": "a96f925ba804ca9fe7e83ad59fd66bacceb065e46525deb67a8903c007cd0e86"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-DATE-PICKER.yaml",
+        "previousSha256": "29b750703c1782169a802ec75beab1ae8fbd2741005d57b5c90ddb31310f1aa2",
+        "currentSha256": "f275839399bd6a88f422cd63d667343873ab9bf888449fde9130ea6b75929147"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-NUMBER-FIELD.yaml",
+        "previousSha256": "326c52d16506f2484d27f7e4598264604860942048cafa9c3ef2dbc519ab2edb",
+        "currentSha256": "78c69382a15683999bcd31eefbcebb4b5473520c0f17fb39e9168fe2c452023d"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-RESIZABLE.yaml",
+        "previousSha256": "93e80f6b6d9b47e6a1f48bd2bf3569e1bbc4f1f20c1f887bd02d462db7d2f8e4",
+        "currentSha256": "6d8df1b71443a7d9079f8bb1807da2d7b049d0dfd71962d3b58aceacc000dba8"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-NUMBER-FIELD.yaml",
+        "previousSha256": "2b530e8813dddf164585597304cd893877bd2b30db6f0c59b74c11aa0bd635a8",
+        "currentSha256": "77337fc21b1b0299775daaa7acfb6fdc4c8e0205dad73e7aa599efac68c44037"
+      }
+    ],
+    "changedBindingsFromIntermediateCandidate": [
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+        "previousSha256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+        "currentSha256": "2c77c92425d2ff6a7fa5ded9e85b2e870c78b23e6c5477575dc9c5e8c3f521d9"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+        "previousSha256": "f8a107cf7f608f930799fbf6080aacdd4430901016169369acbbfc1024d9580a",
+        "currentSha256": "8356520dd8363d76acda198cb31711ec5a7b9356842676e15ef1a4fb149f6738"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+        "previousSha256": "6d2e6dab2d844541e71baed7a8966d18aecdf2f4fcdd2e223b74b06ea84cea01",
+        "currentSha256": "8bc0de8a6966d2fef277e14ca5f9d92096f73543c769422394f4ece9b12a4148"
+      }
+    ],
+    "removedBindings": [],
+    "outputSha256": {
+      "internal/coverage-matrices/prototype-coverage-matrix.json": "5ccd78d048d7d5efa4af1c8fa55f917acbcbb5d33ee6069390490c6a3bccf743",
+      "internal/coverage-matrices/prototype-coverage-matrix.md": "d92562cbe433736932fae17fc4f58daee0c181e949fccfb5ef07678dc1703dde",
+      "internal/coverage-matrices/finf-delivery-checklist.md": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+    },
+    "generatedFiles": [
+      "internal/coverage-matrices/prototype-coverage-matrix.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.md",
+      "internal/coverage-matrices/finf-delivery-checklist.md"
+    ],
+    "candidateChangedFieldSummary": {
+      "revision": {
+        "before": "fc17170c7a647cd4248efd51db3c3678b9b34e0a",
+        "after": "85153d83969c65a812185e44e045fa0fe7e803c9"
+      },
+      "sourceBindingsObject": {
+        "before": "fc17170c7a647cd4248efd51db3c3678b9b34e0a",
+        "after": "85153d83969c65a812185e44e045fa0fe7e803c9"
+      },
+      "sourceObjectProof": {
+        "meaning": "Offline Git tree/blob proof rederived for the exact new commit, not an acceptance receipt"
+      },
+      "sourceBindings": {
+        "beforeCount": 5944,
+        "afterCount": 5955
+      },
+      "counts": {
+        "type": "dict",
+        "changed": true
+      },
+      "prototypeInventory": {
+        "changedFamilies": {
+          "base": ["calendar", "carousel", "number-field"]
+        }
+      },
+      "projectionRows": {
+        "type": "list",
+        "changed": true
+      },
+      "atomicProjectionMapping": {
+        "type": "list",
+        "changed": true
+      },
+      "gpuiCoverageRows": {
+        "type": "list",
+        "changed": true
+      }
+    },
+    "generatedNumstat": "1\t1\tinternal/coverage-matrices/finf-delivery-checklist.md\n176\t126\tinternal/coverage-matrices/prototype-coverage-matrix.json\n1\t1\tinternal/coverage-matrices/prototype-coverage-matrix.md\n",
+    "derivedCandidateFactsDelta": {
+      "counts": {
+        "count": 1,
+        "allChanges": [["counts.libraryInventory.base.sourceFiles", 260, 263]]
+      },
+      "projectionRows": {
+        "count": 3,
+        "allChanges": [
+          ["projectionRows[5].base.sourceFiles.length", 5, 6],
+          ["projectionRows[6].base.sourceFiles.length", 3, 4],
+          ["projectionRows[32].base.sourceFiles.length", 9, 10]
+        ]
+      },
+      "atomicProjectionMapping": {
+        "count": 2,
+        "allChanges": [
+          [
+            "atomicProjectionMapping[65].projectionCells.brutalist.mappedCurrentIdentities.length",
+            0,
+            1
+          ],
+          [
+            "atomicProjectionMapping[65].projectionCells.brutalist.status",
+            "required-missing",
+            "bounded-draft-mapping-needs-full-acceptance"
+          ]
+        ]
+      },
+      "gpuiCoverageRows": {
+        "count": 1,
+        "allChanges": [["gpuiCoverageRows[261].projectionIdentities.length", 0, 1]]
+      }
+    },
+    "generatedOutputBeforeFormattingSha256": {
+      "internal/coverage-matrices/prototype-coverage-matrix.json": "aeb4bd36dda5c4b498253dba4120bd852af060a70dfbb0a8ee7ea4e4dbd6328d",
+      "internal/coverage-matrices/prototype-coverage-matrix.md": "d92562cbe433736932fae17fc4f58daee0c181e949fccfb5ef07678dc1703dde",
+      "internal/coverage-matrices/finf-delivery-checklist.md": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+    },
+    "formattingReceipt": "/workspace/scratch/fbd6f62bb640/native-closeout-85153-generated-format.json"
+  },
+  "formatting": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "prettier",
+      "--write",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "exitCode": 0,
+    "stdout": "internal/coverage-matrices/prototype-coverage-matrix.json 1410ms\n",
+    "completedAt": "2026-11-21T18:40:51.447339+00:00",
+    "jsonValueUnchanged": true,
+    "beforeSha256": "aeb4bd36dda5c4b498253dba4120bd852af060a70dfbb0a8ee7ea4e4dbd6328d",
+    "afterSha256": "5ccd78d048d7d5efa4af1c8fa55f917acbcbb5d33ee6069390490c6a3bccf743",
+    "qualification": "Formatting after successful full coverage gate. Same parsed JSON, candidate proof, source hashes, statuses and acceptance data; no product source or test changed."
+  },
+  "localGate": {
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+    "startedAt": "2026-11-21T18:32:45.675851+00:00",
+    "status": "completed",
+    "candidateRevision": "85153d83969c65a812185e44e045fa0fe7e803c9",
+    "headAtStart": "85153d83969c65a812185e44e045fa0fe7e803c9",
+    "nodeVersion": "v24.22.3",
+    "pnpmVersion": "10.32.1",
+    "worktreeAtStart": " M internal/coverage-matrices/finf-delivery-checklist.md\n M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+    "qualification": "Local gate against frozen source commit plus its three generated projections; not a native clean final-head CI receipt.",
+    "stages": [
+      {
+        "name": "website-checker-completed",
+        "elapsedSeconds": 165.40601637700092,
+        "at": "2026-11-21T18:35:31.117166+00:00",
+        "message": "[coverage-matrices] OK (2 matrices)"
+      }
+    ],
+    "finishedAt": "2026-11-21T18:40:03.372296+00:00",
+    "durationSeconds": 437.6613087470014,
+    "exitCode": 0,
+    "headAtEnd": "85153d83969c65a812185e44e045fa0fe7e803c9",
+    "worktreeAtEnd": " M internal/coverage-matrices/finf-delivery-checklist.md\n M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+    "logSha256": "c5793bbd3023b8b6080295fa341cc5cb244afee213adc8c4f743a17bb34f41a1"
+  },
+  "localTestCounts": {
+    "total": 4491,
+    "passed": 4490,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Portable suite deliberately excludes Linux media integration. Required separately through scripts/coverage-matrices/test/decode-video-evidence.integration.mjs on each native general VM."
+  },
+  "knownUpstreamMerge": {
+    "revision": "a4583a0873b0b7742171f5b66279204b13f7332e",
+    "pullRequest": 1670,
+    "change": "One production-browser test corrects malformed Location transport evidence. Original implementation and remaining controls unchanged.",
+    "bindingScope": "The changed apps/www browser test is outside the 5955 product-source binding set and all eleven measured package closures. This is a source-scope observation, not a final-head measurement or native pass."
+  },
+  "finalAcceptance": "After the generated-only commit and known upstream merge, verify all bound bytes again, measure strict budgets on the clean exact head and obtain that head's own full native run. Do not relabel this local gate as the final native receipt."
+}
