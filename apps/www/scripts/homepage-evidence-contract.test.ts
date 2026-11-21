@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
 import { transformSync } from 'esbuild';
@@ -860,7 +862,7 @@ test('Dialog capture waits on the actual bounded focus owner and disposes its ph
   }
 });
 
-test('native and Copy browser scopes have independent bounded jobs and small evidence bundles', () => {
+test('all fifteen homepage browser scopes have independent bounded jobs and complete evidence paths', () => {
   const workflow = parse(
     readFileSync(
       new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
@@ -880,16 +882,49 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     { name: 'homepage-button-contract', suite: 'homepage-button-contract' },
     { name: 'homepage-composition', suite: 'homepage-composition' },
     { name: 'copy-commands', suite: 'site-copy-commands' },
-    { name: 'runtime-box', suite: 'runtime-preview-surface', contract: 'runtime-preview-evidence' },
+    {
+      name: 'runtime-box',
+      suite: 'runtime-preview-surface',
+      contract: 'runtime-preview-evidence',
+    },
     { name: 'search-commands', suite: 'site-search-commands' },
+    {
+      name: 'homepage-dogfood',
+      suite: 'homepage-dogfood',
+      runtimeEvidence: true,
+    },
+    {
+      name: 'home-demo-runtime',
+      suite: 'home-demo-runtime',
+      runtimeEvidence: true,
+    },
+    {
+      name: 'prototype-projection-scope',
+      suite: 'prototype-projection-scope',
+      runtimeEvidence: true,
+    },
+    {
+      name: 'demo-brutalist-checkbox',
+      suite: 'demo-brutalist-checkbox',
+      runtimeEvidence: true,
+    },
+    {
+      name: 'demo-brutalist-remaining',
+      suite: 'demo-brutalist-remaining',
+      runtimeEvidence: true,
+    },
   ];
-  assert.deepEqual(job.strategy.matrix.include, expectedScopes);
+  const verifyScopes = (actual: typeof expectedScopes) => assert.deepEqual(actual, expectedScopes);
+  verifyScopes(job.strategy.matrix.include);
+  for (const omitted of expectedScopes)
+    assert.throws(() => verifyScopes(expectedScopes.filter((entry) => entry !== omitted)), {
+      code: 'ERR_ASSERTION',
+    });
+  assert.throws(() => verifyScopes([...expectedScopes, expectedScopes[0]!]), {
+    code: 'ERR_ASSERTION',
+  });
   assert.throws(
-    () =>
-      assert.deepEqual(
-        [...job.strategy.matrix.include, { name: 'unknown-scope', suite: 'unknown-scope' }],
-        expectedScopes
-      ),
+    () => verifyScopes([...expectedScopes, { name: 'unknown-scope', suite: 'unknown-scope' }]),
     { code: 'ERR_ASSERTION' }
   );
   const run = job.steps.find(
@@ -907,22 +942,85 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   const artifact = job.steps.at(-1);
   assert.equal(artifact.if, 'always()');
   assert.match(artifact.with.name, /matrix.name/);
-  const focused = workflow.jobs.capture.steps.find((step: { name?: string }) =>
-    step.name?.startsWith('Execute focused real-browser')
+  assert.equal(
+    workflow.jobs.capture.steps.find((step: { name?: string }) =>
+      step.name?.startsWith('Execute focused real-browser')
+    ),
+    undefined,
+    'The serial five-suite owner must be removed after exact-once transfer'
   );
-  for (const entry of job.strategy.matrix.include)
+  for (const entry of expectedScopes)
     assert.ok(
-      !focused.run.includes(`${entry.suite}.browser.test.ts`),
-      'No duplicated shared-lifetime suite'
+      !workflow.jobs.capture.steps.some((step: { run?: string }) =>
+        step.run?.includes(`${entry.suite}.browser.test.ts`)
+      ),
+      `${entry.suite} has no duplicate capture-job invocation`
     );
-  for (const suite of [
-    'homepage-dogfood',
-    'home-demo-runtime',
-    'prototype-projection-scope',
-    'demo-brutalist-checkbox',
-    'demo-brutalist-remaining',
-  ])
-    assert.ok(focused.run.includes(`${suite}.browser.test.ts`), `${suite} still runs`);
+  assert.equal(run.env.RUNTIME_EVIDENCE, '${{ matrix.runtimeEvidence }}');
+  const temporary = mkdtempSync(path.join(os.tmpdir(), 'homepage-schedule-contract-'));
+  mkdirSync(path.join(temporary, 'homepage-evidence'));
+  try {
+    // Run the actual selection/pipefail shell; only the expensive timeout child is replaced.
+    const exercise = (entry: (typeof expectedScopes)[number], exitCode = 0) => {
+      const result = spawnSync(
+        'bash',
+        [
+          '-c',
+          `timeout() {
+            printf 'fixture-argument:%s\n' "$@"
+            printf 'fixture-runtime-evidence:%s\n' "\${PROTO_UI_RUNTIME_EVIDENCE_DIR-unset}"
+            return "$FIXTURE_EXIT_CODE"
+          }
+          ${run.run}`,
+        ],
+        {
+          cwd: new URL('../../../', import.meta.url),
+          encoding: 'utf8',
+          env: {
+            ...process.env,
+            RUNNER_TEMP: temporary,
+            SUITE: entry.suite,
+            CONTRACT: 'contract' in entry ? entry.contract : '',
+            RUNTIME_EVIDENCE: 'runtimeEvidence' in entry ? 'true' : '',
+            PROTO_UI_RUNTIME_EVIDENCE_DIR: undefined,
+            FIXTURE_EXIT_CODE: String(exitCode),
+          },
+        }
+      );
+      assert.equal(result.status, exitCode, result.stderr || result.error?.message);
+      const argumentsReceived = result.stdout
+        .split('\n')
+        .filter((line) => line.startsWith('fixture-argument:'))
+        .map((line) => line.slice('fixture-argument:'.length));
+      assert.deepEqual(argumentsReceived, [
+        '--signal=TERM',
+        '--kill-after=10s',
+        '600s',
+        'corepack',
+        'pnpm@10.32.1',
+        'exec',
+        'vitest',
+        'run',
+        '--no-file-parallelism',
+        `apps/www/src/content/docs/zh-cn/${entry.suite}.browser.test.ts`,
+        ...('contract' in entry
+          ? [`apps/www/src/content/docs/zh-cn/${entry.contract}.test.ts`]
+          : []),
+      ]);
+      assert.ok(
+        result.stdout.includes(
+          `fixture-runtime-evidence:${'runtimeEvidence' in entry ? path.join(temporary, 'homepage-evidence/runtime') : 'unset'}\n`
+        ),
+        `${entry.suite}: original runtime evidence directory is preserved only for moved scopes`
+      );
+    };
+    for (const entry of expectedScopes) exercise(entry);
+    const moved = expectedScopes.find((entry) => 'runtimeEvidence' in entry)!;
+    exercise(moved, 1);
+    exercise(moved, 124);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
   const frames = workflow.jobs.capture.steps.find(
     (step: { name?: string }) => step.name === 'Retain small candidate frame and metadata bundles'
   );

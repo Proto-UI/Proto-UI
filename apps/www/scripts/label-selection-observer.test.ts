@@ -58,7 +58,7 @@ test('serialized observer reports controlled hit geometry without changing selec
   window.happyDOM.close();
 });
 
-test('native drag and strict selection assertion remain; focused artifacts share the uploaded directory', () => {
+test('native drag and strict selection assertion remain; isolated artifacts share the uploaded directory', () => {
   const source = readFileSync(
     new URL('../src/content/docs/zh-cn/home-demo-runtime.browser.test.ts', import.meta.url),
     'utf8'
@@ -76,14 +76,23 @@ test('native drag and strict selection assertion remain; focused artifacts share
       'utf8'
     )
   );
-  const steps = Object.values(workflow.jobs).flatMap((job: any) => job.steps ?? []);
-  const focused = steps.find(
-    (step: any) => step.name === 'Execute focused real-browser regressions on the exact candidate'
-  ) as any;
-  const upload = steps.find(
-    (step: any) => step.name === 'Retain actual images, measurements and failure output'
-  ) as any;
-  assert.equal(focused.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, `${upload.with.path}/runtime`);
+  const job = workflow.jobs['isolated-controls'];
+  const owners = job.strategy.matrix.include.filter(
+    (entry: { suite: string }) => entry.suite === 'home-demo-runtime'
+  );
+  assert.equal(owners.length, 1);
+  assert.equal(owners[0].runtimeEvidence, true);
+  const isolated = job.steps.find(
+    (step: { name?: string }) => step.name === 'Execute the exact isolated browser suite'
+  );
+  const upload = job.steps.find(
+    (step: { name?: string }) =>
+      step.name === "Preserve this suite's actual images, measurements and failures"
+  );
+  assert.equal(upload.if, 'always()');
+  assert.equal(isolated.env.RUNTIME_EVIDENCE, '${{ matrix.runtimeEvidence }}');
+  const runtimeDirectory = `${upload.with.path.replace('${{ runner.temp }}', '$RUNNER_TEMP')}/runtime`;
+  assert.ok(isolated.run.includes(`export PROTO_UI_RUNTIME_EVIDENCE_DIR="${runtimeDirectory}"`));
   assert.deepEqual(workflow.permissions, { contents: 'read' });
 });
 
