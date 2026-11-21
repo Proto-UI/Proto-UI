@@ -137,7 +137,7 @@ describe('public hook admission and actionable frontend diagnostics', () => {
       });
   });
 
-  it('names an unsupported capability call and retains its actual source range', () => {
+  it('diagnoses an invalid part declaration and retains its actual source range', () => {
     const input = `import {definePrototype} from '@proto.ui/core';
 import {asAccessible} from '@proto.ui/hooks';
 export default definePrototype({name:'diagnostic-subject',setup(){
@@ -151,7 +151,7 @@ export default definePrototype({name:'diagnostic-subject',setup(){
         {
           code: 'PUI1006',
           category: 'unsupported-input',
-          message: 'Undeclared object member part.',
+          message: 'Invalid argument count for accessible.part.',
           span: {
             file: 'nested/subject.proto.ts',
             start: input.indexOf("accessible.part('content')"),

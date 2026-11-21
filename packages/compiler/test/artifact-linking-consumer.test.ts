@@ -479,6 +479,74 @@ describe('ordinary consumers of independently compiled and linked libraries', ()
     expect(exposes.count.get()).toBe(1);
   });
 
+  it('resolves structured A11y targets across independent feature closures without crossing domains or private families', async () => {
+    const directory = await workspace();
+    const declarations = `import {createAnatomyFamily} from '@proto.ui/core';
+      export const FAMILY=createAnatomyFamily('same-debug-name',{roles:{root:{cardinality:{min:1,max:1}},source:{cardinality:{min:0,max:'*'}},content:{cardinality:{min:0,max:'*'}}}});`;
+    const rootSource = `import {definePrototype} from '@proto.ui/core';import {FAMILY} from './keys';
+      export default definePrototype({name:'relationship-scope',setup(def){def.anatomy.claim(FAMILY,{role:'root'});return r=>r.el('section',r.slot());}});`;
+    const endpoint = (target: boolean) => `import {definePrototype} from '@proto.ui/core';import {asAccessible} from '@proto.ui/hooks';import {FAMILY} from './keys';
+      export default definePrototype({name:'arbitrary-${target ? 'target' : 'source'}',setup(def){
+        def.anatomy.claim(FAMILY,{role:'${target ? 'content' : 'source'}'});
+        const key=def.state.string('key','match');const accessible=asAccessible();
+        ${target ? `accessible.part(FAMILY,{key});` : `accessible.relation('controls',{target:{kind:'part',family:FAMILY,role:'content',key}});`}
+        def.expose.method('key',(value:string)=>key.set(value));
+        return r=>r.el('${target ? 'article' : 'button'}','endpoint');
+      }});`;
+    const profile = 'react-dom-source-v1';
+    const scope = await publish(directory, 'scope', profile, { 'keys.ts': declarations, 'entry.proto.ts': rootSource }, { exports: { Family: 'keys.ts#FAMILY' } });
+    const imports = { 'keys.ts#FAMILY': { library: 'scope', export: 'Family' } };
+    const source = await publish(directory, 'source', profile, { 'keys.ts': declarations, 'entry.proto.ts': endpoint(false) }, { imports });
+    const target = await publish(directory, 'target', profile, { 'keys.ts': declarations, 'entry.proto.ts': endpoint(true) }, { imports });
+    const privateTarget = await publish(directory, 'private-target', profile, { 'keys.ts': declarations, 'entry.proto.ts': endpoint(true) });
+    const linked = await link(directory, [scope, source, target, privateTarget]);
+    const Scope = (await linked.entry('scope')).CompiledComponent as Component;
+    const Source = (await linked.entry('source')).CompiledComponent as Component;
+    const Target = (await linked.entry('target')).CompiledComponent as Component;
+    const Private = (await linked.entry('private-target')).CompiledComponent as Component;
+    const host = document.createElement('main'); document.body.append(host);
+    const root = createRoot(host);
+    cleanup.push(async () => { await React.act(async () => root.unmount()); });
+    const sourceRef = React.createRef<Handle>(), targetRef = React.createRef<Handle>();
+    const tree = (visible: boolean, duplicate = false) => React.createElement('div', null,
+      React.createElement('div', { 'data-domain': 'one' }, React.createElement(Scope, null,
+        React.createElement(Source, { ref: sourceRef }),
+        visible ? React.createElement(Target, { key: 'target', ref: targetRef }) : null,
+        duplicate ? React.createElement(Target, { key: 'duplicate' }) : null)),
+      React.createElement('div', { 'data-domain': 'adjacent' }, React.createElement(Scope, null,
+        React.createElement(Source), React.createElement(Target))),
+      React.createElement('div', { 'data-domain': 'private' }, React.createElement(Scope, null,
+        React.createElement(Source), React.createElement(Private))));
+    await React.act(async () => root.render(tree(true)));
+    const first = host.querySelector('[data-domain="one"] button')!;
+    const article = host.querySelector<HTMLElement>('[data-domain="one"] article')!;
+    const firstId = article.id;
+    expect(firstId).toMatch(/^pui-part-/);
+    expect(first.getAttribute('aria-controls')).toBe(firstId);
+    const adjacent = host.querySelector<HTMLElement>('[data-domain="adjacent"] article')!;
+    expect(adjacent.id).not.toBe(firstId);
+    expect(host.querySelector('[data-domain="adjacent"] button')!.getAttribute('aria-controls')).toBe(adjacent.id);
+    expect(host.querySelector('[data-domain="private"] button')!.hasAttribute('aria-controls')).toBe(false);
+    const targetApi = targetRef.current!.getExposes() as unknown as { key(value: string): void };
+    const sourceApi = sourceRef.current!.getExposes() as unknown as { key(value: string): void };
+    await React.act(async () => targetApi.key('arbitrary / [] unicode 中'));
+    expect(first.hasAttribute('aria-controls')).toBe(false);
+    await React.act(async () => sourceApi.key('arbitrary / [] unicode 中'));
+    expect(first.getAttribute('aria-controls')).toBe(firstId);
+    await React.act(async () => { targetApi.key('match'); sourceApi.key('match'); });
+    await React.act(async () => root.render(tree(true, true)));
+    expect(first.hasAttribute('aria-controls')).toBe(false);
+    await React.act(async () => root.render(tree(true)));
+    expect(first.getAttribute('aria-controls')).toBe(firstId);
+    await React.act(async () => root.render(tree(false)));
+    expect(first.hasAttribute('aria-controls')).toBe(false);
+    expect(article.hasAttribute('id')).toBe(false);
+    await React.act(async () => root.render(tree(true)));
+    const replacement = host.querySelector<HTMLElement>('[data-domain="one"] article')!;
+    expect(replacement.id).toMatch(/^pui-part-/);
+    expect(first.getAttribute('aria-controls')).toBe(replacement.id);
+  });
+
   it('rejects incompatible Focus metadata and declaration kinds before native import', async () => {
     const directory = await workspace();
     const sources = (kind: string) => ({
