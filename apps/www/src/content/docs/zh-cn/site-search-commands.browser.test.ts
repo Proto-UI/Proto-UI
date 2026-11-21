@@ -3114,7 +3114,7 @@ it('docs brutalist dark 390px keeps Close focused through delayed Pagefind failu
     await expectSearchOpenerFocus(page, trigger, id, 'delayed-failure-space');
     const spaceTargets = await page.evaluate(() => {
       // installOpenCounter owns this in-process event record.
-      const observedWindow = window as Window & {
+      const observedWindow = window as unknown as Window & {
         __puiSearchTimeline: Array<{
           type: string;
           target: { ref: string | null } | null;
