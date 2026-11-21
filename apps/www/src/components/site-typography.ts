@@ -22,8 +22,9 @@ const ROLES = new Set<string>(SITE_TYPOGRAPHY_ROLES);
 const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';
 const DOCS_SEMANTIC_TARGETS =
   'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption,li,dt,dd,summary,th,td,caption,blockquote';
-const COMPONENT_OWNED =
-  '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-primary-nav-link],pre,code,script,style,template';
+const PREVIEWER_OWNED = '[data-previewer-id]';
+const NATIVE_STATUS = 'output[data-home-demo-status]';
+const COMPONENT_OWNED = `${PREVIEWER_OWNED},[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-primary-nav-link],pre,code,script,style,template`;
 const CODE_OWNED = '[data-code-example], div.site-code-surface-mount, div.site-copy-mount';
 const PROTOTYPE_OWNED = '[data-pui-root],[data-pui-style]';
 const TYPOGRAPHY_SOURCE =
@@ -64,8 +65,7 @@ function excludedTypographyOwner(native: Element, docsOnly: boolean): Element | 
   const code = docsOnly ? native.closest(CODE_OWNED) : null;
   if (code) return code;
   const component = native.closest(COMPONENT_OWNED);
-  if (component && !(explicitRole && native.matches('output[data-home-demo-status]')))
-    return component;
+  if (component && !(explicitRole && native.matches(NATIVE_STATUS))) return component;
   const batch = native.closest('[data-site-typography-batch]');
   if (batch) return batch;
   const prototype = native.closest(PROTOTYPE_OWNED);
@@ -91,16 +91,14 @@ export function isPrivateTypographyMutation(record: MutationRecord): boolean {
   if (isWithinOwnedCodeContent(record.target)) return true;
   if (record.target.nodeType !== 1) return false;
   const target = record.target as Element;
-  const owner = excludedTypographyOwner(target, true);
-  // Preserve other component exclusions' explicit native-label exceptions.
-  // Only actual Proto owners add a new filtering boundary here.
-  if (!owner?.matches(PROTOTYPE_OWNED)) return false;
+  const owner = target.closest(PREVIEWER_OWNED) ?? excludedTypographyOwner(target, true);
+  if (!owner?.matches(`${PREVIEWER_OWNED},${PROTOTYPE_OWNED}`)) return false;
+  const sourceBoundary = `${PASSIVE_HEADER_FRAME},${TYPOGRAPHY_SOURCE},${NATIVE_STATUS}`;
   if (
-    target.closest(PASSIVE_HEADER_FRAME) ||
-    target.closest(TYPOGRAPHY_SOURCE) ||
-    // Existing borrowed source may be deeper than this mutation's target, and
-    // its Header frame may have lost admission before this childList record.
-    owner.querySelector(TYPOGRAPHY_SOURCE)
+    target.closest(sourceBoundary) ||
+    // Borrowed source or an explicit native status can be elsewhere in the
+    // owner, including a Header frame whose eligibility just changed.
+    owner.querySelector(`${TYPOGRAPHY_SOURCE},${NATIVE_STATUS}`)
   )
     return false;
   // An outer paragraph/list item/explicit target can gain or lose eligibility
@@ -108,7 +106,6 @@ export function isPrivateTypographyMutation(record: MutationRecord): boolean {
   // own labels remain excluded. Check every documentation candidate kind.
   if (owner.parentElement?.closest(`[data-site-typography],${DOCS_SEMANTIC_TARGETS}`)) return false;
   if (record.type === 'childList') {
-    const sourceBoundary = `${PASSIVE_HEADER_FRAME},${TYPOGRAPHY_SOURCE}`;
     for (const node of [...record.addedNodes, ...record.removedNodes]) {
       if (node.nodeType !== 1) continue;
       const element = node as Element;
