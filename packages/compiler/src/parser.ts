@@ -1236,6 +1236,8 @@ class Frontend {
     const value = this.expressionValue(module, node, scope, phase, argumentRule, expectedType);
     if (value.kind === 'intrinsic' && value.name === 'array.every')
       this.invalidateFlow(scope, true);
+    if (value.kind === 'intrinsic' && value.name === 'object.assign')
+      this.invalidateFlow(scope, true, true);
     this.flow.observe(value);
     return value;
   }
@@ -2440,8 +2442,24 @@ class Frontend {
               ? 'object.freeze'
               : owner.text === 'Object' && property === 'hasOwn'
                 ? 'object.hasOwn'
-                : undefined;
+                : owner.text === 'Object' && property === 'assign'
+                  ? 'object.assign'
+                  : undefined;
         if (name) {
+          if (name === 'object.assign' && (node.questionDotToken || node.expression.questionDotToken))
+            rejectNode(node, 'PUI1006', 'Object.assign does not admit optional calls.');
+          if (name === 'object.assign') {
+            const operands = node.arguments.map((argument) => {
+              while (ts.isParenthesizedExpression(argument)) argument = argument.expression;
+              return argument;
+            });
+            if (
+              !operands.length ||
+              (!ts.isObjectLiteralExpression(operands[0]) && !ts.isNewExpression(operands[0])) ||
+              operands.slice(1).some((operand) => !ts.isObjectLiteralExpression(operand))
+            )
+              rejectNode(node, 'PUI1006', 'Object.assign requires a direct fresh target and record literal sources.');
+          }
           const args = node.arguments.map((argument) =>
             this.expression(
               module,
@@ -2459,7 +2477,8 @@ class Frontend {
             type: this.checkedValue(node, () =>
               intrinsicResult(
                 name,
-                args.map((arg) => arg.type)
+                args.map((arg) => arg.type),
+                args
               )
             ),
             span,

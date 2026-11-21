@@ -300,6 +300,7 @@ export type ExpressionIR = ExpressionBase &
         name:
           | 'number.isFinite'
           | 'object.freeze'
+          | 'object.assign'
           | 'object.hasOwn'
           | 'array.every'
           | 'array.includes'

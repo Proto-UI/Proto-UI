@@ -993,6 +993,8 @@ function analyzeCallableFlow(
             parameters
           );
         }
+        if (value.name === 'object.assign')
+          return isDataValueType(value.type) ? dataFact(value.type) : args[0];
         return value.name === 'object.freeze' ? args[0] : UNKNOWN;
       }
       case 'lexical-cell': {
