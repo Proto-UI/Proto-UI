@@ -311,16 +311,28 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             const firstContent = await popup(page, trigger);
             if (family === 'liquid-glass') {
               materialEvidence.push(await selectMaterialSnapshot(previewer, 'popup-visible'));
+              // Content keeps the listbox/portal contract. Its named Surface
+              // is the sole popup paint owner in the complete public recipe.
+              const firstSurface = firstContent.locator('[data-demo-ref="uncontrolledSurface"]');
+              expect(await firstSurface.count()).toBe(1);
+              expect(await firstSurface.getAttribute('data-projection-prototype')).toBe(
+                'liquid-glass-select-surface'
+              );
               // Real wrapped page positive control: missing box metadata or an
               // unconsumed plan must fail, not silently pass via opaque fallback.
               await expect
-                .poll(() => firstContent.getAttribute('data-material-quality'), { timeout: 20000 })
+                .poll(() => firstSurface.getAttribute('data-material-quality'), { timeout: 20000 })
                 .toBe('self-optical');
               await expect
                 .poll(() => trigger.getAttribute('data-material-quality'), { timeout: 20000 })
                 .toBe('self-optical');
               expect(
                 await firstContent.evaluate(
+                  (node) => node.closest<HTMLElement>('[data-material-scene]')?.dataset.demoRef
+                )
+              ).toBe('uncontrolledStage');
+              expect(
+                await firstSurface.evaluate(
                   (node) => node.closest<HTMLElement>('[data-material-scene]')?.dataset.demoRef
                 )
               ).toBe('uncontrolledStage');

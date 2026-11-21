@@ -1,8 +1,11 @@
 /** Existing CI planning/validation exports. Unknown receipt inputs are validated at runtime. */
+import type { BrowserShardCost } from './runtime-test-plan.mjs';
+
 export interface RuntimeCiPlan {
   checkoutSha: string;
   general: string[];
   browser: string[][];
+  browserCosts: BrowserShardCost[];
   productionExcluded: string[];
 }
 export interface RuntimeSelection {
@@ -34,6 +37,7 @@ export function runtimeSelection(
 ): RuntimeSelection;
 /** Throws for missing, failed, skipped browser or inconsistent report data; no type predicate. */
 export function assertVitestReport(report: unknown, selection: unknown, root?: string): void;
+export function assertRuntimeSource(source: unknown, selection: unknown): void;
 export function assertRuntimeGate(
   needs: unknown,
   plan: unknown,

@@ -207,7 +207,11 @@ describe.sequential('Public passive atom documentation previews', () => {
         await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded' });
         const preview = page.locator('[data-previewer-id]').first();
         const readinessDeadline = Date.now() + 20_000;
-        await selectRuntime(page, preview, runtime, '[data-pui-root]', expectedAtoms);
+        // The Rhea recipe adds one logical StyleScope around the same four
+        // authored samples. Keep the complete host inventory exact, then
+        // inspect that scope separately from the painted atoms below.
+        const expectedRoots = expectedAtoms + (family === 'shadcn' ? 1 : 0);
+        await selectRuntime(page, preview, runtime, '[data-pui-root]', expectedRoots);
         if (Date.now() >= readinessDeadline)
           throw new Error('Passive atom readiness exceeded its original 20-second budget');
         // A preparing hidden/empty candidate is not another active content owner.
@@ -255,7 +259,7 @@ describe.sequential('Public passive atom documentation previews', () => {
         ).toBe(true);
         expect(shellEvidence.events.length).toBeGreaterThan(0);
         expect(shellEvidence.events.every(readyEventHasExpectedOwner)).toBe(true);
-        const facts = await preview.evaluate((root) => {
+        const facts = await preview.evaluate((root, family) => {
           const host =
             root.querySelector<HTMLElement>('[data-projection-content]') ??
             root.querySelector<HTMLElement>('.host');
@@ -287,7 +291,33 @@ describe.sequential('Public passive atom documentation previews', () => {
               `Expected exactly one active borrowed-content frame, got ${active.length}`
             );
           const content = active[0];
-          const nodes = [...content.querySelectorAll<HTMLElement>('[data-pui-root]')];
+          let nodes = [...content.querySelectorAll<HTMLElement>('[data-pui-root]')];
+          if (family === 'shadcn') {
+            const scopes = nodes.filter((node) => node.classList.contains('contents'));
+            const topLevel = nodes.filter((node) => {
+              const parent = node.parentElement?.closest('[data-pui-root]');
+              return !parent || !content.contains(parent);
+            });
+            if (scopes.length !== 1 || topLevel.length !== 1 || topLevel[0] !== scopes[0])
+              throw new Error('Shadcn passive samples require exactly one outer contents scope');
+            const scope = scopes[0]!;
+            if (
+              getComputedStyle(scope).display !== 'contents' ||
+              scope.getAttribute('role') !== null ||
+              scope.tabIndex !== -1
+            )
+              throw new Error('The Shadcn style scope must remain flow-neutral and passive');
+            const samples = nodes.filter((node) => node !== scope);
+            if (
+              nodes.length !== 5 ||
+              samples.length !== 4 ||
+              !samples.every((node) => scope.contains(node))
+            )
+              throw new Error(
+                'The Shadcn scope must contain exactly the four authored passive atoms'
+              );
+            nodes = samples;
+          }
           return nodes.map((node) => {
             const style = getComputedStyle(node);
             return {
@@ -308,7 +338,7 @@ describe.sequential('Public passive atom documentation previews', () => {
               transform: style.transform,
             };
           });
-        });
+        }, family);
         // P-BASE-TEXT-PASSIVE / P-BASE-SURFACE-PASSIVE: a visual sample must not gain input ownership.
         expect(facts).toHaveLength(expectedAtoms);
         for (const fact of facts) {

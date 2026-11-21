@@ -1,0 +1,546 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T18:01:32.775563+00:00",
+  "kind": "test-premise repairs with original failed native evidence preserved; no native rerun",
+  "base": "a8bf56087e5836e3c14c153cafbd796bd98bff37",
+  "workingTreeDirty": true,
+  "historicalCandidate": "031d9b661025312244d31506758eed989cc71f94",
+  "runId": 44930338506,
+  "liquid": {
+    "jobId": 136925850280,
+    "artifactId": 14717556584,
+    "artifactURL": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/artifacts/14717556584",
+    "archiveBytes": 1943402,
+    "archiveSHA256": "41ebea6165dc08e31468e2b738bb0b264e275c16195abd01c72c5f7854355671",
+    "source": {
+      "sourceSha": "031d9b661025312244d31506758eed989cc71f94",
+      "candidateSha": "031d9b661025312244d31506758eed989cc71f94",
+      "runId": "44930338506",
+      "runAttempt": "1",
+      "job": "hover-evidence",
+      "sourceTree": "8c62c18e45d3de8d9c21fba4f4231db10ff5877a",
+      "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runtimes": ["react"],
+      "plan": "plan.json",
+      "progress": "progress.json",
+      "status": "Planned; Vitest terminal outcome is authoritative"
+    },
+    "observations": [
+      {
+        "path": "hover/react-light-source-edge-negative-idle.json",
+        "sha256": "c4b2788e622c42ebb5dab450c0a779692ef96d64ec34b4a8bb7aeb7c554243cd",
+        "runtime": "react",
+        "theme": "light",
+        "part": "source-edge",
+        "quality": "self-optical",
+        "reason": "rendered",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 162,
+          "top": 922.71875,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": -1,
+          "top": -1,
+          "width": 130.547,
+          "height": 38
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 50,
+        "observationError": "page.waitForFunction: Timeout 7980.378455999991ms exceeded."
+      },
+      {
+        "path": "hover/react-light-neighbor-negative-idle.json",
+        "sha256": "fa74484250683f8fc110284461e0c58b88550cbf149452795a1b2e22c7828a52",
+        "runtime": "react",
+        "theme": "light",
+        "part": "neighbor",
+        "quality": "self-optical",
+        "reason": "rendered",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 208,
+          "top": 933.53125,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": -1,
+          "top": -1,
+          "width": 130.547,
+          "height": 38
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 48,
+        "observationError": "page.waitForFunction: Timeout 7902.282003ms exceeded."
+      },
+      {
+        "path": "hover/react-light-accordion-tight-negative-idle.json",
+        "sha256": "9f77456c1ebc800704978c60991dbe5f655d0c1e7c752dbb831957750f6d965f",
+        "runtime": "react",
+        "theme": "light",
+        "part": "accordion-tight",
+        "quality": "self-optical",
+        "reason": "rendered",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 801,
+          "top": 100.90625,
+          "width": 414,
+          "height": 50
+        },
+        "actualCarrier": {
+          "left": 0,
+          "top": 0,
+          "width": 414,
+          "height": 50
+        },
+        "legacyExpectedOutset": 35,
+        "portalGap": 1,
+        "observationError": "page.waitForFunction: Timeout 7978.01378899999ms exceeded."
+      },
+      {
+        "path": "hover/react-light-authored-before-negative-idle.json",
+        "sha256": "ee3df158b1d1bc0281c0188b6e3132c7f73b043ad564ef4c85832acc31bf9884",
+        "runtime": "react",
+        "theme": "light",
+        "part": "authored-before",
+        "quality": "opaque-fallback",
+        "reason": "contact-carrier-pseudo-conflict",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 800,
+          "top": 968.71875,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": 2,
+          "top": 2,
+          "width": 8.26562,
+          "height": 20
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 48,
+        "observationError": null
+      },
+      {
+        "path": "hover/react-light-clipped-source-negative-idle.json",
+        "sha256": "c8b15d349e9cca264a1e5a8afac7d15820a8755d1aa14d4ba3a4dfd23243b658",
+        "runtime": "react",
+        "theme": "light",
+        "part": "clipped-source",
+        "quality": "opaque-fallback",
+        "reason": "source-not-visible-or-composited",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 800,
+          "top": 933.53125,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": null,
+          "top": null,
+          "width": null,
+          "height": null
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 48,
+        "observationError": null
+      },
+      {
+        "path": "hover/react-dark-source-edge-negative-idle.json",
+        "sha256": "ad80f90e1d441f99df870425f236c11c26f238ab3926552e131b561c8b273644",
+        "runtime": "react",
+        "theme": "dark",
+        "part": "source-edge",
+        "quality": "self-optical",
+        "reason": "rendered",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 162,
+          "top": 922.71875,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": -1,
+          "top": -1,
+          "width": 130.547,
+          "height": 38
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 50,
+        "observationError": "page.waitForFunction: Timeout 7982.983432000008ms exceeded."
+      },
+      {
+        "path": "hover/react-dark-neighbor-negative-idle.json",
+        "sha256": "36fa73d4c1e8133eab34bdc6673088eb301fdfc55801835f146bf646a8ba2bfa",
+        "runtime": "react",
+        "theme": "dark",
+        "part": "neighbor",
+        "quality": "self-optical",
+        "reason": "rendered",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 208,
+          "top": 933.53125,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": -1,
+          "top": -1,
+          "width": 130.547,
+          "height": 38
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 48,
+        "observationError": "page.waitForFunction: Timeout 7904.921318000008ms exceeded."
+      },
+      {
+        "path": "hover/react-dark-accordion-tight-negative-idle.json",
+        "sha256": "8c05f304f04fa04e89825a6da4bb98df758d893977465bac727ed016b9919199",
+        "runtime": "react",
+        "theme": "dark",
+        "part": "accordion-tight",
+        "quality": "self-optical",
+        "reason": "rendered",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 801,
+          "top": 100.90625,
+          "width": 414,
+          "height": 50
+        },
+        "actualCarrier": {
+          "left": 0,
+          "top": 0,
+          "width": 414,
+          "height": 50
+        },
+        "legacyExpectedOutset": 35,
+        "portalGap": 1,
+        "observationError": "page.waitForFunction: Timeout 7976.202343000012ms exceeded."
+      },
+      {
+        "path": "hover/react-dark-authored-before-negative-idle.json",
+        "sha256": "1d94348e28fe0fc35ba56957ea0e8b9fab457bf986e8d7197e6e9c113c9b7f65",
+        "runtime": "react",
+        "theme": "dark",
+        "part": "authored-before",
+        "quality": "opaque-fallback",
+        "reason": "contact-carrier-pseudo-conflict",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 800,
+          "top": 968.71875,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": 2,
+          "top": 2,
+          "width": 8.26562,
+          "height": 20
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 48,
+        "observationError": null
+      },
+      {
+        "path": "hover/react-dark-clipped-source-negative-idle.json",
+        "sha256": "a991864fc7e73c72e80bfa80475b4fe8ebbc8504a5d5b1af20a90baac15dc7a7",
+        "runtime": "react",
+        "theme": "dark",
+        "part": "clipped-source",
+        "quality": "opaque-fallback",
+        "reason": "source-not-visible-or-composited",
+        "contact": "rest",
+        "pressed": false,
+        "host": {
+          "left": 800,
+          "top": 933.53125,
+          "width": 130.546875,
+          "height": 38
+        },
+        "actualCarrier": {
+          "left": null,
+          "top": null,
+          "width": null,
+          "height": null
+        },
+        "legacyExpectedOutset": 12,
+        "portalGap": 48,
+        "observationError": null
+      }
+    ],
+    "classification": "source-edge, neighbor and accordion-tight waited for opaque fallback at idle even though idle has zero contact expansion. Native mouse-down must still reject their expanded footprint. Authored-pseudo/clipped-source negatives remain idle fallback.",
+    "expectedContactBound": "ceil(max(native host width, native host height) * 0.08 + 1), independent of actual missing fallback carrier",
+    "preserved": [
+      "fallback quality, absence of image/carrier, opacity and contrast >= 4.5",
+      "specific source-bounds-unavailable / source-overlapping-content reasons under real mouse-down",
+      "accordion actual portal gap close to 1px, greater than zero and below the independently derived expanded-contact bound",
+      "all existing optical, source, image, geometry and decode checks",
+      "8000ms settle budget and 240000ms original case budget",
+      "all other positive interactions and authored-before/clipped-source negative journeys"
+    ],
+    "pending": "Real press rejection and finite release/leave re-admission on next exact candidate; no native pass is claimed by this record."
+  },
+  "menubar": {
+    "jobId": 136925440952,
+    "jobURL": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/job/136925440952",
+    "logBytes": 204144,
+    "logSHA256": "a3920cdb4b63790b7b75dd995c2872f2575f66ccd48c23c9dd4da2b0731fef58",
+    "shardCounts": {
+      "passed": 70,
+      "failed": 10,
+      "total": 80
+    },
+    "failedCases": [
+      " packages/adapters/web-component/test/native-text-width.browser.test.ts > exact-source native full-width editor composition > retains four-runtime geometry and editing with reset=false",
+      " packages/adapters/web-component/test/native-text-width.browser.test.ts > exact-source native full-width editor composition > retains four-runtime geometry and editing with reset=true",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > wc light preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > wc dark preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > react light preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > react dark preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > vue light preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > vue dark preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > vue2 light preserves closed focus, navigation and real item paint",
+      " apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts > Shadcn Menubar public Rhea native projection > vue2 dark preserves closed focus, navigation and real item paint"
+    ],
+    "receivedFocusedTokens": "relative flex min-w-0 cursor-default select-none items-center outline-none break-words data-[disabled]:pointer-events-none data-[disabled]:opacity-50 gap-2 min-h-7 rounded-[var(--pui-radius-xl)] py-1.5 text-sm pr-2 pl-2 bg-accent text-accent-foreground",
+    "classification": "All eight Menubar cases reached the obsolete data-[focused]:bg-accent token assertion; the resolved focused Rule supplies bg-accent and text-accent-foreground. Computed paint checks after that assertion were not reached.",
+    "definition": "menubar/item.proto.ts wires Base focused/focusVisible to setupMenuItemPaint in dropdown/visual.ts; default focused Rule supplies the two concrete tokens.",
+    "replacement": "Require same-frame native focused=true and exact token membership for bg-accent and text-accent-foreground; keep every original computed color, navigation, geometry and activation assertion.",
+    "unmodifiedProductObservations": [
+      {
+        "observed": {
+          "fact": {
+            "runtime": "wc",
+            "font": 100,
+            "reset": false,
+            "kind": "textarea",
+            "width": 144,
+            "layout": "padded-two-siblings",
+            "variant": "placeholder",
+            "editorWidth": 91.296875,
+            "available": 88,
+            "parentWidth": 172,
+            "editorBoxSizing": "border-box",
+            "expectedValue": "",
+            "initialValue": "",
+            "valuePreserved": true,
+            "disabled": false,
+            "readOnly": false,
+            "focused": true,
+            "selection": [0, 0],
+            "editorIndex": "44"
+          },
+          "reference": {
+            "runtime": "react",
+            "font": 100,
+            "reset": false,
+            "kind": "textarea",
+            "width": 144,
+            "layout": "padded-two-siblings",
+            "variant": "placeholder",
+            "editorWidth": 88,
+            "available": 88,
+            "parentWidth": 172,
+            "editorBoxSizing": "border-box",
+            "expectedValue": "",
+            "initialValue": "",
+            "valuePreserved": true,
+            "disabled": false,
+            "readOnly": false,
+            "focused": true,
+            "selection": [0, 0],
+            "editorIndex": "44"
+          }
+        },
+        "assertion": "expected 3.296875 to be less than or equal to 1"
+      },
+      {
+        "observed": {
+          "runtime": "wc",
+          "font": 100,
+          "reset": true,
+          "kind": "textarea",
+          "width": 144,
+          "layout": "padded-sibling",
+          "variant": "placeholder",
+          "editorWidth": 91.296875,
+          "available": 84,
+          "parentWidth": 144,
+          "editorBoxSizing": "border-box",
+          "expectedValue": "",
+          "initialValue": "",
+          "valuePreserved": true,
+          "disabled": false,
+          "readOnly": false,
+          "focused": true,
+          "selection": [0, 0],
+          "editorIndex": "40"
+        },
+        "assertion": "expected 7.296875 to be less than or equal to 1"
+      }
+    ],
+    "nativeTextareaThresholdPx": 1,
+    "pending": "Eight Menubar journeys and original WC text-width cases require native rerun; 3.296875px / 7.296875px textarea differences remain product observations."
+  },
+  "changedSource": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+      "sha256": "e77b6274f9132c3a640b687721562d5167ac0468bdc6c4143f600c94e35d335b"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts",
+      "sha256": "b10647c4bfee287ac6cef26f30c50c8752918e784d274697388571b81a881c37"
+    }
+  ],
+  "readSource": [
+    {
+      "path": "packages/prototypes/shadcn/src/menubar/item.proto.ts",
+      "sha256": "2877f6ad2ec55b00efe0d0dfb10cdcee93cee74c2fd61cc2c4ed0fbd159bb5af",
+      "matchesHistoricalCandidate": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/dropdown/visual.ts",
+      "sha256": "0eac9d9c9b408b1bd48a4094ec03bc4e580f45cddd8fc1dce1bd490bb92a1177",
+      "matchesHistoricalCandidate": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/contact-profile.ts",
+      "sha256": "0b1bd7e655c17cf57c24df5fc97e36a0d5955555a70520d56ac547c6cf1095c8",
+      "matchesHistoricalCandidate": true
+    },
+    {
+      "path": "packages/adapters/web-component/test/native-text-width.browser.test.ts",
+      "sha256": "e7198642a310a5e99d6f78aba41aeaf2fb6eafeaa59dabf2673d2def72d67b0d",
+      "matchesHistoricalCandidate": true
+    }
+  ],
+  "staticComparison": {
+    "schemaVersion": 1,
+    "kind": "static assertion and deadline comparison; no native browser run",
+    "candidate": "031d9b661025312244d31506758eed989cc71f94",
+    "base": "a8bf56087e5836e3c14c153cafbd796bd98bff37",
+    "files": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+        "beforeSHA256": "29499b9181b1ed0a66d8db61f874ec93ba4a134e5904c374343310aaf8d0d2f0",
+        "afterSHA256": "e77b6274f9132c3a640b687721562d5167ac0468bdc6c4143f600c94e35d335b",
+        "beforeParseErrors": 0,
+        "afterParseErrors": 0,
+        "originalAssertions": 137,
+        "currentAssertions": 158,
+        "missingOriginalAssertions": [
+          "expect(rejected.raw.portalDestination!.gapBelowSubject).toBeLessThan( rejected.facts.paint.paintOutset )"
+        ],
+        "addedAssertions": [
+          "expect(idle.facts.paint.paintOutset).toBe(0)",
+          "expect(idle.states.pressed).toBe(false)",
+          "expect(idle.raw.sourceBackdrop).not.toBeNull()",
+          "expect(Math.min(...sourceGaps)).toBeGreaterThanOrEqual(0)",
+          "expect(Math.min(...sourceGaps)).toBeLessThan(contactBound)",
+          "expect(idle.raw.adjacentPaint).not.toBeNull()",
+          "expect(gap).toBeCloseTo(1, 2)",
+          "expect(gap).toBeGreaterThan(0)",
+          "expect(gap).toBeLessThan(contactBound)",
+          "expect(neighbor.top).toBeLessThan(idle.raw.y + idle.raw.height)",
+          "expect(neighbor.bottom).toBeGreaterThan(idle.raw.y)",
+          "expect(hovered.facts.paint.paintOutset).toBe(0)",
+          "expect(hovered.states.pressed).toBe(false)",
+          "expect(hovered.facts.background).toEqual(idle.facts.background)",
+          "expect(hovered.facts.foreground).toEqual(idle.facts.foreground)",
+          "expect(rejected.states.pressed).toBe(true)",
+          "expect(rejected.facts.reason).toBe('source-bounds-unavailable')",
+          "expect(rejected.raw.portalDestination!.gapBelowSubject).toBeLessThan( contactBound )",
+          "expect(released.facts.paint.paintOutset).toBe(0)",
+          "expect(released.states.pressed).toBe(false)",
+          "expect(left.facts.paint.paintOutset).toBe(0)",
+          "expect(rejected.facts.reason).not.toBe('rendered')"
+        ],
+        "testDeclarationsAndDeadlinePreserved": true,
+        "testDeclarations": [
+          {
+            "title": "[229,[16,\"\"],[240,[80,\"runtime\"],[17,\"/\"]],[240,[80,\"theme\"],[18,\": eight real owners, hover/press/focus and cancellation\"]]]",
+            "arity": 3,
+            "timeout": "[9,\"240000\"]"
+          },
+          {
+            "title": "[229,[16,\"\"],[240,[80,\"runtime\"],[17,\"/\"]],[240,[80,\"theme\"],[18,\": current-state fallback, disabled policy, source loss and carrier boundaries\"]]]",
+            "arity": 3,
+            "timeout": "[9,\"240000\"]"
+          }
+        ],
+        "unchangedHelpers": [
+          {
+            "name": "settle",
+            "unchanged": true,
+            "sha256": "aaecf0a7c158a6d17e4409b2bc918745d1fc31cec2127302415078b5618f1544"
+          },
+          {
+            "name": "optical",
+            "unchanged": true,
+            "sha256": "124df8e2df21544ed0e980e79cde9985ac6c9193af07e71043c7910e6bf75772"
+          },
+          {
+            "name": "fallback",
+            "unchanged": true,
+            "sha256": "eba2699b286a327dfc07ce58b7430c0e68b3830686268f8f23be0d319441aa05"
+          },
+          {
+            "name": "sameGeometry",
+            "unchanged": true,
+            "sha256": "df4f38a9b1a7dc7eea32b180e55f1b304d22733f7f81e9c1a1134fd9262c0a97"
+          }
+        ]
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts",
+        "beforeSHA256": "b302c9373d74029a020d9d934086258f03c5a7d52b1a15ffeb71e6a78c535b4f",
+        "afterSHA256": "b10647c4bfee287ac6cef26f30c50c8752918e784d274697388571b81a881c37",
+        "beforeParseErrors": 0,
+        "afterParseErrors": 0,
+        "originalAssertions": 40,
+        "currentAssertions": 42,
+        "missingOriginalAssertions": ["expect(item.tokens).toContain('data-[focused]:bg-accent')"],
+        "addedAssertions": [
+          "expect(item.focused).toBe(true)",
+          "expect(focusedTokens).toContain('bg-accent')",
+          "expect(focusedTokens).toContain('text-accent-foreground')"
+        ],
+        "testDeclarationsAndDeadlinePreserved": true,
+        "testDeclarations": [
+          {
+            "title": "[229,[16,\"\"],[240,[80,\"runtime\"],[17,\" \"]],[240,[80,\"scheme\"],[18,\" preserves closed focus, navigation and real item paint\"]]]",
+            "arity": 3,
+            "timeout": "[9,\"90000\"]"
+          }
+        ],
+        "unchangedHelpers": []
+      }
+    ]
+  },
+  "validation": {
+    "nativeBrowserRuns": 0,
+    "prettier": "passed for both changed test files",
+    "diffCheck": "passed",
+    "fullTypeCheck": "not rerun for these changes",
+    "staticComparison": "Both files parse, case declarations and deadlines remain. Liquid has only the explained max-bound expression replacement among 137 original assertions; Menubar has only the obsolete token expression replacement among 40 original assertions."
+  }
+}

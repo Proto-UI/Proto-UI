@@ -1,0 +1,660 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T17:50:11.178993+00:00",
+  "kind": "fixture repair with preserved native failure; native candidate rerun required",
+  "base": "a8bf56087e5836e3c14c153cafbd796bd98bff37",
+  "workingTreeDirty": true,
+  "nativeBaseline": {
+    "schemaVersion": 1,
+    "kind": "read-only native artifact timeout attribution",
+    "observedAt": "2026-11-21T17:38:23.965950+00:00",
+    "runId": 44930338506,
+    "jobId": 136925373902,
+    "candidate": "031d9b661025312244d31506758eed989cc71f94",
+    "artifactId": 14717201836,
+    "artifactURL": "https://github.com/Proto-UI/Proto-UI/actions/runs/44930338506/artifacts/14717201836",
+    "archiveBytes": 823940,
+    "archiveSHA256": "3417bc8f7c0c7e9b0819da8d4a8b3f30247dd4620d37c32e2fd6627075a9c8e2",
+    "browserVersion": "157.0.8103.78",
+    "nodeVersion": "v24.22.3",
+    "vitest": {
+      "counts": {
+        "numTotalTests": 12,
+        "numPassedTests": 11,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "failedCase": {
+        "ancestorTitles": ["ordinary native WC browser light"],
+        "fullName": "ordinary native WC browser light constructs empty/style/aliased nodes and updates a mixed helper",
+        "status": "failed",
+        "title": "constructs empty/style/aliased nodes and updates a mixed helper",
+        "duration": 5001.868233000001,
+        "failureMessages": [
+          "Error: Test timed out in 5000ms.\nIf this is a long-running test, pass a timeout value as the last argument or configure it globally with \"testTimeout\".\n    at Timeout.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:44:18)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+        ],
+        "meta": {}
+      },
+      "firstCaseStartWallMs": 1795282215802,
+      "firstCaseLimitMs": 5000,
+      "observedTimeoutWallMs": 1795282220803.8682
+    },
+    "timingMethod": "Trace context wallTime plus event monotonic delta, relative to the first case start (Vitest JSON file startTime is minimum task.result.startTime). Trace wallTime is millisecond-rounded; cross-process times are approximate to that resolution.",
+    "traces": {
+      "construct-false": {
+        "traceSHA256": "0535d0e28a34f98b99203f0997991c83d082be2a9e32728469e3578f58795cdf",
+        "traceWallMs": 1795282216211,
+        "traceRelativeToFirstCaseMs": 409,
+        "playwrightVersion": "1.58.2",
+        "calls": [
+          {
+            "method": "newPage",
+            "stage": "newPage",
+            "startMonotonicMs": 12739.689,
+            "startWallMs": 1795282216213.001,
+            "startRelativeToFirstCaseMs": 411.0009765625,
+            "endMonotonicMs": 16973.242,
+            "endWallMs": 1795282220446.554,
+            "endRelativeToFirstCaseMs": 4644.553955078125,
+            "error": null,
+            "durationMs": 4233.552999999998
+          },
+          {
+            "method": "goto",
+            "stage": "goto",
+            "startMonotonicMs": 16981.562,
+            "startWallMs": 1795282220454.874,
+            "startRelativeToFirstCaseMs": 4652.8740234375,
+            "endMonotonicMs": 17725.244,
+            "endWallMs": 1795282221198.556,
+            "endRelativeToFirstCaseMs": 5396.555908203125,
+            "error": null,
+            "durationMs": 743.6819999999971
+          },
+          {
+            "method": "continue",
+            "stage": "continue",
+            "startMonotonicMs": 17312.957,
+            "startWallMs": 1795282220786.269,
+            "startRelativeToFirstCaseMs": 4984.26904296875,
+            "endMonotonicMs": 17389.115,
+            "endWallMs": 1795282220862.427,
+            "endRelativeToFirstCaseMs": 5060.427001953125,
+            "error": null,
+            "durationMs": 76.15800000000309
+          },
+          {
+            "method": "continue",
+            "stage": "continue",
+            "startMonotonicMs": 17688.103,
+            "startWallMs": 1795282221161.415,
+            "startRelativeToFirstCaseMs": 5359.4150390625,
+            "endMonotonicMs": 17705.564,
+            "endWallMs": 1795282221178.876,
+            "endRelativeToFirstCaseMs": 5376.8759765625,
+            "error": null,
+            "durationMs": 17.46099999999933
+          },
+          {
+            "method": "waitForFunction",
+            "stage": "waitForFunction",
+            "startMonotonicMs": 17806.013,
+            "startWallMs": 1795282221279.325,
+            "startRelativeToFirstCaseMs": 5477.324951171875,
+            "endMonotonicMs": 17996.942,
+            "endWallMs": 1795282221470.254,
+            "endRelativeToFirstCaseMs": 5668.25390625,
+            "error": null,
+            "durationMs": 190.9290000000001
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "construct-host",
+            "startMonotonicMs": 17999.793,
+            "startWallMs": 1795282221473.105,
+            "startRelativeToFirstCaseMs": 5671.10498046875,
+            "endMonotonicMs": 18008.607,
+            "endWallMs": 1795282221481.919,
+            "endRelativeToFirstCaseMs": 5679.9189453125,
+            "error": null,
+            "durationMs": 8.813999999998487
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "assert-owner",
+            "startMonotonicMs": 18123.759,
+            "startWallMs": 1795282221597.071,
+            "startRelativeToFirstCaseMs": 5795.071044921875,
+            "endMonotonicMs": 18127.926,
+            "endWallMs": 1795282221601.238,
+            "endRelativeToFirstCaseMs": 5799.238037109375,
+            "error": null,
+            "durationMs": 4.167000000001281
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-span-texts",
+            "startMonotonicMs": 18129.643,
+            "startWallMs": 1795282221602.955,
+            "startRelativeToFirstCaseMs": 5800.955078125,
+            "endMonotonicMs": 18132.819,
+            "endWallMs": 1795282221606.131,
+            "endRelativeToFirstCaseMs": 5804.131103515625,
+            "error": null,
+            "durationMs": 3.175999999999476
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-product-state",
+            "startMonotonicMs": 18136.873,
+            "startWallMs": 1795282221610.185,
+            "startRelativeToFirstCaseMs": 5808.18505859375,
+            "endMonotonicMs": 18139.636,
+            "endWallMs": 1795282221612.948,
+            "endRelativeToFirstCaseMs": 5810.947998046875,
+            "error": null,
+            "durationMs": 2.7629999999990105
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "bump-and-update",
+            "startMonotonicMs": 18141.082,
+            "startWallMs": 1795282221614.394,
+            "startRelativeToFirstCaseMs": 5812.39404296875,
+            "endMonotonicMs": 18194.244,
+            "endWallMs": 1795282221667.556,
+            "endRelativeToFirstCaseMs": 5865.555908203125,
+            "error": null,
+            "durationMs": 53.16200000000026
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-span-texts",
+            "startMonotonicMs": 18198.19,
+            "startWallMs": 1795282221671.502,
+            "startRelativeToFirstCaseMs": 5869.501953125,
+            "endMonotonicMs": 18201.156,
+            "endWallMs": 1795282221674.468,
+            "endRelativeToFirstCaseMs": 5872.468017578125,
+            "error": null,
+            "durationMs": 2.9660000000003492
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-product-state",
+            "startMonotonicMs": 18204.915,
+            "startWallMs": 1795282221678.227,
+            "startRelativeToFirstCaseMs": 5876.22705078125,
+            "endMonotonicMs": 18209.352,
+            "endWallMs": 1795282221682.664,
+            "endRelativeToFirstCaseMs": 5880.6640625,
+            "error": null,
+            "durationMs": 4.436999999998079
+          },
+          {
+            "method": "screenshot",
+            "stage": "screenshot",
+            "startMonotonicMs": 18211.691,
+            "startWallMs": 1795282221685.003,
+            "startRelativeToFirstCaseMs": 5883.0029296875,
+            "endMonotonicMs": 18436.918,
+            "endWallMs": 1795282221910.23,
+            "endRelativeToFirstCaseMs": 6108.22998046875,
+            "error": null,
+            "durationMs": 225.2270000000026
+          }
+        ],
+        "helperResult": {
+          "head": "031d9b661025312244d31506758eed989cc71f94",
+          "name": "construct-false",
+          "shadow": false,
+          "outcome": "PASS",
+          "errors": [],
+          "expectedErrors": [],
+          "blocked": [],
+          "messages": [],
+          "failure": null,
+          "screenshotError": null
+        }
+      },
+      "slot-false": {
+        "traceSHA256": "9efdd1eecffddf6d3f07434bdb53fa70bde37c998103824ca66911ef8cae5854",
+        "traceWallMs": 1795282220874,
+        "traceRelativeToFirstCaseMs": 5072,
+        "playwrightVersion": "1.58.2",
+        "calls": [
+          {
+            "method": "newPage",
+            "stage": "newPage",
+            "startMonotonicMs": 17401.776,
+            "startWallMs": 1795282220875.0098,
+            "startRelativeToFirstCaseMs": 5073.009765625,
+            "endMonotonicMs": 17601.696,
+            "endWallMs": 1795282221074.93,
+            "endRelativeToFirstCaseMs": 5272.929931640625,
+            "error": null,
+            "durationMs": 199.91999999999825
+          },
+          {
+            "method": "goto",
+            "stage": "goto",
+            "startMonotonicMs": 17604.975,
+            "startWallMs": 1795282221078.209,
+            "startRelativeToFirstCaseMs": 5276.208984375,
+            "endMonotonicMs": 17833.432,
+            "endWallMs": 1795282221306.6658,
+            "endRelativeToFirstCaseMs": 5504.665771484375,
+            "error": null,
+            "durationMs": 228.45700000000215
+          },
+          {
+            "method": "continue",
+            "stage": "continue",
+            "startMonotonicMs": 17705.221,
+            "startWallMs": 1795282221178.4548,
+            "startRelativeToFirstCaseMs": 5376.454833984375,
+            "endMonotonicMs": 17707.606,
+            "endWallMs": 1795282221180.8398,
+            "endRelativeToFirstCaseMs": 5378.83984375,
+            "error": null,
+            "durationMs": 2.3849999999983993
+          },
+          {
+            "method": "continue",
+            "stage": "continue",
+            "startMonotonicMs": 17794.499,
+            "startWallMs": 1795282221267.733,
+            "startRelativeToFirstCaseMs": 5465.73291015625,
+            "endMonotonicMs": 17806.793,
+            "endWallMs": 1795282221280.0269,
+            "endRelativeToFirstCaseMs": 5478.02685546875,
+            "error": null,
+            "durationMs": 12.294000000001688
+          },
+          {
+            "method": "waitForFunction",
+            "stage": "waitForFunction",
+            "startMonotonicMs": 17846.783,
+            "startWallMs": 1795282221320.0168,
+            "startRelativeToFirstCaseMs": 5518.016845703125,
+            "endMonotonicMs": 17995.872,
+            "endWallMs": 1795282221469.106,
+            "endRelativeToFirstCaseMs": 5667.10595703125,
+            "error": null,
+            "durationMs": 149.08899999999994
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "construct-host",
+            "startMonotonicMs": 17999.218,
+            "startWallMs": 1795282221472.452,
+            "startRelativeToFirstCaseMs": 5670.451904296875,
+            "endMonotonicMs": 18009.186,
+            "endWallMs": 1795282221482.42,
+            "endRelativeToFirstCaseMs": 5680.419921875,
+            "error": null,
+            "durationMs": 9.968000000000757
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "assert-owner",
+            "startMonotonicMs": 18126.269,
+            "startWallMs": 1795282221599.503,
+            "startRelativeToFirstCaseMs": 5797.5029296875,
+            "endMonotonicMs": 18128.46,
+            "endWallMs": 1795282221601.6938,
+            "endRelativeToFirstCaseMs": 5799.69384765625,
+            "error": null,
+            "durationMs": 2.190999999998894
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-product-state",
+            "startMonotonicMs": 18131.075,
+            "startWallMs": 1795282221604.3088,
+            "startRelativeToFirstCaseMs": 5802.308837890625,
+            "endMonotonicMs": 18133.441,
+            "endWallMs": 1795282221606.6748,
+            "endRelativeToFirstCaseMs": 5804.6748046875,
+            "error": null,
+            "durationMs": 2.3659999999981665
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "bump-and-update",
+            "startMonotonicMs": 18138.123,
+            "startWallMs": 1795282221611.357,
+            "startRelativeToFirstCaseMs": 5809.35693359375,
+            "endMonotonicMs": 18194.814,
+            "endWallMs": 1795282221668.0479,
+            "endRelativeToFirstCaseMs": 5866.0478515625,
+            "error": null,
+            "durationMs": 56.690999999998894
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-span-texts",
+            "startMonotonicMs": 18199.557,
+            "startWallMs": 1795282221672.7908,
+            "startRelativeToFirstCaseMs": 5870.790771484375,
+            "endMonotonicMs": 18203.678,
+            "endWallMs": 1795282221676.9119,
+            "endRelativeToFirstCaseMs": 5874.911865234375,
+            "error": null,
+            "durationMs": 4.120999999999185
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-product-state",
+            "startMonotonicMs": 18208.782,
+            "startWallMs": 1795282221682.0159,
+            "startRelativeToFirstCaseMs": 5880.015869140625,
+            "endMonotonicMs": 18217.27,
+            "endWallMs": 1795282221690.504,
+            "endRelativeToFirstCaseMs": 5888.50390625,
+            "error": null,
+            "durationMs": 8.488000000001193
+          },
+          {
+            "method": "screenshot",
+            "stage": "screenshot",
+            "startMonotonicMs": 18222.571,
+            "startWallMs": 1795282221695.805,
+            "startRelativeToFirstCaseMs": 5893.804931640625,
+            "endMonotonicMs": 18422.008,
+            "endWallMs": 1795282221895.242,
+            "endRelativeToFirstCaseMs": 6093.241943359375,
+            "error": null,
+            "durationMs": 199.43700000000172
+          }
+        ],
+        "helperResult": {
+          "head": "031d9b661025312244d31506758eed989cc71f94",
+          "name": "slot-false",
+          "shadow": false,
+          "outcome": "PASS",
+          "errors": [],
+          "expectedErrors": [],
+          "blocked": [],
+          "messages": [],
+          "failure": null,
+          "screenshotError": null
+        }
+      },
+      "construct-true": {
+        "traceSHA256": "b67abd152e369287636bfe02c52d57472d3b7cb0be0b1c8c989148f6a905489f",
+        "traceWallMs": 1795282223855,
+        "traceRelativeToFirstCaseMs": 8053,
+        "playwrightVersion": "1.58.2",
+        "calls": [
+          {
+            "method": "newPage",
+            "stage": "newPage",
+            "startMonotonicMs": 20381.842,
+            "startWallMs": 1795282223855.818,
+            "startRelativeToFirstCaseMs": 8053.818115234375,
+            "endMonotonicMs": 20455.689,
+            "endWallMs": 1795282223929.665,
+            "endRelativeToFirstCaseMs": 8127.6650390625,
+            "error": null,
+            "durationMs": 73.84699999999793
+          },
+          {
+            "method": "goto",
+            "stage": "goto",
+            "startMonotonicMs": 20461.824,
+            "startWallMs": 1795282223935.8,
+            "startRelativeToFirstCaseMs": 8133.800048828125,
+            "endMonotonicMs": 20508.314,
+            "endWallMs": 1795282223982.29,
+            "endRelativeToFirstCaseMs": 8180.2900390625,
+            "error": null,
+            "durationMs": 46.48999999999796
+          },
+          {
+            "method": "continue",
+            "stage": "continue",
+            "startMonotonicMs": 20473.673,
+            "startWallMs": 1795282223947.6492,
+            "startRelativeToFirstCaseMs": 8145.649169921875,
+            "endMonotonicMs": 20475.059,
+            "endWallMs": 1795282223949.0352,
+            "endRelativeToFirstCaseMs": 8147.03515625,
+            "error": null,
+            "durationMs": 1.386000000002241
+          },
+          {
+            "method": "continue",
+            "stage": "continue",
+            "startMonotonicMs": 20496.842,
+            "startWallMs": 1795282223970.818,
+            "startRelativeToFirstCaseMs": 8168.818115234375,
+            "endMonotonicMs": 20498.753,
+            "endWallMs": 1795282223972.729,
+            "endRelativeToFirstCaseMs": 8170.72900390625,
+            "error": null,
+            "durationMs": 1.9110000000000582
+          },
+          {
+            "method": "waitForFunction",
+            "stage": "waitForFunction",
+            "startMonotonicMs": 20516.682,
+            "startWallMs": 1795282223990.658,
+            "startRelativeToFirstCaseMs": 8188.657958984375,
+            "endMonotonicMs": 20543.283,
+            "endWallMs": 1795282224017.259,
+            "endRelativeToFirstCaseMs": 8215.259033203125,
+            "error": null,
+            "durationMs": 26.60099999999875
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "construct-host",
+            "startMonotonicMs": 20545.636,
+            "startWallMs": 1795282224019.612,
+            "startRelativeToFirstCaseMs": 8217.612060546875,
+            "endMonotonicMs": 20551.505,
+            "endWallMs": 1795282224025.481,
+            "endRelativeToFirstCaseMs": 8223.48095703125,
+            "error": null,
+            "durationMs": 5.869000000002416
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "assert-owner",
+            "startMonotonicMs": 20556.738,
+            "startWallMs": 1795282224030.714,
+            "startRelativeToFirstCaseMs": 8228.714111328125,
+            "endMonotonicMs": 20561.741,
+            "endWallMs": 1795282224035.717,
+            "endRelativeToFirstCaseMs": 8233.717041015625,
+            "error": null,
+            "durationMs": 5.003000000000611
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-span-texts",
+            "startMonotonicMs": 20563.814,
+            "startWallMs": 1795282224037.79,
+            "startRelativeToFirstCaseMs": 8235.7900390625,
+            "endMonotonicMs": 20566.146,
+            "endWallMs": 1795282224040.122,
+            "endRelativeToFirstCaseMs": 8238.1220703125,
+            "error": null,
+            "durationMs": 2.3320000000021537
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-product-state",
+            "startMonotonicMs": 20573.04,
+            "startWallMs": 1795282224047.016,
+            "startRelativeToFirstCaseMs": 8245.01611328125,
+            "endMonotonicMs": 20575.768,
+            "endWallMs": 1795282224049.7441,
+            "endRelativeToFirstCaseMs": 8247.744140625,
+            "error": null,
+            "durationMs": 2.727999999999156
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "bump-and-update",
+            "startMonotonicMs": 20577.616,
+            "startWallMs": 1795282224051.592,
+            "startRelativeToFirstCaseMs": 8249.592041015625,
+            "endMonotonicMs": 20580.132,
+            "endWallMs": 1795282224054.1082,
+            "endRelativeToFirstCaseMs": 8252.108154296875,
+            "error": null,
+            "durationMs": 2.5159999999996217
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-span-texts",
+            "startMonotonicMs": 20581.729,
+            "startWallMs": 1795282224055.705,
+            "startRelativeToFirstCaseMs": 8253.705078125,
+            "endMonotonicMs": 20584.391,
+            "endWallMs": 1795282224058.3672,
+            "endRelativeToFirstCaseMs": 8256.3671875,
+            "error": null,
+            "durationMs": 2.662000000000262
+          },
+          {
+            "method": "evaluateExpression",
+            "stage": "read-product-state",
+            "startMonotonicMs": 20587.184,
+            "startWallMs": 1795282224061.1602,
+            "startRelativeToFirstCaseMs": 8259.16015625,
+            "endMonotonicMs": 20589.635,
+            "endWallMs": 1795282224063.611,
+            "endRelativeToFirstCaseMs": 8261.611083984375,
+            "error": null,
+            "durationMs": 2.4509999999972933
+          },
+          {
+            "method": "screenshot",
+            "stage": "screenshot",
+            "startMonotonicMs": 20592.306,
+            "startWallMs": 1795282224066.282,
+            "startRelativeToFirstCaseMs": 8264.281982421875,
+            "endMonotonicMs": 20651.165,
+            "endWallMs": 1795282224125.141,
+            "endRelativeToFirstCaseMs": 8323.14111328125,
+            "error": null,
+            "durationMs": 58.85900000000038
+          }
+        ],
+        "helperResult": {
+          "head": "031d9b661025312244d31506758eed989cc71f94",
+          "name": "construct-true",
+          "shadow": true,
+          "outcome": "PASS",
+          "errors": [],
+          "expectedErrors": [],
+          "blocked": [],
+          "messages": [],
+          "failure": null,
+          "screenshotError": null
+        }
+      }
+    },
+    "classification": "fixture cold-page setup exhausted whole-case deadline before product construction; timed-out async continuation overlaps next case and writes misleading late PASS receipt",
+    "findings": [
+      "Isolation preflight and suite beforeAll build/browser launch completed; this is not the earlier local browser setup blocker.",
+      "The first BrowserContext.newPage took 4233.553ms. The following goto took 743.682ms and crossed the 5000ms case deadline before nativeWcReady and host construction.",
+      "The first screenshot started about 5883ms after case start, after the deadline, and lasted 225.227ms. Screenshot/trace disk output did not cause the original timeout.",
+      "The next light case began tracing about 5072ms after first-case start, while the timed-out first case was still navigating.",
+      "The uncancelled first case later completed its checks and emitted helper outcome PASS with no pageerrors, but the authoritative Vitest result remains failed. Late helper PASS cannot certify the failed case.",
+      "No product assertion mismatch is reported. This sample does not prove general runner latency, product performance or that a fixture repair will pass."
+    ],
+    "changeBoundary": "No source or assertions changed and no test/browser rerun. A possible repair should retain the product-case deadline and original assertions, give setup/cleanup explicit bounded ownership, cancel timed-out continuations, and bind helper outcome to the runner result; implementation requires separate review."
+  },
+  "changedSource": [
+    {
+      "path": "packages/compiler/test/web-component-native.browser.test.ts",
+      "sha256": "c4f3303b6b2750947ce814e73f06798596e1a11715dea0155a57453d7f0177cc",
+      "bytes": 14246
+    },
+    {
+      "path": "packages/compiler/test/web-component-native-case-owner.ts",
+      "sha256": "8057af5fb63d4a7c819ac06fd6f70df872b7bb0d5af9b9065fe4061decd0f303",
+      "bytes": 2439
+    },
+    {
+      "path": "packages/compiler/test/web-component-native-case-owner.test.ts",
+      "sha256": "59b60df967e096e5bb1d38d5b82c1cf9887606c3a72d31c604bb85f867a56dd5",
+      "bytes": 2744
+    }
+  ],
+  "assertionPreservation": {
+    "originalCandidate": "031d9b661025312244d31506758eed989cc71f94",
+    "beforeSHA256": "550b29815da575227e9b2faaf3600c80139a62071dca421283b8552673558a75",
+    "afterSHA256": "c4f3303b6b2750947ce814e73f06798596e1a11715dea0155a57453d7f0177cc",
+    "beforeParseErrors": 0,
+    "afterParseErrors": 0,
+    "originalAssertionExpressions": 20,
+    "currentAssertionExpressions": 20,
+    "originalAssertionSyntaxPreserved": true,
+    "assertionSyntaxSHA256": "126a83278b88b0750804be49c31e016b22cc22ef9164a437f913021591c5e1db",
+    "testDeclarationTitlesAndArityPreserved": true,
+    "testDeclarationCount": 5,
+    "enumeratedNativeCases": 12,
+    "caseBodyTimeoutPolicy": "Original two-argument it declarations preserved; no case timeout override. Locked Vitest default remains 5000ms."
+  },
+  "localControlRun": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "packages/compiler/test/web-component-native-case-owner.test.ts",
+      "--pool=forks",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--no-file-parallelism",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/fbd6f62bb640/compiler-native-case-owner-controls.json"
+    ],
+    "exitCode": 0,
+    "counts": {
+      "numTotalTests": 4,
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    },
+    "cases": [
+      {
+        "name": "native browser case evidence ownership records completed assertions as observations, never a replacement for the runner verdict",
+        "status": "passed"
+      },
+      {
+        "name": "native browser case evidence ownership cannot turn a timed-out case into successful evidence when its body resolves late",
+        "status": "passed"
+      },
+      {
+        "name": "native browser case evidence ownership closes a context acquired after setup retirement instead of handing it to another case",
+        "status": "passed"
+      },
+      {
+        "name": "native browser case evidence ownership keeps cleanup failure visible even when the body had completed",
+        "status": "passed"
+      }
+    ],
+    "reportSHA256": "080a2a5d4298b1fed0ed8be33768c7ea777a24176c67a53529473d7ba77ce85f",
+    "logSHA256": "691b3fa72b4325f20e8d51c7941771d5ccea6a68d344c3369608320096f0d5ae",
+    "nativeBrowserJourneys": 0
+  },
+  "limits": {
+    "productBodyMs": 5000,
+    "perCaseSetupMs": 30000,
+    "screenshotMs": 5000,
+    "traceExportMs": 10000,
+    "contextCleanupMs": 10000,
+    "receiptWriteMs": 5000,
+    "cleanupHookMs": 60000
+  },
+  "remaining": "Original twelve native cases on exact reviewed candidate; local controls cannot convert the prior 11 passed / 1 failed native run into a pass."
+}

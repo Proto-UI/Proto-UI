@@ -1,7 +1,7 @@
 import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';
 import { withOwnedCarrierMarker } from './paint-mutations';
 import { observeWebPointerContact } from '../events/pointer-contact';
-import { CONTACT_RELEASE_MS, createContactMotion } from './contact-motion';
+import { createContactMotion } from './contact-motion';
 import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
 import { contactProfile, contactPaintOutset } from './contact-profile';
 import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';
@@ -156,7 +156,6 @@ function createDocumentMaterialSink(
   let cancellationSession: number | null = null;
   let cancelledPointerPhase = false;
   let contactEpoch = 0;
-  let releaseUntil = 0;
   let neutralPaint: {
     lease: string;
     image: string;
@@ -170,8 +169,6 @@ function createDocumentMaterialSink(
     sourceRefresh.cancel();
     if (motion.update(sample, win.performance.now())) {
       contactEpoch++;
-      if (!sample.active && sample.reason === 'up')
-        releaseUntil = win.performance.now() + CONTACT_RELEASE_MS;
       if (sample.active) {
         cancellationSession = null;
         cancelledPointerPhase = false;
@@ -507,19 +504,9 @@ function createDocumentMaterialSink(
         : wantsContact
           ? contactProfile
           : 'liquidgl-v2-app-canvas-1';
-      // The expanded paint box only exists while pointer deformation is
-      // actually engaged. Rejecting at rest solely for being within outset
-      // distance of a sibling would fall back every contact-tracked surface
-      // in ordinary stacked layouts; engagement re-runs this admission and
-      // still falls back if the real expansion overlaps painted content.
-      const contactEngaged =
-        !!contact.current()?.active ||
-        win!.performance.now() < releaseUntil ||
-        (requestedCandidate?.intent === 'liquid-glass' &&
-          requestedCandidate.deformation?.phase === 'pressed');
-      const paintOutset =
-        wantsContact && contactEngaged ? contactPaintOutset(rect.width, rect.height) : 0;
-      const admission = inspectCanvasBackdrop(host, source, paintOutset);
+      // Establish ordinary source ownership before resolving motion policy.
+      // The actual frame below must separately admit its complete paint extent.
+      let admission = inspectCanvasBackdrop(host, source, 0);
       const carrierConflict =
         carrier && !carrier.valid(paintedImage)
           ? 'contact-carrier-style-conflict'
@@ -550,7 +537,7 @@ function createDocumentMaterialSink(
       // Source/host reads may synchronously change preferences. Preserve the
       // existing fresh policy read and never turn a former UA-color exemption
       // into optical admission after forced colors has been withdrawn.
-      const prefs = preferences.current();
+      const prefs = { ...preferences.current() };
       if (!currentDocument()) return;
       if (!foregroundMatches && prefs.forcedColors !== 'active') {
         ordinary('external-foreground-mismatch');
@@ -626,6 +613,7 @@ function createDocumentMaterialSink(
       if (candidate.deformation?.phase !== 'pressed') cancelledPointerPhase = false;
       const suppressCancelledPress = cancellingContact || cancelledPointerPhase;
       if (policy.effectiveMotion !== 'press' || !tracksContact) motion.stop();
+      const paintContact = contact.current();
       const motionFrame = motion.frame(
         win!.performance.now(),
         policy.effectiveMotion === 'press' && tracksContact
@@ -641,6 +629,48 @@ function createDocumentMaterialSink(
         motionFrame.contact?.strength === 0
       )
         motionFrame.contact = { x: 0.5, y: 0.5, deltaX: 0, deltaY: 0, strength: 1 };
+      const effectivePressed =
+        !suppressCancelledPress &&
+        policy.effectiveMotion === 'press' &&
+        candidate.deformation?.phase === 'pressed';
+      // Use the same effective frame for geometry, paint and its receipt. The
+      // motion owner already owns the finite release tail and revocation; a
+      // second pointer-up clock can drift from it or survive motion.stop().
+      const paintOutset =
+        tracksContact &&
+        policy.effectiveMotion === 'press' &&
+        (motionFrame.animating || (motionFrame.contact?.strength ?? 0) > 0 || effectivePressed)
+          ? contactPaintOutset(rect.width, rect.height)
+          : 0;
+      if (paintOutset > 0) {
+        admission = inspectCanvasBackdrop(host, source, paintOutset);
+        const currentPreferences = preferences.current();
+        if (!currentDocument()) return;
+        if (
+          last !== frame ||
+          frameContactEpoch !== contactEpoch ||
+          contact.current() !== paintContact ||
+          JSON.stringify(currentPreferences) !== JSON.stringify(prefs)
+        ) {
+          // Withdraw the obsolete paint without cancelling a newer input
+          // session. Retry through a browser frame, not recursive admission.
+          sourceRefresh.cancel();
+          initialPaint?.retire();
+          cancelPending();
+          clearImage();
+          program.clear();
+          restore();
+          clearDiagnostics();
+          report('materialQuality', 'unavailable');
+          report('materialReason', 'material-frame-changed-during-admission');
+          schedule();
+          return;
+        }
+        if (!admission.valid) {
+          fallback(resolved.fill, admission.reason);
+          return;
+        }
+      }
       const opticalGeometry: OpticalGeometry = {
         ...geometry,
         paintOutset,
@@ -757,10 +787,7 @@ function createDocumentMaterialSink(
       const renderFrame: OpticalFrame = {
         source,
         geometry: opticalGeometry,
-        pressed:
-          !suppressCancelledPress &&
-          policy.effectiveMotion === 'press' &&
-          candidate.deformation?.phase === 'pressed',
+        pressed: effectivePressed,
         contact: tracksContact ? motionFrame.contact : undefined,
         variant: candidate.variant ?? 'regular',
         ...(candidate.tint ? { tint: candidate.tint } : {}),

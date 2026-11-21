@@ -28,17 +28,24 @@ function fixture(
     backgroundRepeat: 'no-repeat',
     ...patch,
   };
+  const receipt = {
+    materialQuality: 'self-optical',
+    materialSource: 'visible-app-canvas',
+    materialContact: 'held',
+    materialPhase: 'rest',
+  };
+  const rect = { left: 0, top: 0, width: 100, height: 40 };
   const element = {
     ownerDocument: {
       defaultView: { getComputedStyle: (_el: unknown, part?: string) => (part ? pseudo : style) },
     },
     style: { getPropertyValue: (name: string) => (name === '--pui-material-image' ? image : '') },
-    dataset: { materialQuality: 'self-optical', materialSource: 'visible-app-canvas' },
+    dataset: receipt,
     getAttribute: () => marker,
-    getBoundingClientRect: () => ({ width: 100, height: 40 }),
+    getBoundingClientRect: () => rect,
     querySelectorAll: () => [],
   } as unknown as Element;
-  return { element, style, pseudo };
+  return { element, style, pseudo, receipt, rect };
 }
 
 describe('owned optical paint observation, independent of quality metadata', () => {
@@ -49,6 +56,65 @@ describe('owned optical paint observation, independent of quality metadata', () 
       geometryMatches: true,
       carrier: 'contact-v1',
       expectedCarrierGeometry: { left: -10, top: -10, width: 118, height: 58 },
+    });
+  });
+  it.each(['idle', 'hover', 'focus'])(
+    'accepts the unexpanded %s carrier only with a neutral committed contact receipt',
+    () => {
+      const { element, receipt } = fixture({
+        left: '-1px',
+        top: '-1px',
+        width: '100px',
+        height: '40px',
+      });
+      receipt.materialContact = 'rest';
+      expect(observeOwnedMaterialPaint(element)).toMatchObject({
+        committed: true,
+        geometryMatches: true,
+        paintOutset: 0,
+        expectedCarrierGeometry: { left: -1, top: -1, width: 100, height: 40 },
+      });
+    }
+  );
+  it.each([
+    ['held', 'rest'],
+    ['held', 'pressed'],
+    ['release', 'rest'],
+    ['rest', 'pressed'],
+  ])('requires the bounded expansion for contact=%s phase=%s', (contact, phase) => {
+    const { element, receipt, pseudo } = fixture();
+    receipt.materialContact = contact;
+    receipt.materialPhase = phase;
+    expect(observeOwnedMaterialPaint(element)).toMatchObject({
+      committed: true,
+      paintOutset: 9,
+    });
+    Object.assign(pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
+    expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+  });
+  it('does not infer engagement from an expanded actual carrier or an unknown receipt', () => {
+    const { element, receipt } = fixture();
+    receipt.materialContact = 'rest';
+    expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+    for (const contact of ['', 'unknown']) {
+      receipt.materialContact = contact;
+      receipt.materialPhase = 'pressed';
+      expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+    }
+    receipt.materialContact = 'held';
+    receipt.materialPhase = 'unknown';
+    expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+  });
+  it('recomputes the bound from host dimensions and rejects a scaled old carrier', () => {
+    const { element, rect, pseudo } = fixture();
+    Object.assign(rect, { width: 200, height: 80 });
+    Object.assign(pseudo, { left: '-19px', top: '-19px', width: '236px', height: '116px' });
+    expect(observeOwnedMaterialPaint(element).committed).toBe(false);
+    Object.assign(pseudo, { left: '-18px', top: '-18px', width: '234px', height: '114px' });
+    expect(observeOwnedMaterialPaint(element)).toMatchObject({
+      committed: true,
+      paintOutset: 17,
+      expectedCarrierGeometry: { left: -18, top: -18, width: 234, height: 114 },
     });
   });
   it.each([

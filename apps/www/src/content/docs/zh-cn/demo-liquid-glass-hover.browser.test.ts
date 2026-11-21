@@ -364,6 +364,19 @@ async function capture(
     const css = getComputedStyle(el),
       box = el.getBoundingClientRect();
     const center = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+    const scene = el.closest('[data-material-scene]');
+    const bounds = (node: Element | null | undefined) => {
+      if (!node) return null;
+      const rect = node.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+      };
+    };
     return {
       attributes: Object.fromEntries(
         [...el.attributes].map((attr) => [
@@ -377,9 +390,10 @@ async function capture(
       documentY: box.y + scrollY,
       viewport: { width: innerWidth, height: innerHeight },
       scroll: { x: scrollX, y: scrollY },
+      sourceBackdrop: bounds(scene?.querySelector(':scope > canvas[data-material-backdrop]')),
+      adjacentPaint: bounds(scene?.querySelector('[data-hover-neighbor]')),
       portalDestination: (() => {
-        const scope = el.closest('[data-material-scene]');
-        const destination = scope?.querySelector<HTMLElement>(
+        const destination = scene?.querySelector<HTMLElement>(
           ':scope > [data-material-overlay-mount]'
         );
         if (!destination) return null;
@@ -1131,20 +1145,101 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                 for (const part of [...LIQUID_HOVER_NEGATIVES, 'accordion-tight'])
                   await run(part, async (sample, target) => {
                     await page.mouse.move(0, 0);
+                    if (['source-edge', 'neighbor', 'accordion-tight'].includes(part)) {
+                      // These layouts reject the expanded contact footprint, not
+                      // the admitted zero-outset idle/hover surface. Keep their
+                      // source/overlap gates blocking under real native press.
+                      const idle = await sample('negative-idle', {
+                        quality: 'self-optical',
+                        contact: 'rest',
+                      });
+                      optical(idle);
+                      expect(idle.facts.paint.paintOutset).toBe(0);
+                      expect(idle.states.pressed).toBe(false);
+                      expect(idle.raw.sourceBackdrop).not.toBeNull();
+                      const sourceBounds = idle.raw.sourceBackdrop!;
+                      const sourceGaps = [
+                        idle.raw.x - sourceBounds.left,
+                        idle.raw.y - sourceBounds.top,
+                        sourceBounds.right - idle.raw.x - idle.raw.width,
+                        sourceBounds.bottom - idle.raw.y - idle.raw.height,
+                      ];
+                      expect(Math.min(...sourceGaps)).toBeGreaterThanOrEqual(0);
+                      // Independent bound from native host dimensions: maximal
+                      // 5.5% displacement + 2.25% dilation + AA. Fallback has no
+                      // carrier, so its actual paint outset cannot prove this
+                      // layout still intersects the proposed contact footprint.
+                      const contactBound = Math.ceil(
+                        Math.max(idle.raw.width, idle.raw.height) * 0.08 + 1
+                      );
+                      if (part === 'source-edge')
+                        expect(Math.min(...sourceGaps)).toBeLessThan(contactBound);
+                      if (part === 'neighbor') {
+                        expect(idle.raw.adjacentPaint).not.toBeNull();
+                        const neighbor = idle.raw.adjacentPaint!;
+                        const gap = neighbor.left - idle.raw.x - idle.raw.width;
+                        expect(gap).toBeCloseTo(1, 2);
+                        expect(gap).toBeGreaterThan(0);
+                        expect(gap).toBeLessThan(contactBound);
+                        expect(neighbor.top).toBeLessThan(idle.raw.y + idle.raw.height);
+                        expect(neighbor.bottom).toBeGreaterThan(idle.raw.y);
+                      }
+                      await target.hover();
+                      const hovered = await sample('negative-hover', {
+                        quality: 'self-optical',
+                        contact: 'rest',
+                      });
+                      optical(hovered);
+                      expect(hovered.facts.paint.paintOutset).toBe(0);
+                      expect(hovered.states.pressed).toBe(false);
+                      expect(hovered.facts.background).toEqual(idle.facts.background);
+                      expect(hovered.facts.foreground).toEqual(idle.facts.foreground);
+                      sameGeometry(idle, hovered);
+                      await page.mouse.down();
+                      const rejected = await sample('negative-press', {
+                        quality: 'opaque-fallback',
+                      });
+                      fallback(rejected);
+                      expect(rejected.states.pressed).toBe(true);
+                      expect(rejected.facts.reason).not.toBe('rendered');
+                      if (part === 'source-edge')
+                        expect(rejected.facts.reason).toBe('source-bounds-unavailable');
+                      else expect(rejected.facts.reason).toBe('source-overlapping-content');
+                      sameGeometry(idle, rejected);
+                      if (part === 'accordion-tight') {
+                        // This destination-overlap negative does not prove
+                        // admission or rejection of the ancestor's visible border.
+                        expect(rejected.raw.portalDestination).not.toBeNull();
+                        expect(rejected.raw.portalDestination!.gapBelowSubject).toBeCloseTo(1, 2);
+                        expect(rejected.raw.portalDestination!.gapBelowSubject).toBeGreaterThan(0);
+                        expect(rejected.raw.portalDestination!.gapBelowSubject).toBeLessThan(
+                          contactBound
+                        );
+                      }
+                      await page.mouse.up();
+                      // Expansion may remain during the finite release tail;
+                      // after it settles the same actual source must be admitted.
+                      const released = await sample('negative-release-rest', {
+                        quality: 'self-optical',
+                        contact: 'rest',
+                      });
+                      optical(released);
+                      expect(released.facts.paint.paintOutset).toBe(0);
+                      expect(released.states.pressed).toBe(false);
+                      sameGeometry(idle, released);
+                      await page.mouse.move(0, 0);
+                      const left = await sample('negative-leave', {
+                        quality: 'self-optical',
+                        contact: 'rest',
+                      });
+                      optical(left);
+                      expect(left.facts.paint.paintOutset).toBe(0);
+                      sameGeometry(idle, left);
+                      return;
+                    }
                     const rejected = await sample('negative-idle', { quality: 'opaque-fallback' });
                     fallback(rejected);
                     expect(rejected.facts.reason).not.toBe('rendered');
-                    if (part === 'accordion-tight') {
-                      // This actual destination-overlap negative does not prove
-                      // admission or rejection of the ancestor's visible border.
-                      expect(rejected.facts.reason).toBe('source-overlapping-content');
-                      expect(rejected.raw.portalDestination).not.toBeNull();
-                      expect(rejected.raw.portalDestination!.gapBelowSubject).toBeCloseTo(1, 2);
-                      expect(rejected.raw.portalDestination!.gapBelowSubject).toBeGreaterThan(0);
-                      expect(rejected.raw.portalDestination!.gapBelowSubject).toBeLessThan(
-                        rejected.facts.paint.paintOutset
-                      );
-                    }
                     if (part === 'authored-before') expect(rejected.raw.beforeContent).toBe('"•"');
                     await target.hover();
                     const hovered = await sample('negative-hover');

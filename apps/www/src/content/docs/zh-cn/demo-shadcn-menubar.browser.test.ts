@@ -246,7 +246,12 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             expect(item.height).toBeGreaterThanOrEqual(fontSize * 1.75 - 0.1);
             expect(Number.parseFloat(item.paddingLeft)).toBeCloseTo(fontSize * 0.5, 1);
             expect(Number.parseFloat(item.paddingTop)).toBeCloseTo(fontSize * 0.375, 1);
-            expect(item.tokens).toContain('data-[focused]:bg-accent');
+            // MenuItem's focused/focusVisible Rule contributes concrete paint
+            // tokens; the native state is already resolved at this boundary.
+            expect(item.focused).toBe(true);
+            const focusedTokens = item.tokens?.split(/\s+/) ?? [];
+            expect(focusedTokens).toContain('bg-accent');
+            expect(focusedTokens).toContain('text-accent-foreground');
             const accent = await undo.evaluate((element) => {
               const probe = document.createElement('span');
               probe.style.cssText =

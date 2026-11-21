@@ -1,9 +1,22 @@
 // @vitest-environment node
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { Page } from '../../../apps/www/node_modules/playwright-core/types/types';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type TaskContext,
+} from 'vitest';
+import type {
+  BrowserContext,
+  Page,
+} from '../../../apps/www/node_modules/playwright-core/types/types';
 import { nativeTags, startNativeWcFixture } from './web-component-native-browser-fixture';
+import { createNativeCaseOwner, withinNativePhase } from './web-component-native-case-owner';
 interface NativeHost extends HTMLElement {
   logicalOwner: symbol | null;
   update(): void;
@@ -24,45 +37,163 @@ declare global {
   }
 }
 let fixture: Awaited<ReturnType<typeof startNativeWcFixture>>;
+type CaseState = {
+  owner: ReturnType<typeof createNativeCaseOwner>;
+  name: string;
+  shadow: boolean | null;
+  context?: BrowserContext;
+  page?: Page;
+  tracing: boolean;
+  errors: string[];
+  expectedErrors: string[];
+  blocked: string[];
+  messages: { type: string; text: string }[];
+  failure?: unknown;
+};
+const cases = new WeakMap<TaskContext['task'], CaseState>();
 beforeAll(async () => {
   fixture = await startNativeWcFixture();
 }, 120_000);
 afterAll(async () => {
   await fixture?.close();
 }, 60_000);
+
+// Keep the original 5s test-body budget for native product assertions. The
+// existing Playwright navigation/readiness limit was 30s per operation; setup
+// now has one shared 30s bound instead of consuming the first product case.
+beforeEach(async (test) => {
+  const owner = createNativeCaseOwner();
+  const state: CaseState = {
+    owner,
+    name: 'setup-' + test.task.id.replace(/[^a-zA-Z0-9_-]/g, '_'),
+    shadow: null,
+    tracing: false,
+    errors: [],
+    expectedErrors: [],
+    blocked: [],
+    messages: [],
+  };
+  cases.set(test.task, state);
+  await withinNativePhase(
+    'page setup',
+    30_000,
+    async () => {
+      const context = (state.context = await owner.acquire(
+        fixture.browser.newContext({
+          viewport: { width: 900, height: 600 },
+          deviceScaleFactor: 1,
+          reducedMotion: 'reduce',
+          serviceWorkers: 'block',
+        })
+      ));
+      owner.assertActive();
+      await context.route('**/*', (route) => {
+        const u = new URL(route.request().url());
+        if (u.origin !== fixture.baseUrl) {
+          state.blocked.push(u.origin + u.pathname);
+          return route.abort();
+        }
+        return route.continue();
+      });
+      owner.assertActive();
+      await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
+      state.tracing = true;
+      owner.assertActive();
+      const page = (state.page = await context.newPage());
+      owner.assertActive();
+      page.on('pageerror', (error) => state.errors.push(error.message));
+      page.on('console', (message) =>
+        state.messages.push({ type: message.type(), text: message.text() })
+      );
+      const response = await page.goto(fixture.baseUrl);
+      owner.assertActive();
+      expect(response?.status()).toBe(200);
+      await page.waitForFunction(() => window.nativeWcReady === true);
+      owner.assertActive();
+    },
+    () => {
+      owner.retire();
+      void owner.close().catch(() => {});
+    }
+  );
+}, 30_000);
+
+// Vitest 2.1.9 runs afterEach after it has recorded a body failure/timeout. Its
+// Promise.race timeout does not cancel that body, so retire its owner first.
+// Per-case files are observations; only browser-vitest.json accepts a case.
+afterEach(async (test) => {
+  const state = cases.get(test.task);
+  if (!state) return;
+  cases.delete(test.task);
+  state.owner.retire();
+  const cleanupErrors: string[] = [];
+  const cancel = () => void state.owner.close().catch(() => {});
+  const capture = async (phase: string, milliseconds: number, run: () => Promise<unknown>) => {
+    try {
+      await withinNativePhase(phase, milliseconds, run, cancel);
+    } catch (error) {
+      cleanupErrors.push(`${phase}: ${String(error)}`);
+    }
+  };
+  const suffix = test.task.result?.state === 'fail' ? '-FAIL' : '-OBSERVED';
+  if (state.page && !state.page.isClosed()) {
+    await capture('screenshot', 5_000, () =>
+      state.page!.screenshot({
+        path: path.join(fixture.evidenceDir, state.name + suffix + '.png'),
+        fullPage: true,
+        timeout: 5_000,
+      })
+    );
+  }
+  if (state.context && state.tracing) {
+    await capture('trace export', 10_000, () =>
+      state.context!.tracing.stop({
+        path: path.join(fixture.evidenceDir, state.name + '-trace.zip'),
+      })
+    );
+  }
+  await capture('context cleanup', 10_000, () => state.owner.close());
+  await withinNativePhase('evidence record', 5_000, () =>
+    writeFile(
+      path.join(fixture.evidenceDir, state.name + '-result.json'),
+      JSON.stringify(
+        {
+          head: fixture.head,
+          name: state.name,
+          shadow: state.shadow,
+          ...state.owner.observation(test.task.result?.state, cleanupErrors),
+          errors: state.errors,
+          expectedErrors: state.expectedErrors,
+          blocked: state.blocked,
+          messages: state.messages,
+          failure: state.failure ? String(state.failure) : null,
+          runnerErrors: test.task.result?.errors?.map((error) => error.message) ?? [],
+          cleanupErrors,
+        },
+        null,
+        2
+      ),
+      { signal: AbortSignal.timeout(5_000) }
+    )
+  );
+  if (cleanupErrors.length) throw new Error(cleanupErrors.join('\n'));
+}, 60_000);
+
 async function withPage(
+  test: TaskContext,
   name: string,
   shadow: boolean,
   run: (page: Page) => Promise<void>,
   expectedErrors: string[] = []
 ) {
-  const context = await fixture.browser.newContext({
-    viewport: { width: 900, height: 600 },
-    deviceScaleFactor: 1,
-    reducedMotion: 'reduce',
-    serviceWorkers: 'block',
-  });
-  const blocked: string[] = [];
-  await context.route('**/*', (route) => {
-    const u = new URL(route.request().url());
-    if (u.origin !== fixture.baseUrl) {
-      blocked.push(u.origin + u.pathname);
-      return route.abort();
-    }
-    return route.continue();
-  });
-  await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
-  const page = await context.newPage();
-  const errors: string[] = [];
-  const messages: { type: string; text: string }[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  page.on('console', (message) => messages.push({ type: message.type(), text: message.text() }));
-  let failure: unknown;
-  let screenshotError: unknown;
+  const state = cases.get(test.task);
+  if (!state?.page) throw new Error('Native browser case setup did not complete');
+  const { owner, page, errors, blocked } = state;
+  owner.assertActive();
+  state.name = name;
+  state.shadow = shadow;
+  state.expectedErrors = expectedErrors;
   try {
-    const response = await page.goto(fixture.baseUrl);
-    expect(response?.status()).toBe(200);
-    await page.waitForFunction(() => window.nativeWcReady === true);
     await page.evaluate(
       (tag) => {
         const host = document.createElement(tag) as NativeHost;
@@ -83,51 +214,20 @@ async function withPage(
       },
       shadow ? nativeTags.shadow : nativeTags.light
     );
+    owner.assertActive();
     expect(
       await page.evaluate(
         () => window.nativeProbe.owner !== null && window.nativeProbe.section !== null
       )
     ).toBe(true);
     await run(page);
+    owner.assertActive();
     expect(errors).toEqual(expectedErrors);
     expect(blocked).toEqual([]);
+    owner.complete();
   } catch (error) {
-    failure = error;
+    state.failure = error;
     throw error;
-  } finally {
-    try {
-      await page.screenshot({
-        path: path.join(fixture.evidenceDir, name + (failure ? '-FAIL' : '-PASS') + '.png'),
-        fullPage: true,
-      });
-    } catch (error) {
-      screenshotError = error;
-    }
-    await writeFile(
-      path.join(fixture.evidenceDir, name + '-result.json'),
-      JSON.stringify(
-        {
-          head: fixture.head,
-          name,
-          shadow,
-          outcome: failure || screenshotError ? 'FAIL' : 'PASS',
-          errors,
-          expectedErrors,
-          blocked,
-          messages,
-          failure: failure ? String(failure) : null,
-          screenshotError: screenshotError ? String(screenshotError) : null,
-        },
-        null,
-        2
-      )
-    );
-    try {
-      await context.tracing.stop({ path: path.join(fixture.evidenceDir, name + '-trace.zip') });
-    } finally {
-      await context.close();
-    }
-    if (screenshotError && !failure) throw screenshotError;
   }
 }
 async function bump(page: Page, value: number) {
@@ -148,8 +248,8 @@ async function spanTexts(page: Page) {
 }
 for (const shadow of [false, true])
   describe('ordinary native WC browser ' + (shadow ? 'shadow' : 'light'), () => {
-    it('constructs empty/style/aliased nodes and updates a mixed helper', async () =>
-      withPage('construct-' + shadow, shadow, async (page) => {
+    it('constructs empty/style/aliased nodes and updates a mixed helper', async (test) =>
+      withPage(test, 'construct-' + shadow, shadow, async (page) => {
         expect(await spanTexts(page)).toEqual(['1', '1']);
         expect(
           await page.evaluate(() => {
@@ -175,8 +275,8 @@ for (const shadow of [false, true])
           })
         ).toEqual({ b: true, text: true });
       }));
-    it('retains native child identity/listeners and real slot projection on updates', async () =>
-      withPage('slot-' + shadow, shadow, async (page) => {
+    it('retains native child identity/listeners and real slot projection on updates', async (test) =>
+      withPage(test, 'slot-' + shadow, shadow, async (page) => {
         await page.evaluate(() => window.nativeProbe.child.click());
         await bump(page, 2);
         await expect.poll(() => spanTexts(page)).toEqual(['2', '2']);
@@ -196,8 +296,8 @@ for (const shadow of [false, true])
           })
         ).toEqual({ connected: true, clicks: 2, owner: true, projection: true });
       }));
-    it('does not steal a consumer-transferred native slot child', async () =>
-      withPage('transfer-' + shadow, shadow, async (page) => {
+    it('does not steal a consumer-transferred native slot child', async (test) =>
+      withPage(test, 'transfer-' + shadow, shadow, async (page) => {
         await page.evaluate(() =>
           document.querySelector('#outside')!.append(window.nativeProbe.child)
         );
@@ -212,8 +312,8 @@ for (const shadow of [false, true])
           })
         ).toEqual({ outside: 'outside', clicks: 1 });
       }));
-    it('retains same-turn owner, but disconnect/reconnect and dispose clean up', async () =>
-      withPage('lifecycle-' + shadow, shadow, async (page) => {
+    it('retains same-turn owner, but disconnect/reconnect and dispose clean up', async (test) =>
+      withPage(test, 'lifecycle-' + shadow, shadow, async (page) => {
         await page.evaluate(() =>
           document.querySelector('#outside')!.append(window.nativeProbe.host)
         );
@@ -266,8 +366,9 @@ for (const shadow of [false, true])
       ['evaluation', 99],
       ['construction', 98],
     ] as const) {
-      it(`preserves live DOM after ${phase} failure and recovers`, async () =>
+      it(`preserves live DOM after ${phase} failure and recovers`, async (test) =>
         withPage(
+          test,
           'rollback-' + phase + '-' + shadow,
           shadow,
           async (page) => {

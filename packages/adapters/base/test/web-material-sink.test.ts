@@ -66,7 +66,7 @@ function fixture(delayed = false) {
   };
   const sourceListeners = new Set<() => void>(),
     preferenceListeners = new Set<() => void>();
-  let reducedMotion: 'no-preference' | 'reduce' = 'no-preference',
+  let reducedMotion: 'no-preference' | 'reduce' | 'unknown' = 'no-preference',
     reducedTransparency: 'no-preference' | 'reduce' = 'no-preference';
   let paletteThrows = false;
   let paletteRevision = 1;
@@ -176,6 +176,9 @@ function fixture(delayed = false) {
     },
     silentTransparency() {
       reducedTransparency = 'reduce';
+    },
+    silentMotion(value: typeof reducedMotion) {
+      reducedMotion = value;
     },
     silentContrast() {
       contrast = 'more';
@@ -545,6 +548,206 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
       });
     return { ...f, frame, send, flushFrame };
   }
+  describe('contact paint extent', () => {
+    function duringExpandedAdmission(f: ReturnType<typeof setup>, change: () => void) {
+      const canvas = f.sourceFrame()!.canvas;
+      const bounds = canvas.getBoundingClientRect();
+      let reads = 0;
+      vi.mocked(canvas.getBoundingClientRect).mockImplementation(() => {
+        if (++reads === 2) change();
+        return bounds;
+      });
+    }
+    it.each(['up', 'new session'] as const)(
+      'retires an obsolete expanded frame while preserving %s during admission',
+      async (change) => {
+        let now = 100;
+        vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+        const f = setup('rest');
+        try {
+          optical.render.mockClear();
+          duringExpandedAdmission(f, () => {
+            now = 120;
+            f.send(0.8, change === 'up' ? 'up' : 'down', change === 'up' ? 1 : 2);
+          });
+          f.send(0.8, 'down');
+          await Promise.resolve();
+          expect(optical.render).not.toHaveBeenCalled();
+          expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+          now = 140;
+          f.flushFrame();
+          expect(f.host.dataset.materialContact).toBe(change === 'up' ? 'release' : 'held');
+          expect(f.host.dataset.materialContactSession).toBe(change === 'up' ? '1' : '2');
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+    it.each(['reduce', 'unknown'] as const)(
+      'rechecks a silent %s motion preference after expanded admission',
+      async (preference) => {
+        const f = setup('rest');
+        try {
+          optical.render.mockClear();
+          duringExpandedAdmission(f, () => f.silentMotion(preference));
+          f.send(0.8, 'down');
+          await Promise.resolve();
+          expect(optical.render).not.toHaveBeenCalled();
+          expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+          f.flushFrame();
+          expect(f.host.dataset.materialMotion).toBe('static');
+          expect(f.host.dataset.materialContact).toBe('rest');
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+    it('does not publish an obsolete source withdrawn during expanded admission', async () => {
+      const f = setup('rest');
+      try {
+        duringExpandedAdmission(f, () => f.source(false, 2, false));
+        f.send(0.8, 'down');
+        await Promise.resolve();
+        expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        f.source(true, 3);
+        f.flushFrame();
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+        expect(f.host.dataset.materialSourceRevision).toBe('3');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it('keeps expanded-source bounds blocking even when the rest source was admitted', async () => {
+      const f = setup('rest');
+      try {
+        const canvas = f.sourceFrame()!.canvas;
+        vi.mocked(canvas.getBoundingClientRect).mockReturnValue(rect(40, 30, 400, 240));
+        optical.render.mockClear();
+        f.send(0.8, 'down');
+        await Promise.resolve();
+        expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+        expect(f.host.dataset.materialReason).toBe('source-bounds-unavailable');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        expect(optical.render).not.toHaveBeenCalled();
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it.each(['reduce', 'unknown'] as const)(
+      'uses the static receipt and extent while a pointer is held under %s motion',
+      async (preference) => {
+        const f = setup('rest');
+        try {
+          f.send(0.8, 'down');
+          await Promise.resolve();
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+          f.motion(preference);
+          expect(f.host.dataset.materialMotion).toBe('static');
+          expect(f.host.dataset.materialContact).toBe('rest');
+          expect(f.host.dataset.materialPhase).toBe('rest');
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+          expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+            geometry: { paintOutset: 0 },
+            pressed: false,
+            contact: { strength: 0 },
+          });
+          f.motion('no-preference');
+          f.flushFrame();
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+          expect(f.host.dataset.materialContact).toBe('rest');
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+    it('withdraws the release extent when the sampled source owner is replaced', async () => {
+      let now = 100;
+      vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+      const f = setup('rest');
+      try {
+        f.send(0.8, 'down');
+        await Promise.resolve();
+        now = 120;
+        f.send(0.8, 'up');
+        now = 140;
+        f.flushFrame();
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+        f.rebindSource();
+        // The former painted canvas remains a real foreign source blocker.
+        // Revocation must withdraw its release image, not manufacture rest paint.
+        expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('');
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it('keeps the expanded carrier through the same-session release tail, then returns to rest', async () => {
+      let now = 100;
+      vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+      const f = setup('rest');
+      try {
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+        f.send(0.8, 'down');
+        await Promise.resolve();
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+        expect(f.host.dataset.materialContact).toBe('held');
+        now = 120;
+        f.send(0.8, 'up');
+        now = 140;
+        f.flushFrame();
+        expect(f.host.dataset.materialContact).toBe('release');
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+        expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+          geometry: { paintOutset: 9 },
+          contact: { strength: expect.any(Number) },
+        });
+        now = 359;
+        f.flushFrame();
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+        now = 360;
+        f.flushFrame();
+        expect(f.host.dataset.materialContact).toBe('rest');
+        expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+        expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+          geometry: { paintOutset: 0 },
+          contact: { strength: 0 },
+        });
+      } finally {
+        f.sink.release(1);
+      }
+    });
+    it.each(['cancel', 'lostcapture', 'blur'] as const)(
+      'does not retain or revive a release extent after %s',
+      async (reason) => {
+        let now = 100;
+        vi.spyOn(window.performance, 'now').mockImplementation(() => now);
+        const f = setup('rest');
+        try {
+          f.send(0.8, 'down');
+          await Promise.resolve();
+          now = 120;
+          f.send(0.8, 'up');
+          now = 140;
+          f.flushFrame();
+          expect(f.host.dataset.materialContact).toBe('release');
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('118px');
+          f.send(0.8, reason);
+          f.flushFrame();
+          expect(f.host.dataset.materialContact).toBe('rest');
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+          now = 160;
+          f.flushFrame();
+          expect(f.host.style.getPropertyValue('--pui-material-width')).toBe('100px');
+        } finally {
+          f.sink.release(1);
+        }
+      }
+    );
+  });
   describe('fresh-press microtask', () => {
     it('renders the newest same-turn session before RAF and still waits for normal decode', async () => {
       const f = setup('rest');

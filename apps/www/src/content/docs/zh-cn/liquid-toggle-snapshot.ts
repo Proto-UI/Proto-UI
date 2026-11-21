@@ -100,7 +100,15 @@ export async function observeLiquidToggleSnapshot(element: Element) {
     };
     // Same committed-carrier criteria as observeOwnedMaterialPaint; unlike a
     // second Locator.evaluate, this receipt cannot come from a later frame.
-    const outset = Math.ceil(Math.max(rect.width, rect.height) * 0.08 + 1);
+    // Use committed contact/phase primitives, never the actual carrier size,
+    // to distinguish neutral zero outset from held/release/keyboard expansion.
+    // This same outset registers decoded content pixels and prominent-tint crops.
+    const knownContact =
+      (receipt.contact === 'rest' || receipt.contact === 'held' || receipt.contact === 'release') &&
+      (facts.phase === 'rest' || facts.phase === 'pressed');
+    const engaged =
+      receipt.contact === 'held' || receipt.contact === 'release' || facts.phase === 'pressed';
+    const outset = engaged ? Math.ceil(Math.max(rect.width, rect.height) * 0.08 + 1) : 0;
     const expected = {
       left: -outset - parseFloat(css.borderLeftWidth),
       top: -outset - parseFloat(css.borderTopWidth),
@@ -113,10 +121,12 @@ export async function observeLiquidToggleSnapshot(element: Element) {
       width: parseFloat(carrierCss.width),
       height: parseFloat(carrierCss.height),
     };
-    const geometryMatches = Object.keys(expected).every((key) => {
-      const name = key as keyof typeof expected;
-      return Number.isFinite(actual[name]) && Math.abs(actual[name] - expected[name]) <= 1 / 64;
-    });
+    const geometryMatches =
+      knownContact &&
+      Object.keys(expected).every((key) => {
+        const name = key as keyof typeof expected;
+        return Number.isFinite(actual[name]) && Math.abs(actual[name] - expected[name]) <= 1 / 64;
+      });
     const committed =
       carrierMarker === 'contact-v1'
         ? facts.carrier.image === receipt.ownedImage &&

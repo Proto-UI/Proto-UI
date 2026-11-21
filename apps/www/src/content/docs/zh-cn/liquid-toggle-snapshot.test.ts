@@ -23,6 +23,7 @@ function fixture(onDecode: (call: number) => void | Promise<void> = () => {}) {
     materialFrame: '1',
     materialSourceRevision: '7',
     materialPhase: 'rest',
+    materialContact: 'held',
     materialMotion: 'press',
     materialContactSession: '1',
   });
@@ -113,14 +114,17 @@ function fixture(onDecode: (call: number) => void | Promise<void> = () => {}) {
   const decode = vi.fn(async () => {
     await onDecode(decode.mock.calls.length);
   });
+  const imageSize = { width: 118, height: 58 };
   vi.stubGlobal(
     'Image',
     class {
       src = '';
       get width() {
-        return this.src.includes('BBBB') ? 218 : 118;
+        return this.src.includes('BBBB') ? 218 : imageSize.width;
       }
-      height = 58;
+      get height() {
+        return imageSize.height;
+      }
       decode = decode;
     }
   );
@@ -130,6 +134,7 @@ function fixture(onDecode: (call: number) => void | Promise<void> = () => {}) {
     pseudo,
     decode,
     pixels,
+    imageSize,
     updateImage() {
       pseudo.backgroundImage = imageB;
       host.style.setProperty('--pui-material-image', imageB);
@@ -167,6 +172,58 @@ describe('Liquid Toggle immutable committed snapshot (modeled decode timing, not
     expect(facts.paint).toMatchObject(observeOwnedMaterialPaint(f.host));
     expect(facts.snapshot).toEqual({ attempts: 1, verifiedAfterDecode: true });
     expect(f.decode).toHaveBeenCalledOnce();
+  });
+  it.each(['idle', 'hover', 'focus'])(
+    'maps an unexpanded %s image to the real host content pixels',
+    async () => {
+      const f = fixture();
+      f.host.dataset.materialContact = 'rest';
+      Object.assign(f.pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
+      Object.assign(f.imageSize, { width: 100, height: 40 });
+      f.pixels.at = (x, y) =>
+        x >= 13 && x < 87 && y >= 9 && y < 31 ? [0, 97, 204, 255] : [255, 255, 255, 32];
+      const facts = await observeLiquidToggleSnapshot(f.host);
+      expect(facts.paint).toMatchObject(observeOwnedMaterialPaint(f.host));
+      expect(facts.paint).toMatchObject({ committed: true, geometryMatches: true, paintOutset: 0 });
+      expect(facts.snapshot.verifiedAfterDecode).toBe(true);
+      expect(facts.pixels!.content).toMatchObject({
+        contentPixels: 74 * 22,
+        opaquePixels: 74 * 22,
+        partialAlphaPixels: 0,
+        transparentPixels: 0,
+      });
+      expect(facts.pixels!.tint.meanRgb).toEqual([0, 97, 204]);
+    }
+  );
+  it.each([
+    ['held', 'rest'],
+    ['held', 'pressed'],
+    ['release', 'rest'],
+    ['rest', 'pressed'],
+  ])('keeps expanded pixel registration for contact=%s phase=%s', async (contact, phase) => {
+    const f = fixture();
+    f.host.dataset.materialContact = contact;
+    f.host.dataset.materialPhase = phase;
+    const facts = await observeLiquidToggleSnapshot(f.host);
+    expect(facts.paint).toMatchObject(observeOwnedMaterialPaint(f.host));
+    expect(facts.paint).toMatchObject({ committed: true, paintOutset: 9 });
+    expect(facts.pixels!.content.contentPixels).toBe(74 * 22);
+    Object.assign(f.pseudo, { left: '-1px', top: '-1px', width: '100px', height: '40px' });
+    expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+  });
+  it('rejects expanded neutral paint, unknown state and a scaled carrier', async () => {
+    const f = fixture();
+    f.host.dataset.materialContact = 'rest';
+    expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+    f.host.dataset.materialContact = 'unknown';
+    f.host.dataset.materialPhase = 'pressed';
+    expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+    f.host.dataset.materialContact = 'held';
+    f.host.dataset.materialPhase = 'unknown';
+    expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
+    f.host.dataset.materialPhase = 'rest';
+    Object.assign(f.pseudo, { left: '-19px', top: '-19px', width: '236px', height: '116px' });
+    expect((await observeLiquidToggleSnapshot(f.host)).paint.committed).toBe(false);
   });
   it('measures a nonempty content ROI against the foreground from that exact receipt', async () => {
     const f = fixture();

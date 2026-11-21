@@ -9,8 +9,16 @@ export function observeOwnedMaterialPaint(element: Element) {
   const marker = host.getAttribute('data-pui-material-carrier');
   const carrier = win.getComputedStyle(host, '::before');
   const image = marker === 'contact-v1' ? carrier.backgroundImage : css.backgroundImage;
-  // The existing contact-profile.ts bounds 5.5% displacement + 2.25% dilation + AA.
-  const outset = Math.ceil(Math.max(rect.width, rect.height) * 0.08 + 1);
+  // The committed receipt identifies engagement independently of actual bounds.
+  // Idle/hover/focus use no expansion; held contact, its finite release tail and
+  // keyboard press use contact-profile.ts's displacement + dilation + AA bound.
+  const contact = host.dataset.materialContact;
+  const phase = host.dataset.materialPhase;
+  const knownContact =
+    (contact === 'rest' || contact === 'held' || contact === 'release') &&
+    (phase === 'rest' || phase === 'pressed');
+  const engaged = contact === 'held' || contact === 'release' || phase === 'pressed';
+  const outset = engaged ? Math.ceil(Math.max(rect.width, rect.height) * 0.08 + 1) : 0;
   const expected = {
     left: -outset - parseFloat(css.borderLeftWidth),
     top: -outset - parseFloat(css.borderTopWidth),
@@ -23,10 +31,12 @@ export function observeOwnedMaterialPaint(element: Element) {
     width: parseFloat(carrier.width),
     height: parseFloat(carrier.height),
   };
-  const geometryMatches = Object.keys(expected).every((key) => {
-    const name = key as keyof typeof expected;
-    return Number.isFinite(actual[name]) && Math.abs(actual[name] - expected[name]) <= 1 / 64;
-  });
+  const geometryMatches =
+    knownContact &&
+    Object.keys(expected).every((key) => {
+      const name = key as keyof typeof expected;
+      return Number.isFinite(actual[name]) && Math.abs(actual[name] - expected[name]) <= 1 / 64;
+    });
   const committed =
     marker === 'contact-v1'
       ? carrier.backgroundImage === host.style.getPropertyValue('--pui-material-image').trim() &&
