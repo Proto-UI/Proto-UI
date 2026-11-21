@@ -1263,6 +1263,51 @@ describe('part-relationship host observation', () => {
 describe('part-relationship identity observation ownership', () => {
   const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
+  it('skips unrelated DOM edits and still observes the insertion and removal of a nested duplicate ID', async () => {
+    const doc = document.implementation.createHTMLDocument('unrelated-observer');
+    const source = doc.createElement('button');
+    const target = doc.createElement('div');
+    target.id = 'target';
+    doc.body.append(source, target);
+    const registry = createWebA11yProjectionRegistry();
+    const ref = createA11ySemanticObjectRef();
+    const targetProjector = createWebA11yProjector(target, undefined, registry);
+    const sourceProjector = createWebA11yProjector(source, undefined, registry);
+    try {
+      targetProjector({ ...semanticSnapshot(ref), viewEpoch: 1 });
+      sourceProjector(semanticSnapshot(createA11ySemanticObjectRef(), { controls: [ref] }));
+      await flush();
+      expect(source.getAttribute('aria-controls')).toBe('target');
+      const query = vi.spyOn(doc, 'querySelectorAll');
+      try {
+        const unrelated = doc.createElement('section');
+        unrelated.append(doc.createElement('span'), 'unrelated text');
+        doc.body.append(unrelated);
+        await flush();
+        unrelated.remove();
+        await flush();
+        expect(query).not.toHaveBeenCalled();
+        expect(source.getAttribute('aria-controls')).toBe('target');
+
+        const container = doc.createElement('section');
+        const duplicate = doc.createElement('span');
+        duplicate.id = 'target';
+        container.append(duplicate);
+        doc.body.append(container);
+        await flush();
+        expect(source.getAttribute('aria-controls')).toBeNull();
+        container.remove();
+        await flush();
+        expect(source.getAttribute('aria-controls')).toBe('target');
+      } finally {
+        query.mockRestore();
+      }
+    } finally {
+      sourceProjector.dispose?.();
+      targetProjector.dispose?.();
+    }
+  });
+
   it.each([false, true])(
     'PUI-549-REVIEW-LIVE-EXPLICIT-ID: preserves an author rewrite, replay before delivery=%s',
     async (replayBeforeDelivery) => {
