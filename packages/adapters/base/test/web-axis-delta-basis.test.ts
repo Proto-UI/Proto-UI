@@ -16,6 +16,10 @@ function target(width: number, height = 100) {
   document.body.append(el);
   nodes.push(el);
   el.getBoundingClientRect = () => ({ left: 0, top: 0, width, height }) as DOMRect;
+  // Contact basis measures untransformed extents through computed layout,
+  // which happy-dom exposes only via inline styles.
+  el.style.width = `${width}px`;
+  el.style.height = `${height}px`;
   return el;
 }
 function pointer(el: HTMLElement, type: string, x: number, y = 10) {
@@ -83,18 +87,21 @@ it('a redistribution retaining summed extent continues, but a different sum canc
   pointer(f.input, 'pointerdown', 100);
   f.basis[0].getBoundingClientRect = () =>
     ({ left: 0, top: 0, width: 148, height: 100 }) as DOMRect;
+  f.basis[0].style.width = '148px';
   f.basis[1].getBoundingClientRect = () =>
     ({ left: 0, top: 0, width: 152, height: 100 }) as DOMRect;
+  f.basis[1].style.width = '152px';
   pointer(f.input, 'pointermove', 148);
   expect(f.samples.at(-1)).toMatchObject({ phase: 'move', totalDelta: 0.1 });
   f.basis[1].getBoundingClientRect = () =>
     ({ left: 0, top: 0, width: 150, height: 100 }) as DOMRect;
+  f.basis[1].style.width = '150px';
   pointer(f.input, 'pointerup', 148);
   expect(f.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'basis-changed' });
   expect(f.samples.filter((s) => s.phase === 'end')).toEqual([]);
 });
 it('ignores transformed extent summation noise while still cancelling a real subpixel change', () => {
-  const f = fixture([126.01406250000001, 180, 205.1859375]);
+  const f = fixture([126.1, 180, 205.1]);
   f.basis.forEach((part) => {
     part.style.transform = 'matrix(0.9, 0, 0, 0.9, 0, 0)';
   });
@@ -104,11 +111,13 @@ it('ignores transformed extent summation noise while still cancelling a real sub
   [126.028125, 180, 205.171875].forEach((width, index) => {
     f.basis[index].getBoundingClientRect = () =>
       ({ left: 0, top: 0, width, height: 100 }) as DOMRect;
+    f.basis[index].style.width = `${width}px`;
   });
   pointer(f.input, 'pointermove', 110);
   expect(f.samples.at(-1)).toMatchObject({ phase: 'move' });
   f.basis[0].getBoundingClientRect = () =>
     ({ left: 0, top: 0, width: 126.029125, height: 100 }) as DOMRect;
+  f.basis[0].style.width = '126.029125px';
   pointer(f.input, 'pointerup', 110);
   expect(f.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'basis-changed' });
 });

@@ -13,6 +13,10 @@ function target(left = 10, top = 20, width = 200, height = 100) {
   const el = document.createElement('div');
   document.body.append(el);
   el.getBoundingClientRect = () => ({ left, top, width, height }) as DOMRect;
+  // The contact-basis path measures untransformed extents through computed
+  // layout, which happy-dom exposes only via inline styles.
+  el.style.width = `${width}px`;
+  el.style.height = `${height}px`;
   const captured = new Set<number>();
   Object.assign(el, {
     setPointerCapture: (id: number) => captured.add(id),
@@ -241,6 +245,8 @@ describe('opt-in physical extent basis', () => {
       lease,
       set: (patch: Partial<typeof rect>) => {
         rect = { ...rect, ...patch };
+        if (patch.width !== undefined) input.style.width = `${patch.width}px`;
+        if (patch.height !== undefined) input.style.height = `${patch.height}px`;
       },
     };
   }
@@ -491,6 +497,7 @@ describe('draft travel-target normalization', () => {
     expect(h.samples.at(-1)).toMatchObject({ phase: 'move', totalDelta: 0.3 });
     h.thumb.getBoundingClientRect = () =>
       ({ left: 100, top: 500, width: 18, height: 16 }) as DOMRect;
+    h.thumb.style.width = '18px';
     pointer(h.root, 'pointerup', 34);
     expect(h.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'basis-changed' });
     expect(h.samples.some((s) => s.phase === 'end')).toBe(false);
@@ -498,6 +505,7 @@ describe('draft travel-target normalization', () => {
   it('refuses invalid travel and preserves pending pointerdown defaults', () => {
     const h = fixture();
     h.thumb.getBoundingClientRect = () => ({ left: 0, top: 0, width: 48, height: 16 }) as DOMRect;
+    h.thumb.style.width = '48px';
     const down = pointer(h.root, 'pointerdown', 24);
     pointer(h.root, 'pointermove', 40);
     pointer(h.root, 'pointerup', 40);

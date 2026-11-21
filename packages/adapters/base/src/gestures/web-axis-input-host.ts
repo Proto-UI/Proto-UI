@@ -81,9 +81,31 @@ function geometryOf(
   if (!target.isConnected) return null;
   const rect = target.getBoundingClientRect();
   const horizontal = config.axis === 'horizontal';
+  const computed = (element: HTMLElement) =>
+    element.ownerDocument.defaultView!.getComputedStyle(element);
+  const read = (value: string) => (value === '' ? 0 : Number.parseFloat(value));
+  /**
+   * Untransformed border-box extent in CSS pixels, the transform-independent
+   * counterpart of the measured rect extent used only by the contact-basis
+   * cancellation below.
+   */
+  const untransformedExtent = (element: HTMLElement): number => {
+    const style = computed(element);
+    const before =
+      read(horizontal ? style.borderLeftWidth : style.borderTopWidth) +
+      read(horizontal ? style.paddingLeft : style.paddingTop);
+    const after =
+      read(horizontal ? style.borderRightWidth : style.borderBottomWidth) +
+      read(horizontal ? style.paddingRight : style.paddingBottom);
+    const specified = Number.parseFloat(horizontal ? style.width : style.height);
+    const extent = style.boxSizing === 'border-box' ? specified : specified + before + after;
+    return Number.isFinite(extent) ? extent : NaN;
+  };
   let origin = horizontal ? rect.left : rect.top;
   let span = horizontal ? rect.width : rect.height;
   if (!Number.isFinite(origin) || !Number.isFinite(span) || span <= 0) return null;
+  let basisBefore = 0;
+  let travelExtent = 0;
   if (travel) {
     if (
       !travel.isConnected ||
@@ -92,8 +114,7 @@ function geometryOf(
       !axisAligned(travel)
     )
       return null;
-    const style = target.ownerDocument.defaultView!.getComputedStyle(target);
-    const read = (value: string) => (value === '' ? 0 : Number.parseFloat(value));
+    const style = computed(target);
     const before =
       read(horizontal ? style.borderLeftWidth : style.borderTopWidth) +
       read(horizontal ? style.paddingLeft : style.paddingTop);
@@ -119,6 +140,10 @@ function geometryOf(
     origin += before * scale + handle / 2;
     span -= (before + after) * scale + handle;
     if (!Number.isFinite(origin) || !Number.isFinite(span) || span <= 0) return null;
+    basisBefore = before + after;
+    const untransformedHandle = untransformedExtent(travel);
+    if (!Number.isFinite(untransformedHandle) || untransformedHandle <= 0) return null;
+    travelExtent = untransformedHandle;
   }
   let deltaSpan = span;
   if (deltaBasis) {
@@ -138,18 +163,18 @@ function geometryOf(
   if (config.contactBasis !== 'cancel-on-extent-change') {
     return { origin, span, deltaSpan, sign: reverse ? -1 : 1 };
   }
-  const layoutExtent = (element: HTMLElement): number => {
-    const style = element.ownerDocument.defaultView!.getComputedStyle(element);
-    const value = Number.parseFloat(horizontal ? style.width : style.height);
-    return Number.isFinite(value) ? value : NaN;
-  };
-  const basisSpan = layoutExtent(target);
+  // The basis mirrors the span composition in untransformed extents: the
+  // target's border box minus its border/padding inset and the travel handle,
+  // or the summed part extents when a delta basis is declared.
+  const targetExtent = untransformedExtent(target);
+  if (!Number.isFinite(targetExtent) || targetExtent <= 0) return null;
+  const basisSpan = targetExtent - basisBefore - travelExtent;
   if (!Number.isFinite(basisSpan) || basisSpan <= 0) return null;
   let basisDeltaSpan = basisSpan;
   if (deltaBasis) {
     basisDeltaSpan = 0;
     for (const part of deltaBasis) {
-      const extent = layoutExtent(part);
+      const extent = untransformedExtent(part);
       if (!Number.isFinite(extent) || extent < 0) return null;
       basisDeltaSpan += extent;
     }
