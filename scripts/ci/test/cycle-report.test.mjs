@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { cycleJobInventory } from '../cycle-job-inventory.mjs';
 import {
   QUEUE_DELAY_LIMIT_MS,
   SLOT_GRACE_MS,
@@ -37,6 +38,51 @@ const run = (id, fields = {}) => {
     ...fields,
   };
 };
+
+test('incomplete or contradictory native execution cannot publish a green baseline receipt', () => {
+  for (const [status, conclusion, expected] of [
+    ['in_progress', null, 'unknown'],
+    ['completed', 'failure', 'fail'],
+    ['completed', 'cancelled', 'unknown'],
+  ]) {
+    const currentRun = run(9, { run_attempt: 1 });
+    const nativeJobs = cycleJobInventory(
+      [
+        {
+          total_count: 1,
+          jobs: [
+            {
+              id: 99,
+              run_id: 9,
+              head_sha: currentRun.head_sha,
+              run_attempt: 1,
+              name: 'test-browser (1/18)',
+              status,
+              conclusion,
+            },
+          ],
+        },
+      ],
+      { runId: 9, sourceRevision: currentRun.head_sha, runAttempt: 1 }
+    );
+    const { receipt, verdict } = auditCycle({
+      now: '2026-11-04T09:00:00Z',
+      cron: '0 8 * * *',
+      laneResults: { build: 'success', test: 'success' },
+      currentRun,
+      recentRuns: [],
+      nativeJobs,
+    });
+    assert.equal(receipt.laneVerdict, 'pass');
+    assert.equal(receipt.verdict, expected);
+    assert.equal(verdict, expected);
+    assert.equal(receipt.lastBaseline, null);
+    assert.equal(receipt.hoursSinceBaseline, 9);
+    assert.equal(receipt.consecutiveGreenCycles, 0);
+    assert.ok(receipt.consecutiveFailedCycles > 0);
+    assert.deepEqual(receipt.nativeJobs, nativeJobs);
+  }
+});
 
 test('expected slot calculation resolves the previous UTC slot', () => {
   assert.equal(expectedSlotAt('2026-11-04T09:00:00Z'), Date.parse('2026-11-04T08:00:00Z'));

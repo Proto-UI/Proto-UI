@@ -190,6 +190,14 @@ export function applyProjectionThemeSurfaceStyle(
   appliedThemeProperties.set(element, nextProperties);
 }
 
+/** Drop a theme copy this projection applied so the element inherits again. */
+export function clearProjectionThemeSurfaceStyle(element: ProjectionThemeSurface): void {
+  for (const property of appliedThemeProperties.get(element) ?? []) {
+    element.style.removeProperty(property);
+  }
+  appliedThemeProperties.delete(element);
+}
+
 /**
  * Observe Website color-mode inputs and emit a complete, closed theme copy.
  * Repeated mutations that resolve to the same map are suppressed, so a

@@ -2081,6 +2081,11 @@ for (const width of [320, 390]) {
       const id = `docs-${family}-font-200-${width}`;
       stage(page, id, 'font-navigate');
       try {
+        // This is the geometry/reflow control. Dev has no Pagefind index, so
+        // keep its external data outcome stable while retaining every native
+        // clipping, hit-test, focus and dismissal assertion below. Loading and
+        // failure transitions have their own unchanged cases in this suite.
+        await installSuccessfulEmptySearchData(page);
         expect(
           (await page.goto(`${baseUrl}${searchRoute(family)}`, { waitUntil: 'networkidle' }))?.ok()
         ).toBe(true);
@@ -2228,6 +2233,7 @@ for (const width of [320, 390]) {
           }
           expect(modal.editor.ownsCenter).toBe(true);
           expect(modal.close.ownsCenter).toBe(true);
+          await expect.poll(() => status.textContent()).toBe('输入关键词搜索全部文档');
           const statusText = await status.textContent();
           expect(statusText?.trim()).toBeTruthy();
           await status.evaluate((node) => node.scrollIntoView({ block: 'end' }));

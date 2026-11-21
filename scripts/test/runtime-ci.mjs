@@ -8,15 +8,19 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { RUNTIME_TEST_INCLUDES } from './runtime-inventory.mjs';
 import {
   BROWSER_SHARD_COUNT,
   BROWSER_SUITES,
   PRODUCTION_BROWSER_SUITES,
   assertBrowserInventory,
+  assertBrowserShardCapacity,
+  browserShardCosts,
   browserShards,
   selectBrowserShard,
 } from './runtime-test-plan.mjs';
@@ -28,25 +32,23 @@ export function checkoutSha(root = runtimeRoot) {
 
 export function createCiPlan(sha = checkoutSha()) {
   assertBrowserInventory();
+  const browser = browserShards();
+  assertBrowserShardCapacity(browser);
   return {
     checkoutSha: sha,
     general: [
       ...new Set(
-        globSync(
-          [
-            'packages/**/*.test.ts',
-            'internal/contracts/__tests__/**/*.test.ts',
-            'apps/**/test/**/*.test.ts',
-            'apps/www/src/**/*.test.ts',
-          ],
-          { cwd: runtimeRoot, exclude: ['**/node_modules/**', '**/dist/**'] }
-        )
+        globSync([...RUNTIME_TEST_INCLUDES], {
+          cwd: runtimeRoot,
+          exclude: ['**/node_modules/**', '**/dist/**'],
+        })
       ),
     ]
       .map((file) => file.replaceAll('\\', '/'))
       .filter((file) => ![...BROWSER_SUITES, ...PRODUCTION_BROWSER_SUITES].includes(file))
       .sort(),
-    browser: browserShards(),
+    browser,
+    browserCosts: browserShardCosts(browser),
     productionExcluded: [...PRODUCTION_BROWSER_SUITES],
   };
 }
@@ -92,6 +94,15 @@ export function assertVitestReport(report, selection, root = runtimeRoot) {
   assert.equal(passed, report.numPassedTests, 'Passed assertion count disagrees with report');
 }
 
+export function assertRuntimeSource(source, selection) {
+  assert.ok(source?.before && source?.after, 'Missing runtime source binding');
+  assert.deepEqual(source.after, source.before, 'Runtime source changed during execution');
+  assert.equal(source.before.checkoutSha, selection.checkoutSha, 'Runtime source SHA drift');
+  assert.equal(source.before.dirty, false, 'Dirty runtime source cannot certify a commit');
+  assert.match(source.before.treeSha ?? '', /^[a-f0-9]{40}$/, 'Missing runtime tree SHA');
+  assert.match(source.before.worktreeSha256 ?? '', /^[a-f0-9]{64}$/, 'Missing worktree digest');
+}
+
 export function assertRuntimeGate(needs, plan, receipts, sha = checkoutSha()) {
   assert.deepEqual(Object.keys(needs).sort(), ['test-browser', 'test-general', 'test-plan']);
   for (const [job, result] of Object.entries(needs))
@@ -121,12 +132,13 @@ export function assertRuntimeGate(needs, plan, receipts, sha = checkoutSha()) {
       1,
       `Missing/duplicate receipt: ${selection.phase} ${selection.shard}`
     );
-    const { report, ...actual } = matches[0];
+    const { report, source, ...actual } = matches[0];
     assert.deepEqual(
       actual,
       selection,
       'Receipt must bind the checkout SHA and planned suite list'
     );
+    assertRuntimeSource(source, selection);
     assertVitestReport(report, selection);
   }
 }
@@ -237,7 +249,9 @@ export function finishCiSlot(directory, slot, outcome, context = ciContext()) {
 
 export function writeJson(file, value) {
   mkdirSync(path.dirname(file), { recursive: true });
-  writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+  const temporary = `${file}.${process.pid}.tmp`;
+  writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`);
+  renameSync(temporary, file);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

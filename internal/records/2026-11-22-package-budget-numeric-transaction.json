@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-22",
+  "kind": "separately reviewable numeric package-budget transaction",
+  "state": "applied numeric-only candidate; final clean and native checks pending",
+  "sourceBase": "d095fa0a811facff676b6f62929b177aa1dc7583",
+  "authority": "Current user requests regression and package-budget governance; pui-dev authorizes bounded numeric choices for already integrated accepted capabilities, preserving independent review and exact-candidate CI.",
+  "costEvidence": "internal/records/2026-11-22-package-budget-restoration.json",
+  "canonicalRun": 44876125495,
+  "canonicalJob": 136761147724,
+  "canonicalSource": "7a696228c31e6b77998c4e356a57dcebd08854a0",
+  "comparison": "All nine whole-entry vectors and two consumer vectors match the canonical old cycle at current product source; all old-source vectors reproduce exactly under the current toolchain. This is not an exact-candidate complete-cycle receipt.",
+  "capabilityScope": "Existing integrated Axis Input, Native Link, target alignment and size matching, portal/input/view ownership, resident motion/Presence presentation, and Shadcn action profiles. Numeric accounting does not promote draft spec entities or certify unresolved product acceptance.",
+  "headroomRationale": "Small bounded rounding reserves for the measured integrated closure: 88–947 gzip bytes (0.35–1.13% of current measured sizes). These are neither future-feature allocations nor permission to skip the next strict comparison. No speculative wider ceiling, externalization, target, compression or consumer-profile substitution.",
+  "changes": [
+    {
+      "entry": "packages/core/src/index.ts",
+      "name": "core root",
+      "oldCeiling": 7600,
+      "newCeiling": 11500,
+      "canonicalGzipBytes": 11378,
+      "headroomBytes": 122,
+      "headroomPercentOfMeasurement": 1.072
+    },
+    {
+      "entry": "packages/runtime/src/index.ts",
+      "name": "runtime root",
+      "oldCeiling": 78500,
+      "newCeiling": 101500,
+      "canonicalGzipBytes": 101068,
+      "headroomBytes": 432,
+      "headroomPercentOfMeasurement": 0.427
+    },
+    {
+      "entry": "packages/adapters/react/src/index.ts",
+      "name": "adapter-react root",
+      "oldCeiling": 106000,
+      "newCeiling": 164500,
+      "canonicalGzipBytes": 163757,
+      "headroomBytes": 743,
+      "headroomPercentOfMeasurement": 0.454
+    },
+    {
+      "entry": "packages/adapters/vue/src/index.ts",
+      "name": "adapter-vue root",
+      "oldCeiling": 106000,
+      "newCeiling": 163500,
+      "canonicalGzipBytes": 162553,
+      "headroomBytes": 947,
+      "headroomPercentOfMeasurement": 0.583
+    },
+    {
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "name": "adapter-web-component root",
+      "oldCeiling": 132000,
+      "newCeiling": 197500,
+      "canonicalGzipBytes": 196814,
+      "headroomBytes": 686,
+      "headroomPercentOfMeasurement": 0.349
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "name": "prototypes-shadcn/button",
+      "oldCeiling": 7000,
+      "newCeiling": 7900,
+      "canonicalGzipBytes": 7812,
+      "headroomBytes": 88,
+      "headroomPercentOfMeasurement": 1.126
+    }
+  ],
+  "unchangedEntries": ["lucide/icons/x", "lucide root", "prototypes-base/button"],
+  "validation": {
+    "before": "9 measured; six legacy strict failures retained in costEvidence",
+    "after": "Pending final clean candidate measurement and exact-head native workflow; this record is not that receipt.",
+    "independentReview": "Fresh independent local review verified all 11 old/current/canonical artifact vectors, attribution, unchanged measurement boundaries and proposed arithmetic. No GitHub APPROVE or current native pass is claimed.",
+    "canonicalFinalCandidate": "pending; old canonical result cannot be relabeled"
+  },
+  "boundaries": [
+    "Only six existing numeric literals and their explanatory record change in this transaction.",
+    "Old budgets and red canonical observations remain in the separate restoration record.",
+    "Final source changes invalidate the proposed headroom until remeasured.",
+    "No release, publication, lifecycle promotion, or future cost waiver."
+  ],
+  "governanceCheckpoint": "8917def4b1789b351d4ddba32a979195f3ebe935",
+  "costEvidenceSha256": "15aaa5339eb30982c85630c68ba34c3f5d391dde3d29b50dd46d0dae6c1604d7",
+  "checkpointInputVerification": {
+    "uniqueInputCount": 3824,
+    "workingTreeMismatches": 0,
+    "committedObjectMismatches": 0,
+    "meaning": "Measured product closure exactly matches the governance checkpoint; this is not a new canonical CI run."
+  },
+  "rollbackBoundary": "Revert only this numeric transaction to restore six old ceilings; strict overages then remain failures. The separate governance changes, historical measurements and original browser assertions remain."
+}

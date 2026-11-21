@@ -48,6 +48,7 @@ jobs:
       - name: Audit workflow event and schedule inventory
         run: |
           node --test scripts/ci/test/ci-scheduling-policy.test.mjs
+          node --test scripts/ci/test/cycle-job-inventory.test.mjs scripts/ci/test/cycle-report.test.mjs
           node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs
           node scripts/ci/check-ci-schedule.mjs
 
@@ -184,11 +185,24 @@ jobs:
             corepack pnpm@10.32.1 build:packages
           fi
 
-      - name: Check public manifests and bundle budgets
+      - name: Check public manifests and budget measurement controls
         run: |
           corepack pnpm@10.32.1 check:package-manifests
           corepack pnpm@10.32.1 test:package-budget-policy
-          corepack pnpm@10.32.1 check:package-budgets
+
+      - name: Enforce strict whole-entry bundle budgets
+        run: |
+          mkdir -p "$RUNNER_TEMP/package-budgets"
+          node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA" > "$RUNNER_TEMP/package-budgets/report.json"
+
+      - name: Preserve actual strict budget comparisons and source closure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-budgets-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/package-budgets/report.json
+          if-no-files-found: error
+          retention-days: 30
 
   type-check:
     if: ${{ github.event_name != 'pull_request' }}
@@ -509,9 +523,11 @@ jobs:
     # Linux memfd and the distro FFmpeg 6.1 line form the video evidence baseline.
     runs-on: ubuntu-24.04
     # 913009ef: setup/real-decoder gate took 9m13s; the prior repository
-    # suite took 17m27s. Run 36889476980 exhausted the former 20m budget.
-    # This total-job allowance does not change decoder resource limits.
-    timeout-minutes: 30
+    # suite took 17m27s. Coverage validation now adds a separately retained
+    # preflight, and a red preflight no longer prevents the runtime phase.
+    # Reserve time for that complete chain, teardown and evidence upload;
+    # this total-job allowance does not change decoder or test timeouts.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -587,13 +603,10 @@ jobs:
           export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
           mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
           git rev-parse HEAD | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          # Keep the complete repository preflight chain; only its runtime phase is split.
+          # Preserve each original check and its exit status, but collect later
+          # evidence even when a coverage/source binding check is red.
           exec > >(tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/general.log") 2>&1
-          BASE="${SPEC_AUTHORING_BASE:?cycle-plan must provide the full spec delta base}"
-          corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:spec-authoring -- --base "${BASE}"
-          corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:public-docs
-          corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:public-docs
-          corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
+          node scripts/test/general-ci.mjs
 
       - name: Record terminal producer outcome
         if: always()
@@ -616,7 +629,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       fail-fast: false
-      max-parallel: 10
+      max-parallel: 6
       matrix: ${{ fromJSON(needs.test-plan.outputs.matrix) }}
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -975,6 +988,8 @@ jobs:
           export CYCLE_POLICY_ACTIVATED_AT="$(git log --first-parent --diff-filter=A --format=%cI -- scripts/ci/cycle-report.mjs)"
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             > "$RUNNER_TEMP/cycle/current-run.json"
+          gh api --paginate --slurp "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?filter=latest&per_page=100" \
+            > "$RUNNER_TEMP/cycle/jobs.json"
           # The scheduled history of this branch is collected on its own: the
           # unfiltered window was crowded out by pull-request and manual runs
           # and no longer carried the green baseline. The collector fails
@@ -986,6 +1001,7 @@ jobs:
             --out "$RUNNER_TEMP/cycle/recent-runs.json"
           node scripts/ci/cycle-report.mjs \
             --current-run "$RUNNER_TEMP/cycle/current-run.json" \
+            --jobs "$RUNNER_TEMP/cycle/jobs.json" \
             --recent-runs "$RUNNER_TEMP/cycle/recent-runs.json" \
             --needs "$CYCLE_NEEDS" \
             --out "$RUNNER_TEMP/cycle/regression-cycle.json"
@@ -994,6 +1010,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: regression-cycle-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/cycle/regression-cycle.json
+          path: ${{ runner.temp }}/cycle/
           if-no-files-found: error
           retention-days: 30

@@ -504,6 +504,8 @@ function createDocumentMaterialSink(
         : wantsContact
           ? contactProfile
           : 'liquidgl-v2-app-canvas-1';
+      // One conservative profile footprint preserves the admitted image lease
+      // across rest, held contact and its finite release tail.
       const paintOutset = wantsContact ? contactPaintOutset(rect.width, rect.height) : 0;
       const admission = inspectCanvasBackdrop(host, source, paintOutset);
       const carrierConflict =
@@ -760,9 +762,16 @@ function createDocumentMaterialSink(
         paintSignature === signature &&
         owned.get('background-image')?.applied[0] === host.style.backgroundImage &&
         (!carrier || carrier.valid(paintedImage))
-      )
+      ) {
+        // Equal pixels at the first release tick still need a later sample.
+        if (motionFrame.animating) schedule();
         return;
-      if (pending?.signature === signature) return;
+      }
+      if (pending?.signature === signature) {
+        // Let the existing decode finish before continuing the release tail.
+        if (motionFrame.animating) queued = true;
+        return;
+      }
       if (pending?.lease === lease) {
         queued = true;
         return;

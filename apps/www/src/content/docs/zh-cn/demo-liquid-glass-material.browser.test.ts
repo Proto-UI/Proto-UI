@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, BrowserContext, CDPSession, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -506,6 +506,674 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
         baseActivation: true,
       });
     }
+  }, 150000);
+});
+
+describe.sequential('bounded release lifecycle', () => {
+  it('retains complete paint geometry, finishes real release tails and rejects late completions', async () => {
+    if (!evidence)
+      throw new Error('Release lifecycle artifacts require PROTO_UI_MATERIAL_EVIDENCE_DIR');
+    const directory = path.join(evidence, 'release-lifecycle');
+    await mkdir(directory, { recursive: true });
+    const files = [
+      'pnpm-lock.yaml',
+      'packages/adapters/base/src/material/sink.ts',
+      'packages/adapters/base/src/material/program.ts',
+      'packages/adapters/base/src/material/program-pool.ts',
+      'packages/adapters/base/src/material/source.ts',
+      'packages/adapters/base/src/material/source-refresh-task.ts',
+      'packages/adapters/base/src/material/contact-motion.ts',
+      'packages/adapters/base/src/material/contact-profile.ts',
+      'packages/adapters/base/src/material/contact-carrier.ts',
+      'packages/adapters/base/src/material/image-prepare.ts',
+      'packages/adapters/base/src/events/pointer-contact.ts',
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      'apps/www/src/pages/en/test/liquid-glass-material.astro',
+      'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+      'apps/www/src/content/docs/zh-cn/material-paint-observation.ts',
+      'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
+      '.github/workflows/liquid-glass-frame-budget.yml',
+    ];
+    const identity = async () => ({
+      head: execFileSync('git', ['rev-parse', 'HEAD'], {
+        encoding: 'utf8',
+      }).trim(),
+      tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {
+        encoding: 'utf8',
+      }).trim(),
+      status: execFileSync('git', ['status', '--porcelain'], {
+        encoding: 'utf8',
+      }).trim(),
+      hashes: Object.fromEntries(
+        await Promise.all(
+          files.map(async (file) => [
+            file,
+            createHash('sha256')
+              .update(await readFile(file))
+              .digest('hex'),
+          ])
+        )
+      ),
+    });
+    const report: Record<string, any> = {
+      schemaVersion: 1,
+      scope:
+        'Candidate-only real-browser lifecycle acceptance; not matched latency or input-to-photon evidence.',
+      clock:
+        'Unmodified performance.now and native RAF. Exact same-clock branches have separate deterministic unit controls.',
+      controlledDecode:
+        'Only the next actual PNG Image.decode promise delivery is gated; native invocation and settlement are recorded separately. No fake image, completion or decode duration.',
+      cancellation:
+        'Trusted Playwright down/up; pointercancel and window blur below are explicitly synthetic DOM lifecycle delivery, not OS-generated cancellation.',
+      releaseProfileMs: 240,
+      observationDeadlineMs: 2000,
+      cases: [],
+      failures: [],
+      console: [],
+      pageErrors: [],
+      sourceAtStart: await identity(),
+    };
+    const onConsole = (message: any) =>
+      report.console.push({
+        type: message.type(),
+        text: message.text(),
+        location: message.location(),
+      });
+    const onError = (error: Error) =>
+      report.pageErrors.push({
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    page.on('console', onConsole);
+    page.on('pageerror', onError);
+    const resources = () => page.evaluate(() => (window as any).liquidMaterialFixture.metrics());
+    const twoRaf = () =>
+      page.evaluate(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Post-action RAF deadline')), 2000);
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                clearTimeout(timer);
+                resolve();
+              })
+            );
+          })
+      );
+    const zeroResources = (value: Record<string, number>) => {
+      for (const key of [
+        'contexts',
+        'consumers',
+        'pendingImages',
+        'decodedImages',
+        'pendingSourceRefreshTasks',
+      ])
+        expect(value[key], `released resource ${key}`).toBe(0);
+    };
+    const archiveImage = async (name: string, css: string) => {
+      const encoded = /data:image\/png;base64,([A-Za-z0-9+/=]+)/.exec(css)?.[1];
+      const bytes = encoded ? Buffer.from(encoded, 'base64') : Buffer.from(css);
+      const sha256 = createHash('sha256').update(bytes).digest('hex');
+      if (encoded) await writeFile(path.join(directory, `${name}.png`), bytes);
+      return {
+        sha256,
+        bytes: bytes.length,
+        png: encoded ? `${name}.png` : null,
+      };
+    };
+    const checkpoint = (label: string) =>
+      page.evaluate((label) => (window as any).__liquidReleaseProbe.snapshot(label), label);
+    const prepare = async (runtime: string, theme = 'light') => {
+      await preference(theme);
+      await page.setViewportSize({ width: 1000, height: 1050 });
+      await page.goto(`${baseUrl}${ROUTE}?theme=${theme}`, {
+        waitUntil: 'networkidle',
+      });
+      await page.waitForFunction(() => document.documentElement.dataset.materialReady, undefined, {
+        timeout: 60000,
+      });
+      await page.evaluate(() => (window as any).liquidMaterialFixture.pause(true));
+      await page.waitForFunction(
+        () => (window as any).liquidMaterialFixture.metrics().pendingImages === 0
+      );
+      const selector = `[data-material-host="${runtime}"] [data-demo-ref="regular"]`;
+      const target = page.locator(selector);
+      await target.hover();
+      await page.waitForFunction(
+        (selector) => {
+          const node = document.querySelector<HTMLElement>(selector);
+          return (
+            node?.dataset.materialQuality === 'self-optical' &&
+            node.dataset.materialContact === 'rest' &&
+            (window as any).liquidMaterialFixture.metrics().pendingImages === 0
+          );
+        },
+        selector,
+        { timeout: 2000 }
+      );
+      await twoRaf();
+      await page.evaluate(
+        ({ selector, observeSource }) => {
+          const target = document.querySelector<HTMLElement>(selector)!;
+          const observe = Function(
+            `return (${observeSource})`
+          )() as typeof observeOwnedMaterialPaint;
+          const images: string[] = [],
+            imageIds = new Map<string, number>();
+          const state: any = {
+            snapshots: [],
+            inputs: [],
+            images,
+            truncated: false,
+          };
+          const snapshot = (label: string) => {
+            const { image, ...paint } = observe(target);
+            if (!imageIds.has(image)) {
+              imageIds.set(image, images.length);
+              images.push(image);
+            }
+            const entry = {
+              at: performance.now(),
+              label,
+              connected: target.isConnected,
+              frame: target.dataset.materialFrame ?? null,
+              contact: target.dataset.materialContact ?? null,
+              session: target.dataset.materialContactSession ?? null,
+              sourceRevision: target.dataset.materialSourceRevision ?? null,
+              reason: target.dataset.materialReason ?? null,
+              imageId: imageIds.get(image),
+              imageNone: image === 'none',
+              paint,
+              resources: (window as any).liquidMaterialFixture.metrics(),
+            };
+            if (state.snapshots.length < 1200) state.snapshots.push(entry);
+            else state.truncated = true;
+            return entry;
+          };
+          const input = (event: Event) =>
+            state.inputs.push({
+              type: event.type,
+              at: performance.now(),
+              timestamp: event.timeStamp,
+              trusted: event.isTrusted,
+              pointerId: event instanceof PointerEvent ? event.pointerId : null,
+            });
+          for (const name of ['pointerdown', 'pointerup', 'pointercancel'])
+            target.addEventListener(name, input, true);
+          window.addEventListener('blur', input, true);
+          const observer = new MutationObserver(() => snapshot('mutation'));
+          observer.observe(target, {
+            attributes: true,
+            attributeFilter: [
+              'data-material-frame',
+              'data-material-contact',
+              'data-material-quality',
+              'data-material-reason',
+              'data-material-source-revision',
+            ],
+          });
+          let raf = 0;
+          const tick = () => {
+            snapshot('raf');
+            raf = requestAnimationFrame(tick);
+          };
+          raf = requestAnimationFrame(tick);
+          (window as any).__liquidReleaseProbe = {
+            state,
+            snapshot,
+            stop() {
+              cancelAnimationFrame(raf);
+              observer.disconnect();
+              for (const name of ['pointerdown', 'pointerup', 'pointercancel'])
+                target.removeEventListener(name, input, true);
+              window.removeEventListener('blur', input, true);
+              snapshot('stop');
+              delete (window as any).__liquidReleaseProbe;
+              return state;
+            },
+          };
+          snapshot('initial');
+        },
+        { selector, observeSource: observeOwnedMaterialPaint.toString() }
+      );
+      return { selector, target };
+    };
+    const ownedRest = async (selector: string, afterFrame: number) => {
+      await page.waitForFunction(
+        ({ selector, afterFrame }) => {
+          const node = document.querySelector<HTMLElement>(selector);
+          return (
+            node?.dataset.materialQuality === 'self-optical' &&
+            node.dataset.materialContact === 'rest' &&
+            Number(node.dataset.materialFrame) > afterFrame &&
+            (window as any).liquidMaterialFixture.metrics().pendingImages === 0
+          );
+        },
+        { selector, afterFrame },
+        { timeout: 2000 }
+      );
+      const state = await checkpoint('settled-rest');
+      expect(state.paint.committed).toBe(true);
+      expect(state.paint.geometryMatches).toBe(true);
+      return state;
+    };
+    const installGate = () =>
+      page.evaluate(() => {
+        const original = HTMLImageElement.prototype.decode;
+        const state: any = {
+          armed: true,
+          ticket: null,
+          autoOpened: false,
+          restored: false,
+        };
+        let open = () => {},
+          timer: ReturnType<typeof setTimeout> | undefined;
+        const wrapped = function (this: HTMLImageElement) {
+          const actual = original.call(this);
+          if (!state.armed || !this.src.startsWith('data:image/png;base64,')) return actual;
+          state.armed = false;
+          const ticket: any = {
+            startedAt: performance.now(),
+            source: this.src,
+            nativeState: 'pending',
+            deliveredAt: null,
+          };
+          state.ticket = ticket;
+          const barrier = new Promise<void>((resolve) => {
+            open = () => {
+              ticket.openedAt ??= performance.now();
+              resolve();
+            };
+          });
+          // Consume native rejection immediately, retaining its actual error for delivery.
+          const native = actual.then(
+            () => {
+              ticket.nativeState = 'fulfilled';
+              ticket.nativeSettledAt = performance.now();
+              return { ok: true as const };
+            },
+            (error: unknown) => {
+              ticket.nativeState = 'rejected';
+              ticket.nativeSettledAt = performance.now();
+              ticket.nativeError = String(error);
+              return { ok: false as const, error };
+            }
+          );
+          timer = setTimeout(() => {
+            state.autoOpened = true;
+            open();
+          }, 2500);
+          return Promise.all([native, barrier]).then(([result]) => {
+            clearTimeout(timer);
+            ticket.deliveredAt = performance.now();
+            if (!result.ok) throw result.error;
+          });
+        };
+        HTMLImageElement.prototype.decode = wrapped;
+        (window as any).__liquidDecodeGate = {
+          state,
+          open() {
+            open();
+          },
+          restore() {
+            open();
+            clearTimeout(timer);
+            if (HTMLImageElement.prototype.decode !== wrapped)
+              throw new Error('Decode gate ownership changed');
+            HTMLImageElement.prototype.decode = original;
+            state.restored = true;
+            return state;
+          },
+        };
+      });
+    const finish = async (entry: Record<string, any>) => {
+      const trace = await page.evaluate(() => (window as any).__liquidReleaseProbe?.stop() ?? null);
+      if (trace) {
+        const images = trace.images as string[];
+        trace.images = await Promise.all(
+          images.map((css, i) => archiveImage(`${entry.name}-image-${i}`, css))
+        );
+        entry.trace = trace;
+        expect(trace.truncated, 'bounded release trace overflow').toBe(false);
+      }
+    };
+    let pointerDown = false;
+    const down = async () => {
+      await page.mouse.down();
+      pointerDown = true;
+    };
+    const up = async () => {
+      await page.mouse.up();
+      pointerDown = false;
+    };
+    const runCase = async (name: string, work: (entry: Record<string, any>) => Promise<void>) => {
+      const entry: Record<string, any> = { name };
+      report.cases.push(entry);
+      try {
+        await work(entry);
+      } catch (error) {
+        entry.failure =
+          error instanceof Error
+            ? { name: error.name, message: error.message, stack: error.stack }
+            : String(error);
+        report.failures.push({ name, error: entry.failure });
+      } finally {
+        try {
+          await page.evaluate(() => {
+            const gate = (window as any).__liquidDecodeGate;
+            if (gate) gate.restore();
+          });
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-gate-restore`,
+            error: String(error),
+          });
+        }
+        try {
+          if (pointerDown) await up();
+          await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+          entry.cleanupImmediate = await resources();
+          await twoRaf();
+          entry.cleanupAfterTwoRaf = await resources();
+          zeroResources(entry.cleanupImmediate);
+          zeroResources(entry.cleanupAfterTwoRaf);
+          for (const key of [
+            'renders',
+            'sourceRefreshTasksScheduled',
+            'sourceRefreshTasksCancelled',
+            'sourceRefreshTasksRun',
+          ])
+            expect(entry.cleanupAfterTwoRaf[key], `post-disposal ${key}`).toBe(
+              entry.cleanupImmediate[key]
+            );
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-cleanup`,
+            error: String(error),
+          });
+        }
+        try {
+          entry.gate = await page.evaluate(() => {
+            const gate = (window as any).__liquidDecodeGate;
+            const value = gate?.state ?? null;
+            delete (window as any).__liquidDecodeGate;
+            return value;
+          });
+          if (entry.gate?.ticket?.source) {
+            entry.gate.ticket.image = await archiveImage(
+              `${name}-gated-native`,
+              entry.gate.ticket.source
+            );
+            delete entry.gate.ticket.source;
+          }
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-gate-evidence`,
+            error: String(error),
+          });
+        }
+        // Preserve the complete trace even when a cleanup/resource assertion failed.
+        try {
+          await finish(entry);
+        } catch (error) {
+          report.failures.push({
+            name: `${name}-trace-evidence`,
+            error: String(error),
+          });
+        }
+        await writeFile(path.join(directory, 'report.json'), JSON.stringify(report, null, 2));
+      }
+    };
+    try {
+      expect(report.sourceAtStart.status).toBe('');
+      if (process.env.CANDIDATE_SHA)
+        expect(report.sourceAtStart.head).toBe(process.env.CANDIDATE_SHA);
+      for (const [runtime, theme] of [
+        ...RUNTIMES.map((runtime) => [runtime, 'light'] as const),
+        ['wc', 'dark'] as const,
+      ]) {
+        await runCase(`natural-${theme}-${runtime}`, async (entry) => {
+          entry.mode = 'natural native decode and trusted pointer input';
+          const { selector, target } = await prepare(runtime, theme);
+          entry.before = await checkpoint('before-down');
+          expect(entry.before.paint.committed).toBe(true);
+          expect(entry.before.paint.geometryMatches).toBe(true);
+          await target.screenshot({
+            path: path.join(directory, `${entry.name}-rest.png`),
+          });
+          await down();
+          await page.waitForFunction(
+            (selector) =>
+              document.querySelector<HTMLElement>(selector)?.dataset.materialContact === 'held' &&
+              (window as any).liquidMaterialFixture.metrics().pendingImages === 0,
+            selector,
+            { timeout: 2000 }
+          );
+          entry.held = await checkpoint('decoded-held');
+          await target.screenshot({
+            path: path.join(directory, `${entry.name}-held.png`),
+          });
+          await up();
+          entry.afterUp = await checkpoint('after-trusted-up');
+          entry.rest = await ownedRest(selector, Number(entry.held.frame));
+          await target.screenshot({
+            path: path.join(directory, `${entry.name}-returned.png`),
+          });
+          await page.waitForTimeout(270);
+          entry.quietStart = await resources();
+          await twoRaf();
+          entry.quietEnd = await resources();
+          expect(entry.quietEnd.renders).toBe(entry.quietStart.renders);
+          const observed = await page.evaluate(() => (window as any).__liquidReleaseProbe.state);
+          const upEvent = observed.inputs.find((input: any) => input.type === 'pointerup');
+          expect(observed.inputs.map((input: any) => input.type)).toEqual([
+            'pointerdown',
+            'pointerup',
+          ]);
+          const releases = observed.snapshots.filter(
+            (sample: any) => sample.at >= upEvent.at && sample.contact === 'release'
+          );
+          expect(releases.length).toBeGreaterThan(0);
+          expect(
+            observed.inputs
+              .filter((input: any) => input.type === 'pointerdown' || input.type === 'pointerup')
+              .every((input: any) => input.trusted)
+          ).toBe(true);
+          expect(entry.rest.session).toBe(entry.held.session);
+          for (const sample of [entry.before, entry.held, ...releases, entry.rest]) {
+            expect(sample.paint.committed).toBe(true);
+            expect(sample.paint.geometryMatches).toBe(true);
+            expect(sample.paint.carrierGeometry).toEqual(entry.before.paint.carrierGeometry);
+            expect(sample.sourceRevision).toBe(entry.before.sourceRevision);
+          }
+        });
+      }
+      for (const action of ['up', 'cancel', 'blur', 'source-revoke', 'dispose']) {
+        await runCase(`controlled-pending-${action}`, async (entry) => {
+          entry.mode =
+            'Controlled delivery of one real native decode promise; excluded from latency evidence';
+          const { selector } = await prepare('wc');
+          entry.before = await checkpoint('before-gated-down');
+          await installGate();
+          await down();
+          await page.waitForFunction(
+            () =>
+              (window as any).__liquidDecodeGate.state.ticket !== null &&
+              (window as any).liquidMaterialFixture.metrics().pendingImages > 0,
+            undefined,
+            { timeout: 2000 }
+          );
+          entry.pending = await checkpoint('native-decode-delivery-pending');
+          expect(entry.pending.resources.pendingImages).toBeGreaterThan(0);
+          if (action === 'up') await up();
+          else if (action === 'cancel')
+            await page.evaluate((selector) => {
+              const id = (window as any).__liquidReleaseProbe.state.inputs.find(
+                (input: any) => input.type === 'pointerdown'
+              ).pointerId;
+              document.querySelector(selector)!.dispatchEvent(
+                new PointerEvent('pointercancel', {
+                  bubbles: true,
+                  pointerId: id,
+                  pointerType: 'mouse',
+                  isPrimary: true,
+                })
+              );
+            }, selector);
+          else if (action === 'blur')
+            await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+          else if (action === 'source-revoke')
+            await page.evaluate(() => (window as any).liquidMaterialFixture.source('wc', false));
+          else await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+          entry.afterAction = await checkpoint(`after-${action}`);
+          await page.evaluate(() => (window as any).__liquidDecodeGate.open());
+          await page.waitForFunction(
+            () => (window as any).__liquidDecodeGate.state.ticket.deliveredAt !== null,
+            undefined,
+            { timeout: 2000 }
+          );
+          if (action !== 'up') await up(); // Explicit late up must not revive cancelled ownership.
+          await twoRaf();
+          entry.afterLateDelivery = await checkpoint('after-native-completion-delivery');
+          const gate = await page.evaluate(() => (window as any).__liquidDecodeGate.state);
+          expect(gate.autoOpened).toBe(false);
+          expect(gate.ticket.openedAt).toBeGreaterThanOrEqual(entry.afterAction.at);
+          expect(gate.ticket.nativeSettledAt).toBeGreaterThanOrEqual(gate.ticket.startedAt);
+          if (action === 'up') expect(gate.ticket.nativeState).toBe('fulfilled');
+          if (action === 'dispose') {
+            zeroResources(entry.afterAction.resources);
+            zeroResources(entry.afterLateDelivery.resources);
+            expect(entry.afterLateDelivery.connected).toBe(false);
+          } else if (action === 'source-revoke') {
+            for (const sample of [entry.afterAction, entry.afterLateDelivery]) {
+              expect(sample.paint.quality).toBe('opaque-fallback');
+              expect(sample.paint.carrier).toBe(null);
+              expect(sample.paint.committed).toBe(false);
+              expect(sample.imageNone).toBe(true);
+            }
+            await page.evaluate(() => (window as any).liquidMaterialFixture.source('wc', true));
+            entry.recovered = await ownedRest(selector, Number(entry.before.frame));
+          } else {
+            entry.rest = await ownedRest(selector, Number(entry.before.frame));
+            expect(entry.rest.sourceRevision).toBe(entry.before.sourceRevision);
+            expect(Number(entry.rest.session)).toBe(Number(entry.before.session) + 1);
+            if (action === 'up') {
+              const observed = await page.evaluate(
+                () => (window as any).__liquidReleaseProbe.state
+              );
+              expect(
+                observed.snapshots.some(
+                  (sample: any) =>
+                    sample.at >= gate.ticket.deliveredAt && sample.contact === 'release'
+                )
+              ).toBe(true);
+            }
+            if (action !== 'up') {
+              const observed = await page.evaluate(
+                () => (window as any).__liquidReleaseProbe.state
+              );
+              const rejected = observed.snapshots.filter(
+                (sample: any) =>
+                  sample.at >= entry.afterAction.at &&
+                  (sample.contact === 'held' || sample.contact === 'release')
+              );
+              expect(rejected).toEqual([]);
+            }
+          }
+        });
+      }
+      await runCase('full-footprint-negative-guards', async (entry) => {
+        const { target } = await prepare('wc');
+        entry.before = await checkpoint('expanded-idle');
+        await target.evaluate((host) => {
+          const root = host.closest('[data-material-scene]')!;
+          const r = host.getBoundingClientRect(),
+            s = root.getBoundingClientRect();
+          const block = document.createElement('div');
+          block.dataset.releaseFootprintGuard = '';
+          Object.assign(block.style, {
+            position: 'absolute',
+            left: `${r.right - s.left + 2}px`,
+            top: `${r.top - s.top + r.height / 2}px`,
+            width: '2px',
+            height: '2px',
+            background: 'red',
+          });
+          root.append(block);
+        });
+        entry.obstruction = await target.evaluate((host) => {
+          const block = document.querySelector('[data-release-footprint-guard]')!;
+          const h = host.getBoundingClientRect(),
+            b = block.getBoundingClientRect();
+          return {
+            hostRight: h.right,
+            obstructionLeft: b.left,
+            obstructionRight: b.right,
+          };
+        });
+        expect(entry.obstruction.obstructionLeft).toBeGreaterThanOrEqual(
+          entry.obstruction.hostRight
+        );
+        expect(entry.obstruction.obstructionRight).toBeLessThanOrEqual(
+          entry.obstruction.hostRight + entry.before.paint.paintOutset
+        );
+        await expect
+          .poll(() => target.getAttribute('data-material-reason'), {
+            timeout: 2000,
+          })
+          .toBe('source-overlapping-content');
+        entry.outsideHostOverlap = await checkpoint('outside-host-inside-full-footprint');
+        expect(entry.outsideHostOverlap.paint.quality).toBe('opaque-fallback');
+        expect(entry.outsideHostOverlap.paint.committed).toBe(false);
+        expect(entry.outsideHostOverlap.paint.carrier).toBe(null);
+        expect(entry.outsideHostOverlap.imageNone).toBe(true);
+        await page.screenshot({
+          path: path.join(directory, 'full-footprint-idle-overlap.png'),
+        });
+        await page.locator('[data-release-footprint-guard]').evaluate((node) => node.remove());
+        entry.recovered = await ownedRest(
+          '[data-material-host="wc"] [data-demo-ref="regular"]',
+          Number(entry.before.frame)
+        );
+        await target.evaluate((host) => {
+          (host as HTMLElement).style.overflow = 'hidden';
+        });
+        await expect
+          .poll(() => target.getAttribute('data-material-reason'), {
+            timeout: 2000,
+          })
+          .toBe('source-expanded-paint-clipped');
+        entry.clipped = await checkpoint('expanded-footprint-clipped');
+        expect(entry.clipped.paint.quality).toBe('opaque-fallback');
+        expect(entry.clipped.paint.committed).toBe(false);
+        expect(entry.clipped.paint.carrier).toBe(null);
+        expect(entry.clipped.imageNone).toBe(true);
+        await page.screenshot({
+          path: path.join(directory, 'full-footprint-clipped.png'),
+        });
+      });
+    } finally {
+      page.off('console', onConsole);
+      page.off('pageerror', onError);
+      report.sourceAtEnd = await identity();
+      report.sourceStable =
+        JSON.stringify(report.sourceAtStart) === JSON.stringify(report.sourceAtEnd);
+      await writeFile(path.join(directory, 'report.json'), JSON.stringify(report, null, 2));
+      await writeFile(
+        path.join(directory, 'console.json'),
+        JSON.stringify({ console: report.console, pageErrors: report.pageErrors }, null, 2)
+      );
+      observations.push({
+        releaseLifecycle: 'release-lifecycle/report.json',
+        sourceStable: report.sourceStable,
+        failures: report.failures,
+      });
+    }
+    expect(report.sourceStable).toBe(true);
+    expect(report.pageErrors).toEqual([]);
+    expect(report.cases).toHaveLength(11);
+    expect(report.failures).toEqual([]);
   }, 150000);
 });
 

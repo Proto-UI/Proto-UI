@@ -1,0 +1,199 @@
+{
+  "beforeSource": "8c2b9b39c14fa478d46e7480a7e2054b30b28187",
+  "mergedSource": "0cf1cb9039fb57c85747025432c76c6836197f47",
+  "method": "TypeScript syntax kinds, child structure and identifier/literal text; SourceFile raw text, comments, positions and formatting excluded. This is source comparison, not test execution.",
+  "observations": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "401d4131e972b77585eed1ca9089a782b3d81b695fc15936a453604e65f5435a",
+      "syntaxTreeSHA256": "70b683f7358fd3d690945c4c1b61ea85484b8e2970d2acf38dd4caddf0765940"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.test.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "b2d9d3eeee7f056869051afe4a42203a1ed3ecd49d71537cdb6bd81bbd6178a5",
+      "syntaxTreeSHA256": "500f436266e462745458c3d4636fe5eaf73c84322a1f8337e8648815e5231052"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "758da09841116bc0898ac558baeacd8917dfaed5cdd93871ad66fdfc38684a8d",
+      "syntaxTreeSHA256": "0251ed9ea4dedde1393058dd26decadb50713a17062593cab92cba33f09a9c09"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.test.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "0c097f7f34e7d990165986d2e38396c7534206d807081d1d6cedb6396bc1e8f2",
+      "syntaxTreeSHA256": "0c097f7f34e7d990165986d2e38396c7534206d807081d1d6cedb6396bc1e8f2"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "d0413566f92dbed77a4d28fe1419edb6629487749d1ed06d701e605292adf20c",
+      "syntaxTreeSHA256": "1d6951108c696a691165ad75539059d02d65dfe5a462e333a4d8ad37250ec8c0"
+    },
+    {
+      "path": "apps/www/src/content/docs/liquid-glass-button-demo-layout.test.ts",
+      "status": "added",
+      "parseDiagnosticsBefore": null,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": null,
+      "syntaxTreeSHA256": "3a0d0b18674b6b22f7cdb4efc33260a74d5da71c566b63cc7246acb852835c3b"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "2d29376a00ce6bf8f27a511670ea811275e1935004af5be30075522ae921a215",
+      "syntaxTreeSHA256": "2d29376a00ce6bf8f27a511670ea811275e1935004af5be30075522ae921a215"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/finf-shadcn-toggle.browser.test.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "6ebeffe041e2954b5aba5b0a3d897b1807c86cf7279943fb6a396b052fb91e66",
+      "syntaxTreeSHA256": "1f05d040d7f89f8d25a8c02f8f62dca7e913f36d438a7c86d20564acc5136d8e"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "be295ca33070395f5531532c8bd0fcf726455ebd51d772f89afda09bc4f31942",
+      "syntaxTreeSHA256": "be295ca33070395f5531532c8bd0fcf726455ebd51d772f89afda09bc4f31942"
+    },
+    {
+      "path": "packages/adapters/base/src/material/prefilter.ts",
+      "status": "added",
+      "parseDiagnosticsBefore": null,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": null,
+      "syntaxTreeSHA256": "006efbe48a239bb0c086e4c2f3181fd1ba0f1c612df2cb5f742a8417b3807e62"
+    },
+    {
+      "path": "packages/adapters/base/src/material/program-inputs.ts",
+      "status": "added",
+      "parseDiagnosticsBefore": null,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": null,
+      "syntaxTreeSHA256": "618b0052ad18b5b8180744d53873942f4380f32c08a412f0cfaeb91e7d3d4eca"
+    },
+    {
+      "path": "packages/adapters/base/src/material/program-pool.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "e39d900180d0c20de4d1e0fe5ed08508e74a6e00ec8efde3615eba8206a1966b",
+      "syntaxTreeSHA256": "882384a6ef642312f74afc48760d4a8e49fbb9d1427dc070b9d1ccfb8769280c"
+    },
+    {
+      "path": "packages/adapters/base/src/material/program.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "a814ac73d1cba8ce6b0524224487f1721e2774595cb70546f4b14e2f8eaa2cdd",
+      "syntaxTreeSHA256": "8a7c9f6683eb657d58e105da915a1bbd09745a7aeaf6bf942928a3dd87425983"
+    },
+    {
+      "path": "packages/adapters/base/src/material/sink.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "edd29b8b7180ffe52cd4ec220c4965b290e421aaacf9fbcbf20c913373bde4a4",
+      "syntaxTreeSHA256": "b038754f1967f8a3509f734a900d29a517e2683a6f35edcf61ed25e91826eb1b"
+    },
+    {
+      "path": "packages/adapters/base/src/material/source-refresh-task.ts",
+      "status": "added",
+      "parseDiagnosticsBefore": null,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": null,
+      "syntaxTreeSHA256": "af8ce9b366ff69eaea49cb54a60bb64f871389181ba7a0986fb39c730d86d00a"
+    },
+    {
+      "path": "packages/adapters/base/src/material/source.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "3b6ee4808b571599e18d76cc180270f37b3cf390aaf6b9d5cb28f73ca2a95e94",
+      "syntaxTreeSHA256": "5c9841c8a4b6ee4319da38b33c728249ec4673ba3b4ff4da534d3aa177106edb"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "8f81be8763b844d32f2b52221bc52b9e9ef020353acbc9ffef422e9ccd3ff865",
+      "syntaxTreeSHA256": "68d5fe08458f771bcf477b375e9ebc379a43079b0e75d4e374ca363d75901917"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-prefilter.test.ts",
+      "status": "added",
+      "parseDiagnosticsBefore": null,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": null,
+      "syntaxTreeSHA256": "f8ffdada6e0fc0f0f125d1655f7a34f98979936e7ce0a2c80cbde7c0c46cad59"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-program.test.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "4e8ae9006fc4d236f2d7d8ea96aee626b24321baa40f902e60b7ed2b5fb1dd38",
+      "syntaxTreeSHA256": "37df18eba2c15973a0d6a7fa6a084e922704851eb7df0990726515990f7327de"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-sink.test.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "b0f4fc0e00acffaa8607b6ae67151eb55205f848ec887c3e026ce11d06bbc04e",
+      "syntaxTreeSHA256": "c556f022761bf706edb50ec8ddba5a2d62979ed949bd75658cf3f4bc7ca47cef"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-source-refresh-task.test.ts",
+      "status": "added",
+      "parseDiagnosticsBefore": null,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": null,
+      "syntaxTreeSHA256": "1f3ae7f496b44662fde4359ec82de76724672f827d504190fb05b0b92f5e302a"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-source.test.ts",
+      "status": "syntax-tree-changed",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "bce2acbbdf09bdcd820c6037497f66809f1252d68a7d6518be40709eedaff22f",
+      "syntaxTreeSHA256": "51f0f4f15028aa038846c441ca29a6faec7a19c1d1f34b4d770e4a55231c129b"
+    },
+    {
+      "path": "packages/adapters/react/src/adapt.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "48ccf83bf23e4d27194de081de984f991fbcff4552ae35d00d2b250459b48d8b",
+      "syntaxTreeSHA256": "48ccf83bf23e4d27194de081de984f991fbcff4552ae35d00d2b250459b48d8b"
+    },
+    {
+      "path": "packages/adapters/web-component/src/shadow-split-effects.ts",
+      "status": "formatting-or-comments-only",
+      "parseDiagnosticsBefore": 0,
+      "parseDiagnosticsAfter": 0,
+      "beforeSyntaxTreeSHA256": "ae10d92093934bec3e243d83a6765f0c2ae886eacfce43f9fe962107e6263ca2",
+      "syntaxTreeSHA256": "ae10d92093934bec3e243d83a6765f0c2ae886eacfce43f9fe962107e6263ca2"
+    }
+  ]
+}

@@ -386,6 +386,64 @@ describe('Website projection composition', () => {
     );
   });
 
+  it('lets nested Proto surfaces inherit theme and restamps a detached surface', async () => {
+    const composition = createProjectionComposition({
+      ownerId: 'inherit-theme',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 3,
+      componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
+      childDemo: {
+        type: 'demo',
+        root: {
+          kind: 'proto',
+          prototypeId: 'shadcn-button',
+          ref: 'outer',
+          children: [
+            {
+              kind: 'proto',
+              prototypeId: 'shadcn-button',
+              ref: 'inner',
+              surfaceStyle: { color: 'red' },
+              children: ['Inner'],
+            },
+          ],
+        },
+      },
+      controls: controls(),
+      controlIds: [],
+      themeSurfaceStyle: { '--pui-background': '#fff', '--pui-foreground': '#111' },
+    });
+    const innerNode = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.ref === 'inner'
+    );
+    const outerNode = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.ref === 'outer'
+    );
+    expect(outerNode).toMatchObject({ surfaceStyle: { '--pui-background': '#fff' } });
+    if (innerNode.kind !== 'proto') throw new Error('Expected the nested Proto.');
+    expect(JSON.stringify(innerNode.surfaceStyle)).not.toContain('--pui-background');
+
+    const { host, refs } = mountDemoTree(composition.demo);
+    const cleanup = composition.demo.setup?.({
+      host,
+      refs,
+      api: { call: () => undefined, getExposes: () => undefined, setProps: () => undefined },
+    });
+    expect(refs.outer!.style.getPropertyValue('--pui-background')).toBe('#fff');
+    expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe('');
+    document.body.appendChild(refs.inner!);
+    await vi.waitFor(() =>
+      expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe('#fff')
+    );
+    refs.outer!.appendChild(refs.inner!);
+    await vi.waitFor(() => expect(refs.inner!.style.getPropertyValue('--pui-background')).toBe(''));
+    (cleanup as () => void)();
+  });
+
   it('materializes only explicitly requested controls for a fixed-family consumer', () => {
     const composition = createProjectionComposition({
       ownerId: 'fixed-family',
@@ -1033,7 +1091,12 @@ describe('Website projection composition', () => {
       if (node.kind !== 'proto' || !node.surfaceStyle) return;
       const entries = Array.isArray(node.surfaceStyle) ? node.surfaceStyle : [node.surfaceStyle];
       const themeEntry = entries.at(-1);
-      if (themeEntry && typeof themeEntry === 'object') rendererThemeEntries.push(themeEntry);
+      if (
+        themeEntry &&
+        typeof themeEntry === 'object' &&
+        Object.prototype.hasOwnProperty.call(themeEntry, '--pui-background')
+      )
+        rendererThemeEntries.push(themeEntry);
     });
     expect(rendererThemeEntries.length).toBeGreaterThan(0);
 

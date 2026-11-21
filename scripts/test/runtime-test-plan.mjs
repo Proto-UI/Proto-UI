@@ -1,4 +1,4 @@
-import { globSync } from 'node:fs';
+import { globSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 // Astro compiles on first request. Keep the shared runner's readiness inventory
 // importable without starting its server or running Vitest.
@@ -290,12 +290,15 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 });
 
 // Bound each CI worker to a deterministic share of the complete development inventory.
-// Weight-aware assignment is deterministic and never changes local coverage. Ten
-// shards keep the heaviest balanced shard (~734s of measured suite cost plus
-// ~64s of shared-server setup) under the 900s execution cap with headroom for
-// suites whose cost is still estimated; eight shards concentrated ~1330s into
-// one shard and timed out seven of eight shards in cycle 43837651044.
-export const BROWSER_SHARD_COUNT = 10;
+// The 44876125495 cycle disproved the former ten-shard estimate: an unmeasured
+// Header suite alone took 641s rather than its 52s fallback. Preserve the 900s
+// deadline and complete inventory; use more bounded, less concurrent workers.
+// These estimates are planning admission, never executed acceptance evidence.
+export const BROWSER_SHARD_COUNT = 18;
+export const BROWSER_EXECUTION_BUDGET_SECONDS = 900;
+export const BROWSER_SETUP_RESERVE_SECONDS = 180;
+export const BROWSER_MAX_ESTIMATED_SECONDS =
+  BROWSER_EXECUTION_BUDGET_SECONDS - BROWSER_SETUP_RESERVE_SECONDS;
 
 export function corepackInvocation(platform = process.platform) {
   return {
@@ -345,8 +348,9 @@ export function assertBrowserInventory(
 // site-native-links ~355s) into the same shards, so seven of eight shards hit
 // the outer 900s cap before reporting a terminal summary. Weight-aware
 // assignment spreads that cost instead of raising the cap. Suites without a
-// measurement use the median measured cost; the table is refreshed from a
-// complete cycle receipt, never from a partial or timed-out shard.
+// measurement used the former median measured cost. Retain this history and
+// take the larger of it and newer terminal-file observations below. An aborted
+// file is not a terminal sample; failed terminal files are costs, not passes.
 export const BROWSER_SUITE_WEIGHT_SECONDS = Object.freeze({
   'apps/www/src/components/documentation-image-preview.browser.test.ts': 90,
   'apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts': 55,
@@ -398,10 +402,84 @@ export const BROWSER_SUITE_WEIGHT_SECONDS = Object.freeze({
   'packages/prototypes/base/test/async-region.browser.test.ts': 3,
 });
 
-const DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS = 52;
+export function validateBrowserCostEvidence(evidence) {
+  if (
+    evidence?.schemaVersion !== 1 ||
+    !Number.isSafeInteger(evidence.runId) ||
+    evidence.runId < 1 ||
+    !/^[a-f0-9]{40}$/.test(evidence.headSha ?? '') ||
+    !Array.isArray(evidence.observations) ||
+    !evidence.observations.length
+  )
+    throw new Error('Invalid browser cost evidence identity');
+  const suites = new Set();
+  for (const row of evidence.observations) {
+    if (
+      !/^(apps|packages|internal)\/[\w/.-]+\.browser\.test\.ts$/.test(row.suite ?? '') ||
+      suites.has(row.suite) ||
+      !Number.isFinite(row.durationMs) ||
+      row.durationMs < 0 ||
+      !Number.isSafeInteger(row.jobId) ||
+      row.jobId < 1 ||
+      row.jobUrl !==
+        `https://github.com/Proto-UI/Proto-UI/actions/runs/${evidence.runId}/job/${row.jobId}` ||
+      !/^[a-f0-9]{64}$/.test(row.logSha256 ?? '') ||
+      !['passed', 'failed'].includes(row.fileOutcome)
+    )
+      throw new Error(`Invalid or duplicate browser cost observation: ${row.suite}`);
+    suites.add(row.suite);
+  }
+  return evidence;
+}
 
-function browserSuiteWeightSeconds(suite) {
-  return BROWSER_SUITE_WEIGHT_SECONDS[suite] ?? DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS;
+const costEvidence = validateBrowserCostEvidence(
+  JSON.parse(
+    readFileSync(
+      new URL('./fixtures/browser-suite-costs-44876125495.json', import.meta.url),
+      'utf8'
+    )
+  )
+);
+const observedCosts = Object.fromEntries(
+  costEvidence.observations.map(({ suite, durationMs }) => [suite, Math.ceil(durationMs / 1000)])
+);
+// The passive-atoms file was still running when the old shard was killed. Its
+// 600s reserve is explicitly an estimate, not an invented completion sample.
+const interruptedSuiteReserves = {
+  'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts': 600,
+};
+export const DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS = 120;
+
+export function browserSuiteWeightSeconds(suite) {
+  const known = [
+    BROWSER_SUITE_WEIGHT_SECONDS[suite],
+    observedCosts[suite],
+    interruptedSuiteReserves[suite],
+  ].filter((value) => value !== undefined);
+  return known.length ? Math.max(...known) : DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS;
+}
+
+export function browserShardCosts(shards = browserShards()) {
+  return shards.map((suites) => ({
+    estimatedSeconds: suites.reduce((sum, suite) => sum + browserSuiteWeightSeconds(suite), 0),
+    setupReserveSeconds: BROWSER_SETUP_RESERVE_SECONDS,
+    executionBudgetSeconds: BROWSER_EXECUTION_BUDGET_SECONDS,
+  }));
+}
+
+export function assertBrowserShardCapacity(shards = browserShards()) {
+  for (const [index, cost] of browserShardCosts(shards).entries()) {
+    if (
+      !Number.isFinite(cost.estimatedSeconds) ||
+      cost.estimatedSeconds < 0 ||
+      cost.estimatedSeconds > BROWSER_MAX_ESTIMATED_SECONDS
+    )
+      throw new Error(
+        `Browser shard ${index + 1}/${shards.length} estimates ${cost.estimatedSeconds}s + ` +
+          `${cost.setupReserveSeconds}s setup beyond ${cost.executionBudgetSeconds}s; ` +
+          'rebalance the complete inventory before execution'
+      );
+  }
 }
 
 export function browserShards(suites = BROWSER_SUITES, count = BROWSER_SHARD_COUNT) {

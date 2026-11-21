@@ -8,7 +8,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./paint-mutations']),
   }),
   'packages/adapters/base/src/material/contact-motion.ts': Object.freeze({
-    sourceSha256: 'fccf22b6e0947e260f9a31e898f90af5ef753488ba0406d9a8d40438d89387b6',
+    sourceSha256: '3c037b199f60e74e7b1ff259996fed9d292eb7ab4eeb45f4ff6a155bc8ef7cbe',
     specifiers: Object.freeze(['../events/pointer-contact', './program']),
   }),
   'packages/adapters/base/src/material/initial-paint-bridge.ts': Object.freeze({
@@ -24,7 +24,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
-    sourceSha256: 'e5de14a554483dc0877673b8ea6618a4162e26b58a113a232e8102379a000ae9',
+    sourceSha256: '6e7d8dd7c421a8a3cd6d10be55dd6a4fe83b50d68feecb538981071dc7e62159',
     specifiers: Object.freeze([
       './initial-paint-bridge',
       './paint-mutations',
@@ -41,6 +41,8 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
       './source',
       './preferences',
       './program',
+      './program-inputs',
+      './source-refresh-task',
       './program-pool',
       './style',
     ]),
@@ -82,11 +84,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'packages/adapters/base/src/material/style-tint-profile.ts': Object.freeze({
     sourceSha256: '5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246',
-    specifiers: Object.freeze([
-      './contact-profile',
-      './liquidgl-kernel.generated',
-      './style',
-    ]),
+    specifiers: Object.freeze(['./contact-profile', './liquidgl-kernel.generated', './style']),
   }),
   'apps/www/src/components/library-card-client.ts': Object.freeze({
     sourceSha256: '7b4f42ca2201e26ca971fa4c61ce0bdaa08ea03f20df7a9f58677b328386ffb8',

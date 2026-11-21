@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T16:35:28.392178+00:00",
+  "scope": "Browser fixture and observation triage; original native acceptance remains required.",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "base": "d095fa0a811facff676b6f62929b177aa1dc7583",
+  "historicalRun": "44876125495",
+  "historicalSource": "7a696228c31e6b77998c4e356a57dcebd08854a0",
+  "workingTreeDirty": true,
+  "receiptBoundary": "Source hashes describe the reviewed dirty worktree. This is not a clean final-candidate or native-pass receipt.",
+  "files": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+      "role": "modified-test-or-fixture",
+      "bytes": 21189,
+      "sha256": "e46580435c73d887d996dc3e39b4c2fda9c3ba80f5fb302048d3bea9a19f8c5c",
+      "baseSha256": "9a421ad32df43c12db85fe0aa4069a0e966b8dc2f6cfcb044653571a9723c958"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts",
+      "role": "modified-test-or-fixture",
+      "bytes": 151046,
+      "sha256": "7bf80d6ea55439e51b7a6b7b3362c6d823dd29e1425dcd3e40a31d84fdcbc5de",
+      "baseSha256": "93421140c6b2b0bcc89a2de4c0c8eb44ecfdd38e16acce498c7f0d977c51becd"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+      "role": "modified-test-or-fixture",
+      "bytes": 861,
+      "sha256": "ad59800ee7b40816dc7f261b83ce97d620e5cdad095ad90f66de9538839caacf",
+      "baseSha256": "02c89ecf13b93ddfcf160ed748012b995f7e017802fa5bf362d894e5d703f5bf"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "role": "modified-test-or-fixture",
+      "bytes": 20111,
+      "sha256": "a0829a43941c0a70742672441934b6406e641ad527fe4176d0378e7a02ee1fc9",
+      "baseSha256": "b9b6ea1c8558e948a39c842a7af41582677748137cd773d770d852789a22f66e"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts",
+      "role": "modified-test-or-fixture",
+      "bytes": 3039,
+      "sha256": "6d2e6dab2d844541e71baed7a8966d18aecdf2f4fcdd2e223b74b06ea84cea01",
+      "baseSha256": "9496bc0b8e2eb24fd847bfab8f394a707bf05378736026410ebf916bc32bd895"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-presence.ts",
+      "role": "modified-test-or-fixture",
+      "bytes": 6637,
+      "sha256": "49a1a1479d71b26f3b17fdf1499c779e8c12879e0dc8438cc8da0aea14c268e3",
+      "baseSha256": "d4273dd05f582e90708fae7e8a96834824fa91b3b3ec37670636f03eef2bd0b1"
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-showcase.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 20624,
+      "sha256": "0d0f1c6cf9aa355866e9c85d4870014069ba3943b723cbf3d17c62667b2038fa",
+      "baseSha256": "0d0f1c6cf9aa355866e9c85d4870014069ba3943b723cbf3d17c62667b2038fa"
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 7133,
+      "sha256": "6079b4367f861d6c99f2b06455e268be4aff0960619ac9fef9e91ecbc78b3862",
+      "baseSha256": "6079b4367f861d6c99f2b06455e268be4aff0960619ac9fef9e91ecbc78b3862"
+    },
+    {
+      "path": "apps/www/src/components/override/Search.astro",
+      "role": "reviewed-existing-source",
+      "bytes": 6397,
+      "sha256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0",
+      "baseSha256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0"
+    },
+    {
+      "path": "apps/www/src/components/site-search-data.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 5917,
+      "sha256": "bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb",
+      "baseSha256": "bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb"
+    },
+    {
+      "path": "apps/www/src/components/site-pagefind-resource.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 4510,
+      "sha256": "1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a",
+      "baseSha256": "1af8170a8e53e5b06f8583d13a8a4b7680e178abeccbffd04237ecb3a885b02a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.css",
+      "role": "reviewed-existing-source",
+      "bytes": 54,
+      "sha256": "95e09b50f20d6e8b64334448369dccb288a8b2ec7fcdf7dd4fc51a1438c432d3",
+      "baseSha256": "95e09b50f20d6e8b64334448369dccb288a8b2ec7fcdf7dd4fc51a1438c432d3"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 20044,
+      "sha256": "a81616ab292b272c87ca1fa614f4cfa857446bc8a15bff30cb91acd6470476dd",
+      "baseSha256": "a81616ab292b272c87ca1fa614f4cfa857446bc8a15bff30cb91acd6470476dd"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 26204,
+      "sha256": "f3218ed22385f622e10b73067064a744f2900b70334d6879e330d776020a0229",
+      "baseSha256": "f3218ed22385f622e10b73067064a744f2900b70334d6879e330d776020a0229"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 54053,
+      "sha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "baseSha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178"
+    },
+    {
+      "path": "packages/prototypes/base/src/drawer/extent-model.ts",
+      "role": "reviewed-existing-source",
+      "bytes": 3067,
+      "sha256": "283265aac5fd560d1f5d0db751b20182e5998ff23a65a8ade9a9ff9f49a743b6",
+      "baseSha256": "283265aac5fd560d1f5d0db751b20182e5998ff23a65a8ade9a9ff9f49a743b6"
+    },
+    {
+      "path": "spec/contracts/C-DRAWER-EXTENT-MODEL-0001.yaml",
+      "role": "reviewed-existing-source",
+      "bytes": 6053,
+      "sha256": "e2ac3b9364a37705df0f5c3be761286cd71d5539a6ed828956e2d9c23b6b43f7",
+      "baseSha256": "e2ac3b9364a37705df0f5c3be761286cd71d5539a6ed828956e2d9c23b6b43f7"
+    },
+    {
+      "path": "spec/contracts/C-DRAWER-AUTO-CONSUMER-0001.yaml",
+      "role": "reviewed-existing-source",
+      "bytes": 7396,
+      "sha256": "39e46405dace2f01d78347d5ab134bef172d1ca3b2495aa806d0a7858d558cc8",
+      "baseSha256": "39e46405dace2f01d78347d5ab134bef172d1ca3b2495aa806d0a7858d558cc8"
+    }
+  ],
+  "homepageAuthorTree": {
+    "families": ["shadcn", "brutalist"],
+    "perGalleryDemo": {
+      "controls": 3,
+      "workspace-command": 3,
+      "workspace-analytics": 15,
+      "workspace-progress": 3,
+      "preferences": 7,
+      "workspace-help": 5,
+      "editor": 3,
+      "hover": 7,
+      "overlays": 3,
+      "choices": 3
+    },
+    "authoredTotal": 52,
+    "frameworkClosedFaqBodiesWithdrawn": 2,
+    "expectedPhysicalTextInventory": {
+      "wc": 52,
+      "react": 50,
+      "vue": 50,
+      "vue2": 50
+    },
+    "nativeGeometryClaim": false
+  },
+  "localRuns": [
+    {
+      "name": "browser-fixtures-r1",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+        "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+        "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+        "--pool=forks",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/fbd6f62bb640/browser-fixtures-r1.json"
+      ],
+      "environment": {
+        "CHROME_PATH": "/usr/bin/chromium"
+      },
+      "startedAt": "2026-11-21T16:27:02.486000+00:00",
+      "exitCode": 1,
+      "success": false,
+      "counts": {
+        "numTotalTests": 198,
+        "numPassedTests": 1,
+        "numFailedTests": 0,
+        "numPendingTests": 197
+      },
+      "suites": [
+        {
+          "path": "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+          "status": "failed",
+          "reportedCaseOutcomes": {
+            "skipped": 190
+          },
+          "hookErrorObservations": [
+            "[pid=94][err] [94:94:1121/112703.937639:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)",
+            "[pid=94][err] [1121/112703.938459:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)",
+            "\u001b[2m  - [pid=94][err] [94:94:1121/112703.937639:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)\u001b[22m",
+            "\u001b[2m  - [pid=94][err] [1121/112703.938459:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)\u001b[22m"
+          ],
+          "nativeJourneysReached": 0
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+          "status": "passed",
+          "reportedCaseOutcomes": {
+            "passed": 1
+          },
+          "hookErrorObservations": [],
+          "nativeJourneysReached": 0
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+          "status": "failed",
+          "reportedCaseOutcomes": {
+            "skipped": 7
+          },
+          "hookErrorObservations": [
+            "[pid=154][err] [154:154:1121/112706.997734:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)",
+            "[pid=154][err] [1121/112706.997964:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)",
+            "\u001b[2m  - [pid=154][err] [154:154:1121/112706.997734:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)\u001b[22m",
+            "\u001b[2m  - [pid=154][err] [1121/112706.997964:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)\u001b[22m"
+          ],
+          "nativeJourneysReached": 0
+        }
+      ],
+      "rawReports": [
+        {
+          "name": "browser-fixtures-r1.json",
+          "sha256": "68223f5dca4f7e01b7bca2ac9aff5754f13b3e5f4eb1e29d923fe9e5631f3613",
+          "bytes": 79698
+        },
+        {
+          "name": "browser-fixtures-r1.log",
+          "sha256": "c8bd75b0fa2db37945e1dbcc04000482f5db8a88f1497551dbdb8c3b995e6d1a",
+          "bytes": 6880
+        }
+      ],
+      "interpretation": "Two native beforeAll launch failures; 197 native cases unrun, plus one passed non-native build control."
+    },
+    {
+      "name": "browser-source-controls",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+        "packages/prototypes/base/test/navigation-overlays/drawer-extent-model.test.ts",
+        "apps/www/src/components/site-search-data.test.ts",
+        "apps/www/src/components/site-pagefind-resource.test.ts",
+        "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+        "--pool=forks",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/fbd6f62bb640/browser-source-controls.json"
+      ],
+      "environment": {},
+      "startedAt": "2026-11-21T16:29:34.624000+00:00",
+      "exitCode": 0,
+      "success": true,
+      "counts": {
+        "numTotalTests": 61,
+        "numPassedTests": 61,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "suites": [
+        {
+          "path": "packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts",
+          "status": "passed",
+          "reportedCaseOutcomes": {
+            "passed": 1
+          },
+          "hookErrorObservations": [],
+          "nativeJourneysReached": 0
+        },
+        {
+          "path": "packages/prototypes/base/test/navigation-overlays/drawer-extent-model.test.ts",
+          "status": "passed",
+          "reportedCaseOutcomes": {
+            "passed": 38
+          },
+          "hookErrorObservations": [],
+          "nativeJourneysReached": 0
+        },
+        {
+          "path": "apps/www/src/components/site-pagefind-resource.test.ts",
+          "status": "passed",
+          "reportedCaseOutcomes": {
+            "passed": 4
+          },
+          "hookErrorObservations": [],
+          "nativeJourneysReached": 0
+        },
+        {
+          "path": "apps/www/src/components/site-search-data.test.ts",
+          "status": "passed",
+          "reportedCaseOutcomes": {
+            "passed": 12
+          },
+          "hookErrorObservations": [],
+          "nativeJourneysReached": 0
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+          "status": "passed",
+          "reportedCaseOutcomes": {
+            "passed": 6
+          },
+          "hookErrorObservations": [],
+          "nativeJourneysReached": 0
+        }
+      ],
+      "rawReports": [
+        {
+          "name": "browser-source-controls.json",
+          "sha256": "bd6a99b9cc4a61802c339bd08987612e55ca48748122631dfa946bc27059e73b",
+          "bytes": 18230
+        },
+        {
+          "name": "browser-source-controls.log",
+          "sha256": "345f643cc985d14b89b3687c7d51941b572f29029b20d7399f8bff73dfdd7bcd",
+          "bytes": 366198
+        }
+      ],
+      "interpretation": "61 existing source, model and fixture controls passed; no native geometry or paint acceptance."
+    }
+  ],
+  "historicalBrowserJobs": [
+    {
+      "job": "136761144905",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144905",
+      "logSHA256": "81be4749ad675d9ac8212d0a54325a3cf42fb386ca21745efc4e5467226b6f0f",
+      "logBytes": 203575,
+      "observedFailures": [
+        {
+          "case": "bounded public Liquid live-canvas diagnostics > records actual four-runtime idle/hover work without accepting an optimization 5559ms",
+          "immediateReason": "Requested trace categories unavailable: devtools.timeline,blink.user_timing,v8,cc,gpu"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/wc/light: full selection flow, own toolbar, RTL portal and narrow long labels 23428ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/wc/dark: full selection flow, own toolbar, RTL portal and narrow long labels 23523ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/react/light: full selection flow, own toolbar, RTL portal and narrow long labels 25008ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/react/dark: full selection flow, own toolbar, RTL portal and narrow long labels 25053ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/vue/light: full selection flow, own toolbar, RTL portal and narrow long labels 24543ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/vue/dark: full selection flow, own toolbar, RTL portal and narrow long labels 24967ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/vue2/light: full selection flow, own toolbar, RTL portal and narrow long labels 24895ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        },
+        {
+          "case": "actual Bootstrap/Liquid Select input, layout and source-bound paint > liquid-glass/vue2/dark: full selection flow, own toolbar, RTL portal and narrow long labels 25086ms",
+          "immediateReason": "Matcher did not succeed in 20000ms"
+        }
+      ],
+      "completeFailedCaseSummary": {
+        "failed": 9,
+        "passed": 89,
+        "skipped": 4
+      }
+    },
+    {
+      "job": "136761144925",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144925",
+      "logSHA256": "ee6260eab43042b31d4ef769455dd22a46339693e86a721c7640bc902c9ed2d4",
+      "logBytes": 86839,
+      "observedFailures": [],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144929",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144929",
+      "logSHA256": "5307770c415d995cb5f78fc29a70b1a97ce98b8afdf09f5c28b0e48711b7d104",
+      "logBytes": 199383,
+      "observedFailures": [],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144936",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144936",
+      "logSHA256": "d8127d713725fdf9160eef46f216ecbe22cbc25764781c44be31cc277733b3ef",
+      "logBytes": 165237,
+      "observedFailures": [
+        {
+          "case": "retains brutalist preference owners and portals through real breakpoint reconnects 5465ms",
+          "immediateReason": "Matcher did not succeed in 1000ms"
+        },
+        {
+          "case": "Website Demo Matrix browser smoke > mounts every demo in every official Web adapter 74118ms",
+          "immediateReason": "page.waitForFunction: Timeout 60000ms exceeded."
+        },
+        {
+          "case": "Website Demo Matrix browser smoke > keeps the matrix readable at 320px 74479ms",
+          "immediateReason": "page.waitForFunction: Timeout 60000ms exceeded."
+        },
+        {
+          "case": "Website Demo Matrix browser smoke > keeps the matrix readable at 390px 75117ms",
+          "immediateReason": "page.waitForFunction: Timeout 60000ms exceeded."
+        },
+        {
+          "case": "Website Demo Matrix browser smoke > moves focus into the Base Dialog content in every runtime 75287ms",
+          "immediateReason": "page.waitForFunction: Timeout 60000ms exceeded."
+        },
+        {
+          "case": "real Drawer semantic Scroll physical target > document keeps one bounded slot scrollport 1455ms",
+          "immediateReason": "Matcher did not succeed in 1000ms"
+        },
+        {
+          "case": "real Drawer semantic Scroll physical target > shadow keeps one bounded slot scrollport 1474ms",
+          "immediateReason": "Matcher did not succeed in 1000ms"
+        },
+        {
+          "case": "public www Drawer cold-entry diagnostic > rejects the real scoped public demo when only its scope dependency is omitted 207ms",
+          "immediateReason": "Build failed with 1 error:"
+        },
+        {
+          "case": "public www Drawer cold-entry diagnostic > animates the public cold entry with measured intrinsic geometry (fixed control=false) 2560ms",
+          "immediateReason": "Build failed with 1 error:"
+        },
+        {
+          "case": "public www Drawer cold-entry diagnostic > animates the public cold entry with measured intrinsic geometry (fixed control=true) 2304ms",
+          "immediateReason": "Build failed with 1 error:"
+        }
+      ],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144940",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144940",
+      "logSHA256": "814ca08ea14f55103636f8106bd225b4eb062924b21565266e2f14b53d6e0c6d",
+      "logBytes": 122478,
+      "observedFailures": [],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144947",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144947",
+      "logSHA256": "a265496385cf4077e7d294479d44ad86417864522319dfa0a62b53086956ab9e",
+      "logBytes": 190495,
+      "observedFailures": [
+        {
+          "case": "Docs brutalist 320px keeps enlarged 200% text reachable without clipping 11092ms",
+          "immediateReason": "expected '搜索暂不可用，请重试' to be '正在加载搜索…' // Object.is equality"
+        },
+        {
+          "case": "Docs brutalist 390px keeps enlarged 200% text reachable without clipping 8783ms",
+          "immediateReason": "expected '搜索暂不可用，请重试' to be '正在加载搜索…' // Object.is equality"
+        }
+      ],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144961",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144961",
+      "logSHA256": "e11a42b524ff5c61ac5319726fa7290a09d45fcd807fdf6e0f499e7ed79cd712",
+      "logBytes": 434347,
+      "observedFailures": [
+        {
+          "case": "Shadow closeout native boundaries > rejects external split surface transforms that collapse the caller 5003ms",
+          "immediateReason": "Test timed out in 5000ms."
+        },
+        {
+          "case": "Shadow closeout native boundaries > rejects external opacity filters hiding a split slot 3046ms",
+          "immediateReason": "expected 'Error: [WC Adapter] decoration physic…' to be null"
+        },
+        {
+          "case": "Shadow closeout native boundaries > validates caller select choices through late split publication (unchanged) 371ms",
+          "immediateReason": "expected { …(9) } to deeply equal { error: null, …(8) }"
+        },
+        {
+          "case": "Shadow closeout native boundaries > accepts an admitted split exit animation at its retained zero opacity 532ms",
+          "immediateReason": "expected 'Error: [WC Adapter] decoration physic…' to be null"
+        },
+        {
+          "case": "Shadow closeout native boundaries > rejects removed split surface paint after a legitimate Rule change 344ms",
+          "immediateReason": "expected 'Error: [WC Adapter] decoration physic…' to be null"
+        },
+        {
+          "case": "Shadow closeout native boundaries > accepts native zero opacity at the start of admitted split entry 346ms",
+          "immediateReason": "expected 'Error: [WC Adapter] decoration physic…' to be null"
+        },
+        {
+          "case": "Shadow closeout native boundaries > retains selector-owned split opacity after native hover settles: native 655ms",
+          "immediateReason": "Native exit observation: {\"trusted\":true,\"hovered\":false,\"opacity\":\"0\",\"delay\":\"0s\",\"projectionWrites\":0,\"transition\":true,\"exactTarget\":true,\"endpoints\":[\"0\",\"1\"],\"progress\":0,\"concealedOpacity\":\"0\",\"owned\":true,\"retainedTransition\":true,\"otherOpacityAnimation\":false,\"updates\":[\"Error: [WC Adapter] decoration physical blueprint changed\",\"Error: [WC Adapter] decoration physical blueprint changed\"],\"identity\":{\"caller\":true,\"surface\":true,\"slot\":true,\"decoration\":true,\"controller\":true,\"generation\":true,\"resources\":true,\"setups\":1}}: expected { Object (trusted, hovered, ...) } to match object { Object (trusted, hovered, ...) }"
+        },
+        {
+          "case": "Shadow closeout native boundaries > retains owned split Root opacity during its CSS transition out of zero 355ms",
+          "immediateReason": "expected '1' to be '0' // Object.is equality"
+        },
+        {
+          "case": "Shadow closeout native boundaries > retains owned split Root opacity when a Rule withdraws its last opacity token: finish 368ms",
+          "immediateReason": "expected { opacity: '0', …(6) } to deeply equal { opacity: '0', …(6) }"
+        },
+        {
+          "case": "Shadow closeout native boundaries > retains owned split Root opacity when a Rule withdraws its last opacity token: external replacement 373ms",
+          "immediateReason": "expected { opacity: '0', …(6) } to deeply equal { opacity: '0', …(6) }"
+        },
+        {
+          "case": "automatic documentation image preview in real Chromium > 390px real intermediate frames follow linear forward/reverse motion 31999ms",
+          "immediateReason": "page.waitForFunction: Timeout 30000ms exceeded."
+        },
+        {
+          "case": "automatic documentation image preview in real Chromium > 1280px real intermediate frames follow linear forward/reverse motion 32219ms",
+          "immediateReason": "page.waitForFunction: Timeout 30000ms exceeded."
+        }
+      ],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144964",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144964",
+      "logSHA256": "7a7419a1f158e0e2a604875d0601e39d58340820747b7841f903457204adeb3f",
+      "logBytes": 108393,
+      "observedFailures": [
+        {
+          "case": "Liquid portal container diagnostics (observation, not guard relaxation) > measures the actual docs-shell fixed point with a disposable containment handover 8869ms",
+          "immediateReason": "expected 'row' to be 'column' // Object.is equality"
+        },
+        {
+          "case": "chains reverse wheel from an independently located real short PRE to the document 13438ms",
+          "immediateReason": "expected 785 to be less than 285"
+        },
+        {
+          "case": "Runtime-only vertical layout parity > homepage shadcn/1440: preserves card and text line boxes through a WC round trip 2742ms",
+          "immediateReason": "expected 52 to be 37 // Object.is equality"
+        },
+        {
+          "case": "Runtime-only vertical layout parity > homepage shadcn/390: preserves card and text line boxes through a WC round trip 2518ms",
+          "immediateReason": "expected 52 to be 37 // Object.is equality"
+        },
+        {
+          "case": "Runtime-only vertical layout parity > homepage brutalist/1440: preserves card and text line boxes through a WC round trip 4274ms",
+          "immediateReason": "expected 52 to be 37 // Object.is equality"
+        },
+        {
+          "case": "Runtime-only vertical layout parity > homepage brutalist/390: preserves card and text line boxes through a WC round trip 4394ms",
+          "immediateReason": "expected 52 to be 37 // Object.is equality"
+        }
+      ],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144967",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144967",
+      "logSHA256": "819c59b3ca1beab0f29d4324a1104e60b1601f5787b3ab4681758576ab5dda55",
+      "logBytes": 145010,
+      "observedFailures": [],
+      "completeFailedCaseSummary": null
+    },
+    {
+      "job": "136761144978",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144978",
+      "logSHA256": "cd6e47097fa6702fc801bb71046224ba818757104b0e8b48c8202f7c1d2729e8",
+      "logBytes": 121416,
+      "observedFailures": [],
+      "completeFailedCaseSummary": null
+    }
+  ],
+  "preservedBoundaries": [
+    "Original native test files and cases remain selected by the normal runtime plan.",
+    "No browser-launch sandbox flag, case deadline, clipping threshold, focus requirement or Shadow guard relaxed.",
+    "Search font geometry uses the existing successful-empty external data control; original missing/delayed failure controls unchanged.",
+    "Only stale exact Text inventory expectation corrected; pairwise geometry and negative strut assertions preserved.",
+    "Real renderer CSS is bundled and installed; no empty-loader workaround."
+  ],
+  "remainingNativeAcceptance": [
+    "All seven original Drawer cases and all 190 Shadow closeout cases.",
+    "Four corrected Search font cases and complete six-case runtime layout parity file, followed by complete Search coverage.",
+    "All four original Demo Matrix cases; startup profiling is supplementary.",
+    "Eight Liquid Select self-optical positive controls; observed null requires explanation.",
+    "Liquid trace category capability and remaining native observations in interrupted shards.",
+    "Complete canonical cycle bound to the final clean candidate after review."
+  ],
+  "sourceFingerprintRefreshedAt": "2026-11-21T16:48:42.408230+00:00",
+  "sourceFingerprintRefreshNote": "All 18 current source fingerprints were checked after repository formatting. Only site-search-commands.browser.test.ts changed: a multiline expect.poll expression was formatted onto one line. Local run receipts and historical observations are unchanged; no tests were rerun."
+}

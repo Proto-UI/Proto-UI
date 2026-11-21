@@ -24,7 +24,10 @@ import {
   applyColorScheme,
 } from './browser-harness';
 
-import { mountPopoverNova, type PopoverNovaFixtureHandle } from './popover-nova-fixture';
+import {
+  mountPopoverNova,
+  type PopoverNovaFixtureHandle,
+} from '../../../../test/fixtures/popover-nova-fixture';
 
 const route = '/en/ui-libraries/shadcn/popover/';
 const demoId = 'demo-shadcn-popover';

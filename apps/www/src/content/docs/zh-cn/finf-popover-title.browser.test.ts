@@ -13,7 +13,10 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
-import { mountPopoverNova, type PopoverNovaFixtureHandle } from './popover-nova-fixture';
+import {
+  mountPopoverNova,
+  type PopoverNovaFixtureHandle,
+} from '../../../../test/fixtures/popover-nova-fixture';
 import {
   RUNTIMES,
   COLOR_SCHEMES,

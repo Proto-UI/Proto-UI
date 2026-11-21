@@ -56,7 +56,6 @@ export function createWebOpticalProgram(
     program: WebGLProgram;
     locations: Record<string, WebGLUniformLocation | null>;
     attribute: number;
-    constantsInitialized: boolean;
   };
   let gl: WebGLRenderingContext | null = null,
     buffer: WebGLBuffer | null = null;
@@ -322,7 +321,7 @@ export function createWebOpticalProgram(
             new Uint8Array(4)
           );
         }
-      const pipeline = { program, locations, attribute, constantsInitialized: false };
+      const pipeline = { program, locations, attribute };
       pipelines.set(key, pipeline);
       return pipeline;
     } catch (error) {
@@ -415,29 +414,7 @@ export function createWebOpticalProgram(
         i = (name: string, value: number) => g.uniform1i(locations[name], value);
       const v2 = (name: string, value: number[]) => g.uniform2fv(locations[name], value),
         v4 = (name: string, value: number[]) => g.uniform4fv(locations[name], value);
-      if (!pipeline.constantsInitialized) {
-        // Uniform values belong to the linked program and survive profile and
-        // framebuffer switches. Initialize after binding this main pipeline;
-        // clear/recovery creates new pipelines with their own unset flag.
-        i('u_tex', 0);
-        f('u_bevelWidth', 0.22);
-        f('u_frost', 0);
-        f('u_time', 0);
-        // Preserve the #809 fixed regular profile. Its inherited reversed-edge
-        // smoothstep requires exact-engine visual evidence; no cross-engine or
-        // language equivalence follows from retaining these original bytes.
-        i('u_specular', 1);
-        f('u_revealProgress', 1);
-        i('u_revealType', 0);
-        f('u_tiltX', 0);
-        f('u_tiltY', 0);
-        i('u_stack', 1);
-        v4('u_stackMapping', [0, 0, 0, 0]);
-        v4('u_stackRegion', [0, 0, 0, 0]);
-        i('u_shadow', 2);
-        v4('u_shadowMapping', [0, 0, 0, 0]);
-        pipeline.constantsInitialized = true;
-      }
+      i('u_tex', 0);
       v2('u_resolution', [width, height]);
       v2('u_textureResolution', [source.width, source.height]);
       v4('u_bounds', geometry.bounds);
@@ -449,7 +426,18 @@ export function createWebOpticalProgram(
           : 0
       );
       f('u_bevelDepth', diagnostic === 'zero-refraction' ? 0 : blend(0.06, 0.12));
+      f('u_bevelWidth', 0.22);
+      f('u_frost', 0);
       f('u_radius', Math.min(geometry.radius * geometry.dpr, width / 2, height / 2));
+      f('u_time', 0);
+      // Preserve the #809 fixed regular profile. Its inherited reversed-edge
+      // smoothstep requires exact-engine visual evidence; no cross-engine or
+      // language equivalence follows from retaining these original bytes.
+      i('u_specular', 1);
+      f('u_revealProgress', 1);
+      i('u_revealType', 0);
+      f('u_tiltX', 0);
+      f('u_tiltY', 0);
       f('u_magnify', diagnostic === 'zero-refraction' ? 1 : blend(1.025, 1.08));
       v2('u_subpixel', [outset * geometry.dpr, outset * geometry.dpr]);
       v2('u_boxSize', [geometry.width * geometry.dpr, geometry.height * geometry.dpr]);
@@ -466,6 +454,9 @@ export function createWebOpticalProgram(
         f('u_styleTintLightForeground', tintEnvelope.lightForeground ? 1 : 0);
         f('u_styleTintLuminanceBound', tintEnvelope.luminanceBound);
       }
+      i('u_stack', 1);
+      v4('u_stackMapping', [0, 0, 0, 0]);
+      v4('u_stackRegion', [0, 0, 0, 0]);
       f('u_contactShape', contact && diagnostic !== 'zero-deformation' ? strength : 0);
       v4(
         'u_interaction',
@@ -483,6 +474,8 @@ export function createWebOpticalProgram(
           : [0.5, 0.5, 0, 0]
       );
       f('u_interactionRadius', contact ? 0.8 * strength : 0);
+      i('u_shadow', 2);
+      v4('u_shadowMapping', [0, 0, 0, 0]);
       g.clearColor(0, 0, 0, 0);
       g.clear(g.COLOR_BUFFER_BIT);
       g.disable(g.BLEND);

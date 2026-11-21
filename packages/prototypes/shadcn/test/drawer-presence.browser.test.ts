@@ -273,13 +273,14 @@ describe('real Drawer semantic Scroll physical target', () => {
 describe('public www Drawer cold-entry diagnostic', () => {
   it('rejects the real scoped public demo when only its scope dependency is omitted', async () => {
     const { buildPublicDrawerEntryProbe } = await import('./fixtures/drawer-entry-build');
-    const diagnosticScript = await buildPublicDrawerEntryProbe();
+    const diagnostic = await buildPublicDrawerEntryProbe();
     // A fresh page has a fresh registry: no earlier positive can supply the scope.
     const page = await browser.newPage();
     try {
       await page.route('**/*', (route) => route.abort());
       await page.setContent('<body></body>');
-      await page.addScriptTag({ content: diagnosticScript });
+      await page.addStyleTag({ content: diagnostic.css });
+      await page.addScriptTag({ content: diagnostic.script });
       await expect(
         page.evaluate(() => {
           const fixture = (
@@ -322,7 +323,7 @@ describe('public www Drawer cold-entry diagnostic', () => {
         (token): token is string => typeof token === 'string'
       );
       const css = `${await buildPublicDrawerBoxCss([...boxTokens])}\n${renderProtoStyleTokenCss(sourceTokens)}`;
-      const diagnosticScript = await buildPublicDrawerEntryProbe();
+      const diagnostic = await buildPublicDrawerEntryProbe();
       const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(String(error)));
@@ -332,7 +333,8 @@ describe('public www Drawer cold-entry diagnostic', () => {
         await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.setContent('<style>html{font-size:16px}body{margin:0;background:white}</style>');
         await page.addStyleTag({ content: css });
-        await page.addScriptTag({ content: diagnosticScript });
+        await page.addStyleTag({ content: diagnostic.css });
+        await page.addScriptTag({ content: diagnostic.script });
         await page.evaluate(async (fixed) => {
           (window as any).publicEntry = await (
             window as any

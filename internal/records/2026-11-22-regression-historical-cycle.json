@@ -1,0 +1,904 @@
+{
+  "runId": 44876125495,
+  "sourceRevision": "7a696228c31e6b77998c4e356a57dcebd08854a0",
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495",
+  "totalJobs": 89,
+  "jobs": [
+    {
+      "id": 136761093646,
+      "name": "ci-config-audit",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093646",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:34:00Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093846,
+      "name": "release-scan",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093846",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:34:08Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093875,
+      "name": "production-suites / shadcn-style-source / inspect-source",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093875",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:33:58Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093900,
+      "name": "lockstep-check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093900",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:33:54Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093901,
+      "name": "rust-interop",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093901",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:35:36Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093935,
+      "name": "production-suites / effect-graph-model / inspect-models",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093935",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:34:06Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093937,
+      "name": "rust",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093937",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:34:22Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093945,
+      "name": "production-suites / material-source-specializer / source-and-host",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093945",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:35:40Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093984,
+      "name": "coverage-governance / reconcile",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093984",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:34:04Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761093995,
+      "name": "cycle-plan",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761093995",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:33:58Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094015,
+      "name": "type-check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094015",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:37:51Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094043,
+      "name": "compiler-gpui-consumers / native-consumer (macos-15)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094043",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:36:16Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094072,
+      "name": "public_package_plan",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094072",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:33:56Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094078,
+      "name": "agent-operations-fixtures / local-fixtures",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094078",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:44:26Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094089,
+      "name": "compiler-gpui-consumers / native-consumer (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094089",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:35:34Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094096,
+      "name": "rust-macos",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094096",
+      "startedAt": "2026-11-21T06:33:48Z",
+      "completedAt": "2026-11-21T06:40:56Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094107,
+      "name": "test-plan",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094107",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:33:55Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094122,
+      "name": "production-suites / intranet-preview-checks / preview",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094122",
+      "startedAt": "2026-11-21T06:33:46Z",
+      "completedAt": "2026-11-21T06:33:56Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761094292,
+      "name": "production-suites / compiler-wc-native / ordinary-native-browser",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761094292",
+      "startedAt": "2026-11-21T06:33:47Z",
+      "completedAt": "2026-11-21T06:34:28Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761144905,
+      "name": "test-browser (2/10, browser-2-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144905",
+      "startedAt": "2026-11-21T06:33:58Z",
+      "completedAt": "2026-11-21T06:45:22Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144925,
+      "name": "test-browser (6/10, browser-6-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144925",
+      "startedAt": "2026-11-21T06:33:58Z",
+      "completedAt": "2026-11-21T06:49:25Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144929,
+      "name": "test-browser (5/10, browser-5-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144929",
+      "startedAt": "2026-11-21T06:34:00Z",
+      "completedAt": "2026-11-21T06:49:24Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144936,
+      "name": "test-browser (3/10, browser-3-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144936",
+      "startedAt": "2026-11-21T06:33:58Z",
+      "completedAt": "2026-11-21T06:49:22Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144940,
+      "name": "test-browser (9/10, browser-9-of-10)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144940",
+      "startedAt": "2026-11-21T06:33:58Z",
+      "completedAt": "2026-11-21T06:45:11Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761144947,
+      "name": "test-browser (1/10, browser-1-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144947",
+      "startedAt": "2026-11-21T06:34:02Z",
+      "completedAt": "2026-11-21T06:49:32Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144961,
+      "name": "test-browser (8/10, browser-8-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144961",
+      "startedAt": "2026-11-21T06:33:58Z",
+      "completedAt": "2026-11-21T06:49:33Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144964,
+      "name": "test-browser (7/10, browser-7-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144964",
+      "startedAt": "2026-11-21T06:34:08Z",
+      "completedAt": "2026-11-21T06:49:31Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144967,
+      "name": "test-browser (4/10, browser-4-of-10)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144967",
+      "startedAt": "2026-11-21T06:34:10Z",
+      "completedAt": "2026-11-21T06:49:31Z",
+      "failedSteps": ["Run the bounded shard with its own documentation server"]
+    },
+    {
+      "id": 136761144978,
+      "name": "test-browser (10/10, browser-10-of-10)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761144978",
+      "startedAt": "2026-11-21T06:34:00Z",
+      "completedAt": "2026-11-21T06:45:22Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761147724,
+      "name": "public_package_build",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761147724",
+      "startedAt": "2026-11-21T06:34:24Z",
+      "completedAt": "2026-11-21T06:36:04Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761147742,
+      "name": "release-consumer-react",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761147742",
+      "startedAt": "2026-11-21T06:35:37Z",
+      "completedAt": "2026-11-21T06:38:18Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761147758,
+      "name": "release-stage",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761147758",
+      "startedAt": "2026-11-21T06:35:38Z",
+      "completedAt": "2026-11-21T06:37:22Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761147773,
+      "name": "cli-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761147773",
+      "startedAt": "2026-11-21T06:34:30Z",
+      "completedAt": "2026-11-21T06:37:27Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761154197,
+      "name": "test-general",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761154197",
+      "startedAt": "2026-11-21T06:34:07Z",
+      "completedAt": "2026-11-21T06:40:22Z",
+      "failedSteps": ["Public documentation gate and repository tests"]
+    },
+    {
+      "id": 136761277171,
+      "name": "production-suites / finf-button-ghost / public-button-ghost",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761277171",
+      "startedAt": "2026-11-21T06:35:43Z",
+      "completedAt": "2026-11-21T06:41:39Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761568250,
+      "name": "production-suites / liquid-material / visible-refraction-diagnostic",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568250",
+      "startedAt": "2026-11-21T06:36:20Z",
+      "completedAt": "2026-11-21T06:39:46Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761568325,
+      "name": "production-suites / liquid-material / hover-evidence (wc)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568325",
+      "startedAt": "2026-11-21T06:37:54Z",
+      "completedAt": "2026-11-21T06:43:44Z",
+      "failedSteps": ["Retain the complete runtime hover partition"]
+    },
+    {
+      "id": 136761568327,
+      "name": "production-suites / liquid-material / browser-evidence",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568327",
+      "startedAt": "2026-11-21T06:37:25Z",
+      "completedAt": "2026-11-21T06:48:45Z",
+      "failedSteps": ["Source closure and real material/library evidence"]
+    },
+    {
+      "id": 136761568331,
+      "name": "production-suites / liquid-material / tint-stage-diagnostic",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568331",
+      "startedAt": "2026-11-21T06:38:21Z",
+      "completedAt": "2026-11-21T06:41:18Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136761568335,
+      "name": "production-suites / liquid-material / hover-evidence (vue)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568335",
+      "startedAt": "2026-11-21T06:40:25Z",
+      "completedAt": "2026-11-21T06:46:14Z",
+      "failedSteps": ["Retain the complete runtime hover partition"]
+    },
+    {
+      "id": 136761568336,
+      "name": "production-suites / liquid-material / prominent-tint-evidence (react)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568336",
+      "startedAt": "2026-11-21T06:36:06Z",
+      "completedAt": "2026-11-21T06:43:21Z",
+      "failedSteps": ["Main-command tint source closure and real component evidence"]
+    },
+    {
+      "id": 136761568340,
+      "name": "production-suites / liquid-material / prominent-tint-evidence (wc)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568340",
+      "startedAt": "2026-11-21T06:37:30Z",
+      "completedAt": "2026-11-21T06:44:52Z",
+      "failedSteps": ["Main-command tint source closure and real component evidence"]
+    },
+    {
+      "id": 136761568344,
+      "name": "production-suites / liquid-material / hover-evidence (vue2)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568344",
+      "startedAt": "2026-11-21T06:39:49Z",
+      "completedAt": "2026-11-21T06:46:29Z",
+      "failedSteps": ["Retain the complete runtime hover partition"]
+    },
+    {
+      "id": 136761568350,
+      "name": "production-suites / liquid-material / hover-evidence (react)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568350",
+      "startedAt": "2026-11-21T06:40:58Z",
+      "completedAt": "2026-11-21T06:46:31Z",
+      "failedSteps": ["Retain the complete runtime hover partition"]
+    },
+    {
+      "id": 136761568392,
+      "name": "production-suites / liquid-material / prominent-tint-evidence (vue2)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568392",
+      "startedAt": "2026-11-21T06:41:20Z",
+      "completedAt": "2026-11-21T06:47:33Z",
+      "failedSteps": ["Main-command tint source closure and real component evidence"]
+    },
+    {
+      "id": 136761568393,
+      "name": "production-suites / liquid-material / prominent-tint-evidence (vue)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761568393",
+      "startedAt": "2026-11-21T06:41:41Z",
+      "completedAt": "2026-11-21T06:51:33Z",
+      "failedSteps": ["Main-command tint source closure and real component evidence"]
+    },
+    {
+      "id": 136763024663,
+      "name": "production-suites / finf-button-ghost-component / component-button-ghost",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136763024663",
+      "startedAt": "2026-11-21T06:43:24Z",
+      "completedAt": "2026-11-21T06:47:42Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490406,
+      "name": "production-suites / finf-representative-features / representative-features (slider)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490406",
+      "startedAt": "2026-11-21T06:53:44Z",
+      "completedAt": "2026-11-21T06:59:30Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764490432,
+      "name": "production-suites / finf-representative-features / representative-features (modal-overlays)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490432",
+      "startedAt": "2026-11-21T06:47:45Z",
+      "completedAt": "2026-11-21T06:53:43Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490439,
+      "name": "production-suites / finf-representative-features / representative-features (runtime-tabs)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490439",
+      "startedAt": "2026-11-21T06:52:21Z",
+      "completedAt": "2026-11-21T06:58:10Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764490441,
+      "name": "production-suites / finf-representative-features / representative-features (calendar)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490441",
+      "startedAt": "2026-11-21T06:47:45Z",
+      "completedAt": "2026-11-21T06:53:41Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490470,
+      "name": "production-suites / finf-representative-features / representative-features (forms)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490470",
+      "startedAt": "2026-11-21T06:47:46Z",
+      "completedAt": "2026-11-21T06:52:19Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490477,
+      "name": "production-suites / finf-representative-features / representative-features (popover-command-density)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490477",
+      "startedAt": "2026-11-21T07:04:19Z",
+      "completedAt": "2026-11-21T07:10:33Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490485,
+      "name": "production-suites / finf-representative-features / representative-features (drawer-command-density)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490485",
+      "startedAt": "2026-11-21T07:01:05Z",
+      "completedAt": "2026-11-21T07:11:25Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490496,
+      "name": "production-suites / finf-representative-features / representative-features (popover-title)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490496",
+      "startedAt": "2026-11-21T06:58:12Z",
+      "completedAt": "2026-11-21T07:04:17Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490504,
+      "name": "production-suites / finf-representative-features / representative-features (liquid-dropdown)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490504",
+      "startedAt": "2026-11-21T06:54:20Z",
+      "completedAt": "2026-11-21T07:01:01Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490511,
+      "name": "production-suites / finf-representative-features / representative-features (dropdown)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490511",
+      "startedAt": "2026-11-21T06:53:46Z",
+      "completedAt": "2026-11-21T07:00:10Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490526,
+      "name": "production-suites / finf-representative-features / representative-features (neo-popover-title)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490526",
+      "startedAt": "2026-11-21T07:05:46Z",
+      "completedAt": "2026-11-21T07:10:47Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490548,
+      "name": "production-suites / finf-representative-features / representative-features (popover-navigation)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490548",
+      "startedAt": "2026-11-21T06:59:32Z",
+      "completedAt": "2026-11-21T07:05:43Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764490591,
+      "name": "production-suites / finf-representative-features / representative-features (drawer-intrinsic)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490591",
+      "startedAt": "2026-11-21T07:00:13Z",
+      "completedAt": "2026-11-21T07:07:22Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764490628,
+      "name": "production-suites / finf-representative-features / representative-features (disclosure-overlays)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764490628",
+      "startedAt": "2026-11-21T06:47:46Z",
+      "completedAt": "2026-11-21T06:54:17Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764491514,
+      "name": "production-suites / finf-representative-features / representative-features (shadcn-toggle)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764491514",
+      "startedAt": "2026-11-21T07:10:29Z",
+      "completedAt": "2026-11-21T07:16:01Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764491540,
+      "name": "production-suites / finf-representative-features / representative-features (resident-motion-capability)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764491540",
+      "startedAt": "2026-11-21T07:07:24Z",
+      "completedAt": "2026-11-21T07:10:27Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764491592,
+      "name": "production-suites / finf-representative-features / representative-features (shadcn-switch-consumer)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764491592",
+      "startedAt": "2026-11-21T07:10:35Z",
+      "completedAt": "2026-11-21T07:14:15Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136764491624,
+      "name": "production-suites / finf-representative-features / representative-features (shadcn-drawer-presence)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764491624",
+      "startedAt": "2026-11-21T07:10:49Z",
+      "completedAt": "2026-11-21T07:14:17Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764491626,
+      "name": "production-suites / finf-representative-features / representative-features (brutalist-switch-consumer)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764491626",
+      "startedAt": "2026-11-21T07:14:18Z",
+      "completedAt": "2026-11-21T07:18:26Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764491692,
+      "name": "production-suites / finf-representative-features / representative-features (shadcn-card)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764491692",
+      "startedAt": "2026-11-21T07:11:28Z",
+      "completedAt": "2026-11-21T07:15:41Z",
+      "failedSteps": ["Capture independent current-source component group"]
+    },
+    {
+      "id": 136764927590,
+      "name": "test",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136764927590",
+      "startedAt": "2026-11-21T06:49:36Z",
+      "completedAt": "2026-11-21T06:49:51Z",
+      "failedSteps": ["Require all jobs and exact checkout-bound suite receipts"]
+    },
+    {
+      "id": 136765401656,
+      "name": "production-suites / liquid-elevation-control / controlled-surface",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136765401656",
+      "startedAt": "2026-11-21T06:51:37Z",
+      "completedAt": "2026-11-21T06:52:17Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136765569548,
+      "name": "production-suites / liquid-card-candidate / actual-card-producer",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136765569548",
+      "startedAt": "2026-11-21T06:52:21Z",
+      "completedAt": "2026-11-21T06:55:28Z",
+      "failedSteps": ["Run original twelve Card cases and six response collector controls"]
+    },
+    {
+      "id": 136771838450,
+      "name": "production-suites / homepage-visual / visual-density",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838450",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:24:38Z",
+      "failedSteps": [
+        "Capture the first same-page sidebar after view",
+        "Capture and verify actual candidate Text and Surface leaves"
+      ]
+    },
+    {
+      "id": 136771838452,
+      "name": "production-suites / homepage-visual / mobile-navigation-reading",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838452",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:26:29Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838467,
+      "name": "production-suites / homepage-visual / capture",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838467",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:40:59Z",
+      "failedSteps": [
+        "Capture real exact-head candidate with the same browser probe",
+        "Execute focused real-browser regressions on the exact candidate"
+      ]
+    },
+    {
+      "id": 136771838555,
+      "name": "production-suites / homepage-visual / isolated-controls (code-surface-grammar, code-surface-grammar)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838555",
+      "startedAt": "2026-11-21T07:18:30Z",
+      "completedAt": "2026-11-21T07:24:28Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838560,
+      "name": "production-suites / homepage-visual / isolated-controls (native-links, site-native-links)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838560",
+      "startedAt": "2026-11-21T07:18:30Z",
+      "completedAt": "2026-11-21T07:25:59Z",
+      "failedSteps": ["Execute the exact isolated browser suite"]
+    },
+    {
+      "id": 136771838563,
+      "name": "production-suites / homepage-visual / isolated-controls (search-commands, site-search-commands)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838563",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:28:52Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838569,
+      "name": "production-suites / homepage-visual / isolated-controls (brutalist-action-motion, brutalist-action-motion)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838569",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:20:39Z",
+      "failedSteps": ["Execute the exact isolated browser suite"]
+    },
+    {
+      "id": 136771838573,
+      "name": "production-suites / homepage-visual / isolated-controls (homepage-button-contract, homepage-button-contract)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838573",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:21:39Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838587,
+      "name": "production-suites / homepage-visual / isolated-controls (copy-commands, site-copy-commands)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838587",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:23:02Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838593,
+      "name": "production-suites / homepage-visual / isolated-controls (homepage-composition, homepage-composition)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838593",
+      "startedAt": "2026-11-21T07:18:30Z",
+      "completedAt": "2026-11-21T07:21:44Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838609,
+      "name": "production-suites / homepage-visual / isolated-controls (code-surfaces, code-surfaces)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838609",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:20:48Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838627,
+      "name": "production-suites / homepage-visual / isolated-controls (runtime-box, runtime-preview-surface, runtime-preview-evidence)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838627",
+      "startedAt": "2026-11-21T07:18:30Z",
+      "completedAt": "2026-11-21T07:20:37Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136771838685,
+      "name": "production-suites / homepage-visual / isolated-controls (docs-content-flow, docs-content-flow)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136771838685",
+      "startedAt": "2026-11-21T07:18:29Z",
+      "completedAt": "2026-11-21T07:20:49Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136777174088,
+      "name": "production-suites / language-select-navigation / native-language-navigation",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136777174088",
+      "startedAt": "2026-11-21T07:41:03Z",
+      "completedAt": "2026-11-21T07:46:53Z",
+      "failedSteps": ["Execute production locale journeys"]
+    },
+    {
+      "id": 136778552577,
+      "name": "production-suites / select-target-alignment / native-cold-alignment",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136778552577",
+      "startedAt": "2026-11-21T07:46:56Z",
+      "completedAt": "2026-11-21T07:47:49Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136778767352,
+      "name": "production-suites / site-startup-theme / capture (baseline)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136778767352",
+      "startedAt": "2026-11-21T07:47:52Z",
+      "completedAt": "2026-11-21T07:51:58Z",
+      "failedSteps": ["Capture production cold-load, theme and Select journeys"]
+    },
+    {
+      "id": 136778767456,
+      "name": "production-suites / site-startup-theme / capture (candidate)",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136778767456",
+      "startedAt": "2026-11-21T07:47:52Z",
+      "completedAt": "2026-11-21T07:54:05Z",
+      "failedSteps": ["Capture production cold-load, theme and Select journeys"]
+    },
+    {
+      "id": 136780186867,
+      "name": "production-suites / select-item-sizing / styled-demo-eight",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136780186867",
+      "startedAt": "2026-11-21T07:54:08Z",
+      "completedAt": "2026-11-21T07:58:01Z",
+      "failedSteps": []
+    },
+    {
+      "id": 136781076715,
+      "name": "cycle-report",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136781076715",
+      "startedAt": "2026-11-21T07:58:04Z",
+      "completedAt": "2026-11-21T07:58:18Z",
+      "failedSteps": ["Collect exact run metadata and write the cycle receipt"]
+    }
+  ]
+}

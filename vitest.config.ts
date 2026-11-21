@@ -1,4 +1,5 @@
 import { runtimeRetryUrlsPlugin } from './apps/www/scripts/runtime-retry-urls.mjs';
+import { RUNTIME_TEST_INCLUDES } from './scripts/test/runtime-inventory.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -112,13 +113,6 @@ export default defineConfig({
   ],
   test: {
     environment: 'happy-dom',
-    include: [
-      'packages/**/*.test.ts',
-      'packages/**/test/**/*.test.ts',
-      'internal/contracts/__tests__/**/*.test.ts',
-      'apps/**/test/**/*.test.ts',
-      'apps/www/test/proto-ui-source.test.mjs',
-      'apps/www/src/**/*.test.ts',
-    ],
+    include: [...RUNTIME_TEST_INCLUDES],
   },
 });
