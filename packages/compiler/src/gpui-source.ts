@@ -8,6 +8,7 @@ import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import {
   GPUI_NATIVE_SDK_PATH,
   GPUI_NATIVE_SDK_VERSION,
+  gpuiCargoDependency,
   gpuiNativeSdkFiles,
 } from './gpui-native-sdk';
 import type { DataType } from './data-types';
@@ -43,7 +44,7 @@ import type {
 /** Ordinary Rust functions, closures and GPUI elements. No serialized IR ships. */
 export function emitGpuiSource(
   input: PrototypeIR,
-  options: { componentName?: string; nativeSdkPath?: string } = {}
+  options: { componentName?: string; nativeSdkPath?: string; gpuiDependency?: 'workspace' } = {}
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
@@ -2664,6 +2665,8 @@ impl __PuiNativeRecordValue {
     .update(styleFixture.contents);
   for (const artifact of staticArtifacts)
     packageDigest.update('\0').update(artifact.path).update('\0').update(artifact.contents);
+  const useWorkspace = options.gpuiDependency === 'workspace';
+  const dependency = gpuiCargoDependency(useWorkspace);
   const manifest = `[package]
   name = "generated-gpui-${packageDigest.digest('hex').slice(0, 32)}"
   version = "0.1.0"
@@ -2679,13 +2682,13 @@ impl __PuiNativeRecordValue {
   path = "Component.rs"
   
   [dependencies]
-  proto-ui-gpui-native = { version = "=${GPUI_NATIVE_SDK_VERSION}", path = ${JSON.stringify(options.nativeSdkPath ?? GPUI_NATIVE_SDK_PATH)} }
-  gpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8" }
+  proto-ui-gpui-native = { version = "=${GPUI_NATIVE_SDK_VERSION}", path = ${JSON.stringify(options.nativeSdkPath ?? GPUI_NATIVE_SDK_PATH)}${useWorkspace ? ', features = ["gpui-modern-element-api"]' : ''} }
+  gpui = { ${dependency} }
   serde = { version = "1.0", features = ["derive"] }
   serde_json = "1.0"
   
   [dev-dependencies]
-  gpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8", features = ["test-support"] }
+  gpui = { ${dependency}${useWorkspace ? '' : ', features = ["test-support"]'} }
   `;
   if (diagnostics.length) return { ok: false, diagnostics };
   return {
@@ -2695,11 +2698,13 @@ impl __PuiNativeRecordValue {
       profile: 'gpui-source-v1',
       supportingFiles: [
         { path: 'Cargo.toml', kind: 'source', contents: manifest },
-        ...(options.nativeSdkPath === undefined ? gpuiNativeSdkFiles() : []),
+        ...(options.nativeSdkPath === undefined ? gpuiNativeSdkFiles(useWorkspace) : []),
         styleFixture,
         ...staticArtifacts.map(({ path, kind, contents }) => ({ path, kind, contents })),
       ],
-      dependencies: [...TARGET_PROFILES['gpui-source-v1'].dependencies],
+      dependencies: TARGET_PROFILES['gpui-source-v1'].dependencies.map((entry) =>
+        useWorkspace && entry.name === 'gpui' ? { ...entry, version: 'workspace' } : entry
+      ),
       provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: 'gpui-source-v1' },
     },
   };

@@ -88,6 +88,7 @@ fn resolve_position(geometry:PositionGeometry,config:PositionConfig)->(gpui::Poi
     (origin,side,align)
 }
 struct PositionedRoot {element:AnyElement,owner:OwnerWeak,controller:OwnerWeak}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for PositionedRoot{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for PositionedRoot {
     type RequestLayoutState=gpui::LayoutId;type PrepaintState=();
