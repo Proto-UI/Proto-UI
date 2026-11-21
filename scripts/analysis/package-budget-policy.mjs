@@ -66,11 +66,28 @@ export function resolveBudgetPolicy({ finfDevelopment = false, root, read = read
 }
 
 export function parseBudgetArguments(args) {
-  const allowed = new Set(['--json', '--finf-development']);
-  if (args.some((arg) => !allowed.has(arg)) || new Set(args).size !== args.length) {
-    fail('unknown or duplicate argument; use --json and/or --finf-development');
+  const allowed = new Set(['--json', '--finf-development', '--require-clean', '--expected-sha']);
+  const seen = new Set();
+  let expectedSha;
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (!allowed.has(arg) || seen.has(arg))
+      fail(
+        'unknown or duplicate argument; use --json, --finf-development, --require-clean, --expected-sha <sha>'
+      );
+    seen.add(arg);
+    if (arg === '--expected-sha') {
+      expectedSha = args[++index];
+      if (!/^[a-f0-9]{40}$/.test(expectedSha ?? ''))
+        fail('--expected-sha requires a full commit SHA');
+    }
   }
-  return { json: args.includes('--json'), finfDevelopment: args.includes('--finf-development') };
+  return {
+    json: seen.has('--json'),
+    finfDevelopment: seen.has('--finf-development'),
+    requireClean: seen.has('--require-clean'),
+    expectedSha,
+  };
 }
 
 // Missing output must never become an apparently tiny successful bundle.

@@ -1,4 +1,5 @@
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
+import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
 import {
   LIBRARY_CARD_IMPORT_ALLOWLIST,
   LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES,
@@ -168,6 +169,7 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
+  ...DIAGNOSTIC_IMPORT_ALLOWLIST,
   // Import-edge allowances only: an inline entry without a `sourceSha256`
   // certifies the exact specifier or resolved path, never the source body.
   // Post-admission body drift is invisible to this gate and stays source-review
@@ -285,10 +287,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts': Object.freeze({
-    specifiers: Object.freeze([
-      '@proto.ui/adapter-base',
-      '@proto.ui/adapter-base/web-material',
-    ]),
+    specifiers: Object.freeze(['@proto.ui/adapter-base', '@proto.ui/adapter-base/web-material']),
     resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
   }),
   'packages/adapters/base/src/material/program-pool.ts': Object.freeze({
@@ -302,6 +301,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/adapters/base/src/material/contact-profile',
       'packages/adapters/base/src/material/liquidgl-kernel.generated',
       'packages/adapters/base/src/material/style',
+      'packages/adapters/base/src/material/style-tint-profile',
       'packages/adapters/base/src/material/source',
     ]),
   }),
@@ -342,10 +342,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({
     sourceSha256: '02c712c674cac0201a874c1b9c34b5adba177cfeb65ce40ff94c1de0f69ccdee',
-    specifiers: Object.freeze([
-      '@proto.ui/core',
-      '@proto.ui/prototypes-bootstrap-2-3-2/surface',
-    ]),
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/prototypes-bootstrap-2-3-2/surface']),
   }),
   // Exact demo compositions delegating geometry/materialization to the public Web
   // attachment. Their authored-controller owner remains blocked. Bootstrap and

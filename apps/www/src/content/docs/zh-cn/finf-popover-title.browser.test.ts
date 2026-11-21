@@ -13,7 +13,10 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
-import { mountPopoverNova, type PopoverNovaFixtureHandle } from './popover-nova-fixture';
+import {
+  mountPopoverNova,
+  type PopoverNovaFixtureHandle,
+} from '../../../../test/fixtures/popover-nova-fixture';
 import {
   RUNTIMES,
   COLOR_SCHEMES,
@@ -217,7 +220,10 @@ for (const runtime of RUNTIMES)
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
           fixture = await mountPopoverNova(page, runtime);
-          observations.profiles = await fixture.evaluate((view) => ({ public: view.publicProfile, fixture: view.fixtureProfile }));
+          observations.profiles = await fixture.evaluate((view) => ({
+            public: view.publicProfile,
+            fixture: view.fixtureProfile,
+          }));
           expect(observations.profiles).toEqual({ public: 'rhea', fixture: 'nova' });
           previewer = page.locator('[data-popover-nova-fixture]');
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });

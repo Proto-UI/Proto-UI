@@ -3,6 +3,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 import { build, version as esbuildVersion } from 'esbuild';
 import {
@@ -11,9 +12,18 @@ import {
   parseBudgetArguments,
   resolveBudgetPolicy,
 } from './package-budget-policy.mjs';
+import {
+  assertBudgetCandidate,
+  assertStableBudgetSource,
+  captureBudgetSource,
+  describeBudgetClosure,
+} from './package-budget-evidence.mjs';
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const { json, finfDevelopment } = parseBudgetArguments(process.argv.slice(2));
+const { json, finfDevelopment, requireClean, expectedSha } = parseBudgetArguments(
+  process.argv.slice(2)
+);
+const sourceBefore = captureBudgetSource(ROOT_DIR);
 const policy = resolveBudgetPolicy({ finfDevelopment, root: ROOT_DIR });
 // Provenance makes a ceiling change reviewable per the #654 policy: a number
 // is only comparable with the Node/zlib/esbuild/platform environment and the
@@ -153,18 +163,41 @@ const measure = async (entry) => {
     platform: 'browser',
     target: ['es2020'],
     external,
+    metafile: true,
     logLevel: 'silent',
   });
-  return measureBuildOutput(result);
+  return {
+    ...measureBuildOutput(result),
+    closure: describeBudgetClosure({
+      metafile: result.metafile,
+      root: ROOT_DIR,
+      source: sourceBefore,
+    }),
+  };
 };
 
 const report = await collectBudgetReport({ cases, diagnostics, measure, environment, policy });
+const sourceAfter = captureBudgetSource(ROOT_DIR);
+assertStableBudgetSource(sourceBefore, sourceAfter);
+assertBudgetCandidate(sourceAfter, { requireClean, expectedSha });
+report.schemaVersion = 2;
+report.source = {
+  ...sourceAfter.receipt,
+  stableDuringMeasurement: true,
+  requireClean,
+  expectedSha: expectedSha ?? null,
+};
+report.measurement.external = external;
+report.measurement.externalSha256 = createHash('sha256')
+  .update(JSON.stringify(external))
+  .digest('hex');
 const { results, diagnostics: diagnosticResults } = report;
 
 if (json) console.log(JSON.stringify(report, null, 2));
 else {
   console.log(`[package-budgets] ${JSON.stringify(environment)}`);
   console.log(`[package-budgets] policy=${JSON.stringify(policy)}`);
+  console.log(`[package-budgets] source=${JSON.stringify(report.source)}`);
   for (const result of results) {
     console.log(
       `${result.pass ? 'PASS' : result.blocking ? 'FAIL' : 'ADVISORY'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; overBudget=${result.overBudgetBytes}; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`

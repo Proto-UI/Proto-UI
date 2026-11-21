@@ -32,7 +32,7 @@ import {
   runProminentTintCase,
   awaitProminentTintCheckpoint,
   PROMINENT_TINT_OBSERVATION_PROGRESS,
-} from './liquid-prominent-tint-test-harness';
+} from '../../../../test/fixtures/liquid-prominent-tint-test-harness';
 import type { captureProminentTintFrame } from './liquid-prominent-tint-capture';
 
 // Native only in official exact-candidate CI. Independent bounded shard per

@@ -1,0 +1,830 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-ownership-reconciliation",
+  "reviewDate": "2026-11-22",
+  "reviewBase": "d095fa0a811facff676b6f62929b177aa1dc7583",
+  "historicalEvidence": {
+    "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495",
+    "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44876125495/job/136761154197",
+    "jobLogSha256": "cd60103eb149e870b7099b42b1be14beb109015e333450a34fdd2f57f1c6bb8c",
+    "findings": 101,
+    "classification": {
+      "unreviewedRawImportEdges": 34,
+      "unreviewedRuntimeCompilation": 1,
+      "staleSourceFingerprints": 40,
+      "missingInteractiveSourceBindings": 10,
+      "missingInteractiveSourceOwners": 10,
+      "unclassifiedComponentSources": 6
+    }
+  },
+  "historicalArchive": "refs/heads/archive/finf-200/pr872-8a2d8897",
+  "historicalArchiveRevision": "8a2d8897d710ab4f1c47a564f4077920b5203bf4",
+  "acceptance": "Source ownership and bounded import admission only. All matrix states, draft lifecycle gates, historical browser failures and independent consumer-evidence requirements remain unchanged.",
+  "reconciledSources": [
+    {
+      "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+      "previous": {
+        "sourceSha256": "9336b90719ba80d87528c415f313df94a0431dc091f1b5980ebec20168ec2c80",
+        "revision": "a006753fa03cba0c065e20cf84ece92c79eace80",
+        "gitBlob": "2faa534d6e09c8125eed57b718008fa4a0c6eca3"
+      },
+      "reviewed": {
+        "sourceSha256": "505d0e1d02df1fb14bab6f3be958e9b331a79c6b0c1e4352726af24c3d4d59c1",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "45e9e2ae9b204a52f71d9ce616c866f5697b19b9"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Explicit public Select Surface/Viewport/Group/Label/Separator/ItemText anatomy; placement offset 8 to 2; callback-owned selection replaces duplicate WC listeners. Application retains pending acceptance, status and accessible trigger-name observation."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "previous": {
+        "sourceSha256": "f8cc88455432b7e3c758f292ef3143dcb821868ade017739c37c530b08f837cf",
+        "revision": "a006753fa03cba0c065e20cf84ece92c79eace80",
+        "gitBlob": "607eca153eed628a51f05c8a89fe6aeb3be22485"
+      },
+      "reviewed": {
+        "sourceSha256": "02942f7dee26c8dd7e3b0a3e02e17a28cdc1d3f65d5e49dfbf9845567639540a",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "321b4a0a4be6e497304c8118cf998feab47fecd4"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Explicit public Select anatomy and one owned material stage per control within the renderer tree. Application retains pending acceptance/status and accessible trigger-name observation; callbacks replace duplicate WC listeners. Liquid Glass remains experimental."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-collapsible.demo.ts",
+      "previous": {
+        "sourceSha256": "9c4fc0147e888f965014696d2f8284d6c11710805cdc04847172de987e6de64a",
+        "revision": "78903a5419c6aff381a7de9c1123dbee733eca68",
+        "gitBlob": "203af6918cc77bd84f88dd644d82f69879ac71c4"
+      },
+      "reviewed": {
+        "sourceSha256": "95a125af610fb66bcdda399a883fc56f5c7f62a14f25a208686a190890af016e",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "509d066edf5d9a24b4a18a9f43803f50b4fd62cc"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Public onOpenChange/onClick callbacks replace duplicate WC CustomEvent subscriptions; authored controlled request/accept ownership is unchanged."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-collapsible.demo.ts",
+      "previous": {
+        "sourceSha256": "9deade9f6939aef8ebb67dbc8e2024a8bb0e3dc06c63c41b54064aabf95652ca",
+        "revision": "78903a5419c6aff381a7de9c1123dbee733eca68",
+        "gitBlob": "e10e60aebc7c35c79cbd8ddbd4dbd0e7f082a3f4"
+      },
+      "reviewed": {
+        "sourceSha256": "1c2ec85076c0b2ba5975e2f826c723539a06e74133220003fbf726a7953ae1a1",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "9f9c59919ffaebcb5fd134671175680e5656752a"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Public callbacks replace duplicate WC CustomEvent subscriptions and the authored layout becomes one explicit grid column; existing controlled request/accept ownership remains."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/bootstrap-state-controls.astro",
+      "previous": {
+        "sourceSha256": "ff19eb2915abb2a34518720e71a46eef23b99ca6aa77154c1d106f02328bb9e2",
+        "revision": "ccd734ed6e547ef80fff3053af558ce63f2e5ebc",
+        "gitBlob": "732891da332ddd3cfc0dd5daeb8297afed3f8dde"
+      },
+      "reviewed": {
+        "sourceSha256": "6af770d6bd60744cd5dda7b8f729cb82f9ad5449cabf4d9de935342c7207086f",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "cc926331b8ec939bf370035cc86c509f2fac48cc"
+      },
+      "ownersBefore": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "ownersAfter": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Fixture distinguishes light control surfaces from labels/dividers and inherits the intended foreground. The existing fixture controller and renderer owners remain; appearance still needs native evidence."
+    },
+    {
+      "path": "apps/www/src/components/SiteCopyBootstrap.astro",
+      "previous": {
+        "sourceSha256": "cebb51c51c665af7b621700465f28026ea3c1068b3977ffdf6ec8dcf745482b1",
+        "revision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+        "gitBlob": "27b1b2ca3fccd795ff5e03343ae702a80784f675"
+      },
+      "reviewed": {
+        "sourceSha256": "25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "50b701c4577a2dd5fba7e624248ca72074de687b"
+      },
+      "ownersBefore": [
+        "www.docs.code-panel-copy",
+        "www.docs.code-surface",
+        "www.docs.install-copy",
+        "www.docs.note-surface"
+      ],
+      "ownersAfter": [
+        "www.docs.code-panel-copy",
+        "www.docs.code-surface",
+        "www.docs.install-copy",
+        "www.docs.note-surface"
+      ],
+      "sourceReview": "Inline startup CSS generation is replaced by the static site-code-startup.css link. Existing Copy, code and note ownership remains; initialization is unchanged."
+    },
+    {
+      "path": "apps/www/src/components/SiteLibraryStyle.astro",
+      "previous": {
+        "sourceSha256": "f5c612c3841e7dd9e5441db733f6ac991aac7b9875338c167ffa1caa7667584e",
+        "revision": "cb6cdfa97f77f4c60dfb5ed053d4124a0cb378e7",
+        "gitBlob": "2b219c0da91bf0a20c0e2a25af902f828fa0f4e7"
+      },
+      "reviewed": {
+        "sourceSha256": "7fec23169c164d43f266b8fc71efbf55aaadba2bb4561f8670dc69e3d8c49e33",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "66373a322469f02f22e51a1796993faf69739ce1"
+      },
+      "ownersBefore": ["www.build.style-generation"],
+      "ownersAfter": ["www.build.style-generation"],
+      "sourceReview": "Inline Brutalist theme generation becomes a static site-library-theme.css link under the existing build-style owner; no interactive owner is added."
+    },
+    {
+      "path": "apps/www/src/components/adapter-preference.ts",
+      "previous": {
+        "sourceSha256": "f7101a19317c58dcc0901172e7da9afe71086a8544c6e9db9570fbbe5d8d38f8",
+        "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+        "gitBlob": "e3bb9d04a7902cae8bc133855c604038c64f9942"
+      },
+      "reviewed": {
+        "sourceSha256": "ce782a88af08dcc150ec5d4d29c3145e4a90bba86392ad86561a0fe5d313bc93",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "9e22de78f6ab5d08ad0472db5b7c1facfe4734dc"
+      },
+      "ownersBefore": ["www.demo.runtime-select", "www.shell.adapter-select"],
+      "ownersAfter": ["www.demo.runtime-select", "www.shell.adapter-select"],
+      "sourceReview": "Supported Select values delegate to supportsSiteSelectValue instead of a light-DOM-only query. Existing runtime preference and adapter-select owners remain."
+    },
+    {
+      "path": "apps/www/src/components/code-example-client.ts",
+      "previous": {
+        "sourceSha256": "633770a9da7279618a88f53af9a0cb9d69058e238fe14b88f93d1f795b0629ad",
+        "revision": "cb985473352472b5902286ed56a22b85558b7814",
+        "gitBlob": "4bb2d275e255b1b988e6ec0f99c725fbdb8cee22"
+      },
+      "reviewed": {
+        "sourceSha256": "4d78d40daf862af7f343e838d5ab16d08e92b856c8145964dcb2276c1e26e5b9",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "d64f96f6516c0ceddaa4840ad4aaf676ea9a4602"
+      },
+      "ownersBefore": ["www.docs.code-example-file-tabs", "www.docs.code-example-host-tabs"],
+      "ownersAfter": ["www.docs.code-example-file-tabs", "www.docs.code-example-host-tabs"],
+      "sourceReview": "Native initial tabs remain while real Tabs/Tree acquisition is progressively scheduled. Existing file/host owners now include explicit keyboard orientation, pending cancellation, re-entry/retirement guards, coalesced viewport reveal and local/global host selection; failed cleanup does not authorize reacquisition."
+    },
+    {
+      "path": "apps/www/src/components/documentation-image-preview.ts",
+      "previous": {
+        "sourceSha256": "f404732aae9830832165a820877d209082befe0aac3f4f64290b1e22129d2c85",
+        "revision": "a7952f1ce1e47399f6928b42a48c8d162afa2a8b",
+        "gitBlob": "6e97f6df0360319ef992a8795246e58347390a26"
+      },
+      "reviewed": {
+        "sourceSha256": "1bbc87aa3c4554c36c13a5ed7e9886f694bef108e3af9deff4a64e17838ee2aa",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "e0d3ad9fbe8568a72308f4b97027117b50ca608c"
+      },
+      "ownersBefore": ["www.docs.whitepaper-diagram-viewer"],
+      "ownersAfter": ["www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "Media inventory ignores private preview mutations but retains authored article/source moves and cleanup. Source selection and geometry remain with the existing blocked media owner."
+    },
+    {
+      "path": "apps/www/src/components/hidden-first-activation.ts",
+      "previous": {
+        "sourceSha256": "be46b5e43f8604df479dcf59c4f10fc3d75301efc8fb48674ede91765e59de58",
+        "revision": "216038b4093109490df4acef1da54c1b76826fc0",
+        "gitBlob": "261f49b1a138202ed3269acc99e5f55cdba32c14"
+      },
+      "reviewed": {
+        "sourceSha256": "d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "b9041967dced68c66d8b060041adf58d26341860"
+      },
+      "ownersBefore": [
+        "www.docs.code-panel-copy",
+        "www.docs.code-surface",
+        "www.docs.install-copy",
+        "www.docs.note-surface"
+      ],
+      "ownersAfter": [
+        "www.docs.code-panel-copy",
+        "www.docs.code-surface",
+        "www.docs.install-copy",
+        "www.docs.note-surface"
+      ],
+      "sourceReview": "Visibility reads inspect ancestors first and share per-batch facts, invalidating them around callbacks. Identical attribute notifications are ignored and disposed activations cannot publish; the existing Copy/code/note owners remain."
+    },
+    {
+      "path": "apps/www/src/components/override/AdapterSelect.astro",
+      "previous": {
+        "sourceSha256": "9bae80be9b490ab0f5e5da698d7b5f863fb16b42c3c37697ee42e6f335b7f8c3",
+        "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+        "gitBlob": "186b38d6d2491619b865577a0a651b1fff776e1d"
+      },
+      "reviewed": {
+        "sourceSha256": "8072d25e7b3d8ec5dd2967e3bd0cab93ab5485601965766627f8e1115a6fc6d1",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "037528f0b44caf979e7b17d07baab61db50834c2"
+      },
+      "ownersBefore": ["www.shell.adapter-select"],
+      "ownersAfter": ["www.shell.adapter-select"],
+      "sourceReview": "Non-Brutalist Select uses explicit Surface/Viewport/ItemText anatomy while Brutalist retains its popper/end recipe. The same adapter-selector owner remains."
+    },
+    {
+      "path": "apps/www/src/components/override/Hero.astro",
+      "previous": {
+        "sourceSha256": "d3cd9ed290558c323292af0a56586bb3372c11324bf2ca6c0107c89b62952e34",
+        "revision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+        "gitBlob": "f45587f7cd490530797b8daa17a3fecbf8780886"
+      },
+      "reviewed": {
+        "sourceSha256": "af559ac7dd3b32cb5c1ddbe4f67b3950ad1984acf80b3cfd42b182b77726deb8",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "7e82299abdb7f1f9e7dfc7310f8882dd0f3a0d38"
+      },
+      "ownersBefore": ["www.shell.hero-actions", "www.shell.native-link-presentation"],
+      "ownersAfter": ["www.shell.hero-actions", "www.shell.native-link-presentation"],
+      "sourceReview": "Hero changes action appearance, compact layout, announcement pill, family Text versus native fallback typography, and responsive Chinese slogan/weight. Existing native-link and Hero owners remain; no visual acceptance follows from source review."
+    },
+    {
+      "path": "apps/www/src/components/override/SocialIcons.astro",
+      "previous": {
+        "sourceSha256": "12d59a437c47767ead0edf80c2877b94f071b303bdbeb4542260ab82af8ad401",
+        "revision": "17165ea1cecde6f02607a6e51232f45ef8fc1534",
+        "gitBlob": "30bbce4cc270de4b3b6d96dd6f757e08099cff26"
+      },
+      "reviewed": {
+        "sourceSha256": "6f92b07d95903b205d9c31bf06c04e0b3fb2fab6fb6d37aa5da13aa93ad70fc4",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "830513f2feb1973b7af5010a9e9f16992c2bc509"
+      },
+      "ownersBefore": ["www.shell.native-link-presentation", "www.shell.social-links"],
+      "ownersAfter": ["www.shell.native-link-presentation", "www.shell.social-links"],
+      "sourceReview": "Native social controls opt into progressive initialization; native navigation and draft passive presentation keep their existing grouped owners."
+    },
+    {
+      "path": "apps/www/src/components/override/TableOfContents/TableOfContents.astro",
+      "previous": {
+        "sourceSha256": "9bd30716988a52dc84f35502b252621b2ae37b61d038e17b888e68e62f435cbb",
+        "revision": "0b44648eed1baff8e095ff4f05bc4402fa6b049d",
+        "gitBlob": "f6b42f2dfaa63c80b3ad670f0cd451f7fb1272ea"
+      },
+      "reviewed": {
+        "sourceSha256": "60bdc13dc0f9d34d39bbc4e4905f48acb1ea129773e90b385710118673b85497",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "dfa18527f57061ddc16ef0def53d5db94131cfc9"
+      },
+      "ownersBefore": ["www.shell.table-of-contents"],
+      "ownersAfter": ["www.shell.table-of-contents"],
+      "sourceReview": "Table-of-contents title changes from label to reading-toc-title presentation role; navigation ownership remains."
+    },
+    {
+      "path": "apps/www/src/components/site-code-surface.ts",
+      "previous": {
+        "sourceSha256": "0aeee7dbda6debe1dafb449924738c3674f5216fe5ad64c76cd31e63701ea9e1",
+        "revision": "973c3d7d8bcd97fe0b220696653eab996e6b1cb7",
+        "gitBlob": "a16ba5fd7c96cb28af5731dedd3616c2428c54ee"
+      },
+      "reviewed": {
+        "sourceSha256": "97a44d91efc560c3e2fa9fcbed26c4b07ebe14eeca80315b93fd5294d28d6b98",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "d94027f8ff178039a1547b5b7ff519a901c32d0d"
+      },
+      "ownersBefore": ["www.docs.code-surface", "www.docs.note-surface"],
+      "ownersAfter": ["www.docs.code-surface", "www.docs.note-surface"],
+      "sourceReview": "Theme lifecycle moves into the materializer; usable code surfaces may defer behind header preparation. The owner is published before acquisition, preparation is abortable, and added-subtree discovery replaces document rescans. Existing code/note owners retain lifecycle and disposal responsibility."
+    },
+    {
+      "path": "apps/www/src/components/site-contents-command.ts",
+      "previous": {
+        "sourceSha256": "5c2a4374a6e8c28c0f5d1d5aac9f367a96709f57047db5c49343b3b139da5579",
+        "revision": "87686982696f872bd271a7a281076ed71aee2138",
+        "gitBlob": "2c1a8567ba032c6c885737f7bd77422d25503950"
+      },
+      "reviewed": {
+        "sourceSha256": "b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "87d7967e1979661bb9b9ec44dac6f8d87618e3dc"
+      },
+      "ownersBefore": ["www.shell.mobile-menu-toggle"],
+      "ownersAfter": ["www.shell.mobile-menu-toggle"],
+      "sourceReview": "Shared header recipes add the existing Bootstrap family composition and avoid redundant focus assignment. The mobile-menu application owner remains blocked."
+    },
+    {
+      "path": "apps/www/src/components/site-copy-command.ts",
+      "previous": {
+        "sourceSha256": "262b743f2f8a8176c14431b234e9cbd2a9cfe20fd13cda70ff00d9934e8b8f58",
+        "revision": "973c3d7d8bcd97fe0b220696653eab996e6b1cb7",
+        "gitBlob": "375642c2d89fc548960d573d43132b898be83cc9"
+      },
+      "reviewed": {
+        "sourceSha256": "75e31bef21c8e6cd2db3647f201b42403836fe3de530529d994b553c85bd604d",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "9c210ebb8736751cbb6d108acfb93e62a82e61a9"
+      },
+      "ownersBefore": ["www.docs.code-panel-copy", "www.docs.install-copy"],
+      "ownersAfter": ["www.docs.code-panel-copy", "www.docs.install-copy"],
+      "sourceReview": "CodeExample Copy uses compact ghost presentation without an unnecessary backplate. Usable retained commands may defer behind header preparation, with cancellation on dispose and theme lifecycle delegated to the materializer; Clipboard ownership is retained."
+    },
+    {
+      "path": "apps/www/src/components/site-header-disclosure.ts",
+      "previous": {
+        "sourceSha256": "9d597364cb274a62613d9c0e252f7f4ef15eb333c0f0ed999dea3c0e6241e0f7",
+        "revision": "1e3f268f445c91e712c6df7d4e92e6c4b230a16f",
+        "gitBlob": "1662a7c2b4b49fc528b6082c15b380f3a2ea5b81"
+      },
+      "reviewed": {
+        "sourceSha256": "4fb52b5b1708fb65a2e329205a9ba74bfcb528989e7b203eeef5fbb26ee72017",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "0b662bb5255902278d7f1f9d72908ec983fc38de"
+      },
+      "ownersBefore": ["www.shell.mobile-menu-panel", "www.shell.mobile-menu-toggle"],
+      "ownersAfter": ["www.shell.mobile-menu-panel", "www.shell.mobile-menu-toggle"],
+      "sourceReview": "Header disclosure avoids writing unchanged hidden values. Visibility, dismissal and grouped menu ownership are unchanged."
+    },
+    {
+      "path": "apps/www/src/components/site-header-surface.ts",
+      "previous": {
+        "sourceSha256": "6ab5b4dc199f7a712d8058e621b3e91518cc2fa06fac25adfab1ab7b79dbace9",
+        "revision": "973c3d7d8bcd97fe0b220696653eab996e6b1cb7",
+        "gitBlob": "42b6772e4864db7cac7c482dee83fb23c49a8ecf"
+      },
+      "reviewed": {
+        "sourceSha256": "7d6f1107d4761555fbfd8373da0704da4be96b0b1ef5d3288ac00a46603f2864",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "c42188355c9dddd3387a10bd56e05efb32963ecd"
+      },
+      "ownersBefore": ["www.shell.mobile-menu-panel", "www.shell.mobile-menu-toggle"],
+      "ownersAfter": ["www.shell.mobile-menu-panel", "www.shell.mobile-menu-toggle"],
+      "sourceReview": "Header Surface retains native subtree focus through moveBefore, adds Popover participation and existing Bootstrap composition, reserves preparation before preference work, and hands back/tears down the panel before trigger disposal. Existing grouped menu owners remain responsible."
+    },
+    {
+      "path": "apps/www/src/components/site-sidebar-current-visibility.ts",
+      "previous": {
+        "sourceSha256": "5d950f495c575e52862356f974cfe35d95b2d627d10a09cc33f3fb3e865b018b",
+        "revision": "506b8d58ec92cd29d78a34c3899fefbb1ce33f3f",
+        "gitBlob": "fa3604b22457b3acaf43cea7d05a70634402eba0"
+      },
+      "reviewed": {
+        "sourceSha256": "0c82ae36d1fa9d81efbceaad25c2e153a52333d3da0087abae9f3aac16315b6b",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "889ae0e74275986720d624633a0127b3cc2e09ab"
+      },
+      "ownersBefore": ["www.shell.sidebar-navigation"],
+      "ownersAfter": ["www.shell.sidebar-navigation"],
+      "sourceReview": "Current-sidebar visibility follows the composed-tree scroll owner, respects disclosure/manual intent, retargets after reparenting, yields to user input and cancels retired work. The sidebar owner remains blocked."
+    },
+    {
+      "path": "apps/www/src/components/site-text-recipes.ts",
+      "previous": {
+        "sourceSha256": "0a0a29fd6f832c1ffd76ee82e93ec59b6e10f4f1efafab6cfc7204c5f9b46533",
+        "revision": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+        "gitBlob": "96b42e20d00121ee0a8012f73c4d3ba436534153"
+      },
+      "reviewed": {
+        "sourceSha256": "e035ff8d22dcff7af4e7df6b21ef4938f23884e98a6d362c0167180bf9dcce8d",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "d67fb64e367e4b2e1f748487a33713405b2df457"
+      },
+      "ownersBefore": ["www.content.typography-presentation"],
+      "ownersAfter": ["www.content.typography-presentation"],
+      "sourceReview": "Text recipes cover native lists, tables, quotes and the reading TOC; document heading/line-height inheritance and responsive Shadcn/Chinese Hero props are explicit. This adds no control-state owner or visual acceptance."
+    },
+    {
+      "path": "apps/www/src/components/site-typography-client.ts",
+      "previous": {
+        "sourceSha256": "47b13667f6a8374b9ec9b3181700cac87f765410933c6f7f430e072108ecf8ca",
+        "revision": "87fe36ac41377faa5fef52fd24f624a283f40168",
+        "gitBlob": "b32fc922d9dc5914b3a6f85fd3f1856b88277dd9"
+      },
+      "reviewed": {
+        "sourceSha256": "779a638445611fa5dffe633ef6699902d6a3ca605ead481232522e7c7f270176",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "e56e21cd1236387a1b3b9ffdb7f6989faf9e7d4a"
+      },
+      "ownersBefore": ["www.content.typography-presentation"],
+      "ownersAfter": ["www.content.typography-presentation"],
+      "sourceReview": "Typography inventory updates coalesce into a task, avoid private mutations while preparing, and cancel pending work on destruction. The existing typography owner remains."
+    },
+    {
+      "path": "apps/www/src/components/site-typography.ts",
+      "previous": {
+        "sourceSha256": "68972340f1b074e57f771905d75ceec346a227c3ae5bd838f92ab414cfd9936e",
+        "revision": "d854cae0da2d0c3178b801ea18574a9eac88257f",
+        "gitBlob": "7353850d9794a9240c122649bca6bb3d93cf8700"
+      },
+      "reviewed": {
+        "sourceSha256": "9da41374b7379af51514477115d210076eb54fea9555c300be33bd1b61ba4b74",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "08df40e8aee60c07add149943bd306d81501eee1"
+      },
+      "ownersBefore": ["www.content.typography-presentation"],
+      "ownersAfter": ["www.content.typography-presentation"],
+      "sourceReview": "Typography inventories native document semantics, excludes private component trees, conservatively handles moved sources, rereads after module acquisition and avoids reconnecting unchanged teardown batches. Bootstrap status inherits ink; native source ownership remains with the same typography composition."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts",
+      "previous": {
+        "sourceSha256": "b0947ee50577daf259f2b7ba5ae7f4c368e890d4c263d3763ee71b7d523a6613",
+        "revision": "bc5acfd6a1de0c5b70bbf8961ea9955b9e1fb888",
+        "gitBlob": "7011054ca4bb042ff4078c6582b44602c48b797f"
+      },
+      "reviewed": {
+        "sourceSha256": "55f59f12bdab2528f0aa65422010b168d5e6cb5aa3a1e60a614df4ab02e1c7bf",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "595a31a6a660bbafc737f1620d7a940879f61c2b"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Bootstrap Button examples cover seven variants/four sizes; public callbacks replace duplicate CustomEvent activation counting. Authored fixture controls remain blocked and the family experimental."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts",
+      "previous": {
+        "sourceSha256": "4c4cc768a6b41b05a881bf109752e658a6daa42d6525f3c4d72e55b84d808d14",
+        "revision": "bc5acfd6a1de0c5b70bbf8961ea9955b9e1fb888",
+        "gitBlob": "fa6d5902ffd65fc49e76ec56aee15661fc47e622"
+      },
+      "reviewed": {
+        "sourceSha256": "9a23bd1970b0355b1adc54a6f0de6011ffbe4784e55d12956c05ae144fdc4f2f",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "cc8a2e5d1ac7d9f9a41ff9a1e3910f60ed754cf5"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Liquid Button uses the existing public callback without duplicate CustomEvent counting. Fixture ownership is unchanged and the family remains experimental."
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md",
+      "previous": {
+        "sourceSha256": "01df744dc15bb1efd996a905571da9efa3f85c52363288e11e3e40860201da06",
+        "revision": "b01e9854ea7780518884b1023e9ad855899ac2ec",
+        "gitBlob": "a857a85943648f253c0bc9fbaf0e393440815a72"
+      },
+      "reviewed": {
+        "sourceSha256": "05c6ff350ab6133feef386a6939bf176482ec9ec7366d547ac52af25efb8d0de",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "d5f100680a1b89c7e7c1d610cacb913b3578526f"
+      },
+      "ownersBefore": ["www.content.native-disclosures"],
+      "ownersAfter": ["www.content.native-disclosures", "www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "The legacy diagram remains inside native details while the revised figure adds an accessible preview button and description. Add the existing blocked diagram-viewer owner alongside the research native-disclosure owner instead of treating preview activation as native-only."
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/6-consistency-boundary.md",
+      "previous": {
+        "sourceSha256": "267016923d1346c41e96a691f810fa279b888f10c2f890c79dc3e76a1ef574f2",
+        "revision": "b01e9854ea7780518884b1023e9ad855899ac2ec",
+        "gitBlob": "c96f81ec65cc801a86d4b67bad8ae3598b81c558"
+      },
+      "reviewed": {
+        "sourceSha256": "02c09c4b3005a424f0446b32d9eb83dd2bbe15f17d70d9ea399785ca07cc7a57",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "1e09148a5af4f7aee4eb3eeb79636d6d0c38a6a8"
+      },
+      "ownersBefore": ["www.docs.whitepaper-diagram-viewer"],
+      "ownersAfter": ["www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "Diagram preview adds aria-describedby and an accessible caption; the existing blocked media owner remains."
+    },
+    {
+      "path": "apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md",
+      "previous": {
+        "sourceSha256": "36878ad9fde9181b9e139eebdaf86a3cf323eebf37bf94b7ca5c6abd0a074ac0",
+        "revision": "b01e9854ea7780518884b1023e9ad855899ac2ec",
+        "gitBlob": "130a8dfb588ad21c29886b945dd7dadb32aee79b"
+      },
+      "reviewed": {
+        "sourceSha256": "72cb0fbcf72ede21fa055a1a260fce754c6477c9278624dacdf503c0b6eeb64c",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "0abe3604e728baedd74e1e6b493cbb46acf95d40"
+      },
+      "ownersBefore": ["www.docs.whitepaper-diagram-viewer"],
+      "ownersAfter": ["www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "Diagram preview uses responsive picture sources and an accessible description; the existing blocked media owner remains."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-image.demo.ts",
+      "previous": {
+        "sourceSha256": "a6c66ea0ef3761ceee30f5d2fec66bbdc0a895497793ad7c67711629f8081a20",
+        "revision": "631f304f1a881acaf3e01905db3eb2f4392368dd",
+        "gitBlob": "60b7c46c9f1c21569530542d203a760f67bb1548"
+      },
+      "reviewed": {
+        "sourceSha256": "9a8a33af3ada563c51b62c76a7b238d26a3266c13b6203513614abf1f0c8e77c",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "049061f1954da89de2132e21d61f25e24ddd333f"
+      },
+      "ownersBefore": ["www.demo.base-image-controls"],
+      "ownersAfter": ["www.demo.base-image-controls"],
+      "sourceReview": "Base Image removes duplicate DOM loading/activation listeners in favor of public callbacks while preserving application state sampling, animation-frame updates and cancellation. Existing image controller ownership remains."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts",
+      "previous": {
+        "sourceSha256": "f8e5b4a72a6fd4e64e68c9c13d803ea4bb89c26d71a9d1d2ffec46f2b663cfdc",
+        "revision": "7137b0e8e1de30fa04d1e1cad061cf7ddab6ce03",
+        "gitBlob": "3ed4056e61744c2de3dd9b6dbd01029759dc1262"
+      },
+      "reviewed": {
+        "sourceSha256": "1459a7aee6b4d9ce43002e634542695e66e7ed12707ec36c7607b670e3a0bd23",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "de410c307701ba923c53aee2758fb88f06ba71da"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Base Input replaces a host CustomEvent subscription with complete callback props, retaining value/name and an active-lifetime guard. Authored controller ownership remains."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-textarea.demo.ts",
+      "previous": {
+        "sourceSha256": "08d0f9b8e7dc413e099ac71cc627dd2f6c60c4d9de0868956d1718bc17136e62",
+        "revision": "b2742e0e982f84a6af43ba4407e6ef1be95fdf89",
+        "gitBlob": "c4170f136c77b3f10b20d265b9215ea988605dfd"
+      },
+      "reviewed": {
+        "sourceSha256": "5086c8bb63dddf28ba06726eda54ab354479b6f1ff2c703619b9ddbe8c49b7a4",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "9e912e23e7e3de3e549e587c4be97a513b68075c"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Base Textarea removes duplicate exposed-event tracking while retaining callback tracking, native host interaction and cleanup. Authored controller ownership remains."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts",
+      "previous": {
+        "sourceSha256": "7a34a4f5babaff7d487b23247e0f2e985ae797fdec94dfe144f8c472893af5da",
+        "revision": "0d072c686764208576f20433e525e3079afe008f",
+        "gitBlob": "c14148782eedbfcbb6e2e18fb864a09f82ad2dd7"
+      },
+      "reviewed": {
+        "sourceSha256": "395cbf668a4f1e337a09081486030851f643c92b2ec2d83954698142d9fb03d4",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "03badfca8bef247bf4e56180c8daacb758d1e719"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Shadcn Radio Group replaces passive text and duplicate hidden labels with real public label/controlLabel associations. Base continues to own activation semantics; the authored demo remains blocked."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts",
+      "previous": {
+        "sourceSha256": "e0853379e6d8a241101bc82e78f43f4dec9db1d14e522f8c4b72ee46ff05cdb3",
+        "revision": "aa7ea6c3752c0b70eae136196453b16ace3958fa",
+        "gitBlob": "8f24daa774f962ba6cea4d67579b3febcf1e7dc7"
+      },
+      "reviewed": {
+        "sourceSha256": "c970ce38944dca2017729c6882d9953f74237593bb2d0e70a6bad2a695933c9c",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "90eae32b47b4d6b18ccea89b0f9fe57e710a6832"
+      },
+      "ownersBefore": ["www.demo.authored-controllers"],
+      "ownersAfter": ["www.demo.authored-controllers"],
+      "sourceReview": "Shadcn Select adds its Rhea scope and explicit Surface/Viewport/Group/Label/ItemText anatomy. Application status observation and authored controller ownership remain."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md",
+      "previous": {
+        "sourceSha256": "a8d277d42f1a6df4196cc098ddc02bec4d891640d501bda337b509fac40de7e7",
+        "revision": "b01e9854ea7780518884b1023e9ad855899ac2ec",
+        "gitBlob": "9cd4fd2721a342631008659fc9637e08ff28973a"
+      },
+      "reviewed": {
+        "sourceSha256": "1d4c80e40b4156f69797d326cc1d27dfb305cf709d7f57b4b1d79b832de4cb2e",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "e28ad3118bac377b86ad40a0d4c89c784993f4d8"
+      },
+      "ownersBefore": ["www.content.native-disclosures"],
+      "ownersAfter": ["www.content.native-disclosures", "www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "The legacy diagram remains inside native details while the revised Chinese figure adds an accessible preview button and description. Add the existing blocked diagram-viewer owner alongside the research native-disclosure owner."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/6-consistency-boundary.md",
+      "previous": {
+        "sourceSha256": "f8d89a60bd20a6737f08052d5cd47c2f8a12560662ffe65ae25cfce6a435ba62",
+        "revision": "b01e9854ea7780518884b1023e9ad855899ac2ec",
+        "gitBlob": "e6cc152fc8029a594a03c15911ecab5fb0ab5728"
+      },
+      "reviewed": {
+        "sourceSha256": "0bcd49be82a0b2fbac791e29487d1c3cd52a5adf631db3602370d310319d0f78",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "cca55d202ba86026da2b5cee60cbf600a919f2c8"
+      },
+      "ownersBefore": ["www.docs.whitepaper-diagram-viewer"],
+      "ownersAfter": ["www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "Chinese diagram preview adds aria-describedby and an accessible caption; the existing blocked media owner remains."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md",
+      "previous": {
+        "sourceSha256": "f4bc3b3cb0d2791d03ef1b02199f83059c1de8f6561b0cd3d7ecdc97f65120ef",
+        "revision": "b01e9854ea7780518884b1023e9ad855899ac2ec",
+        "gitBlob": "b6477068f22fda001a01d666870932689cab626e"
+      },
+      "reviewed": {
+        "sourceSha256": "69028887a3abd3fa47b5b56190c440ee3624398b98936bdc77a4e2c9ca6a6772",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "bf334f7205af38ca660af8ec508c870cb4db9d4b"
+      },
+      "ownersBefore": ["www.docs.whitepaper-diagram-viewer"],
+      "ownersAfter": ["www.docs.whitepaper-diagram-viewer"],
+      "sourceReview": "Chinese diagram preview uses responsive picture sources and an accessible description; the existing blocked media owner remains."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-material.astro",
+      "previous": {
+        "sourceSha256": "660e17ed48a165dac18f67d6699f088f273a5c14a0dd824af7cad6a33ee41387",
+        "revision": "31ec14c63a661b45cd12937cdca47e9a6d4c91ce",
+        "gitBlob": "20d2838097f3d9e3a24576657ae87c98af1587d4"
+      },
+      "reviewed": {
+        "sourceSha256": "38eda9a1fd180efb8a33b91ba2859b64c2a502abdcd0b11ffead61d56b0c0f7c",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "065bd3fcb0748fde7fc6da0a5a9fd36ff4def5b0"
+      },
+      "ownersBefore": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "ownersAfter": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Material fixture removes duplicate WC activation listeners and provides 21px relative-positioned stage spacing for owned paint, with formatting-only remainder. Authored controls and renderer diagnostics retain separate owners; no optical acceptance is inferred."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/new-projection-families.astro",
+      "previous": {
+        "sourceSha256": "2a0c1838bf6d3f8392af14befa51796b9bd598cf38615222b385838a0a140afa",
+        "revision": "e1f0d8ffeecc8d03270fa98b5b579d4262370962",
+        "gitBlob": "4f31d1546d6cf859e4626cae0f167e24d206d833"
+      },
+      "reviewed": {
+        "sourceSha256": "15d8548bf682e27af23b288fcb946285893f4d12a9e6c21f426df5f3f4c51e98",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "a84c422fa5a83771b5a8ec1ca816a69045d0514d"
+      },
+      "ownersBefore": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "ownersAfter": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Fixed-family fixture describes seven-color/four-size Bootstrap recipes and removes duplicate DOM activation listeners. Authored controls and renderer diagnostics retain their grouped ownership."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/site-typography.astro",
+      "previous": {
+        "sourceSha256": "deb9a55385b6db74a35e4653c0c3d9d09b8597fbfcc33dcf1f46c93f8095f096",
+        "revision": "a48a10b486e7a78237899484beca9d5041bc3942",
+        "gitBlob": "397167bb4df228b3e876a013f593477ae8edab5e"
+      },
+      "reviewed": {
+        "sourceSha256": "35b7b76ec748aa48a331e8bfe38fde1b94e91ed8bf5052794403ab8e386b6557",
+        "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+        "gitBlob": "1910847ef857f7031f216387a34eca9cb814493a"
+      },
+      "ownersBefore": ["www.content.typography-presentation", "www.demo.authored-controllers"],
+      "ownersAfter": ["www.content.typography-presentation", "www.demo.authored-controllers"],
+      "sourceReview": "Typography fixture adds native lists, description lists, tables, quotes and details/summary, retaining original SSR identity observations. Existing typography and authored-controller owners remain; the fixture is not browser evidence by itself."
+    }
+  ],
+  "addedSources": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts",
+      "sourceSha256": "a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "d87a192b24678f1ddb2d0eae2d86ed27dac4f3ce",
+      "owners": ["www.demo.demo-matrix"],
+      "sourceReview": "Frozen historical tint-profile reproduction with exact shader substitutions, bounded fixture geometry and owned GL instrumentation restored on disposal. Reports retain rejected analytical conclusions and currentProductValidation=false; this does not implement a website control."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-detail-probe.ts",
+      "sourceSha256": "ccc7d8268a06ebd987313ffedbbe816cac468b8d2a8886ca405b000210cbdce0",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "7afcfb31f1e24bcf01ab67e5142c48c6748d6e9d",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Finite pattern/geometry fixture owns isolated neutral, tinted and zero-refraction programs, reports source/frame hashes and errors, and disposes every program in finally. No surrounding production control semantics are admitted."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts",
+      "sourceSha256": "bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "3c699840b9614dceaa64ec7655a844aa91bcc418",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Finite fixture compares isolated and interleaved shared neutral/tint programs with fixed source patterns, retained hashes/errors and finally disposal. Diagnostic input choices remain authored composition."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts",
+      "sourceSha256": "aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "08c487f273d397ce62d5056c8dc11b3570ba11c4",
+      "owners": ["www.demo.demo-matrix"],
+      "sourceReview": "Fixed-DPR/frame/source budgets and exact warp-off shader substitutions isolate refraction. Own GL instrumentation is restored and programs disposed; capability/hash outputs retain refused results and productAccepted=false."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "sourceSha256": "f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "5355a8a8dcfc7203b477e5c97db9519b29e84f98",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Opt-in fixture renders eight public command parts and negative controls with one owned material scene per cell. Runtime, prop/counter controls and cleanup are authored composition; cross-host mounting is diagnostic infrastructure."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-portal.astro",
+      "sourceSha256": "85a63e6869403d278042fa3800c99418eb8e5691e429c302aacd594e181e4cc7",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "50517ddeae4c97f48170ca171276044f608accd3",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Opt-in Dropdown uses public portal registration and an owned source canvas. Native external control, open/focus/blur counters and geometry/overlap queries are authored fixture state; mounting and disposal are diagnostic infrastructure."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro",
+      "sourceSha256": "3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "a638682698b1012916f06bce84457adc73bd9e5f",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Opt-in public Button/Form fixture uses query-selected runtime/part/content/theme and neutral/tinted/opaque scenes. Prop/source/capture controls and pagehide cleanup remain authored fixture state."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-toggle.astro",
+      "sourceSha256": "0d0902bb724042377375f7d016e55538d05f5665e4e1b65be20770edfdb1b2f0",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "fc79522627a82be7ca0b09cd87fe9e9a62203555",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "sourceReview": "Opt-in fixture compares four runtimes, six public Toggle recipes and a no-provider control. Props, source and state/counter readouts are authored composition; probe execution and renderer cleanup are diagnostics."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro",
+      "sourceSha256": "15fdd9630395f57354319736d48b4d0b09c960081485988022412f52860a311e",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "a3362ee2ada93cdd8b1a84773792a78816f987cd",
+      "owners": ["www.demo.demo-matrix"],
+      "sourceReview": "Dedicated route exposes only the retained historical profile4-versus-current5 diagnostic; it is not a production control or current product validation."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro",
+      "sourceSha256": "1b930e0fcbe8bda0360bbb89b10d00966656c1fe6f39bccab76901e6451137e0",
+      "revision": "d095fa0a811facff676b6f62929b177aa1dc7583",
+      "gitBlob": "cb2a6e6a1354e80d898a959559cde3aaa0046788",
+      "owners": ["www.demo.demo-matrix"],
+      "sourceReview": "Dedicated route exposes only fixed-budget refraction/capability observations; refused results and lack of product acceptance remain explicit."
+    }
+  ],
+  "testOnlyRelocations": [
+    {
+      "previousPath": "apps/www/src/content/docs/zh-cn/popover-nova-fixture.ts",
+      "path": "apps/www/test/fixtures/popover-nova-fixture.ts",
+      "previousSourceSha256": "d1b7bb2210c7a0e573653d805b48060a7d05eb3ee64eb5b85b7a6beddd42cb7f",
+      "sourceSha256": "9d4358c3201ebec5f59cb5baffa5de5b47872b2264aae6e3e1fa7d4b32ff2d7b",
+      "review": "Playwright-only helper moved out of production source roots. Browser-evaluated URLs, operations and assertions are unchanged; Popover type-import relative paths and formatting follow the new location. A production import still re-enters the ordinary reachability scan."
+    },
+    {
+      "previousPath": "apps/www/src/content/docs/zh-cn/liquid-prominent-tint-test-harness.ts",
+      "path": "apps/www/test/fixtures/liquid-prominent-tint-test-harness.ts",
+      "previousSourceSha256": "9711adba65dc0255a29b57f1936338d4337477a780d47df2581e75937972c432",
+      "sourceSha256": "9711adba65dc0255a29b57f1936338d4337477a780d47df2581e75937972c432",
+      "review": "Playwright-only helper moved out of production source roots. Browser-evaluated URLs, operations and assertions are unchanged; Popover type-import relative paths and formatting follow the new location. A production import still re-enters the ordinary reachability scan."
+    }
+  ],
+  "materialProgramEdge": {
+    "path": "packages/adapters/base/src/material/program.ts",
+    "specifier": "./style-tint-profile",
+    "resolvedPath": "packages/adapters/base/src/material/style-tint-profile",
+    "review": "The existing finite material program edge policy lacked this dependency. The imported tint shaders, foreground and envelope belong to the already source-bound Card material profile. This admits this edge only, not arbitrary siblings or program-body/optical acceptance."
+  },
+  "validation": {
+    "sourceMatrixCheck": {
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 0,
+      "result": "[coverage-matrices] OK (2 matrices)"
+    },
+    "newBoundaryRegressions": {
+      "command": "node --test --test-name-pattern='diagnostic import review rejects|relocated Playwright fixtures' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "passed": 3,
+      "failed": 0
+    },
+    "materialClosureRegressions": {
+      "command": "node --test --test-name-pattern='Finf continuous optical closure' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "passed": 4,
+      "failed": 0
+    },
+    "relocatedHarnessUnitTests": {
+      "command": "corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/liquid-prominent-tint-test-harness.test.ts --pool=threads --minWorkers=1 --maxWorkers=1",
+      "testFilesPassed": 1,
+      "passed": 17,
+      "failed": 0,
+      "note": "Existing esbuild warning for ES2024; this is deterministic unit evidence, not browser execution."
+    },
+    "fullCoverageBeforePortfolioRepair": {
+      "command": "node --test scripts/coverage-matrices/test/*.test.mjs",
+      "exitCode": 1,
+      "tests": 4475,
+      "passed": 4405,
+      "failed": 69,
+      "skipped": 1,
+      "durationMilliseconds": 227669.216495,
+      "failureScope": "All 69 failures are in prototype-coverage.test.mjs; source ownership/import checker tests pass.",
+      "logSha256": "c41b4c85779ca8335774dd35345c9635aa4fc68c54fb30aedfa8215eca8a966b",
+      "rootCauses": [
+        "323 current consumer-ledger fields differ from the cached portfolio consumer projection.",
+        "The candidate resolver mistakes Base Menubar supporting menu-primitives source citations for a second subject owner.",
+        "The Shadcn retained-source resolver omits the upstream storage root.",
+        "The separately recorded candidate source proof predates the current package, catalog, implementation and consumer source."
+      ]
+    }
+  }
+}

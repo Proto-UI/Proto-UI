@@ -200,7 +200,10 @@ describe.sequential('Runtime-only vertical layout parity', () => {
             await capture(page, home, `home-${family}-${width}-${index}-${runtime}`, facts);
             expect(facts.theme).toBe('light');
             expect(facts.pageOverflow).toBeLessThanOrEqual(1);
-            expect(facts.authoredTextCount).toBe({ wc: 37, react: 35, vue: 35, vue2: 35 }[runtime]);
+            // The authored rhythm card adds fifteen Text owners to the former
+            // 37/35 fixture. WC retains the two closed FAQ bodies; framework
+            // hosts withdraw them. Keep exact counts and all pairwise geometry.
+            expect(facts.authoredTextCount).toBe({ wc: 52, react: 50, vue: 50, vue2: 50 }[runtime]);
             expect(facts.text.length).toBeGreaterThan(20);
             expect(new Set(facts.text.map((text) => text.key)).size).toBe(facts.text.length);
             for (const text of facts.text) expect(text.display, text.role).toBe('block');

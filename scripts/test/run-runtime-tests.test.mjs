@@ -10,6 +10,16 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import YAML from 'yaml';
 import { WC_NATIVE_BROWSER_SUITE } from './wc-native-isolation.mjs';
+// Synthetic clean-source controls; these are not execution evidence.
+const cleanSourceControl = (sha) => {
+  const snapshot = {
+    checkoutSha: sha,
+    treeSha: 'b'.repeat(40),
+    dirty: false,
+    worktreeSha256: 'c'.repeat(64),
+  };
+  return { before: snapshot, after: { ...snapshot } };
+};
 import {
   createCiPlan,
   runtimeSelection,
@@ -563,7 +573,11 @@ describe('bounded documentation readiness', () => {
     assert.ok(!excluded.includes(suite));
     assert.ok(existsSync(suite), 'The startup ownership suite must exist.');
     const config = readFileSync('vitest.config.ts', 'utf8');
-    assert.match(config, /apps\/www\/src\/\*\*\/\*\.test\.ts/);
+    assert.match(config, /include:\s*\[\.\.\.RUNTIME_TEST_INCLUDES\]/);
+    assert.ok(
+      createCiPlan().general.includes(suite),
+      'The shared inventory must collect startup ownership.'
+    );
   });
 
   // Execute the production helper with a deterministic clock and HTTP
@@ -1195,7 +1209,11 @@ describe('bounded CI runtime shards (no browser or server)', () => {
     })),
   });
   const receipts = () =>
-    selections.map((selection) => ({ ...selection, report: report(selection) }));
+    selections.map((selection) => ({
+      ...selection,
+      source: cleanSourceControl(selection.checkoutSha),
+      report: report(selection),
+    }));
   it('registers standalone Neo Input once and preserves its captures in the uploaded runtime directory', () => {
     const suite = 'apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts';
     assert.equal(BROWSER_SUITES.filter((entry) => entry === suite).length, 1);
@@ -1515,6 +1533,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
       const payload = selection
         ? {
             ...selection,
+            source: cleanSourceControl(selection.checkoutSha),
             report: {
               success: true,
               numFailedTests: 0,
