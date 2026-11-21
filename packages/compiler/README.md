@@ -97,6 +97,8 @@ Equal debug names or matching source text do not make two independently owned de
 
 The library manifest/linker currently covers the Web source artifacts. GPUI's independently generated Rust crates use ordinary Cargo linking and explicit SDK declarations. Those native consumers do not establish support for the Web artifact-library manifest on Rust targets.
 
+Each `gpui-source-v1` output bundles the GPUI SDK as its own `proto-ui-gpui-native` crate. Cargo admits only one package of that name in a workspace, so a consumer with several units emits the SDK once with `proto-compiler emit-gpui-sdk --output <dir>` and compiles every unit with `--native-sdk-path <dir>`. The units then link one SDK crate; its version must match the compiler that produced them.
+
 ## Artifact and SDK compatibility
 
 Serialized IR is versioned separately from generated support ABI. Old IR is rejected with a source-recompilation diagnostic. Exact historical emitted support can be recognized by its recorded byte identity; historical provenance is retained. An old native artifact containing the retired copied Transition implementation is rejected before writes and must be recompiled from source. An unrelated authored method with the same spelling is not a migration marker.

@@ -1,11 +1,17 @@
 import { lstat, mkdir, readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { compileFile, diffCompilation, writeCompilation } from './compile';
 import { migrateNativeSupport } from './native-support-migration';
 import { diagnosticsJson, formatCompilerDiagnostics } from './diagnostic-format';
 import type { CompilerDiagnostic } from './ir';
 import { resolveTargetProfile, TARGET_PROFILES } from './targets';
+import {
+  gpuiNativeSdkFiles,
+  GPUI_NATIVE_SDK_PATH,
+  GPUI_NATIVE_SDK_VERSION,
+} from './gpui-native-sdk';
+import { writeArtifactSet, type OutputArtifact } from './artifact-output';
 import { watchProject, type ProjectWatch, type ProjectWatchReport } from './watch';
 
 export interface CompilerCliEnvironment {
@@ -23,7 +29,8 @@ type Command =
   | 'explain'
   | 'watch'
   | 'diff'
-  | 'migrate-native-support';
+  | 'migrate-native-support'
+  | 'emit-gpui-sdk';
 interface Options {
   entry?: string;
   root?: string;
@@ -41,7 +48,7 @@ interface ParsedArguments {
 }
 
 const HELP = `Private Proto UI compiler
-Usage: proto-compiler <compile|check|inspect|explain|watch|diff|migrate-native-support> [entry] [options]
+Usage: proto-compiler <compile|check|inspect|explain|watch|diff|migrate-native-support|emit-gpui-sdk> [entry] [options]
 
 Commands:
   compile  Compile an entry and exclusively create a fresh output directory.
@@ -53,6 +60,9 @@ Commands:
   diff     Compare proposed artifacts against an owned output directory, read-only.
   migrate-native-support  Read an explicit hash-anchored migration plan and create
            a fresh linked Vue2 source directory. Never overwrite old output.
+  emit-gpui-sdk  Create the GPUI native SDK crate alone in a fresh --output directory
+           (no entry). Compile each gpui-source-v1 unit with --native-sdk-path
+           pointing at it so several units share one crate in a Cargo workspace.
 
 Options:
   --entry <file>      Entry source; alternatively supply one positional entry.
@@ -126,6 +136,7 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
         'watch',
         'diff',
         'migrate-native-support',
+        'emit-gpui-sdk',
       ].includes(command)
     )
       throw new CliUsageError(
@@ -538,6 +549,33 @@ async function runWatch(
 }
 
 /** argv excludes the executable and script names. Input modules are parsed, never imported. */
+/** The shared SDK crate rooted at the output directory, with its provenance manifest. */
+export function gpuiSdkArtifacts(): OutputArtifact[] {
+  const prefix = `${GPUI_NATIVE_SDK_PATH}/`;
+  const files: OutputArtifact[] = gpuiNativeSdkFiles().map((file) => ({
+    path: file.path.slice(prefix.length),
+    kind: file.kind,
+    contents: file.contents,
+  }));
+  const manifest = {
+    sdk: 'proto-ui-gpui-native',
+    version: GPUI_NATIVE_SDK_VERSION,
+    artifacts: files.map((file) => ({
+      path: file.path,
+      kind: file.kind,
+      sha256: createHash('sha256').update(file.contents).digest('hex'),
+    })),
+  };
+  return [
+    ...files,
+    {
+      path: 'provenance.json',
+      kind: 'manifest',
+      contents: JSON.stringify(manifest, null, 2) + '\n',
+    },
+  ];
+}
+
 export async function runCompilerCli(
   argv: readonly string[],
   environment: CompilerCliEnvironment = {}
@@ -578,6 +616,31 @@ export async function runCompilerCli(
       : {};
     const options: Options = { ...configured, ...parsed.options };
     json = options.json ?? false;
+    if (command === 'emit-gpui-sdk') {
+      if (!options.output)
+        throw new CliUsageError('emit-gpui-sdk requires an explicit --output directory');
+      if (
+        options.entry !== undefined ||
+        options.root !== undefined ||
+        options.export !== undefined ||
+        options.profile !== undefined ||
+        options.nativeSdkPath !== undefined
+      )
+        throw new CliUsageError(
+          'emit-gpui-sdk accepts only output, json and explicit configuration'
+        );
+      const written = await writeArtifactSet(gpuiSdkArtifacts(), path.resolve(cwd, options.output));
+      if (!written.ok) return fail(written.diagnostics, failureExit(written.diagnostics));
+      if (json)
+        stdout(
+          JSON.stringify({ ok: true, command, result: written.value, diagnostics: [] }) + '\n'
+        );
+      else
+        stdout(
+          `Created GPUI native SDK ${GPUI_NATIVE_SDK_VERSION} in ${written.value.directory}\n${written.value.files.map((file) => `  ${file}`).join('\n')}\n`
+        );
+      return 0;
+    }
     if (!options.entry)
       throw new CliUsageError('An entry is required (--entry or positional entry)');
     if (command === 'migrate-native-support') {
