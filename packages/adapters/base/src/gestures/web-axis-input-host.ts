@@ -11,7 +11,20 @@ import type {
 } from '@proto.ui/core';
 import { createWebMoveGestureHost } from './web-move-gesture-host';
 
-type Geometry = { origin: number; span: number; deltaSpan: number; sign: 1 | -1 };
+type Geometry = {
+  origin: number;
+  span: number;
+  deltaSpan: number;
+  sign: 1 | -1;
+  /**
+   * Untransformed layout extents used by 'cancel-on-extent-change' only.
+   * Transformed rect extents wobble by a few hundredths of a CSS pixel while a
+   * translated surface is repainted; they are measured positions, not the
+   * accepted contact basis.
+   */
+  basisSpan: number;
+  basisDeltaSpan: number;
+};
 // Summing independently transformed part extents may differ by a few floating
 // point ULPs after redistribution. Ignore only arithmetic noise, not CSS-pixel
 // or subpixel changes to the accepted contact basis.
@@ -121,8 +134,25 @@ function geometryOf(
     }
     if (!Number.isFinite(deltaSpan) || deltaSpan <= 0) return null;
   }
+  const layoutExtent = (element: HTMLElement): number => {
+    const style = element.ownerDocument.defaultView!.getComputedStyle(element);
+    const value = Number.parseFloat(horizontal ? style.width : style.height);
+    return Number.isFinite(value) ? value : NaN;
+  };
+  const basisSpan = layoutExtent(target);
+  if (!Number.isFinite(basisSpan) || basisSpan <= 0) return null;
+  let basisDeltaSpan = basisSpan;
+  if (deltaBasis) {
+    basisDeltaSpan = 0;
+    for (const part of deltaBasis) {
+      const extent = layoutExtent(part);
+      if (!Number.isFinite(extent) || extent < 0) return null;
+      basisDeltaSpan += extent;
+    }
+    if (!Number.isFinite(basisDeltaSpan) || basisDeltaSpan <= 0) return null;
+  }
   const reverse = (horizontal && config.direction === 'rtl') !== config.reverse;
-  return { origin, span, deltaSpan, sign: reverse ? -1 : 1 };
+  return { origin, span, deltaSpan, sign: reverse ? -1 : 1, basisSpan, basisDeltaSpan };
 }
 
 function normalized(
@@ -297,8 +327,8 @@ export function createWebAxisInputHost(
         }
         if (
           binding.config.contactBasis === 'cancel-on-extent-change' &&
-          (!sameExtent(live.span, current.geometry.span) ||
-            !sameExtent(live.deltaSpan, current.geometry.deltaSpan))
+          (!sameExtent(live.basisSpan, current.geometry.basisSpan) ||
+            !sameExtent(live.basisDeltaSpan, current.geometry.basisDeltaSpan))
         ) {
           restart('basis-changed');
           return false;
