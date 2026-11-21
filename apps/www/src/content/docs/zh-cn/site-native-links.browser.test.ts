@@ -3251,6 +3251,12 @@ it('records the English shell labels, destinations and native activation ownersh
     ).toBe(0);
     await openSettings(docs);
     await assertHeaderPopupSurface(docs, 'shadcn', 'wc', false);
+    // Popup primary navigation is hidden on desktop in documentation too.
+    // Observe its native hit targets only at the viewport that displays them.
+    expect(await docs.locator('[data-site-header-navigation]').isVisible()).toBe(false);
+    await docs.setViewportSize({ width: 390, height: 844 });
+    expect(await docs.locator('[data-site-header-desktop-navigation]').isVisible()).toBe(false);
+    await openSettings(docs);
     const popup = await collectShellLinks(docs, '[data-site-header-navigation] a');
     expect(shellNavigationIssues(popup, englishExpectation)).toEqual([]);
     expect(
@@ -3261,6 +3267,8 @@ it('records the English shell labels, destinations and native activation ownersh
       )
     ).toEqual([navigationLabel]);
     expect(await docs.locator('[data-site-header-navigation] a[aria-current]').count()).toBe(0);
+    await docs.setViewportSize({ width: 1440, height: 1000 });
+    await openSettings(docs);
     const socialLinks = docs.locator('.site-social-links a[data-site-native-link]');
     const socialFacts = await collectShellLinks(
       docs,
