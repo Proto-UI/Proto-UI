@@ -40,6 +40,8 @@ In `vue-source-v1`, an already-issued external State subscription cancellation r
 
 Public callable records require statically known named fields. Portable IR rejects typed index signatures because their dynamic fields have no implemented public projection contract. The opaque `index: unknown` view used by internal `JsonObject` and hook stores remains available inside the checked program and is not a public value contract.
 
+The React DOM source profile admits keyed `def.props.watchRaw(keys, callback)` against its adapter-supplied pre-resolution snapshot, following active `C-PROPS-0012` and `C-PROPS-0013`. Initial hydration is silent; later dispatch compares the union of raw keys with `Object.is`, runs matching raw watchers before resolved watchers, and binds `run.props.*` to that dispatch window. Keys may be undeclared, but raw values do not enter resolved props through this API. The returned cancellation remains setup-only. `props.watchRawAll` and raw-watch admission on other source profiles retain their existing target boundaries. The focused generated React consumer is `test/raw-props-watch-consumer.test.ts`.
+
 ## Source resolution
 
 An authored package publishes its compiler input through the `proto` condition in `package.json` exports. The source loader follows that condition, relative `.proto.ts` imports, aliases and re-exports. It records manifests, resolved files and unresolved lookup candidates so project caching and watch invalidation can detect edits, retargeted exports and a previously missing package becoming available. It does not guess `src` paths from `dist` names or execute a package to discover its definition.
