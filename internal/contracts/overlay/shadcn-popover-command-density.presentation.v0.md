@@ -1,5 +1,16 @@
 # Shadcn Popover command density (v0, proposed bounded presentation)
 
+## Explicit Nova evidence consumer (2026-11-21)
+
+The public `demo-shadcn-popover` now selects Rhea through `withShadcnRheaDemo`.
+Its 0.75rem inline command inset is not the Nova 0.625rem oracle below. The
+dedicated historical density suite therefore mounts a separate ordinary consumer
+of the same DemoSpec with the public style scope explicitly set to `nova`, using
+the existing preview renderer and theme surface. It preserves all original
+geometry, scaling and pointer assertions and records both profile identities.
+The public demo and prototype recipes remain unchanged. These rows establish
+Nova consumer evidence only; they do not establish Rhea page acceptance.
+
 Status: independently reviewed bounded presentation direction, admitted for this local implementation on 2026-10-11. This is an uncataloged transitional presentation slice, not full Popover or Button admission.
 
 ## Fixed reference and scope

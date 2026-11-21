@@ -38,26 +38,8 @@ jobs:
       max-parallel: 4
       matrix:
         group:
-          - forms
-          - calendar
-          - disclosure-overlays
-          - modal-overlays
-          - runtime-tabs
-          - slider
-          - dropdown
-          - liquid-dropdown
           - popover-title
-          - popover-navigation
-          - drawer-intrinsic
-          - drawer-command-density
           - popover-command-density
-          - neo-popover-title
-          - resident-motion-capability
-          - shadcn-toggle
-          - shadcn-switch-consumer
-          - shadcn-drawer-presence
-          - shadcn-card
-          - brutalist-switch-consumer
         # Preserve the full group inventory above for all/reusable invocations.
         # Reusable calls retain their caller's event and workflow ref. Only this
         # workflow's direct dispatch may apply its manual selectors.

@@ -1,5 +1,16 @@
 # Shadcn Popover Title presentation (v0, uncataloged slice)
 
+## Explicit Nova evidence consumer (2026-11-21)
+
+The public `demo-shadcn-popover` now selects Rhea through `withShadcnRheaDemo`.
+Rhea Title explicitly contributes `text-base font-medium`; the inherited Nova
+14px/20px oracle below does not describe that profile. The dedicated historical
+Title suite mounts a separate ordinary consumer of the same DemoSpec with its
+public style scope explicitly set to `nova`, using the existing preview renderer
+and theme surface. All original typography, ancestor inheritance, lifecycle and
+input assertions remain intact, with both profile identities recorded. The
+public Rhea demo remains unchanged and requires its own acceptance evidence.
+
 Status: independently reviewed bounded presentation direction, approved for this local implementation on 2026-10-11. Full component admission remains open.
 
 This transitional definition concerns only the passive typography of the existing Shadcn Popover Title. It is not an active catalog entity, a complete Popover protocol, a new public API, or full upstream/native acceptance. The current owner-directed Finf work selects the existing Base-route Nova presentation; this document makes the narrow expected result independently reviewable before its recipe changes. A future coherent Popover catalog must replace this uncataloged definition rather than treating implementation or passing tests as its authority.

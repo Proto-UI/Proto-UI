@@ -24,6 +24,8 @@ import {
   applyColorScheme,
 } from './browser-harness';
 
+import { mountPopoverNova, type PopoverNovaFixtureHandle } from './popover-nova-fixture';
+
 const route = '/en/ui-libraries/shadcn/popover/';
 const demoId = 'demo-shadcn-popover';
 const output =
@@ -294,6 +296,7 @@ for (const runtime of RUNTIMES)
       async () => {
         let context: BrowserContext | undefined, page: Page | undefined;
         let domProbe: PopoverDomProbe | undefined;
+        let fixture: PopoverNovaFixtureHandle | undefined;
         let stage = 'created',
           result = 'failed',
           failure: string | undefined;
@@ -342,11 +345,15 @@ for (const runtime of RUNTIMES)
           expect(
             (await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' }))?.status()
           ).toBe(200);
-          const previewer = page.locator('[data-previewer-id]').first();
+          let previewer = page.locator('[data-previewer-id]').first();
           await previewer.scrollIntoViewIfNeeded();
           await selectRuntime(page, previewer, runtime, '[data-demo-ref="root"]', 1);
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
+          fixture = await mountPopoverNova(page, runtime);
+          observations.profiles = await fixture.evaluate((view) => ({ public: view.publicProfile, fixture: view.fixtureProfile }));
+          expect(observations.profiles).toEqual({ public: 'rhea', fixture: 'nova' });
+          previewer = page.locator('[data-popover-nova-fixture]');
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
           domProbe = await startPopoverDomProbe(page, trigger);
           stage = 'default-trigger';
@@ -480,7 +487,11 @@ for (const runtime of RUNTIMES)
               browser: browser.version(),
             });
           } finally {
-            await context?.close();
+            try {
+              await fixture?.evaluate((view) => view.destroy()).finally(() => fixture?.dispose());
+            } finally {
+              await context?.close();
+            }
           }
         }
       },
