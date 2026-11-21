@@ -398,12 +398,27 @@ async function capture(
         );
         if (!destination) return null;
         const rect = destination.getBoundingClientRect();
+        const paint = destination.querySelector<HTMLElement>('[data-hover-tight-overlap]');
+        const paintCss = paint ? getComputedStyle(paint) : null;
         return {
           x: rect.x,
           y: rect.y,
           width: rect.width,
           height: rect.height,
           gapBelowSubject: rect.top - box.bottom,
+          opacity: getComputedStyle(destination).opacity,
+          visiblePaint:
+            paint && paintCss
+              ? {
+                  bounds: bounds(paint),
+                  background: paintCss.backgroundColor,
+                  opacity: paintCss.opacity,
+                  visibility: paintCss.visibility,
+                  display: paintCss.display,
+                  pointerEvents: paintCss.pointerEvents,
+                  ariaHidden: paint.getAttribute('aria-hidden'),
+                }
+              : null,
         };
       })(),
       width: box.width,
@@ -1172,6 +1187,29 @@ describe.sequential('Liquid command static hover and existing self-contact nativ
                       const contactBound = Math.ceil(
                         Math.max(idle.raw.width, idle.raw.height) * 0.08 + 1
                       );
+                      if (part === 'accordion-tight') {
+                        const destination = idle.raw.portalDestination!;
+                        const paint = destination.visiblePaint;
+                        expect(paint).not.toBeNull();
+                        expect(Number(destination.opacity)).toBe(1);
+                        expect(paint!.display).not.toBe('none');
+                        expect(paint!.visibility).toBe('visible');
+                        expect(Number(paint!.opacity)).toBe(1);
+                        expect(paint!.background).not.toBe('rgba(0, 0, 0, 0)');
+                        expect(paint!.background).not.toBe('transparent');
+                        expect(paint!.pointerEvents).toBe('none');
+                        expect(paint!.ariaHidden).toBe('true');
+                        expect(paint!.bounds!.width).toBeGreaterThan(0);
+                        expect(paint!.bounds!.height).toBeGreaterThan(0);
+                        const paintGap = paint!.bounds!.top - idle.raw.y - idle.raw.height;
+                        expect(paintGap).toBeCloseTo(1, 2);
+                        expect(paintGap).toBeGreaterThan(0);
+                        expect(paintGap).toBeLessThan(contactBound);
+                        expect(paint!.bounds!.left).toBeLessThan(
+                          idle.raw.x + idle.raw.width + contactBound
+                        );
+                        expect(paint!.bounds!.right).toBeGreaterThan(idle.raw.x - contactBound);
+                      }
                       if (part === 'source-edge')
                         expect(Math.min(...sourceGaps)).toBeLessThan(contactBound);
                       if (part === 'neighbor') {

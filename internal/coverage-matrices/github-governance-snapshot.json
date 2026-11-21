@@ -21,10 +21,7 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "app content infrastructure owner",
-        "app content renderer"
-      ]
+      "owners": ["app content infrastructure owner", "app content renderer"]
     },
     {
       "number": 517,
@@ -44,19 +41,17 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "app highlighting infrastructure owner"
-      ]
+      "owners": ["app highlighting infrastructure owner"]
     },
     {
       "number": 522,
       "nodeId": "I_kwDOMhQZjc8AAAABOKZu0A",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/522",
       "title": "[proposal][resizable] Define a bounded two-pane Resizable semantic slice for workbench layouts",
-      "bodySha256": "01022ebe00f1295e8a0af6667ba9bf39085fdc6ed3f0c5b6fdf9c565343fb662",
+      "bodySha256": "fd6c4909092f9db5123251cf268ad957d75b7c8dfdcf999e3c1c2ebd4f0d47e5",
       "state": "OPEN",
       "stateReason": "REOPENED",
-      "updatedAt": "2026-11-06T16:52:32Z",
+      "updatedAt": "2026-11-21T17:56:32Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -67,20 +62,17 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "harness implementer",
-        "resizable and interaction-extensibility maintainers"
-      ]
+      "owners": ["harness implementer", "resizable and interaction-extensibility maintainers"]
     },
     {
       "number": 523,
       "nodeId": "I_kwDOMhQZjc8AAAABOKaOtA",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/523",
       "title": "[proposal][tree] Define a hierarchical Tree family for files, plans, sessions, and subagents",
-      "bodySha256": "d735b6e77c07b91c476e0d11c2adcf8be5d44c30626ce66c100a6e6206f10391",
+      "bodySha256": "b3c09a98d4ac9bee5972ac2fcbdf3f31412b676cd6973c8d5b79f645a0df763f",
       "state": "OPEN",
       "stateReason": "REOPENED",
-      "updatedAt": "2026-11-06T16:52:35Z",
+      "updatedAt": "2026-11-21T17:56:37Z",
       "labels": [
         "advanced contribution",
         "agent-ready",
@@ -102,32 +94,24 @@
       "nodeId": "I_kwDOMhQZjc8AAAABTdsjMA",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/745",
       "title": "[follow-up][agent-harness] Project #531 editor boundary into the coverage matrix",
-      "bodySha256": "a8166c70c3f4d6ba68a91e35b69d6d1c4562af52f197e8c5e4b69928031a0606",
+      "bodySha256": "0d06d1056feb2024b2378a3dbfa6a9c4bb3a1b77d511d7c41e56175d7e026e84",
       "state": "OPEN",
       "stateReason": "REOPENED",
-      "updatedAt": "2026-11-10T23:49:05Z",
-      "labels": [
-        "F2 – Small",
-        "advanced contribution",
-        "docs",
-        "enhancement"
-      ],
+      "updatedAt": "2026-11-21T17:55:11Z",
+      "labels": ["F2 – Small", "advanced contribution", "docs", "enhancement"],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "app editor infrastructure owner",
-        "text document projection maintainer"
-      ]
+      "owners": ["app editor infrastructure owner", "text document projection maintainer"]
     },
     {
       "number": 746,
       "nodeId": "I_kwDOMhQZjc8AAAABTd5CCg",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/746",
       "title": "[implementation][agent-harness] Compose follow-tail over Scroll end-follow",
-      "bodySha256": "b8ab403b3e81a1c7b7898318af8db1a62cd08d2ae2a3147d6ed53e7afc09b8c0",
+      "bodySha256": "71572ff854e83a29d391d7aa3d96d5f5c1da3f7cfce763dc21df8a812dc0e7e9",
       "state": "OPEN",
       "stateReason": "REOPENED",
-      "updatedAt": "2026-11-06T12:46:54Z",
+      "updatedAt": "2026-11-21T17:56:45Z",
       "labels": [
         "F5 - Large",
         "advanced contribution",
@@ -137,19 +121,17 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": [
-        "harness follow-tail implementer"
-      ]
+      "owners": ["harness follow-tail implementer"]
     },
     {
       "number": 1323,
       "nodeId": "I_kwDOMhQZjc8AAAABdBnpWQ",
       "url": "https://github.com/Proto-UI/Proto-UI/issues/1323",
       "title": "[0.4] Post-release tracking umbrella — all items deferred from 0.3",
-      "bodySha256": "cdb0cb1c0c57f0048bc54392124374d1ccd2bccaeaf32911b953611761651c68",
+      "bodySha256": "c6dcf6b86a6384e34a7d531bf2fc0ed9e161025bde485ee3cb7620c0d557a6eb",
       "state": "OPEN",
       "stateReason": null,
-      "updatedAt": "2026-11-07T01:05:59Z",
+      "updatedAt": "2026-11-21T17:56:28Z",
       "labels": [],
       "assignees": [],
       "milestone": null,

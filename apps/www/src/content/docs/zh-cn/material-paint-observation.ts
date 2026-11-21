@@ -67,3 +67,39 @@ export function observeOwnedMaterialPaint(element: Element) {
     canvas: host.querySelectorAll('canvas').length,
   };
 }
+
+/** Register an unscaled PNG crop to the same host pixels across contact extents. */
+export function materialHostPixelWindow(
+  paint: Pick<ReturnType<typeof observeOwnedMaterialPaint>, 'hostGeometry' | 'paintOutset'>,
+  dpr: number
+) {
+  const { width, height } = paint.hostGeometry;
+  const outset = paint.paintOutset;
+  if (
+    ![width, height, outset, dpr].every(Number.isFinite) ||
+    width <= 0 ||
+    height <= 0 ||
+    outset < 0 ||
+    dpr <= 0
+  )
+    throw new Error('Invalid optical comparison geometry');
+  const offset = outset * dpr;
+  // No rescaling or interpolation may manufacture a changed-pixel result.
+  if (!Number.isInteger(offset))
+    throw new Error('Optical comparison requires an aligned physical pixel grid');
+  const window = {
+    imageWidth: Math.ceil((width + 2 * outset) * dpr),
+    imageHeight: Math.ceil((height + 2 * outset) * dpr),
+    x: offset,
+    y: offset,
+    width: Math.ceil(width * dpr),
+    height: Math.ceil(height * dpr),
+  };
+  if (
+    !Object.values(window).every(Number.isSafeInteger) ||
+    window.imageWidth !== window.width + 2 * offset ||
+    window.imageHeight !== window.height + 2 * offset
+  )
+    throw new Error('Optical comparison pixel registration changed');
+  return window;
+}

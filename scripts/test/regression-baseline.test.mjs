@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { parse } from 'yaml';
 import { generalCheckPlan, executeGeneralChecks } from './general-ci.mjs';
 import { selectGeneralChecks } from './general-check-plan.mjs';
 import { assertRuntimeSource, createCiPlan, runtimeRoot } from './runtime-ci.mjs';
@@ -143,6 +144,37 @@ test('independent general groups partition the original plan without omitting or
   assert.throws(() => selectGeneralChecks(plan, 'partial'), /Unknown general check group/);
   assert.throws(() => selectGeneralChecks([...plan, plan[0]], 'checks'), /Duplicate general step/);
   assert.throws(() => selectGeneralChecks(checks, 'checks'), /exactly one runtime execution/);
+});
+
+test('the independent runtime worker prepares its generated CSS before collection and fails closed', () => {
+  const workflow = parse(readFileSync(path.join(runtimeRoot, '.github/workflows/ci.yml'), 'utf8'));
+  const job = workflow.jobs['test-general'];
+  const command = 'corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style';
+  const preparations = job.steps.filter((step) => step.run === command);
+  assert.equal(preparations.length, 1);
+  const preparation = preparations[0];
+  assert.equal(preparation.if, "${{ matrix.group == 'runtime' }}");
+  assert.equal(preparation['continue-on-error'] ?? false, false);
+  assert.equal(job['continue-on-error'] ?? false, false);
+  const execution = job.steps.find((step) =>
+    step.run?.includes('node scripts/test/general-ci.mjs')
+  );
+  assert.ok(execution);
+  assert.ok(job.steps.indexOf(preparation) < job.steps.indexOf(execution));
+  assert.equal(execution.if, undefined, 'a failed preparation must prevent runtime collection');
+  assert.equal(execution['continue-on-error'] ?? false, false);
+  assert.deepEqual(job.strategy.matrix.include, [
+    { group: 'checks', slot: 'general-checks' },
+    { group: 'runtime', slot: 'general' },
+  ]);
+  assert.deepEqual(job.needs, ['test-plan', 'cycle-plan']);
+  const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+  const plan = generalCheckPlan(manifest, sha);
+  assert.equal(plan.length, 21, 'input preparation must not become a new acceptance command');
+  assert.equal(
+    plan.some((step) => step.args.includes('generate:proto-ui-style')),
+    false
+  );
 });
 
 test('a complete red report preserves failures and skipped tests separately', () => {

@@ -25,6 +25,22 @@ export const LIQUID_HOVER_NEGATIVES = [
 ] as const;
 export type HoverRequest = { kind: string; detail: unknown };
 
+/** Actual application paint for the tight-layout negative, not a material override. */
+export function appendLiquidHoverOverlapPaint(destination: HTMLElement): HTMLElement {
+  const paint = destination.ownerDocument.createElement('span');
+  paint.dataset.hoverTightOverlap = '';
+  paint.setAttribute('aria-hidden', 'true');
+  Object.assign(paint.style, {
+    display: 'block',
+    width: '100%',
+    height: '8px',
+    backgroundColor: 'currentColor',
+    pointerEvents: 'none',
+  });
+  destination.append(paint);
+  return paint;
+}
+
 export function liquidHoverDemo(
   part: LiquidHoverPart,
   capture: (api: DemoRuntimeApi) => void,

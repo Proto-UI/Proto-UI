@@ -204,7 +204,8 @@ The 2026-11-22 regression reconciliation also reviews the material closure intro
 | `apps/www/src/pages/en/test/liquid-glass-toggle.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `0d0902bb724042377375f7d016e55538d05f5665e4e1b65be20770edfdb1b2f0` |
 | `apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b` |
 | `apps/www/src/pages/en/test/liquid-glass-portal.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `85a63e6869403d278042fa3800c99418eb8e5691e429c302aacd594e181e4cc7` |
-| `apps/www/src/pages/en/test/liquid-glass-hover.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7` |
+| `apps/www/src/pages/en/test/liquid-glass-hover.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83` |
+| `apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts` | `www.demo.authored-controllers` | `b3610d4249358f84f24a535efcf4a2a82122df4fe2e637f1cc6f635fa7f19fd3` |
 | `apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts` | `www.demo.demo-matrix` | `aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56` |
 | `apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3` |
 | `apps/www/src/content/docs/zh-cn/liquid-toggle-detail-probe.ts` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `ccc7d8268a06ebd987313ffedbbe816cac468b8d2a8886ca405b000210cbdce0` |

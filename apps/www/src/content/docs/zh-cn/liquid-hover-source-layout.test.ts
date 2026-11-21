@@ -5,10 +5,16 @@ import {
   inspectCanvasBackdrop,
 } from '../../../../../../packages/adapters/base/src/material/source';
 import { contactPaintOutset } from '../../../../../../packages/adapters/base/src/material/contact-profile';
+import { appendLiquidHoverOverlapPaint } from './liquid-hover-fixture';
 
 // Real admission implementation, injected geometry from a62 native receipts.
 // This is a deterministic fixture regression, not browser/layout/GPU evidence.
 const pageSource = readFileSync('apps/www/src/pages/en/test/liquid-glass-hover.astro', 'utf8');
+const sceneCss = readFileSync(
+  'apps/www/src/components/PrototypePreviewer/preview-material-scene.css',
+  'utf8'
+);
+const sceneStyles: HTMLStyleElement[] = [];
 const authoredReserve = Number(
   pageSource.match(/scene\.mount\.style\.paddingBottom = '(\d+)px'/)?.[1] ?? 0
 );
@@ -61,9 +67,14 @@ function layout(width: number, height: number, reserve: number, edge = false) {
 // source (752, 51.90625, 512x196), subject (801, 100.90625, 414x50),
 // Item (800, 99.90625, 416x52), destination (800, 199.90625, 416x0).
 // The Item's one-pixel border contributes flow height; it is not a claim that
-// source admission rejects ancestor borders. The existing destination is the
-// negative's overlapping box, with no synthetic obstacle or guard override.
-function accordionLayout(reserve: number, inset = 0) {
+// source admission rejects ancestor borders. Current scene CSS makes an empty
+// destination transparent. The repaired fixture supplies actual visible paint
+// through its own helper, keeping these recorded flow rectangles unchanged.
+function accordionLayout(reserve: number, inset = 0, visiblePaint = true) {
+  const stylesheet = document.createElement('style');
+  stylesheet.textContent = sceneCss;
+  document.head.append(stylesheet);
+  sceneStyles.push(stylesheet);
   const scope = document.createElement('div');
   const canvas = document.createElement('canvas');
   const mount = document.createElement('div');
@@ -79,6 +90,7 @@ function accordionLayout(reserve: number, inset = 0) {
   content.style.display = 'none';
   destination.dataset.materialOverlayMount = '';
   destination.style.height = '0px';
+  const paint = visiblePaint ? appendLiquidHoverOverlapPaint(destination) : null;
   inner.append(subject);
   heading.append(inner);
   item.append(heading, content);
@@ -104,6 +116,10 @@ function accordionLayout(reserve: number, inset = 0) {
     rect(800, 99.90625, 416, height + 2 + inset * 2 + reserve)
   );
   vi.spyOn(destination, 'getBoundingClientRect').mockReturnValue(destinationRect);
+  if (paint)
+    vi.spyOn(paint, 'getBoundingClientRect').mockReturnValue(
+      rect(destinationRect.left, destinationRect.top, 416, parseFloat(paint.style.height))
+    );
   vi.spyOn(canvas, 'getContext').mockReturnValue({
     getImageData: () => ({ data: new Uint8ClampedArray(512 * sourceHeight * 4).fill(255) }),
   } as any);
@@ -115,12 +131,15 @@ function accordionLayout(reserve: number, inset = 0) {
     lease,
     subjectRect,
     destinationRect,
+    destination,
+    paint,
     gap: destinationRect.top - subjectRect.bottom,
     outset: contactPaintOutset(width, height),
   };
 }
 afterEach(() => {
   document.body.replaceChildren();
+  for (const stylesheet of sceneStyles.splice(0)) stylesheet.remove();
   vi.restoreAllMocks();
 });
 describe('hover positive fixture keeps the portal destination beyond the contact footprint', () => {
@@ -161,6 +180,37 @@ describe('hover positive fixture keeps the portal destination beyond the contact
 });
 
 describe('Accordion tight negative retains actual destination overlap', () => {
+  it('reproduces the current empty destination exemption instead of calling it visible paint', () => {
+    const f = accordionLayout(authoredTightReserve, 0, false);
+    expect(f.destination.matches(':empty')).toBe(true);
+    expect(getComputedStyle(f.destination).opacity).toBe('0');
+    expect(f.gap).toBe(1);
+    expect(f.outset).toBe(35);
+    expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset)).toMatchObject({
+      valid: true,
+    });
+  });
+  it('requires the real fixture paint with current scene CSS and restores the exemption on removal', () => {
+    expect(tightSource).toContain('appendLiquidHoverOverlapPaint(destination)');
+    const f = accordionLayout(authoredTightReserve);
+    expect(f.destination.matches(':empty')).toBe(false);
+    expect(Number(getComputedStyle(f.destination).opacity || '1')).toBe(1);
+    expect(f.paint!.getAttribute('aria-hidden')).toBe('true');
+    expect(f.paint!.style.pointerEvents).toBe('none');
+    expect(f.paint!.style.backgroundColor).toBe('currentcolor');
+    expect(f.paint!.getBoundingClientRect().width).toBeGreaterThan(0);
+    expect(f.paint!.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(inspectCanvasBackdrop(f.subject, f.lease.current(), 0).valid).toBe(true);
+    expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset)).toMatchObject({
+      valid: false,
+      reason: 'source-overlapping-content',
+    });
+    f.paint!.remove();
+    expect(getComputedStyle(f.destination).opacity).toBe('0');
+    expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset)).toMatchObject({
+      valid: true,
+    });
+  });
   it('correctly admits the observed 0c07f62 49px gap, which is no longer negative', () => {
     const f = accordionLayout(48);
     expect(f.outset).toBe(35);

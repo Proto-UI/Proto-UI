@@ -5,7 +5,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, BrowserContext, CDPSession, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { observeOwnedMaterialPaint } from './material-paint-observation';
+import { materialHostPixelWindow, observeOwnedMaterialPaint } from './material-paint-observation';
 import {
   launchBrowser,
   startServer,
@@ -277,21 +277,34 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
         expect(pressedPaint.source).toBe('visible-app-canvas');
         const pressed = pressedPaint.image;
         expect(pressed).not.toBe(first.image);
+        expect(pressedPaint.hostGeometry.width).toBe(first.hostGeometry.width);
+        expect(pressedPaint.hostGeometry.height).toBe(first.hostGeometry.height);
+        const dpr = await page.evaluate(() => devicePixelRatio);
+        const restWindow = materialHostPixelWindow(first, dpr);
+        const pressWindow = materialHostPixelWindow(pressedPaint, dpr);
         const changed = await page.evaluate(
-          async ({ a, b }) => {
-            async function decode(css: string) {
+          async ({ a, b, restWindow, pressWindow }) => {
+            async function decode(css: string, crop: typeof restWindow) {
               const image = new Image();
               image.src = css.slice(5, -2);
               await image.decode();
+              if (
+                image.naturalWidth !== crop.imageWidth ||
+                image.naturalHeight !== crop.imageHeight
+              )
+                throw new Error('Optical image dimensions changed');
               const canvas = document.createElement('canvas');
-              canvas.width = image.width;
-              canvas.height = image.height;
+              canvas.width = image.naturalWidth;
+              canvas.height = image.naturalHeight;
               const ctx = canvas.getContext('2d')!;
               ctx.drawImage(image, 0, 0);
-              return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+              return ctx.getImageData(crop.x, crop.y, crop.width, crop.height).data;
             }
-            const x = await decode(a),
-              y = await decode(b);
+            // Idle has no carrier margin; pressed paint has its independently
+            // bounded contact margin. Compare identical host pixels without
+            // counting those additional pixels as optical deformation.
+            const x = await decode(a, restWindow),
+              y = await decode(b, pressWindow);
             let count = 0;
             if (x.length !== y.length) throw new Error('Optical image dimensions changed');
             for (let i = 0; i < x.length; i += 4)
@@ -304,8 +317,25 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
                 count++;
             return count;
           },
-          { a: first.image, b: pressed }
+          { a: first.image, b: pressed, restWindow, pressWindow }
         );
+        observations.push({
+          scenario: 'same-host-optical-pixel-change',
+          theme,
+          runtime,
+          dpr,
+          restWindow,
+          pressWindow,
+          restImageCssSha256: createHash('sha256').update(first.image).digest('hex'),
+          pressedImageCssSha256: createHash('sha256').update(pressed).digest('hex'),
+          changedPixels: changed,
+          threshold: 20,
+        });
+        if (evidence)
+          await writeFile(
+            path.join(evidence, `${theme}-${runtime}-optical-pressed.png`),
+            Buffer.from(pressed.slice(5, -2).split(',')[1], 'base64')
+          );
         expect(changed).toBeGreaterThan(20);
         await capture(`${theme}-${runtime}-pressed`);
         await page.mouse.up();

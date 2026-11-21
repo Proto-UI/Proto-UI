@@ -1,5 +1,5 @@
 import type { ExposedStateHandle } from '@proto.ui/core';
-import type { DemoRuntimeApi } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoRuntimeApi } from '../../components/PrototypePreviewer/demo-types';
 
 /** Drawer owns effective disabled, including Root inheritance. Each Button starts
  * disabled until its current public command snapshot reaches the same surface.
@@ -40,11 +40,16 @@ export function bindDrawerCommandDisabled(api: DemoRuntimeApi): () => void {
           const panel = instances.panel;
           const presentation = panel?.getExposes();
           const present = presentation?.isPresent as ExposedStateHandle<boolean> | undefined;
-          const transition = presentation?.transitionState as ExposedStateHandle<string> | undefined;
-          if (panel && (
-            typeof present?.get !== 'function' || typeof present.subscribe !== 'function' ||
-            typeof transition?.get !== 'function' || typeof transition.subscribe !== 'function'
-          ))
+          const transition = presentation?.transitionState as
+            | ExposedStateHandle<string>
+            | undefined;
+          if (
+            panel &&
+            (typeof present?.get !== 'function' ||
+              typeof present.subscribe !== 'function' ||
+              typeof transition?.get !== 'function' ||
+              typeof transition.subscribe !== 'function')
+          )
             throw new Error('Drawer public presentation states are unavailable.');
           let active = true;
           let scheduled = false;

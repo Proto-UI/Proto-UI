@@ -603,6 +603,12 @@ jobs:
           # inventory or version strings alone do not satisfy this gate.
           node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs
 
+      - name: Prepare generated website styles for the independent runtime worker
+        if: ${{ matrix.group == 'runtime' }}
+        # The former sequential website bundle build supplied these ignored CSS
+        # inputs. Each runtime worker must prepare its own inputs before collection.
+        run: corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
+
       - name: Public documentation gate and repository tests
         env:
           SPEC_AUTHORING_BASE: ${{ needs.cycle-plan.outputs.spec_base }}

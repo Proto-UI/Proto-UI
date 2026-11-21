@@ -418,6 +418,7 @@ const staticUtilities: Record<string, string[]> = {
   'pointer-events-none': ['pointer-events: none;'],
   'cursor-not-allowed': ['cursor: not-allowed;'],
   'cursor-default': ['cursor: default;'],
+  'cursor-grabbing': ['cursor: grabbing;'],
   'cursor-ew-resize': ['cursor: ew-resize;'],
   'cursor-ns-resize': ['cursor: ns-resize;'],
   'cursor-pointer': ['cursor: pointer;'],

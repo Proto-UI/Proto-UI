@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { observeOwnedMaterialPaint } from './material-paint-observation';
+import { materialHostPixelWindow, observeOwnedMaterialPaint } from './material-paint-observation';
 
 function fixture(
   patch: Record<string, string | undefined> = {},
@@ -149,5 +149,53 @@ describe('owned optical paint observation, independent of quality metadata', () 
     const { element, style } = fixture({}, null);
     style.backgroundImage = 'url("data:image/png;base64,AAAA")';
     expect(observeOwnedMaterialPaint(element)).toMatchObject({ committed: true, carrier: null });
+  });
+});
+
+describe('optical pixel comparison uses the same host region across carrier extents', () => {
+  const paint = (outset: number, width = 100, height = 40) => ({
+    hostGeometry: { left: 17, top: 31, width, height },
+    paintOutset: outset,
+  });
+  it('excludes new carrier margin pixels without resizing the shared host pixels', () => {
+    const rest = materialHostPixelWindow(paint(0), 2);
+    const pressed = materialHostPixelWindow(paint(9), 2);
+    expect(rest).toEqual({ imageWidth: 200, imageHeight: 80, x: 0, y: 0, width: 200, height: 80 });
+    expect(pressed).toEqual({
+      imageWidth: 236,
+      imageHeight: 116,
+      x: 18,
+      y: 18,
+      width: 200,
+      height: 80,
+    });
+    expect(pressed.width * pressed.height).toBe(rest.width * rest.height);
+    expect(pressed.imageWidth - pressed.x - pressed.width).toBe(pressed.x);
+    expect(pressed.imageHeight - pressed.y - pressed.height).toBe(pressed.y);
+  });
+  it('retains fractional host dimensions with an aligned native pixel origin', () => {
+    expect(materialHostPixelWindow(paint(12, 130.546875, 38), 1)).toEqual({
+      imageWidth: 155,
+      imageHeight: 62,
+      x: 12,
+      y: 12,
+      width: 131,
+      height: 38,
+    });
+  });
+  it('rejects a fractional physical offset instead of resampling to manufacture differences', () => {
+    expect(() => materialHostPixelWindow(paint(9), 1.25)).toThrow('aligned physical pixel grid');
+  });
+  it.each([
+    [NaN, 100, 40, 1],
+    [-1, 100, 40, 1],
+    [0, 0, 40, 1],
+    [0, 100, Infinity, 1],
+    [0, 100, 40, 0],
+    [0, 100, 40, NaN],
+  ])('rejects invalid comparison geometry %j', (outset, width, height, dpr) => {
+    expect(() => materialHostPixelWindow(paint(outset, width, height), dpr)).toThrow(
+      'Invalid optical comparison geometry'
+    );
   });
 });

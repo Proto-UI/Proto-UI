@@ -14,7 +14,10 @@ import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prot
 import { DRAWER_PRESENCE_SOURCE_FILES } from './fixtures/drawer-presence-sources';
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
 const output =
-  process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-drawer-presence-evidence');
+  process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ??
+  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'drawer-presence')
+    : path.join(tmpdir(), 'pui-drawer-presence-evidence'));
 beforeAll(async () => {
   tokens = (await collectProtoStyleTokensFromFiles(DRAWER_PRESENCE_SOURCE_FILES)).filter(
     (x): x is string => typeof x === 'string'
@@ -336,6 +339,13 @@ describe('public www Drawer cold-entry diagnostic', () => {
         }, fixedControl);
         // Let initial closed admission finish, exactly as a human clicks a ready demo.
         await page.locator('wc-shadcn-drawer-trigger').waitFor({ state: 'visible' });
+        await expect
+          .poll(() =>
+            page
+              .locator('wc-shadcn-drawer-trigger [data-demo-ref="trigger-action"]')
+              .getAttribute('aria-disabled')
+          )
+          .toBe('false');
         await page.evaluate(() => {
           const samples: unknown[] = [];
           (window as any).__entryFrames = samples;
@@ -372,6 +382,9 @@ describe('public www Drawer cold-entry diagnostic', () => {
         }));
         expect(errors).toEqual([]);
         const events = (result as any).events as any[];
+        expect(Array.isArray(events), 'Drawer projector observation was not initialized').toBe(
+          true
+        );
         expect(
           events.some(
             (event) =>

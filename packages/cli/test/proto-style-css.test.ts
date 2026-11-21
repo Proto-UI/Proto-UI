@@ -93,6 +93,57 @@ function expectExactStyleUtility(
   }
 }
 
+describe('Carousel finite drag cursor closure', () => {
+  for (const { target, render } of STYLE_CSS_LANES) {
+    it(`${target} lowers the base and dragging cursor through their exact surface selectors`, () => {
+      const token = 'data-[dragging]:cursor-grabbing';
+      const css = render(['cursor-grabbing', token]);
+      expectExactStyleUtility(css, target, 'cursor-grabbing', ['cursor: grabbing;']);
+      const blocks = css
+        .split('}')
+        .filter((block) => block.includes(`[data-pui-style~="${token}"]`))
+        .map((block) => {
+          const open = block.indexOf('{');
+          return {
+            selector: block.slice(0, open).trim().split(/\n/).at(-1)!,
+            declarations: block
+              .slice(open + 1)
+              .trim()
+              .split(/\n/)
+              .map((line) => line.trim())
+              .filter((line) => !line.startsWith(SPLIT_RECEIPT_PREFIX)),
+          };
+        });
+      const flat = `:where([data-pui-style~="${token}"])[data-dragging]`;
+      const selectors =
+        target === 'shadow-split'
+          ? [
+              `:host([data-pui-split-root-style~="${token}"][data-dragging]) > [data-pui-split-surface][data-pui-style~="${token}"]`,
+              flat,
+            ]
+          : [flat];
+      expect(blocks).toEqual(
+        selectors.map((selector) => ({ selector, declarations: ['cursor: grabbing;'] }))
+      );
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    });
+    it(`${target} keeps unknown and near-spelled cursor tokens unsupported`, () => {
+      for (const token of [
+        'cursor-grabing',
+        'cursor-grabbings',
+        'cursor-unknown',
+        'cursor-[grabbing]',
+        'data-[dragging]:cursor-grabing',
+        'data-[dragging]:cursor-[grabbing]',
+      ]) {
+        const css = render([token]);
+        expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toContain('cursor: grabbing;');
+      }
+    });
+  }
+});
+
 describe('proto style css renderer', () => {
   it('admits only the finite border-color clock without text or background interpolation', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {

@@ -1,0 +1,3562 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "bounded-native-candidate-correction",
+  "date": "2026-11-22",
+  "observedAt": "2026-11-21T19:45:30.267073+00:00",
+  "nativeCandidate": {
+    "repository": "Proto-UI/Proto-UI",
+    "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+    "runId": 44937449914,
+    "attempt": 1,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914",
+    "wholeCycleAtRecord": "Still in progress; terminal subjobs below are not a whole-cycle acceptance."
+  },
+  "completedHistoricalCycle": {
+    "runId": 44930338506,
+    "attempt": 1,
+    "head": "031d9b661025312244d31506758eed989cc71f94",
+    "nativeTerminal": {
+      "status": "completed",
+      "conclusion": "failure",
+      "updatedAt": "2026-11-21T18:54:37Z",
+      "observedAt": "20261121T185633Z",
+      "total": 97,
+      "counts": {
+        "success": 59,
+        "failure": 37,
+        "cancelled": 1,
+        "timed_out": 0,
+        "skipped": 0,
+        "neutral": 0,
+        "action_required": 0,
+        "startup_failure": 0,
+        "stale": 0
+      }
+    },
+    "pagination": {
+      "pageSize": 100,
+      "pages": 1,
+      "uniqueJobs": 97,
+      "allJobsTerminal": true,
+      "jobsPageSha256": "daa1f3183d1d0706abf2ad5f73dfc2f23fec136ecb0315ba6364e64613a98d7e"
+    },
+    "cycleReceipt": {
+      "artifactId": 14720206837,
+      "artifactName": "regression-cycle-031d9b661025312244d31506758eed989cc71f94-44930338506-attempt-1",
+      "archiveSha256": "491bf72b3791db76715819dc51f227b48566b261a087a596b3a887c5b393926b",
+      "reportSha256": "74f6aa7ecd013ebd36c091f441251c16f0d9dd026e1a939eb9f5726382354bcf",
+      "verdict": "fail",
+      "laneVerdict": "fail",
+      "upstreamNativeCounts": {
+        "success": 59,
+        "failure": 36,
+        "cancelled": 1
+      },
+      "incompleteUpstreamJobs": [],
+      "lastBaseline": null,
+      "branchScheduleHistoryCaveat": "This manual branch cycle has no examined scheduled runs; do not generalize its branch history counters to repository-wide schedule history."
+    },
+    "cancellation": {
+      "jobId": 136925440826,
+      "nativeConclusion": "cancelled",
+      "reason": "The job has exceeded the maximum execution time of 45m0s",
+      "evidence": "general-cancelled-annotations.json"
+    },
+    "limits": [
+      "This is the failed 031 historical cycle, not acceptance for 4c2 or a later source.",
+      "37 failed jobs are not 37 product bugs.",
+      "No native timed_out jobs does not mean no assertion or internal wait timeouts."
+    ]
+  },
+  "nativeGeneral": {
+    "checks": {
+      "runId": "44937449914",
+      "attempt": 1,
+      "jobId": 136947192287,
+      "sourceHead": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+      "job": {
+        "startedAt": "2026-11-21T18:48:13Z",
+        "finishedAt": "2026-11-21T19:07:09Z",
+        "durationSeconds": 1136,
+        "conclusion": "failure",
+        "outerCancellation": false
+      },
+      "toolchain": {
+        "node": "24.22.3",
+        "pnpm": "10.32.1",
+        "python": "3.12.3",
+        "ffmpeg": "6.1.1-3ubuntu5"
+      },
+      "specBase": "66fa6e49ba3c1eba6de5be2d8136811fafe6ec15",
+      "sourceBefore": {
+        "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+        "dirty": false,
+        "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceAfter": {
+        "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+        "dirty": false,
+        "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceStable": true,
+      "exactCommandVerification": {
+        "sourceManifestSha256": "49f18b4cfce11adeaba9eb8420dd75f04978e8953903d070950303d27248e95d",
+        "sourcePlanModuleSha256": "16f859a148b88fb508408e6af1770094f310aca3355f3a44f64dda9765d19206",
+        "sourceRevision": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "nativeNodeExecutable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+        "completePlan": [
+          {
+            "id": "check:spec-authoring",
+            "args": [
+              "pnpm@10.32.1",
+              "-s",
+              "check:spec-authoring",
+              "--",
+              "--base",
+              "66fa6e49ba3c1eba6de5be2d8136811fafe6ec15"
+            ]
+          },
+          {
+            "id": "check:public-docs",
+            "args": ["pnpm@10.32.1", "-s", "check:public-docs"]
+          },
+          {
+            "id": "check:release-version",
+            "args": ["pnpm@10.32.1", "-s", "check:release-version"]
+          },
+          {
+            "id": "release:assets:check",
+            "args": ["pnpm@10.32.1", "-s", "release:assets:check"]
+          },
+          {
+            "id": "check:styles:preset",
+            "args": ["pnpm@10.32.1", "-s", "check:styles:preset"]
+          },
+          {
+            "id": "check:styles:variant-order",
+            "args": ["pnpm@10.32.1", "-s", "check:styles:variant-order"]
+          },
+          {
+            "id": "check:component-presets",
+            "args": ["pnpm@10.32.1", "-s", "check:component-presets"]
+          },
+          {
+            "id": "check:prototype-catalog",
+            "args": ["pnpm@10.32.1", "-s", "check:prototype-catalog"]
+          },
+          {
+            "id": "check:coverage-matrices",
+            "args": ["pnpm@10.32.1", "-s", "check:coverage-matrices"]
+          },
+          {
+            "id": "check:website-production-bundle",
+            "args": ["pnpm@10.32.1", "-s", "check:website-production-bundle"]
+          },
+          {
+            "id": "check:agent-operations",
+            "args": ["pnpm@10.32.1", "-s", "check:agent-operations"]
+          },
+          {
+            "id": "check:gpui-style-fixture",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-style-fixture"]
+          },
+          {
+            "id": "check:gpui-event-fixture",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-event-fixture"]
+          },
+          {
+            "id": "check:gpui-message-fixture",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-message-fixture"]
+          },
+          {
+            "id": "check:gpui-session-fixtures",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-session-fixtures"]
+          },
+          {
+            "id": "test:gpui-scripts",
+            "args": ["pnpm@10.32.1", "-s", "test:gpui-scripts"]
+          },
+          {
+            "id": "test:public-docs",
+            "args": ["pnpm@10.32.1", "-s", "test:public-docs"]
+          },
+          {
+            "id": "test:release",
+            "args": ["pnpm@10.32.1", "-s", "test:release"]
+          },
+          {
+            "id": "test:types",
+            "args": ["pnpm@10.32.1", "-s", "test:types"]
+          },
+          {
+            "id": "test:runtime:controls",
+            "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+            "args": [
+              "--test",
+              "scripts/test/run-runtime-tests.test.mjs",
+              "scripts/test/regression-baseline.test.mjs",
+              "scripts/test/wc-native-isolation.test.mjs",
+              "scripts/test/happy-dom-mutation-keepalive.test.mjs",
+              "scripts/analysis/shadow-s4-paint-cleanup.test.mjs"
+            ]
+          },
+          {
+            "id": "test:runtime:execute",
+            "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+            "args": ["scripts/test/run-runtime-tests.mjs"]
+          }
+        ],
+        "checks": [
+          {
+            "id": "check:spec-authoring",
+            "args": [
+              "pnpm@10.32.1",
+              "-s",
+              "check:spec-authoring",
+              "--",
+              "--base",
+              "66fa6e49ba3c1eba6de5be2d8136811fafe6ec15"
+            ]
+          },
+          {
+            "id": "check:public-docs",
+            "args": ["pnpm@10.32.1", "-s", "check:public-docs"]
+          },
+          {
+            "id": "check:release-version",
+            "args": ["pnpm@10.32.1", "-s", "check:release-version"]
+          },
+          {
+            "id": "release:assets:check",
+            "args": ["pnpm@10.32.1", "-s", "release:assets:check"]
+          },
+          {
+            "id": "check:styles:preset",
+            "args": ["pnpm@10.32.1", "-s", "check:styles:preset"]
+          },
+          {
+            "id": "check:styles:variant-order",
+            "args": ["pnpm@10.32.1", "-s", "check:styles:variant-order"]
+          },
+          {
+            "id": "check:component-presets",
+            "args": ["pnpm@10.32.1", "-s", "check:component-presets"]
+          },
+          {
+            "id": "check:prototype-catalog",
+            "args": ["pnpm@10.32.1", "-s", "check:prototype-catalog"]
+          },
+          {
+            "id": "check:coverage-matrices",
+            "args": ["pnpm@10.32.1", "-s", "check:coverage-matrices"]
+          },
+          {
+            "id": "check:website-production-bundle",
+            "args": ["pnpm@10.32.1", "-s", "check:website-production-bundle"]
+          },
+          {
+            "id": "check:agent-operations",
+            "args": ["pnpm@10.32.1", "-s", "check:agent-operations"]
+          },
+          {
+            "id": "check:gpui-style-fixture",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-style-fixture"]
+          },
+          {
+            "id": "check:gpui-event-fixture",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-event-fixture"]
+          },
+          {
+            "id": "check:gpui-message-fixture",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-message-fixture"]
+          },
+          {
+            "id": "check:gpui-session-fixtures",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-session-fixtures"]
+          },
+          {
+            "id": "test:gpui-scripts",
+            "args": ["pnpm@10.32.1", "-s", "test:gpui-scripts"]
+          },
+          {
+            "id": "test:public-docs",
+            "args": ["pnpm@10.32.1", "-s", "test:public-docs"]
+          },
+          {
+            "id": "test:release",
+            "args": ["pnpm@10.32.1", "-s", "test:release"]
+          },
+          {
+            "id": "test:types",
+            "args": ["pnpm@10.32.1", "-s", "test:types"]
+          },
+          {
+            "id": "test:runtime:controls",
+            "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+            "args": [
+              "--test",
+              "scripts/test/run-runtime-tests.test.mjs",
+              "scripts/test/regression-baseline.test.mjs",
+              "scripts/test/wc-native-isolation.test.mjs",
+              "scripts/test/happy-dom-mutation-keepalive.test.mjs",
+              "scripts/analysis/shadow-s4-paint-cleanup.test.mjs"
+            ]
+          }
+        ],
+        "resultsEqualExpectedCommands": true,
+        "progressComplete": true,
+        "totalPlanned": 20,
+        "totalCompleted": 20,
+        "pass": 13,
+        "fail": 7,
+        "signals": [],
+        "executionErrors": []
+      },
+      "coverage": {
+        "matrixCount": 2,
+        "tests": 4491,
+        "pass": 4490,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 1,
+        "portableSkip": "Linux media integration is a distinct mandatory job setup step, which completed successfully; portable placeholder remains skipped."
+      },
+      "failures": [
+        {
+          "id": "check:styles:preset",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 0,
+          "previousSignal": null,
+          "classification": "New observed derived-manifest drift relative to prior native cycle; actual generator evidence owned by package agent."
+        },
+        {
+          "id": "check:website-production-bundle",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 1,
+          "previousSignal": null,
+          "classification": "Same failure category present in previous native cycle; exact retained diagnostics were compared."
+        },
+        {
+          "id": "check:gpui-style-fixture",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 1,
+          "previousSignal": null,
+          "classification": "Same failure category present in previous native cycle; exact retained diagnostics were compared."
+        },
+        {
+          "id": "check:gpui-event-fixture",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 1,
+          "previousSignal": null,
+          "classification": "Same failure category present in previous native cycle; exact retained diagnostics were compared."
+        },
+        {
+          "id": "check:gpui-session-fixtures",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 1,
+          "previousSignal": null,
+          "classification": "Same failure category present in previous native cycle; exact retained diagnostics were compared."
+        },
+        {
+          "id": "test:gpui-scripts",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 1,
+          "previousSignal": null,
+          "classification": "Same failure category present in previous native cycle; exact retained diagnostics were compared."
+        },
+        {
+          "id": "test:release",
+          "exitCode": 1,
+          "signal": null,
+          "previousExitCode": 1,
+          "previousSignal": null,
+          "classification": "Same failure category present in previous native cycle; exact retained diagnostics were compared."
+        }
+      ],
+      "qualification": "This evidence is bound only to native clean 4c2, not later local repairs. Runtime leg still pending at analysis creation."
+    },
+    "runtime": {
+      "runId": "44937449914",
+      "attempt": 1,
+      "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+      "job": {
+        "id": 136947192301,
+        "startedAt": "2026-11-21T18:48:52Z",
+        "finishedAt": "2026-11-21T19:14:31Z",
+        "durationSeconds": 1539,
+        "conclusion": "failure",
+        "outerCancellation": false
+      },
+      "execution": {
+        "id": "test:runtime:execute",
+        "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+        "args": ["scripts/test/run-runtime-tests.mjs"],
+        "exitCode": 1,
+        "signal": null,
+        "startedAt": "2026-11-21T18:49:46.867Z",
+        "finishedAt": "2026-11-21T19:14:27.278Z",
+        "logFile": "test-runtime-execute.log",
+        "passed": false
+      },
+      "specBase": "66fa6e49ba3c1eba6de5be2d8136811fafe6ec15",
+      "sourceBefore": {
+        "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+        "dirty": false,
+        "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceAfter": {
+        "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+        "dirty": false,
+        "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sourceStable": true,
+      "commandUnion": {
+        "checksCount": 20,
+        "runtimeCount": 1,
+        "total": 21,
+        "matchesExactFrozenSourcePlan": true,
+        "duplicateCommands": [],
+        "missingCommands": [],
+        "commands": [
+          {
+            "id": "check:spec-authoring",
+            "executable": "corepack",
+            "args": [
+              "pnpm@10.32.1",
+              "-s",
+              "check:spec-authoring",
+              "--",
+              "--base",
+              "66fa6e49ba3c1eba6de5be2d8136811fafe6ec15"
+            ]
+          },
+          {
+            "id": "check:public-docs",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:public-docs"]
+          },
+          {
+            "id": "check:release-version",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:release-version"]
+          },
+          {
+            "id": "release:assets:check",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "release:assets:check"]
+          },
+          {
+            "id": "check:styles:preset",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:styles:preset"]
+          },
+          {
+            "id": "check:styles:variant-order",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:styles:variant-order"]
+          },
+          {
+            "id": "check:component-presets",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:component-presets"]
+          },
+          {
+            "id": "check:prototype-catalog",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:prototype-catalog"]
+          },
+          {
+            "id": "check:coverage-matrices",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:coverage-matrices"]
+          },
+          {
+            "id": "check:website-production-bundle",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:website-production-bundle"]
+          },
+          {
+            "id": "check:agent-operations",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:agent-operations"]
+          },
+          {
+            "id": "check:gpui-style-fixture",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-style-fixture"]
+          },
+          {
+            "id": "check:gpui-event-fixture",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-event-fixture"]
+          },
+          {
+            "id": "check:gpui-message-fixture",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-message-fixture"]
+          },
+          {
+            "id": "check:gpui-session-fixtures",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "check:gpui-session-fixtures"]
+          },
+          {
+            "id": "test:gpui-scripts",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "test:gpui-scripts"]
+          },
+          {
+            "id": "test:public-docs",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "test:public-docs"]
+          },
+          {
+            "id": "test:release",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "test:release"]
+          },
+          {
+            "id": "test:types",
+            "executable": "corepack",
+            "args": ["pnpm@10.32.1", "-s", "test:types"]
+          },
+          {
+            "id": "test:runtime:controls",
+            "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+            "args": [
+              "--test",
+              "scripts/test/run-runtime-tests.test.mjs",
+              "scripts/test/regression-baseline.test.mjs",
+              "scripts/test/wc-native-isolation.test.mjs",
+              "scripts/test/happy-dom-mutation-keepalive.test.mjs",
+              "scripts/analysis/shadow-s4-paint-cleanup.test.mjs"
+            ]
+          },
+          {
+            "id": "test:runtime:execute",
+            "executable": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+            "args": ["scripts/test/run-runtime-tests.mjs"]
+          }
+        ]
+      },
+      "inventory": {
+        "selectedFiles": 1778,
+        "reportedFiles": 1778,
+        "matchesNativePlan": true,
+        "missingFiles": [],
+        "unexpectedFiles": [],
+        "duplicateFiles": [],
+        "retainedFileCount": 1778,
+        "fileListSha256": "6ca6315e579c81dbaee83ba576f1687dddf4e256195c729e3949f37c5004f7f9",
+        "fullFileList": "Native runtime artifact 14721132146: selection-general.json; matching cycle plan artifact and full local runtime-terminal-analysis.json retained."
+      },
+      "progress": {
+        "finished": true,
+        "updatedAt": "2026-11-21T19:14:26.507Z",
+        "files": 1778,
+        "unhandledErrors": [],
+        "parseErrors": {
+          "report": null,
+          "checkpoint": null
+        }
+      },
+      "counts": {
+        "totalTests": 22627,
+        "passed": 22043,
+        "failed": 506,
+        "pending": 41,
+        "todo": 37,
+        "assertionStatusCounts": {
+          "passed": 22043,
+          "failed": 506,
+          "skipped": 41,
+          "todo": 37
+        },
+        "fileStatusCounts": {
+          "passed": 1700,
+          "failed": 78
+        },
+        "vitestDescribeSuiteCounts": {
+          "numTotalTestSuites": 4054,
+          "numPassedTestSuites": 3901,
+          "numFailedTestSuites": 153,
+          "numPendingTestSuites": 0
+        },
+        "consoleFileCounts": {
+          "passed": 1695,
+          "failed": 78,
+          "skipped": 5
+        },
+        "fileStatusQualification": "Raw Vitest testResults.status labels five wholly skipped files passed. Only the console count 1695 represents passed files; inventory completeness is separate."
+      },
+      "failedFilesWithoutAssertions": [
+        {
+          "file": "apps/www/src/components/Homepage/homepage-composition.integration.test.ts",
+          "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+        },
+        {
+          "file": "apps/www/src/components/Homepage/homepage-dialog-focus.integration.test.ts",
+          "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+        },
+        {
+          "file": "apps/www/src/components/Homepage/homepage-gallery-props.test.ts",
+          "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+        },
+        {
+          "file": "apps/www/src/components/Homepage/homepage-showcase.integration.test.ts",
+          "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+        },
+        {
+          "file": "apps/www/src/components/Homepage/homepage-showcase.react19.test.ts",
+          "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+        }
+      ],
+      "qualification": "All 1778 files reached an inventory terminal entry; five collection errors and three failing beforeAll hooks with 32 skipped assertions are not successful execution. Original 9 authored skips and 37 todo remain distinct.",
+      "skipAndCollectionBoundaries": {
+        "newSkippedOrTodo": [
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "fullName": "shadcn/wc real gallery keeps every declared physical part in the owning generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "fullName": "brutalist/wc real gallery keeps every declared physical part in the owning generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "fullName": "bootstrap-2-3-2/wc real gallery keeps every declared physical part in the owning generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "fullName": "shadcn/react real gallery keeps every declared physical part in the owning generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "fullName": "brutalist/react real gallery keeps every declared physical part in the owning generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "fullName": "bootstrap-2-3-2/react real gallery keeps every declared physical part in the owning generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts leaves unrelated inline text and its surrounding sentence unchanged",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts shadcn/wc preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts shadcn/react preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts shadcn/vue preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts shadcn/vue2 preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts brutalist/wc preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts brutalist/react preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts brutalist/vue preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "fullName": "Homepage block text layout across runtime hosts brutalist/vue2 preserves the block text formatting context",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state viewport: keeps the original logical owners, draft, switch, caret and page snapshot",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state new source heading: keeps the original logical owners, draft, switch, caret and page snapshot",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state prepare failure keeps the current gallery, typography owner and page snapshot",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state partial activate failure keeps the current gallery, typography owner and page snapshot",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state coalesces source and viewport changes during local preparation without activating stale source",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state a whole-page family commit revokes an older same-generation local preparation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state whole-page publication rollback restores the latest locally refreshed typography and live gallery",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state a failed publication keeps the committed owner and no replacement batch",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state a source added during a failed publication joins the retained generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state a source added during a whole-page runtime preparation joins its committed generation without a second page commit",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state destroy waits for and retires an in-flight local batch without reviving source or framework owners",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state change role: observes only the authored change, keeps gallery state and settles after one batch",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state remove role: observes only the authored change, keeps gallery state and settles after one batch",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state new marker: observes only the authored change, keeps gallery state and settles after one batch",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state keeps language and complete textContent replacement fresh in the same page generation",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "homepage passive typography refresh preserves real gallery state reconciles source changes arriving while a failed local batch is being disposed",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "fullName": "publishes a committed runtime preference when a live family request supersedes its pending retirement observer",
+            "occurrence": 0,
+            "status": "skipped",
+            "previousStatus": "passed"
+          }
+        ],
+        "newSkippedByFile": {
+          "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts": 6,
+          "apps/www/src/components/Homepage/homepage-text-layout.test.ts": 9,
+          "apps/www/src/components/Homepage/homepage-typography-state.test.ts": 17
+        },
+        "failedFilesWithNoFailedAssertions": [
+          {
+            "file": "apps/www/src/components/Homepage/homepage-composition.integration.test.ts",
+            "assertionStatusCounts": {},
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-dialog-focus.integration.test.ts",
+            "assertionStatusCounts": {},
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery-props.test.ts",
+            "assertionStatusCounts": {},
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-gallery.projection.test.ts",
+            "assertionStatusCounts": {
+              "skipped": 6
+            },
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-showcase.integration.test.ts",
+            "assertionStatusCounts": {},
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-showcase.react19.test.ts",
+            "assertionStatusCounts": {},
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-text-layout.test.ts",
+            "assertionStatusCounts": {
+              "skipped": 9
+            },
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          },
+          {
+            "file": "apps/www/src/components/Homepage/homepage-typography-state.test.ts",
+            "assertionStatusCounts": {
+              "skipped": 17
+            },
+            "message": "ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+          }
+        ]
+      }
+    }
+  },
+  "corrections": {
+    "runtimeStylePreparation": {
+      "command": ["node", "--test", "scripts/test/regression-baseline.test.mjs"],
+      "startedAt": "2026-11-21T19:22:45.743954+00:00",
+      "finishedAt": "2026-11-21T19:22:47.178438+00:00",
+      "durationSeconds": 1.4344916289992398,
+      "exitCode": 0,
+      "nativeFailureHead": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+      "qualification": "Local focused controls for the authorized workflow input preparation; no native rerun result is claimed.",
+      "logSha256": "8bda838886c2507d8b766e32c6b4de92f538f4f085a4084c9c8d999018182ed9"
+    },
+    "drawerTypes": {
+      "nativeFailure": {
+        "runId": 44937449914,
+        "attempt": 1,
+        "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "jobId": 136947087339,
+        "conclusion": "failure",
+        "exitCode": 2,
+        "toolchain": {
+          "node": "v24.22.3",
+          "pnpm": "10.32.1",
+          "typescript": "5.9.3"
+        },
+        "diagnostics": [
+          {
+            "diagnostic": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts(3,31): error TS2307: Cannot find module '@/components/PrototypePreviewer/demo-types' or its corresponding type declarations.",
+            "code": "TS2307",
+            "line": 3,
+            "column": 31
+          },
+          {
+            "diagnostic": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts(108,11): error TS7031: Binding element 'refs' implicitly has an 'any' type.",
+            "code": "TS7031",
+            "line": 108,
+            "column": 11
+          },
+          {
+            "diagnostic": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts(108,17): error TS7031: Binding element 'api' implicitly has an 'any' type.",
+            "code": "TS7031",
+            "line": 108,
+            "column": 17
+          },
+          {
+            "diagnostic": "apps/www/src/content/docs/drawer-command-disabled.shared.ts(2,37): error TS2307: Cannot find module '@/components/PrototypePreviewer/demo-types' or its corresponding type declarations.",
+            "code": "TS2307",
+            "line": 2,
+            "column": 37
+          },
+          {
+            "diagnostic": "apps/www/src/content/docs/drawer-command-disabled.shared.ts(26,10): error TS7006: Parameter 'instances' implicitly has an 'any' type.",
+            "code": "TS7006",
+            "line": 26,
+            "column": 10
+          },
+          {
+            "diagnostic": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts(50,54): error TS2345: Argument of type 'ShadcnRheaDemo<DemoSpec>' is not assignable to parameter of type 'DemoSpec'.",
+            "code": "TS2345",
+            "line": 50,
+            "column": 54
+          },
+          {
+            "diagnostic": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts(55,63): error TS2345: Argument of type 'ShadcnRheaDemo<DemoSpec>' is not assignable to parameter of type 'DemoSpec'.",
+            "code": "TS2345",
+            "line": 55,
+            "column": 63
+          }
+        ],
+        "errorCount": 7,
+        "classification": "Newly reachable website type aliases fail under workspace TypeScript configuration; not heap exhaustion or outer timeout.",
+        "causeEvidence": [
+          "check:types generates Website styles then runs tsc -p tsconfig.workspace.json before the Astro check.",
+          "workspace config excludes apps/www as roots but the new package Drawer test imports the real Website DemoSpec through a literal module path.",
+          "Root tsconfig has no @/* alias; only the Website tsconfig declares it.",
+          "Both unresolved imports are type-only DemoSpec/DemoRuntimeApi imports; the subsequent implicit-any and missing type properties match loss of contextual types."
+        ],
+        "scopeLimit": "Static source chain and native diagnostics establish the missing aliases. Cascade resolution requires verification after an authorized repair; no repair or type replay was performed here.",
+        "sourceAfterReceipt": null,
+        "sourceLimit": "Job checkout log identifies the commit; this types job has no dedicated before/after clean/stable source receipt. General producer artifacts have their own source snapshots.",
+        "logSha256": "41b7df7e6be7f52a7bd10da64329ba6d31953657e1d9f4af91aa657c57e3ae18"
+      },
+      "finalSourceReview": {
+        "sourceHead": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "compiler": "TypeScript 5.9.3",
+        "options": {
+          "target": 11,
+          "module": 99,
+          "sourceMap": false
+        },
+        "files": [
+          {
+            "path": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts",
+            "previousSha256": "144be637bc412b93e1b4cd4ebde362b696f84fdb8768941c98721c9be3399051",
+            "currentSha256": "b4dec1f8661fb8866a69d195117e5d76da38590afd76112f4e263d74a51e611a",
+            "expectedTypeImportAndFormatOnly": true,
+            "emittedJsIdentical": true,
+            "previousEmittedJsSha256": "29c646f072bcf23a0611da1aa5c5aef8eb3805b99ce024a671baa27eb38ac206",
+            "currentEmittedJsSha256": "29c646f072bcf23a0611da1aa5c5aef8eb3805b99ce024a671baa27eb38ac206",
+            "formattedEmittedJsIdentical": true,
+            "formattedEmittedJsSha256": "93ad6ab4ae955d059f5fc93b0df9741bc9c2dafdd4dc1dfa34bd5ade2ba0c33a"
+          },
+          {
+            "path": "apps/www/src/content/docs/drawer-command-disabled.shared.ts",
+            "previousSha256": "bdbf1708e7a961aec3085222c0d1faaea49cc674aa10e06c9921f926ccac59d3",
+            "currentSha256": "b046d82b1709a4c0411d0ee26aaa7fbba4412fcc7c5b173b7d160cd151fb3dbe",
+            "expectedTypeImportAndFormatOnly": true,
+            "emittedJsIdentical": false,
+            "previousEmittedJsSha256": "2e817aa2c6f479c27b9bb4eb86a8bdcd606ae0c1e9272dbfb64599bdc6a08604",
+            "currentEmittedJsSha256": "a58d9649008b4c71a96455d51ea62f26a305e9c614a3db9ce7cb5e5fee947db2",
+            "formattedEmittedJsIdentical": true,
+            "formattedEmittedJsSha256": "753a8cfe8cf26178642da10aec1b590f05c47a9b6942de7a48749c1b3b997d74",
+            "emittedDifference": "TypeScript retained source line breaks; normalized emitted JavaScript is byte-identical. Raw emitted bytes are not claimed identical."
+          }
+        ],
+        "coverageBindingDecision": {
+          "sourceScanRowsAdded": 0,
+          "existingSourceScanRowsChanged": 0,
+          "existingRawImportHashRenewals": 1,
+          "allowedLiteralSpecifiers": ["@proto.ui/core"],
+          "correction": "Neither repaired source has an existing Source-scan fingerprint row. The helper already has the exact raw-import allowance; only its hash is renewed. Existing blocked authored-controller ownership and matrix counts/states remain unchanged."
+        },
+        "qualification": "Local compiler and deterministic formatting evidence only; does not supersede native run 44937449914 at the original clean head."
+      },
+      "sourceScanRowsAdded": 0,
+      "sourceScanRowsChanged": 0,
+      "rawImportHashesRenewed": 1,
+      "matrixConsumerStatesChanged": false
+    },
+    "selectRtlOwner": {
+      "scope": "Minimal RTL paint-owner correction authorized after native 4c2 evidence; no product changes or browser execution.",
+      "nativeEvidence": {
+        "runId": 44937449914,
+        "attempt": 1,
+        "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "artifactId": 14721120225,
+        "failure": "Seven RTL assertions sampled transparent listbox Content while the exact named Surface was connected and visible; WC dark Trigger external-foreground-mismatch remains an independent red observation."
+      },
+      "change": "Content continues to supply direction, portal/listbox/scroll geometry, labels and dimensions. Liquid RTL color/background/radius are sampled on exactly one rtlSurface, with exact liquid-glass-select-surface identity and Content/Surface selectRtlLayout scene assertions. Bootstrap continues to sample Content. All original paint/geometry assertions and deadlines remain unchanged.",
+      "sourceFiles": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "sha256": "1504c5b613c732ffdfbc6961eeda210c8cfd5bb9d29bf7e1f1eed610189c728d"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-regression-fixture-contract.test.ts",
+          "sha256": "b0c12b5eec72679bb1b7e38529b00bb81f010481aaaf635e2e31e179ca6fa252"
+        }
+      ],
+      "validation": {
+        "command": "node node_modules/vitest/vitest.mjs run apps/www/src/content/docs/zh-cn/demo-regression-fixture-contract.test.ts apps/www/src/components/PrototypePreviewer/projection-composition.material-stages.test.ts --maxWorkers=1 --minWorkers=1",
+        "filesPassed": 2,
+        "testsPassed": 18,
+        "testsFailed": 0,
+        "durationSeconds": 1.58,
+        "log": "select-rtl-owner-controls.log",
+        "logSha256": "d5e74d4b042c3c07c245aaca3b0eae8b89adf16b29c272d8224c687761b82000",
+        "assertionAst": {
+          "originalTopLevelExpectChains": 62,
+          "currentTopLevelExpectChains": 65,
+          "missingOriginalAssertions": [],
+          "addedAssertions": [
+            "expect(await rtlSurface.count()).toBe(1)",
+            "expect(await rtlSurface.getAttribute('data-projection-prototype')).toBe( 'liquid-glass-select-surface' )",
+            "expect( await owner.evaluate( (node) => node.closest<HTMLElement>('[data-material-scene]')?.dataset.demoRef ) ).toBe('selectRtlLayout')"
+          ],
+          "scope": "AST assertion-expression preservation only; no native browser execution."
+        },
+        "prettier": "passed",
+        "gitDiffCheck": "passed",
+        "nativeBrowser": "not run"
+      }
+    },
+    "hoverVisibleOverlap": {
+      "schemaVersion": 1,
+      "nativeFailure": {
+        "runId": 44937449914,
+        "attempt": 1,
+        "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "scope": "all four Liquid hover runtimes; policy negative only",
+        "originalAssertionsRetained": true
+      },
+      "cause": {
+        "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.css",
+        "sha256": "95e09b50f20d6e8b64334448369dccb288a8b2ec7fcdf7dd4fc51a1438c432d3",
+        "rule": "[data-material-overlay-mount]:empty { opacity: 0; }",
+        "originCommit": "009612b25",
+        "meaning": "Current CSS hides empty portal destinations; original model did not load it. opacity=0 sibling is legitimately skipped by unchanged source admission."
+      },
+      "repair": "Only accordion-tight adds actual positive-area app-owned paint within the original portal destination, using the real fixture helper. Real CSS stays active; native observations require visible opaque paint, exact 1px gap, intersection with independent contact bound. No material quality/receipt/source override.",
+      "assertions": {
+        "before": 158,
+        "after": 174,
+        "missing": [],
+        "added": 16
+      },
+      "sourceFiles": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+          "sha256": "764138b658a5e8e265dd0f8d40976e5ff909c81724ec0480165a0776cafbbf94"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+          "sha256": "b3610d4249358f84f24a535efcf4a2a82122df4fe2e637f1cc6f635fa7f19fd3"
+        },
+        {
+          "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+          "sha256": "e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/liquid-hover-source-layout.test.ts",
+          "sha256": "a8ad99b737ab62cdfbe32d4074ccb6bc64b1d647f8db7ec1a0796668883d449f"
+        }
+      ],
+      "controls": {
+        "filesPassed": 3,
+        "passed": 132,
+        "failed": 0,
+        "logSha256": "7279b67e53716c0d9424626b5004285aad643a319eef0b23a83746fd6e9652a7",
+        "durationSeconds": 1.84,
+        "scope": "Happy DOM source-admission model with actual scene CSS plus fixture and capture-plan controls, not native optical proof"
+      },
+      "unchanged": [
+        "source.ts admission",
+        "contact-carrier.ts",
+        "sink.ts",
+        "8-second settle limit",
+        "240-second native case budget",
+        "original sameGeometry/fallback reason/1px gap assertions"
+      ],
+      "nativeFinal": "Replacement-head native evidence required"
+    },
+    "materialHostPixelRegistration": {
+      "schemaVersion": 1,
+      "native": {
+        "runId": 44937449914,
+        "attempt": 1,
+        "jobId": 136947171517,
+        "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "error": "Optical image dimensions changed",
+        "location": "two light/dark optical tests after both owned-paint observations passed"
+      },
+      "cause": "Idle has zero carrier outset while pressed has the independently bounded contact extent. Comparing full PNG lengths confuses valid carrier geometry with changed host pixels.",
+      "repair": "Validate natural PNG dimensions against independent host/outset/DPR windows, decode at original size, crop identical host pixels without scaling/interpolation, retain RGB sum > 3 and changedPixels > 20. Fractional physical offset and unsafe/misaligned geometry fail closed. Preserve rest and pressed PNGs and identity/window/count metadata in native artifact.",
+      "assertions": {
+        "before": 28,
+        "after": 30,
+        "missing": [],
+        "added": 2
+      },
+      "sourceFiles": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+          "sha256": "50b513099f0afc86c8c4e14e4f442d20269519838d55885cd630d9895fb60646"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+          "sha256": "2beb2df386fcd579942ebc7d04aed361857948376cf27e84cb0c2566c1c8083b"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+          "sha256": "a4d2964f4498c9c7ba6fc79a39f02fa17226b09fe053bec8dce4a22256eb8218"
+        }
+      ],
+      "controls": {
+        "passed": 76,
+        "failed": 0,
+        "files": 2,
+        "durationSeconds": 1.42,
+        "addedWindowControls": 9,
+        "logSha256": "37bee651618e483c715db1e7f9917b1dcf2cc7b1f5de50233199698045d9bd4e"
+      },
+      "capabilityFailureUnchanged": "Required CDP trace categories unavailable remains a separate failure; no category omitted or fallback acceptance introduced.",
+      "nativeValidation": "Must come from corrected candidate; local mocks do not prove native pixel change."
+    },
+    "hoverPlanAndFiniteStyleMap": {
+      "scope": "Frozen limited implementation and pure controls before generated manifests complete; runtime fixture edits remain parent-owned.",
+      "files": [
+        {
+          "path": "apps/www/test/helpers/liquid-hover-plan.ts",
+          "bytes": 10964,
+          "sha256": "0988fa29bcb5357e72ef33b636ee5b70eaf25429eaa912fecfb01d817fee5e3b"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+          "bytes": 15436,
+          "sha256": "b440c13b552d5b8d393018f476193fca445b1c0337005474e79262e52f2383b2"
+        },
+        {
+          "path": "packages/cli/src/services/proto-style-css.ts",
+          "bytes": 78103,
+          "sha256": "772afaadd3db92585cee86c9cc6dd85496a4f46de2d3c9abbfb6cffb734c8430"
+        },
+        {
+          "path": "packages/cli/test/proto-style-css.test.ts",
+          "bytes": 57856,
+          "sha256": "77c67d109fe871b75d71a09f8a19a75c7d47c7274987c6fa7a07b9486d17aacb"
+        }
+      ],
+      "checks": [
+        {
+          "path": "hover-plan-controls.log",
+          "actualExit": 0,
+          "tests": 13,
+          "bytes": 2006,
+          "sha256": "5b52abcbd0dd09137e545e5a7f158fa6c20e2fed59575270cb0c58ab52f8ac39"
+        },
+        {
+          "path": "carousel-cursor-css-controls.log",
+          "actualExit": 0,
+          "tests": 84,
+          "bytes": 3004,
+          "sha256": "45cd519738a89c2be363f23ae141c03acfec3ff5bc805564c03483d75719e8dd"
+        }
+      ]
+    },
+    "styleClosure": {
+      "baseline": "a8bf56087e5836e3c14c153cafbd796bd98bff37",
+      "sourceCommit": "4a59696bda68bd862154c1faa9a33eb0ed48e90e",
+      "sourcePullRequest": 1666,
+      "inputProof": {
+        "baseline": "a8bf56087",
+        "candidate": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "uniqueInputCount": 1518,
+        "allFamilyAndReachedBaseInputsMatchBaselineObjects": true,
+        "mismatches": [],
+        "familyInputCounts": {
+          "shadcn": 689,
+          "brutalist": 596,
+          "bootstrap-2-3-2": 585,
+          "liquid-glass": 581
+        },
+        "sourceBoundary": "Each family src directory plus static reached Base src; does not scan shadcn/test, apps/www, or Drawer fixture/test files.",
+        "otherComparedPaths": [
+          "scripts/styles",
+          "packages/cli/src/services",
+          "packages/cli/src/generated",
+          "pnpm-lock.yaml",
+          ".prettierrc",
+          "package.json"
+        ],
+        "otherPathChanges": [],
+        "sourceCommitAttribution": "4a59696bd feat(components): complete selection, numeric, scroll and resize capabilities (#1666)"
+      },
+      "families": [
+        {
+          "family": "shadcn",
+          "oldCount": 944,
+          "newCount": 953,
+          "addedCount": 11,
+          "removedCount": 2,
+          "inputCount": 689,
+          "delta": [
+            {
+              "change": "added",
+              "token": "basis-[min(100%,max(calc(var(--pui-basis)*1%),calc(var(--pui-min-size)*1px)))]",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:select-none",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[hidden]:invisible",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[outside]:not-[data-selected]:text-muted-foreground",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:bg-accent",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:rounded-none",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:text-accent-foreground",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:bg-primary",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:text-primary-foreground",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "removed",
+              "token": "basis-full",
+              "sourcePaths": ["packages/prototypes/shadcn/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "removed",
+              "token": "data-[outside]:text-muted-foreground",
+              "sourcePaths": ["packages/prototypes/shadcn/src/calendar/visual.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            }
+          ]
+        },
+        {
+          "family": "brutalist",
+          "oldCount": 527,
+          "newCount": 540,
+          "addedCount": 13,
+          "removedCount": 0,
+          "inputCount": 596,
+          "delta": [
+            {
+              "change": "added",
+              "token": "basis-[min(100%,max(calc(var(--pui-basis)*1%),calc(var(--pui-min-size)*1px)))]",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "box-border",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:select-none",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[hidden]:invisible",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:bg-main/20",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:rounded-none",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:text-foreground",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:bg-main",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:bg-primary",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:text-main-foreground",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:text-primary-foreground",
+              "sourcePaths": [
+                "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+                "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            }
+          ]
+        },
+        {
+          "family": "bootstrap-2-3-2",
+          "oldCount": 647,
+          "newCount": 657,
+          "addedCount": 12,
+          "removedCount": 2,
+          "inputCount": 585,
+          "delta": [
+            {
+              "change": "added",
+              "token": "basis-[min(100%,max(calc(var(--pui-basis)*1%),calc(var(--pui-min-size)*1px)))]",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:select-none",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[hidden]:invisible",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:bg-secondary",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:border-transparent",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:rounded-none",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:text-foreground",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_rgb(0_0_0/25%)_rgb(0_0_0/10%)]",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)]",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "overscroll-contain",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "removed",
+              "token": "data-[selected]:border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_rgb(0_0_0/25%)_rgb(0_0_0/10%)]",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "removed",
+              "token": "data-[selected]:text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)]",
+              "sourcePaths": ["packages/prototypes/bootstrap-2-3-2/src/calendar/day-paint.ts"],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            }
+          ]
+        },
+        {
+          "family": "liquid-glass",
+          "oldCount": 440,
+          "newCount": 452,
+          "addedCount": 12,
+          "removedCount": 0,
+          "inputCount": 581,
+          "delta": [
+            {
+              "change": "added",
+              "token": "basis-[min(100%,max(calc(var(--pui-basis)*1%),calc(var(--pui-min-size)*1px)))]",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "box-border",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:cursor-grabbing",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[dragging]:select-none",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[hidden]:invisible",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:bg-secondary",
+              "sourcePaths": [
+                "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+                "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:rounded-none",
+              "sourcePaths": [
+                "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+                "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[range-middle]:text-secondary-foreground",
+              "sourcePaths": [
+                "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+                "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:bg-primary",
+              "sourcePaths": [
+                "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+                "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "data-[selected]:not-[data-range-middle]:text-primary-foreground",
+              "sourcePaths": [
+                "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+                "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts"
+              ],
+              "reason": "Calendar / Date Picker inclusive range middle and selected endpoint styling; selected outside-day exclusion where applicable."
+            },
+            {
+              "change": "added",
+              "token": "overscroll-contain",
+              "sourcePaths": ["packages/prototypes/base/src/carousel/carousel.proto.ts"],
+              "reason": "Carousel continuous drag / retained slide size and visibility; source style rules from inherited capability commit."
+            }
+          ]
+        }
+      ],
+      "executions": [
+        {
+          "name": "preset-baseline-a8bf-check",
+          "command": ["corepack", "pnpm@10.32.1", "check:styles:preset"],
+          "seconds": 44.396,
+          "exitCode": 1,
+          "logSha256": "78e3c6eee5a44705efeb7a2f4ee32b1122c4d514da6265615e43fddf647a177d",
+          "logBytes": 912
+        },
+        {
+          "name": "preset-real-generator",
+          "command": ["corepack", "pnpm@10.32.1", "styles:preset:generate"],
+          "seconds": 127.147,
+          "exitCode": 1,
+          "logSha256": "7e10b6545af1f2f521284011f98d8aa8dbf116050d559b5479e3f53930fd98bc",
+          "logBytes": 1035
+        },
+        {
+          "name": "preset-real-generator-after-cursor",
+          "command": ["corepack", "pnpm@10.32.1", "styles:preset:generate"],
+          "seconds": 165.648,
+          "exitCode": 0,
+          "logSha256": "676e92c1716d360265b73ec5d285e538e59e0a789cf216b4e4be1da710a46022",
+          "logBytes": 628
+        },
+        {
+          "name": "preset-complete-check-after-cursor",
+          "command": ["corepack", "pnpm@10.32.1", "check:styles:preset"],
+          "seconds": 163.41,
+          "exitCode": 0,
+          "logSha256": "b5d35e5ba650f6d4dda97d84cfff7268e4baf35c1d67227a97387a38e777cb57",
+          "logBytes": 2036
+        }
+      ],
+      "generatedCandidatesMatch": {
+        "shadcn-style-tokens.ts": {
+          "matches": true,
+          "bytes": 27921,
+          "sha256": "e3a292e56f99a3f59b47a042c337bba95e48fee79d7f05b4a89f3e10df8229a7"
+        },
+        "brutalist-style-tokens.ts": {
+          "matches": true,
+          "bytes": 13803,
+          "sha256": "e7d96d26c54c5a23208c66a1571d6755b55e23c414555bb40a1637e6193f7738"
+        },
+        "draft-family-style-tokens.ts": {
+          "matches": true,
+          "bytes": 36397,
+          "sha256": "48b809b48028aef5f4fde99d9106a9c8a9479fdf411f9f9a1ef6e4bfe27f1bce"
+        }
+      },
+      "interpretation": "Original real generator and unsupported-token guard retained. One finite cursor mapping restores an already authored Carousel token; no prototype or Compiler/IR semantics change."
+    },
+    "liveGovernanceFacts": {
+      "schemaVersion": 1,
+      "operation": "explicit-local-factual-refresh",
+      "observedAt": "2026-11-21T18:57:24.166Z",
+      "source": "actual exported normalization/reconciliation generator with freshly retrieved GitHub REST facts",
+      "generator": "scripts/coverage-matrices/sync-github-governance-snapshot.mjs",
+      "generatorSha256": "5228630dd963f4994d6903f0cb860eea6beaeb951cf82b0e8e101713bb29b14d",
+      "beforeSha256": "d668ce75f8c6371135525be20f53160799f26f1ee0e98ecd3256502539e11ea4",
+      "afterSha256": "8596b4f1e8f24e4859e703df4b938df39ed2fc00c01e2734b12e0f40d588ba08",
+      "deltas": [
+        {
+          "kind": "issues",
+          "number": 522,
+          "key": "bodySha256",
+          "before": "01022ebe00f1295e8a0af6667ba9bf39085fdc6ed3f0c5b6fdf9c565343fb662",
+          "after": "fd6c4909092f9db5123251cf268ad957d75b7c8dfdcf999e3c1c2ebd4f0d47e5"
+        },
+        {
+          "kind": "issues",
+          "number": 523,
+          "key": "bodySha256",
+          "before": "d735b6e77c07b91c476e0d11c2adcf8be5d44c30626ce66c100a6e6206f10391",
+          "after": "b3c09a98d4ac9bee5972ac2fcbdf3f31412b676cd6973c8d5b79f645a0df763f"
+        },
+        {
+          "kind": "issues",
+          "number": 745,
+          "key": "bodySha256",
+          "before": "a8166c70c3f4d6ba68a91e35b69d6d1c4562af52f197e8c5e4b69928031a0606",
+          "after": "0d06d1056feb2024b2378a3dbfa6a9c4bb3a1b77d511d7c41e56175d7e026e84"
+        },
+        {
+          "kind": "issues",
+          "number": 746,
+          "key": "bodySha256",
+          "before": "b8ab403b3e81a1c7b7898318af8db1a62cd08d2ae2a3147d6ed53e7afc09b8c0",
+          "after": "71572ff854e83a29d391d7aa3d96d5f5c1da3f7cfce763dc21df8a812dc0e7e9"
+        },
+        {
+          "kind": "issues",
+          "number": 1323,
+          "key": "bodySha256",
+          "before": "cdb0cb1c0c57f0048bc54392124374d1ccd2bccaeaf32911b953611761651c68",
+          "after": "c6dcf6b86a6384e34a7d531bf2fc0ed9e161025bde485ee3cb7620c0d557a6eb"
+        }
+      ],
+      "preserved": "all lifecycle/state/title/labels/assignees/milestone/owners and PR facts; matrix rows unchanged",
+      "nativeFailure": {
+        "run": 44937449914,
+        "job": 136947087565,
+        "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+      },
+      "cliWriteExecuted": false
+    },
+    "drawerActivationAndRetention": {
+      "schemaVersion": 1,
+      "observedAt": "2026-11-21T19:36:53.669677+00:00",
+      "scope": "Narrow fixture activation and failure-artifact retention repair; no local browser execution; historical native failures remain failures.",
+      "source": {
+        "checkpointHead": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "files": [
+          {
+            "file": "packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+            "path": "/workspace/scratch/fbd6f62bb640/proto-ui/packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+            "sha256": "e437eb2de9c711c59eac46244b2689bffac59791a5bfc4332a3b26db600c52b7",
+            "bytes": 2050
+          },
+          {
+            "file": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+            "path": "/workspace/scratch/fbd6f62bb640/proto-ui/packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+            "sha256": "7d8dd37707ba371054467ec828b62b40f1a3fb593f9f0e7ea6b5669765485669",
+            "bytes": 4156
+          },
+          {
+            "file": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+            "path": "/workspace/scratch/fbd6f62bb640/proto-ui/packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+            "sha256": "c2cf7628ade330299623f979acb4b6ce8c6ae060534b079ab89a07832b19e39d",
+            "bytes": 20234
+          }
+        ],
+        "trackedFilesFrozen": true
+      },
+      "nativeObservation": {
+        "runId": 44937449914,
+        "attempt": 1,
+        "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+        "shard": 18,
+        "jobId": 136947172470,
+        "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947172470",
+        "artifactId": 14720693504,
+        "artifactDigest": "sha256:0190638d464dfcdb3d5dbc565683f7718380fd408944523fc8cb74eda595a15e",
+        "file": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+        "fileCases": {
+          "passed": 5,
+          "failed": 2
+        },
+        "failure": "Both public cold-entry cases reached events.some with the projector observation undefined. Page-error assertion had passed; later moving geometry assertions were not reached.",
+        "unavailableEvidence": "Native frame/PNG evidence was written to an uncollected tmp directory; the 4c2 artifact does not establish the actual native closed/entered frame sequence."
+      },
+      "causalControl": {
+        "observation": {
+          "path": "/workspace/scratch/fbd6f62bb640/drawer-open-control-observation.json",
+          "sha256": "82c14a042ddde4eda4c9af34f8e6f995139d30626734473afa21acc1c49bdfc0",
+          "bytes": 651
+        },
+        "log": {
+          "path": "/workspace/scratch/fbd6f62bb640/drawer-open-control.log",
+          "sha256": "317c5180fca77578d66dfdef184875589ac5348a238514ee649924a37e6e4575",
+          "bytes": 180750
+        },
+        "scope": "Happy DOM model using the actual public Drawer fixture; wrapper activation leaves public Root.open false, authored Button activation changes public Root.open to true. This is not native movement/geometry proof."
+      },
+      "changes": [
+        "Fixture open selects exactly one authored trigger-action element, validates wc-shadcn-button, then calls that Button click.",
+        "Existing fixture control waits for public effective disabled=false, proves the wrapper does not open, then proves fixture.open opens.",
+        "Native cold-entry case waits for public aria-disabled=false; missing projector event array now fails explicitly before all original events and geometry assertions.",
+        "Dedicated PUI_FINF_FEATURE_EVIDENCE_DIR remains first priority; otherwise PROTO_UI_RUNTIME_EVIDENCE_DIR/drawer-presence retains the artifact; only local fallback uses tmpdir."
+      ],
+      "validation": {
+        "expectedBeforeFailure": {
+          "path": "/workspace/scratch/fbd6f62bb640/drawer-entry-before-control.log",
+          "sha256": "0c70991ebacbc8112035edcf0b1fc4baaf0d3ea10c3af3d000e788c34b9b54a6",
+          "bytes": 185561
+        },
+        "after": {
+          "command": "node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/drawer-www-entry.test.ts packages/prototypes/shadcn/test/drawer-entry-diagnostic.test.ts --maxWorkers=1 --minWorkers=1",
+          "passedFiles": 2,
+          "passedTests": 2,
+          "failedTests": 0,
+          "durationSeconds": 7.73,
+          "log": {
+            "path": "/workspace/scratch/fbd6f62bb640/drawer-entry-after-controls.log",
+            "sha256": "2e9d18937df824ae739090ecbad1f6b070c5fbcac970ab21a54ae4d0345aac2a",
+            "bytes": 189365
+          }
+        },
+        "assertionPreservation": {
+          "originalTopLevelExpectChains": 53,
+          "currentTopLevelExpectChains": 55,
+          "missingOriginalAssertions": [],
+          "addedAssertions": [
+            "expect .poll(() => page .locator('wc-shadcn-drawer-trigger [data-demo-ref=\"trigger-action\"]') .getAttribute('aria-disabled') ) .toBe('false')",
+            "expect(Array.isArray(events), 'Drawer projector observation was not initialized').toBe( true )"
+          ],
+          "scope": "AST assertion preservation only. Original 30s cold-entry case budget and events/moving geometry assertions remain unchanged."
+        },
+        "assertionEvidence": {
+          "path": "/workspace/scratch/fbd6f62bb640/drawer-entry-assertion-preservation.json",
+          "sha256": "65341f6d7abf6b3258e5f4aa4c5f320ed41f2c7d3908750ae5b4894e831b8069",
+          "bytes": 532
+        },
+        "format": "Prettier applied to exactly these three files; git diff --check returned zero.",
+        "nativeBrowserStatus": "Not rerun locally. Final candidate native geometry and motion acceptance remains outstanding."
+      }
+    }
+  },
+  "finalLocalTypeCheck": {
+    "schemaVersion": 1,
+    "command": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+    "environment": {
+      "NODE_OPTIONS": "--max-old-space-size=4096"
+    },
+    "startedAt": "2026-11-21T19:41:36.185590+00:00",
+    "finishedAt": "2026-11-21T19:45:20.621398+00:00",
+    "durationSeconds": 224.4358084889991,
+    "exitCode": 0,
+    "signal": null,
+    "sourceBefore": {
+      "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+      "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+      "dirty": true,
+      "worktreeSha256": "57162450c1191871c61d8ad14e4021a77e4d7c7e82255cd075ac601d92a701ef"
+    },
+    "sourceAfter": {
+      "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+      "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+      "dirty": true,
+      "worktreeSha256": "57162450c1191871c61d8ad14e4021a77e4d7c7e82255cd075ac601d92a701ef"
+    },
+    "sourceStable": true,
+    "log": {
+      "path": "/workspace/scratch/fbd6f62bb640/native-candidate-final-frozen-types.log",
+      "bytes": 10228,
+      "sha256": "7679d735a30a0ee3a0983db0af5670e57fdb4bafefebf1c84e2fde7f364dca36"
+    },
+    "qualification": "Full local command on the frozen correction including the late Drawer repair. Source was dirty at the old 4c2 head but byte-stable throughout. Subsequent record edits do not alter these implementation files; this is not native CI acceptance.",
+    "astroFiles": 1259,
+    "errors": 0,
+    "warnings": 0,
+    "hints": 31
+  },
+  "sourceScanChange": {
+    "renewedPage": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+    "addedHelper": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+    "helperOwner": "www.demo.authored-controllers",
+    "renewedExistingRows": 1,
+    "addedRows": 1,
+    "existing78ConsumerRowsChanged": false
+  },
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "d26a928fdefaf697e543e25bcbce409a9256e400fab8440a35cb4b9b6693feb6"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts",
+      "sha256": "b4dec1f8661fb8866a69d195117e5d76da38590afd76112f4e263d74a51e611a"
+    },
+    {
+      "path": "apps/www/src/content/docs/drawer-command-disabled.shared.ts",
+      "sha256": "b046d82b1709a4c0411d0ee26aaa7fbba4412fcc7c5b173b7d160cd151fb3dbe"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts",
+      "sha256": "764138b658a5e8e265dd0f8d40976e5ff909c81724ec0480165a0776cafbbf94"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "sha256": "50b513099f0afc86c8c4e14e4f442d20269519838d55885cd630d9895fb60646"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-regression-fixture-contract.test.ts",
+      "sha256": "b0c12b5eec72679bb1b7e38529b00bb81f010481aaaf635e2e31e179ca6fa252"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "sha256": "1504c5b613c732ffdfbc6961eeda210c8cfd5bb9d29bf7e1f1eed610189c728d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-hover-fixture.ts",
+      "sha256": "b3610d4249358f84f24a535efcf4a2a82122df4fe2e637f1cc6f635fa7f19fd3"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-hover-plan.test.ts",
+      "sha256": "b440c13b552d5b8d393018f476193fca445b1c0337005474e79262e52f2383b2"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-hover-source-layout.test.ts",
+      "sha256": "a8ad99b737ab62cdfbe32d4074ccb6bc64b1d647f8db7ec1a0796668883d449f"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts",
+      "sha256": "a4d2964f4498c9c7ba6fc79a39f02fa17226b09fe053bec8dce4a22256eb8218"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/material-paint-observation.ts",
+      "sha256": "2beb2df386fcd579942ebc7d04aed361857948376cf27e84cb0c2566c1c8083b"
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "sha256": "e5ac9d5ed097908f60abec84790684d1e84570b9747fa3a03ba95faf9b763d83"
+    },
+    {
+      "path": "apps/www/test/helpers/liquid-hover-plan.ts",
+      "sha256": "0988fa29bcb5357e72ef33b636ee5b70eaf25429eaa912fecfb01d817fee5e3b"
+    },
+    {
+      "path": "internal/coverage-matrices/github-governance-snapshot.json",
+      "sha256": "8596b4f1e8f24e4859e703df4b938df39ed2fc00c01e2734b12e0f40d588ba08"
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "sha256": "8fbe8f4d01366730d92efdd1440cbd9c01004450ed7e9b373264e5bf1a04d8f4"
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "sha256": "e7d96d26c54c5a23208c66a1571d6755b55e23c414555bb40a1637e6193f7738"
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "sha256": "48b809b48028aef5f4fde99d9106a9c8a9479fdf411f9f9a1ef6e4bfe27f1bce"
+    },
+    {
+      "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "sha256": "e3a292e56f99a3f59b47a042c337bba95e48fee79d7f05b4a89f3e10df8229a7"
+    },
+    {
+      "path": "packages/cli/src/services/proto-style-css.ts",
+      "sha256": "772afaadd3db92585cee86c9cc6dd85496a4f46de2d3c9abbfb6cffb734c8430"
+    },
+    {
+      "path": "packages/cli/test/proto-style-css.test.ts",
+      "sha256": "77c67d109fe871b75d71a09f8a19a75c7d47c7274987c6fa7a07b9486d17aacb"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "sha256": "c2cf7628ade330299623f979acb4b6ce8c6ae060534b079ab89a07832b19e39d"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-www-entry.test.ts",
+      "sha256": "7d8dd37707ba371054467ec828b62b40f1a3fb593f9f0e7ea6b5669765485669"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+      "sha256": "e437eb2de9c711c59eac46244b2689bffac59791a5bfc4332a3b26db600c52b7"
+    },
+    {
+      "path": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "sha256": "9a92d81c89a330e5c2d35c0a89978f3152f0fb6193b5f841e510f38a058060f7"
+    },
+    {
+      "path": "scripts/test/regression-baseline.test.mjs",
+      "sha256": "09053c27c5f8499886d90db57f15ab1350ba67823c16c7b06522efeca9fb4c9e"
+    }
+  ],
+  "review": "Independent read-only source and retained-evidence review found no new P1/P2 or source blocker; not GitHub APPROVE or native acceptance.",
+  "remainingBoundary": [
+    "Every prior native failed or cancelled job retains its actual conclusion and head.",
+    "Completed file inventory is distinct from successful collection, passed assertions and complete case captures.",
+    "Original scope/readiness/geometry/focus/paint/trace checks remain blocking; no broad skipped or capability waiver.",
+    "Final generated source bindings, clean strict size measurement and a full native cycle must identify the replacement candidate.",
+    "The new native cycle will retain known product, fixture, capability and generated-evidence failures rather than converting failed jobs into product-bug counts."
+  ],
+  "previousLocalTypeCheck": {
+    "command": "NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm@10.32.1 -s check:types",
+    "exitCode": 0,
+    "astroFiles": 1259,
+    "errors": 0,
+    "warnings": 0,
+    "hints": 31,
+    "logSha256": "4abd8605fdc100ee56026cf4a604e09174e8b64181002d62883b8a9cd9efd069",
+    "qualification": "Observed before the late Drawer activation repair; retained historical local type receipt, not final-candidate acceptance."
+  },
+  "nativeSharedBrowser": {
+    "runId": 44937449914,
+    "attempt": 1,
+    "head": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+    "scope": "Complete shared-browser shard evidence only. The whole workflow was still in progress at this snapshot.",
+    "nativeBrowserCounts": {
+      "success": 5,
+      "failure": 13
+    },
+    "plan": {
+      "browserFiles": 99,
+      "browserShards": 18,
+      "generalFiles": 1778
+    },
+    "artifactCount": 19,
+    "artifactZipHashesVerified": true,
+    "aggregateTestCounts": {
+      "numTotalTests": 1443,
+      "numPassedTests": 1348,
+      "numFailedTests": 76,
+      "numPendingTests": 19,
+      "numTodoTests": 0
+    },
+    "inventory": {
+      "selectedFiles": 99,
+      "reportedFiles": 99,
+      "uniqueReportedFiles": 99,
+      "missing": [],
+      "unexpected": [],
+      "duplicates": []
+    },
+    "noOuter900SecondTruncation": true,
+    "summarySha256": "e0eb827e5467a67c870e224a5e23f3768d01e33f0548ca064defacb0ead921b5",
+    "shards": [
+      {
+        "shard": 1,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-1-of-18",
+          "outcome": "success"
+        },
+        "selectedFiles": ["apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts"],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 0,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 84,
+          "numPassedTests": 84,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "7424a935a5f5aa53df4980cd26ec941038ab4a80e32797ccac0d91a8125aa0cb",
+          "result-browser-1-of-18.json": "6e2401d0549bff4e1def3f55ba1f1e84a8facf967915eaa881b67cf84ae14b00",
+          "observation-browser-1-of-18.json": "8096e73feace4aec76635d8bf7899631c9491f2436a8aab37cc80177a408d57b",
+          "progress-browser-1-of-18.json": "9f98340639adc78372680f4077b546a8a181b5be8e6e33f553e80b581a7984a1",
+          "selection-browser-1-of-18.json": "727a4b4c5315d7c30654252d68ca844df7c8efe9cc4bcb91c6b9a450797bd737",
+          "vitest-browser-1-of-18.json": "d76c1c4c39e57b1f37194e00b489e8794626324e0835f50d907f4b2fe390e5a4",
+          "browser.log": "784b43169a5bbb06227888757b55193f5752734789af38c932af0087b9283f85"
+        },
+        "job": {
+          "id": 136947171480,
+          "name": "test-browser (1/18, browser-1-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171480",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-21T18:48:01Z",
+          "completedAt": "2026-11-21T19:01:32Z"
+        },
+        "artifact": {
+          "id": 14720418095,
+          "name": "runtime-ci-44937449914-browser-1-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720418095",
+          "size_in_bytes": 23925028,
+          "digest": "sha256:a84aea943858b7d18643b3dc3e2460866a1f18b31f5b45db7336d32b6d114d2f",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 2,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-2-of-18",
+          "outcome": "success"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 0,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 39,
+          "numPassedTests": 39,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "c7d12f625ceb5d2c59feb671b8007bdec4d4f287763d993d0a165beb1bd23c7f",
+          "result-browser-2-of-18.json": "fee116da61bd2d79cfc36b5747b84131cc3a5835f1b3fae68dc866969f36ddf9",
+          "observation-browser-2-of-18.json": "8538cff6939c5d8c95fc782bfba58107a43f9956592539801ccb13cf82540721",
+          "progress-browser-2-of-18.json": "5c95ee66d2112d714564690cb8f1ac73ee89acbc258b6942b5146d09351c1321",
+          "selection-browser-2-of-18.json": "6f9794f3734252a6121f0e4fc4d66c6c4251337f34131fe050c019fdeb41f523",
+          "vitest-browser-2-of-18.json": "e4994c1712aa7f7204e2b6d3e0bd7672b1ad28e167ae4f91ce959e9033b5a959",
+          "browser.log": "900a72b5bf999c30e8fcc6f33af22fcebc17386651dc94b8d1f229a5503d07b6"
+        },
+        "job": {
+          "id": 136947171512,
+          "name": "test-browser (2/18, browser-2-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171512",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-21T18:48:21Z",
+          "completedAt": "2026-11-21T19:00:33Z"
+        },
+        "artifact": {
+          "id": 14720906050,
+          "name": "runtime-ci-44937449914-browser-2-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720906050",
+          "size_in_bytes": 77611136,
+          "digest": "sha256:8bb7b2084d664de85a17fde2134cdef37eb3acbc29ec72108290b4fabe0c5b20",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 3,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-3-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts",
+          "apps/www/test/virtual-list-resize.browser.test.ts",
+          "packages/adapters/vue/test/focus-request-readiness.browser.test.ts",
+          "packages/prototypes/base/test/async-region.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 0,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 103,
+          "numPassedTests": 99,
+          "numFailedTests": 0,
+          "numPendingTests": 4,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "d518ac308ea5d55f21df95f0a061de2821adac1682f6645f4b509a589ec9e46d",
+          "result-browser-3-of-18.json": "cf11af278fc09f9a0962cffc832ff7b5d7d33adee727a0761043b6aaec436530",
+          "observation-browser-3-of-18.json": "320b661097a48c261aca95bd86295b3a7e981a3f123b23b4bb4817f19d0d556e",
+          "progress-browser-3-of-18.json": "7d723f72055be1e52fe7a39282afcc5b0ce4d2e4f3a18937beaeb8c2e7c2fc9a",
+          "selection-browser-3-of-18.json": "158bc519b95d981efc23ec78be9cad22c94cfebcef81d7c5718a9bc41adb1041",
+          "vitest-browser-3-of-18.json": "a1eb102de31633e190b6a2ea40acf6907b8febb5f701bd82973873e9a22e07d5",
+          "browser.log": "7e1ec42d2ecf88532a54bc5321b51f33c0296c33655f6d2f40afb23fcfba4a47"
+        },
+        "job": {
+          "id": 136947171507,
+          "name": "test-browser (3/18, browser-3-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171507",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:48:07Z",
+          "completedAt": "2026-11-21T18:52:59Z"
+        },
+        "artifact": {
+          "id": 14720875643,
+          "name": "runtime-ci-44937449914-browser-3-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720875643",
+          "size_in_bytes": 3957753,
+          "digest": "sha256:10c3cf023776197d03be415921a09dd0f47ddfcd011fe646b13820e5c66cf0a3",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 4,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-4-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts",
+          "packages/compiler/test/focus-scope-native.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 73,
+          "numPassedTests": 65,
+          "numFailedTests": 8,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "ecf93f1ce6e1052e1257b3fc42db74b9a9ebf5a2515dab94c4c6dbd08c1ab4cd",
+          "result-browser-4-of-18.json": "7069bb3996a375618de7c2e8ea301af485910dd521b81699860275de264292b7",
+          "observation-browser-4-of-18.json": "4e37bc93cf49aca26fe95d503c2859e301f69e38fb1540cb5b006a77624b066c",
+          "progress-browser-4-of-18.json": "54f34830635d9b5c4f95cb2031793f95d0a6cbba544e6d7021dca0a76af9adfe",
+          "selection-browser-4-of-18.json": "a2a9fbde6281ad943888cc1f493f8a2c612bf68fdb1493e46423c5cb97653244",
+          "vitest-browser-4-of-18.json": "b37ecbc2f9cc272d1ee522b18c15998c8cf37a5a76ae3574b885fbe1f1985513",
+          "browser.log": "089443dfdce7d0f761c184a924371c58e88cd029bb42f7e445648c6057474be4"
+        },
+        "job": {
+          "id": 136947171596,
+          "name": "test-browser (4/18, browser-4-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171596",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:48:38Z",
+          "completedAt": "2026-11-21T18:55:44Z"
+        },
+        "artifact": {
+          "id": 14721120225,
+          "name": "runtime-ci-44937449914-browser-4-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14721120225",
+          "size_in_bytes": 7031843,
+          "digest": "sha256:69166ecfc6a6b10394397df0e7190603c1a1ba17948ba3c0d0684ff379c6a5ad",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 5,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-5-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts",
+          "apps/www/test/radio-group-entry.browser.test.ts",
+          "packages/compiler/test/vue2-native-editor.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 90,
+          "numPassedTests": 86,
+          "numFailedTests": 4,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "73cdb322d3ebd56db19a036d212930686bd0cfea6117622d33333b26651a1516",
+          "result-browser-5-of-18.json": "aea23cea0e045e0975df69044d1494cd8961b8293f245f5bcfd79020834cf629",
+          "observation-browser-5-of-18.json": "d611c3b46c49cfe4de5c5efde0f812baa23e7e523da0507807928584abf72498",
+          "progress-browser-5-of-18.json": "3e5efcda83f7c7450bd45e9b8ee204f46cda6c28cc521bee421d3edc3f63dff7",
+          "selection-browser-5-of-18.json": "40bfe5f1c7933f9928569c7172f80400e9931112c425383590fd0c1cbd2999a2",
+          "vitest-browser-5-of-18.json": "d8f131812a8b1ddeca85597c9e181c89b74c8c22ce76baa5a6a68d76d2398f42",
+          "browser.log": "d7c9844ba53d10b3c0cda0fd59d5706dc14db7b892a0ef60d937715114920ade"
+        },
+        "job": {
+          "id": 136947171500,
+          "name": "test-browser (5/18, browser-5-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171500",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:48:06Z",
+          "completedAt": "2026-11-21T18:57:14Z"
+        },
+        "artifact": {
+          "id": 14720238113,
+          "name": "runtime-ci-44937449914-browser-5-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720238113",
+          "size_in_bytes": 66081,
+          "digest": "sha256:213c4d058de06e1baed44701c9202754e0e2a20da45fb7ddca8126757d067c17",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 6,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-6-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts",
+          "apps/www/test/message-composition.browser.test.ts",
+          "packages/adapters/react/test/focus-entry-readiness.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 40,
+          "numPassedTests": 39,
+          "numFailedTests": 1,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "781c926c34118569f65e2bba8b5efd5087f1f27e239d060634d8266697b8914e",
+          "result-browser-6-of-18.json": "622f70459b99d857e578715b8e2598e6d8f7b7fccf042abba60466281a674cd1",
+          "observation-browser-6-of-18.json": "eb96a29f76fddae07640af83595112f0b311a73da63e8a0d794ebb788353f938",
+          "progress-browser-6-of-18.json": "f55f465ecaa7fd3f8e93354869a4ba0f0ce2e69530c3100213dd480ee02e04b3",
+          "selection-browser-6-of-18.json": "b4654d535e8194637b2b3e8e1b1b508e5b560f1a1086ab6772f08332fac3935e",
+          "vitest-browser-6-of-18.json": "4bb506bd9088c1469db637c13986b2e169df27f91bda312017d342e077d7ec66",
+          "browser.log": "3bb13bae42daf751d0048a2fb798ab6880b1cebd05f03566939bfbc2d0340805"
+        },
+        "job": {
+          "id": 136947171485,
+          "name": "test-browser (6/18, browser-6-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171485",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:48:01Z",
+          "completedAt": "2026-11-21T18:54:57Z"
+        },
+        "artifact": {
+          "id": 14720191874,
+          "name": "runtime-ci-44937449914-browser-6-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720191874",
+          "size_in_bytes": 10297507,
+          "digest": "sha256:4a87548578a49ee8700df9a0e705ab1e3f09a0f50d52f5cd37209d9ad6e518ce",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 7,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-7-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts",
+          "apps/www/test/component-consumer-repairs.browser.test.ts",
+          "packages/adapters/web-component/test/shadow-closeout.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 223,
+          "numPassedTests": 205,
+          "numFailedTests": 18,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "900e9665844d1b4700bf5448d8ab51006af8158b1514140b2bd305a2bdf13709",
+          "result-browser-7-of-18.json": "00a89ec4cdb5558ab320cc127e7adc43491ab6a384b9e5a8f237a5591b06fcfd",
+          "observation-browser-7-of-18.json": "5ae221da48c2de3aade04f8c59cb27618fba7e314e74c30888729177d59f26e6",
+          "progress-browser-7-of-18.json": "157f2be6be30c23ef1defb4ed8676a07cc05b214025e6879dc4fdb8db048ddc1",
+          "selection-browser-7-of-18.json": "42f2e8e75344d63b6767e1fbee87d49a7477e74706cf8ad363c9f69e31fbe07a",
+          "vitest-browser-7-of-18.json": "6818f69eddecc119b88e35b940f657b6736f1e9e2d99fa0e4529d04e491bb2db",
+          "browser.log": "c056eee09f19c284185782b4a6b2d10b8bf8034d32e0a1538c2da421258a76dd"
+        },
+        "job": {
+          "id": 136947171552,
+          "name": "test-browser (7/18, browser-7-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171552",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:53:01Z",
+          "completedAt": "2026-11-21T19:06:22Z"
+        },
+        "artifact": {
+          "id": 14720159862,
+          "name": "runtime-ci-44937449914-browser-7-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720159862",
+          "size_in_bytes": 597671,
+          "digest": "sha256:a8afb1513c7603093ba530efd51e9766ccc14db2e1b8aaf47b692de15c961e26",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 8,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-8-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/contrast-tooltip-warm-handoff.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts",
+          "apps/www/test/preferences.browser.test.ts",
+          "packages/adapters/web-component/test/native-text-width.browser.test.ts",
+          "packages/compiler/test/control-label-native.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 80,
+          "numPassedTests": 70,
+          "numFailedTests": 10,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "1924d008da7c65eafdc223aaa741f224882a86c89f0c2781762de00f4b2398a4",
+          "result-browser-8-of-18.json": "4f4806ba8982a1e2585842255c664c63adf3d13770516448366cc9d5c75ccd63",
+          "observation-browser-8-of-18.json": "d4a0b40121eea2de308c6a450305c3b288c1d48a9665cbeb6e8262cae2575f50",
+          "progress-browser-8-of-18.json": "540b28c11e9a946f89e6fb410ef453d45b4ad4a3ba856ef84d185c96333901f6",
+          "selection-browser-8-of-18.json": "0fb8e31c448a8c03b6d291766082355986e6a2334521e2b96e08df3e918ac9e5",
+          "vitest-browser-8-of-18.json": "5f431721bfba5f0ddefefbf1d9a915d8c8e790df968064a7411b26f386e370be",
+          "browser.log": "6cf2dd2c241c0b7f42b572b21c3f2920851f12232e51f262aaaf78668ab9fff7"
+        },
+        "job": {
+          "id": 136947171526,
+          "name": "test-browser (8/18, browser-8-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171526",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:54:59Z",
+          "completedAt": "2026-11-21T19:01:57Z"
+        },
+        "artifact": {
+          "id": 14720481927,
+          "name": "runtime-ci-44937449914-browser-8-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720481927",
+          "size_in_bytes": 12581827,
+          "digest": "sha256:befa53ca691e2a5c7586ed6bf90e5d2c64a99faaed5b494d29b0addc92366006",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 9,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-9-of-18",
+          "outcome": "success"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts",
+          "apps/www/test/tree-navigation.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 0,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 43,
+          "numPassedTests": 43,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "4301383406b35c01ccda08ff805ebadc644fb6e376efe2bc84a7fa85ba179549",
+          "result-browser-9-of-18.json": "b6626be0fc651c9567bc860364d7957761d8b4444f64927d51fa9b67d2693933",
+          "observation-browser-9-of-18.json": "d3b8a5bc0eae92fee7c09c9f09d093671313c3052456ff46d0ab82537c1db16c",
+          "progress-browser-9-of-18.json": "44f2e2f88af80b70e70931ea52af3459b13e46d1d432153f1b85810a08506c20",
+          "selection-browser-9-of-18.json": "13b70aad9e417f4ac9fa1691b870b14715f5bfca8bf7a45dbc1c156f0febb57b",
+          "vitest-browser-9-of-18.json": "df465c7c56f37a8e14330bc08a577d05de3fb626d684da3bd6e52e694831ca2e",
+          "browser.log": "6f5148e52328a9f17a1bd9a0044cf0f9914d812c6f97bbcab8e7c0b2f1baba7f"
+        },
+        "job": {
+          "id": 136947171509,
+          "name": "test-browser (9/18, browser-9-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171509",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-21T18:55:46Z",
+          "completedAt": "2026-11-21T19:05:32Z"
+        },
+        "artifact": {
+          "id": 14720723168,
+          "name": "runtime-ci-44937449914-browser-9-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720723168",
+          "size_in_bytes": 15287538,
+          "digest": "sha256:4d9baf131f7f98f6af4f72b4ee3b669cfbcac9e3c910f745b845668cc4354daa",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 10,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-10-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts",
+          "apps/www/test/template-style.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 66,
+          "numPassedTests": 63,
+          "numFailedTests": 3,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "713cd5fe31a68f5df97c86b71428a3de4455664e078762d54ad9d85c968d6d9a",
+          "result-browser-10-of-18.json": "3355444fe667eee74b5219969d5a7c6c6fa25bc79bf8c07b81894b1b5a37a71d",
+          "observation-browser-10-of-18.json": "6098e8a9df47c9fc95abcd84e469b5fa56cde213fe0dddbb6cf41ff4df1bed37",
+          "progress-browser-10-of-18.json": "f1d0e45ca679cca408a5adebcf79894a72aea16e5853dcb4d9af832473e453fe",
+          "selection-browser-10-of-18.json": "f04eee112ee9a24dc8d955f45a8ff449945b54fdc068cc59a4ef6a8c5040bd4f",
+          "vitest-browser-10-of-18.json": "b11ce8eb9575969264349337cda0f044b723b8edb17323c3d586fca9884d4554",
+          "browser.log": "cac4999571b168c46de5ddedb2e2940e1ee47c3a50049930f365f0f931a80933"
+        },
+        "job": {
+          "id": 136947171503,
+          "name": "test-browser (10/18, browser-10-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171503",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T18:57:16Z",
+          "completedAt": "2026-11-21T19:06:08Z"
+        },
+        "artifact": {
+          "id": 14720473752,
+          "name": "runtime-ci-44937449914-browser-10-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720473752",
+          "size_in_bytes": 18489474,
+          "digest": "sha256:ea6937c05dd5d9d366e6cc8be9426abf42b6a18343c3a8995766ff76c9d211dc",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 11,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-11-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts",
+          "apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts",
+          "packages/adapters/base/test/focus-intent-retries.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 132,
+          "numPassedTests": 114,
+          "numFailedTests": 3,
+          "numPendingTests": 15,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "84e885e11923385fa8b9e948799d6524b347bd10e2ff766c73a5f0a82fb14d52",
+          "result-browser-11-of-18.json": "5de31922b9023e9e34cf81540eec826f79ea618fb87c056c9e187ebc1a3dea01",
+          "observation-browser-11-of-18.json": "a4683b8247d0c6f6db8baf3fa9812487507dd2a7e0d5692f4ba3146b3ba57c7a",
+          "progress-browser-11-of-18.json": "c2e90e593a7f5b1de925d1c6309d7debcd8c8f34a46ac131b695543152a33c30",
+          "selection-browser-11-of-18.json": "f08a7c2fb9a5b59f7d28c065b61d786c979e5f157157c1c548fa2ac59f802aea",
+          "vitest-browser-11-of-18.json": "836b693c3e110715c07c750d096e8b45db90874f374f5a90b3582e73ca096825",
+          "browser.log": "0fed550cf8d840132483ecbed61855a79979902ba5e86a0a0835b314a21fe088"
+        },
+        "job": {
+          "id": 136947171517,
+          "name": "test-browser (11/18, browser-11-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171517",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T19:00:35Z",
+          "completedAt": "2026-11-21T19:08:53Z"
+        },
+        "artifact": {
+          "id": 14720409368,
+          "name": "runtime-ci-44937449914-browser-11-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720409368",
+          "size_in_bytes": 2390229,
+          "digest": "sha256:1eed8e74f0a1123aff2818bd98637568fb6c200955fe19ffa5da95a730fd360c",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 12,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-12-of-18",
+          "outcome": "success"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts",
+          "apps/www/test/evidence/brutalist-fonts.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 0,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 41,
+          "numPassedTests": 41,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "4b08759d6a288645c48cc973be400d6ba9fcb89f327566b8ee5ad1608a169b29",
+          "result-browser-12-of-18.json": "39984d6dcc89e98ffa016a5407b08403c094dfbd23094e663b6259930da30623",
+          "observation-browser-12-of-18.json": "cb73a5e4b9cb6bcbe45f7d5d0e1ad10d7f6ac89b01b252d0071b87696367a780",
+          "progress-browser-12-of-18.json": "9236a69f1d74a64583bad51b7174bb1dc65e516025f02339466aa9ec17694be9",
+          "selection-browser-12-of-18.json": "411ef8d5885234e9f1cf5b22a630a979a0d94e06fbdc0596e1baa97d52ceb25d",
+          "vitest-browser-12-of-18.json": "97dc6e63aef990a106acd6f1477e11eeb78fd47791b94148452bb34937486d4e",
+          "browser.log": "ebee03b4063224b7755aff45a17e442926052c94f70874eb92017078ef837adf"
+        },
+        "job": {
+          "id": 136947171547,
+          "name": "test-browser (12/18, browser-12-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171547",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-21T19:01:34Z",
+          "completedAt": "2026-11-21T19:10:23Z"
+        },
+        "artifact": {
+          "id": 14720728953,
+          "name": "runtime-ci-44937449914-browser-12-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720728953",
+          "size_in_bytes": 7525852,
+          "digest": "sha256:080e3e4efb5cc2a3095e934307c75c6da092d41741bd8367a3c835bbef6c0153",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 13,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-13-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/workspace/test/lifecycle.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 41,
+          "numPassedTests": 33,
+          "numFailedTests": 8,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "ad6fe4a2c3a797105736d24f38dfa67262d60019fccaef563067c61c3049022f",
+          "result-browser-13-of-18.json": "6f590876adc626bf8ff516b70a2b015e30bd535a60ff639c7c67c3be2d473ed9",
+          "observation-browser-13-of-18.json": "1874af9b95ad279f2b5e09e06ab9a89fbc4abf32c5e2ec60ab9bc6ad53d63ab6",
+          "progress-browser-13-of-18.json": "9bb3b339071b8fa945daaf041f7405ea73cab4a9b807b5c4043d8aa4deec4fb3",
+          "selection-browser-13-of-18.json": "b597e99f506a1d2eb8a760e120d06a44f7497bf6eebc9e94683e7b018fb501d0",
+          "vitest-browser-13-of-18.json": "3ebe1d4c846c04603fd8e6513a99d24a9c92408334dc8c9caac1873697e9dda0",
+          "browser.log": "7b791e20dcfbe22828c6f70d5b6d202c8d0fd712acdb67584b877759772b3d80"
+        },
+        "job": {
+          "id": 136947171506,
+          "name": "test-browser (13/18, browser-13-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171506",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T19:01:58Z",
+          "completedAt": "2026-11-21T19:08:54Z"
+        },
+        "artifact": {
+          "id": 14720289957,
+          "name": "runtime-ci-44937449914-browser-13-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720289957",
+          "size_in_bytes": 1240980,
+          "digest": "sha256:93a862f43f723a3651ade99127f9947763dddd5d5612cbe27d6c1e6bfe179091",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 14,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-14-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 62,
+          "numPassedTests": 57,
+          "numFailedTests": 5,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "5be48b6f73677b940c846f484afedb69d7824c59fad2ce10feab8d424041727d",
+          "result-browser-14-of-18.json": "da22668dbef6c0d97c7b5f01b7a3b62023f2f26f32c1312a0840fda32ca9cb57",
+          "observation-browser-14-of-18.json": "071fb32492baaccc66cbbc64fa2f7088daf4f0f518d3b95119a27c1c2b5f3e09",
+          "progress-browser-14-of-18.json": "90bdb533d189133a39d71aa36a18f488f3b79654ad772899542fbf73a5517f31",
+          "selection-browser-14-of-18.json": "7f8a2e18f1cd6aec8c4d48e5cc4411cd7c39c8995d852bff7363b83a281eed0d",
+          "vitest-browser-14-of-18.json": "c857e8032996f666257fa6cbcef9fc741607521afd1260f3e9ca50999d2ceaa9",
+          "browser.log": "6b7a2e404e1023f29fda3e821f38e71ae9d954ec71593f9cea74eae8606ec5ff"
+        },
+        "job": {
+          "id": 136947171568,
+          "name": "test-browser (14/18, browser-14-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171568",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T19:05:34Z",
+          "completedAt": "2026-11-21T19:15:18Z"
+        },
+        "artifact": {
+          "id": 14720209253,
+          "name": "runtime-ci-44937449914-browser-14-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720209253",
+          "size_in_bytes": 67958586,
+          "digest": "sha256:2f5d24aa6d523430fd91a07c5288ec9b662fd1cc82b2b8a2d71f99623f391207",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 15,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-15-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 86,
+          "numPassedTests": 83,
+          "numFailedTests": 3,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "244a96d5f883678cba84500432024de6bf3ab55ccc95d45abb2e569cbc1b837c",
+          "result-browser-15-of-18.json": "17a55653189ce9f008e788ebe560fc9dbba263026baf55ef07243490789c2df5",
+          "observation-browser-15-of-18.json": "024c62ecc0d070bce557d29b525e29c1cecb8f9acdc87e3edf53c5c4bddc39d1",
+          "progress-browser-15-of-18.json": "931f38fc9ac98fe7a5b453d006c464e24563a697258b99c4057c332885f78693",
+          "selection-browser-15-of-18.json": "8e2f0d68822c939400bdc2c4f452edc0572c260c8a37655a19ce74841d68e8eb",
+          "vitest-browser-15-of-18.json": "3a2fdc3ac606aa5fa1efc9bc6cc40f524a580a6a3140e68cdc66d2c1e82f7491",
+          "browser.log": "dd31d21448d5af49598d4d056a07375b06074e5134100bf7f7dc4ce6cb0e653a"
+        },
+        "job": {
+          "id": 136947171537,
+          "name": "test-browser (15/18, browser-15-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171537",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T19:06:10Z",
+          "completedAt": "2026-11-21T19:16:35Z"
+        },
+        "artifact": {
+          "id": 14721381007,
+          "name": "runtime-ci-44937449914-browser-15-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14721381007",
+          "size_in_bytes": 10490943,
+          "digest": "sha256:afaa6e2945a9e02851467fcc04188ea560f2435129eae6efe18f88fc2b1c871d",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 16,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-16-of-18",
+          "outcome": "success"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts",
+          "apps/www/test/button-view-lifetime.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 0,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 62,
+          "numPassedTests": 62,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "cefd3b5e86137dac4b5d1db3a087de5559b74be0013b1ad8404299ca110ba8c6",
+          "result-browser-16-of-18.json": "0136c7b9561127e87b180fbfb15b83ad050d9e249df98398ec625a00fdd80365",
+          "observation-browser-16-of-18.json": "77d0401138b35825d6632ab05ed9a914f44b6d8198dcac3cbde3581d4a215ce6",
+          "progress-browser-16-of-18.json": "6431ba9b8243776c8663f111daad0ee12163f3908fe07ee1fde860b9d508a428",
+          "selection-browser-16-of-18.json": "b47d6f1dcebdce9b8357b037349fc922292a8047a9b68e8eb4486286aa4f858d",
+          "vitest-browser-16-of-18.json": "b7477bb13604b525c78b0cc1f0a8e54380969ca2df759fbfa91e8778d2bcb37e",
+          "browser.log": "d80dac5074e22ccc1d4366298945288a424f4c79ddbee4c4f56b6cbf5f5f9725"
+        },
+        "job": {
+          "id": 136947171618,
+          "name": "test-browser (16/18, browser-16-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947171618",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-21T19:06:24Z",
+          "completedAt": "2026-11-21T19:16:24Z"
+        },
+        "artifact": {
+          "id": 14721530335,
+          "name": "runtime-ci-44937449914-browser-16-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14721530335",
+          "size_in_bytes": 23067597,
+          "digest": "sha256:91e776e9de7b7607d7342356141e750e1ce1ab1e79846224d9f084654e47ce7e",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 17,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-17-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts",
+          "apps/www/test/color-scheme.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 88,
+          "numPassedTests": 79,
+          "numFailedTests": 9,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "3f79a45ef69e72bea095fbe452511af6bd51efa911a3b90617823ec1b4e12971",
+          "result-browser-17-of-18.json": "5d196d24fd484f525db1f6d2f850a3170121d474bf66a051112dc3919d03ea7b",
+          "observation-browser-17-of-18.json": "4f5e387228404f281c9b0c8e51b85b4bdb6f4bc254dd8f53a711acfa97383f7f",
+          "progress-browser-17-of-18.json": "e49810af98fc697da613a79102672fd0ede84a0c20ea5190086537e691a7ce4d",
+          "selection-browser-17-of-18.json": "441452deb445f73d4b671ac0f6291db577509d31a6e62a74dfb913d91e8e3dcd",
+          "vitest-browser-17-of-18.json": "7cd3e0e54834de9e5289f70fd3fd734d343bcc8624072dfa469cf987999bfc3d",
+          "browser.log": "aad1bd1089d200132ea31681373b520e6ae72da8132b3ea246afc09db3483e93"
+        },
+        "job": {
+          "id": 136947172474,
+          "name": "test-browser (17/18, browser-17-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947172474",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T19:08:56Z",
+          "completedAt": "2026-11-21T19:20:58Z"
+        },
+        "artifact": {
+          "id": 14721790377,
+          "name": "runtime-ci-44937449914-browser-17-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14721790377",
+          "size_in_bytes": 45449531,
+          "digest": "sha256:20ea4481b5fd346c7d142bf2a03c60faa143915063cc8952e2880ca8515adb7f",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      },
+      {
+        "shard": 18,
+        "receiptIdentity": {
+          "schemaVersion": 1,
+          "runId": "44937449914",
+          "attempt": 1,
+          "eventSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+          "slot": "browser-18-of-18",
+          "outcome": "failure"
+        },
+        "selectedFiles": [
+          "apps/www/src/components/documentation-image-preview.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts",
+          "packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts",
+          "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts"
+        ],
+        "source": {
+          "before": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "after": {
+            "checkoutSha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e",
+            "treeSha": "a3225eda1ad55bd6870771d5fe355d42bd0b4c57",
+            "dirty": false,
+            "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "exactPlanAndReportInventory": true,
+        "execution": "reported",
+        "vitestExitCode": 1,
+        "signal": null,
+        "error": null,
+        "completeInventory": true,
+        "missingSuites": [],
+        "unexpectedSuites": [],
+        "duplicateSuites": [],
+        "checkpointFinished": true,
+        "unhandledErrors": [],
+        "counts": {
+          "numTotalTests": 90,
+          "numPassedTests": 86,
+          "numFailedTests": 4,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "evidenceHashes": {
+          "receipt.json": "3c8835af3d2b8161b020dfd6881d584eaced26a3e769d323d9d0b8d810b542f7",
+          "result-browser-18-of-18.json": "79c0b726ea6df1aed3358731bc5feb2bea1b0a5a77684048cde7072fa9cc4ce0",
+          "observation-browser-18-of-18.json": "30e79735a2bea0a62df890bcf300da8ae89ba834294c7af15eec69ab9f31a1ff",
+          "progress-browser-18-of-18.json": "e1e56b13e802ff5845c77838aa11dda6dc734ebe893e211e590b31396586251e",
+          "selection-browser-18-of-18.json": "070deccb41a0a539a165305cc1b048430a19ac2cc0371fb92b0762f7ffd17f2f",
+          "vitest-browser-18-of-18.json": "bc477521ddb59cdf058e15b5e2c6661ba4ecc1fd6faa312c14556f27cbbb7779",
+          "browser.log": "e2ce8ff77091540e0f7665ed2983841e3dd38a0b90813d579e6f2897afe961f7"
+        },
+        "job": {
+          "id": 136947172470,
+          "name": "test-browser (18/18, browser-18-of-18)",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44937449914/job/136947172470",
+          "status": "completed",
+          "conclusion": "failure",
+          "startedAt": "2026-11-21T19:08:56Z",
+          "completedAt": "2026-11-21T19:17:17Z"
+        },
+        "artifact": {
+          "id": 14720693504,
+          "name": "runtime-ci-44937449914-browser-18-of-18-attempt-1",
+          "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14720693504",
+          "size_in_bytes": 4377229,
+          "digest": "sha256:0190638d464dfcdb3d5dbc565683f7718380fd408944523fc8cb74eda595a15e",
+          "workflow_run": {
+            "id": 44937449914,
+            "repository_id": 840178061,
+            "head_repository_id": 840178061,
+            "head_branch": "fix/regression-native-closeout-20261122",
+            "head_sha": "4c2c34019a97b50ea7d486b31c3ee140bc46130e"
+          }
+        }
+      }
+    ],
+    "skipBoundary": "Four authored Async Region 0.4/WIP cases and 15 Bootstrap exact-head opt-in cases. Original strict gates remain; these are not passed assertions or missing files.",
+    "priorityBoundary": {
+      "search": "84 passed, including original 320/390px, 200% font and nested-scroll cases.",
+      "runtimeLayoutParity": "Six passed, including WC round-trip layout.",
+      "demoMatrix": "Four cases stopped at the original 60-second inited-count readiness check; mobile readability and Dialog focus checks were not reached.",
+      "drawer": "Five passed, two public cold-entry cases failed before moving geometry because projector events were uninitialized. The old artifact did not retain native frame/PNG observations; no native closed-frame sequence is inferred.",
+      "wcShadow": "Concrete blueprint, opacity, transition and bounded-readiness observations remain failed; they are not categorized wholesale as runner slowness."
+    }
+  }
+}

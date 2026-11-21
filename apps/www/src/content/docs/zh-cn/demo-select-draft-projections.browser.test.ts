@@ -413,7 +413,33 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             await rtl.scrollIntoViewIfNeeded();
             await rtl.click();
             const rtlContent = await popup(page, rtl);
-            const geometry = await rtlContent.evaluate((node) => {
+            let rtlPaintOwner = rtlContent;
+            if (family === 'liquid-glass') {
+              const rtlSurface = rtlContent.locator('[data-demo-ref="rtlSurface"]');
+              expect(await rtlSurface.count()).toBe(1);
+              expect(await rtlSurface.getAttribute('data-projection-prototype')).toBe(
+                'liquid-glass-select-surface'
+              );
+              for (const owner of [rtlContent, rtlSurface]) {
+                expect(
+                  await owner.evaluate(
+                    (node) => node.closest<HTMLElement>('[data-material-scene]')?.dataset.demoRef
+                  )
+                ).toBe('selectRtlLayout');
+              }
+              rtlPaintOwner = rtlSurface;
+            }
+            // Keep Content's listbox/portal geometry and measure paint on the
+            // same named Surface used by the complete Liquid popup recipe.
+            const paint = await rtlPaintOwner.evaluate((node) => {
+              const style = getComputedStyle(node);
+              return {
+                color: style.color,
+                background: style.backgroundColor,
+                radius: style.borderRadius,
+              };
+            });
+            const contentGeometry = await rtlContent.evaluate((node) => {
               const style = getComputedStyle(node);
               const rect = node.getBoundingClientRect();
               const selected = node.querySelector<HTMLElement>(
@@ -432,11 +458,9 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 labelLeft: label.left,
                 indicatorRight: indicator.right,
                 selectedText: selected.textContent,
-                color: style.color,
-                background: style.backgroundColor,
-                radius: style.borderRadius,
               };
             });
+            const geometry = { ...contentGeometry, ...paint };
             await withLiquidCardFailureObservation(
               async () => {
                 expect(geometry.direction).toBe('rtl');

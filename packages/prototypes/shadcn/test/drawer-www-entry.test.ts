@@ -75,6 +75,23 @@ it('admits every dependency of the real public Drawer demo while preserving the 
     expect(content).not.toBeNull();
     expect(content.style.height).toBe('');
     expect(content.style.width).toBe('');
+    type PublicBooleanState = { get(): boolean };
+    const root = document.querySelector('wc-shadcn-drawer-root') as HTMLElement & {
+      getExposes(): { open: PublicBooleanState };
+    };
+    const trigger = document.querySelector<HTMLElement>('wc-shadcn-drawer-trigger')!;
+    const action = button as HTMLElement & {
+      getExposes(): { disabled: PublicBooleanState };
+    };
+    await vi.waitFor(() => expect(action.getExposes().disabled.get()).toBe(false));
+    expect(root.getExposes().open.get()).toBe(false);
+    // The composed Trigger routes activation from its authored Button. The
+    // previous fixture clicked the wrapper and never requested an open attempt.
+    trigger.click();
+    await Promise.resolve();
+    expect(root.getExposes().open.get()).toBe(false);
+    fixture.open();
+    await vi.waitFor(() => expect(root.getExposes().open.get()).toBe(true));
   } finally {
     await fixture.dispose();
   }

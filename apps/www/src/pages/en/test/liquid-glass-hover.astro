@@ -70,6 +70,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
       import {
         LIQUID_HOVER_PARTS,
         LIQUID_HOVER_NEGATIVES,
+        appendLiquidHoverOverlapPaint,
         liquidHoverDemo,
         liquidHoverRemoveProp,
         type LiquidHoverPart,
@@ -197,9 +198,14 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
           )!.style.clipPath = 'inset(4px)';
         if (id === 'accordion-tight') {
           scene.mount.querySelector<HTMLElement>('.liquid-hover-inset')!.style.padding = '0px';
-          // Retain this negative's real destination overlap: the Item's 1px
-          // bottom border leaves a 1px gap, inside the 35px contact footprint.
+          // The Item's border leaves the same 1px gap. Empty destinations are
+          // transparent under the real scene CSS, so this negative needs actual
+          // visible application paint inside the expanded contact footprint.
           scene.mount.style.paddingBottom = '0px';
+          const destination = scene.scope.querySelector<HTMLElement>(
+            ':scope > [data-material-overlay-mount]'
+          )!;
+          appendLiquidHoverOverlapPaint(destination);
         }
         scene.pause(true);
       }

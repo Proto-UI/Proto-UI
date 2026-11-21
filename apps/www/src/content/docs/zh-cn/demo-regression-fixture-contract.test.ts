@@ -57,6 +57,13 @@ describe('native regression fixture ownership', () => {
       expect(contents[0].children?.[0]).toBe(surfaces[0]);
       expect(surfaces[0].children).toHaveLength(1);
       expect(surfaces[0].children?.[0]).toBe(viewports[0]);
+      const sceneRef = ref === 'rtl' ? 'selectRtlLayout' : `${ref}Stage`;
+      const scenes = nodes(liquidSelect.root).filter(
+        (node) => node.kind === 'box' && node.ref === sceneRef
+      );
+      expect(scenes).toHaveLength(1);
+      expect(prototypes(scenes[0])).toContain(contents[0]);
+      expect(prototypes(scenes[0])).toContain(surfaces[0]);
     }
   );
 });

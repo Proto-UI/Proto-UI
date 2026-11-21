@@ -346,7 +346,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // owner (#420). Core is type-only; the Bootstrap helper supplies passive
   // appearance, while Drawer/Dialog retain input, focus and dismissal ownership.
   'apps/www/src/content/docs/drawer-command-disabled.shared.ts': Object.freeze({
-    sourceSha256: 'bdbf1708e7a961aec3085222c0d1faaea49cc674aa10e06c9921f926ccac59d3',
+    sourceSha256: 'b046d82b1709a4c0411d0ee26aaa7fbba4412fcc7c5b173b7d160cd151fb3dbe',
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({

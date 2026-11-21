@@ -82,11 +82,11 @@ describe('complete native hover matrix partitions without changing its scope', (
     const captures = cases.flatMap((entry) =>
       entry.parts.flatMap((part) => part.captures.map((capture) => capture.name))
     );
-    expect(captures).toHaveLength(2880);
+    expect(captures).toHaveLength(2904);
     expect(new Set(captures).size).toBe(captures.length);
     for (const entry of cases)
       expect(entry.parts.reduce((sum, part) => sum + part.captures.length, 0)).toBe(
-        entry.journey === 'interaction' ? 232 : 128
+        entry.journey === 'interaction' ? 232 : 131
       );
     expect(captures).toEqual(
       plan.cases.flatMap((entry) =>
@@ -159,13 +159,31 @@ describe('complete native hover matrix partitions without changing its scope', (
       expect(policy.slice(-2)).toEqual(['reduced-motion', 'reduced-transparency']);
     }
     expect(liquidHoverStages('policy-and-boundaries', 'accordion-blocked')).toHaveLength(4);
+    const contactBoundaries = ['source-edge', 'neighbor', 'accordion-tight'];
+    const contactBranchStart = native.indexOf(
+      "if (['source-edge', 'neighbor', 'accordion-tight'].includes(part))"
+    );
+    expect(contactBranchStart).toBeGreaterThan(0);
+    const contactBranch = native.slice(
+      contactBranchStart,
+      native.indexOf('return;', contactBranchStart)
+    );
+    const contactStages = [...contactBranch.matchAll(/sample\('([^']+)'/g)].map(
+      (match) => match[1]
+    );
+    expect(contactStages).toEqual([
+      'negative-idle',
+      'negative-hover',
+      'negative-press',
+      'negative-release-rest',
+      'negative-leave',
+    ]);
     for (const part of [...LIQUID_HOVER_NEGATIVES, 'accordion-tight'])
-      expect(liquidHoverStages('policy-and-boundaries', part)).toEqual([
-        'negative-idle',
-        'negative-hover',
-        'negative-press',
-        'negative-release',
-      ]);
+      expect(liquidHoverStages('policy-and-boundaries', part)).toEqual(
+        contactBoundaries.includes(part)
+          ? contactStages
+          : ['negative-idle', 'negative-hover', 'negative-press', 'negative-release']
+      );
   });
   it('writes source-bound plan and initial progress before any server or browser launch', () => {
     const initialized = native.indexOf('await checkpoint.initialize()');
