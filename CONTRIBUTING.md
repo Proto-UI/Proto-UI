@@ -29,6 +29,8 @@ Before editing:
 5. Treat implementation and tests as evidence. A mismatch with an applicable entity is drift, not an implicit amendment.
 6. Treat README files, package prose, demos, and the website as reader projections.
 
+For document placement, ownership, current-source links and historical retirement, follow the [documentation policy](internal/governance/documentation-policy.md). Keep published-version guidance distinct from current workspace development. The [release entry point](RELEASE_CHECKLIST.md) routes to the current release plan and workflow.
+
 Read `spec/README.md` before authoring an entity. Do not create an entity merely because a component name, file, package, token, or capability count exists. Model one coherent semantic slice with executable evidence.
 
 When sources genuinely conflict, stop and state the exact contradiction. Do not choose the most convenient source in silence.
