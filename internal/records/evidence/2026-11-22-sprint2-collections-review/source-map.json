@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "recordDate": "2026-11-22",
+  "scope": "Independent review source bindings, not proof of final integrated native acceptance",
+  "sources": [
+    {
+      "key": "collections-authored",
+      "commit": "6c59bbc20176fd523427ac46d7333908d978bc7b",
+      "tree": "e8d23544a17f4321a3b07d6e806bc8247e0ab498",
+      "commitObjectSha256": "41b660b84e1ba79c7b7ba816e50763a204587084451c622082b00e063ae31301",
+      "boundary": "Authored implementation; independent source review by root, own source test executions"
+    },
+    {
+      "key": "collections-source-inventory",
+      "commit": "b3e4cd0d2cfdeb4fe48787911cd5dd4cee7a006b",
+      "tree": "ec7d79e01a5f5afca8b794225b9b97d3e226eb9b",
+      "commitObjectSha256": "ae968e093bcdae7649b1c7eb0e38e83e84ff7a5ffbf47ad5213a3008ead09ba7",
+      "boundary": "Original Chinese-path ENOENT negative control and native inventory source fix"
+    },
+    {
+      "key": "compiler-reviewed-original",
+      "commit": "936a6f497f1dcbfe1906ffa376fcc43c3aa4413c",
+      "tree": "c3368e361ff0f34fd5c75d0f5ec8b0a2d1a5f87d",
+      "commitObjectSha256": "a3e530fde9d4c008445a96da809df9dd36d3849e1dbb6926eb9ddc338264cbe4",
+      "boundary": "Independent bounded compiler semantic review"
+    },
+    {
+      "key": "compiler-review-corrections",
+      "commit": "3624d24ea8dc168292fbdb9e029be54ca0b10797",
+      "tree": "894f037455ff79b526ec1002623f0b6b6783f058",
+      "commitObjectSha256": "54419b67cdc34451e30510aa14408f7ad45d79b6074c0ce81f3ec48aed390d8d",
+      "boundary": "API-pair/cleanup and lexical shadow corrections"
+    },
+    {
+      "key": "compiler-module-scope-correction",
+      "commit": "f618a760cfcdeee9d237474af1b7345eb60bd6c9",
+      "tree": "63445140fb257da228d6e3c54c051aac441155c5",
+      "commitObjectSha256": "5b20e18621b1cddd95226c23520b3d6bce0a1f726a0c008a250ad3788b07ce04",
+      "boundary": "Module lexical environment and conservative resolved Props proof"
+    },
+    {
+      "key": "pinned-build-cli",
+      "commit": "a3b245ac1b8a284123eff3ea238b38ee59b9bbcb",
+      "tree": "4826ad844acbf4d22e1041e8c3fbdd0ea7f0032a",
+      "commitObjectSha256": "bc17d0fee74913b974f81f56f92166824281f697fa4245c394bf9e7d9cd42e79",
+      "boundary": "Clean source pin and declared dependency boundary"
+    },
+    {
+      "key": "ordinary-release-family-tools",
+      "commit": "12de6f461c45fbcb14677f776ff8c572672a34f4",
+      "tree": "f95bcd9cec819ff0301866c910649bc4a036146d",
+      "commitObjectSha256": "72f7b7752806e0afc7f97cf7686a709b22491974eec30df093b71303b480ef4d",
+      "boundary": "Ordinary framework consumers and source maps"
+    },
+    {
+      "key": "pinned-build-tested",
+      "commit": "3ea9e34545615ce4a981e2e19c3c3fcc9de3b0bb",
+      "tree": "839d5cba87641dc6643aeba22fa6eadac61b3f3f",
+      "commitObjectSha256": "1709e4cc89e0eea06b38fac43280cdea5df8844028820ceaa5cc3a3f3da001e2",
+      "boundary": "Original pinned build/CLI evidence source; predates later TextControl helper"
+    },
+    {
+      "key": "real-consumer-tools",
+      "commit": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "tree": "cd6dab7ec13e706df85ab1d63def1963e8a4995d",
+      "commitObjectSha256": "5bbc1b845e468d405c1e21c64934678ed6818981e64ae0cf2be3e37718bac8cd",
+      "boundary": "Actual pinned CLI and Shenko replay tools; executed snapshots bound separately"
+    },
+    {
+      "key": "compiled-caret",
+      "commit": "c5ebad5888cc0c517bf17fa1a21ccfff2d2284ce",
+      "tree": "5b80ada5daeb17ed177166ccb067ef91e9f9a6c1",
+      "commitObjectSha256": "c7f04bc27d8cfccbce1a90464098bf30a25abe1b9dd48ddea0c13d26227246ee",
+      "boundary": "Generic generated TextControl candidate protection"
+    },
+    {
+      "key": "compiled-caret-owner-revert",
+      "commit": "a165c4058188aa802b475d1d50ce46ab0d574320",
+      "tree": "d95e52a263ca71d38234d31a262ffa3aa521841b",
+      "commitObjectSha256": "6779cdab1c7809110853a589d96ad15436a331c487771f27218d0c3a8e26dbab",
+      "boundary": "Monotonic candidate invalidation; final actual Shenko upstream artifact"
+    },
+    {
+      "key": "compiled-native20",
+      "commit": "ee943e59d6f6bd9a418c2ba6f11487e349d5ccc1",
+      "tree": "9922d0d7a81af3c899fde4d1318e21a5eae5a2a1",
+      "commitObjectSha256": "b9a8902374d9781db20a102908d31c910543f36cc2c32b1dda7617b2f1bf2f12",
+      "boundary": "Final native20 test source, no native pass inferred"
+    },
+    {
+      "key": "compiler-evidence-record",
+      "commit": "f8ffe8ef05680495be6ede0d8203e501377af296",
+      "tree": "f16f379fe84c22cbd13b292a58d252f0358bb063",
+      "commitObjectSha256": "915fce8bd2d1e4244d18bbc1b908fd58c9ad3a597c58d883ef5120b8b418dd91",
+      "boundary": "Separate complete compiler-author evidence archive, cross-referenced"
+    },
+    {
+      "key": "shared-caret",
+      "commit": "b1033a4851fd13e4509b22145ba4e7d0bdaf8596",
+      "tree": "0f04054d12d3f2e7ca0218cc03c936a4ad613d6f",
+      "commitObjectSha256": "60aa76a3e7592ec6cd8d706fd8f9261bbee31b80a8119dce3ccecd90036850a6",
+      "boundary": "Original reviewed shared candidate-protection extension"
+    },
+    {
+      "key": "shared-caret-owner-revert",
+      "commit": "14c47f2a22ad3629ae88a5e6cce99b4098732b0e",
+      "tree": "af281990d2d043137dd1bba4735a765a291e126e",
+      "commitObjectSha256": "51267b7a94d9397cccfafbe18c13d2585e88049a4b200829a8a35c48ec65c623",
+      "boundary": "A-to-B-to-A lifetime correction"
+    },
+    {
+      "key": "field-choices-original",
+      "commit": "e16e820afd4df769cee36ab132f79f754a8c23fc",
+      "tree": "9bbae029704e0306fd55071c2fd91824c70e31f7",
+      "commitObjectSha256": "722f5cfe862ff8a7e45a0297653e483975974e9fd210d9c2f50f4fd4b3911b07",
+      "boundary": "Original explicit choice Field definitions/source"
+    },
+    {
+      "key": "field-choices-reconnect-mixed-focus",
+      "commit": "ebbfc57c0868c14318d0673266bc4e6d1db16604",
+      "tree": "21916f6926a9dc4e93c44025ac3ca78d8b3fe735",
+      "commitObjectSha256": "34bd4dbf2b450afb2b9d1b82c7aaa57443246bc2aaf0d5f46d09789b3ae34893",
+      "boundary": "Review001/002/003 plus explicit Switch reset"
+    },
+    {
+      "key": "field-radio-focused-retirement",
+      "commit": "369362235af5028b1bff5e4355461dbaf4b1f930",
+      "tree": "63f9e62ee1494f141b42369cf8e2fac82b635ffc",
+      "commitObjectSha256": "10ae087b7b51c14ba0d220566e54f3a711a5977aa911e129608d9185322ee914",
+      "boundary": "Review004 source and independent original replay"
+    },
+    {
+      "key": "field-switch-reset-lease",
+      "commit": "42ee3b9c35f227622e6f2914f83f7dcc55938700",
+      "tree": "f39f968e844c1022ec9d11d60b8b185a966a37dc",
+      "commitObjectSha256": "825f40fdf552cf72cd024423793753beed12249f2770545e4523676df2540254",
+      "boundary": "Review005 source and independent original replay"
+    },
+    {
+      "key": "field-public-recipes",
+      "commit": "095ecbdde4902941a13032386765dac59ebd7e6b",
+      "tree": "216ff7d5c1d639a70889d5f1ea930e1a87bef0fa",
+      "commitObjectSha256": "0e97d80e9fc2c14e679397a8d6115a43452c201c17080881dc5e1ef1c7264750",
+      "boundary": "12 four-host public choices source recipes/native suite/CSS/definitions/docs"
+    },
+    {
+      "key": "website-r3-source-link",
+      "commit": "4b3a9c84ff9b04fa6005f82ebe412332432ad43a",
+      "tree": "f103e8d808d7d69be4d33ace327ae6f8f4dea46c",
+      "commitObjectSha256": "f12cc18d2f7a10f3b653deacccc99aa98e0efd197a5541997ec8e05944e31033",
+      "boundary": "Original failure record link repair; separate native result required"
+    },
+    {
+      "key": "website-hero-focus",
+      "commit": "f0aa85b99ebb27f68bef2bb729dcd6f530965e7f",
+      "tree": "132602e1cba6ee364d149c451cdee745ed617a84",
+      "commitObjectSha256": "d87a65cfc0096c59fae6e57459d53f6712e0fdaff1342f83c7465f302976a7e9",
+      "boundary": "Single native-link focus paint correction"
+    },
+    {
+      "key": "datepicker-initial-completion-order",
+      "commit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "tree": "3ca6d7c2d0ff51bcf72d5bd53bc67087fbd95437",
+      "commitObjectSha256": "2218807b8092ceaf30901c7bda72b906da7302887a28b0202e7fea30263bbdef",
+      "boundary": "Initial scoped completion repair; later earlier-state/context findings preserved"
+    },
+    {
+      "key": "datepicker-intermediate-request-session",
+      "commit": "593682a8758a777306f3889b98fef475d4263c44",
+      "tree": "b94d4409216ddc1b1f65deb681ee0d56c6824993",
+      "commitObjectSha256": "653c5f40f7f359aa1d62f04e62b6246f52f573aee29407f8479bde5c4f081fe0",
+      "boundary": "State/Context observer correction; subsequent nested Context finding still open"
+    },
+    {
+      "key": "datepicker-native-journey-delta",
+      "commit": "69d8e8ab2d6372392e4a86aa3d500b3a733d0f01",
+      "tree": "6cc297c6427bb469bc0cff08664111d18a4f0746",
+      "commitObjectSha256": "247e74f1dac18f5e2094f2bf21a5ef6d8611727cf52f16eb76b4658524f296aa",
+      "boundary": "Updated existing native fixture/runner, not execution evidence"
+    },
+    {
+      "key": "queue-final-inventory",
+      "commit": "2430aeaf1c74dc1f4563a543e0021574e7d5c441",
+      "tree": "219b4f23367f836a4028a785184f1818fee4e259",
+      "commitObjectSha256": "65fe9578e6a8f13bb7c0edbeebcddabca661ea572daeae7b2886a16ebf7d82fd",
+      "boundary": "Ten suites304 cases:292browser12ordinary; independent source/dry-plan check"
+    }
+  ],
+  "verifiedIntegrationMappings": [
+    {
+      "source": "42ee3b9c35f227622e6f2914f83f7dcc55938700",
+      "integrated": "4900d2b8260c5c89a77761d1df24d9eea2a429a6",
+      "verifiedChangedFilesByteIdentical": [
+        {
+          "path": "packages/prototypes/base/src/switch/root.proto.ts",
+          "bytes": 17511,
+          "sha256": "79a9bf69adff37c77510511b5806156f0953b23df94a6d07f7b732654054fab4"
+        },
+        {
+          "path": "packages/prototypes/base/test/field-switch.test.ts",
+          "bytes": 10820,
+          "sha256": "26a2de8a6eaa953e626de892108288b6e41a3a5165dd066f6948d3ad971c9627"
+        },
+        {
+          "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+          "bytes": 62802,
+          "sha256": "81d8be9696734b9bffdbdfeefca9c68df98461b0fda14c051581c7affecd37a1"
+        }
+      ]
+    },
+    {
+      "source": "095ecbdde4902941a13032386765dac59ebd7e6b",
+      "integrated": "06558a3fa0b1fa21ee632114c3ae81c24de9373e",
+      "verifiedChangedFilesByteIdentical": [
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/field-choices-recipes.test.ts",
+          "bytes": 12173,
+          "sha256": "4406b786260fcdae17711b9f421089156ae28c136cc39568534b6311ebeea5bc"
+        },
+        {
+          "path": "apps/www/src/content/docs/demo-base-field-choices.demo.ts",
+          "bytes": 117,
+          "sha256": "7a0c249419cc12fa04d6e7f4f5bc4844493763391b591674abc4d9b1df061869"
+        },
+        {
+          "path": "apps/www/src/content/docs/demo-brutalist-field-choices.demo.ts",
+          "bytes": 122,
+          "sha256": "c98a3560800a4d65cb8978754d1458e9b02a41c8a837df17d963357c904efabd"
+        },
+        {
+          "path": "apps/www/src/content/docs/demo-shadcn-field-choices.demo.ts",
+          "bytes": 197,
+          "sha256": "215edb0738d2db6c56f8b3fdd53dd6d665e2b1ab0b592c9a5f8089885e570511"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/checkbox.mdx",
+          "bytes": 3551,
+          "sha256": "0a586c2e3aef6d1b368b380c376744847c762cf421704df88a2379bd2abd8b1d"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/form.mdx",
+          "bytes": 5425,
+          "sha256": "62eaf1f43ab9275422ed26e0521f85fac1ae6b6bc79af90fa1cbc8a524d73a05"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/radio-group.mdx",
+          "bytes": 5761,
+          "sha256": "1021dfc0cb80737c5ec3942258f4babb236827bd2f9f4b67842e74e4e4df59f8"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/checkbox.mdx",
+          "bytes": 3559,
+          "sha256": "83483f9da4c003edd57cad8bd2a0dc40f18608f1b14b0ae9202c1341af060b4f"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/radio-group.mdx",
+          "bytes": 3697,
+          "sha256": "4aecf0c16d24934780ac4983ec4399edd8c8577a745968a507e4374189811df3"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/form.mdx",
+          "bytes": 5460,
+          "sha256": "adfe4bc3c9321e77967eadc31e26ee96cec96ba866f30ef724df98fa7ccd825f"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/checkbox.mdx",
+          "bytes": 3609,
+          "sha256": "3853f254a56bc5c3ef8455bcb993329da0bbde3c00945e03136ad70efb978f53"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/form.mdx",
+          "bytes": 5783,
+          "sha256": "4a271707ab1af2e9edbf3fbb4de277efc6a4f0fe215108b916191dcdd883f6a8"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/radio-group.mdx",
+          "bytes": 6717,
+          "sha256": "a679c6b676f30df6c663ea0872121ea1fa05ece23d9e461f89d8093e26cd2099"
+        },
+        {
+          "path": "apps/www/src/content/docs/field-choices-demo.shared.ts",
+          "bytes": 10345,
+          "sha256": "8e298d75babf379a4e71d5eff497bf780201522ca1be4ba05e7bc36c9fbaea10"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/checkbox.mdx",
+          "bytes": 3430,
+          "sha256": "f8a5a36e413624b62635367a216f23613d9e50d57d595fa19bfbea25ca83a44e"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/form.mdx",
+          "bytes": 4767,
+          "sha256": "41676da6db7d679ef9942ffd8abaae2afd6a3ccf45ae7762f402f2e99acb93cc"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/radio-group.mdx",
+          "bytes": 5405,
+          "sha256": "77bbe527832ace9b90250e20a3e92475a2408666475da817e952f3e855759280"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/checkbox.mdx",
+          "bytes": 3319,
+          "sha256": "8d44bc2fb6500ae61515124d27c323ff9324305838a0d9665785fac11898c58a"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/radio-group.mdx",
+          "bytes": 3382,
+          "sha256": "5e3573cdc3bae1ccef0e23b3b49704e313a56a138db19c81a1d61ed19f1cb4bd"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/form.mdx",
+          "bytes": 4802,
+          "sha256": "43c7123a1e9b7b7080a67b98924d1de39f21ef8663a1b99eba6d06f71bd15f37"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/checkbox.mdx",
+          "bytes": 3426,
+          "sha256": "3a1dac0ad0ab96ea6c7b38a9ae1819badeb3b6fbf72b13ba1aff9247eabd53c3"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/form.mdx",
+          "bytes": 5094,
+          "sha256": "8b39d07b928f8f06d4c37995f5d90edf64fc267c8fd50c865548b09a83a4e4da"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx",
+          "bytes": 6154,
+          "sha256": "44808d256e63183900cc8cf79325ac54d8033cadf596bc43b77f28f78bf7a10e"
+        },
+        {
+          "path": "scripts/analysis/fixtures/form-select-recipes-browser.ts",
+          "bytes": 8071,
+          "sha256": "6f111978c88e6de60efd5fab5704f04938fb93d63e28de13b9443dfda7327dc2"
+        },
+        {
+          "path": "scripts/analysis/form-select-recipe-css.mjs",
+          "bytes": 2995,
+          "sha256": "467ed3968b9fd05172cf7b65a51c4ad249675a9f26296d4e7c09d7154b322e88"
+        },
+        {
+          "path": "scripts/analysis/form-select-recipes-browser.mjs",
+          "bytes": 28385,
+          "sha256": "046980d3b4c26747968c9c03346bc834390ded83d01e1c2a3fa91ce6b410a4b3"
+        },
+        {
+          "path": "spec/tests/T-BASE-FIELD-CHOICES-0001.yaml",
+          "bytes": 4824,
+          "sha256": "c620b3d3dc30bd7bac55866a359c5cb497ea2e07c92ab767679d583b82d83524"
+        },
+        {
+          "path": "spec/tests/T-FIELD-SWITCH-0001.yaml",
+          "bytes": 2794,
+          "sha256": "7f859915409b4e7a996b345040f8edaa25c03b3a0676003c4378ac5905ff9e34"
+        }
+      ]
+    }
+  ],
+  "historicalNativeObservation": {
+    "suite": "Resizable/Carousel",
+    "cases": 24,
+    "reportedStatus": "pass",
+    "source": "f5de205",
+    "runnerLaunchCorrection": "3105d5d",
+    "remotePath": "/home/ezra/proto-ui-sprint2-20261122/native-r2",
+    "observer": "/root",
+    "rawReceiptAvailableToReviewer": false,
+    "reviewerIndependentNativeExecution": false,
+    "finalHeadAcceptance": false
+  },
+  "sourceMapsAlreadyRetained": [
+    "reviews/collections-agent-website-review-source*.json",
+    "reviews/collections-agent-text-control-review-source.json",
+    "reviews/collections-agent-pinned-cli-review-source.json",
+    "reviews/collections-agent-datepicker-review-source.json",
+    "reviews/collections-agent-sprint2-ci-review-source*.json",
+    "compiler/compiler-review-picker-source-bindings.json"
+  ],
+  "independentFieldReplays": [
+    {
+      "source": "369362235af5028b1bff5e4355461dbaf4b1f930",
+      "receipts": [
+        "field/field-choice-owner-payload-review-probe-fixed.json",
+        "field/field-choice-focus-retirement-probe-fixed.json",
+        "field/field-choice-focus-review-fixed.json"
+      ],
+      "cases": [
+        6,
+        3,
+        6
+      ],
+      "kind": "real Runtime + source Adapter, no native browser"
+    },
+    {
+      "source": "42ee3b9c35f227622e6f2914f83f7dcc55938700",
+      "receipts": [
+        "field/field-switch-reset-preview-review-probe-fixed.json"
+      ],
+      "cases": [
+        2
+      ],
+      "kind": "real Runtime source, no native browser"
+    },
+    {
+      "source": "095ecbdde4902941a13032386765dac59ebd7e6b",
+      "receipts": [
+        "field/field-choice-stylesheet-review.json"
+      ],
+      "kind": "ordinary site stylesheet generation only"
+    }
+  ]
+}
