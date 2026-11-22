@@ -852,12 +852,11 @@ async function writeJson(file: string, value: unknown) {
   await writeFile(path.join(output, file), JSON.stringify(value, null, 2));
 }
 
-async function captureFailureDiagnostics(page: Page, id: string, capture: Journey['capture']) {
-  const previewer = page
-    .locator(
-      id === 'shadcn-drawer' ? '[data-demo-id="demo-shadcn-drawer-snap"]' : '[data-previewer-id]'
-    )
-    .first();
+async function captureFailureDiagnostics(
+  previewer: Locator,
+  id: string,
+  capture: Journey['capture']
+) {
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
   const files: Record<string, string> = {};
   const errors: string[] = [];
@@ -894,7 +893,9 @@ async function runCase(testCase: Case) {
     .locator(
       testCase.component === 'drawer'
         ? '[data-demo-id="demo-shadcn-drawer-snap"]'
-        : '[data-previewer-id]'
+        : testCase.component === 'calendar'
+          ? `[data-demo-id="demo-${testCase.family}-calendar"]`
+          : '[data-previewer-id]'
     )
     .first();
   const screenshots: Screenshot[] = [];
@@ -1003,7 +1004,7 @@ async function runCase(testCase: Case) {
     // A failed assertion cannot suppress either the current pixels or the receipt.
     await capture(failure ? 'failed' : 'final').catch((error) => captureErrors.push(String(error)));
     const failureDiagnostics = failure
-      ? await captureFailureDiagnostics(page, testCase.id, capture).catch((error) => ({
+      ? await captureFailureDiagnostics(previewer, testCase.id, capture).catch((error) => ({
           error: String(error),
         }))
       : null;

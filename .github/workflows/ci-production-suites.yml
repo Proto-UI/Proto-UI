@@ -49,6 +49,10 @@ jobs:
     needs: liquid-elevation-control
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/liquid-card-candidate-evidence.yml
+  component-capabilities:
+    needs: liquid-card-candidate
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/projection-family-evidence.yml
   liquid-elevation-control:
     needs: liquid-material
     if: ${{ !cancelled() }}
