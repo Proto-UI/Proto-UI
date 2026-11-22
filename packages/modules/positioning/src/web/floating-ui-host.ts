@@ -250,6 +250,20 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
   };
 }
 
+// computePosition yields before writing coordinates. A portaled custom element
+// is still in normal flow at the end of the document during that gap, and WC
+// entry focus scrolls it into view even when preventScroll is requested. The
+// later fixed coordinates are then solved against the scrolled anchor and stay
+// outside the viewport. Pin the configured strategy inside the viewport before
+// the first await so focus cannot move the document.
+function pinAnchoredStrategy(floating: HTMLElement, strategy: string) {
+  if (floating.style.position === strategy && floating.style.top !== '' && floating.style.left !== '')
+    return;
+  floating.style.position = strategy;
+  if (floating.style.top === '') floating.style.top = '0px';
+  if (floating.style.left === '') floating.style.left = '0px';
+}
+
 function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
   return {
     attach(initial): AnchoredPositionHostLease {
@@ -298,6 +312,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           }
           return;
         }
+        pinAnchoredStrategy(floating, config.strategy);
         if (sizing) {
           const ownSizing = sizing;
           for (let pass = 0; pass < 4; pass++) {
