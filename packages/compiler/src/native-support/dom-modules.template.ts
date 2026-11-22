@@ -921,12 +921,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     sync(patch) {
       runtime('textControl.sync');
       if (textDeclaration?.config.lineMode === 'single' && (patch.rows !== undefined || patch.wrap !== undefined)) throw new Error('[TextControl] rows/wrap require multiline declaration.');
+      const previousValue = textValue;
       if (!textInitialized) { textMode = String(patch.valueMode ?? 'uncontrolled'); if (!['controlled','uncontrolled'].includes(textMode)) throw new Error('[TextControl] invalid value mode.'); textValue = canonicalText(String(textMode === 'controlled' ? patch.value ?? '' : patch.defaultValue ?? '')); textInitialized = true; }
       textPatch = { ...textPatch, ...patch, valueMode: textMode,
         ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
         ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
       if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
-      applyText(textMode === 'controlled'); requestPresentation();
+      applyText(textMode === 'controlled' && textValue !== previousValue); requestPresentation();
     },
     snapshot() { alive(); const target = ready() ? root as HTMLInputElement | HTMLTextAreaElement : null; return textDeclared ? Object.freeze({ value: textValue, composing: textComposing, selection: target && canonicalText(target.value) === textValue ? readTextSelection(target, target.value) : null }) : null; },
   };
@@ -960,10 +961,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (type === 'compositionstart' || type === 'input' && editing.isComposing) textComposing = true;
       if (type === 'compositionend') textComposing = false;
       const source = target.value, value = canonicalText(source);
-      if (textMode === 'uncontrolled' && type === 'input') textValue = value;
+      if (textMode === 'uncontrolled' && (type === 'input' || type === 'change')) textValue = value;
       const event = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null, selection: readTextSelection(target, source) });
       for (const callback of [...textListeners.get(type) ?? []]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; options.invoke(() => callback(options.getRun(), event)); }
-      if (textMode === 'controlled' && (type === 'compositionend' || type === 'input' && !textComposing)) queueMicrotask(() => { if (current()) applyText(true); });
+      if (textMode === 'controlled' && (type === 'compositionend' || (type === 'input' || type === 'change') && !textComposing)) queueMicrotask(() => { if (current()) applyText(true); });
     });
     queueTextSelection();
   }
