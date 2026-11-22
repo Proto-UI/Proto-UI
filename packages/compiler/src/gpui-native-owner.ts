@@ -86,7 +86,7 @@ pub fn assert_native_slot_children(children:&[NativeSnapshot]) {
 #[derive(Clone)]
 pub enum Value {
     Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16),
-    Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(NativeRenderer), Owner(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
+    Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(NativeRenderer), Owner(OwnerWeak), Definition(OwnerWeak), RenderHandle(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
     Style(Vec<(String, String)>), Resource(Rc<Cell<bool>>),
     Input(Rc<Input>),
     StaticCapability(&'static StaticDeclaration), Handle(OwnerWeak, &'static str),
@@ -169,14 +169,14 @@ impl Value {
     // Native consumers use call(), which returns before any GPUI lease unwinds.
     pub fn call_authored(&self, args: Vec<Self>) -> Self { match self { Self::Function(f)=>f(args), _=>value_type_error("Value is not callable") } }
     pub fn get(&self) -> Self { match self { Self::State(state)|Self::BorrowedState(state)=>{ensure(&state.owner);state.value.borrow().clone()}, Self::Observed(owner, key)=>observed(owner,key), _=>value_type_error("expected State handle") } }
-    pub fn owner(&self) -> OwnerWeak { match self { Self::Owner(owner)|Self::Handle(owner,_)|Self::HostTarget(owner)|Self::Part(owner,_)|Self::ObjectRef(owner)=>owner.clone(), _=>panic!("expected owner capability") } }
+    pub fn owner(&self) -> OwnerWeak { match self { Self::Owner(owner)|Self::Definition(owner)|Self::RenderHandle(owner)|Self::Handle(owner,_)|Self::HostTarget(owner)|Self::Part(owner,_)|Self::ObjectRef(owner)=>owner.clone(), _=>panic!("expected owner capability") } }
     pub fn items(&self) -> Vec<Self> { match self {Self::Array(v)=>(**v).clone(),Self::Json(Json::Array(v))=>v.iter().cloned().map(Self::json).collect(),_=>value_type_error("expected array")} }
 }
 pub fn strict_equal(a:&Value,b:&Value)->bool {
     match (a,b) {
         // Callback handles are retained references to one owner. Comparing
         // clones observes identity without granting a new callback scope.
-        (Value::Owner(a),Value::Owner(b))=>return Weak::ptr_eq(a,b),
+        (Value::Owner(a),Value::Owner(b))|(Value::Definition(a),Value::Definition(b))|(Value::RenderHandle(a),Value::RenderHandle(b))=>return Weak::ptr_eq(a,b),
         (Value::CaughtStringUnit(a),Value::CaughtStringUnit(b))=>return a==b,
         (Value::CaughtStringUnit(unit),Value::Json(Json::String(text)))|(Value::Json(Json::String(text)),Value::CaughtStringUnit(unit))=>return text.encode_utf16().eq(std::iter::once(*unit)),
         _=>{},
@@ -265,6 +265,8 @@ pub fn ensure(owner:&OwnerWeak)->OwnerRef{let owner=owner.upgrade().unwrap_or_el
 pub fn setup(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);if owner.borrow().phase!="setup"{value_error("setup-only capability")}owner}
 pub fn runtime(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);if matches!(owner.borrow().phase,"setup"|"render"|"before-dispose"){value_error("callback capability required")}owner}
 pub fn capability(owner:&OwnerWeak)->Value{Value::Owner(owner.clone())}
+pub fn definition_capability(owner:&OwnerWeak)->Value{Value::Definition(owner.clone())}
+pub fn renderer_capability(owner:&OwnerWeak)->Value{Value::RenderHandle(owner.clone())}
 pub struct State { pub value:RefCell<Value>, pub kind:&'static str, pub spec:Value, pub owner:OwnerWeak }
 #[derive(Clone)]
 struct Watcher { active:Rc<Cell<bool>>, keys:Option<Vec<String>>, raw:bool, callback:Value }
@@ -350,7 +352,7 @@ impl Owner {
         let guard=PhaseGuard{owner:Rc::downgrade(owner),previous};
         // C-CORE-SYNTAX-0004-C: void setup projects one anonymous slot.
         let _lexical_owner=enter_lexical_owner(&Rc::downgrade(owner));
-        let result=match renderer{Value::Undefined=>NativeSnapshot::slot(),Value::Renderer(render)=>render(vec![capability(&Rc::downgrade(owner))]),_=>panic!("expected compiled native renderer")};
+        let result=match renderer{Value::Undefined=>NativeSnapshot::slot(),Value::Renderer(render)=>render(vec![renderer_capability(&Rc::downgrade(owner))]),_=>panic!("expected compiled native renderer")};
         result.assert_children();
         {let mut o=owner.borrow_mut();o.projection=Some(result);o.projection_revision+=1;}
         drop(guard);
@@ -1074,6 +1076,9 @@ mod callback_handle_identity_tests {
         assert!(strict_equal(&handle,&capability(&Rc::downgrade(&first))));
         assert!(!strict_equal(&handle,&capability(&Rc::downgrade(&second))));
         assert!(!strict_equal(&handle,&Value::HostTarget(Rc::downgrade(&first))));
+        let definition=definition_capability(&Rc::downgrade(&first));let renderer=renderer_capability(&Rc::downgrade(&first));
+        assert!(strict_equal(&definition,&definition.clone()));assert!(strict_equal(&renderer,&renderer.clone()));
+        assert!(!strict_equal(&definition,&handle));assert!(!strict_equal(&renderer,&handle));assert!(!strict_equal(&definition,&renderer));
         Owner::finish(&first,Value::Undefined);Owner::dispose(&first);
         assert!(strict_equal(&handle,&retained),"reference identity survives retirement");
         assert!(catch_authored(||runtime(&handle.owner())).is_err(),"identity is not callback authority");

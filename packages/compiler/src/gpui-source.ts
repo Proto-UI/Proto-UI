@@ -1725,7 +1725,7 @@ impl __PuiNativeRecordValue {
         return functionValue(node.function, environment, depth);
 
       case 'authored-hook':
-        return `${hookNames.get(node.hookId)}(capability(&${ownerReference()}), ${node.arguments?.[0] ? expression(node.arguments[0], environment, depth) : 'Value::Undefined'})`;
+        return `${hookNames.get(node.hookId)}(definition_capability(&${ownerReference()}), ${node.arguments?.[0] ? expression(node.arguments[0], environment, depth) : 'Value::Undefined'})`;
       case 'static-capability':
         return `Value::StaticCapability(&${staticArtifacts.find((declaration) => declaration.id === node.declarationId)!.name}::DECLARATION)`;
       case 'rule': {
@@ -2643,7 +2643,7 @@ impl __PuiNativeRecordValue {
           configure_native_atoms(&owner_ref, ${admittedAnalysis.operations.includes('scheduler.delay')}, ${admittedAnalysis.operations.includes('meta.get')});
           refresh_native_atoms(&owner_ref, window, cx);
           let _lexical_owner = enter_lexical_owner(&owner);
-          let renderer = ${setupCallable}.call_authored(vec![capability(&owner)]);
+          let renderer = ${setupCallable}.call_authored(vec![definition_capability(&owner)]);
           Owner::finish(&owner_ref, renderer);
           let focus_subscriptions = if native_focus_observation_needed(&owner_ref) {
           let focus_owner = owner_ref.clone();

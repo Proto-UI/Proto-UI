@@ -26,7 +26,7 @@ An authored capture's `render` member retains the callable returned by that exac
 
 A valid Expose emission wakes the native component's observers even when the callback does not modify State or call `run.update()`. The event remains queued until its consumer takes it; observing it does not manufacture a new authored input or duplicate the payload. Invalid emissions cannot schedule a wakeup.
 
-Retained callback handles preserve reference identity within their instance, including when a callback compares a saved handle with its own local copy. Handles from different instances remain distinct. Equality only observes the reference; it neither grants callback scope nor revives a disposed owner.
+Retained callback handles preserve reference identity within their instance, including when a callback compares a saved handle with its own local copy. Handles from different instances remain distinct; the same instance's definition, callback and renderer handles also have separate identities. Equality only observes the reference; it neither grants callback scope nor revives a disposed owner.
 
 `C-LIFECYCLE-0005-E` retains a callback scope for `onBeforeDispose`. Releasing a focus scope in that terminal callback is allowed so its activation and physical entry cannot outlive the owner. This is a release-only path: setup and render remain invalid, disposed owners cannot be revived, and the guard against acquiring new runtime work during disposal is unchanged.
 

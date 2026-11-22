@@ -22,6 +22,15 @@ old request revision; cleanup removes only its own registration. A remount
 retains the authored association intent. Target requests carry a borrowed
 `isCurrent` check covering both view epochs, pair revision and exact members.
 
+Each participant must also have exactly one physical binding in the same
+native layout frame. Reusing a single logical Entity under two native parents
+is ambiguous even though it has only one logical registration. Naming, pointer
+input and direct assistive activation all reject this condition. The view
+receipt includes the unique native node, so replacing that node or entering
+and leaving an ambiguous frame retires a pending pointer/request turn. A
+stable unique or ambiguous layout does not repeatedly advance the receipt or
+schedule redraws.
+
 ## Naming and input
 
 Naming projects AccessKit `labelled_by` to the actual label node from the same
@@ -63,3 +72,7 @@ checks direct/assistive activation parity, disabled behavior, exact pairing,
 naming conflicts, duplicate and foreign-window rejection, reentrant retirement,
 detach/remount, and mouse qualification. The producer emits every Rust component
 and SDK file from source; generated Rust is not patched by the consumer.
+The same-Entity fixture renders both Label and target through two distinct
+native parents, then restores one view; an earlier mouse down cannot revive
+after that restoration. SDK request tests additionally replace the unique
+physical node while retaining the same logical owner and window.
