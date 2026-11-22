@@ -929,6 +929,13 @@ function analyzeCallableFlow(
       ])
     );
   }
+  function overlayField(source: Known | undefined, previous: Known | undefined): Known {
+    // A spread/assignment copies only present own properties. An optional
+    // source field's absent alternative keeps the preceding target property.
+    return merge(
+      (source ?? ABSENT).map((value) => (value.kind === 'absent' ? (previous ?? ABSENT) : [value]))
+    );
+  }
 
   function property(values: Known, name: string): Known {
     return values.flatMap((value) =>
@@ -1083,7 +1090,7 @@ function analyzeCallableFlow(
                 name,
                 merge(
                   sources.map((source) =>
-                    source ? (source.get(name) ?? nextFields.get(name) ?? ABSENT) : UNKNOWN
+                    source ? overlayField(source.get(name), nextFields.get(name)) : UNKNOWN
                   )
                 )
               );
@@ -1175,8 +1182,8 @@ function analyzeCallableFlow(
                       target,
                       name,
                       merge(
-                        sources.map(
-                          (source) => source!.get(name) ?? fields(target).get(name) ?? ABSENT
+                        sources.map((source) =>
+                          overlayField(source!.get(name), fields(target).get(name))
                         )
                       ),
                       args[0].length > 1

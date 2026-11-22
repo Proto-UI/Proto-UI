@@ -16,6 +16,12 @@ const prototype = (setup: string, callback: string) => `
 
 const view = (hidden: string) => `const original={value:'ok',hidden:${hidden}};
   const view:Readonly<{value:string}>=original;`;
+const optionalOverlay = (hidden: string) => `
+  const original={value:'ok',hidden:${hidden}};
+  const extra:{hidden?:string}={};
+  if(flag.get())extra.hidden='safe';
+  const merged={...original,...extra};
+  const view:Readonly<{value:string}>=merged;`;
 
 describe('outward JSON retains actual ordinary-value provenance', () => {
   const negative = [
@@ -68,6 +74,11 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `${view('undefined')} let current:Readonly<{value:string}>={value:'safe'};`,
       `current=view;run.expose.emit('changed',current);`,
     ],
+    [
+      'an absent optional spread cannot hide the existing undefined field',
+      `const flag=def.state.bool('flag',false);`,
+      `${optionalOverlay('undefined')}run.expose.emit('changed',view);`,
+    ],
   ];
   it.each(negative)(
     'rejects %s only when the retained value reaches the sink',
@@ -103,39 +114,55 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `run.expose.emit('changed',{value:String(42),count:Number('3')});`,
     ],
     ['ordinary arrays', '', `run.expose.emit('changed',{values:[1,2,3]});`],
+    [
+      'optional spread preserves an already safe existing field',
+      `const flag=def.state.bool('flag',false);`,
+      `${optionalOverlay("'original'")}run.expose.emit('changed',view);`,
+    ],
   ])('preserves %s', (_, setup, callback) => {
     const result = compilePrototype(prototype(setup, callback), { profile: 'gpui-source-v1' });
     expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
   });
 
-  it('independently rejects a serialized IR sink that substitutes the narrowed original for a fresh copy', () => {
-    const parsed = parsePrototype(
-      prototype(view('undefined'), `run.expose.emit('changed',{value:view.value});`)
-    );
-    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    const ir: PrototypeIR = JSON.parse(JSON.stringify(parsed.value));
-    let changed = false;
-    const visit = (value: unknown): void => {
-      if (!value || typeof value !== 'object') return;
-      if (Array.isArray(value)) {
-        value.forEach(visit);
-        return;
-      }
-      const node = value as ExpressionIR;
-      if (node.kind === 'operation' && node.operation === 'expose.emit') {
-        const payload = node.arguments[1];
-        if (payload.kind !== 'record' || payload.entries[0].value.kind !== 'member')
-          throw new Error('fresh snapshot fixture');
-        node.arguments[1] = JSON.parse(JSON.stringify(payload.entries[0].value.object));
-        changed = true;
-        return;
-      }
-      Object.values(value).forEach(visit);
-    };
-    visit(ir);
-    expect(changed).toBe(true);
-    const result = validateIR(ir);
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.diagnostics[0].message).toContain('Outward JSON payload retains');
-  });
+  it.each([
+    ['direct hidden field', view('undefined'), ''],
+    [
+      'optional spread overlay',
+      `const flag=def.state.bool('flag',false);`,
+      optionalOverlay('undefined'),
+    ],
+  ])(
+    'independently rejects serialized IR substitution of %s for a fresh copy',
+    (_, setup, beforeEmit) => {
+      const parsed = parsePrototype(
+        prototype(setup, `${beforeEmit}run.expose.emit('changed',{value:view.value});`)
+      );
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+      const ir: PrototypeIR = JSON.parse(JSON.stringify(parsed.value));
+      let changed = false;
+      const visit = (value: unknown): void => {
+        if (!value || typeof value !== 'object') return;
+        if (Array.isArray(value)) {
+          value.forEach(visit);
+          return;
+        }
+        const node = value as ExpressionIR;
+        if (node.kind === 'operation' && node.operation === 'expose.emit') {
+          const payload = node.arguments[1];
+          if (payload.kind !== 'record' || payload.entries[0].value.kind !== 'member')
+            throw new Error('fresh snapshot fixture');
+          node.arguments[1] = JSON.parse(JSON.stringify(payload.entries[0].value.object));
+          changed = true;
+          return;
+        }
+        Object.values(value).forEach(visit);
+      };
+      visit(ir);
+      expect(changed).toBe(true);
+      const result = validateIR(ir);
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.diagnostics[0].message).toContain('Outward JSON payload retains');
+    }
+  );
 });
