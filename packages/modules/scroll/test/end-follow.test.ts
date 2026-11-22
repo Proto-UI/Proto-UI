@@ -215,6 +215,18 @@ describe('module-scroll: end-follow host contract', () => {
     expect(snapshots).toHaveLength(before);
     expect(snapshots.at(-1)?.endFollow.state).toBe('pending');
     replacement.update({
+      config: {
+        axes: 'horizontal',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    const disabledCount = snapshots.length;
+    expect(replacement.pauseFollowing!()).toBe(false);
+    expect(snapshots).toHaveLength(disabledCount);
+    replacement.update({
       config: { axes: 'vertical', projection: 'system', endFollow: { mode: 'off' } },
       projection: 'system',
       onFacts: (snapshot) => snapshots.push(snapshot),

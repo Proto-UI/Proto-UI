@@ -1330,7 +1330,7 @@ export function createWebScrollSurfaceHost(
         pauseFollowing() {
           if (disposed || !policyCurrent()) return false;
           const axis = configuredFollowAxis();
-          if (!axis) return false;
+          if (!axis || !isAxisEnabled(axis)) return false;
           cancelScheduledEnd(true);
           readerIntentUntil = 0;
           readerArrivalUntil = 0;

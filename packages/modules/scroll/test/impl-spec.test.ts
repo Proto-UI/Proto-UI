@@ -210,6 +210,10 @@ describe('module-scroll: fake host contract', () => {
     h.module.hooks.onMountPhase?.('mounted', 1);
     expect(commands).toEqual(['to-end', 'pause']);
     expect(h.surface.endFollow.state.get()).toBe('paused');
+    h.sys.phase = 'callback';
+    h.surface.sync({ axes: 'horizontal' });
+    expect(h.surface.pauseFollowing()).toEqual({ kind: 'rejected', reason: 'unavailable' });
+    expect(commands).toEqual(['to-end', 'pause']);
     h.module.hooks.onMountPhase?.('detached', 1);
     expect(h.surface.pauseFollowing()).toEqual({ kind: 'rejected', reason: 'not-mounted' });
     expect(commands).toEqual(['to-end', 'pause']);

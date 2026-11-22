@@ -276,6 +276,7 @@ export class ScrollModuleImpl extends ModuleBase {
     if (!this.mounted) return { kind: 'rejected', reason: 'not-mounted' };
     if (
       this.config.endFollow.mode === 'off' ||
+      (this.config.axes !== 'both' && this.config.axes !== this.config.endFollow.axis) ||
       (this.availabilitySession && !this.bindingIsCurrent(this.leaseEpoch, this.currentBinding))
     )
       return { kind: 'rejected', reason: 'unavailable' };
