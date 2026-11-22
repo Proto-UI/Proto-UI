@@ -32,11 +32,14 @@ const sources = [
   ['button', 'button/button'],
   ['label', 'label/root'],
   ['input', 'input/root'],
+  ['input_delegate', null],
 ];
 const entries = [];
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 for (const [stem, source] of sources) {
-  const entry = path.join(root, 'packages/prototypes/base/src', source + '.proto.ts');
+  const entry = source
+    ? path.join(root, 'packages/prototypes/base/src', source + '.proto.ts')
+    : path.join(fixture, 'input-delegate.proto.ts');
   const result = await compileFile(entry, {
     root,
     profile: 'gpui-source-v1',
@@ -65,7 +68,7 @@ edition="2021"
 publish=false
 [workspace]
 resolver="2"
-members=["button","label","input","button/.proto-ui/gpui-native"]
+members=["button","label","input","input_delegate","button/.proto-ui/gpui-native"]
 [workspace.dependencies]
 gpui={git=${JSON.stringify(git)},rev=${JSON.stringify(rev)}}
 [dependencies]

@@ -372,3 +372,30 @@ fn actual_pointer_press_preserves_all_portable_modifiers(cx:&mut TestAppContext)
     visual.simulate_click(point,gpui::Modifiers{shift:true,control:true,alt:true,platform:true,..Default::default()});
     window.update(&mut visual,|host,_,cx|assert_eq!(host.component.read(cx).handle().take_events(),vec![("pressed".into(),json!({"shift":true,"ctrl":true,"alt":true,"meta":true}))])).unwrap();
 }
+
+
+struct EventObserverHarness {
+    component:Entity<press_modifiers::CompiledComponent>,
+    observed:Rc<std::cell::RefCell<Vec<(String,serde_json::Value)>>>,
+    _observation:gpui::Subscription,
+}
+impl Render for EventObserverHarness{fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement{gpui::div().size_full().child(self.component.clone())}}
+#[gpui::test]
+fn event_only_native_press_notifies_the_consumer_without_state_or_run_update(cx:&mut TestAppContext){
+    let window=cx.open_window(size(px(240.),px(60.)),|window,cx|{
+        let component=cx.new(|cx|{
+            let mut component=press_modifiers::CompiledComponent::new(json!({}),None,window,cx).unwrap_or_else(|_|panic!("event-only component"));
+            component.set_slot(vec![proto_ui_gpui_native::gpui_native_owner::NativeSnapshot::text_value(Value::string("Repeat action"))],cx).unwrap_or_else(|_|panic!("visible content"));component
+        });
+        let observed=Rc::new(std::cell::RefCell::new(Vec::new()));let received=observed.clone();
+        let observation=cx.observe(&component,move|_:&mut EventObserverHarness,component,cx|received.borrow_mut().extend(component.read(cx).handle().take_events()));
+        EventObserverHarness{component,observed,_observation:observation}
+    });
+    let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);frames(&mut visual);
+    let position=window.update(&mut visual,|host,_,cx|{host.observed.borrow_mut().clear();assert!(host.component.read(cx).owner.borrow().states.is_empty());host.component.read(cx).owner.borrow().bounds.unwrap().center()}).unwrap();
+    for _ in 0..2{visual.simulate_click(position,gpui::Modifiers::default());visual.run_until_parked();}
+    window.update(&mut visual,|host,_,cx|{
+        assert_eq!(*host.observed.borrow(),vec![("pressed".into(),json!({"shift":false,"ctrl":false,"alt":false,"meta":false}));2]);
+        assert!(host.component.read(cx).handle().take_events().is_empty(),"the observer receives each event exactly once");
+    }).unwrap();
+}

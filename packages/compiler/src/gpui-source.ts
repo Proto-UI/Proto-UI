@@ -1064,6 +1064,32 @@ impl __PuiNativeRecordValue {
     ): { fn: FunctionIR; environment: NativeLexicalScope }[] {
       if (node.kind === 'function') return [{ fn: node.function, environment: scope }];
       if (node.kind === 'narrow') return resolve(node.value, scope);
+      // An authored capture is nominal provenance, not a structural record.
+      // Its render member is the setup result captured by that exact hook.
+      // Preserve scalar/null render callbacks at the native renderer boundary
+      // without converting arbitrary records or guessing a component identity.
+      if (node.kind === 'member' && node.property === 'render') {
+        const captures = valueAlternatives(node.object.type).filter(
+          (type): type is Extract<ExpressionIR['type'], { kind: 'capture' }> =>
+            typeof type !== 'string' && type.kind === 'capture'
+        );
+        if (captures.length) {
+          if (active.has(node)) return [];
+          active.add(node);
+          try {
+            return captures.flatMap((capture) => {
+              const hook = ir.hooks.find((hook) => hook.id === capture.hookId);
+              return hook
+                ? returnedValues(hook.setup).flatMap((result) =>
+                    result.value ? resolve(result.value, result.scope) : []
+                  )
+                : [];
+            });
+          } finally {
+            active.delete(node);
+          }
+        }
+      }
       if (node.kind === 'conditional')
         return [...resolve(node.then, scope), ...resolve(node.otherwise, scope)];
       if (node.kind === 'reference') {
@@ -1220,6 +1246,7 @@ impl __PuiNativeRecordValue {
     return `{ let callable=${value}; match callable {
       Value::NativeFunction{render,..} => Value::Renderer(render),
       Value::Renderer(render) => Value::Renderer(render),
+      ${valueAlternatives(node.type).includes('void') ? 'Value::Undefined => Value::Undefined,' : ''}
       Value::Function(callback) => Value::Renderer(Rc::new(move |arguments:Vec<Value>| { ${result} })),
       _ => panic!("checked setup result must be a callable")
     } }`;

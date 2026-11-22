@@ -176,15 +176,12 @@ mod context_menu_tests {
     use super::*;
     #[test]
     fn native_menu_key_beats_synthetic_text_and_keeps_modifiers() {
-        let event = KeyDownEvent {
-            keystroke: Keystroke {
-                key: "menu".into(), key_char: Some("menu".into()),
-                modifiers: Modifiers { shift: true, control: true, ..Default::default() },
-            }, is_held: false,
+        let keystroke = Keystroke {
+            key: "menu".into(), key_char: Some("menu".into()),
+            modifiers: Modifiers { shift: true, control: true, ..Default::default() },
         };
-        let fields = from_key_down(&event).expect("a named menu key");
-        assert_eq!(fields.key, "ContextMenu");
-        assert!(fields.modifiers.shift && fields.modifiers.ctrl);
-        assert!(!fields.repeat);
+        assert_eq!(portable_key(&keystroke).as_deref(), Some("ContextMenu"));
+        let modifiers = PortableModifiers::from(keystroke.modifiers);
+        assert!(modifiers.shift && modifiers.ctrl);
     }
 }
