@@ -41,7 +41,8 @@ vi.mock('./PrototypePreviewer/runtimes/vue2-runtime', async (original) => {
   const require = createRequire(resolve('packages/adapters/vue2/package.json'));
   return { ...actual, loadVue2: async () => require('vue') };
 });
-vi.mock('./PrototypePreviewer/projection-theme', () => ({
+vi.mock('./PrototypePreviewer/projection-theme', async (original) => ({
+  ...(await original<typeof import('./PrototypePreviewer/projection-theme')>()),
   resolveProjectionThemeSurfaceStyle: () => ({
     '--pui-background': '#fff',
     '--pui-foreground': '#111',

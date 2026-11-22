@@ -530,7 +530,10 @@ function createProjectedProto(
     props: { ...(input.props ?? {}) },
     surfaceStyle: mergeSurfaceStyle(input.surfaceStyle, themeSurfaceStyle) ?? {},
   };
-  if (themeSurfaceStyle && Object.keys(themeSurfaceStyle).length > 0) {
+  // An omitted initial palette still supplies a private empty renderer slot.
+  // Register that slot now so the first palette update has the same owner;
+  // undefined is reserved for nested authored surfaces that only inherit it.
+  if (themeSurfaceStyle !== undefined) {
     const style = node.surfaceStyle;
     const entry = Array.isArray(style) ? style.at(-1) : style;
     if (!entry || typeof entry === 'string') {

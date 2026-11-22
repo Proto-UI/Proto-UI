@@ -3,6 +3,9 @@ import { createProjectionComposition } from './PrototypePreviewer/projection-com
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
 import { renderDemo } from './PrototypePreviewer/demo-renderer';
 import { initSiteHeaderDisclosure, type SiteHeaderDisclosure } from './site-header-disclosure';
+import type { DemoSetupContext } from './PrototypePreviewer/demo-types';
+import { createRequire } from 'node:module';
+import { isNativeFocusTargetReady as isVueNativeFocusTargetReady } from '../../../../packages/adapters/vue/src/platform/instance-tree';
 
 // Real installed runtimes and adapters; only CDN loading is replaced in Happy DOM.
 vi.mock('./PrototypePreviewer/runtimes/react-runtime', async () => {
@@ -95,7 +98,18 @@ for (const family of ['shadcn', 'brutalist'] as const)
           ? ['shadcn-select-surface', 'shadcn-select-viewport', 'shadcn-select-item-text']
           : []),
       ]);
-      rendered = await renderDemo({ runtime, demo: composition.demo, host });
+      let context: DemoSetupContext | undefined;
+      rendered = await renderDemo({
+        runtime,
+        demo: {
+          ...composition.demo,
+          setup(next) {
+            context = next;
+            return composition.demo.setup?.(next);
+          },
+        },
+        host,
+      });
       disclosure = initSiteHeaderDisclosure(header);
       disclosure.bindButton(document.getElementById('menu')!);
       disclosure.enhance();
@@ -105,7 +119,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
         ...host.querySelectorAll(`[data-projection-prototype="${family}-select-root"]`),
       ];
       expect(roots).toHaveLength(2);
-      const assertSame = () => {
+      const assertSame = (focusVisibleTrigger: HTMLElement | null = null) => {
         expect(host.querySelectorAll('[role="combobox"]')).toHaveLength(2);
         expect(
           host.querySelectorAll(`[data-projection-prototype="${family}-select-root"]`)
@@ -120,9 +134,15 @@ for (const family of ['shadcn', 'brutalist'] as const)
           expect(trigger.dataset.projectionOwner).toBe('header-ghost-appearance');
           expect(trigger.dataset.projectionGeneration).toBe('7');
           expect(trigger.dataset.projectionRuntime).toBe(runtime);
-          expect(
-            trigger.getAttribute('data-pui-style')!.split(/\s+/).includes('border-transparent')
-          ).toBe(family === 'shadcn' && !compact.matches);
+          const tokens = trigger.getAttribute('data-pui-style')!.split(/\s+/);
+          const focusVisible = trigger === focusVisibleTrigger;
+          expect(tokens.includes('border-transparent')).toBe(
+            family === 'shadcn' && !compact.matches && !focusVisible
+          );
+          if (family === 'shadcn') {
+            for (const token of ['border-ring', 'ring-3', 'ring-ring/50'])
+              expect(tokens.includes(token)).toBe(focusVisible);
+          }
           expect(
             trigger.getAttribute('data-pui-style')!.includes('shadow-[4px_4px_0_0_#000]')
           ).toBe(family === 'brutalist');
@@ -144,6 +164,19 @@ for (const family of ['shadcn', 'brutalist'] as const)
           )
         ).toBe(true);
       }
+      if (runtime === 'vue') {
+        const Vue = createRequire(process.cwd() + '/apps/www/package.json')('vue') as {
+          nextTick(): Promise<void>;
+        };
+        // Equal appearance props also schedule a Vue recommit. Unchanged
+        // tokens do not certify that commit's event gate has reopened. Settle
+        // the same framework queue as the Vue adapter tests, then require the
+        // actual current owner to be ready before the first input is sent.
+        await Promise.resolve();
+        await Vue.nextTick();
+        await Promise.resolve();
+        await vi.waitFor(() => expect(isVueNativeFocusTargetReady(triggers[0])).toBe(true));
+      }
       triggers[0].focus();
       triggers[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       triggers[0].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
@@ -161,6 +194,18 @@ for (const family of ['shadcn', 'brutalist'] as const)
       option.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await vi.waitFor(() => expect(triggers[0].getAttribute('aria-expanded')).toBe('false'));
       await vi.waitFor(() => expect(document.activeElement).toBe(triggers[0]));
-      assertSame();
+      if (family === 'shadcn') {
+        const ref = Object.entries(context!.refs).find(([, node]) => node === triggers[0])![0];
+        const focusVisible = context!.api.getExposes(ref)!.focusVisible as { get(): boolean };
+        // Escape hands keyboard focus back to this same owner. Its real focus
+        // paint overrides the resting ghost border until a real blur occurs.
+        expect(focusVisible.get()).toBe(true);
+        assertSame(triggers[0]);
+        triggers[0].blur();
+        await vi.waitFor(() => {
+          expect(focusVisible.get()).toBe(false);
+          assertSame();
+        });
+      } else assertSame();
     }, 15000);
   }
