@@ -13,7 +13,7 @@ const dialogMask = definePrototype<BrutalistDialogMaskProps, BrutalistDialogMask
     const dialogState = dialog.stateHandles;
     const { open } = dialogState;
     // P-BRUTALIST-DIALOG-MASK-VISUAL-GRAMMAR: fixed inset-0 bg-overlay flat scrim (no blur, no border, no shadow).
-    def.feedback.style.use(tw('fixed inset-0 bg-overlay'));
+    def.feedback.style.use(tw('fixed inset-0 z-40 bg-overlay'));
 
     def.rule({
       when: (w) => w.state(open).eq(true),

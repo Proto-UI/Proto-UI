@@ -161,7 +161,7 @@ const dialogMask = definePrototype({
   name: 'base-dialog-mask',
   setup(def) {
     setupDialogMask(def);
-    def.feedback.style.use(tw('fixed inset-0'));
+    def.feedback.style.use(tw('fixed inset-0 z-40'));
   },
 });
 
