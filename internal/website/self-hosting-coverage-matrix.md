@@ -261,7 +261,7 @@ The 2026-11-22 contact-footprint regression review compares the complete deltas 
 | `apps/www/src/content/docs/zh-cn/popover-public-dom-probe.ts` | `www.demo.demo-matrix` | `30d01d9c17c7824e92cb36879b99666eb89f37ccd03fcd499ce4edfeac991b63` |
 | `apps/www/src/content/docs/zh-cn/tooltip-pressed-observation.ts` | `www.demo.demo-matrix` | `ff759b29b654aabe746f9ba12cabb7bafcc08d6ae9a674d52bc8fc49d53aae65` |
 | `apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts` | `www.demo.authored-controllers` | `505d0e1d02df1fb14bab6f3be958e9b331a79c6b0c1e4352726af24c3d4d59c1` |
-| `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09` |
+| `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564` |
 | `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `bd8d2918449a7712d0c24223185bf5a6a042d7bdbf8672b2b5047b4e7bf5c32b` |
 | `apps/www/src/content/docs/transition-demo.shared.ts` | `www.demo.authored-controllers` | `8c6d04cd8474c649decfae175c956beff9dccfe3c7adcf57b8ce48bef4d1a3dc` |
 | `apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts` | `www.demo.authored-controllers` | `57d48df5281bd97cf579a701642781cc7e072ff2c9b29ea8494a3eae2ddc6894` |
