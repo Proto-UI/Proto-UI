@@ -48,13 +48,14 @@ export function siteLinkAppearance(link: HTMLElement): SiteLinkAppearance {
     requested === 'icon' ||
     requested === 'nav' ||
     requested === 'text' ||
+    requested === 'pill' ||
     requested === 'brand' ||
     requested === 'sidebar' ||
     requested === 'toc' ||
     requested === 'pagination'
   )
     return requested;
-  if (link.closest('.homepage-hero__eyebrow')) return 'text';
+  if (link.closest('.homepage-hero__eyebrow')) return 'pill';
   if (link.closest('.sidebar-pane .top-level')) return 'sidebar';
   if (link.closest('.pagination-links')) return 'pagination';
   if (link.closest('sl-toc')) return 'toc';

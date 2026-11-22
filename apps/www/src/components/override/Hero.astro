@@ -16,6 +16,7 @@ const whitepaperLabel =
 <section class="homepage-hero" aria-labelledby={PAGE_TITLE_ID}>
   <HomeActions
     id="homepage-whitepaper"
+    appearance="pill"
     class="homepage-hero__eyebrow"
     actions={[
       { text: whitepaperLabel, link: whitepaperHref, variant: 'minimal', icon: 'arrow-right' },
@@ -72,6 +73,7 @@ const whitepaperLabel =
     line-height: 1.25rem;
     white-space: normal;
     text-wrap: balance;
+    text-decoration: none;
     transition: background-color 120ms ease;
   }
   .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-link svg),
@@ -83,6 +85,10 @@ const whitepaperLabel =
   .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-link:hover),
   .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a:hover) {
     background-color: color-mix(in srgb, var(--color-muted) 80%, var(--color-foreground) 8%);
+  }
+  .homepage-hero :global(.homepage-hero__eyebrow a:focus-visible) {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
   }
   .homepage-hero h1 {
     max-width: 100%;

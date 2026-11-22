@@ -11,6 +11,7 @@ export type SiteLinkAppearance =
   | 'icon'
   | 'nav'
   | 'text'
+  | 'pill'
   | 'brand'
   | 'nav-group'
   | 'sidebar'
@@ -134,7 +135,7 @@ export function linkSurfaceProps(
       ? family === 'brutalist'
         ? 'default'
         : 'lg'
-      : row
+      : row || group
         ? family === 'brutalist'
           ? 'default'
           : 'md'
@@ -169,7 +170,12 @@ export function linkTextProps(
     return shadcnActionAppearance({ styleProfile: 'rhea', ...facts }).text;
   const quietNavigation = family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc');
   return {
-    size: appearance === 'brand' ? 'base' : appearance === 'nav-group' ? 'xs' : 'sm',
+    size:
+      appearance === 'brand'
+        ? 'base'
+        : appearance === 'nav-group' || appearance === 'pill'
+          ? 'xs'
+          : 'sm',
     tone:
       appearance === 'nav-group' &&
       sidebarRole !== 'nested-group' &&
@@ -271,9 +277,9 @@ export function linkSurfaceLayout(
               gap: '0.5rem',
             }
           : {
-              minHeight: appearance === 'text' ? '1.5rem' : '2.75rem',
+              minHeight: appearance === 'text' || appearance === 'pill' ? '1.5rem' : '2.75rem',
               padding:
-                appearance === 'text'
+                appearance === 'text' || appearance === 'pill'
                   ? '0'
                   : family === 'brutalist'
                     ? '0.5rem 0.75rem'

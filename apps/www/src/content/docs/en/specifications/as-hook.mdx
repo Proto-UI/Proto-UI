@@ -352,6 +352,8 @@ Source review found that R1's reported static-declaration pass was vacuous: both
 
 #### Actual Bounded R3 Result
 
+The [pinned preparation and R3 evidence record](https://github.com/Proto-UI/Proto-UI/blob/dc3b184ba10b0de53e40359c52d012b204b2cd01/internal/records/2026-11-11-issue-1154-container-preparation.json) retains the executed selection, source/package bindings, failure and unexecuted assertions. This link identifies the historical record; it does not rerun or accept those conditions.
+
 Main subsequently executed the fixture-only R3 run against the retained installed packages. Its requested and executed probe lists were both exactly `['static-module-declarations']`, with no unmatched selector. The probe failed at consumer line 324 with `retained C-HOOK-0001-K target requires a Module declaration array`. The container command exited 1 with no signal or timeout; the existing 1200-second container and 180000 ms probe deadlines were unchanged.
 
 Five of the six execution phases passed, including source and real Git metadata admission, retained-input binding, and the final package/index readback. All 41 retained packages kept their tarball, export, installed-membership, and lockfile bindings; the semantic index matched before and after. The static probe stopped at the missing array, so its later order, exact declaration/token/config identity, required-field, and freezing assertions were not reached. This is an actual failure of the historical K target. Current legacy `HookCaller` has no public `modules` commitment, so this result does not establish a current Core regression. R1's vacuous reported pass remains preserved as history and supplies no static-declaration acceptance.
