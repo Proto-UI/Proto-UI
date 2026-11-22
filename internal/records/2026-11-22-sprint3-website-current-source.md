@@ -29,6 +29,14 @@ Historical scopes retain their original identities:
 - #1141's original catalog closure and retained Dropdown owner/generation/portal/lease/part/orphan anatomy evidence remain separate. This slice does not substitute a new source count for those browser frames.
 - #1175's original 19 conditions, 78 consumer rows and 11 + 72 + 72 subject matrix remain separate. The recorded Camoufox R5 failures remain historical failures; the private fixed runner/archive bytes were not recovered from current Git refs/public discussion. The new Chromium suite is named current-source and cannot replace that driver or its receipt.
 
+### Public CLI target wording correction
+
+Further source reconciliation found **84 bilingual guides / 42 families** claiming that no public `proto-ui add` target exists even though the actual `COMPONENT_REGISTRY` includes the target. These are Base and Brutalist guides, including Accordion, Select and Spinner. Only the inaccurate sentence changes: it names this workspace's actual target and requires matching CLI/package versions with release availability checked separately. Existing unavailable published-export notices and draft lifecycle text remain intact.
+
+This correction explicitly distinguishes `COMPONENT_REGISTRY` from `WORKSPACE_COMPONENT_REGISTRY`. `runAddCommand` rejects `sourceOnly: true` entries; source metadata discoverable through `getComponentEntry` does not make those installed-consumer targets. Their existing no-public-add statements remain intact. No CLI/compiler code changes are part of this correction.
+
+`node --test scripts/docs/test/public-cli-delivery.test.mjs` loads the actual CLI registry and release route inventory. At `4e3406b9c8f594875fe5f272caa56501c2e2a226`, it failed on the 84 current claims; after correcting those sentences it passes with zero contradictions. The test is included automatically by `test:public-docs`. This proves the bounded registry/prose consistency, not clean installation or complete Usage.
+
 ## Executed local checks
 
 Node `24.22.3`, pnpm `10.32.1`, Linux; dependencies installed with the frozen lockfile in this worktree.
