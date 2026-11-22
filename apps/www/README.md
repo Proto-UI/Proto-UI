@@ -21,9 +21,9 @@ Run commands from the repository root:
 
 | Command                        | Action                                   |
 | :----------------------------- | :--------------------------------------- |
-| `pnpm docs:dev`                | Start the docs dev server                |
-| `pnpm docs:build`              | Build the production docs site           |
-| `pnpm docs:preview`            | Preview a production build               |
+| `pnpm -w docs:dev`             | Start the docs dev server                |
+| `pnpm -w docs:build`           | Build the production docs site           |
+| `pnpm -w docs:preview`         | Preview a production build               |
 | `pnpm --filter apps-www check` | Run Astro type and content checks        |
 | `pnpm --filter apps-www astro` | Run Astro/Starlight maintenance commands |
 

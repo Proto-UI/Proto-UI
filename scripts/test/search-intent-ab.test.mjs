@@ -183,6 +183,9 @@ test('normal validation rejects missing results, browser errors, pre-open DOM or
       s.errors.push('error');
     },
     (s) => {
+      // Only the counterfactual Starlight search may not pre-construct its UI;
+      // the current composition pre-connects its shell by design.
+      s.variant = 'baseline';
       s.events.uiBeforeOpen = true;
     },
     (s) => {
@@ -199,6 +202,14 @@ test('normal validation rejects missing results, browser errors, pre-open DOM or
     mutate(s);
     assert.throws(() => validateSample(s));
   }
+});
+
+test('the current Search shell may pre-connect without violating paint or request invariants', () => {
+  const s = good();
+  s.events.uiBeforeOpen = true;
+  validateSample(s);
+  s.variant = 'baseline';
+  assert.throws(() => validateSample(s));
 });
 
 test('no-intent startup rejects any Search service traffic and accidentally injected intent', () => {

@@ -4,6 +4,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 import { publicDocPolicy } from './public-doc-policy.mjs';
+import { runRepositoryDocsCheck } from './check-repository-docs.mjs';
 
 const DEFAULT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DOC_EXTENSIONS = ['.md', '.mdx', '/index.md', '/index.mdx'];
@@ -369,6 +370,8 @@ async function loadLibraryManifests(root, bom, libraries) {
 
 export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicDocPolicy } = {}) {
   const errors = [];
+  const repositoryDocs = await runRepositoryDocsCheck({ root });
+  errors.push(...repositoryDocs.errors);
   const releaseTruth = await loadVersionTruth(root, policy);
   const workspaceVersion = (await fs.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
   releaseTruth.bom.__source = releaseTruth.bomSource;
@@ -444,7 +447,7 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
       sidebarSlugs,
     })
   );
-  return { errors, releaseTruth, workspaceVersion, sidebarSlugs, primaryDocuments };
+  return { errors, releaseTruth, workspaceVersion, sidebarSlugs, primaryDocuments, repositoryDocs };
 }
 
 async function main() {
@@ -456,7 +459,7 @@ async function main() {
     return;
   }
   console.log(
-    `[public-docs] OK: stable ${result.releaseTruth.stable.release.version} from ${result.releaseTruth.stable.__file}; workspace ${result.workspaceVersion}; ${result.sidebarSlugs.length} bilingual primary routes; ${publicDocPolicy.libraries.length} library inventories.`
+    `[public-docs] OK: stable ${result.releaseTruth.stable.release.version} from ${result.releaseTruth.stable.__file}; workspace ${result.workspaceVersion}; ${result.sidebarSlugs.length} bilingual primary routes; ${publicDocPolicy.libraries.length} library inventories; ${result.repositoryDocs.counts.maintained} maintained repository documents.`
   );
 }
 
