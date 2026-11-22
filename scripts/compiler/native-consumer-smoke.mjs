@@ -5,6 +5,7 @@
  * NATIVE_CONSUMER_DEPENDENCIES=registry instead installs exact versions in each consumer.
  * NATIVE_CONSUMER_PACKAGE_ROOT selects an installed tree for offline copies.
  * NATIVE_CONSUMER_PROFILES is a comma-separated subset of the four implemented profiles.
+ * NATIVE_CONSUMER_COMPILER selects a built pinned index.js; omission uses this checkout.
  * Every consumer, compiler input, command stream, failure, trace and measurement is retained.
  * Happy DOM exercises real framework/custom-element mounts; this is not browser/layout proof.
  */
@@ -18,11 +19,14 @@ import {
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
-import {
+const {
   compileFile, compileProject, compilationArtifacts, writeArtifactSet, TARGET_PROFILES, verifyConsumerClosure,
-} from '../../packages/compiler/src/index.ts';
+  compilerBuildIdentity,
+} = await import(process.env.NATIVE_CONSUMER_COMPILER
+  ? pathToFileURL(path.resolve(process.env.NATIVE_CONSUMER_COMPILER)).href
+  : new URL('../../packages/compiler/src/index.ts', import.meta.url).href);
 
 const repoRoot = realpathSync(fileURLToPath(new URL('../../', import.meta.url)));
 const script = fileURLToPath(import.meta.url);
@@ -179,7 +183,7 @@ function runNpm(evidence, name, args, consumer) {
 }
 
 /** Copy real package payloads and reproduce Node's reachable dependency/peer graph. */
-function copyInstalledClosure(consumer, dependencies, devDependencies, installedRoot) {
+export function copyInstalledClosure(consumer, dependencies, devDependencies, installedRoot) {
   const roots = [installedRoot, path.join(installedRoot, 'packages/compiler'), path.join(installedRoot, 'packages/adapters/react')];
   const store = path.join(installedRoot, 'node_modules/.pnpm');
   const storeEntries = existsSync(store) ? readdirSync(store).sort() : [];
@@ -408,7 +412,7 @@ async function compilerWorker(inputRoot, outputRoot, profile, evidence) {
   }
 }
 
-const buildProgram = `import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+export const buildProgram = `import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 const provenance=JSON.parse(readFileSync('generated/provenance.json','utf8'));
@@ -686,7 +690,10 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
   filesUnder(path.join(consumer, 'node_modules'));
   const provenance = json(path.join(consumer, 'generated/provenance.json'));
   assert.equal(provenance.profile, profile.id);
-  assert.deepEqual(provenance.dependencies, profile.dependencies);
+  // This assembly exercises state/style/Context, not positioning. The profile is
+  // an upper bound; a geometry package in these consumers is an unwanted leak.
+  const expectedDependencies = profile.dependencies.filter(dependency => dependency.name !== '@floating-ui/dom');
+  assert.deepEqual(provenance.dependencies, expectedDependencies);
   for (const dependency of provenance.dependencies) assert.equal(dependency.role, 'target', `Native output retained a ${dependency.role} dependency`);
   for (const helper of provenance.helpers ?? profile.helpers) {
     assert.equal(helper.classification, 'native-lowering', `Native output retained unsupported helper ${helper.name}`);
@@ -714,7 +721,7 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
   const dependencyProvenance = { ...provenance };
   delete dependencyProvenance.helpers;
   save(path.join(consumer, 'dependency-provenance.json'), dependencyProvenance);
-  const expected = { profile: profile.id, dependencies: profile.dependencies, generatedFiles: sourceFiles.map((file) => `generated/${file.path}`), provenanceFile: 'dependency-provenance.json' };
+  const expected = { profile: profile.id, dependencies: expectedDependencies, generatedFiles: sourceFiles.map((file) => `generated/${file.path}`), provenanceFile: 'dependency-provenance.json' };
   const closure = await verifyConsumerClosure(consumer, expected);
   save(path.join(evidence, 'closure-result.json'), closure);
   if (!closure.ok) throw new Error(JSON.stringify(closure.failures));
@@ -815,7 +822,7 @@ async function main() {
   const work = mkdtempSync(path.join(tmpdir(), 'proto-native-consumers-'));
   assert.ok(!within(repoRoot, work), 'Consumer evidence must be outside the source repository');
   console.log(`NATIVE_CONSUMER_EVIDENCE: ${work}`);
-  const summary = { evidence: work, node: process.version, dependencyMode: mode, oneSided: true, surface: 'Happy DOM real framework mounts; no native-browser/layout evidence', results: [] };
+  const summary = { evidence: work, node: process.version, compilerBuild: compilerBuildIdentity, dependencyMode: mode, oneSided: true, surface: 'Happy DOM real framework mounts; no native-browser/layout evidence', results: [] };
   for (const id of selected) {
     const evidence = path.join(work, id);
     const consumer = path.join(evidence, 'consumer');
@@ -829,7 +836,8 @@ async function main() {
     try {
       assert.ok(profile?.implemented && profile.mode === 'source', `Native profile not implemented: ${id}`);
       recordCommand(evidence, 'cold-compiler-process', process.execPath, [...process.execArgv, script, '--compiler-worker', inputs, path.join(consumer, 'generated'), id, evidence], repoRoot);
-      const dependencies = Object.fromEntries(profile.dependencies.map((dependency) => [dependency.name, dependency.version]));
+      const generatedProvenance = json(path.join(consumer, 'generated/provenance.json'));
+      const dependencies = Object.fromEntries(generatedProvenance.dependencies.map((dependency) => [dependency.name, dependency.version]));
       for (const name of Object.keys(dependencies)) packageName(name);
       const devDependencies = { ...toolVersions, ...(id === 'react-dom-source-v1' ? reactTypeVersions : {}) };
       save(path.join(consumer, 'package.json'), { name: `native-consumer-${id}`, version: '1.0.0', private: true, type: 'module', dependencies, devDependencies });
@@ -892,7 +900,7 @@ async function main() {
   if (!summary.ok) process.exitCode = 1;
 }
 
-try {
+if (process.argv[1] && path.resolve(process.argv[1]) === script) try {
   if (process.argv[2] === '--compiler-worker') await compilerWorker(...process.argv.slice(3));
   else await main();
 } catch (error) {
