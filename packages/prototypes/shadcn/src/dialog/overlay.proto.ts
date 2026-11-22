@@ -14,6 +14,8 @@ const dialogMask = definePrototype<ShadcnDialogMaskProps, ShadcnDialogMaskExpose
     const dialogState = dialog.stateHandles;
     const { open } = dialogState;
     const style = setupOverlayMask(def, { opaqueFallback: true });
+    // Content is z-50. A later portal append must not paint the mask over it.
+    def.feedback.style.use(tw('z-40'));
     def.rule({
       when: (w) => w.not(w.state(style).eq('new-york-v4')),
       intent: (i) => i.feedback.style.use(tw('duration-100')),
