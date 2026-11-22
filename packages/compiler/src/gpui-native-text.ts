@@ -112,6 +112,19 @@ pub fn text_disabled(owner:&OwnerRef)->bool{bool_or(field(&owner.borrow().module
 pub fn text_is_composing(owner:&OwnerRef)->bool{
     if !ready(owner){return false}let o=owner.borrow();o.modules.text.supported&&o.modules.text.composing
 }
+fn text_notify_selection_changed(focus:&FocusHandle,window:&mut Window){
+    #[cfg(feature="gpui-modern-element-api")]
+    window.notify_text_selection_changed(focus);
+    #[cfg(not(feature="gpui-modern-element-api"))]
+    if focus.is_focused(window){
+        // Published GPUI 62e5991 exposes the same pull-input path used by its
+        // Editor::selections_did_change: next frame queries the current native
+        // input handler's selected bounds and updates the platform IME position.
+        // Redraw also publishes the changed selection/caret and editing lease.
+        window.invalidate_character_coordinates();
+        window.refresh();
+    }
+}
 /// Apply a source-authored UTF-16 selection request to this exact live editor.
 /// Selection itself is permitted in readonly text, but cannot disturb a marked
 /// range, a disabled owner, another window, or a detached editing lease.
@@ -123,7 +136,7 @@ pub fn text_select_utf16(owner:&OwnerRef,start:usize,end:usize,window:&mut Windo
         text.selection=utf16_range(&text.editor,start..end.max(start));text.reversed=false;
         text.drag_anchor=None;text.reveal_caret=true;o.dirty=true;o.modules.focus.native.clone()
     };
-    if let Some(focus)=focus{window.notify_text_selection_changed(&focus);}
+    if let Some(focus)=focus{text_notify_selection_changed(&focus,window);}
     text_drive(owner,window,cx);true
 }
 pub fn text_accessible(owner:&OwnerRef,node:&mut gpui::accesskit::Node){
@@ -439,7 +452,59 @@ mod text_owner_tests {
         text_sync(&weak,record(vec![(if controlled{"value"}else{"defaultValue"},Value::string(value)),("valueMode",Value::string(if controlled{"controlled"}else{"uncontrolled"}))]));owner
     }
     fn input(owner:&OwnerRef)->NativeTextInput{NativeTextInput{owner:Rc::downgrade(owner),epoch:owner.borrow().modules.text.lease_epoch}}
-    fn key_down(key:&'static str)->gpui::KeyDownEvent{gpui::KeyDownEvent{keystroke:gpui::Keystroke::parse(key).unwrap(),is_held:false,#[cfg(feature="gpui-modern-element-api")]prefer_character_input:false}}
+    fn key_down(key:&'static str)->gpui::KeyDownEvent{gpui::KeyDownEvent{keystroke:gpui::Keystroke::parse(key).unwrap(),is_held:false,prefer_character_input:false}}
+
+    #[cfg(not(feature="gpui-modern-element-api"))]
+    #[gpui::test]
+    fn legacy_selection_notifies_the_live_native_input_and_respects_focus(cx:&mut TestAppContext){
+        // Readiness and geometry are supplied by this host fixture. Selection
+        // is read from NativeTextInput by GPUI's real deferred IME query.
+        struct Probe{input:NativeTextInput,observed:Rc<RefCell<Vec<Range<usize>>>>}
+        impl InputHandler for Probe{
+            fn text_for_range(&mut self,r:Range<usize>,a:&mut Option<Range<usize>>,w:&mut Window,c:&mut App)->Option<String>{self.input.text_for_range(r,a,w,c)}
+            fn selected_text_range(&mut self,disabled:bool,w:&mut Window,c:&mut App)->Option<gpui::UTF16Selection>{
+                let selection=self.input.selected_text_range(disabled,w,c)?;self.observed.borrow_mut().push(selection.range.clone());Some(selection)
+            }
+            fn marked_text_range(&mut self,w:&mut Window,c:&mut App)->Option<Range<usize>>{self.input.marked_text_range(w,c)}
+            fn unmark_text(&mut self,w:&mut Window,c:&mut App){self.input.unmark_text(w,c)}
+            fn replace_text_in_range(&mut self,r:Option<Range<usize>>,s:&str,w:&mut Window,c:&mut App){self.input.replace_text_in_range(r,s,w,c)}
+            fn replace_and_mark_text_in_range(&mut self,r:Option<Range<usize>>,s:&str,n:Option<Range<usize>>,w:&mut Window,c:&mut App){self.input.replace_and_mark_text_in_range(r,s,n,w,c)}
+            fn bounds_for_range(&mut self,_:Range<usize>,_:&mut Window,_:&mut App)->Option<Bounds<Pixels>>{Some(Bounds::new(gpui::point(gpui::px(4.),gpui::px(3.)),gpui::size(gpui::px(1.),gpui::px(18.))))}
+            fn character_index_for_point(&mut self,p:gpui::Point<Pixels>,w:&mut Window,c:&mut App)->Option<usize>{self.input.character_index_for_point(p,w,c)}
+        }
+        struct Field{owner:OwnerRef,focus:FocusHandle,observed:Rc<RefCell<Vec<Range<usize>>>>}
+        impl Render for Field{
+            fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement{
+                let owner=self.owner.clone();let focus=self.focus.clone();let observed=self.observed.clone();
+                div().id("legacy-selection-field").track_focus(&self.focus).child(canvas(|_,_,_|(),move|_,_,window,cx|{
+                    window.handle_input(&focus,Probe{input:input(&owner),observed},cx);
+                }).size(gpui::px(24.)))
+            }
+        }
+        let window=cx.open_window(gpui::size(gpui::px(96.),gpui::px(48.)),|window,cx|{
+            let owner=text_owner(window,"a😀候b");let focus=cx.focus_handle();
+            owner.borrow_mut().modules.focus.native=Some(focus.clone());window.focus(&focus,cx);
+            Field{owner,focus,observed:Default::default()}
+        });
+        cx.update_window(window.into(),|_,window,cx|{window.refresh();window.draw(cx).clear(cx);window.simulate_next_frame(cx);}).unwrap();
+        window.update(cx,|field,window,cx|{
+            field.observed.borrow_mut().clear();
+            assert!(text_select_utf16(&field.owner,1,3,window,cx));
+            assert!(field.observed.borrow().is_empty(),"legacy notification queries on the frame boundary");
+            window.simulate_next_frame(cx);
+            assert_eq!(&*field.observed.borrow(),&[1..3],"the platform re-queries the accepted UTF-16 selection");
+            let other=cx.focus_handle();window.focus(&other,cx);
+            assert!(text_select_utf16(&field.owner,0,1,window,cx));
+            window.simulate_next_frame(cx);
+            assert_eq!(&*field.observed.borrow(),&[1..3],"an unfocused editor cannot invalidate another input's IME");
+            window.focus(&field.focus,cx);
+            assert!(text_select_utf16(&field.owner,3,4,window,cx));
+            text_detach(&field.owner);
+            window.simulate_next_frame(cx);
+            assert_eq!(&*field.observed.borrow(),&[1..3],"queued native queries cannot read a retired editing lease");
+            Owner::dispose(&field.owner);
+        }).unwrap();
+    }
 
     #[gpui::test]
     fn source_selection_snaps_utf16_and_obeys_exact_live_owner(cx:&mut TestAppContext){
