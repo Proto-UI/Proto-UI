@@ -90,6 +90,22 @@ test('a full count in one host cannot substitute for missing family/host/scenari
   );
 });
 
+test('a full Vitest count cannot replace the admitted generated consumer identities', () => {
+  const suite = SPRINT2_SUITES.find((item) => item.id === 'compiled-consumers');
+  const receipt = (names) => ({
+    testResults: [{ assertionResults: names.map((fullName) => ({ fullName, status: 'passed' })) }],
+  });
+  assert.throws(
+    () =>
+      summarizeReceipt(
+        suite,
+        receipt(Array.from({ length: 20 }, (_, n) => `react/base: unadmitted ${n}`))
+      ),
+    /each admitted generated consumer/
+  );
+  assert.equal(summarizeReceipt(suite, receipt(suite.expectedIds)).passed, 20);
+});
+
 test(
   'timeout retires an ignoring descendant even after its group leader exits',
   { skip: process.platform !== 'linux' },
