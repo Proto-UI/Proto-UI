@@ -86,6 +86,16 @@ const frozen = () =>
       .map((file) => [file, hash(readFileSync(path.join(checkout, file)))])
   );
 summary.authoredSources = frozen();
+for (const [file, expected] of Object.entries(summary.authoredSources)) {
+  const original = spawnSync('git', ['show', 'HEAD:' + file], { cwd: checkout });
+  assert.equal(original.status, 0, 'Read the frozen consumer Git blob: ' + file);
+  assert.equal(
+    hash(original.stdout),
+    expected,
+    'Consumer source was modified before replay: ' + file
+  );
+}
+summary.authoredSourcesMatchFrozenCommit = true;
 const originalPin = json(path.join(web, 'upstream-pin.json'));
 const pin = { ...originalPin, commit: identity.revision, lock_sha256: identity.lockSha256 };
 save(path.join(web, 'upstream-pin.json'), pin);
