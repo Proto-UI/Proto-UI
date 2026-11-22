@@ -877,6 +877,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   let textDeclared = false, textInitialized = false, textValue = '', textComposing = false, textMode = 'uncontrolled';
   let textPatch: NativeConfig = {};
   let queueTextSelection: (() => void) | null = null;
+  let textObservation: { epoch: number; ownerValue: string } | null = null;
   const canonicalText = (value: string) => { const normalized = value.replace(/\r\n?/g, '\n'); return textDeclaration?.config.lineMode === 'single' ? normalized.replace(/\n/g, '') : normalized; };
   function readTextSelection(target: HTMLInputElement | HTMLTextAreaElement, source: string): NativeTextSelection | null {
     try {
@@ -921,13 +922,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     sync(patch) {
       runtime('textControl.sync');
       if (textDeclaration?.config.lineMode === 'single' && (patch.rows !== undefined || patch.wrap !== undefined)) throw new Error('[TextControl] rows/wrap require multiline declaration.');
-      const previousValue = textValue;
       if (!textInitialized) { textMode = String(patch.valueMode ?? 'uncontrolled'); if (!['controlled','uncontrolled'].includes(textMode)) throw new Error('[TextControl] invalid value mode.'); textValue = canonicalText(String(textMode === 'controlled' ? patch.value ?? '' : patch.defaultValue ?? '')); textInitialized = true; }
       textPatch = { ...textPatch, ...patch, valueMode: textMode,
         ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
         ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
       if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
-      applyText(textMode === 'controlled' && textValue !== previousValue); requestPresentation();
+      applyText(!(textObservation?.epoch === generation && textObservation.ownerValue === textValue)); requestPresentation();
     },
     snapshot() { alive(); const target = ready() ? root as HTMLInputElement | HTMLTextAreaElement : null; return textDeclared ? Object.freeze({ value: textValue, composing: textComposing, selection: target && canonicalText(target.value) === textValue ? readTextSelection(target, target.value) : null }) : null; },
   };
@@ -945,7 +945,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       lastSelection = identity;
       const event: NativeTextEvent = Object.freeze({ type: 'selectionchange', value, composing: textComposing, data: null, inputType: null, selection });
       const listeners = textListeners.get('selectionchange');
-      for (const callback of [...listeners ?? []]) { if (!current()) break; if (listeners?.has(callback)) options.invoke(() => callback(options.getRun(), event)); }
+      const previous = textObservation, observation = value !== textValue ? { epoch, ownerValue: textValue } : null;
+      if (observation) textObservation = observation;
+      try { for (const callback of [...listeners ?? []]) { if (!current()) break; if (listeners?.has(callback)) options.invoke(() => callback(options.getRun(), event)); } }
+      finally { if (observation && textObservation === observation) textObservation = previous; }
     };
     queueTextSelection = () => {
       if (selectionQueued || !current()) return;
@@ -1586,7 +1589,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('positioning')) positionBaselines.clear();
     if (__nativeFeature('scroll')) for (const [target, snapshot] of chromeTargets) { target.style.width = snapshot.width; target.style.height = snapshot.height; target.style.transform = snapshot.transform; target.style.display = snapshot.display; if (snapshot.size) target.style.setProperty('--proto-ui-scroll-thumb-size', snapshot.size); else target.style.removeProperty('--proto-ui-scroll-thumb-size'); if (snapshot.offset) target.style.setProperty('--proto-ui-scroll-thumb-offset', snapshot.offset); else target.style.removeProperty('--proto-ui-scroll-thumb-offset'); }
     if (__nativeFeature('scroll')) { chromeTargets.clear(); readerContacts = 0; }
-    if (__nativeFeature('text')) { textComposing = false; queueTextSelection = null; }
+    if (__nativeFeature('text')) { textComposing = false; queueTextSelection = null; textObservation = null; }
     if (__nativeFeature('overlay')) overlayMaterialized = false;
     if (previous) {
       if (options.isAlive() && (options.isReady?.() ?? true)) {

@@ -25,10 +25,11 @@ export default definePrototype({name:'selection-consumer',
     def.expose.state('notifications',notifications);
     def.expose.state('afterSelection',afterSelection);
     def.expose.method('read',()=>editor.snapshot());
-    def.expose.method('syncHint',()=>editor.sync({placeholder:'hint',defaultValue:'later-default'}));
+    def.expose.method('resyncOwner',()=>editor.sync({value:editor.snapshot()?.value ?? ''}));
     editor.on('selectionchange',(run,event)=>{
       start.set(event.selection?.start ?? -1);
       notifications.set(notifications.get()+1);
+      editor.sync({placeholder:'hint',defaultValue:'later-default'});
       if(run.props.get().detachOnSelection)run.lifecycle.setPresent(false);
     });
     editor.on('selectionchange',()=>afterSelection.set(afterSelection.get()+1));
@@ -73,7 +74,6 @@ for (const profile of nativeOwnerProfiles)
         await owner.act(() => {
           target.value = 'changed';
           target.setSelectionRange(2, 5, 'forward');
-          api.syncHint();
           // The physical edit has not been accepted into the owner value.
           expect(api.read().selection).toBeNull();
           target.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
@@ -83,6 +83,11 @@ for (const profile of nativeOwnerProfiles)
           value: controlled ? 'abcd' : 'changed',
           composing: false,
           selection: { start: 2, end: controlled ? 4 : 5, direction: 'forward' },
+        });
+        expect(target.value).toBe(controlled ? 'abcd' : 'changed');
+        await owner.act(() => {
+          target.value = 'unreported candidate';
+          api.resyncOwner();
         });
         expect(target.value).toBe(controlled ? 'abcd' : 'changed');
 
