@@ -2121,7 +2121,7 @@ export interface OperationBindings {
   stateValueType?: 'boolean' | 'number' | 'string';
   stateDataType?: DataType;
   eventPayloadType?: DataType;
-  inputPayloadType?: 'event' | 'host-event';
+  inputPayloadType?: 'event' | 'host-event' | 'a11y-value-event';
   methodParameters?: readonly { type: ValueType; optional?: boolean }[];
   methodReturnType?: ValueType;
 }

@@ -1,0 +1,69 @@
+id: T-COMPILER-GPUI-A11Y-VALUE-0001
+type: test
+title: Checked numeric accessibility events and the actual native SDK bridge
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  Compiler and native bridge tests cover this bounded private profile. A platform accessibility setter remains a separate required consumer evidence layer, not a claim made by GPUI test-platform execution.
+
+cases:
+  - id: T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA
+    title: Source and independently checked IR bind numeric input to the authored action
+    covers: [C-COMPILER-GPUI-A11Y-VALUE-0001-SCHEMA]
+    expectation: The custom and default route compile, while wrong actions, routes, global callbacks, forged IR and other consuming source targets fail explicitly.
+  - id: T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-NATIVE
+    title: Generated Rust executes the same bridge invoked by the GPUI action callback
+    covers:
+      [
+        C-COMPILER-GPUI-A11Y-VALUE-0001-PROJECTION,
+        C-COMPILER-GPUI-A11Y-VALUE-0001-PAYLOAD,
+        C-COMPILER-GPUI-A11Y-VALUE-0001-INGRESS,
+        C-COMPILER-GPUI-A11Y-VALUE-0001-LIFETIME,
+      ]
+    expectation: Finite NumericValue is delivered unchanged, invalid native and direct host inputs cannot invoke or consume once, scoped controls work, and detach or disposal blocks delivery.
+  - id: T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-RUNTIME
+    title: Portable Runtime preserves raw host input and authored policy
+    covers: [C-COMPILER-GPUI-A11Y-VALUE-0001-PAYLOAD, C-COMPILER-GPUI-A11Y-VALUE-0001-LIFETIME]
+    expectation: Action snapshots preserve the configured route, the existing raw host event path passes value, authored finite validation remains explicit, and State changes only through authored code.
+implementations:
+  - id: checked-numeric-schema
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/gpui-a11y-value.test.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA]
+  - id: native-numeric-bridge
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs
+    required: true
+    consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-NATIVE]
+    notes:
+      - Compile the authored source with produce.mjs and execute cargo test; generated Rust is never patched.
+      - The SDK bridge call shares the real callback implementation but does not simulate the private GPUI Window action dispatcher or prove OS delivery.
+  - id: runtime-numeric-request
+    kind: runtime-test
+    status: needs-review
+    path: packages/runtime/test/contract/a11y-numeric-request.contract.test.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-RUNTIME]
+verifies:
+  contracts:
+    - id: C-COMPILER-GPUI-A11Y-VALUE-0001
+      anchors:
+        [
+          C-COMPILER-GPUI-A11Y-VALUE-0001-PROJECTION,
+          C-COMPILER-GPUI-A11Y-VALUE-0001-PAYLOAD,
+          C-COMPILER-GPUI-A11Y-VALUE-0001-SCHEMA,
+          C-COMPILER-GPUI-A11Y-VALUE-0001-INGRESS,
+          C-COMPILER-GPUI-A11Y-VALUE-0001-LIFETIME,
+        ]
+openQuestions:
+  - id: T-COMPILER-GPUI-A11Y-VALUE-0001-Q-OS
+    question: Acceptance of a platform bridge needs a real accessibility client setting a rendered native control and observing its authored commit; an SDK bridge test is insufficient.
+    blocks: [activation:T-COMPILER-GPUI-A11Y-VALUE-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Map checked numeric host payload, actual generated native bridge and Runtime request tests without promoting them to OS evidence.
+tags: [compiler, gpui, accessibility, event, conformance]
