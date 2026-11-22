@@ -80,8 +80,8 @@ export function createTooltipScene(container: HTMLElement) {
   return {
     shadow,
     appMount,
-    dispose(unmount: () => void) {
-      unmount();
+    async dispose(unmount: () => void | Promise<void>) {
+      await unmount();
       shell.remove();
       releasePortal();
     },
@@ -89,7 +89,7 @@ export function createTooltipScene(container: HTMLElement) {
 }
 ```
 
-Mount Root, the same-subject command and Content through your chosen Adapter inside `appMount`, and install the family's generated CSS inside `shadow`. Keep `overlays` connected for that owner's lifetime. When leaving the scene, call `dispose` with the framework's unmount/destroy function so the component owner retires before its portal registration is released. The destination must stay inside the scene and outside the projected Content itself.
+Mount Root, the same-subject command and Content through your chosen Adapter inside `appMount`, and install the family's generated CSS inside `shadow`. Keep `overlays` connected for that owner's lifetime. When leaving the scene, await `dispose` with the framework's unmount/destroy function so the component owner retires before its portal registration is released. The destination must stay inside the scene and outside the projected Content itself.
 
 The native consumer regression covers this composition for Base, Shadcn and Brutalist in all four Web hosts, including Tab order, the browser's computed accessible description, Escape, command remount and cleanup. Its negative control retains the default body destination and observes an empty computed description despite matching ID strings. This is a Web/browser accessibility boundary; native assistive-technology acceptance remains separate.
 

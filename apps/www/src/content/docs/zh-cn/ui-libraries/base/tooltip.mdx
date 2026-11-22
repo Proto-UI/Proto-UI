@@ -80,8 +80,8 @@ export function createTooltipScene(container: HTMLElement) {
   return {
     shadow,
     appMount,
-    dispose(unmount: () => void) {
-      unmount();
+    async dispose(unmount: () => void | Promise<void>) {
+      await unmount();
       shell.remove();
       releasePortal();
     },
@@ -89,7 +89,7 @@ export function createTooltipScene(container: HTMLElement) {
 }
 ```
 
-通过所选 Adapter 把 Root、共用 subject 的命令和 Content 挂到 `appMount`，并把家族生成的 CSS 放进 `shadow`。在 owner 存活期间保持 `overlays` 已连接。离开 scene 时，把框架的 unmount/destroy 函数传给 `dispose`，先退休组件 owner，再释放 portal 注册。目标必须位于 scene 内，不能放在被投影的 Content 自身内部。
+通过所选 Adapter 把 Root、共用 subject 的命令和 Content 挂到 `appMount`，并把家族生成的 CSS 放进 `shadow`。在 owner 存活期间保持 `overlays` 已连接。离开 scene 时，把框架的 unmount/destroy 函数传给 `dispose` 并等待完成，先退休组件 owner，再释放 portal 注册。目标必须位于 scene 内，不能放在被投影的 Content 自身内部。
 
 原生消费者回归覆盖 Base、Shadcn、Brutalist 与四个 Web 宿主的该组合，检查 Tab 顺序、浏览器计算出的可访问描述、Escape、命令重新挂载和清理。对应负控保留默认 body 目标，观察 ID 字符串相同但计算描述为空的结果。这是 Web／浏览器可访问性边界；真实辅助技术验收仍单独保留。
 
