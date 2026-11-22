@@ -105,6 +105,8 @@ it('expands only proven static enumeration and rejects container mutation, escap
     program("tokens.last='bg-green';"),
     program('const escaped=tokens;'),
     program('', "const Object={keys:(x:unknown)=>['last']};"),
+    program('', 'function Object(){return 1;}'),
+    program('', "const {Object}={Object:{keys:(x:unknown)=>['last']}};"),
     program()
       .replace("const tokens={'2':'bg-red','1':'bg-black',last:'bg-white'};", '')
       .replace('}});', "const tokens={'2':'bg-red','1':'bg-black',last:'bg-white'};}});"),

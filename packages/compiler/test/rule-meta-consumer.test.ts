@@ -2,7 +2,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ts from 'typescript';
 import { compilePrototype } from '../src/compile';
-import { nativeRulePreferenceArtifact } from '../src/native-async';
+import {
+  nativeRulePreferenceArtifact,
+  nativeRuleColorSchemeArtifact,
+  nativeMetaArtifact,
+  nativeMetaSubscriptionArtifact,
+} from '../src/native-async';
 import { mountNativeOwner, nativeOwnerProfiles } from './native-owner-consumer';
 
 const cleanup: (() => Promise<void>)[] = [];
@@ -115,14 +120,25 @@ for (const profile of nativeOwnerProfiles)
     });
   });
 
-it('requires an active getter/source pair and shares only successfully acquired preference leases', async () => {
-  const js = ts.transpileModule(nativeRulePreferenceArtifact.contents, {
+function sourceUrl(contents: string): string {
+  const js = ts.transpileModule(contents, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
   }).outputText;
+  return `data:text/javascript;base64,${Buffer.from(js).toString('base64')}`;
+}
+async function metaSource(contents: string) {
+  const linked = contents
+    .replace(
+      "'./subscription-v1'",
+      JSON.stringify(sourceUrl(nativeMetaSubscriptionArtifact.contents))
+    )
+    .replace("'./web-snapshot-v1'", JSON.stringify(sourceUrl(nativeMetaArtifact.contents)));
+  return import(/* @vite-ignore */ sourceUrl(linked));
+}
+
+it('requires an active getter/source pair and shares only successfully acquired preference leases', async () => {
   const { readNativeRulePreference: read, subscribeNativeRulePreferences: subscribe } =
-    await import(
-      /* @vite-ignore */ `data:text/javascript;base64,${Buffer.from(js).toString('base64')}`
-    );
+    await metaSource(nativeRulePreferenceArtifact.contents);
   const key = 'preference.reducedMotion';
   const host = media();
   host.change({ '(prefers-reduced-motion: no-preference)': true });
@@ -156,6 +172,162 @@ it('requires an active getter/source pair and shares only successfully acquired 
   // A source without a paired notification/release API cannot enable presentation.
   expect(host.live()).toBe(0);
   expect(window.matchMedia).toBe(getter);
+});
+
+it('retains matched legacy pairs, attempts every teardown, and permits fresh leases during retirement', async () => {
+  const { readNativeRulePreference: read, subscribeNativeRulePreferences: subscribe } =
+    await metaSource(nativeRulePreferenceArtifact.contents);
+  const key = 'preference.reducedMotion',
+    callbacks = new Map<string, Set<() => void>>();
+  let modernAdds = 0,
+    removals = 0,
+    throwRemove = false,
+    throwAdd = false,
+    reenter: (() => void) | undefined;
+  const doc = {
+    defaultView: {
+      matchMedia(query: string) {
+        const listeners = callbacks.get(query) ?? new Set<() => void>();
+        callbacks.set(query, listeners);
+        return {
+          matches: query.includes('no-preference'),
+          addEventListener() {
+            ++modernAdds;
+          },
+          addListener(callback: () => void) {
+            listeners.add(callback);
+            if (throwAdd && query === '(prefers-reduced-transparency: reduce)') {
+              throwAdd = false;
+              throw new Error('later key failed');
+            }
+          },
+          removeListener(callback: () => void) {
+            listeners.delete(callback);
+            ++removals;
+            const next = reenter;
+            reenter = undefined;
+            next?.();
+            if (throwRemove) {
+              throwRemove = false;
+              throw new Error('remove failed');
+            }
+          },
+        };
+      },
+    },
+  };
+  const live = () => [...callbacks.values()].reduce((sum, value) => sum + value.size, 0),
+    notify = vi.fn();
+  let release = subscribe(doc, [key], notify);
+  expect(modernAdds).toBe(0);
+  expect(live()).toBe(2);
+  throwRemove = true;
+  expect(release).toThrow('remove failed');
+  expect(removals).toBe(2);
+  expect(live()).toBe(0);
+  expect(read(doc, key)).toBe('unknown');
+  throwAdd = true;
+  expect(() => subscribe(doc, [key, 'preference.reducedTransparency'], notify)).toThrow(
+    'later key failed'
+  );
+  expect(live()).toBe(0);
+  expect(read(doc, key)).toBe('unknown');
+  expect(read(doc, 'preference.reducedTransparency')).toBe('unknown');
+  release = subscribe(doc, [key], notify);
+  let fresh: (() => void) | undefined;
+  reenter = () => {
+    fresh = subscribe(doc, [key], notify);
+  };
+  release();
+  expect(live()).toBe(2);
+  expect(read(doc, key)).toBe('no-preference');
+  fresh!();
+  expect(live()).toBe(0);
+  expect(read(doc, key)).toBe('unknown');
+});
+
+it('rolls back failed color registration and retires its document cache before throwing or reentry', async () => {
+  const { subscribeNativeColorScheme: subscribe } = await metaSource(
+    nativeRuleColorSchemeArtifact.contents
+  );
+  let observers = 0,
+    observed = 0,
+    throwObserve = true,
+    throwDisconnect = false,
+    throwAdd = false,
+    modernAdds = 0;
+  let reenter: (() => void) | undefined;
+  const listeners = new Set<() => void>();
+  const doc = {
+    documentElement: { dataset: { theme: 'light' }, classList: { contains: () => false } },
+    defaultView: {
+      MutationObserver: class {
+        constructor() {
+          ++observers;
+        }
+        observe() {
+          ++observed;
+          if (throwObserve) {
+            throwObserve = false;
+            throw new Error('observe failed');
+          }
+        }
+        disconnect() {
+          --observed;
+          const next = reenter;
+          reenter = undefined;
+          next?.();
+          if (throwDisconnect) {
+            throwDisconnect = false;
+            throw new Error('disconnect failed');
+          }
+        }
+      },
+      matchMedia() {
+        return {
+          matches: false,
+          addEventListener() {
+            ++modernAdds;
+          },
+          addListener(callback: () => void) {
+            listeners.add(callback);
+            if (throwAdd) {
+              throwAdd = false;
+              throw new Error('add failed');
+            }
+          },
+          removeListener(callback: () => void) {
+            listeners.delete(callback);
+          },
+        };
+      },
+    },
+  };
+  expect(() => subscribe(doc, vi.fn())).toThrow('observe failed');
+  expect(observed).toBe(0);
+  expect(listeners.size).toBe(0);
+  throwAdd = true;
+  expect(() => subscribe(doc, vi.fn())).toThrow('add failed');
+  expect(observed).toBe(0);
+  expect(listeners.size).toBe(0);
+  let release = subscribe(doc, vi.fn());
+  throwDisconnect = true;
+  expect(release).toThrow('disconnect failed');
+  expect(observed).toBe(0);
+  expect(listeners.size).toBe(0);
+  expect(modernAdds).toBe(0);
+  release = subscribe(doc, vi.fn());
+  let fresh: (() => void) | undefined;
+  reenter = () => {
+    fresh = subscribe(doc, vi.fn());
+  };
+  release();
+  expect(observed).toBe(1);
+  expect(listeners.size).toBe(1);
+  fresh!();
+  expect(observed).toBe(0);
+  expect(listeners.size).toBe(0);
+  expect(observers).toBe(5);
 });
 
 it('retains explicit unsupported keys/targets and omits all environment observers when not reached', () => {

@@ -77,6 +77,7 @@ export function createNativeStyle(options: {
   const chunks: Chunk[] = [], rules: Rule[] = [];
   const patches = new Map<string, Patch>();
   let mounted = false, disposed = false, nextRuleId = 1;
+  let metaGeneration = 0;
   let releaseMeta: (() => void) | undefined;
   let projected: readonly string[] = [];
   function snapshot(includeRules = mounted): string[] {
@@ -151,14 +152,26 @@ export function createNativeStyle(options: {
       } });
     },
     refresh,
-    mount(): void { mounted = true; releaseMeta ??= options.subscribeMeta?.(refresh); const next = snapshot(); options.project(next); projected = next; },
-    unmount(): void { mounted = false; releaseMeta?.(); releaseMeta = undefined; projected = []; },
+    mount(): void {
+      if (disposed || !options.isAlive()) return;
+      if (!mounted) { mounted = true; ++metaGeneration; }
+      const generation = metaGeneration;
+      if (!releaseMeta && options.subscribeMeta) {
+        let release: () => void;
+        try { release = options.subscribeMeta(() => { if (mounted && generation === metaGeneration) refresh(); }); }
+        catch (error) { if (generation === metaGeneration) { mounted = false; ++metaGeneration; } throw error; }
+        if (!mounted || disposed || generation !== metaGeneration) { release(); return; }
+        releaseMeta = release;
+      }
+      const next = snapshot(); options.project(next); projected = next;
+    },
+    unmount(): void { mounted = false; ++metaGeneration; const release = releaseMeta; releaseMeta = undefined; projected = []; release?.(); },
     tokens(): readonly string[] { return snapshot(); },
     serverTokens(): readonly string[] {
       if (disposed || !options.isAlive()) throw new Error('[Style] owner is terminally disposed');
       return snapshot(true);
     },
-    dispose(): void { disposed = true; mounted = false; releaseMeta?.(); releaseMeta = undefined; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; },
+    dispose(): void { disposed = true; mounted = false; ++metaGeneration; const release = releaseMeta; releaseMeta = undefined; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; release?.(); },
   };
   return style;
 }

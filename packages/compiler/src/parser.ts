@@ -3614,6 +3614,16 @@ const unrolledLoops = new WeakMap<ts.Statement, readonly ts.Statement[]>();
 function staticLocalBindings(nodes: readonly ts.Statement[], objectUnshadowed: boolean): Map<string, ts.Expression | undefined> {
   const bindings = new Map<string, ts.Expression | undefined>();
   const candidates = new Map<string, ts.VariableDeclaration>();
+  const shadow = (name: ts.BindingName): void => {
+    if (ts.isIdentifier(name)) bindings.set(name.text, undefined);
+    else for (const element of name.elements) if (!ts.isOmittedExpression(element)) shadow(element.name);
+  };
+  // Expansion precedes semantic predeclaration, so all lexical names must block
+  // builtin/module lookup here, including hoisted functions and binding patterns.
+  for (const statement of nodes) {
+    if (ts.isVariableStatement(statement)) for (const declaration of statement.declarationList.declarations) shadow(declaration.name);
+    else if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) shadow(statement.name);
+  }
   for (const statement of nodes) if (ts.isVariableStatement(statement)) {
     for (const declaration of statement.declarationList.declarations) if (ts.isIdentifier(declaration.name)) {
       const name = declaration.name.text; bindings.set(name, undefined);
