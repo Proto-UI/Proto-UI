@@ -36,6 +36,7 @@ export function textControlSelectionConformance(
             ] as const)
               control.on(type, (_run, event) => {
                 events.push(event);
+                if (type === 'selectionchange') control.sync({ placeholder: 'Observed selection' });
                 if (type === 'input') callbackSnapshots.push(control.snapshot());
               });
             def.lifecycle.onCreated(() =>
@@ -78,6 +79,12 @@ export function textControlSelectionConformance(
           });
           editor.value = '123456';
           editor.setSelectionRange(5, 6, 'forward');
+          await mounted.dispatch(editor, new Event('selectionchange', { bubbles: true }));
+          await mounted.flush();
+          // Selection may arrive before input. An observation-induced ordinary
+          // sync must not replace the uncommitted physical candidate in either mode.
+          expect(editor.value).toBe('123456');
+          expect(control.snapshot()).toEqual({ value: '1234', composing: false, selection: null });
           await mounted.dispatch(
             editor,
             new InputEvent('input', { bubbles: true, data: '56', inputType: 'insertText' })

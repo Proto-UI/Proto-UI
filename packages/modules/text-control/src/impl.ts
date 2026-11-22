@@ -45,6 +45,7 @@ export class TextControlModuleImpl extends ModuleBase {
   private value = '';
   private composing = false;
   private callbackPrelude: { epoch: number } | null = null;
+  private selectionObservation: { epoch: number; ownerValue: string } | null = null;
   private listeners: Listener[] = [];
   private host: TextControlHost | null = null;
   private lease: TextControlHostLease | null = null;
@@ -144,6 +145,7 @@ export class TextControlModuleImpl extends ModuleBase {
     // Retire composition, queued restoration and reentrant old callbacks before the new value.
     this.eventGeneration += 1;
     this.callbackPrelude = null;
+    this.selectionObservation = null;
     this.value = next;
     this.composing = false;
     this.attachLease();
@@ -216,8 +218,10 @@ export class TextControlModuleImpl extends ModuleBase {
   private effectivePatch(): TextControlPatch {
     const { value: _declaredValue, ...patchWithoutValue } = this.patch;
     const shouldProjectValue = !(
-      this.valueMode === 'controlled' &&
-      (this.composing || this.callbackPrelude?.epoch === this.leaseEpoch)
+      (this.valueMode === 'controlled' &&
+        (this.composing || this.callbackPrelude?.epoch === this.leaseEpoch)) ||
+      (this.selectionObservation?.epoch === this.leaseEpoch &&
+        this.selectionObservation.ownerValue === this.value)
     );
     return Object.freeze({
       ...patchWithoutValue,
@@ -233,6 +237,12 @@ export class TextControlModuleImpl extends ModuleBase {
   private receive(event: TextControlEvent): void {
     const epoch = this.leaseEpoch;
     const generation = ++this.eventGeneration;
+    const previousObservation = this.selectionObservation;
+    const observation =
+      event.type === 'selectionchange' && this.canonicalize(event.value) !== this.value
+        ? { epoch, ownerValue: this.value }
+        : null;
+    if (observation) this.selectionObservation = observation;
     // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
     const canonicalEvent: TextControlEvent = Object.freeze({
       type: event.type,
@@ -321,6 +331,8 @@ export class TextControlModuleImpl extends ModuleBase {
         if (epoch === this.leaseEpoch) inCurrentCallback(() => this.syncLease());
       });
     } finally {
+      if (observation && this.selectionObservation === observation)
+        this.selectionObservation = previousObservation;
       // Native composition facts survive a failed callback prelude. An older
       // event must never settle over a newer event or a replacement lease.
       if (epoch === this.leaseEpoch && generation === this.eventGeneration) {

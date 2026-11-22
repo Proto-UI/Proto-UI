@@ -91,4 +91,21 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s OTP selection consumer', (fam
     await flush();
     expect(m.active()).toEqual([false, true, false, false]);
   });
+
+  it('preserves a candidate when selection arrives before input and Context refreshes', async () => {
+    const m = await mount({ defaultValue: '12' });
+    await m.select(1);
+    m.editor.value = '1234';
+    m.editor.setSelectionRange(4, 4);
+    m.editor.dispatchEvent(new Event('selectionchange'));
+    await flush();
+    expect(m.editor.value).toBe('1234');
+    expect(m.root.getExposes().value.get()).toBe('12');
+    expect(m.active()).toEqual([false, false, false, false]);
+    m.editor.dispatchEvent(new InputEvent('input', { bubbles: true, data: '34' }));
+    await flush();
+    expect(m.root.getExposes().value.get()).toBe('1234');
+    expect(m.editor.value).toBe('1234');
+    expect(m.active()).toEqual([false, false, false, true]);
+  });
 });

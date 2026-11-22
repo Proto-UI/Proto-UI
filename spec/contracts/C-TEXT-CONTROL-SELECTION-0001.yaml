@@ -17,8 +17,8 @@ criteria:
       zh-CN: 选择为不可变的 {start, end, direction}；start/end 是事件 canonical value 内有序非负整数 UTF-16 偏移，direction 为 forward、backward 或 none。缺失、读取失败或无效事实返回 null，不能猜测末尾光标；源偏移须随 CR/LF 与单行规范化一起转换。
   - id: C-TEXT-CONTROL-SELECTION-0001-OBSERVATION
     text:
-      en: Editing events may include selection facts; selectionchange observes selection without proposing or accepting a value. Snapshot selection is null when no current lease exists or the physical candidate differs from the snapshot's canonical owner value. Existing hosts may omit selection, which means unknown. No selection-setting patch or request is admitted.
-      zh-CN: 编辑事件可携带选择事实；selectionchange 只观察选择，不提出或接受文本值。无当前 lease 或物理 candidate 与快照 canonical owner value 不同时，快照选择为 null。旧宿主省略 selection 表示未知；本契约不准入设置选择的 patch 或 request。
+      en: Editing events may include selection facts; selectionchange observes selection without proposing or accepting a value. Snapshot selection is null when no current lease exists or the physical candidate differs from the snapshot's canonical owner value. An ordinary refresh within that observation must not replace a distinct physical candidate with the unchanged canonical owner before its editing event; an explicit different owner value remains authoritative. Existing hosts may omit selection, which means unknown. No selection-setting patch or request is admitted.
+      zh-CN: 编辑事件可携带选择事实；selectionchange 只观察选择，不提出或接受文本值。无当前 lease 或物理 candidate 与快照 canonical owner value 不同时，快照选择为 null。该观察中的普通刷新不得在编辑事件到达前以未变的 canonical owner 覆盖不同的物理 candidate；明确的新 owner 值仍有权更新。旧宿主省略 selection 表示未知；本契约不准入设置选择的 patch 或 request。
   - id: C-TEXT-CONTROL-SELECTION-0001-LIFETIME
     text:
       en: Selection listeners and deferred notifications belong to one editor mount lease. Detach, reset, replacement and disposal retire them; a stale callback cannot change a replacement owner. Unrelated synchronization preserves native selection and IME. Rejected controlled values restore with the retained selection bounded to the restored value.

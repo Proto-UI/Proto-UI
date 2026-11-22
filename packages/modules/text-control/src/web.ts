@@ -165,7 +165,7 @@ function attachTarget(
     if (root.activeElement === target) emitSelection();
   };
   documentTarget.addEventListener('selectionchange', onDocumentSelection);
-  valueProjectionDeferred = applyPatch(target, patch, true);
+  valueProjectionDeferred = applyPatch(target, patch, true, true);
   lastSelection = selectionKey();
   applyingPatch = false;
 
@@ -210,14 +210,15 @@ function assertTextCompatibleTarget(target: WebTextControl): void {
 function applyPatch(
   target: WebTextControl,
   patch: TextControlPatch,
-  allowValueProjection: boolean
+  allowValueProjection: boolean,
+  initial = false
 ): boolean {
   let valueProjectionDeferred = false;
   if (typeof patch.defaultValue === 'string' && target.defaultValue !== patch.defaultValue) {
     target.defaultValue = patch.defaultValue;
   }
   const value =
-    patch.value ?? (patch.valueMode === 'uncontrolled' ? patch.defaultValue : undefined);
+    patch.value ?? (initial && patch.valueMode === 'uncontrolled' ? patch.defaultValue : undefined);
   if (typeof value === 'string' && target.value !== value) {
     if (allowValueProjection) replaceValuePreservingEditingSession(target, value);
     else valueProjectionDeferred = true;
