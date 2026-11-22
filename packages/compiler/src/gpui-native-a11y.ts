@@ -191,7 +191,5 @@ mod conditional_state_tests {
         owner.borrow_mut().accessible_states.insert("pressed".into(),broken_value);
         assert!(catch_authored(||project(&owner)).is_err());Owner::dispose(&owner);
     }
-
 }
-
 `;
