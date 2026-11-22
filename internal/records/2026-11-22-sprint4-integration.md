@@ -72,14 +72,7 @@ The evidence index is [Sprint 4 observations](./evidence/2026-11-22-sprint4/obse
 
 Verdant's initial unchanged-consumer upgrade failed first on its old generated crate package name and then on its obsolete static `call_data_method` API. The instance-owned API change already existed in base history at `2403772bea490de3cc9e79f009ab25e2fe7d6962`. The reviewed migration retains the generated GPUI view, and routes the three headless decisions through the existing `C-COMPILER-RUST-DATA-0001` / `rust-data-v1` contract: `planNoteGesture`, `planControlGesture` and `dragNormalized`. The canonical producer writes the dependency-free Rust data artifact; no fake mounted owner or handwritten generated reducer is used. The [complete temporary consumer patch](./evidence/2026-11-22-sprint4/verdant-consumer-migration.patch) applies cleanly to the original application revision. It has not been published to the application repository.
 
-**Verdant-derived source and translated business logic retain AGPL-3.0-or-later.**
-The [evidence attribution and original notices](./evidence/2026-11-22-sprint4/README.md)
-bind the exact upstream revision and source hashes. Proto-UI's MIT license does
-not replace Verdant's license. The generated data crate's existing hardcoded MIT
-metadata is retained as an identified defect, not a relicensing or publication
-permission. Source-license selection/inheritance and regenerated distribution
-metadata remain work for the Compiler/consumer owner before a downstream crate
-release. The temporary compile/test result does not certify distribution readiness.
+**Verdant-derived source and translated business logic retain AGPL-3.0-or-later.** The [evidence attribution and original notices](./evidence/2026-11-22-sprint4/README.md) bind the exact upstream revision and source hashes. Proto-UI's MIT license does not replace Verdant's license. The generated data crate's existing hardcoded MIT metadata is retained as an identified defect, not a relicensing or publication permission. Source-license selection/inheritance and regenerated distribution metadata remain work for the Compiler/consumer owner before a downstream crate release. The temporary compile/test result does not certify distribution readiness.
 
 The retained source-bound visuals were inspected directly:
 
@@ -100,3 +93,7 @@ The full cycle also observed the original Scroll Area WC drag result `scrollTop 
 `.github/workflows/package-budget-evidence.yml` provides a manual/callable complete-package build and strict measurement using the same Node 24, pnpm 10.32.1, manifest checks and measurement controls as `ci.yml`. It adds no automatic trigger, changes no existing regression lane or measurement policy, and always preserves the actual source-bound report. Final exact-head PR readiness and independent review are recorded on the PR after validation and readback; this record alone does not declare a green full cycle or a GitHub approval.
 
 Agent provenance: ChatGPT coding agents authored the new public implementation, tests and records under the current user's instruction. A separate fresh context reviewed the implementation, supplied independent falsifying probes and checked source attribution. No GitHub self-approval, original-author certification, merge, release or application deployment is claimed.
+
+## Subsequent CI reconciliation
+
+The [validation follow-up](2026-11-22-sprint4-validation-reconciliation.md) preserves the actual complete baseline comparison, four corrected compiler controls, four unchanged Website cases restored on the R8 snapshot, exact shader owner projections, and the remaining hosted build/budget work. It supersedes earlier unknown baseline attribution only where an actual matching case was executed; historical failed runs and unexecuted conditions remain visible.

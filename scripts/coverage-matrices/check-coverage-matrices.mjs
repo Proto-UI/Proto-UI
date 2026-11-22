@@ -9715,11 +9715,13 @@ const PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256 =
 const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
 const PROMOTION_RETRY_PLUGIN_SHA256 =
   '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';
-// This configuration admits only the four owners of the public Retry virtual ID.
+// Sprint 4 changes only the exact two-provider site-control grouping. Resolver
+// and Retry helper bytes stay unchanged; this configuration still admits only
+// the four owners of the public Retry virtual ID.
 // Bind its extracted resolver and optional probe as metadata without admitting
 // the current configuration to the general package resolver profiles below.
 const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
-  'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7';
+  'e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

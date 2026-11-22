@@ -445,6 +445,35 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
   assert.equal(artifact.with['if-no-files-found'], 'error');
 });
 
+test('manual compiler evidence can explicitly request the unchanged strict package gate', () => {
+  const workflows = readWorkflows();
+  const workflow = workflows['compiler-gpui-source-consumers.yml'];
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.package_budget_evidence, {
+    description: 'Also run the strict whole-entry package gate for this exact ref',
+    type: 'boolean',
+    required: false,
+    default: false,
+  });
+  assert.equal(workflow.on.workflow_call, null);
+  const job = workflow.jobs['package-budgets'];
+  assert.equal(
+    job.if,
+    "github.event_name == 'workflow_dispatch' && inputs.package_budget_evidence == true"
+  );
+  assert.equal(job.uses, './.github/workflows/package-budget-evidence.yml');
+  assert.deepEqual(job.permissions, { contents: 'read' });
+  assert.equal(job.secrets, undefined);
+  assert.equal(workflow.jobs['native-consumer'].if, undefined);
+  const gate = workflows['package-budget-evidence.yml'].jobs['whole-entry-budgets'];
+  assert.ok(
+    gate.steps.some((step) =>
+      step.run?.includes(
+        'node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA"'
+      )
+    )
+  );
+});
+
 test('GPUI Cargo target is initialized after runner allocation in the shared step environment', () => {
   const workflow = readWorkflows()['compiler-gpui-source-consumers.yml'];
   const job = workflow.jobs['native-consumer'];
