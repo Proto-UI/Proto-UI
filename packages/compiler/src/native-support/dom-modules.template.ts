@@ -42,9 +42,10 @@ export type NativeScrollPositionRequest = {kind:'by';axis:'horizontal'|'vertical
 export type NativeScrollRequest = NativeScrollPositionRequest | {kind:'reveal';axis:'vertical';family:NativeAnatomyFamily;part:NativeAnatomyPart};
 export type NativeScrollRequestOutcome = {kind:'dispatched'}|{kind:'queued'}|{kind:'rejected';reason:'not-mounted'|'not-declared'|'unavailable'};
 export interface NativeScroll { axes: NativeObserved<string>; horizontal: NativeScrollAxis; vertical: NativeScrollAxis; scrolling: NativeObserved<boolean>; projection: NativeObserved<string>; endFollow: { state: NativeObserved<string>; requestStatus: NativeObserved<string> }; configure(config: NativeConfig): void; bindComposedChrome(binding: NativeConfig): void; request(request: NativeScrollRequest): NativeScrollRequestOutcome; getSnapshot(): NativeScrollSnapshot }
-export type NativeTextEvent = Readonly<{type: string; value: string; composing: boolean; data: string | null; inputType: string | null}>;
+export type NativeTextSelection = Readonly<{start: number; end: number; direction: 'forward' | 'backward' | 'none'}>;
+export type NativeTextEvent = Readonly<{type: string; value: string; composing: boolean; data: string | null; inputType: string | null; selection: NativeTextSelection | null}>;
 export type NativeImageEvent = Readonly<{status: string; previousStatus: string; source: string}>;
-export interface NativeTextControl<Run = unknown> { on(type: string, callback: (run: Run, event: NativeTextEvent) => void): () => void; sync(patch: NativeConfig): void; snapshot(): { value: string; composing: boolean } | null }
+export interface NativeTextControl<Run = unknown> { on(type: string, callback: (run: Run, event: NativeTextEvent) => void): () => void; sync(patch: NativeConfig): void; snapshot(): { value: string; composing: boolean; selection: NativeTextSelection | null } | null }
 export interface NativeImageView<Run = unknown> { on(type: string, callback: (run: Run, event: NativeImageEvent) => void): () => void; sync(patch: NativeConfig): void; snapshot(): { source: string; loadingStatus: string; fit: string } | null }
 export interface NativeTableStructure {
   readonly role: string;
@@ -875,16 +876,24 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   const textListeners = new Map<string, Set<(run: Run, event: NativeTextEvent) => void>>();
   let textDeclared = false, textInitialized = false, textValue = '', textComposing = false, textMode = 'uncontrolled';
   let textPatch: NativeConfig = {};
+  let queueTextSelection: (() => void) | null = null;
   const canonicalText = (value: string) => { const normalized = value.replace(/\r\n?/g, '\n'); return textDeclaration?.config.lineMode === 'single' ? normalized.replace(/\n/g, '') : normalized; };
+  function readTextSelection(target: HTMLInputElement | HTMLTextAreaElement, source: string): NativeTextSelection | null {
+    try {
+      const start = target.selectionStart, end = target.selectionEnd, direction = target.selectionDirection;
+      if (typeof start !== 'number' || typeof end !== 'number' || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > source.length || !['forward','backward','none'].includes(String(direction))) return null;
+      return Object.freeze({ start: canonicalText(source.slice(0, start)).length, end: canonicalText(source.slice(0, end)).length, direction: direction as NativeTextSelection['direction'] });
+    } catch { return null; }
+  }
   function restoreTextValue(target: HTMLInputElement | HTMLTextAreaElement) {
     if (target.value === textValue || textComposing) return;
-    const start = target.selectionStart, end = target.selectionEnd, direction = target.selectionDirection;
+    const selection = readTextSelection(target, target.value);
     const top = target.scrollTop, left = target.scrollLeft;
     target.value = textValue;
-    if (start !== null && end !== null) target.setSelectionRange(Math.min(start, textValue.length), Math.min(end, textValue.length), direction ?? 'none');
+    if (selection) target.setSelectionRange(Math.min(selection.start, textValue.length), Math.min(selection.end, textValue.length), selection.direction);
     target.scrollTop = top; target.scrollLeft = left;
   }
-  function applyText() {
+  function applyText(restoreValue = false) {
     if (!ready() || !textDeclared) return;
     if (root!.localName !== 'input' && root!.localName !== 'textarea') throw new Error('[TextControl] renderer did not bind the required physical Root.');
     const target = root as HTMLInputElement | HTMLTextAreaElement;
@@ -896,13 +905,16 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (key === 'minLength' || key === 'maxLength') { if (Number(value) < 0) target.removeAttribute(key.toLowerCase()); else Reflect.set(target, key, Math.trunc(Number(value))); continue; }
       if (['placeholder','name','autoComplete','inputMode','enterKeyHint','wrap'].includes(key)) { if (value === '') target.removeAttribute(key.toLowerCase()); else target.setAttribute(key.toLowerCase(), String(value)); }
     }
-    if (typeof textPatch.defaultValue === 'string') target.defaultValue = canonicalText(textPatch.defaultValue);
-    restoreTextValue(target);
+    if (typeof textPatch.defaultValue === 'string' && target.defaultValue !== textPatch.defaultValue) target.defaultValue = canonicalText(textPatch.defaultValue);
+    // Selection-only observations may update semantic states before an input
+    // event arrives. Attribute refresh must not commit or reject that candidate.
+    if (restoreValue) restoreTextValue(target);
+    queueTextSelection?.();
   }
   const textControl: NativeTextControl<Run> = {
     on(type, callback) {
       setup('textControl.on');
-      if (!['input','change','compositionstart','compositionupdate','compositionend'].includes(type)) throw new Error('[TextControl] invalid event type.');
+      if (!['input','change','compositionstart','compositionupdate','compositionend','selectionchange'].includes(type)) throw new Error('[TextControl] invalid event type.');
       let listeners = textListeners.get(type); if (!listeners) { listeners = new Set(); textListeners.set(type, listeners); }
       listeners.add(callback); return () => { setup('textControl.off'); listeners!.delete(callback); };
     },
@@ -914,24 +926,46 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
         ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
         ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
       if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
-      applyText(); requestPresentation();
+      applyText(textMode === 'controlled'); requestPresentation();
     },
-    snapshot() { alive(); return textDeclared ? Object.freeze({ value: textValue, composing: textComposing }) : null; },
+    snapshot() { alive(); const target = ready() ? root as HTMLInputElement | HTMLTextAreaElement : null; return textDeclared ? Object.freeze({ value: textValue, composing: textComposing, selection: target && canonicalText(target.value) === textValue ? readTextSelection(target, target.value) : null }) : null; },
   };
   function attachText() {
     if (!textDeclared) return;
-    applyText();
+    applyText(true);
     const target = root as HTMLInputElement | HTMLTextAreaElement, epoch = generation;
+    let lastSelection: string | undefined, selectionQueued = false;
+    const current = () => epoch === generation && ready() && root === target && (options.isReady?.() ?? true);
+    const emitSelection = () => {
+      if (!current()) return;
+      const source = target.value, value = canonicalText(source), selection = readTextSelection(target, source);
+      const identity = JSON.stringify([value, selection]);
+      if (identity === lastSelection) return;
+      lastSelection = identity;
+      const event: NativeTextEvent = Object.freeze({ type: 'selectionchange', value, composing: textComposing, data: null, inputType: null, selection });
+      const listeners = textListeners.get('selectionchange');
+      for (const callback of [...listeners ?? []]) { if (!current()) break; if (listeners?.has(callback)) options.invoke(() => callback(options.getRun(), event)); }
+    };
+    queueTextSelection = () => {
+      if (selectionQueued || !current()) return;
+      selectionQueued = true;
+      queueMicrotask(() => { selectionQueued = false; emitSelection(); });
+    };
+    for (const type of ['select','selectionchange','keyup','pointerup','focus','blur']) listen(target, type, emitSelection);
+    listen(target.ownerDocument, 'selectionchange', () => {
+      if ((target.getRootNode() as Document | ShadowRoot).activeElement === target) emitSelection();
+    });
     for (const type of ['input','change','compositionstart','compositionupdate','compositionend']) listen(target, type, native => {
       const editing = native as InputEvent;
       if (type === 'compositionstart' || type === 'input' && editing.isComposing) textComposing = true;
       if (type === 'compositionend') textComposing = false;
-      const value = canonicalText(target.value);
+      const source = target.value, value = canonicalText(source);
       if (textMode === 'uncontrolled' && type === 'input') textValue = value;
-      const event = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null });
+      const event = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null, selection: readTextSelection(target, source) });
       for (const callback of [...textListeners.get(type) ?? []]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; options.invoke(() => callback(options.getRun(), event)); }
-      if (textMode === 'controlled' && (type === 'compositionend' || type === 'input' && !textComposing)) queueMicrotask(() => { if (epoch === generation && ready()) applyText(); });
+      if (textMode === 'controlled' && (type === 'compositionend' || type === 'input' && !textComposing)) queueMicrotask(() => { if (current()) applyText(true); });
     });
+    queueTextSelection();
   }
   const imageListeners = new Set<(run: Run, event: NativeImageEvent) => void>();
   let imageDeclared = false, imageFit = String(imageDeclaration?.config.fit ?? 'contain'), imageGeneration = 0;
@@ -1551,7 +1585,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('positioning')) positionBaselines.clear();
     if (__nativeFeature('scroll')) for (const [target, snapshot] of chromeTargets) { target.style.width = snapshot.width; target.style.height = snapshot.height; target.style.transform = snapshot.transform; target.style.display = snapshot.display; if (snapshot.size) target.style.setProperty('--proto-ui-scroll-thumb-size', snapshot.size); else target.style.removeProperty('--proto-ui-scroll-thumb-size'); if (snapshot.offset) target.style.setProperty('--proto-ui-scroll-thumb-offset', snapshot.offset); else target.style.removeProperty('--proto-ui-scroll-thumb-offset'); }
     if (__nativeFeature('scroll')) { chromeTargets.clear(); readerContacts = 0; }
-    if (__nativeFeature('text')) textComposing = false;
+    if (__nativeFeature('text')) { textComposing = false; queueTextSelection = null; }
     if (__nativeFeature('overlay')) overlayMaterialized = false;
     if (previous) {
       if (options.isAlive() && (options.isReady?.() ?? true)) {

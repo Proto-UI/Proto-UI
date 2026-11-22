@@ -560,9 +560,17 @@ export function emitWebComponentSource(
         span: node.span,
       });
     try {
+      // A render callback may omit its unused parameter (for example a physical
+      // TextControl returning null). Its result still needs native normalization.
       const renderer =
-        !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      const callable = `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+        !options.ssr && node.context === 'render'
+          ? (node.parameters[0]?.name ?? `${prefix}Renderer${nativeSequence++}`)
+          : undefined;
+      const parameters =
+        renderer && node.parameters.length === 0
+          ? `${renderer}: ${prefix}Renderer`
+          : emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName);
+      const callable = `(${parameters})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
       return callBoundaries.authored.has(node)
         ? `${prefix}MarkAuthoredCallable(${callable})`
         : callable;
