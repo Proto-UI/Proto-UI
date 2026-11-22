@@ -1,0 +1,287 @@
+{
+  "kind": "sprint2-root-integration-receipt-archive",
+  "sourceHeadAtArchive": "dbcdecb077283d4e3fe11fe1077b74708f24fa4b",
+  "boundary": "Raw historical executions remain bound to their original candidate or explicitly stated dirty source. This archive is not a new whole-head test, native acceptance, independent review or Ready receipt.",
+  "entries": [
+    {
+      "source": "evidence/site-before.log",
+      "path": "raw/site-before.log.gz",
+      "bytes": 160337,
+      "sha256": "2989fef8813bc1975489c8d7c9063bf20d76b986fdd362bb3e12780e7edf924b",
+      "storedBytes": 18897,
+      "storedSha256": "1691ae0bb639ccbed82d65ea065dff08bef8c1a99913f0fe6136f9edac856783"
+    },
+    {
+      "source": "evidence/site-after.log",
+      "path": "raw/site-after.log.gz",
+      "bytes": 156891,
+      "sha256": "9e35e91c152c9d371117a9f6cac20037c27dab91a76839c7afc4fb8d61edc367",
+      "storedBytes": 18252,
+      "storedSha256": "dd3f34af01e4d73ed1af0eb1ed50ba66fb339a35de5decce39f3abe27c64b960"
+    },
+    {
+      "source": "evidence/site-focused.log",
+      "path": "raw/site-focused.log.gz",
+      "bytes": 260103,
+      "sha256": "0c9401bbd87b63cd99a32eeaf7634064941db838e00129e8d06268a027bf62d7",
+      "storedBytes": 29095,
+      "storedSha256": "a0f4b9adc3ac755a240186b4a025eae4118ea17b3ddef43bbe0e4bc52789f237"
+    },
+    {
+      "source": "evidence/site-policy-r2.log",
+      "path": "raw/site-policy-r2.log.gz",
+      "bytes": 97876,
+      "sha256": "f212cc107568e9a4c3b79a7b9777235b882a4ac4c6c642879fffc130daf8e616",
+      "storedBytes": 10532,
+      "storedSha256": "669fd0e07e856c9ee046099bac260cda762470a23b718ffd3512c58befc5a33e"
+    },
+    {
+      "source": "evidence/site-policy-r3.log",
+      "path": "raw/site-policy-r3.log.gz",
+      "bytes": 96359,
+      "sha256": "ac1f4b74718dd24d1387e6a5430ec1abc50b4f66404ad04cc52a4900cffa336b",
+      "storedBytes": 10169,
+      "storedSha256": "b97fc8b7b33b16c1ef5384a8d3aa2ab06a8a0b6ccd561ea985b6141b4e510458"
+    },
+    {
+      "source": "evidence/hero-focus-red.log",
+      "path": "raw/hero-focus-red.log.gz",
+      "bytes": 27688,
+      "sha256": "11bc3c8c258eb02af6181c5fc5029c411d7434ee931d9bcdd2aa83a4d6ff8fa9",
+      "storedBytes": 4120,
+      "storedSha256": "61b3f7855975c44cd33d7455d1f37b24a750cab611334e40362d64ef13638b4a"
+    },
+    {
+      "source": "evidence/hero-focus-green.log",
+      "path": "raw/hero-focus-green.log.gz",
+      "bytes": 158010,
+      "sha256": "1457d6bc996e56e02495adbddff14210b577a616a9d6f9c8b8bc75504a6768d4",
+      "storedBytes": 18598,
+      "storedSha256": "b5319addde9e236cdca562ab316a136d857a6e86da71d59d3818bac94b30ba6c"
+    },
+    {
+      "source": "evidence/hero-focus-green-r2.log",
+      "path": "raw/hero-focus-green-r2.log.gz",
+      "bytes": 157158,
+      "sha256": "8fa18a5d466fdb2a2faea7b30296398460b20dc7919d5632842c47a5df762314",
+      "storedBytes": 18363,
+      "storedSha256": "f54492c32ef28d77a7665c29e73925236dac6893c3931699f224576fa5b19d31"
+    },
+    {
+      "source": "evidence/datepicker-root-original-red.log",
+      "path": "raw/datepicker-root-original-red.log.gz",
+      "bytes": 137387,
+      "sha256": "70aa061e1fc3dac00814c13170d13bfcac9118c7c6b2f8f7b38831a40a370564",
+      "storedBytes": 14636,
+      "storedSha256": "15ace130993a74759613570c3f13410105666af1eb2c6b2f14500703f004fca3"
+    },
+    {
+      "source": "evidence/datepicker-root-valid-red.log",
+      "path": "raw/datepicker-root-valid-red.log.gz",
+      "bytes": 137384,
+      "sha256": "8c2b5bcf5e93ef2f40315091a82983ac11dc78f72e78215df3e5fcd3742d7ef6",
+      "storedBytes": 14645,
+      "storedSha256": "daac1e33342d13dff4f933cceb101641f1a7bb5103cac9c299fc345f7bfaa08c"
+    },
+    {
+      "source": "evidence/datepicker-root-expanded-red.log",
+      "path": "raw/datepicker-root-expanded-red.log.gz",
+      "bytes": 137387,
+      "sha256": "ea0de37181c51865dbc58001d7d8d1dbb4760a3f5b17962b536586597537bba9",
+      "storedBytes": 14639,
+      "storedSha256": "448b4e7693b8713debe41ea832f8956bb2f72cb5d47135c85d85ab11c4b90046"
+    },
+    {
+      "source": "evidence/datepicker-root-green.log",
+      "path": "raw/datepicker-root-green.log.gz",
+      "bytes": 177312,
+      "sha256": "4d5c8d7d6cc1782dcda5befab675dea0636f60253bdfa67e147d64b2e9a27a3f",
+      "storedBytes": 19602,
+      "storedSha256": "0de0a30ea3ff25f3d91ab6d5b5998f4f5940beae3c3e2510dacd48ea9d744f39"
+    },
+    {
+      "source": "evidence/datepicker-request-start-red.log",
+      "path": "raw/datepicker-request-start-red.log.gz",
+      "bytes": 137387,
+      "sha256": "5cc3640b41eed5ea2c331b3e9a7ac22c4586d04f92f03560ae308b5040f47bfb",
+      "storedBytes": 14721,
+      "storedSha256": "1181fa618ea946cfd6446a77d70e991b6188b4a0aca9eb7ba43d318808365261"
+    },
+    {
+      "source": "evidence/datepicker-request-start-green.log",
+      "path": "raw/datepicker-request-start-green.log.gz",
+      "bytes": 177321,
+      "sha256": "c0e4cd19eeb062318d8f8d5a561dde759b4db8cd3e2d2f025c31f4f2dec1ce5f",
+      "storedBytes": 19646,
+      "storedSha256": "2ccb043609fc20ca25933b7bccec56d65368cafd4ce9c3f2435f65d082021a46"
+    },
+    {
+      "source": "evidence/datepicker-context-start-red.log",
+      "path": "raw/datepicker-context-start-red.log.gz",
+      "bytes": 137387,
+      "sha256": "b13703e108bf783819e814dead89207ee338f80665c92cefcd819a7dc671e1ad",
+      "storedBytes": 14665,
+      "storedSha256": "fc22b5df41d1c18517d8a0cfc93d903385ba70de8b147caac12de5382824d4ec"
+    },
+    {
+      "source": "evidence/datepicker-context-start-green.log",
+      "path": "raw/datepicker-context-start-green.log.gz",
+      "bytes": 177321,
+      "sha256": "40d4ded276dcb6a0e63ad1f5ef7d807513d158745ea2b5960445bcc21675352e",
+      "storedBytes": 19609,
+      "storedSha256": "0bd3741ca853f4fd737fb31d1719af96716a9002690906c320a236b90556564b"
+    },
+    {
+      "source": "evidence/datepicker-causal-capture-first.log",
+      "path": "raw/datepicker-causal-capture-first.log.gz",
+      "bytes": 177179,
+      "sha256": "1cf48708937d5a4c91862953929213981b1bd2cc6d422aafb9419deb70676947",
+      "storedBytes": 19777,
+      "storedSha256": "e154263f473e93a038bedc9ed62d72e2f175ba8e10af37b70c690c3c5c819c2d"
+    },
+    {
+      "source": "evidence/datepicker-causal-capture-green.log",
+      "path": "raw/datepicker-causal-capture-green.log.gz",
+      "bytes": 193136,
+      "sha256": "cd6f17089f1fc6425bc82597df36c45e3f8290ae9fe5eb25293c066fa2aab8ed",
+      "storedBytes": 21279,
+      "storedSha256": "f583d625f9891c5f9bf83bf6d209d86621003fdc4769df663ba5439cff0ce908"
+    },
+    {
+      "source": "evidence/datepicker-causal-capture-r2.log",
+      "path": "raw/datepicker-causal-capture-r2.log.gz",
+      "bytes": 192169,
+      "sha256": "642acbca606f741a181ebf5931efb4a4fe8f9838785bb5422e90fa5c95acc7f0",
+      "storedBytes": 20909,
+      "storedSha256": "dd4c27a010859044eeaf193932a7c1b9fd16beb6b8c9c652845def3561253974"
+    },
+    {
+      "source": "evidence/sprint2-workspace-types-r1.log",
+      "path": "raw/sprint2-workspace-types-r1.log.gz",
+      "bytes": 178,
+      "sha256": "ac1faf19ce3765471b7a8d24335b8433ada81d01c42f2cbf05125260920b2902",
+      "storedBytes": 172,
+      "storedSha256": "8bec314ef851ae600659f0ebfb742179bf1798e7c433554bd5ea4dcbb5935362"
+    },
+    {
+      "source": "evidence/sprint2-spec-final.log",
+      "path": "raw/sprint2-spec-final.log.gz",
+      "bytes": 203,
+      "sha256": "d3e82629084e6dadede6c3cd7f2f675488d83110fed965931fc83aef87f96a7c",
+      "storedBytes": 187,
+      "storedSha256": "d2d47987e230b02b40ec8759458da038c9cb13fafe108a8f655cb2856e44ad12"
+    },
+    {
+      "source": "evidence/sprint2-spec-final-r2.log",
+      "path": "raw/sprint2-spec-final-r2.log.gz",
+      "bytes": 100,
+      "sha256": "2edbf5dfb576f0e8c427b6f34a33315b3671483939d69eeab65999e80d8376e2",
+      "storedBytes": 107,
+      "storedSha256": "db892abe4ccc54479ff109f24a6243a2a93b8f8a50d6c31630aecea625086dae"
+    },
+    {
+      "source": "evidence/sprint2-integration-controls-r2.log",
+      "path": "raw/sprint2-integration-controls-r2.log.gz",
+      "bytes": 106127,
+      "sha256": "2db6c301c2c8d73b41137b79cfac3bc2c1c6e7df22f1ea45135d8dbb034ba83b",
+      "storedBytes": 12394,
+      "storedSha256": "9afb6ad2aa019a4b80d9edf10cd7e77ce6def66ea81890c7c2eb6805e883f7c9"
+    },
+    {
+      "source": "evidence/sprint2-queue-final-controls.log",
+      "path": "raw/sprint2-queue-final-controls.log.gz",
+      "bytes": 609,
+      "sha256": "6a5c0c650ca410e0abb6cb3cc159d290d6a07d67274fb87216bcf35f2dc61ca7",
+      "storedBytes": 392,
+      "storedSha256": "d9994ccbcb42d26baf347d7dd548ae9350208fdd0185f780f1541ae4a04a58c0"
+    },
+    {
+      "source": "workflow/transport-r1/sprint2-transport-publish.json",
+      "path": "workflow/transport-r1/sprint2-transport-publish.json.gz",
+      "bytes": 4699,
+      "sha256": "7335e289014968f9fd17d06a3d95f16e197cebf8a458dc9deb8db0a411b3e3b6",
+      "storedBytes": 2248,
+      "storedSha256": "d9e19b3264526aa56b43e36f4385fea2f280543e9434b7a8ca91ade55913ffa5"
+    },
+    {
+      "source": "workflow/transport-r1-fixed/sprint2-transport-publish.json",
+      "path": "workflow/transport-r1-fixed/sprint2-transport-publish.json.gz",
+      "bytes": 5204,
+      "sha256": "9d6dfab826fca677156ec1e758154c2403ee3bc127afbb54a1ff3bca6a2323c4",
+      "storedBytes": 2400,
+      "storedSha256": "dd42d63e437fb89ad1237ab9559e439a6ae9620c9f48573ae23d6ffdc609fbd4"
+    },
+    {
+      "source": "workflow/transport-r1-fixed/publish-candidate.mjs",
+      "path": "workflow/transport-r1-fixed/publish-candidate.mjs.gz",
+      "bytes": 7725,
+      "sha256": "89fe03828da02a663e4fe3623ebf171232d1eabb44f3f465de0446f411f5a78b",
+      "storedBytes": 2759,
+      "storedSha256": "6ef5f94fd3cd0fa2e9e04d3e74c8013cc5b39850889fc81472c379586704bf3f"
+    },
+    {
+      "source": "Proto-UI/packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "path": "source/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+      "bytes": 37057,
+      "sha256": "777790fcbe6c154c45154127a99f9f7c92720586777c68229e8f6a59e0dc1573",
+      "storedBytes": 8005,
+      "storedSha256": "4f54cc293974d62957fad6b0b1eb48a1e94f98e3adba686a1d8e97bc9ec4512f"
+    },
+    {
+      "source": "Proto-UI/packages/prototypes/base/src/calendar/types.ts",
+      "path": "source/packages/prototypes/base/src/calendar/types.ts.gz",
+      "bytes": 6127,
+      "sha256": "76c7ff83b149d9ea39d2afd9efb9bc57e36db4b06506d1ad97c2c168f27f966e",
+      "storedBytes": 1548,
+      "storedSha256": "a4c2bfad0fcc91f7ed38d4636fe57dc491670ffa96b82504b4c96f6afccf99e9"
+    },
+    {
+      "source": "Proto-UI/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "path": "source/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+      "bytes": 5361,
+      "sha256": "c5def0af61fa5a26835ca7f05017cff4786f95bbbecaa03c795b79c3ad677643",
+      "storedBytes": 1371,
+      "storedSha256": "c6026609a3bf66f6e7a87d005dcfc322f7cc2d2af538022409af99e4647c877b"
+    },
+    {
+      "source": "Proto-UI/packages/prototypes/base/src/popover/root.proto.ts",
+      "path": "source/packages/prototypes/base/src/popover/root.proto.ts.gz",
+      "bytes": 4135,
+      "sha256": "fd0b6720ad60d6f37380049fda70822234e857e6386a2b9e9028a9113a8d02ce",
+      "storedBytes": 1346,
+      "storedSha256": "328adcaaa0a0db25f155f429f5704d5047fcddf2346fe69a1877e08a02736173"
+    },
+    {
+      "source": "Proto-UI/packages/prototypes/base/src/popover/shared.ts",
+      "path": "source/packages/prototypes/base/src/popover/shared.ts.gz",
+      "bytes": 2777,
+      "sha256": "63b947ed937524a489737def841dfa6d5a5d923e72cd9a540963318235eec73e",
+      "storedBytes": 901,
+      "storedSha256": "510bcdba9e489a075ae78a6ced82df44474766edde9b7f08bca90d01a848369b"
+    },
+    {
+      "source": "Proto-UI/packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "path": "source/packages/prototypes/base/test/selection-reset-lifecycle.test.ts.gz",
+      "bytes": 36922,
+      "sha256": "4230e4eb21e52bf57208080bf41068b8fbe37c7f248510147d00f71d805ba8bc",
+      "storedBytes": 6547,
+      "storedSha256": "97913fdc761b99ad4094669d41167721fd63b04c80c3b2bfcb60177187909fee"
+    },
+    {
+      "source": "Proto-UI/scripts/analysis/run-sprint2-consumers.mjs",
+      "path": "source/scripts/analysis/run-sprint2-consumers.mjs.gz",
+      "bytes": 15700,
+      "sha256": "347583fd9f8df858599e190968cf384e53bebaabc2c46303a86cbe4c87a3bb47",
+      "storedBytes": 5283,
+      "storedSha256": "e541f7f0602655b82879c4257113e4447d65502907c387f21fac83576f5604f7"
+    },
+    {
+      "source": "Proto-UI/.github/workflows/projection-family-evidence.yml",
+      "path": "source/.github/workflows/projection-family-evidence.yml.gz",
+      "bytes": 4178,
+      "sha256": "a0cf38cf8a30259a32a2a49ef3bc481eae889a537e1e809c3dd51bef47a6bbb4",
+      "storedBytes": 1324,
+      "storedSha256": "8aa34f4506df19901a9f690811a2cd54798e45b81ed04a3a4359acefcf9fdc19"
+    }
+  ]
+}
