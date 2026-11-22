@@ -13,6 +13,12 @@ import {
   type BrowserBuildEvidence,
 } from '../compiler/browser-evidence.mjs';
 import { assertSameBrowserEvidence, digest } from '../compiler/browser-inputs.mjs';
+import {
+  assertLoopbackPortAvailable,
+  childIsAlive,
+  localBrowserServiceConfiguration,
+  observedAstroLocalURL,
+} from '../compiler/browser-service.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const require = createRequire(path.join(root, 'apps/www/package.json'));
@@ -35,10 +41,11 @@ let expectedEvidence: BrowserBuildEvidence | undefined;
 let server: ReturnType<typeof spawn> | undefined;
 let serverLog = '';
 let browser: any;
-const port = process.env.PUI_BROWSER_PORT ?? '4325';
-const base = process.env.PUI_BROWSER_URL ?? `http://127.0.0.1:${port}`;
+let completedCases = false;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 try {
+  const service = localBrowserServiceConfiguration(process.env, root, process.execPath);
+  const base = service.url;
   // Keep the browser's OS sandbox. A host that cannot launch it records an
   // environment failure before spending time preparing the documentation app.
   browser = await chromium.launch({
@@ -47,34 +54,60 @@ try {
     chromiumSandbox: true,
   });
   report.browser = browser.version();
-  if (!process.env.PUI_BROWSER_URL) {
-    execFileSync('corepack', ['pnpm@10.32.1', 'run', 'generate:proto-ui-style'], {
-      cwd: path.join(root, 'apps/www'),
-      stdio: 'pipe',
-    });
-  }
+  execFileSync('corepack', ['pnpm@10.32.1', 'run', 'generate:proto-ui-style'], {
+    cwd: service.cwd,
+    stdio: 'pipe',
+  });
   expectedEvidence = await captureCurrentBrowserEvidence();
   Object.assign(report, browserEvidenceRecord(expectedEvidence));
-  if (!process.env.PUI_BROWSER_URL) {
-    server = spawn(
-      process.execPath,
-      ['node_modules/astro/astro.js', 'dev', '--host', '127.0.0.1', '--port', port],
-      { cwd: path.join(root, 'apps/www'), stdio: ['ignore', 'pipe', 'pipe'] }
-    );
-    server.stdout?.on('data', (chunk) => {
-      serverLog += chunk.toString();
-    });
-    server.stderr?.on('data', (chunk) => {
-      serverLog += chunk.toString();
-    });
-    const deadline = Date.now() + 90_000;
-    while (!serverLog.includes('Local') && !serverLog.includes('ready in')) {
-      if (server.exitCode !== null) throw new Error(`Astro exited: ${serverLog}`);
-      if (Date.now() > deadline)
-        throw new Error(`Astro startup timed out: ${serverLog.slice(-6000)}`);
-      await sleep(100);
-    }
+  await assertLoopbackPortAvailable(service.port);
+  server = spawn(service.executable, service.command.slice(1), {
+    cwd: service.cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let spawnFailure: Error | undefined;
+  server.on('error', (error) => {
+    spawnFailure = error;
+  });
+  server.stdout?.on('data', (chunk) => {
+    serverLog += chunk.toString();
+  });
+  server.stderr?.on('data', (chunk) => {
+    serverLog += chunk.toString();
+  });
+  const deadline = Date.now() + 90_000;
+  let observedLocalURL: string | undefined;
+  while (!(observedLocalURL = observedAstroLocalURL(serverLog, base))) {
+    if (spawnFailure) throw spawnFailure;
+    if (!childIsAlive(server))
+      throw new Error(`Owned Astro exited before binding its URL: ${serverLog}`);
+    if (Date.now() > deadline)
+      throw new Error(`Astro startup timed out: ${serverLog.slice(-6000)}`);
+    await sleep(100);
   }
+  assert.ok(childIsAlive(server), 'owned Astro child must still be alive at its ready URL');
+  assert.deepEqual(
+    server.spawnargs,
+    service.command,
+    'actual child command must match the source-bound launch'
+  );
+  report.service = {
+    url: base,
+    mode: 'local-runner-service',
+    owner: {
+      status: 'running',
+      root: service.root,
+      cwd: service.cwd,
+      executable: server.spawnfile,
+      command: server.spawnargs,
+      pid: server.pid,
+      parentPid: process.pid,
+      port: service.port,
+      observedLocalURL,
+      portAvailableBeforeSpawn: true,
+      aliveAtReady: true,
+    },
+  };
   const serviceManifest = await fetch(`${base}/compiler-assets/input-manifest.json`);
   assert.equal(
     serviceManifest.ok,
@@ -92,12 +125,8 @@ try {
     servedAssets[asset] = actual;
   }
   report.compilerBuild = expectedEvidence.compilerBuild;
-  report.service = {
-    url: base,
-    mode: process.env.PUI_BROWSER_URL ? 'external-source-bound-service' : 'local-runner-service',
-    inputManifestSha256: digest(serviceManifestText),
-    assets: servedAssets,
-  };
+  report.service.inputManifestSha256 = digest(serviceManifestText);
+  report.service.assets = servedAssets;
   const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
   const errors: string[] = [];
   page.on('pageerror', (error: Error) => errors.push(error.message));
@@ -422,11 +451,29 @@ try {
       );
     assert.ok(report.loadedWasm.length > 0, 'the actual Worker loaded the bound QuickJS binary');
   });
+  completedCases = true;
 } catch (error) {
   report.cases.push({ name: 'setup', status: 'failed', error: String(error) });
 } finally {
-  await browser?.close();
-  server?.kill('SIGTERM');
+  if (report.service?.owner) {
+    const alive = childIsAlive(server);
+    report.service.owner.aliveBeforeShutdown = alive;
+    report.service.owner.status = completedCases && alive ? 'passed' : 'failed';
+    report.cases.push({
+      name: 'runner-owned-local-service',
+      status: report.service.owner.status,
+      ...(!completedCases || !alive
+        ? { error: 'The run did not complete against its live owned Astro child.' }
+        : {}),
+    });
+  }
+  try {
+    await browser?.close();
+  } catch (error) {
+    report.cases.push({ name: 'browser-cleanup', status: 'failed', error: String(error) });
+  } finally {
+    server?.kill('SIGTERM');
+  }
   if (expectedEvidence) {
     try {
       const finalEvidence = await captureCurrentBrowserEvidence();

@@ -59,7 +59,13 @@ const RECORDINGS: readonly Recording[] = [
     name: 'Base Label',
     module: '@proto.ui/prototypes-base/label',
     sessions: {
-      passive: { id: 'label-passive', prototype: labelRoot, props: {}, nativeLabel: true },
+      // Passive is an explicit negative control; Label defaults to activation.
+      passive: {
+        id: 'label-passive',
+        prototype: labelRoot,
+        props: { activation: false },
+        nativeLabel: true,
+      },
       actionable: {
         id: 'label-actionable',
         prototype: labelRoot,

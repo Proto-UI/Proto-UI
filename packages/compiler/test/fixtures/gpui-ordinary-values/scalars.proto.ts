@@ -84,7 +84,9 @@ export default definePrototype({
     }));
     def.expose.method('membership', () => ({
       present: IDS.includes('vega'),
+      // @ts-expect-error Deliberately test an out-of-domain needle against the finite string array.
       absent: IDS.includes('other'),
+      // @ts-expect-error ECMAScript accepts an object needle; the negative control must not coerce it.
       noCoercion: IDS.includes({ value: 'vega' }),
       empty: String(),
       number: String(1e21),
@@ -126,15 +128,16 @@ export default definePrototype({
       try {
         throw '𐀀';
       } catch (error) {
-        const high = error[0];
-        const low = error[1];
+        // This try block can only throw its authored string literal; the assertions erase.
+        const high = (error as string)[0];
+        const low = (error as string)[1];
         const length = high.length;
         if (typeof high === 'string' && typeof low === 'string' && typeof length === 'number')
           return {
             order: high < low,
             before: high < 'a',
             length,
-            same: high === error[0],
+            same: high === (error as string)[0],
             converted: String(high) === high,
             assembled: String(high) + low,
             unpaired: high + 'a' < '',

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { tsImport } from 'tsx/esm/api';
 import { assertSameBrowserEvidence, assertSameInputFiles, digest } from './browser-inputs.mjs';
+import { verifyOwnedBrowserService } from './browser-service.mjs';
 
 /** Rebuild instead of trusting a cached build.json or a receipt-supplied list. */
 export async function captureCurrentBrowserEvidence() {
@@ -22,6 +23,7 @@ export function browserEvidenceRecord(manifest) {
 }
 
 export function verifyRecordedBrowserEvidence(receipt, current) {
+  verifyOwnedBrowserService(receipt.service);
   const recorded = { ...receipt.buildManifest, sourceFiles: receipt.sourceFiles };
   assertSameBrowserEvidence(recorded, current);
   const sourceSha256 = digest(JSON.stringify(receipt.sourceFiles));

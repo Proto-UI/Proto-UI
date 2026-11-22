@@ -24,6 +24,7 @@ const controls = [
   'chinese-documentation-route-and-navigation-cleanup',
   'loaded-compiler-target-and-wasm-bindings',
   'source-and-asset-stability',
+  'runner-owned-local-service',
 ];
 const candidateRoutes = new Map([
   ['/en/ui-libraries/base/button/', 'en'],

@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { build } from 'esbuild';
+import { createServer } from 'node:net';
 import { createBrowserDeliveryIndex, verifyBrowserReceipt } from './browser-delivery-index.mjs';
 import { browserEvidenceRecord } from './browser-evidence.mjs';
 import {
@@ -13,6 +14,11 @@ import {
   hashMetafileInputs,
   mergeInputFiles,
 } from './browser-inputs.mjs';
+import {
+  assertLoopbackPortAvailable,
+  localBrowserServiceConfiguration,
+  observedAstroLocalURL,
+} from './browser-service.mjs';
 
 test('retains all prior pages, demos and prototype rejects without treating source admission as browser execution', async () => {
   const result = await createBrowserDeliveryIndex();
@@ -126,7 +132,22 @@ async function evidenceFixture(t) {
     cases: [],
     ...browserEvidenceRecord(manifest),
     compilerBuild: manifest.compilerBuild,
-    service: { inputManifestSha256: manifestSha256, assets: { ...manifest.assets } },
+    service: {
+      mode: 'local-runner-service',
+      url: 'http://127.0.0.1:4325',
+      owner: {
+        ...localBrowserServiceConfiguration({}, '/fixture/repository', '/fixture/node'),
+        status: 'passed',
+        pid: 123,
+        parentPid: 122,
+        observedLocalURL: 'http://127.0.0.1:4325/',
+        portAvailableBeforeSpawn: true,
+        aliveAtReady: true,
+        aliveBeforeShutdown: true,
+      },
+      inputManifestSha256: manifestSha256,
+      assets: { ...manifest.assets },
+    },
     sourceStability: {
       status: 'passed',
       beforeSha256: sourceSha256,
@@ -214,4 +235,80 @@ test('rejects stale target bundles, mismatched remote-service bytes and missing 
     () => assertSameBrowserEvidence(fixture.manifest, final),
     /source drift: vendor.ts/
   );
+});
+
+test('requires a fresh owned service and binds its recorded root, command and listening port', async (t) => {
+  const fixture = await evidenceFixture(t);
+  await verifyBrowserReceipt(fixture.receipt, { capture: fixture.capture });
+  for (const mutate of [
+    (service) => {
+      service.mode = 'external-source-bound-service';
+    },
+    (service) => {
+      service.owner.cwd = '/another/repository/apps/www';
+    },
+    (service) => {
+      service.owner.command[6] = '4326';
+    },
+    (service) => {
+      service.owner.observedLocalURL = 'http://127.0.0.1:4326/';
+    },
+    (service) => {
+      service.owner.aliveBeforeShutdown = false;
+    },
+    (service) => {
+      service.owner.pid = service.owner.parentPid;
+    },
+    (service) => {
+      service.owner.status = 'running';
+    },
+  ]) {
+    const rejected = structuredClone(fixture.receipt);
+    mutate(rejected.service);
+    await assert.rejects(
+      verifyBrowserReceipt(rejected, { capture: fixture.capture }),
+      /local Astro service|process.*binding/
+    );
+  }
+  assert.throws(
+    () =>
+      localBrowserServiceConfiguration(
+        { PUI_BROWSER_URL: 'http://127.0.0.1:4325' },
+        '/fixture/repository',
+        '/fixture/node'
+      ),
+    /must own a fresh local Astro process/
+  );
+  const base = 'http://127.0.0.1:4325';
+  assert.equal(observedAstroLocalURL('astro ready in 100 ms\n', base), undefined);
+  assert.equal(observedAstroLocalURL('┃ Local http://127.0.0.1:', base), undefined);
+  assert.equal(
+    observedAstroLocalURL(
+      '\u001b[2m┃\u001b[22m Local    \u001b[36mhttp://127.0.0.1:4325/\u001b[39m\n',
+      base
+    ),
+    `${base}/`
+  );
+  assert.throws(
+    () => observedAstroLocalURL('┃ Local http://127.0.0.1:4326/\n', base),
+    /refusing an existing or alternate service/
+  );
+});
+
+test('refuses an occupied loopback port without terminating the existing listener', async () => {
+  const occupied = createServer();
+  await new Promise((resolve, reject) => {
+    occupied.once('error', reject);
+    occupied.listen({ host: '127.0.0.1', port: 0, exclusive: true }, resolve);
+  });
+  const port = occupied.address().port;
+  try {
+    await assert.rejects(assertLoopbackPortAvailable(port), (error) => error.code === 'EADDRINUSE');
+    assert.equal(occupied.listening, true);
+  } finally {
+    await new Promise((resolve, reject) =>
+      occupied.close((error) => (error ? reject(error) : resolve()))
+    );
+  }
+  await assertLoopbackPortAvailable(port);
 });

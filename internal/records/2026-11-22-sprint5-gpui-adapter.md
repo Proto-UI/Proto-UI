@@ -53,6 +53,14 @@ Every selected native invocation receives a terminal exit record, including afte
 
 The workflow's YAML and every embedded Bash program were checked locally. Actual hosted execution is recorded separately by run URL and candidate SHA after publication; adding this workflow is not itself a native pass.
 
+### First hosted candidate and recording drift
+
+[Targeted run 45017248297](https://github.com/Proto-UI/Proto-UI/actions/runs/45017248297) was dispatched at published candidate `4ea7e8ffe5f83c08ef38e2fa73775554bbfec0b2`, with the separate Adapter input enabled. The generated-Rust Linux and macOS jobs both reached success. The Adapter peer/shared-vector step failed while the independently aggregated native suites continued; a pending native job is not a passing result.
+
+Read-only local diagnosis at the same source found a passing message-fixture check and four stale session recordings. Current Button adds authored `select-none`; Toggle registers `press.cancel` and advances subsequent leases; Switch exposes `percentage` / `dragging` and sends the new named-state messages. The recording generator's nominally passive Label still passed `{}`, although the actual Label now defaults to activation. Blind regeneration would have turned that accessibility negative control into an actionable Label.
+
+The generator now explicitly passes `activation: false` for its passive Label. Regeneration therefore preserves the existing Label bytes and the native assertion that this text offers no press action. Checkbox also remains byte-identical. Only the Button, Toggle and Switch recordings change, through the real peer generator. Its subsequent `--check` passes for all five recordings. This is an identified, repaired recording failure; the actual hosted log still determines whether the first peer/shared-vector step stopped here or encountered an earlier failure.
+
 ## Remaining scope and owners
 
 - **GPUI Adapter maintainers / #687:** complete the remaining Base capability waves, protocol stability and multi-artifact profile admission; retain genuine host/input/focus/lifecycle/AT and cleanup evidence per platform.
