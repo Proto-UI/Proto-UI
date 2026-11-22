@@ -8,7 +8,7 @@ impl Default for Value { fn default()->Self{Self::Undefined} }
 pub struct Modules {
     pub boundary:BoundaryModule,pub hit:HitModule,pub scroll:ScrollModule,
     pub topology:Topology,pub hooks:BTreeSet<&'static str>,pub focus:FocusModule,pub state_watchers:Vec<NativeStateWatch>,
-    pub text:TextModule,pub image:ImageModule,pub positioning:PositioningModule,pub overlay:OverlayModule,
+    pub control_label:ControlLabelModule,pub text:TextModule,pub image:ImageModule,pub positioning:PositioningModule,pub overlay:OverlayModule,
     pub accessible_text:BTreeMap<String,Value>,pub accessible_relations:BTreeMap<String,Value>,
     pub accessible_tree:Value,pub accessible_level:Value,pub action_events:BTreeMap<String,String>,pub a11y_node:Option<gpui::accesskit::NodeId>,
     pub a11y_frame:u64,pub a11y_bindings:usize,
@@ -293,7 +293,7 @@ pub fn modules_drive(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&m
     if request&&live&&ready(owner)&&native_focus_available(owner)&&!text_disabled(owner){let (bypass_gate,source)={let mut o=owner.borrow_mut();o.focus_requested=false;(std::mem::take(&mut o.modules.focus.bypass_gate),o.modules.focus.request_source.take())};if bypass_gate||top_scope(owner).map_or(true,|scope|descendant(owner,&scope)){window.focus(focus,cx);if focus.is_focused(window){if let Some((source,id))=source{if let Some(source)=source.upgrade(){let selected=source.borrow().modules.focus.scope_recipient.as_ref().is_some_and(|(_,intent)|*intent==id);if selected{source.borrow_mut().modules.focus.scope_recipient=None;}}}}}}
 }
 pub fn drive_queued_focus(owner:&OwnerRef,window:&mut Window,cx:&mut App){for other in owners_in(window){if Rc::ptr_eq(owner,&other){continue}let focus=other.borrow().modules.focus.native.clone();if let Some(focus)=focus{modules_drive(&other,&focus,window,cx);}}}
-pub fn modules_commit(owner:&OwnerRef){overlay_commit(owner);image_mount(owner);topology_refresh();for owner in all_owners(){let pending=owner.borrow().modules.focus.pending.clone();if let Some((operation,options))=pending{navigate_focus(&owner,true,operation,options);}}poll_state_watchers();}
+pub fn modules_commit(owner:&OwnerRef){control_label_commit(owner);overlay_commit(owner);image_mount(owner);topology_refresh();for owner in all_owners(){let pending=owner.borrow().modules.focus.pending.clone();if let Some((operation,options))=pending{navigate_focus(&owner,true,operation,options);}}poll_state_watchers();}
 pub fn focus_key_navigation(event:&gpui::KeyDownEvent,window:&mut Window)->bool{
     let Some(key)=portable_key(&event.keystroke)else{return false};let id=Some(window.window_handle().window_id());
     if key=="Tab"{if let Some(scope)=top_scope_in(id).filter(ready){let trapped={let scope=scope.borrow();let config=&scope.modules.focus.scope;bool_or(field(config,"trap"),false)&&matches!(text_or(field(config,"navigation"),"tab").as_str(),"tab"|"tab+arrow")};if trapped{native_host_callback(&scope,"focus-navigation",||navigate_focus(&scope,false,if event.keystroke.modifiers.shift{"prev"}else{"next"},record(vec![("reason",Value::string("keyboard"))])));window.prevent_default();return true;}}return false;}

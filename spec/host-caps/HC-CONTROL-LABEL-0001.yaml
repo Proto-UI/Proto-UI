@@ -19,6 +19,9 @@ criteria:
   - id: HC-CONTROL-LABEL-0001-CALLBACK
     text:
       en: Activation runs in the target Runtime callback scope, with current binding/generation rechecked before target effects. Target replacements and disposal retire listeners and stale requests.
+  - id: HC-CONTROL-LABEL-0001-GPUI
+    text:
+      en: The compiled GPUI provider requires exact window and current frame identities, projects the actual Label node, and invokes the target-authored callback through a checked pair request. It admits primary unmodified native mouse gestures only on known passive content, retires drag/cancel/blur turns, and rejects unknown native view descendants. Its AccessKit action stays on the visible text node and is unavailable for naming-only or unresolved pairs. The provider does not invent Label key bindings or claim anatomy/touch support.
 satisfies:
   contracts:
     - C-CONTROL-LABEL-0001
@@ -26,6 +29,7 @@ verifies:
   tests:
     - T-CONTROL-LABEL-0001
 sources:
+  - path: packages/compiler/src/gpui-native-control-label.ts
   - path: packages/modules/control-label/src/caps.ts
   - path: packages/modules/control-label/src/web.ts
 revisions:

@@ -7,8 +7,8 @@ lifecycleRationale:
   en: The bounded independent Label and eight-target direction is accepted for implementation; complete paired Web input, lifecycle, projection and assistive-technology evidence is still required before stable admission.
 summary: One opaque reference authorizes one independent Label and one participating control without adding a Label part to the control's anatomy or introducing a general action bus.
 statement:
-  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item; each target declares its own participation and keeps its existing operation owners; Text Control activation is focus-only. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item; their association is exercised through the Prototype packages and their Adapters.
-  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item；每个目标自行声明参与并保留既有操作所有者；Text Control 的关联 activation 仅请求 focus。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断；这些目标的关联通过 Prototype 包与其 Adapter 使用。
+  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item; each target declares its own participation and keeps its existing operation owners; Text Control activation is focus-only. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item; their association is exercised through the Prototype packages and their Adapters. The GPUI source target additionally lowers the generic direct typed InstanceAssociations path, with exact live native-window pairing and same-frame AccessKit references; its anatomy descriptor path remains explicitly unsupported and unknown native slot contents cannot authorize pointer activation.
+  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item；每个目标自行声明参与并保留既有操作所有者；Text Control 的关联 activation 仅请求 focus。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断；这些目标的关联通过 Prototype 包与其 Adapter 使用。GPUI source 额外降级通用 direct typed InstanceAssociations 路径，按当前原生窗口严格配对并引用同帧 AccessKit 节点；anatomy descriptor 路径仍显式不支持，未知 native slot 内容不得授权指针 activation。
 criteria:
   - id: C-CONTROL-LABEL-0001-IDENTITY
     text:
@@ -56,6 +56,9 @@ criteria:
   - id: C-CONTROL-LABEL-0001-BOUNDS
     text:
       en: This module does not own Form, submission, validation or error summaries. Its bounded anatomy bridge may be consumed by an independent Field protocol; it admits no multiple-label ordering, arbitrary action dispatch, native selection model or platform-wide support claim. Missing host capability is an explicit unsupported state, not success. Passing instance-association input or rendering label text alone does not certify a working association.
+  - id: C-CONTROL-LABEL-0001-GPUI-DIRECT
+    text:
+      en: The GPUI source lowering passes a factory-only Rust reference through NativeInstanceAssociations, separately from JSON Props. One exact live label and target in the same window may contribute a same-frame labelled_by relation and an explicitly enabled action on the visible label node. Explicit naming sources retain ownership and conflict independently of activation. Unknown native-view slot content fails closed for pointer qualification, without suppressing its naming or explicit assistive action; the host never guesses whether an arbitrary native child is interactive. Pair revision and both view epochs retire requests after rebinding, duplicate adoption, detach or disposal. Native source anatomy descriptors remain an explicit unsupported diagnostic.
   - id: C-CONTROL-LABEL-0001-ANATOMY
     text:
       en: A participant may instead declare one setup-only {family,labelRole,targetRole} anatomy pair. ControlLabel alone resolves the opaque nearest-root domain and exact self role through AnatomyPort, retains a module-private pair reference for that domain/role tuple, and uses its existing live registry and physical tree-scope guard. The descriptor contains no host IDs or callbacks; the internal reference never enters Props/Context. Explicit non-null InstanceAssociations conflicts with this mode and is rejected. Missing domain, mismatched role, zero/multiple live targets, adoption, detach, replacement and terminal cleanup fail closed or refresh exact leases. Anatomy supplies structure, not a new value or activation owner. Naming may be disabled so a pre-existing A11y part relationship remains the sole name owner.
@@ -82,6 +85,8 @@ references:
       P-BASE-TOGGLE-GROUP,
     ]
 sources:
+  - path: packages/compiler/src/gpui-native-control-label.ts
+  - path: internal/compiler/gpui-control-label.md
   - path: packages/modules/control-label/src/anatomy-pair.ts
   - path: packages/modules/control-label/test/anatomy-pair.test.ts
   - path: packages/core/src/control-label.ts
@@ -97,6 +102,9 @@ openQuestions:
       en: Does the completed slice satisfy paired real input, naming, reentrancy, duplicate binding and remount evidence across all four Web adapters?
     blocks: [activation:C-CONTROL-LABEL-0001]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Defined the bounded direct native GPUI association lowering, actual AccessKit relation ownership and fail-closed pointer eligibility for unknown native slot content; retained explicit anatomy and platform evidence limits.
   - version: 0.3.0-alpha.2
     change: clarified
     summary: Defined same-realm nominal reference and pair interoperability across native output graphs and Runtime Adapters, with target-owned semantic source translation and bounded generated-ID lifetime; retained draft admission and existing Label behavior.

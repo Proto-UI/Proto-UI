@@ -358,3 +358,17 @@ fn generated_text_reset_retains_controlled_truth_and_utf16_scalar_semantics(cx: 
         }).unwrap();
     }
 }
+
+
+native_control!(ModifiersHarness, press_modifiers::CompiledComponent, open_press_modifiers);
+#[gpui::test]
+fn actual_pointer_press_preserves_all_portable_modifiers(cx:&mut TestAppContext) {
+    use proto_ui_gpui_native::gpui_native_owner::NativeSnapshot;
+    let window=open_press_modifiers(cx,json!({}));
+    let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);
+    window.update(&mut visual,|host,_,cx|host.component.update(cx,|component,cx|component.set_slot(vec![NativeSnapshot::text_value(Value::string("Modified action"))],cx).unwrap_or_else(|_|panic!("native label")))).unwrap();
+    frames(&mut visual);
+    let point=window.update(&mut visual,|host,_,cx|host.component.read(cx).owner.borrow().bounds.expect("native hit area").center()).unwrap();
+    visual.simulate_click(point,gpui::Modifiers{shift:true,control:true,alt:true,platform:true,..Default::default()});
+    window.update(&mut visual,|host,_,cx|assert_eq!(host.component.read(cx).handle().take_events(),vec![("pressed".into(),json!({"shift":true,"ctrl":true,"alt":true,"meta":true}))])).unwrap();
+}

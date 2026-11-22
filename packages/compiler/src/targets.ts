@@ -475,6 +475,11 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
       'eventControl.requestDefaultActionPrevention',
       'textControl.resetValue',
       'scroll.sync',
+      'hook.asControlLabel',
+      'controlLabel.label',
+      'controlLabel.target',
+      'controlLabel.sync',
+      'controlLabelRequest.isCurrent',
     ],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [

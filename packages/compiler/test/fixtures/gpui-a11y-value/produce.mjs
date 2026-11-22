@@ -42,7 +42,7 @@ const provenance = JSON.parse(await readFile(path.join(component, 'provenance.js
 const name = /^\s*name\s*=\s*"([^"]+)"/m.exec(manifest)?.[1];
 if (!name) throw new Error('Missing emitted package name.');
 const controls = [];
-for (const stem of ['activation', 'host-activation', 'text']) {
+for (const stem of ['activation', 'host-activation', 'text', 'press-modifiers']) {
   const result = await compileFile(path.join(fixture, stem + '.proto.ts'), {
     root: fixture,
     profile: 'gpui-source-v1',

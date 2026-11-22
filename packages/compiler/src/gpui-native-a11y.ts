@@ -98,10 +98,13 @@ let Some(owner_ref)=self.owner.upgrade()else{return};
 crate::gpui_native_owner::text_accessible(&owner_ref,node);
 crate::gpui_native_owner::image_accessible(&owner_ref,node);
 let native_disabled=node.is_disabled();
+let control_label_name=crate::gpui_native_owner::control_label_name_node(&owner_ref);
+if crate::gpui_native_owner::control_label_is_label(&owner_ref)&&!crate::gpui_native_owner::control_label_action_available(&owner_ref){node.remove_action(gpui::accesskit::Action::Click);}
 let owner=owner_ref.borrow();
 for(key,spec)in &owner.modules.accessible_relations{project_relation(node,key,spec,owner.modules.a11y_frame,owner.window_id);}
-if owner.name_content{node.set_label(text_content(&owner.projection,&owner.slot));}
+if owner.name_content&&control_label_name.is_none(){node.set_label(text_content(&owner.projection,&owner.slot));}
 for(key,value)in &owner.modules.accessible_text{let value=resolved(value);if value.nullish(){continue}match key.as_str(){"name"=>node.set_label(value.text()),"description"=>node.set_description(value.text()),"id"=>{},_=>panic!("unmapped accessible text field")}}
+if let Some(label)=control_label_name{node.clear_label();node.set_labelled_by(vec![label]);}
 if matches!(resolved(&owner.accessible_role),Value::Json(serde_json::Value::String(role))if role=="heading"){if let Some(level)=crate::gpui_native_owner::accessible_level_value(&owner.modules.accessible_level){node.set_level(level);}}
 for(key,state)in &owner.accessible_states{let value=state.get();if owner.accessible_state_conditions.get(key).is_some_and(|condition|!matches!(condition.get(),Value::Json(serde_json::Value::Bool(true)))){continue}if value.nullish()||token_is(&value,""){continue}match key.as_str(){
 "valueNow"=>{if let Some(value)=finite_number(&value){node.set_numeric_value(value)}},
