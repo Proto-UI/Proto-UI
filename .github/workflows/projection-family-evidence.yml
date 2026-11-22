@@ -1,6 +1,14 @@
 name: Draft projection family evidence
 on:
   workflow_dispatch:
+    inputs:
+      scope:
+        description: Evidence inventory (the existing complete family lane remains the default)
+        type: choice
+        default: all
+        options:
+          - all
+          - sprint2
   workflow_call:
 permissions:
   contents: read
@@ -9,6 +17,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   browser-evidence:
+    if: ${{ inputs.scope != 'sprint2' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -55,5 +64,40 @@ jobs:
         with:
           name: projection-families-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/projection-family-evidence
+          if-no-files-found: warn
+          retention-days: 30
+  sprint2-consumers:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scope == 'sprint2' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        timeout-minutes: 10
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Run one sequential Sprint 2 acceptance queue
+        env:
+          PUI_SPRINT2_EVIDENCE_DIR: ${{ runner.temp }}/sprint2-consumers
+        run: node scripts/analysis/run-sprint2-consumers.mjs
+      - name: Retain every passed, failed and not-run receipt
+        if: always()
+        timeout-minutes: 3
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprint2-consumers-${{ github.sha }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/sprint2-consumers
+            !${{ runner.temp }}/sprint2-consumers/**/cache/**
           if-no-files-found: warn
           retention-days: 30
