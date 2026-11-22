@@ -3,6 +3,7 @@ import { build } from 'esbuild';
 import { globSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { chromium, type Browser, type Page } from 'playwright-core';
@@ -26,6 +27,9 @@ const output = path.join(
 const cases = (['base', 'shadcn', 'brutalist'] as const).flatMap((family) =>
   (['react', 'wc'] as const).map((runtime) => ({ family, runtime }))
 );
+const tooltipCases = (['base', 'shadcn', 'brutalist'] as const).flatMap((family) =>
+  (['react', 'wc', 'vue', 'vue2'] as const).map((runtime) => ({ family, runtime }))
+);
 beforeAll(async () => {
   const sourceFiles = [
     ...globSync(
@@ -36,34 +40,39 @@ beforeAll(async () => {
     (token): token is string => typeof token === 'string'
   );
   css = renderProtoStyleTokenCss(tokens);
-  bundle = (
-    await build({
-      entryPoints: ['apps/www/test/fixtures/component-consumer-repairs.ts'],
-      bundle: true,
-      write: false,
-      platform: 'browser',
-      format: 'iife',
-      globalName: 'componentRepairs',
-      target: 'es2022',
-      define: { 'process.env.NODE_ENV': '"development"' },
-    })
-  ).outputFiles[0].text;
+  const built = await build({
+    entryPoints: ['apps/www/test/fixtures/component-consumer-repairs.ts'],
+    bundle: true,
+    write: false,
+    platform: 'browser',
+    format: 'iife',
+    globalName: 'componentRepairs',
+    target: 'es2022',
+    metafile: true,
+    define: { 'process.env.NODE_ENV': '"development"' },
+  });
+  bundle = built.outputFiles[0].text;
   await mkdir(output, { recursive: true });
   const files = [
     ...sourceFiles,
     'apps/www/test/fixtures/component-consumer-repairs.ts',
-    'packages/adapters/react/src/adapt.ts',
+    ...Object.keys(built.metafile.inputs).filter((file) => !file.includes('node_modules/')),
+    'pnpm-lock.yaml',
+    'apps/www/package.json',
+    'apps/www/test/component-consumer-repairs.browser.test.ts',
   ];
   await writeFile(
     path.join(output, 'source.json'),
     JSON.stringify(
       {
+        sourceRevision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+        worktreeStatus: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }),
         source: Object.fromEntries(
           files.map((file) => [file, createHash('sha256').update(readFileSync(file)).digest('hex')])
         ),
         bundleSha256: createHash('sha256').update(bundle).digest('hex'),
         scope:
-          'Actual source prototypes in React and WC; no OS assistive-technology certification.',
+          'Actual source prototypes in React, WC, Vue and Vue2; explicit ShadowRoot host policy; no OS assistive-technology or actual Shenko-application certification.',
       },
       null,
       2
@@ -83,7 +92,8 @@ afterAll(async () => {
 async function fixture(
   scenario: Parameters<typeof mount>[0],
   family: Parameters<typeof mount>[1],
-  runtime: Parameters<typeof mount>[2]
+  runtime: Parameters<typeof mount>[2],
+  options: Parameters<typeof mount>[3] = {}
 ) {
   const page = await browser.newPage({
     viewport: { width: 1200, height: 800 },
@@ -93,24 +103,47 @@ async function fixture(
   page.on('pageerror', (error) => errors.push(error.message));
   await page.route('**/*', (route) => route.abort());
   await page.setContent('<!doctype html><html><head></head><body></body></html>');
-  await page.addStyleTag({
-    content:
-      css +
-      '\nhtml{font-size:16px}body{margin:0;font:16px system-ui} [data-demo-ref="button"],[data-demo-ref="toggle"],[data-demo-ref="item"]{display:inline-flex;padding:12px;margin:8px} [data-demo-ref$="-label"]{display:inline-block;margin:8px} [data-demo-ref="content"]{background:white;color:black} [data-demo-ref="handle"]{display:block;min-width:20px;min-height:40px}',
-  });
+  const styleText =
+    css +
+    '\nhtml{font-size:16px}body{margin:0;font:16px system-ui} [data-demo-ref="button"],[data-demo-ref="trigger"],[data-demo-ref="toggle"],[data-demo-ref="item"]{display:inline-flex;padding:12px;margin:8px} [data-demo-ref$="-label"]{display:inline-block;margin:8px} [data-demo-ref="content"]{background:white;color:black} [data-demo-ref="handle"]{display:block;min-width:20px;min-height:40px}';
+  await page.addStyleTag({ content: styleText });
   await page.addScriptTag({ content: bundle });
   await page.evaluate(
-    async ({ scenario, family, runtime }) => {
-      window.repairFixture = await window.componentRepairs.mount(scenario, family, runtime);
+    async ({ scenario, family, runtime, options }) => {
+      window.repairFixture = await window.componentRepairs.mount(
+        scenario,
+        family,
+        runtime,
+        options
+      );
     },
-    { scenario, family, runtime }
+    { scenario, family, runtime, options: { ...options, styleText } }
   );
   expect(errors).toEqual([]);
   return { page, errors };
 }
 const node = (page: Page, key: string) => page.locator(`[data-demo-ref="${key}"]`);
 const active = (page: Page) =>
-  page.evaluate(() => document.activeElement?.getAttribute('data-demo-ref'));
+  page.evaluate(() => {
+    let element = document.activeElement;
+    while (element?.shadowRoot?.activeElement) element = element.shadowRoot.activeElement;
+    return element?.getAttribute('data-demo-ref');
+  });
+
+/** Browser-computed AX, independent of attribute matching. It is not an OS screen-reader run. */
+async function commandAccessibility(page: Page) {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const { nodes } = await cdp.send('Accessibility.getFullAXTree');
+    const commands = nodes.filter(
+      (entry) => !entry.ignored && entry.role?.value === 'button' && entry.name?.value === 'Save'
+    );
+    expect(commands).toHaveLength(1);
+    return { name: commands[0].name?.value, description: commands[0].description?.value ?? '' };
+  } finally {
+    await cdp.detach();
+  }
+}
 
 it.each(cases)(
   '$family $runtime names icon controls and preserves command/selection ownership',
@@ -152,7 +185,7 @@ it.each(cases)(
   }
 );
 
-it.each(cases)(
+it.each(tooltipCases)(
   '$family $runtime Tooltip Button has one Tab stop, one activation and an owned description',
   async ({ family, runtime }) => {
     const { page, errors } = await fixture('tooltip', family, runtime);
@@ -212,7 +245,7 @@ it.each(cases)(
 // with no browser globals (e.g. the GPUI/native path) and OS assistive-technology
 // certification. This harness observes detached-then-attached mounting and real
 // Chromium Tab/Shift+Tab, pointer/focus opening, Escape and activation only.
-it.each(cases)(
+it.each(tooltipCases)(
   '$family $runtime Tooltip lifecycle keeps one Tab stop across mounting, removal, eligibility and remount',
   async ({ family, runtime }) => {
     const { page, errors } = await fixture('tooltip-lifecycle', family, runtime);
@@ -228,8 +261,7 @@ it.each(cases)(
       return active(page);
     };
     try {
-      // no-DOM mounting: the control is created and wired while its host is
-      // detached, then mounted; after mounting it is exactly one Tab stop.
+      // Detached DOM is a browser lifecycle case, not a native host without DOM globals.
       expect(
         await page.evaluate(() => document.querySelector('[data-demo-ref="button"]'))
       ).toBeNull();
@@ -301,7 +333,7 @@ it.each(cases)(
       await setTabindex(0);
       expect(await tabIndexFromBefore()).toBe('button');
 
-      // Remount / shadow-host boundary: the underlying element is replaced and the
+      // Remount: the underlying element is replaced and the
       // wiring re-binds; the replacement is exactly one Tab stop and still opens,
       // activates and owns the description.
       await page.evaluate(() =>
@@ -310,7 +342,10 @@ it.each(cases)(
       await life('remount');
       const remounted = await page.evaluate(() => {
         const el = document.querySelector('[data-demo-ref="button"]');
-        return { exists: Boolean(el), isReplacement: el ? !el.hasAttribute('data-pre-remount') : false };
+        return {
+          exists: Boolean(el),
+          isReplacement: el ? !el.hasAttribute('data-pre-remount') : false,
+        };
       });
       expect(remounted.exists).toBe(true);
       expect(remounted.isReplacement).toBe(true);
@@ -328,9 +363,194 @@ it.each(cases)(
       expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);
       await page.keyboard.press('Enter');
       expect(await page.evaluate(() => window.repairFixture.counts.click)).toBe(2);
-      await page.screenshot({ path: path.join(output, `${family}-${runtime}-tooltip-lifecycle.png`) });
+      await page.screenshot({
+        path: path.join(output, `${family}-${runtime}-tooltip-lifecycle.png`),
+      });
       expect(errors).toEqual([]);
     } finally {
+      await page.close();
+    }
+  }
+);
+
+it.each(tooltipCases)(
+  '$family $runtime preserves the public nested-Trigger reproduction as a two-owner negative control',
+  async ({ family, runtime }) => {
+    // Issue #1455 reports this public shape from Shenko. This reproduces that
+    // shape on current source; it does not run the actual Shenko application.
+    const { page, errors } = await fixture('tooltip-wrapped', family, runtime);
+    try {
+      await node(page, 'before').focus();
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('trigger');
+      expect(await node(page, 'trigger').getAttribute('role')).toBeNull();
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('button');
+      expect(await node(page, 'button').getAttribute('role')).toBe('button');
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('button');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('trigger');
+      await page.screenshot({
+        path: path.join(output, `${family}-${runtime}-tooltip-nested-control.png`),
+      });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.evaluate(() => window.repairFixture.dispose());
+      await page.close();
+    }
+  }
+);
+
+it.each(tooltipCases)(
+  '$family $runtime standalone Tooltip Trigger retains its own focus and exposes',
+  async ({ family, runtime }) => {
+    const { page, errors } = await fixture('tooltip-standalone', family, runtime);
+    try {
+      await node(page, 'before').focus();
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('trigger');
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.exposes('root').open.get()))
+        .toBe(true);
+      expect(await node(page, 'trigger').getAttribute('role')).toBeNull();
+      expect(await node(page, 'trigger').getAttribute('aria-label')).toBeNull();
+      expect(
+        await page.evaluate(() => {
+          const trigger = window.repairFixture.exposes('trigger');
+          return {
+            focused: trigger.focused.get(),
+            disabled: trigger.disabled.get(),
+            focusSelf: typeof trigger.focusSelf,
+          };
+        })
+      ).toEqual({ focused: true, disabled: false, focusSelf: 'function' });
+      await expect
+        .poll(async () => node(page, 'trigger').getAttribute('aria-describedby'))
+        .toBe(await node(page, 'content').getAttribute('id'));
+      await page.keyboard.press('Escape');
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.exposes('root').open.get()))
+        .toBe(false);
+      expect(await active(page)).toBe('trigger');
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('trigger');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('before');
+      await page.evaluate(() => window.repairFixture.set('trigger', { disabled: true }));
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      expect(errors).toEqual([]);
+    } finally {
+      await page.evaluate(() => window.repairFixture.dispose());
+      await page.close();
+    }
+  }
+);
+
+it.each(tooltipCases)(
+  '$family $runtime Tooltip in a real ShadowRoot keeps its portal, description and replacement focus together',
+  async ({ family, runtime }) => {
+    const { page, errors } = await fixture('tooltip-lifecycle', family, runtime, {
+      shadow: true,
+      portalDestination: 'scene',
+    });
+    try {
+      await page.evaluate(() => window.repairFixture.lifecycle!.attach());
+      await node(page, 'before').focus();
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('button');
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.exposes('root').open.get()))
+        .toBe(true);
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.boundary()))
+        .toEqual({
+          shadow: true,
+          sameTree: true,
+          contentInDestination: true,
+          outerConnected: true,
+        });
+      await expect
+        .poll(() => commandAccessibility(page))
+        .toEqual({
+          name: 'Save',
+          description: 'Save this document',
+        });
+      const contentId = await node(page, 'content').getAttribute('id');
+      expect(contentId).toBeTruthy();
+      expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);
+      await page.keyboard.press('Enter');
+      expect(await page.evaluate(() => window.repairFixture.counts.click)).toBe(1);
+      await page.keyboard.press('Escape');
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.exposes('root').open.get()))
+        .toBe(false);
+      expect(await active(page)).toBe('button');
+      await expect
+        .poll(() => commandAccessibility(page))
+        .toEqual({ name: 'Save', description: '' });
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('button');
+      await node(page, 'button').evaluate((element) => element.setAttribute('data-old-owner', ''));
+      await page.evaluate(() => window.repairFixture.lifecycle!.remount());
+      expect(await node(page, 'button').getAttribute('data-old-owner')).toBeNull();
+      await node(page, 'before').focus();
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('button');
+      await expect
+        .poll(() => commandAccessibility(page))
+        .toEqual({ name: 'Save', description: 'Save this document' });
+      expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);
+      await page.keyboard.press('Enter');
+      expect(await page.evaluate(() => window.repairFixture.counts.click)).toBe(2);
+      await page.screenshot({ path: path.join(output, `${family}-${runtime}-tooltip-shadow.png`) });
+      await page.evaluate(() => window.repairFixture.dispose());
+      expect(await page.locator('[data-repair-fixture], [data-demo-ref="content"]').count()).toBe(
+        0
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  }
+);
+
+it.each(tooltipCases)(
+  '$family $runtime detects unresolved cross-tree description despite matching IDREF strings',
+  async ({ family, runtime }) => {
+    // A ShadowRoot consumer must opt into an admitted same-scene destination.
+    // The default body portal is deliberately retained as a negative control:
+    // comparing aria-describedby and id alone would incorrectly accept it.
+    const { page, errors } = await fixture('tooltip', family, runtime, { shadow: true });
+    try {
+      await node(page, 'before').focus();
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('button');
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.exposes('root').open.get()))
+        .toBe(true);
+      await expect
+        .poll(() => page.evaluate(() => window.repairFixture.boundary()))
+        .toEqual({
+          shadow: true,
+          sameTree: false,
+          contentInDestination: false,
+          outerConnected: true,
+        });
+      const contentId = await node(page, 'content').getAttribute('id');
+      expect(contentId).toBeTruthy();
+      expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);
+      expect(await commandAccessibility(page)).toEqual({ name: 'Save', description: '' });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.evaluate(() => window.repairFixture.dispose());
       await page.close();
     }
   }
