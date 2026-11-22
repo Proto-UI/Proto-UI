@@ -402,6 +402,22 @@ for (const runtime of RUNTIMES)
           await enabled.hover();
           observations.hoverBeforeAssert = await metrics(enabled);
           await capture('hover-before-assert');
+          // Element screenshots scroll the previewer into view, which can
+          // move the button out from under an already-committed pointer. The
+          // hover paint criterion needs the pointer genuinely over the
+          // control at assertion time, so re-assert it if the page moved.
+          const ownsHover = async () => {
+            const box = await enabled.boundingBox();
+            if (!box) return false;
+            return page.evaluate(
+              ({ x, y }) => {
+                const hit = document.elementFromPoint(x, y);
+                return !!hit && hit.closest('[role="button"]')?.textContent?.trim() === 'Ghost';
+              },
+              { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+            );
+          };
+          if (!(await ownsHover())) await enabled.hover();
           observations.hover = await paint(enabled, true);
           await counts(0);
           await capture('hover');
