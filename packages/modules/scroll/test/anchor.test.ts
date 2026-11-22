@@ -267,4 +267,70 @@ describe('module-scroll: anchor host contract', () => {
 
     expect(f.target.scrollTop).toBe(100);
   });
+
+  it('consumes head-growth evidence while the end-follow lease owns the axis', () => {
+    const f = installAnchorFixture({
+      endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      anchor: anchorVertical,
+    });
+    // Follow-owned head growth: pending evidence must be consumed, not
+    // carried into a later anchor-owned pass.
+    const first = document.createElement('div');
+    f.prepend([first]);
+    f.updateMetrics({ scrollHeight: 450 });
+    f.mutations.deliver([childListRecord(f.target, [first])]);
+    f.frames.runAll();
+    expect(f.target.scrollTop).toBe(350);
+    expect(f.snapshots.at(-1)?.endFollow.state).toBe('following');
+
+    // Reader departs; the observation syncs while the reader is away.
+    f.scrollTo(200);
+
+    // Later non-head growth with an unchanged offset must not compensate —
+    // the consumed head-growth evidence was already spent while following.
+    const tail = document.createElement('div');
+    f.target.append(tail);
+    f.updateMetrics({ scrollHeight: 550 });
+    f.mutations.deliver([childListRecord(f.target, [tail])]);
+
+    expect(f.target.scrollTop).toBe(200);
+    f.lease.dispose();
+  });
+
+  it('compensates each head-growth delivery inside one frame', () => {
+    const f = installAnchorFixture({ endFollow: { mode: 'off' }, anchor: anchorVertical });
+    f.scrollTo(100);
+
+    const first = document.createElement('div');
+    f.prepend([first]);
+    f.updateMetrics({ scrollHeight: 500 });
+    f.mutations.deliver([childListRecord(f.target, [first])]);
+    expect(f.target.scrollTop).toBe(200);
+
+    // A second delivery in the same frame (no scroll event between them)
+    // must still compensate by its own delta: the baseline is the
+    // post-compensation offset, not the pre-write offset.
+    const second = document.createElement('div');
+    f.prepend([second]);
+    f.updateMetrics({ scrollHeight: 600 });
+    f.mutations.deliver([childListRecord(f.target, [second])]);
+    expect(f.target.scrollTop).toBe(300);
+    f.lease.dispose();
+  });
+
+  it('does not treat the first append to an empty target as head growth', () => {
+    const f = installAnchorFixture({ endFollow: { mode: 'off' }, anchor: anchorVertical });
+    f.target.replaceChildren();
+    f.updateMetrics({ clientHeight: 100, scrollHeight: 400 });
+    f.scrollTo(0);
+
+    const first = document.createElement('div');
+    const second = document.createElement('div');
+    f.target.append(first, second);
+    f.mutations.deliver([childListRecord(f.target, [first, second])]);
+
+    // Nothing moved above existing content; the offset stays at the top.
+    expect(f.target.scrollTop).toBe(0);
+    f.lease.dispose();
+  });
 });

@@ -556,6 +556,11 @@ export function createWebScrollSurfaceHost(
           if (axis === 'horizontal')
             target.scrollLeft = (next.offset + delta) * horizontalSign(target);
           else target.scrollTop = next.offset + delta;
+          // The baseline must record the post-compensation offset; otherwise a
+          // second head-growth delivery inside the same frame sees a moved
+          // offset and under-compensates by its own delta.
+          anchorObservation = Object.freeze({ ...next, offset: next.offset + delta });
+          return;
         }
         anchorObservation = next;
       };
@@ -767,8 +772,13 @@ export function createWebScrollSurfaceHost(
             (endFollowState === 'following' ||
               endFollowState === 'pending' ||
               scheduledEnd?.axis === anchorAxis);
-          if (followOwnsAnchor) anchorObservation = readAnchorObservation(anchorAxis);
-          else applyAnchorCompensation(anchorAxis);
+          if (followOwnsAnchor) {
+            // The end-follow lease owns this layout window: anchor evidence is
+            // consumed here, not carried into a later anchor-owned pass where
+            // a non-head growth could be misread as head growth.
+            anchorHeadGrowthPending = false;
+            anchorObservation = readAnchorObservation(anchorAxis);
+          } else applyAnchorCompensation(anchorAxis);
         } else {
           anchorObservation = null;
           anchorHeadGrowthPending = false;
@@ -1068,7 +1078,11 @@ export function createWebScrollSurfaceHost(
               record.target === target &&
               record.addedNodes.length > 0
           );
-          if (inserted && target.firstElementChild !== headNode) anchorHeadGrowthPending = true;
+          // headNode must have existed before the mutation: the first append
+          // to an empty target changes firstElementChild without moving any
+          // existing content, so it is not head growth.
+          if (inserted && headNode && target.firstElementChild !== headNode)
+            anchorHeadGrowthPending = true;
         }
         refreshHeadMarkers();
         if (records.some((record) => record.type === 'childList' && record.target === target)) {
