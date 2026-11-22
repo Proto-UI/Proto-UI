@@ -3,6 +3,7 @@
 // do not admit ordinary website consumers, certify the optical algorithm, or
 // promote Liquid Glass from WIP / Experimental. Changed bytes require review.
 // Ownership and historical failures: internal/records/2026-11-22-regression-source-bindings.md.
+// Hover-only digest renewal: internal/records/2026-11-23-sprint4-source-admission-followup.md.
 export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts': Object.freeze({
     sourceSha256: 'a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6',
@@ -38,7 +39,7 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-hover.astro': Object.freeze({
-    sourceSha256: 'f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7',
+    sourceSha256: '4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c',
     specifiers: Object.freeze([
       '../../../../../../packages/prototypes/liquid-glass/src/theme',
       '@proto.ui/prototypes-liquid-glass/button',
