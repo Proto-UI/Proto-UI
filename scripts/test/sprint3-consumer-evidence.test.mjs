@@ -10,6 +10,7 @@ import {
   finalize,
   resolveEvidenceDirectory,
   runCommand,
+  sealProductionArtifact,
   sourceProblems,
   startOwnedPreview,
   vitestProblems,
@@ -242,6 +243,14 @@ function retainedEvidence(t) {
       },
     ],
   };
+  for (const [name, bytes] of [
+    ['build.log', 'completed production build\n'],
+    ['dist-files.json', '[{"file":"en/index.html","bytes":8,"sha256":"fixture"}]\n'],
+    ['preview-requests.jsonl', '{"method":"GET","url":"/en/","status":200}\n'],
+  ]) {
+    writeFileSync(path.join(output, name), bytes);
+    sealProductionArtifact(output, ledger, name);
+  }
   const run = () => finalize(output, ledger, false, () => source);
   const stored = () => JSON.parse(readFileSync(path.join(output, 'results.json'), 'utf8'));
   assert.equal(run(), 0, 'unchanged retained artifacts are the positive control');
@@ -308,4 +317,49 @@ test('final result-write failure cannot leave the earlier successful aggregate',
   assert.equal(f.run(), 1);
   assert.equal(f.stored().status, 'failed');
   assert.match(f.stored().errors.join('\n'), /result receipt I\/O failure/);
+});
+
+test('missing or changed build, dist and preview receipts invalidate the persisted aggregate', (t) => {
+  for (const name of ['build.log', 'dist-files.json', 'preview-requests.jsonl']) {
+    for (const mutation of ['delete', 'change']) {
+      const f = retainedEvidence(t);
+      const original = structuredClone(f.ledger.productionArtifacts);
+      const file = path.join(f.output, name);
+      const bytes = readFileSync(file);
+      if (mutation === 'delete') rmSync(file);
+      else writeFileSync(file, 'changed production evidence');
+      assert.equal(f.run(), 1, `${name}: ${mutation}`);
+      const saved = f.stored();
+      assert.equal(saved.status, 'failed');
+      assert.match(
+        saved.productionEvidenceProblems.join('\n'),
+        new RegExp(name.replaceAll('.', '\\.'))
+      );
+      assert.deepEqual(saved.productionArtifacts, original, 'first sealed hashes remain intact');
+      writeFileSync(file, bytes);
+      assert.equal(f.run(), 1, 'restoring production bytes must not erase recorded failure');
+    }
+  }
+});
+
+test('production receipts cannot be resealed or replaced by unowned or unreadable files', (t) => {
+  const f = retainedEvidence(t);
+  assert.throws(() => sealProductionArtifact(f.output, f.ledger, 'build.log'), /already sealed/);
+  for (const mutation of ['symlink', 'directory', 'unsealed']) {
+    const f = retainedEvidence(t);
+    const file = path.join(f.output, 'dist-files.json');
+    if (mutation === 'unsealed') delete f.ledger.productionArtifacts['dist-files.json'];
+    else {
+      rmSync(file);
+      if (mutation === 'symlink') symlinkSync(path.join(f.output, 'build.log'), file);
+      else mkdirSync(file);
+    }
+    assert.equal(f.run(), 1, mutation);
+    assert.equal(f.stored().status, 'failed');
+    assert.match(f.stored().productionEvidenceProblems.join('\n'), /dist-files.json/);
+    assert.ok(
+      f.stored().observedProductionArtifacts['build.log'],
+      'readable receipts remain available'
+    );
+  }
 });

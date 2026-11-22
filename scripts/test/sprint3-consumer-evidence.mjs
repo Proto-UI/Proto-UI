@@ -145,6 +145,26 @@ const json = (file, value) => {
   renameSync(`${file}.next`, file);
 };
 const git = (...args) => execFileSync('git', args, { cwd: repository, encoding: 'utf8' }).trim();
+const PRODUCTION_ARTIFACTS = ['build.log', 'dist-files.json', 'preview-requests.jsonl'];
+
+function readProductionArtifact(output, name) {
+  const file = path.join(output, name);
+  if (canonicalPath(file) !== path.resolve(file))
+    throw new Error('Production receipt has a symbolic-link ancestor or target.');
+  if (!lstatSync(file).isFile()) throw new Error('Expected an owned regular production receipt.');
+  const bytes = readFileSync(file);
+  return { file: name, bytes: bytes.length, sha256: hash(bytes) };
+}
+
+// Seal each receipt once, when its producer has finished writing. Finalization
+// observes later bytes separately and must never reseal a changed artifact.
+export function sealProductionArtifact(output, ledger, name) {
+  if (!PRODUCTION_ARTIFACTS.includes(name)) throw new Error('Unknown production receipt.');
+  ledger.productionArtifacts ??= {};
+  if (ledger.productionArtifacts[name])
+    throw new Error(`Production receipt already sealed: ${name}`);
+  ledger.productionArtifacts[name] = readProductionArtifact(output, name);
+}
 
 function sourceState() {
   return {
@@ -658,6 +678,7 @@ async function execute(output, ledger) {
             ? 'passed'
             : 'failed',
       };
+      sealProductionArtifact(output, ledger, 'build.log');
       save();
       verifySource();
       if (ledger.build.status === 'passed') {
@@ -665,6 +686,7 @@ async function execute(output, ledger) {
         buildManifest = fileInventory(dist);
         if (!buildManifest.length) throw new Error('The production build emitted no files.');
         json(path.join(output, 'dist-files.json'), buildManifest);
+        sealProductionArtifact(output, ledger, 'dist-files.json');
         ledger.build.distManifestSha256 = hash(JSON.stringify(buildManifest));
         preview = await startOwnedPreview(
           dist,
@@ -698,7 +720,11 @@ async function execute(output, ledger) {
     ledger.errors.push(String(error));
   } finally {
     try {
-      await preview?.close();
+      if (preview) {
+        await preview.close();
+        // All requests have stopped before the append-only log is sealed.
+        sealProductionArtifact(output, ledger, 'preview-requests.jsonl');
+      }
     } catch (error) {
       ledger.errors.push(String(error));
     }
@@ -750,6 +776,33 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
   } catch (error) {
     ledger.errors.push(String(error));
   }
+  const productionProblems = [];
+  ledger.observedProductionArtifacts = {};
+  for (const name of PRODUCTION_ARTIFACTS) {
+    const expected = ledger.productionArtifacts?.[name];
+    if (!expected && ledger.build.status !== 'passed') continue;
+    if (!expected) productionProblems.push(`${name} has no sealed execution receipt.`);
+    try {
+      const actual = readProductionArtifact(output, name);
+      ledger.observedProductionArtifacts[name] = actual;
+      if (
+        expected &&
+        (expected.file !== name ||
+          expected.bytes !== actual.bytes ||
+          expected.sha256 !== actual.sha256)
+      )
+        productionProblems.push(`${name} hash or length drifted after its producer finished.`);
+    } catch (error) {
+      productionProblems.push(`${name} unavailable during finalization: ${String(error)}`);
+    }
+  }
+  ledger.productionEvidenceProblems = [
+    ...new Set([...(ledger.productionEvidenceProblems ?? []), ...productionProblems]),
+  ];
+  if (ledger.productionEvidenceProblems.length)
+    ledger.errors.push(
+      `Production evidence integrity failed: ${ledger.productionEvidenceProblems.join(' ')}`
+    );
   for (const row of ledger.suites) {
     row.executionStatus ??= row.status;
     const directory = path.join(output, row.id);
