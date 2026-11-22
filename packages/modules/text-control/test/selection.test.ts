@@ -78,7 +78,7 @@ describe('portable TextControl selection facts', () => {
       editor.dispatchEvent(new Event('select'));
       document.dispatchEvent(new Event('selectionchange'));
       expect(events).toHaveLength(count);
-      expect(lease.snapshot()).toBeNull();
+      expect(() => lease.snapshot()).toThrow('disposed Web host lease');
       editor.remove();
     }
   );

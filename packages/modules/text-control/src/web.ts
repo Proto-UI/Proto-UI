@@ -182,8 +182,8 @@ function attachTarget(
       }
       queueSelection();
     },
-    snapshot(): TextControlSnapshot | null {
-      if (disposed) return null;
+    snapshot(): TextControlSnapshot {
+      if (disposed) throw new Error('[TextControl] cannot snapshot a disposed Web host lease.');
       assertTextCompatibleTarget(target);
       return Object.freeze({
         value: canonicalizeLineEndings(target.value),
