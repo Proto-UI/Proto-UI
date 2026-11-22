@@ -130,7 +130,14 @@ export class TextControlModuleImpl extends ModuleBase {
           ? this.canonicalize(next.defaultValue)
           : this.patch.defaultValue,
     });
-    if (this.valueMode === 'controlled') this.value = this.canonicalize(this.patch.value ?? '');
+    if (this.valueMode === 'controlled') {
+      const nextValue = this.canonicalize(this.patch.value ?? '');
+      // A real owner transition retires this observation permanently. Returning
+      // to the previous string later in the same callback is another owner
+      // transition, not a refresh of the original owner.
+      if (nextValue !== this.value) this.candidateObservation = null;
+      this.value = nextValue;
+    }
     this.syncLease();
   }
 

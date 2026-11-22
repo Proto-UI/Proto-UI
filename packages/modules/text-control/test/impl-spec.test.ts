@@ -1200,6 +1200,36 @@ describe.each(['single', 'multiline'] as const)('Web %s change-only restoration'
   );
 });
 
+describe.each(['single', 'multiline'] as const)('Web %s controlled owner changes', (lineMode) => {
+  it.each(['input', 'change', 'compositionend'] as const)(
+    'retires candidate protection when the %s callback changes owner and changes back',
+    (type) => {
+      const h = createHarness(false, lineMode);
+      const target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+      const control = h.module.facade.declare();
+      h.vault.attach([[TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)]]);
+      const observed: string[] = [];
+      control.on(type, () => {
+        control.sync({ value: 'accepted owner' });
+        observed.push(target.value);
+        control.sync({ value: 'original owner' });
+        observed.push(target.value);
+      });
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'original owner' });
+      try {
+        target.value = 'candidate';
+        target.dispatchEvent(new Event(type));
+        expect(observed).toEqual(['accepted owner', 'original owner']);
+        expect(control.snapshot()?.value).toBe('original owner');
+      } finally {
+        h.module.hooks.dispose?.();
+      }
+    }
+  );
+});
+
 describe('TextControl bounded reset', () => {
   it('resets uncontrolled canonical value, retires composition and rejects old events', () => {
     const h = createHarness(),
