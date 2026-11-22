@@ -98,6 +98,7 @@ implementations:
     notes:
       - The ordinary tab-focus and tab-scope authored fixtures are compiled afresh. Native test execution and its exact source receipt are required separately; fixture authorship alone is not passing evidence or operating-system keyboard acceptance.
       - The separate-App regression retains live owners with colliding App-local window identifiers and dispatches real keys. Current-App event fan-out and host driving must not invoke or update the other App's Entity; no fixture exception or weaker identity assertion is used.
+      - Repeated Props updates and host driving on the same physical epoch/window/handle must not notify the App focus registry. A real detach/reattach registers the replacement binding, after which steady-state updates remain silent. The executable assertion observes native registry effects rather than a machine-dependent time limit; current target eligibility is still checked at dispatch.
 verifies:
   contracts:
     - id: C-AS-FOCUSABLE-0001
