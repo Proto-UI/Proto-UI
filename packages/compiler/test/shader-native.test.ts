@@ -25,21 +25,24 @@ const profiles = [
   'vue2-source-v1',
   'web-component-source-v1',
 ] as const;
-function graph(): ShaderPresentationDeclaration {
+function graph(
+  pixels = [20, 40, 60, 128],
+  tint: [number, number, number, number] = [0.5, 0.75, 1, 0.5]
+): ShaderPresentationDeclaration {
   return {
     version: 1,
     source: {
       kind: 'owned-pixels',
       width: 1,
       height: 1,
-      pixels: [20, 40, 60, 128],
+      pixels,
       colorSpace: 'linear-srgb',
       alpha: 'premultiplied',
       origin: 'top-left',
     },
     passes: [
       { id: 'copy', kernel: 'copy-rgba8-v1', input: '$source' },
-      { id: 'tint', kernel: 'tint-rgba8-v1', input: 'copy', tint: [0.5, 0.75, 1, 0.5] },
+      { id: 'tint', kernel: 'tint-rgba8-v1', input: 'copy', tint },
     ],
     output: 'tint',
     fallback: [0.1, 0.2, 0.3, 1],
@@ -47,10 +50,12 @@ function graph(): ShaderPresentationDeclaration {
 }
 describe('finite shader data admission', () => {
   it('copies every mutable byte, uniform and resource declaration before freezing', () => {
-    const original = graph(),
+    const pixels = [20, 40, 60, 128];
+    const tint: [number, number, number, number] = [0.5, 0.75, 1, 0.5];
+    const original = graph(pixels, tint),
       copied = snapshotShaderPresentation(original);
-    (original.source.pixels as number[])[0] = 128;
-    (original.passes[1].tint as number[])[0] = 1;
+    pixels[0] = 128;
+    tint[0] = 1;
     expect(copied.source.pixels).toEqual([20, 40, 60, 128]);
     expect(copied.passes[1].tint).toEqual([0.5, 0.75, 1, 0.5]);
     expect(

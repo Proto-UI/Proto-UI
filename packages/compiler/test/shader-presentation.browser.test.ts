@@ -19,6 +19,7 @@ interface ShaderProbe {
   holdDecode: boolean;
   onDelete: null | (() => void);
   contexts: WebGL2RenderingContext[];
+  activeContexts(): WebGL2RenderingContext[];
   waitForHeldDecode(): Promise<void>;
   releaseDecodes(count?: number): void;
   read(): {
@@ -32,6 +33,9 @@ interface ShaderProbe {
     createdIds: number[];
     deletedIds: number[];
     renderers: string[];
+    liveByContext: number[];
+    lostContextIds: number[];
+    restoredContextIds: number[];
   };
 }
 declare global {
@@ -44,10 +48,13 @@ declare global {
 /** Observe real allocations and delete calls; failure controls change only the named host boundary. */
 function installShaderProbe() {
   const live = new Map<object, number>(),
+    owners = new Map<object, WebGL2RenderingContext>(),
     createdIds: number[] = [],
     deletedIds: number[] = [],
     contexts: WebGL2RenderingContext[] = [],
-    renderers: string[] = [];
+    renderers: string[] = [],
+    lostContextIds: number[] = [],
+    restoredContextIds: number[] = [];
   let attempts = 0,
     duplicates = 0,
     nextId = 0,
@@ -61,6 +68,7 @@ function installShaderProbe() {
     holdDecode: false,
     onDelete: null,
     contexts,
+    activeContexts: () => [...new Set(owners.values())],
     waitForHeldDecode() {
       return held.length ? Promise.resolve() : new Promise((resolve) => listeners.push(resolve));
     },
@@ -80,18 +88,26 @@ function installShaderProbe() {
         createdIds: [...createdIds],
         deletedIds: [...deletedIds],
         renderers: [...renderers],
+        liveByContext: contexts.map(
+          (gl) => [...owners.values()].filter((owner) => owner === gl).length
+        ),
+        lostContextIds: [...lostContextIds],
+        restoredContextIds: [...restoredContextIds],
       };
     },
   };
   window.shaderProbe = probe;
   const original = HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.getContext = function (...args: any[]) {
+  HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: any[]) {
     if (args[0] === 'webgl2' && probe.disableWebGL) return null;
     const context = Reflect.apply(original, this, args);
     if (args[0] !== 'webgl2' || !context) return context;
     const gl = context as WebGL2RenderingContext;
     if (contexts.includes(gl)) return gl;
     contexts.push(gl);
+    const contextId = contexts.length - 1;
+    this.addEventListener('webglcontextlost', () => lostContextIds.push(contextId));
+    this.addEventListener('webglcontextrestored', () => restoredContextIds.push(contextId));
     const renderer = gl.getExtension('WEBGL_debug_renderer_info');
     renderers.push(String(gl.getParameter(renderer?.UNMASKED_RENDERER_WEBGL ?? gl.RENDERER)));
     for (const kind of ['Texture', 'Framebuffer', 'Shader', 'Program', 'VertexArray']) {
@@ -106,6 +122,7 @@ function installShaderProbe() {
         if (value) {
           const id = ++nextId;
           live.set(value, id);
+          owners.set(value, gl);
           createdIds.push(id);
         }
         return value;
@@ -116,6 +133,7 @@ function installShaderProbe() {
           if (id === undefined) duplicates++;
           else {
             live.delete(value);
+            owners.delete(value);
             deletedIds.push(id);
           }
         }
@@ -321,26 +339,44 @@ it('context loss exposes fallback and restored old context cannot publish again'
   await run('context-loss', async (page) => {
     await page.evaluate(() => window.shaderNative.fixture.mount('vue', 'runtime'));
     await ready(page);
-    await page.evaluate(() => {
-      const extension = window.shaderProbe.contexts[0].getExtension('WEBGL_lose_context');
+    // Runtime may replay initial style and retire earlier contexts before the first
+    // visible output. Attribute loss to the one context still owning real resources.
+    const current = await page.evaluate(() =>
+      window.shaderProbe.activeContexts().map((gl) => window.shaderProbe.contexts.indexOf(gl))
+    );
+    expect(current).toHaveLength(1);
+    const contextId = current[0];
+    await page.evaluate((id) => {
+      const context = window.shaderProbe.contexts[id];
+      if (!window.shaderProbe.activeContexts().includes(context))
+        throw new Error('Selected shader context is no longer current');
+      const extension = context.getExtension('WEBGL_lose_context');
       if (!extension) throw new Error('Context-loss extension required');
       (window as any).shaderLostExtension = extension;
       extension.loseContext();
-    });
+    }, contextId);
+    await page.waitForFunction(
+      (id) => window.shaderProbe.read().lostContextIds.includes(id),
+      contextId
+    );
     await zero(page);
     expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
       background: 'none',
       fallback: 'rgb(38, 51, 64)',
     });
+    const retired = await resources(page);
     await page.evaluate(() => (window as any).shaderLostExtension.restoreContext());
-    await page.evaluate(
-      () =>
-        new Promise<void>((resolve) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-        )
+    await page.waitForFunction(
+      (id) => window.shaderProbe.read().restoredContextIds.includes(id),
+      contextId
     );
     expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
       background: 'none',
+    });
+    expect(await resources(page)).toMatchObject({
+      created: retired.created,
+      live: 0,
+      duplicates: 0,
     });
   });
 });

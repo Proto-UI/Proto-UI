@@ -135,7 +135,8 @@ it.each(cases)(
           true
         );
         for (const sample of samples) {
-          expect(sample.width).toBe(240);
+          // Transformed DOMRect edges retain subpixel floating-point rounding.
+          expect(sample.width).toBeCloseTo(240, 3);
           expect(sample.translate).toBeLessThan(0);
           expect(Math.abs(sample.translate! - (sample.opacity! - 1) * sample.width!)).toBeLessThan(
             1
