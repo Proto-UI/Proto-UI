@@ -587,27 +587,29 @@ function prefilter(
       0x00200020;
     return ((even >>> 6) & 0x00ff00ff) | (((odd >>> 6) & 0x00ff00ff) << 8);
   }
-  // Clamp the horizontal neighborhood once per column, not per pixel or lane.
-  const offsets = new Int32Array(width * 6);
-  for (let x = 0; x < width; x++) {
-    let at = x * 6;
-    for (let k = -3; k < 0; k++) offsets[at++] = Math.max(0, x + k);
-    for (let k = 1; k <= 3; k++) offsets[at++] = Math.min(width - 1, x + k);
-  }
   for (let y = 0; y < height; y++) {
     const base = y * width;
+    // Adjacent horizontal neighborhoods share six words. Keep those words in
+    // the sliding window instead of repeating seven RGBA and six offset loads
+    // for every pixel. The replicated border and both rounding steps remain
+    // identical to the separable reference, including sources narrower than
+    // the seven-tap kernel.
+    let a = input[base],
+      b = a,
+      c = a,
+      center = a,
+      d = input[base + Math.min(width - 1, 1)],
+      e = input[base + Math.min(width - 1, 2)],
+      f = input[base + Math.min(width - 1, 3)];
     for (let x = 0; x < width; x++) {
-      const at = base + x,
-        offset = x * 6;
-      scratch[at] = sample(
-        input[base + offsets[offset]],
-        input[base + offsets[offset + 1]],
-        input[base + offsets[offset + 2]],
-        input[at],
-        input[base + offsets[offset + 3]],
-        input[base + offsets[offset + 4]],
-        input[base + offsets[offset + 5]]
-      );
+      scratch[base + x] = sample(a, b, c, center, d, e, f);
+      a = b;
+      b = c;
+      c = center;
+      center = d;
+      d = e;
+      e = f;
+      f = input[base + Math.min(width - 1, x + 4)];
     }
   }
   for (let y = 0; y < height; y++) {

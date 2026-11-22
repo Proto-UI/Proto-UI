@@ -34,7 +34,12 @@ jobs:
       - name: Source closure and real material/library evidence
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
+          PUI_LIQUID_GLASS_INCLUDE_WIP: '1'
         run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          mkdir -p "$PROTO_UI_MATERIAL_EVIDENCE_DIR"
+          node --test scripts/test/check-liquid-material-evidence.test.mjs
           node --test scripts/docs/test/liquid-toggle-mdx.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
@@ -49,6 +54,8 @@ jobs:
             packages/adapters/base/test/portal-destination.test.ts \
             packages/adapters/base/test/portal-inline-size.test.ts \
             packages/adapters/base/test/web-material-program.test.ts \
+            packages/adapters/base/test/web-material-image.test.ts \
+            packages/adapters/base/test/web-material-preferences-ownership.test.ts \
             packages/adapters/base/test/web-material-preferences-sequence.test.ts \
             packages/adapters/base/test/web-material-style-tint.test.ts \
             packages/adapters/base/test/web-material-style.test.ts \
@@ -67,14 +74,21 @@ jobs:
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts \
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts \
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts \
-            --maxWorkers=1 --minWorkers=1
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile.json="$PROTO_UI_MATERIAL_EVIDENCE_DIR/vitest.json"
+      - name: Require actual material and lifecycle execution
+        if: always()
+        run: |
+          node scripts/test/check-liquid-material-evidence.mjs \
+            "$RUNNER_TEMP/liquid-material-evidence/vitest.json" material-library \
+            "$RUNNER_TEMP/liquid-material-evidence/coverage.json"
       - name: Retain exact-source evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: liquid-material-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/liquid-material-evidence
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
   prominent-tint-evidence:
     runs-on: ubuntu-24.04
