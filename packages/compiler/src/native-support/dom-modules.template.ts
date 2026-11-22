@@ -1101,7 +1101,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     scrollFacts();
     if (!currentTarget()) return rejected;
     const follow = scrollConfig.endFollow as NativeConfig;
-    if (follow?.mode === 'while-at-end' && (follow.axis ?? 'vertical') === 'vertical') followState.set(vertical.handle.atEnd.get() ? 'following' : 'paused');
+    if (follow?.mode === 'while-at-end' && (follow.axis ?? 'vertical') === 'vertical' && !explicitlyPaused) followState.set(vertical.handle.atEnd.get() ? 'following' : 'paused');
     return currentTarget() ? { kind: 'dispatched' } : rejected;
   }
   function applyScroll(request: NativeConfig, draining = false, readerRequest = false): NativeScrollRequestOutcome {

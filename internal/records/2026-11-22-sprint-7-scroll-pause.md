@@ -18,13 +18,18 @@ Qt's control model receives private physical offset/viewport/extent observations
 
 | Verification | Terminal result | Scope |
 | --- | --- | --- |
-| [Final compiler suites](evidence/2026-11-22-s7-scroll-pause/compiler-final.log) | **84/84 passed**, four files, no skipped tests | 44 current-view/scroll/reveal support cases, 20 parser/outcome checks, 16 ordinary generated framework-consumer cases and four native lowering/Qt-model cases. |
+| [Final compiler suites](evidence/2026-11-22-s7-scroll-pause/compiler-final-85.log) | **85/85 passed**, four files, one worker, no skipped tests | 45 current-view/scroll/reveal support cases, 20 parser/outcome checks, 16 ordinary generated framework-consumer cases and four native lowering/Qt-model cases. |
+| [Preceding compiler revision](evidence/2026-11-22-s7-scroll-pause/compiler-final.log) | **84/84 passed** | Retained unchanged; the final reveal-at-end regression was added afterward. |
 | [Independent review probes](evidence/2026-11-22-s7-scroll-pause/review-final.log) | **4/4 passed** | Unrelated key/stationary scroll; reentrant FIFO attachment commands; pause during end publication; actual composed-wheel arrival. |
 | [Independent native-model review](evidence/2026-11-22-s7-scroll-pause/review-native-model.log) | **4/4 passed** | Exact direct emitters and Qt private geometry path; no platform-runtime inference. |
 | [Runtime disabled-axis counterexample](evidence/2026-11-22-s7-scroll-pause/runtime-disabled-red.log) | Old implementation: **94 passed, 2 failed** | Both Module and Web-host pause incorrectly accepted a disabled followed axis. |
 | [Runtime correction](evidence/2026-11-22-s7-scroll-pause/runtime-disabled-green.log) | **108/108 passed** | Existing module delivery, reader-contact lifetime and Web follow suites after guards. |
 
 The independent reviewer authored no compiler implementation. Review bound the tracked compiler diff SHA-256 `7c0a64247860946f9599f30b2cef567b4c6c2f74c8349c24cfdad8a8a6bc9f0f` and the new target-test file SHA-256 `30959bfd680231ca0d90d425e532063e13a016dcc479ba423023c501534b2403`, then executed its own probes. This is an agent review record, not a GitHub APPROVED review or maintainer certification.
+
+The last Runtime/compiler alignment added one further reveal guard: a valid reveal at the current end must retain an explicit pause, including the absence of a transient `following` publication. The new assertion fails on the preceding source ([negative receipt](evidence/2026-11-22-s7-scroll-pause/reveal-paused-negative.log)). The independent reviewer read the one-line guard and new assertion, then reran its [four probes](evidence/2026-11-22-s7-scroll-pause/review-after-reveal.log) and the [new targeted case](evidence/2026-11-22-s7-scroll-pause/review-reveal-final.log). The targeted receipt filters 44 other cases; the separate final 85-case run executes every case.
+
+The first 85-case attempt suffered a worker exit after 40 completed checks ([raw process failure](evidence/2026-11-22-s7-scroll-pause/compiler-worker-exit.log)). An invocation through the environment's fallback `pnpm` was then rejected for selecting pnpm 11 rather than the declared pnpm 10 range ([engine rejection](evidence/2026-11-22-s7-scroll-pause/compiler-engine-rejection.log)). The terminal successful command used Node 24.22.3 and `corepack pnpm` 10.32.1 with `--maxWorkers=1 --minWorkers=1`; neither failed attempt is a passing receipt.
 
 The framework-consumer tests mount real generated owners through their ordinary frameworks in the declared test environment. They are separate from Shenko's real Chromium journey and from any physical/AT evidence. The full workspace TypeScript process was terminated by the local environment with `SIGKILL` and no compiler diagnostic; the source-bound support type check and consumer tests passed. The workspace process termination is retained and must not be reported as a successful global type check.
 

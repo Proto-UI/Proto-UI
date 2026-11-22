@@ -160,6 +160,17 @@ function frames() {
 }
 
 describe('Compiler Scroll current-view and reveal host closure', () => {
+  it('keeps an explicit pause through a valid reveal at the current end', () => {
+    const f = fixture({ atEnd: true });
+    f.scroll.pauseFollowing();
+    const states: string[] = [];
+    f.scroll.endFollow.state.subscribe((event: { next: string }) => states.push(event.next));
+    expect(f.reveal()).toEqual({ kind: 'dispatched' });
+    expect(f.surface.scrollTop).toBe(300);
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    expect(states).not.toContain('following');
+  });
+
   it('resumes on actual composed wheel arrival while preserving pause for public and clamped movement', () => {
     // The independent reviewer supplied the failing composed-wheel case.
     const f = fixture({ mount: false });
