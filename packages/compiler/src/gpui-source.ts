@@ -2688,7 +2688,7 @@ impl __PuiNativeRecordValue {
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
       fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-          if !native_focus_observation_needed(&self.owner) && !native::gpui_native_move::move_owner_has_binding(&self.owner) { self._window_activation.take(); return; }
+          if !native_window_observation_needed(&self.owner) { self._window_activation.take(); return; }
           let id = window.window_handle().window_id();
           if self._window_activation.as_ref().is_some_and(|(bound, _)| *bound == id) { return; }
           self._window_activation.take();
@@ -2717,14 +2717,22 @@ impl __PuiNativeRecordValue {
           });
           self._entry_readiness = Some((window_id, subscription));
       }
+      fn notify_after_turn(&self, cx: &mut Context<Self>) {
+          let view = cx.entity().downgrade();
+          // GPUI suppresses Entity observer effects while a window is drawing,
+          // including its focus/blur phase. Keep authored state synchronous,
+          // then publish the host change after that physical draw lease ends.
+          // A weak target cannot keep a detached component alive for delivery.
+          cx.defer(move |cx| { let _ = view.update(cx, |_, cx| cx.notify()); });
+      }
       pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
           catch_authored(|| {
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); self.notify_after_turn(cx); return; }
           modules_drive(&self.owner, &self.focus, window, cx);
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); self.notify_after_turn(cx); return; }
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           drive_queued_focus(&self.owner, window, cx);
-          let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty); if dirty { cx.notify(); }
+          let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty); if dirty { self.notify_after_turn(cx); }
           })
       }
   }
@@ -2742,7 +2750,9 @@ impl __PuiNativeRecordValue {
           self.bind_window_activation(window, cx);
           #[cfg(feature = "experimental-focus-tree")] self.bind_entry_readiness(window, cx);
           let drive = self.owner.borrow().native_drive.as_ref().expect("live native owner drive").clone();
-          self.owner.borrow_mut().dirty = false;
+          // Rendering projects the current source; only drive may consume its
+          // pending observer signal. A parent native Render can call an exposed
+          // method before this child is laid out and before deferred drive runs.
           let snapshot = self.owner.borrow().projection.clone().expect("live native projection");
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           let element = paint_native_root(&snapshot, &self.owner, &self.focus, format!("compiled-root-{}", Rc::as_ptr(&self.owner) as usize), drive);

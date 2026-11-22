@@ -30,9 +30,11 @@ criteria:
 
 sources:
   - path: packages/compiler/src/value-types.ts
+  - path: packages/compiler/src/callable-effects.ts
   - path: packages/compiler/src/expression-types.ts
   - path: packages/compiler/src/gpui-native-values.ts
   - path: packages/compiler/test/gpui-authored-inputs.test.ts
+  - path: packages/compiler/test/json-boundary-provenance.test.ts
 verifies:
   tests: [T-COMPILER-GPUI-AUTHORED-INPUT-0001]
 revisions:

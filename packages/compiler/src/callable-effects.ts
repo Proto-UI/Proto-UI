@@ -19,7 +19,14 @@ import {
   type CallbackContext,
 } from './operations';
 import { isDataValueType, lexicalStoredType } from './ir';
-import { arrayEveryCallbackParameters, valueAlternatives } from './value-types';
+import {
+  arrayEveryCallbackParameters,
+  dataBoundaryType,
+  joinValueTypes,
+  memberValueType,
+  objectFields,
+  valueAlternatives,
+} from './value-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 
 type Known = readonly Atom[];
@@ -27,13 +34,13 @@ type CapturedState = HookCaptureIR['states'][number];
 type TracedOperation = Extract<ExpressionIR, { kind: 'operation' }>;
 type Atom =
   | { kind: 'unknown'; data?: ValueType }
-  | { kind: 'undefined' | 'uninitialized' }
+  | { kind: 'undefined' | 'uninitialized' | 'absent' }
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'closure'; fn: FunctionIR; scope: Scope }
   | { kind: 'native'; type: Extract<ValueType, { kind: 'callable' }> }
   | { kind: 'named-state'; state: CapturedState }
   | { kind: 'cell'; initial: Known; tracked: boolean }
-  | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean }
+  | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean; array?: boolean }
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
@@ -82,6 +89,8 @@ const copyStore = (state: Store): Store => ({
 const UNKNOWN: Known = [{ kind: 'unknown' }];
 const UNDEFINED: Known = [{ kind: 'undefined' }];
 const UNINITIALIZED: Known = [{ kind: 'uninitialized' }];
+// Absence is not an enumerable property whose value is undefined.
+const ABSENT: Known = [{ kind: 'absent' }];
 /** An untracked value whose checked type cannot carry a callable or owner authority. */
 const dataFact = (type: ValueType): Known => [{ kind: 'unknown', data: type }];
 
@@ -114,7 +123,12 @@ export interface CallableEffectIssue {
  * unresolved source callable edges are diagnosed rather than treated as empty.
  */
 export function callableEffectIssue(ir: PrototypeIR): CallableEffectIssue | undefined {
-  return analyzeCallableFlow(ir);
+  // Only an outward data sink needs the additional ordinary-data store. Keep
+  // the established callable abstraction for graphs with no JSON event output.
+  const dataOutput = ir.exposes.some(
+    (exposure) => exposure.kind === 'event' && exposure.payload !== 'void'
+  );
+  return analyzeCallableFlow(ir, undefined, undefined, dataOutput);
 }
 
 export interface CallableDemandObserver {
@@ -179,7 +193,8 @@ function analyzeCallableFlow(
     hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>): void;
     owned?: HookContributionObserver;
   },
-  demand?: CallableDemandObserver
+  demand?: CallableDemandObserver,
+  checkDataBoundaries = false
 ): CallableEffectIssue | undefined {
   let issue: CallableEffectIssue | undefined;
   const moduleScope = new Scope();
@@ -266,9 +281,7 @@ function analyzeCallableFlow(
       const names = new Set(maps.flatMap((map) => [...map.keys()]));
       result.records.set(
         record,
-        new Map(
-          [...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? UNDEFINED))])
-        )
+        new Map([...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? ABSENT))]))
       );
     }
     const unionInstallations = (
@@ -351,7 +364,7 @@ function analyzeCallableFlow(
   }
   function writeField(record: RecordValue, name: string, value: Known, weak = false): void {
     const next = new Map(fields(record));
-    next.set(name, weak ? merge([next.get(name) ?? UNDEFINED, value]) : value);
+    next.set(name, weak ? merge([next.get(name) ?? ABSENT, value]) : value);
     store.records.set(record, next);
   }
   function opaque(span: SourceSpan): void {
@@ -445,6 +458,7 @@ function analyzeCallableFlow(
         case 'unknown':
         case 'undefined':
         case 'uninitialized':
+        case 'absent':
           return value.kind === 'unknown' && value.data
             ? ['unknown-data', value.data]
             : [value.kind];
@@ -478,7 +492,7 @@ function analyzeCallableFlow(
         case 'record':
           if (locationsOnly && value.tracked !== false) return ['record-location', location(value)];
           return [
-            'record',
+            value.array ? 'array' : 'record',
             value.tracked === false ? null : location(value),
             [...fields(value)]
               .sort(([a], [b]) => a.localeCompare(b))
@@ -516,6 +530,11 @@ function analyzeCallableFlow(
     if (type.kind === 'value-union') return type.members.some(carriesCallable);
     return false;
   }
+  function carriesStructuredData(type: ValueType): boolean {
+    return valueAlternatives(type).some(
+      (member) => typeof member !== 'string' && ['object', 'record', 'array'].includes(member.kind)
+    );
+  }
 
   /** Native callback inputs and fixed host results carry an explicit external contract. */
   function hostValue(type: ValueType): Known {
@@ -531,9 +550,12 @@ function analyzeCallableFlow(
     }
     if (type.kind === 'value-union' || type.kind === 'union')
       return merge(type.members.map(hostValue));
+    if (checkDataBoundaries && type.kind === 'array') return dataFact(type);
+    if (checkDataBoundaries && type.kind === 'literal')
+      return [{ kind: 'literal', value: type.value }];
     if (type.kind === 'object' || type.kind === 'record') {
       if (isDataValueType(type)) return dataFact(type);
-      if (!carriesCallable(type)) return UNKNOWN;
+      if (!carriesCallable(type)) return checkDataBoundaries ? dataFact(type) : UNKNOWN;
       const record: RecordValue = {
         kind: 'record',
         fields: new Map(),
@@ -822,13 +844,111 @@ function analyzeCallableFlow(
     }
   }
 
+  /** A checked scalar refinement has no hidden enumerable fields. A structural
+   * record view, in contrast, is only a view: retain every actual source field. */
+  function scalarDataView(view: ValueType | undefined, top: boolean): boolean {
+    return (
+      view !== undefined &&
+      valueAlternatives(view).every((type) =>
+        typeof type === 'string'
+          ? ['boolean', 'number', 'string', 'null', ...(top ? ['void'] : [])].includes(type)
+          : type.kind === 'literal'
+      )
+    );
+  }
+  function dataFieldView(
+    view: ValueType | undefined,
+    name: string,
+    array = false
+  ): ValueType | undefined {
+    if (view === undefined) return undefined;
+    const members = valueAlternatives(view).map((type) =>
+      array
+        ? typeof type !== 'string' && type.kind === 'array'
+          ? type.element
+          : undefined
+        : objectFields(type)?.find((field) => field.name === name)?.type
+    );
+    // A field omitted by any structural alternative has not been refined away.
+    return members.every((type): type is ValueType => type !== undefined)
+      ? joinValueTypes(members)
+      : undefined;
+  }
+  function runtimeDataType(type: ValueType, view: ValueType | undefined, top: boolean): boolean {
+    if (scalarDataView(view, top)) return true;
+    if (typeof type === 'string' || type.kind === 'literal')
+      return dataBoundaryType(type, top) !== undefined;
+    if (type.kind === 'union' || type.kind === 'value-union')
+      return type.members.every((member) => runtimeDataType(member, view, top));
+    if (type.kind === 'array')
+      return runtimeDataType(type.element, dataFieldView(view, '', true), false);
+    if (type.kind === 'object' || type.kind === 'record')
+      return (
+        !('index' in type && type.index !== undefined) &&
+        type.fields.every((field) =>
+          runtimeDataType(field.type, dataFieldView(view, field.name), false)
+        )
+      );
+    return false;
+  }
+  function outwardData(
+    values: Known,
+    view: ValueType | undefined,
+    top = true,
+    active = new Set<Atom>()
+  ): boolean {
+    if (scalarDataView(view, top)) return true;
+    return values.every((value) => {
+      if (value.kind === 'absent') return true;
+      if (value.kind === 'undefined') return top;
+      if (value.kind === 'literal') return true;
+      if (value.kind === 'unknown')
+        return value.data !== undefined && runtimeDataType(value.data, view, top);
+      if (value.kind !== 'record' || active.has(value)) return false;
+      const nested = new Set(active).add(value);
+      return [...fields(value)].every(([name, child]) =>
+        outwardData(child, dataFieldView(view, name, value.array), false, nested)
+      );
+    });
+  }
+  function ownFields(value: Atom): Map<string, Known> | undefined {
+    if (value.kind === 'record') return fields(value);
+    if (value.kind !== 'unknown' || value.data === undefined) return undefined;
+    const declared = objectFields(value.data);
+    if (
+      !declared ||
+      (typeof value.data !== 'string' &&
+        value.data.kind === 'object' &&
+        value.data.index !== undefined)
+    )
+      return undefined;
+    return new Map(
+      declared.map((field) => [
+        field.name,
+        field.optional ? merge([hostValue(field.type), ABSENT]) : hostValue(field.type),
+      ])
+    );
+  }
+
   function property(values: Known, name: string): Known {
     return values.flatMap((value) =>
       value.kind === 'record'
-        ? (fields(value).get(name) ?? UNDEFINED)
+        ? value.array && name === 'length'
+          ? dataFact('number')
+          : (fields(value).get(name) ?? UNDEFINED).flatMap((field) =>
+              field.kind === 'absent' ? UNDEFINED : [field]
+            )
         : value.kind === 'capture' && name === 'render'
           ? (captureContents(value).render ?? UNDEFINED)
-          : UNKNOWN
+          : checkDataBoundaries && value.kind === 'unknown' && value.data !== undefined
+            ? (() => {
+                try {
+                  return hostValue(memberValueType(value.data!, name));
+                } catch {
+                  return UNKNOWN;
+                }
+              })()
+            : UNKNOWN
     );
   }
 
@@ -890,8 +1010,17 @@ function analyzeCallableFlow(
           value.span,
           value.arguments
         );
-      case 'member':
-        return property(expression(value.object, scope, execution), value.property);
+      case 'member': {
+        const result = property(expression(value.object, scope, execution), value.property);
+        // A nominal host event/capability has a fixed checked member contract,
+        // unlike a source structural record whose hidden fields remain tracked.
+        return checkDataBoundaries &&
+          typeof value.object.type === 'string' &&
+          !isDataValueType(value.object.type) &&
+          value.object.type !== 'unknown'
+          ? hostValue(value.type)
+          : result;
+      }
       case 'element': {
         const owner = expression(value.object, scope, execution),
           keys = expression(value.index, scope, execution);
@@ -901,14 +1030,22 @@ function analyzeCallableFlow(
               ? property(owner, String(key.value))
               : merge(
                   owner.map((item) =>
-                    item.kind === 'record' ? merge([...fields(item).values()]) : UNKNOWN
+                    item.kind === 'record'
+                      ? merge([...fields(item).values()])
+                      : checkDataBoundaries &&
+                          item.kind === 'unknown' &&
+                          item.data !== undefined &&
+                          typeof item.data !== 'string' &&
+                          item.data.kind === 'array'
+                        ? hostValue(item.data.element)
+                        : UNKNOWN
                   )
                 )
           )
         );
       }
       case 'record': {
-        if (!carriesCallable(value.type)) {
+        if (!checkDataBoundaries && !carriesCallable(value.type)) {
           value.entries.forEach((entry) => expression(entry.value, scope, execution));
           return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         }
@@ -918,7 +1055,7 @@ function analyzeCallableFlow(
           record = {
             kind: 'record',
             fields: new Map(),
-            tracked: carriesCallable(value.type),
+            tracked: checkDataBoundaries || carriesCallable(value.type),
           };
           recordSites.set(value, record);
           allocationSerial++;
@@ -928,40 +1065,38 @@ function analyzeCallableFlow(
         return [record];
       }
       case 'object-spread': {
-        if (!carriesCallable(value.type)) {
+        if (!checkDataBoundaries && !carriesCallable(value.type)) {
           value.parts.forEach((part) => expression(part.value, scope, execution));
           return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         }
         const nextFields = new Map<string, Known>();
+        let opaqueFields = false;
         for (const part of value.parts) {
           const result = expression(part.value, scope, execution);
           if (part.kind === 'entry') nextFields.set(part.key, result);
           else {
-            const names = new Set(
-              result.flatMap((object) =>
-                object.kind === 'record' ? [...fields(object).keys()] : []
-              )
-            );
+            const sources = result.map(ownFields);
+            if (sources.some((source) => source === undefined)) opaqueFields = true;
+            const names = new Set(sources.flatMap((source) => [...(source?.keys() ?? [])]));
             for (const name of names)
               nextFields.set(
                 name,
                 merge(
-                  result.map((object) =>
-                    object.kind === 'record'
-                      ? (fields(object).get(name) ?? nextFields.get(name) ?? UNDEFINED)
-                      : UNKNOWN
+                  sources.map((source) =>
+                    source ? (source.get(name) ?? nextFields.get(name) ?? ABSENT) : UNKNOWN
                   )
                 )
               );
           }
         }
+        if (checkDataBoundaries && opaqueFields) return UNKNOWN;
         let record = recordSites.get(value) as RecordValue | undefined;
         const repeated = !!record;
         if (!record) {
           record = {
             kind: 'record',
             fields: new Map(),
-            tracked: carriesCallable(value.type),
+            tracked: checkDataBoundaries || carriesCallable(value.type),
           };
           recordSites.set(value, record);
           allocationSerial++;
@@ -1007,15 +1142,55 @@ function analyzeCallableFlow(
           const parameters = arrayEveryCallbackParameters(array);
           calls(
             args[1] ?? UNKNOWN,
-            parameters.map((parameter) => dataFact(parameter.type)),
+            checkDataBoundaries
+              ? [
+                  merge(
+                    (args[0] ?? UNKNOWN).map((value) =>
+                      value.kind === 'record' && value.array
+                        ? merge([...fields(value).values()])
+                        : hostValue(array.element)
+                    )
+                  ),
+                  dataFact('number'),
+                  args[0] ?? UNKNOWN,
+                ]
+              : parameters.map((parameter) => dataFact(parameter.type)),
             execution,
             value.span,
             parameters
           );
         }
-        if (value.name === 'object.assign')
+        if (value.name === 'object.assign') {
+          if (checkDataBoundaries) {
+            // Admission proves direct fresh own-data record operands. Copy the
+            // actual nested values, not their potentially narrower static view.
+            for (const target of args[0])
+              if (target.kind === 'record')
+                for (const source of args.slice(1)) {
+                  const sources = source.map(ownFields);
+                  if (sources.some((fields) => fields === undefined)) return UNKNOWN;
+                  const names = new Set(sources.flatMap((fields) => [...fields!.keys()]));
+                  for (const name of names)
+                    writeField(
+                      target,
+                      name,
+                      merge(
+                        sources.map(
+                          (source) => source!.get(name) ?? fields(target).get(name) ?? ABSENT
+                        )
+                      ),
+                      args[0].length > 1
+                    );
+                }
+            return args[0];
+          }
           return isDataValueType(value.type) ? dataFact(value.type) : args[0];
-        return value.name === 'object.freeze' ? args[0] : UNKNOWN;
+        }
+        return value.name === 'object.freeze'
+          ? args[0]
+          : checkDataBoundaries
+            ? hostValue(value.type)
+            : UNKNOWN;
       }
       case 'lexical-cell': {
         const initial = expression(value.value, scope, execution);
@@ -1024,7 +1199,11 @@ function analyzeCallableFlow(
           cell = {
             kind: 'cell',
             initial,
-            tracked: carriesCallable(lexicalStoredType(value.type)!),
+            // Scalars cannot hide enumerable fields. Keep the existing finite
+            // scalar abstraction rather than expanding callback state machines.
+            tracked:
+              carriesCallable(lexicalStoredType(value.type)!) ||
+              (checkDataBoundaries && carriesStructuredData(lexicalStoredType(value.type)!)),
           };
           recordSites.set(value, cell);
           if (cell.tracked) allocationSerial++;
@@ -1034,7 +1213,11 @@ function analyzeCallableFlow(
       case 'lexical-read':
         return merge(
           expression(value.cell, scope, execution).map((cell) =>
-            cell.kind === 'cell' ? cellValue(cell) : UNKNOWN
+            cell.kind === 'cell'
+              ? checkDataBoundaries && !cell.tracked
+                ? hostValue(value.type)
+                : cellValue(cell)
+              : UNKNOWN
           )
         );
       case 'lexical-update': {
@@ -1063,9 +1246,23 @@ function analyzeCallableFlow(
         }
         return result;
       }
-      case 'array':
-        value.elements.forEach((element) => expression(element, scope, execution));
-        return UNKNOWN;
+      case 'array': {
+        if (!checkDataBoundaries) {
+          value.elements.forEach((element) => expression(element, scope, execution));
+          return UNKNOWN;
+        }
+        let array = recordSites.get(value) as RecordValue | undefined;
+        const repeated = !!array;
+        if (!array) {
+          array = { kind: 'record', array: true, fields: new Map(), tracked: true };
+          recordSites.set(value, array);
+          allocationSerial++;
+        }
+        value.elements.forEach((element, index) =>
+          writeField(array!, String(index), expression(element, scope, execution), repeated)
+        );
+        return [array];
+      }
       case 'operation': {
         const phaseIssue = validateOperationPhase(
           value.operation,
@@ -1074,6 +1271,18 @@ function analyzeCallableFlow(
         ).find((item) => item.code !== 'context' || execution.context !== 'helper');
         const receiver = value.receiver ? expression(value.receiver, scope, execution) : UNKNOWN;
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
+        if (
+          checkDataBoundaries &&
+          value.operation === 'expose.emit' &&
+          !outwardData(args[1] ?? UNDEFINED, value.arguments[1]?.type ?? 'void')
+        ) {
+          issue = {
+            message:
+              'Outward JSON payload retains a non-data source field or unresolved data provenance through its structural view.',
+            span: value.arguments[1]?.span ?? value.span,
+          };
+          return UNKNOWN;
+        }
         if (phaseIssue && !trace) {
           if (execution.guarded) {
             possibleThrow();

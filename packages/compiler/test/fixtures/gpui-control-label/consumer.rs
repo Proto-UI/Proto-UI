@@ -135,6 +135,27 @@ fn primary_click_activates_once_but_modified_dragged_and_unknown_slot_input_do_n
 }
 
 #[gpui::test]
+fn window_deactivation_retires_a_label_pointer_request_without_adding_focus(cx:&mut TestAppContext){
+    let window=open(cx,None);let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);
+    window.update(&mut visual,|_,window,_|window.activate_window()).unwrap();visual.run_until_parked();frames(&mut visual);
+    let position=window.update(&mut visual,|host,window,cx|{
+        let label=host.label.read(cx).owner.clone();
+        assert!(window.is_window_active());assert!(!native_tab_participation(&label));assert!(!native_focus_observation_needed(&label));
+        let position=label.borrow().bounds.expect("visible label").center();position
+    }).unwrap();
+    visual.simulate_mouse_down(position,MouseButton::Left,Modifiers::default());
+    let other=visual.open_window(size(px(80.),px(40.)),|_,_|NativeChild(Rc::new(Cell::new(0))));
+    other.update(&mut visual,|_,window,_|window.activate_window()).unwrap();visual.run_until_parked();
+    window.update(&mut visual,|host,window,cx|{assert!(!window.is_window_active());assert!(events(host,cx).is_empty());}).unwrap();
+    window.update(&mut visual,|_,window,_|window.activate_window()).unwrap();visual.run_until_parked();
+    window.update(&mut visual,|_,window,_|assert!(window.is_window_active())).unwrap();
+    visual.simulate_mouse_up(position,MouseButton::Left,Modifiers::default());
+    window.update(&mut visual,|host,_,cx|assert!(events(host,cx).is_empty(),"inactive then active cannot revive the old pointer request")).unwrap();
+    visual.simulate_click(position,Modifiers::default());
+    window.update(&mut visual,|host,_,cx|{assert_eq!(events(host,cx),click_signal());assert!(host.label.read(cx).handle().take_failures().is_empty());}).unwrap();
+}
+
+#[gpui::test]
 fn a_shared_reference_does_not_authorize_different_native_windows(cx:&mut TestAppContext){
     let reference=ControlLabelRef::new();let first=open(cx,Some(reference.clone()));let second=open(cx,Some(reference.clone()));
     let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(first),cx);frames(&mut visual);

@@ -399,3 +399,73 @@ fn event_only_native_press_notifies_the_consumer_without_state_or_run_update(cx:
         assert!(host.component.read(cx).handle().take_events().is_empty(),"the observer receives each event exactly once");
     }).unwrap();
 }
+
+struct NestedMoveBody { child: Entity<CompiledComponent> }
+impl Render for NestedMoveBody {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        gpui::div().w(px(240.)).h(px(120.)).flex().flex_col()
+            .child(gpui::div().w(px(120.)).h(px(32.)).child(self.child.clone()))
+            .child("Parent action background")
+    }
+}
+struct MoveCounts { starts: Rc<std::cell::Cell<usize>>, ends: Rc<std::cell::Cell<usize>> }
+impl proto_ui_gpui_native::gpui_native_move::MoveGestureBinding for MoveCounts {
+    fn on_start(&self, _: &proto_ui_gpui_native::gpui_native_move::MoveGestureSample, _: &mut Window, _: &mut gpui::App) {
+        self.starts.set(self.starts.get() + 1);
+    }
+    fn on_end(&self, _: &proto_ui_gpui_native::gpui_native_move::MoveGestureSample, _: &mut Window, _: &mut gpui::App) {
+        self.ends.set(self.ends.get() + 1);
+    }
+}
+struct NestedMoveHarness {
+    parent: Entity<activation::CompiledComponent>, child: Entity<CompiledComponent>,
+    starts: Rc<std::cell::Cell<usize>>, ends: Rc<std::cell::Cell<usize>>,
+    _lease: proto_ui_gpui_native::gpui_native_move::MoveGestureLease,
+}
+impl Render for NestedMoveHarness {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        gpui::div().size_full().child(self.parent.clone())
+    }
+}
+#[gpui::test]
+fn a_move_bound_child_without_trigger_cannot_also_activate_its_native_parent(cx: &mut TestAppContext) {
+    use proto_ui_gpui_native::{gpui_native_move::attach_move_gesture, gpui_native_owner::NativeSnapshot};
+    let window = cx.open_window(size(px(280.), px(160.)), |window, cx| {
+        let parent = cx.new(|cx| activation::CompiledComponent::new(json!({}), None, window, cx)
+            .unwrap_or_else(|_| panic!("parent action")));
+        let parent_owner = Rc::downgrade(&parent.read(cx).owner);
+        let child = cx.new(|cx| {
+            let mut child = CompiledComponent::new(json!({}), Some(parent_owner), window, cx)
+                .unwrap_or_else(|_| panic!("move-only child"));
+            child.set_slot(vec![NativeSnapshot::text_value(Value::string("Move target"))], cx)
+                .unwrap_or_else(|_| panic!("child content"));
+            child
+        });
+        let starts = Rc::new(std::cell::Cell::new(0)); let ends = Rc::new(std::cell::Cell::new(0));
+        let lease = attach_move_gesture(Rc::downgrade(&child.read(cx).owner),
+            Box::new(MoveCounts { starts: starts.clone(), ends: ends.clone() })).expect("native move attachment");
+        let body = cx.new(|_| NestedMoveBody { child: child.clone() });
+        parent.update(cx, |parent, cx| parent.set_slot(vec![NativeSnapshot::native_view(body.into())], cx)
+            .unwrap_or_else(|_| panic!("native child composition")));
+        NestedMoveHarness { parent, child, starts, ends, _lease: lease }
+    });
+    let mut visual = VisualTestContext::from_window(window.into(), cx); frames(&mut visual);
+    let point = window.update(&mut visual, |host, _, cx| {
+        assert!(!host.child.read(cx).owner.borrow().modules.hooks.contains("trigger"));
+        host.child.read(cx).owner.borrow().bounds.expect("physical child").center()
+    }).unwrap();
+    visual.simulate_click(point, gpui::Modifiers::default());
+    frames(&mut visual);
+    let background = window.update(&mut visual, |host, _, cx| {
+        assert_eq!(host.starts.get(), 1); assert_eq!(host.ends.get(), 1);
+        assert_eq!(host.parent.read(cx).handle().state("count").unwrap_or_else(|_| panic!("parent count")).as_f64(), Some(0.));
+        assert!(host.parent.read(cx).handle().take_events().is_empty());
+        host.parent.read(cx).owner.borrow().bounds.expect("physical parent").bottom_right() - gpui::point(px(4.), px(4.))
+    }).unwrap();
+    visual.simulate_click(background, gpui::Modifiers::default());
+    window.update(&mut visual, |host, _, cx| {
+        assert_eq!(host.starts.get(), 1); assert_eq!(host.ends.get(), 1);
+        assert_eq!(host.parent.read(cx).handle().state("count").unwrap_or_else(|_| panic!("parent count")).as_f64(), Some(2.));
+        assert_eq!(host.parent.read(cx).handle().take_events().len(), 1);
+    }).unwrap();
+}

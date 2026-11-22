@@ -22,7 +22,7 @@ cases:
   - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT
     title: Native label input cannot acquire an unrelated action or stale callback turn
     covers: [C-CONTROL-LABEL-0001-INPUT, C-CONTROL-LABEL-0001-FOCUS, HC-CONTROL-LABEL-0001-GPUI]
-    expectation: Primary unmodified native mouse input invokes the target once; modified, dragged, cancelled and unknown native descendant turns cannot invoke it. Reentrant rebinding and view retirement invalidate old requests even when the same reference is restored.
+    expectation: Primary unmodified native mouse input invokes the target once; modified, dragged, cancelled and unknown native descendant turns cannot invoke it. Reentrant rebinding and view retirement invalidate old requests even when the same reference is restored. Native window deactivation retires an actionable Label's pending pointer request without making the Label focusable or a Tab stop; reactivation cannot revive it.
   - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL
     title: One logical participant cannot authorize multiple physical bindings
     covers: [C-CONTROL-LABEL-0001-UNIQUENESS, C-CONTROL-LABEL-0001-GPUI-DIRECT]
