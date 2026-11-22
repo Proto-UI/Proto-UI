@@ -69,13 +69,25 @@ try {
   if (mode === 'verify') {
     receipt.status = 'verified-no-write';
   } else {
-    const live = JSON.parse(run('gh', ['api', 'graphql', '-f', 'query=query { viewer { login } repository(owner:"Proto-UI", name:"Proto-UI") { nameWithOwner viewerPermission isArchived defaultBranchRef { name } } }']));
+    const live = JSON.parse(run('gh', ['api', 'graphql', '-f', 'query=query { viewer { login } repository(owner:"Proto-UI", name:"Proto-UI") { databaseId nameWithOwner viewerPermission isArchived defaultBranchRef { name } } }']));
     assert.ok(!live.errors?.length);
     assert.equal(live.data.repository.nameWithOwner, manifest.repository);
+    assert.equal(live.data.repository.databaseId, 840178061);
     assert.equal(live.data.repository.isArchived, false);
-    assert.ok(['WRITE', 'MAINTAIN', 'ADMIN'].includes(live.data.repository.viewerPermission));
+    // GITHUB_TOKEN is an installation access token, not a human repository role.
+    // GitHub documents viewerPermission=null for App authentication. The reviewed
+    // publisher job requests contents:write; the actual push enforces that grant.
+    // Do not invent WRITE/MAINTAIN, substitute a token, or weaken a platform refusal.
+    assert.equal(live.data.viewer.login, 'github-actions[bot]');
+    assert.equal(live.data.repository.viewerPermission, null);
+    assert.equal(process.env.GITHUB_JOB, 'publish-exact-candidate');
+    assert.equal(process.env.GITHUB_ACTOR, 'cyjin-yl');
+    assert.equal(process.env.GITHUB_TRIGGERING_ACTOR, 'cyjin-yl');
+    assert.equal(process.env.GITHUB_ACTOR_ID, '19223209');
+    assert.equal(process.env.GITHUB_WORKFLOW_SHA, process.env.GITHUB_SHA);
+    assert.equal(process.env.GITHUB_WORKFLOW_REF, `${manifest.repository}/.github/workflows/preference-source-evidence.yml@refs/heads/${manifest.transportBranch}`);
     assert.notEqual(manifest.branch, live.data.repository.defaultBranchRef.name);
-    receipt.publisher = { actor: live.data.viewer.login, permission: live.data.repository.viewerPermission, credential: 'ephemeral repository GITHUB_TOKEN; not exported' };
+    receipt.publisher = { actor: live.data.viewer.login, userRepositoryRole: live.data.repository.viewerPermission, permissionModel: 'GitHub App installation access token', requestedJobPermission: 'contents:write', credential: 'ephemeral repository GITHUB_TOKEN; not exported', authority: 'current-user authorized feature-branch publication; native Git push is the permission enforcement boundary' };
     receipt.before = remoteHead();
     if (receipt.before === manifest.targetHead) {
       receipt.status = 'already-present-no-write';
