@@ -193,9 +193,7 @@ export const Bootstrap232SurfaceRoot = definePrototype<
           w.prop('focusVisible').eq(true)
         ),
       intent: (i) =>
-        i.feedback.style.use(
-          tw('forced-colors-focus-outline ring-2 ring-primary-foreground ring-offset-0')
-        ),
+        i.feedback.style.use(tw('forced-colors-focus-outline ring-2 ring-white ring-offset-0')),
     });
     def.rule({
       when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('outline')),

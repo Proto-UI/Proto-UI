@@ -176,6 +176,8 @@ async function paint(control: Locator) {
       weight: style.fontWeight,
       ring: style.getPropertyValue('--pui-ring-width').trim(),
       ringColor: style.getPropertyValue('--pui-ring-color').trim(),
+      ringOffset: style.getPropertyValue('--pui-ring-offset-width').trim(),
+      semanticRing: style.getPropertyValue('--pui-ring').trim(),
       x: rect.x,
       y: rect.y,
       width: rect.width,
@@ -183,6 +185,33 @@ async function paint(control: Locator) {
     };
   });
 }
+async function assertWhiteNavbarFocus(name: string, control: Locator) {
+  await expect.poll(async () => (await paint(control)).ring).toBe('2px');
+  const focused = await paint(control);
+  observations.push({ name, phase: 'navbar-focus-paint', ...focused });
+  expect(focused.ringColor).toBe('#ffffff');
+  expect(focused.ringOffset).toBe('0px');
+  // Check the actual painted shadow layer, not only the custom-property width.
+  // The old Docs receipt had 2px with rgb(23,23,23), while Home happened to
+  // inherit white. This same-engine computed oracle rejects both dark and
+  // near-white page palette leakage without changing the white contract.
+  expect(focused.shadow).toMatch(
+    /(?:^|,\s*)rgb\(255,\s*255,\s*255\)\s+0px\s+0px\s+0px\s+2px(?:,|$)/
+  );
+}
+
+async function assertOrdinarySearchFocus(name: string) {
+  await page!.keyboard.press('Tab');
+  await searchButton().focus();
+  await expect.poll(async () => (await paint(searchButton())).ring).toBe('2px');
+  const focused = await paint(searchButton());
+  observations.push({ name, phase: 'ordinary-search-focus-paint', ...focused });
+  expect(focused.ringColor).toBe(focused.semanticRing);
+  expect(focused.ringColor).not.toBe('#ffffff');
+  expect(focused.ringOffset).toBe('2px');
+  expect(focused.shadow).toContain('0px 0px 0px 4px');
+}
+
 async function assertCommandPaint(name: string, width: number) {
   const theme = await paint(themeButton());
   const search = await paint(searchButton());
@@ -345,10 +374,15 @@ async function exerciseHeader(name: string, theme: 'light' | 'dark', width: numb
     expect(linkPaint.color).toBe('rgb(255, 255, 255)');
     await page!.keyboard.press('Tab');
     await link.focus();
-    await expect.poll(async () => (await paint(surface)).ring).toBe('2px');
+    await assertWhiteNavbarFocus(`${name}-navigation`, surface);
     await capture(`${name}-navigation-focus`, page!.locator('[data-site-header]'));
     await link.evaluate((element) => (element as HTMLElement).blur());
   }
+  await page!.keyboard.press('Tab');
+  await themeButton().focus();
+  await assertWhiteNavbarFocus(`${name}-theme`, themeButton());
+  await capture(`${name}-theme-focus`, page!.locator('[data-site-header]'));
+  await themeButton().evaluate((element) => (element as HTMLElement).blur());
   await currentMenu.hover();
   expect((await paint(currentMenu)).background).toBe('rgba(0, 0, 0, 0.1)');
   await capture(`${name}-hover`);
@@ -386,7 +420,7 @@ async function exerciseHeader(name: string, theme: 'light' | 'dark', width: numb
   expect(await currentMenu.evaluate((element) => document.activeElement === element)).toBe(true);
   await page!.keyboard.press('Tab');
   await currentMenu.focus();
-  await expect.poll(async () => (await paint(currentMenu)).ring).toBe('2px');
+  await assertWhiteNavbarFocus(`${name}-menu`, currentMenu);
   await capture(`${name}-focus`, page!.locator('[data-site-header]'));
   // Keyboard opening and a second Escape use the existing disclosure owner.
   await page!.keyboard.press('Enter');
@@ -416,11 +450,21 @@ async function exerciseHeader(name: string, theme: 'light' | 'dark', width: numb
   await expect
     .poll(() => page!.locator('html').getAttribute('data-theme'))
     .toBe(theme === 'light' ? 'dark' : 'light');
+  await page!.mouse.move(0, 200);
+  await page!.keyboard.press('Tab');
+  await themeButton().focus();
+  await assertWhiteNavbarFocus(`${name}-theme-switched`, themeButton());
+  await capture(`${name}-theme-switched-focus`, page!.locator('[data-site-header]'));
   await themeButton().click();
   await expect.poll(() => page!.locator('html').getAttribute('data-theme')).toBe(theme);
   await page!.mouse.move(0, 200);
   await page!.keyboard.press('Tab');
+  await themeButton().focus();
+  await assertWhiteNavbarFocus(`${name}-theme-restored`, themeButton());
+  await capture(`${name}-theme-restored-focus`, page!.locator('[data-site-header]'));
+  await page!.keyboard.press('Tab');
   await assertCommandPaint(`${name}-theme-restored`, width);
+  await assertOrdinarySearchFocus(name);
   await searchButton().click();
   const dialog = page!.locator('[role="dialog"]:visible');
   await dialog.waitFor({ state: 'visible' });

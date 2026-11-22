@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { executeWithHost, type RuntimeHost } from '@proto.ui/runtime';
 import surface from '../src/surface';
-import { THEME } from '../src/theme';
 import {
   renderProtoStyleTokenCss,
   renderProtoShadowStyleTokenCss,
@@ -51,8 +50,8 @@ describe('Bootstrap blue navbar passive Surface context', () => {
           );
         } else expect(tokens).toContain('shadow-none');
         if ('focusVisible' in facts) {
-          expect(tokens).toContain('ring-primary-foreground');
-          expect(tokens).not.toContain('ring-white');
+          expect(tokens).toContain('ring-white');
+          expect(tokens).not.toContain('ring-primary-foreground');
           expect(tokens).not.toContain('ring-ring');
           expect(tokens).toContain('forced-colors-focus-outline');
         }
@@ -95,10 +94,6 @@ describe('navbar focus paint lowering', () => {
       focusVisible: true,
     });
     try {
-      for (const palette of Object.values(THEME)) {
-        expect(palette['primary-foreground']).toBe('#ffffff');
-        expect(palette['primary-foreground']).toBe(palette['navbar-foreground']);
-      }
       const tokens = [...controller.getRuleStyleTokens()];
       for (const render of [
         renderProtoStyleTokenCss,
@@ -107,8 +102,11 @@ describe('navbar focus paint lowering', () => {
       ]) {
         const css = render(tokens);
         expect(css).not.toContain('Unsupported Proto UI style tokens');
-        expect(css).toContain('[data-pui-style~="ring-primary-foreground"]');
-        expect(css).toContain('--pui-ring-color: var(--pui-primary-foreground);');
+        expect(css).toContain('[data-pui-style~="ring-white"]');
+        expect(css).toContain('--pui-ring-color: #ffffff;');
+        // A family Navbar may live inside another page palette (as Docs does).
+        // Its white ring cannot depend on the surrounding primary foreground.
+        expect(css).not.toContain('--pui-ring-color: var(--pui-primary-foreground);');
         expect(css).toContain('--pui-ring-width: 2px;');
         expect(css).toContain('--pui-ring-offset-width: 0px;');
         expect(css).toContain('box-shadow: var(--pui-ring-offset-shadow');

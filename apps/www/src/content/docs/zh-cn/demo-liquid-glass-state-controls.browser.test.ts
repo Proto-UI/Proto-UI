@@ -3,10 +3,17 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, BrowserContext, Locator, Page } from 'playwright-core';
+import type { Browser, BrowserContext, CDPSession, Locator, Page } from 'playwright-core';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
 import { assertNativeValueChangeSequence, type NativeEditorInput } from './native-editor-evidence';
+import {
+  assertNativeCompositionSequence,
+  installCompositionDispatchObservation,
+  observeNativeComposition,
+  readNativeComposition,
+  type NativeCompositionEvent,
+} from './native-composition-evidence';
 import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
 import { THEME } from '../../../../../../packages/prototypes/liquid-glass/src/theme';
 import {
@@ -263,6 +270,123 @@ async function observeNativeInputs(editor: Locator) {
     );
 }
 
+const compositionEvents = (editor: Locator) => editor.evaluate(readNativeComposition);
+
+async function nativeCompositionControl(
+  client: CDPSession,
+  runtime: string,
+  ref: string,
+  kind: 'input' | 'textarea',
+  initial: string
+) {
+  // An independent, plain native editor has no Proto, Adapter, owner callback
+  // or framework listener. Only fixture initialization writes its initial value.
+  await page.evaluate(
+    ({ kind, initial }) => {
+      const editor = document.createElement(kind);
+      editor.setAttribute('data-native-composition-control', '');
+      editor.setAttribute('aria-label', 'Independent native composition control');
+      editor.value = initial;
+      document.body.append(editor);
+    },
+    { kind, initial }
+  );
+  const control = page.locator('[data-native-composition-control]');
+  const inputs = await observeNativeInputs(control);
+  await control.evaluate(observeNativeComposition);
+  const record: {
+    runtime: string;
+    ref: string;
+    stage: string;
+    kind: 'input' | 'textarea';
+    initial: string;
+    inputs: NativeEditorInput[];
+    composition: NativeCompositionEvent[];
+    syntheticEnd?: NativeCompositionEvent;
+    syntheticEndRejected?: boolean;
+    cleanupErrors?: string[];
+  } = {
+    runtime,
+    ref,
+    stage: 'independent-native-composition-control',
+    kind,
+    initial,
+    inputs: [],
+    composition: [],
+  };
+  observations.push(record);
+  try {
+    await control.click();
+    await control.press('Control+A');
+    for (const text of ['ni', '你好']) {
+      await client.send('Input.imeSetComposition', {
+        text,
+        selectionStart: text.length,
+        selectionEnd: text.length,
+      });
+      await expect.poll(() => control.inputValue()).toBe(text);
+    }
+    await client.send('Input.insertText', { text: '你好' });
+    await expect.poll(() => control.inputValue()).toBe('你好');
+    record.inputs = await inputs();
+    record.composition = await compositionEvents(control);
+    expect(record.inputs.map(({ value }) => value)).toEqual(['ni', '你好', '你好']);
+    expect(record.inputs.every((event) => event.type === 'input' && event.isTrusted)).toBe(true);
+    const expected = { kind, initial, candidates: ['ni', '你好'], committed: '你好' };
+    assertNativeCompositionSequence(record.composition, record.composition, expected);
+
+    // Real JS dispatch is a negative control, separate from the retained native
+    // sequence. Even when a native engine reports end.isTrusted=false, replacing
+    // that end with this actual synthetic event must still be rejected.
+    await control.evaluate((element, end) => {
+      element.dispatchEvent(
+        new CompositionEvent('compositionend', {
+          bubbles: end.bubbles,
+          composed: end.composed,
+          cancelable: end.cancelable,
+          data: end.data ?? '',
+        })
+      );
+    }, record.composition.at(-1)!);
+    const afterSynthetic = await compositionEvents(control);
+    expect(afterSynthetic).toHaveLength(record.composition.length + 1);
+    expect(afterSynthetic.slice(0, -1)).toEqual(record.composition);
+    record.syntheticEnd = afterSynthetic.at(-1)!;
+    expect(record.syntheticEnd.isTrusted).toBe(false);
+    expect(record.syntheticEnd.scriptDispatched).toBe(true);
+    expect(() =>
+      assertNativeCompositionSequence(
+        [...record.composition.slice(0, -1), record.syntheticEnd!],
+        record.composition,
+        expected
+      )
+    ).toThrow('script dispatch is not native evidence');
+    record.syntheticEndRejected = true;
+    return { inputs: record.inputs, composition: record.composition };
+  } finally {
+    const errors: unknown[] = [];
+    for (const cleanup of [
+      async () => {
+        if (!record.inputs.length) record.inputs = await inputs();
+      },
+      async () => {
+        if (!record.composition.length) record.composition = await compositionEvents(control);
+      },
+      () => control.evaluate((element) => element.remove()),
+    ]) {
+      try {
+        await cleanup();
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    if (errors.length) {
+      record.cleanupErrors = errors.map(String);
+      throw new AggregateError(errors, 'Native composition control cleanup failed');
+    }
+  }
+}
+
 // Do not start even a local socket when this file is collected outside the authorized job.
 // The workflow's explicit opt-in is not a publication/deployment permission.
 describe
@@ -288,6 +412,7 @@ describe
         baseUrl = await startServer(ROUTE);
         browser = await launchBrowser();
         context = await browser.newContext({ viewport: VIEWPORT });
+        await context.addInitScript(installCompositionDispatchObservation);
         await context.route('**/*', (route) => {
           const url = new URL(route.request().url());
           // Existing demo loaders fetch the public React/Vue ESM runtimes from esm.sh.
@@ -864,46 +989,17 @@ describe
               identity
             );
             const nativeInputs = await observeNativeInputs(editor);
-            await editor.evaluate((element) => {
-              const events: Array<{
-                type: string;
-                data: string | null;
-                value: string;
-                isTrusted: boolean;
-              }> = [];
-              (
-                element as HTMLElement & { __liquidComposition: typeof events }
-              ).__liquidComposition = events;
-              for (const type of ['compositionstart', 'compositionupdate', 'compositionend'])
-                element.addEventListener(
-                  type,
-                  (event) => {
-                    events.push({
-                      type,
-                      data: (event as CompositionEvent).data,
-                      value: (element as HTMLInputElement | HTMLTextAreaElement).value,
-                      isTrusted: event.isTrusted,
-                    });
-                  },
-                  { capture: true }
-                );
-            });
-            const composition = () =>
-              editor.evaluate(
-                (element) =>
-                  (
-                    element as HTMLElement & {
-                      __liquidComposition: Array<{
-                        type: string;
-                        data: string | null;
-                        value: string;
-                        isTrusted: boolean;
-                      }>;
-                    }
-                  ).__liquidComposition
-              );
+            await editor.evaluate(observeNativeComposition);
+            const composition = () => compositionEvents(editor);
             const client = await page.context().newCDPSession(page);
             try {
+              const nativeControl = await nativeCompositionControl(
+                client,
+                runtime,
+                ref,
+                kind,
+                initial
+              );
               await editor.click();
               await editor.press('Control+A');
               for (const text of ['ni', '你好']) {
@@ -935,7 +1031,15 @@ describe
               assertNativeValueChangeSequence(native, emitted);
               expect(native.some((event) => event.composing)).toBe(true);
               const nativeComposition = await composition();
-              expect(nativeComposition.every((event) => event.isTrusted)).toBe(true);
+              // Match the independently executed native editor on this exact
+              // browser. Keep end's actual flag; do not relabel it trusted.
+              assertNativeCompositionSequence(nativeComposition, nativeControl.composition, {
+                kind,
+                initial,
+                candidates: ['ni', '你好'],
+                committed: '你好',
+              });
+              expect(native).toEqual(nativeControl.inputs);
               expect(nativeComposition[0]?.type).toBe('compositionstart');
               expect(nativeComposition.at(-1)?.type).toBe('compositionend');
               for (const [nativeType, exposed] of [

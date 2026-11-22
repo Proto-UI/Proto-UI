@@ -175,3 +175,7 @@ Bootstrap 第一次独立工作树生成命令退出 137，stdout/stderr 为空�
 Docs 消费修复额外运行 4 个完整关联文件，98 / 98 通过，8 文件 scoped TypeScript 退出 0。Theme runtime 现保留原 header 用途；Search 遵从当前家族；Bootstrap Retry/More 使用其公开 default variant，legacy 命令使用支持的 default/small。旧源码四个有效负控失败分别对应 Theme 浅底、Shadcn 别名、动态 surface 与 legacy ghost/secondary/sm，不以 mock 初始化失败替代反证。
 
 工作流/采集边界 15 / 15 Node tests 与 unmodified kernel generator check 通过。更新的 Navbar native 对实际白色 glyph、透明底/无图、蓝色 gradient 两端对比以及 Search 家族/4px/gradient 单独观测；清理和 page errors 也必须进入最终终态。现有 38 cells 保留，第四候选的实际图仍需重新打开后接受。
+
+## 第四候选原生回读与后续前提修正
+
+[独立原生回读与修正记录](2026-11-22-sprint-6-native-recheck.md)接续 Bootstrap 完整成功、Liquid 主套件 952/953、state-controls 的原 16 个 composition 失败、frame-budget 的跨 profile 控制失败及原性能数据。它保留实际图片、原失败 JSON/hash，以及有界 viewport 校准、独立裸 editor 事件对照和冻结 neutral GPU 控制的责任边界。后续精确 head 的原生复验由 PR #1712 的新回执接续，旧运行的 SHA 与失败不改写。

@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 1,
+  "runId": 45018126008,
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008",
+  "selectedLaneStatus": "all-eight-completed-and-read-back",
+  "source": {
+    "sha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "tree": "1e7fa3831490486c783dcb595e118a8df7a7a4f0",
+    "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/afde3097f880dca9d09e9b67b40913bc1576db59",
+    "browser": "157.0.8103.78",
+    "node": "v24.22.3",
+    "scope": "The eight archived jobs and their artifact records bind to this clean immutable source, not to a later PR head."
+  },
+  "totals": {
+    "prominentCases": 56,
+    "prominentCaptures": 1688,
+    "originalProminentCases": 48,
+    "originalProminentCaptures": 1608,
+    "addedConstantFieldCases": 8,
+    "addedConstantFieldCaptures": 80,
+    "hoverCases": 16,
+    "hoverParts": 176,
+    "hoverCaptures": 2880,
+    "opticalPairClassifications": {
+      "passed": 56,
+      "failed": 0,
+      "inconclusive": 8,
+      "diagnostic-only": 32,
+      "invalid-control": 0
+    },
+    "imageHashesVerified": {
+      "prominentSubjectPng": 1688,
+      "hoverRoot": 2880,
+      "hoverContext": 2880,
+      "hoverMaterialIfPresent": 2272
+    }
+  },
+  "crossHostProminentSummary": {
+    "comparedPairsPerHost": 24,
+    "differentHostsFromWc": [],
+    "scope": "Exact classification/numeric-summary comparison after runtime-prefix normalization, not whole-host pixel/lifecycle equivalence."
+  },
+  "sourceClosureReceipts": [
+    {
+      "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/selected-jobs-terminal.json",
+      "sha256": "058bcf63b1af72f38dc118d641e23129e9da14e65a8f1997bd571db2b8151663"
+    },
+    {
+      "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/selected-artifacts-metadata.json",
+      "sha256": "3c1506603d5990edd742eaa5b1514610312005aa4820891590ae3fd603986ad7"
+    },
+    {
+      "path": "/workspace/scratch/cd1b397ad8e7/liquid-work/tint6-native-expectations.json",
+      "sha256": "0093f942ca564b430778d3dbf34e05bee9e77500a978225645e8e174618b7e42"
+    }
+  ],
+  "originalWcFailures": {
+    "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/wc-original-failures-comparison.json",
+    "sha256": "2ff94d7f4ca06442f78eda1ae08e2693e7b1f9fcd668bf73190cff9a418d9227",
+    "independentReview": "Review agent separately recomputed all24 source/geometry/ROI/foreground bindings and complete neutral/opaque metrics from the old and new raw records; four original failed pairs now pass. Actual old/new context images were also inspected."
+  },
+  "limits": [
+    "Each host retains two dark compact Button pastel pairs as inconclusive: both neutral and tinted observations remain below one or more unchanged thresholds. A complete run is not full optical acceptance.",
+    "Each host retains eight chromatic-region pairs as diagnostic-only. They are not promoted to optical passes.",
+    "The original four WC failed pairs now pass under the unchanged source/geometry/foreground and neutral/opaque controls; old profile5 failures are preserved separately.",
+    "Actual image inspection is bounded to the listed screenshots; no Apple parity or complete family visual acceptance is inferred.",
+    "Physical120Hz,10ms input target, OS IME, non-Web, packed/Compiler equivalence, all public component behaviors and broader application acceptance remain outside these eight job results.",
+    "The overall material workflow browser-evidence job failed and is handled separately. Eight selected jobs succeeding does not make the whole workflow or Sprint6 accepted.",
+    "Historical tint-stage diagnostic remains diagnostic-rejected-on-continuous-tone and productAccepted=false; visible-refraction is a separate bounded diagnostic."
+  ],
+  "lanes": [
+    {
+      "kind": "tint",
+      "runtime": "wc",
+      "jobId": 137194782972,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194782972",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 14,
+      "captures": 422,
+      "optical": {
+        "passed": 14,
+        "failed": 0,
+        "inconclusive": 2,
+        "diagnostic-only": 8,
+        "invalid-control": 0
+      },
+      "artifactId": 14753931895,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14753931895",
+      "artifactSha256": "ea43aca281af42082d74d77d1e40e2d574926586afe9fed301fe54ef55b903ce",
+      "artifactBytes": 47210591,
+      "artifactFiles": 3833,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-wc.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-wc-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-wc-readback.json",
+        "sha256": "543893a977861af53e0f071934e8a9947de9cb633c1757bf933aadf31da449f7"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-wc/prominent-tint/results.json",
+          "sha256": "5f2a7335e5dc7a3443d814937513d24ce271acb8e9ccf05f23b738582706d518"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-wc/prominent-tint/coverage-checkpoint.json",
+          "sha256": "a5834653f1dddee718ceddd556f92113a3c856c33bbdd2827d27620786c3dd2b"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-wc-job.log",
+        "sha256": "d217c18a9c5a379c47f1f37cf8f5b6ac1451216263a0c77dbbb63b4b086f781a"
+      },
+      "actualImageReview": [
+        {
+          "file": "wc-light-button-text-pastel-0-tinted-context.png",
+          "observation": "Compared actual old profile5 and current profile6 captures side by side; blue surface retains the diagonal source with a clear white label. Visual improvement is subtle; same-source numeric oracle provides the discriminating result."
+        },
+        {
+          "file": "wc-dark-submit-text-pastel-0-tinted-context.png",
+          "observation": "Compared actual old profile5 and current profile6 captures; dark translucent button still shows subdued backdrop detail with clear white label. This is a bounded visual check, not Apple parity."
+        },
+        {
+          "file": "wc-dark-button-text-pastel-0-tinted-context.png",
+          "observation": "Dark compact Button appears close to solid navy; retain the two inconclusive pastel source-response classifications."
+        }
+      ]
+    },
+    {
+      "kind": "tint",
+      "runtime": "react",
+      "jobId": 137194782923,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194782923",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 14,
+      "captures": 422,
+      "optical": {
+        "passed": 14,
+        "failed": 0,
+        "inconclusive": 2,
+        "diagnostic-only": 8,
+        "invalid-control": 0
+      },
+      "artifactId": 14753003855,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14753003855",
+      "artifactSha256": "d313324b4483950d3d315626615243a56399e0cb970bfa4fd1e8f82a40dfe0f8",
+      "artifactBytes": 47234180,
+      "artifactFiles": 3833,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-react.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-react-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-react-readback.json",
+        "sha256": "49753258cfffbba2f4b5ea4dfbf949005debffc755c8e51d291fe4e4b939e71b"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-react/prominent-tint/results.json",
+          "sha256": "3c8251f9f748a62d17b393c0e353d272e12da9fd130c65d3c94e7c987d5535b2"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-react/prominent-tint/coverage-checkpoint.json",
+          "sha256": "d2dad1e2950ada81fd9600148a9071c458296bd7001e2f480023323f2d4b7de8"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-react-job.log",
+        "sha256": "580b4011cb7d2efc53b928b8f1c5c183fda31a901dcb6e2a656ed76e3e489f4f"
+      },
+      "actualImageReview": [
+        {
+          "file": "react-light-button-text-pastel-1-tinted-context.png",
+          "observation": "Shifted diagonal source remains visible inside the light prominent carrier; white label remains distinct."
+        },
+        {
+          "file": "react-dark-button-text-pastel-0-tinted-context.png",
+          "observation": "Dark small Button again appears close to a solid navy fill; same recorded inconclusive boundary as Vue2."
+        },
+        {
+          "file": "react-light-button-constant-field-3-224-tinted-context.png",
+          "observation": "Bright constant source produces the lighter blue carrier at unchanged geometry."
+        }
+      ]
+    },
+    {
+      "kind": "tint",
+      "runtime": "vue",
+      "jobId": 137194783112,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194783112",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 14,
+      "captures": 422,
+      "optical": {
+        "passed": 14,
+        "failed": 0,
+        "inconclusive": 2,
+        "diagnostic-only": 8,
+        "invalid-control": 0
+      },
+      "artifactId": 14754027831,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14754027831",
+      "artifactSha256": "7e915e15f5f828b0a05a6047df1308080bdaf3a12336931f679d2ab4f3e16612",
+      "artifactBytes": 47217934,
+      "artifactFiles": 3833,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue-readback.json",
+        "sha256": "9372c51a07b5f93210ca03ea56c71a91e76efa759a91bac65ad2d834630b65ba"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue/prominent-tint/results.json",
+          "sha256": "a792a75d620cea63edb08d74ce15b8aa93ba22f183833ed3e7369ef0b4470526"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue/prominent-tint/coverage-checkpoint.json",
+          "sha256": "d281b83f430041ab8e69e50af5fd0eb4610e1ad4b9003b7fc85c8728f270e61a"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue-job.log",
+        "sha256": "4d7f0a5364b67ed8b297b3817a9b82a109b783bf5ef66982f46e4f1b98e5dc5d"
+      },
+      "actualImageReview": [
+        {
+          "file": "vue-light-button-text-pastel-0-tinted-context.png",
+          "observation": "Subdued diagonal source remains visible through the blue Button; white label is clear at actual size."
+        },
+        {
+          "file": "vue-dark-button-text-pastel-0-tinted-context.png",
+          "observation": "Dark compact Button appears near-solid navy; retain the two inconclusive pastel pairs rather than calling this an optical pass."
+        },
+        {
+          "file": "vue-light-button-constant-field-3-224-tinted-context.png",
+          "observation": "Bright constant source produces a visibly lighter blue surface with the same Button geometry and white label."
+        }
+      ]
+    },
+    {
+      "kind": "tint",
+      "runtime": "vue2",
+      "jobId": 137194782952,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194782952",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 14,
+      "captures": 422,
+      "optical": {
+        "passed": 14,
+        "failed": 0,
+        "inconclusive": 2,
+        "diagnostic-only": 8,
+        "invalid-control": 0
+      },
+      "artifactId": 14752368962,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14752368962",
+      "artifactSha256": "e0b6c6bcdb4a5239088e3766b95a01b05a4d6376a3e47023a963f06881d7f3d6",
+      "artifactBytes": 47226211,
+      "artifactFiles": 3833,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue2.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue2-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue2-readback.json",
+        "sha256": "5d5108a485c8a7e5e95c7b56a5948f43186348b8be06d04c4438590f708899b5"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue2/prominent-tint/results.json",
+          "sha256": "318527d23c325abc4ed3346a9a3fb57dd35966a3d9124344503819d805a0eb8a"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue2/prominent-tint/coverage-checkpoint.json",
+          "sha256": "f249e1283e633e233e3338f1589821471b57139c8d4429abef2c8b528b706922"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/tint-vue2-job.log",
+        "sha256": "1b657761f00bb4b92c6257c555c6c3c42fec83a4caf961f01475ead99699e308"
+      },
+      "actualImageReview": [
+        {
+          "file": "vue2-light-button-text-pastel-0-tinted-context.png",
+          "observation": "Actual-size light prominent pill retains subdued diagonal structure behind a clear white Continue label."
+        },
+        {
+          "file": "vue2-dark-submit-text-pastel-0-tinted-context.png",
+          "observation": "Wide dark Submit retains low-amplitude diagonal and blurred text structure; white label stays distinct."
+        },
+        {
+          "file": "vue2-dark-button-text-pastel-0-tinted-context.png",
+          "observation": "Dark small Button appears much closer to a solid navy fill; retain the recorded inconclusive classification."
+        },
+        {
+          "file": "vue2-light-button-constant-field-0-32-tinted-context.png",
+          "observation": "Low source field gives a dark navy pill."
+        },
+        {
+          "file": "vue2-light-button-constant-field-3-224-tinted-context.png",
+          "observation": "Bright source field gives a visibly lighter blue pill with the same geometry and label."
+        }
+      ]
+    },
+    {
+      "kind": "hover",
+      "runtime": "wc",
+      "jobId": 137194783007,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194783007",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 4,
+      "captures": 720,
+      "parts": 44,
+      "artifactId": 14754516085,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14754516085",
+      "artifactSha256": "c44c70f56fea362a6c52bf43332290fa2d3bd74186d3691bf6296dfd1fd3eeac",
+      "artifactBytes": 26579900,
+      "artifactFiles": 2732,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc-readback.json",
+        "sha256": "f22a820b391abd2fc5972eee64327cbafd32b85cc5ab35cce877170f4179028b"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc/hover/results.json",
+          "sha256": "05634ed87ed7d9e65139c9c4ffe7abf82806f6a63fa967a4f19438db510814c6"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc/hover/plan.json",
+          "sha256": "056998b55fe269a6975ccebf3dac4bdf7ef2d386804a71b5a0d18682224b44e0"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc/hover/progress.json",
+          "sha256": "cec908207f4e3727fdd5ab9853ba702f4a777fdf70b90c81e6047e0c7a1d4778"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-wc-job.log",
+        "sha256": "91f0becaaf32e31a43b3030fc801376ba44f40a259bfe27b8462b656a5de263e"
+      },
+      "actualImageReview": [
+        {
+          "file": "wc-light-button-hover-context.png",
+          "observation": "Actual-size pale glass hover surface retains diagonal source colors and legible dark label."
+        },
+        {
+          "file": "wc-dark-toggle-down-context.png",
+          "observation": "Held dark toggle shows a rounded translucent carrier and subdued backdrop detail with a clear light label."
+        }
+      ]
+    },
+    {
+      "kind": "hover",
+      "runtime": "react",
+      "jobId": 137194782977,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194782977",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 4,
+      "captures": 720,
+      "parts": 44,
+      "artifactId": 14753326127,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14753326127",
+      "artifactSha256": "90a6b5b10adcbcbfe299a1fea523984d4f28b846b731af56c2150004432c4638",
+      "artifactBytes": 26664368,
+      "artifactFiles": 2732,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react-readback.json",
+        "sha256": "5f6233a9ffdd88b2065babc69f24103f67e03a50122510172afe9dd784438133"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react/hover/results.json",
+          "sha256": "e4f562dcb12a92879404faa84c367d882231b8b6df369b769f709248a31e7caa"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react/hover/plan.json",
+          "sha256": "3195f632400222a71a4de9d3c27cbf559229c5cdd7c1f9d7b310f726f286bb0d"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react/hover/progress.json",
+          "sha256": "7f486081fd8205dc9d75803ca0fd458c6f6c6cda9168aa85ccfae01445e91189"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-react-job.log",
+        "sha256": "960e6bdf6cfffda00e743aac0eef7ad5b6f750b8772c8884cf8321b2cbe90442"
+      },
+      "actualImageReview": [
+        {
+          "file": "react-light-button-hover-context.png",
+          "observation": "Light regular Button shows the owned diagonal backdrop through a pale rounded carrier; dark label remains distinct."
+        },
+        {
+          "file": "react-dark-toggle-down-context.png",
+          "observation": "Held dark Toggle keeps a rounded translucent carrier and clear light label without cropping."
+        },
+        {
+          "file": "react-dark-dropdown-hover-context.png",
+          "observation": "Dark Dropdown trigger retains the contextual backdrop and legible label at actual size."
+        }
+      ]
+    },
+    {
+      "kind": "hover",
+      "runtime": "vue",
+      "jobId": 137194782991,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194782991",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 4,
+      "captures": 720,
+      "parts": 44,
+      "artifactId": 14753685426,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14753685426",
+      "artifactSha256": "c03b1933e07d3436faa59ef0c18560641f5c10b2516fcca9afffc9f4f097c11f",
+      "artifactBytes": 26679310,
+      "artifactFiles": 2732,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue-readback.json",
+        "sha256": "c8f1ea916f82f190200e92cc01ce18184558d007145c59e18e679c15179eb496"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue/hover/results.json",
+          "sha256": "7ec83cb28b153591c19447d565f7fb2127eecdf46836c5d46b00821407aa2cbf"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue/hover/plan.json",
+          "sha256": "555cae5b39e443596b67dc63e69b7510f0144e379f75602b1b7d08bc00fe1a35"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue/hover/progress.json",
+          "sha256": "e9871eebce6e39aa5ef9f0f8bb8f30c5a4b61e4ccb5e6f5442b9f92dba936ce9"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue-job.log",
+        "sha256": "8a6b2775ee9f166ae39e6367c8918b3ba352377649104ad76509fb048bd345fd"
+      },
+      "actualImageReview": [
+        {
+          "file": "vue-light-button-hover-context.png",
+          "observation": "Light regular Button retains the pastel backdrop through the carrier with a clear dark label and no cropping."
+        },
+        {
+          "file": "vue-dark-toggle-down-context.png",
+          "observation": "Held dark Toggle retains the contextual backdrop and distinct light label."
+        }
+      ]
+    },
+    {
+      "kind": "hover",
+      "runtime": "vue2",
+      "jobId": 137194783086,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/job/137194783086",
+      "jobStatus": "completed",
+      "jobConclusion": "success",
+      "cases": 4,
+      "captures": 720,
+      "parts": 44,
+      "artifactId": 14754007966,
+      "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45018126008/artifacts/14754007966",
+      "artifactSha256": "9bc16be0b7d4bb67472d56a68d8ec94f4a29d73a37451b2b4043e36f1e2f5d88",
+      "artifactBytes": 26688144,
+      "artifactFiles": 2732,
+      "artifactZip": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2.zip",
+      "downloadReceipt": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2-download.json",
+      "readback": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2-readback.json",
+        "sha256": "e4425e33336bf056e3d3089f1008e09b5c584fe2c53d999a6df87a068f689630"
+      },
+      "raw": [
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2/hover/results.json",
+          "sha256": "ab82a551ac4fa14d473bc604437eb0178405fbf79829daf9b6cd1b6dff0e8c34"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2/hover/plan.json",
+          "sha256": "2cbe55915a8ef8f3be220b723583634d26cbe568d9f9c01e41b674b646d400b3"
+        },
+        {
+          "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2/hover/progress.json",
+          "sha256": "76f9875f872c063e0e495bb50cbaa9caaff9981c125133410714c868400a9116"
+        }
+      ],
+      "jobLog": {
+        "path": "/workspace/scratch/cd1b397ad8e7/sprint6-evidence/native-45018126008/hover-vue2-job.log",
+        "sha256": "be285b4972e9023c358e85d0ad3c417e3eb01ca4eed32b512f1236980a0301a7"
+      },
+      "actualImageReview": [
+        {
+          "file": "vue2-light-button-hover-context.png",
+          "observation": "Pale translucent hover surface retains source diagonal colors and legible dark label."
+        },
+        {
+          "file": "vue2-dark-toggle-down-context.png",
+          "observation": "Held dark toggle retains the rounded glass carrier and visible backdrop with a clear light label."
+        }
+      ]
+    }
+  ]
+}

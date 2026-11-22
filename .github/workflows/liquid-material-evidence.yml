@@ -1,6 +1,12 @@
 name: Liquid Glass material and library evidence
 on:
   workflow_dispatch:
+    inputs:
+      browser_only:
+        description: Run material/library and state controls only; other partitions are not selected
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 permissions:
   contents: read
@@ -33,6 +39,38 @@ jobs:
         run: |
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences list
+      - name: Record selected evidence scope
+        env:
+          MANUAL_BROWSER_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.browser_only == true }}
+          REQUEST_EVENT: ${{ github.event_name }}
+          EVIDENCE_DIRECTORY: ${{ runner.temp }}/liquid-material-evidence
+        run: |
+          node --input-type=module - <<'NODE'
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          import path from 'node:path';
+          const otherJobs = [
+            ...['wc', 'react', 'vue', 'vue2'].map(host => `prominent-tint-evidence (${host})`),
+            ...['wc', 'react', 'vue', 'vue2'].map(host => `hover-evidence (${host})`),
+            'tint-stage-diagnostic', 'visible-refraction-diagnostic',
+          ];
+          const browserOnly = process.env.MANUAL_BROWSER_ONLY === 'true';
+          const record = {
+            schemaVersion: 1,
+            sourceSha: process.env.CANDIDATE_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            event: process.env.REQUEST_EVENT,
+            selection: browserOnly ? 'explicit-manual-browser-only' : 'complete-workflow',
+            selectedJobs: ['browser-evidence', ...(browserOnly ? [] : otherJobs)],
+            notSelectedJobs: browserOnly ? otherJobs : [],
+            workflowSha256: createHash('sha256').update(readFileSync('.github/workflows/liquid-material-evidence.yml')).digest('hex'),
+            limitation: 'Selection is not execution or acceptance. Unselected partitions require separately bound evidence and are never counted as passing here.',
+          };
+          mkdirSync(process.env.EVIDENCE_DIRECTORY, { recursive: true });
+          writeFileSync(path.join(process.env.EVIDENCE_DIRECTORY, 'selection.json'), JSON.stringify(record, null, 2) + '\n');
+          console.log(JSON.stringify(record));
+          NODE
       - name: Source closure and real material/library evidence
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
@@ -66,6 +104,7 @@ jobs:
             packages/adapters/base/test/web-material-sink.test.ts \
             apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts \
             apps/www/src/content/docs/zh-cn/trace-category-admission.test.ts \
+            apps/www/src/content/docs/zh-cn/portal-boundary-calibration.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-toggle-failure-diagnostics.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-toggle-detail-metrics.test.ts \
@@ -106,6 +145,7 @@ jobs:
           corepack pnpm@10.32.1 exec vitest run \
             packages/prototypes/liquid-glass/test/draft-control-projections.test.ts \
             apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/native-composition-evidence.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-state-controls-evidence.test.ts \
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts \
             --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
@@ -151,6 +191,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
   prominent-tint-evidence:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -206,6 +247,7 @@ jobs:
           retention-days: 30
 
   hover-evidence:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -248,6 +290,7 @@ jobs:
           retention-days: 30
 
   tint-stage-diagnostic:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -287,6 +330,7 @@ jobs:
           retention-days: 30
 
   visible-refraction-diagnostic:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

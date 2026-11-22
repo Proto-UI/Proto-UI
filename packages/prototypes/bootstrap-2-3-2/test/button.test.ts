@@ -7,6 +7,11 @@ import {
   AS_TRIGGER_PARENT_CAP,
 } from '@proto.ui/module-as-trigger';
 import button from '../src/button';
+import {
+  renderProtoStyleTokenCss,
+  renderProtoShadowStyleTokenCss,
+  renderProtoShadowSplitStyleArtifact,
+} from '../../../cli/src/services/proto-style-css';
 
 const colorCases = [
   ['default', '#fff', '#e6e6e6', '#f5f5f5'],
@@ -275,16 +280,34 @@ describe('bootstrap-2-3-2 Button draft projection', () => {
         global.dispatchEvent(new CustomEvent('key.down'));
         root.dispatchEvent(new CustomEvent('host:focus'));
         assertNavbarFill('bg-black/10');
-        expect(controller.getRuleStyleTokens()).toContain('ring-primary-foreground');
+        expect(controller.getRuleStyleTokens()).toContain('ring-white');
+        expect(controller.getRuleStyleTokens()).not.toContain('ring-primary-foreground');
         expect(controller.getRuleStyleTokens()).toContain('ring-offset-0');
         expect(controller.getRuleStyleTokens()).toContain('forced-colors-focus-outline');
+        for (const render of [
+          renderProtoStyleTokenCss,
+          renderProtoShadowStyleTokenCss,
+          (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+        ]) {
+          const css = render([...controller.getRuleStyleTokens()]);
+          expect(css).not.toContain('Unsupported Proto UI style tokens');
+          expect(css).toContain('--pui-ring-color: #ffffff;');
+          expect(css).not.toContain('--pui-ring-color: var(--pui-primary-foreground);');
+          expect(css).toContain('--pui-ring-width: 2px;');
+          expect(css).toContain('--pui-ring-offset-width: 0px;');
+          expect(css).toContain('box-shadow: var(--pui-ring-offset-shadow');
+        }
         root.dispatchEvent(new CustomEvent('host:blur'));
         assertNavbarFill('bg-transparent');
-        expect(controller.getRuleStyleTokens()).not.toContain('ring-primary-foreground');
+        expect(controller.getRuleStyleTokens()).not.toContain('ring-white');
         // Actual raw-prop removal, not an explicit default patch, restores the
         // entire ordinary variant/size output without retaining navbar paint.
         controller.applyRawProps({ variant, size: 'small' });
         expect([...controller.getRuleStyleTokens()].sort()).toEqual(ordinary);
+        global.dispatchEvent(new CustomEvent('key.down'));
+        root.dispatchEvent(new CustomEvent('host:focus'));
+        expect(controller.getRuleStyleTokens()).toContain('ring-ring');
+        expect(controller.getRuleStyleTokens()).not.toContain('ring-white');
       } finally {
         await invokeUnmounted();
       }

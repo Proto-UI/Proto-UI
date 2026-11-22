@@ -227,9 +227,7 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     def.rule({
       when: (w) => w.all(w.prop('colorContext').eq('navbar'), w.state(focusVisible).eq(true)),
       intent: (i) =>
-        i.feedback.style.use(
-          tw('forced-colors-focus-outline ring-2 ring-primary-foreground ring-offset-0')
-        ),
+        i.feedback.style.use(tw('forced-colors-focus-outline ring-2 ring-white ring-offset-0')),
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
