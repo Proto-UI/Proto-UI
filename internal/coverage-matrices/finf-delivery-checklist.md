@@ -174,7 +174,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 456 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 464 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -300,6 +300,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-MENUBAR | P-SHADCN-MENUBAR | required missing | P-BOOTSTRAP-2-3-2-MENUBAR | P-LIQUID-GLASS-MENUBAR |
 | P-BASE-MESSAGE-SCROLLER | P-SHADCN-MESSAGE-SCROLLER | required missing | P-BOOTSTRAP-2-3-2-MESSAGE-SCROLLER | P-LIQUID-GLASS-MESSAGE-SCROLLER |
 | P-BASE-METER | P-SHADCN-METER | required missing | P-BOOTSTRAP-2-3-2-METER | P-LIQUID-GLASS-METER |
+| P-BASE-NATIVE-FILE-INPUT | required missing | required missing | required missing | required missing |
 | P-BASE-NAVIGATION-MENU | P-SHADCN-NAVIGATION-MENU | required missing | P-BOOTSTRAP-2-3-2-NAVIGATION-MENU | P-LIQUID-GLASS-NAVIGATION-MENU |
 | P-BASE-NUMBER-FIELD | P-SHADCN-NUMBER-FIELD | P-BRUTALIST-NUMBER-FIELD | P-BOOTSTRAP-2-3-2-NUMBER-FIELD | P-LIQUID-GLASS-NUMBER-FIELD |
 | P-BASE-POPOVER | P-SHADCN-POPOVER | required missing | P-BOOTSTRAP-2-3-2-POPOVER | P-LIQUID-GLASS-POPOVER |
@@ -319,6 +320,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-SELECT-STRUCTURAL-PARTS | P-SHADCN-SELECT-STRUCTURAL-PARTS | required missing | P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS | P-LIQUID-GLASS-SELECT-STRUCTURAL-PARTS |
 | P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | P-BRUTALIST-SELECT-TRIGGER | P-BOOTSTRAP-2-3-2-SELECT-TRIGGER | P-LIQUID-GLASS-SELECT-TRIGGER |
 | P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | P-BOOTSTRAP-2-3-2-SELECT-VALUE | P-LIQUID-GLASS-SELECT-VALUE |
+| P-BASE-SELECTABLE-ROW | required missing | required missing | required missing | required missing |
 | P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | P-BRUTALIST-SEPARATOR | P-BOOTSTRAP-2-3-2-SEPARATOR | P-LIQUID-GLASS-SEPARATOR |
 | P-BASE-SLIDER | P-SHADCN-SLIDER | required missing | P-BOOTSTRAP-2-3-2-SLIDER | P-LIQUID-GLASS-SLIDER |
 | P-BASE-SLIDER-FIELD-THUMB | P-SHADCN-SLIDER-FIELD-THUMB | required missing | P-BOOTSTRAP-2-3-2-SLIDER-FIELD-THUMB | P-LIQUID-GLASS-SLIDER-FIELD-THUMB |
