@@ -1085,6 +1085,7 @@ describe('Vue2 compiler-native child construction', () => {
   const context = 'def.context.provide(KEY,{value:1});';
   const supportedDisposers = [
     ['props.watch', props, "def.props.watch(['value'],()=>{})"],
+    ['props.watchRaw', props, "def.props.watchRaw(['value'],()=>{})"],
     ['context.subscribe', context, 'def.context.subscribe(KEY,()=>{})'],
     ['context.trySubscribe', context, 'def.context.trySubscribe(KEY,()=>{})'],
   ] as const;
@@ -1110,7 +1111,6 @@ describe('Vue2 compiler-native child construction', () => {
 
   it.each([
     ['props.watchAll', 'def.props.watchAll(()=>{})'],
-    ['props.watchRaw', "def.props.watchRaw(['value'],()=>{})"],
     ['props.watchRawAll', 'def.props.watchRawAll(()=>{})'],
   ])('retains the existing Vue2 target rejection for %s', (operation, call) => {
     const input = prototype(`${props}return ${call};`);

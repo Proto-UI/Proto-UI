@@ -1,5 +1,6 @@
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import ts from 'typescript';
+import { unwrapSourceExpression } from './source-syntax';
 import { createHash } from 'node:crypto';
 import { CompilerRejection } from './diagnostics';
 import { admittedHookOperation } from './hook-admission';
@@ -135,6 +136,7 @@ interface Binding {
   flowAt?: FlowMark;
   uninitializedParameter?: boolean;
   style?: StyleTokenHandle;
+  staticData?: ts.Expression;
 }
 type Scope = Map<string, Binding>;
 const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
@@ -957,7 +959,9 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
-    nodes = unrollStaticLoops(module, lowerObjectPatterns(nodes));
+    const staticLocals = new Map<string, ts.Expression | undefined>([...scope].map(([name, binding]) => [name, binding.staticData]));
+    for (const [name, value] of staticLocalBindings(nodes, !scope.has('Object') && !module.declarations.has('Object') && !module.imports.has('Object'))) staticLocals.set(name, value);
+    nodes = unrollStaticLoops(module, lowerObjectPatterns(nodes), staticLocals);
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
@@ -1017,6 +1021,7 @@ class Frontend {
                   : alias?.stateId;
             Object.assign(pending, {
               type: value.type,
+              staticData: staticLocals.get(name),
               ...(alias?.helper ? { helper: alias.helper, phase: alias.phase } : {}),
               stateId,
               stateData: stateDeclarationData(value) ?? alias?.stateData,
@@ -2732,7 +2737,7 @@ class Frontend {
       )
         return {
           kind: 'style-handle',
-          handle: extractRuleStyleHandle(module, node),
+          handle: extractRuleStyleHandle(module, node, name => scope.has(name) ? scope.get(name)?.staticData ?? null : undefined),
           type: 'style-handle',
           span,
         };
@@ -2955,7 +2960,7 @@ class Frontend {
         resolveStyle: (expression) =>
           ts.isIdentifier(expression) && scope.get(expression.text)?.style
             ? scope.get(expression.text)!.style
-            : extractRuleStyleHandle(module, expression),
+            : extractRuleStyleHandle(module, expression, name => scope.has(name) ? scope.get(name)?.staticData ?? null : undefined),
       });
       const plan = lowerRulePlan([declaration], span);
       if (!plan.ok) throw new CompilerRejection(plan.diagnostics[0]);
@@ -3605,6 +3610,62 @@ function hasObjectPattern(node: ts.Statement): boolean {
 
 const unrolledLoops = new WeakMap<ts.Statement, readonly ts.Statement[]>();
 
+/** Flat literal tables are static only while their container never escapes or mutates. */
+function staticLocalBindings(nodes: readonly ts.Statement[], objectUnshadowed: boolean): Map<string, ts.Expression | undefined> {
+  const bindings = new Map<string, ts.Expression | undefined>();
+  const candidates = new Map<string, ts.VariableDeclaration>();
+  for (const statement of nodes) if (ts.isVariableStatement(statement)) {
+    for (const declaration of statement.declarationList.declarations) if (ts.isIdentifier(declaration.name)) {
+      const name = declaration.name.text; bindings.set(name, undefined);
+      if (!(statement.declarationList.flags & ts.NodeFlags.Const) || !declaration.initializer) continue;
+      const value = unwrapSourceExpression(declaration.initializer);
+      const scalar = (node: ts.Expression) => scalarInitializer(unwrapSourceExpression(node));
+      const flat = ts.isArrayLiteralExpression(value) ? value.elements.every(element => !ts.isSpreadElement(element) && scalar(element))
+        : ts.isObjectLiteralExpression(value) && value.properties.every(property => ts.isPropertyAssignment(property) && !ts.isComputedPropertyName(property.name) && scalar(property.initializer));
+      if (flat) { candidates.set(name, declaration); bindings.set(name, value); }
+    }
+  }
+  for (const [name, declaration] of candidates) {
+    let safe = true;
+    const visit = (node: ts.Node): void => {
+      if (!safe) return;
+      if (ts.isIdentifier(node) && node.text === name && node !== declaration.name) {
+        const parent = node.parent;
+        if (ts.isPropertyAssignment(parent) && parent.name === node || ts.isPropertyAccessExpression(parent) && parent.name === node) return;
+        if (objectUnshadowed && !bindings.has('Object') && ts.isCallExpression(parent) && parent.arguments[0] === node && parent.arguments.length === 1 && ts.isPropertyAccessExpression(parent.expression) && ts.isIdentifier(parent.expression.expression) && parent.expression.expression.text === 'Object' && parent.expression.name.text === 'keys') return;
+        let read: ts.Node = node;
+        while ((ts.isPropertyAccessExpression(read.parent) || ts.isElementAccessExpression(read.parent)) && read.parent.expression === read) read = read.parent;
+        if (read === node) { safe = false; return; }
+        const use = read.parent;
+        if (ts.isBinaryExpression(use) && use.left === read && use.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && use.operatorToken.kind <= ts.SyntaxKind.LastAssignment || ts.isPrefixUnaryExpression(use) || ts.isPostfixUnaryExpression(use) || ts.isDeleteExpression(use) || ts.isCallExpression(use) && use.expression === read) safe = false;
+      }
+      ts.forEachChild(node, visit);
+    };
+    for (const node of nodes) visit(node);
+    if (!safe) bindings.set(name, undefined);
+  }
+  return bindings;
+}
+
+function staticForEach(node: ts.Statement): ts.ForOfStatement | undefined {
+  if (!ts.isExpressionStatement(node)) return;
+  const call = unwrapSourceExpression(node.expression);
+  if (!ts.isCallExpression(call) || call.questionDotToken || call.arguments.length !== 1 || !ts.isPropertyAccessExpression(call.expression) || call.expression.name.text !== 'forEach') return;
+  const callback = call.arguments[0];
+  if (!ts.isArrowFunction(callback) || callback.modifiers?.length || callback.parameters.length !== 1 || !ts.isIdentifier(callback.parameters[0].name) || callback.parameters[0].initializer || callback.parameters[0].dotDotDotToken) return;
+  let abrupt = false;
+  const inspect = (part: ts.Node): void => { if (ts.isFunctionLike(part)) return; if (ts.isReturnStatement(part) || ts.isBreakStatement(part) || ts.isContinueStatement(part)) abrupt = true; ts.forEachChild(part, inspect); };
+  inspect(callback.body);
+  if (abrupt) return;
+  const factory = ts.factory;
+  const ranged = <T extends ts.Node>(created: T, from: ts.Node): T => ts.setTextRange(created, from);
+  const variable = ranged(factory.createVariableDeclaration(callback.parameters[0].name), callback.parameters[0]);
+  const list = ranged(factory.createVariableDeclarationList([variable], ts.NodeFlags.Const), callback.parameters[0]);
+  const body = ts.isBlock(callback.body) ? callback.body : ranged(factory.createExpressionStatement(callback.body), callback.body);
+  const loop = ranged(factory.createForOfStatement(undefined, list, call.expression.expression, body), node);
+  (loop as { parent: ts.Node }).parent = node.parent; linkParents(loop); return loop;
+}
+
 /**
  * `for (const x of <static list>) { ... }` over finite literal data is expanded
  * at compile time: the body is repeated once per element, with each read of
@@ -3616,11 +3677,12 @@ const unrolledLoops = new WeakMap<ts.Statement, readonly ts.Statement[]>();
  */
 function unrollStaticLoops(
   module: SourceModule,
-  nodes: readonly ts.Statement[]
+  nodes: readonly ts.Statement[],
+  locals: ReadonlyMap<string, ts.Expression | undefined> = new Map()
 ): readonly ts.Statement[] {
-  if (!nodes.some((node) => ts.isForOfStatement(node))) return nodes;
   const out: ts.Statement[] = [];
-  for (const node of nodes) {
+  for (const original of nodes) {
+    const node = staticForEach(original) ?? original;
     if (!ts.isForOfStatement(node)) {
       out.push(node);
       continue;
@@ -3641,7 +3703,7 @@ function unrollStaticLoops(
       out.push(node);
       continue;
     }
-    const values = staticLoopValues(module, node.expression, new Set());
+    const values = staticLoopValues(module, node.expression, new Set(), locals);
     if (!values) {
       out.push(node);
       continue;
@@ -3660,7 +3722,7 @@ function unrollStaticLoops(
         expanded.push(substituteLoopValue(statement, name, value, node.parent));
     // A nested static loop is unrolled within each copy of its enclosing body,
     // and a branch whose condition is now made of literals only is decided.
-    const unrolled = unrollStaticLoops(module, decideLiteralBranches(expanded));
+    const unrolled = unrollStaticLoops(module, decideLiteralBranches(expanded), locals);
     unrolledLoops.set(node, unrolled);
     out.push(...unrolled);
   }
@@ -3670,7 +3732,8 @@ function unrollStaticLoops(
 function staticLoopValues(
   module: SourceModule,
   node: ts.Expression,
-  active: Set<string>
+  active: Set<string>,
+  locals: ReadonlyMap<string, ts.Expression | undefined> = new Map()
 ): (string | number)[] | undefined {
   while (
     ts.isParenthesizedExpression(node) ||
@@ -3694,6 +3757,12 @@ function staticLoopValues(
   const resolved = (
     identifier: ts.Identifier
   ): { module: SourceModule; node: ts.Expression } | undefined => {
+    if (locals.has(identifier.text)) {
+      const node = locals.get(identifier.text);
+      const identity = `local:${identifier.text}`;
+      if (!node || node.pos >= identifier.pos || active.has(identity)) return undefined;
+      active.add(identity); return { module, node };
+    }
     if (!module.declarations.has(identifier.text) && !module.imports.has(identifier.text))
       return undefined;
     const binding = module.graph.resolveBinding(module, identifier.text);
@@ -3705,13 +3774,14 @@ function staticLoopValues(
   };
   if (ts.isIdentifier(node)) {
     const target = resolved(node);
-    return target && staticLoopValues(target.module, target.node, active);
+    return target && staticLoopValues(target.module, target.node, active, target.module === module ? locals : new Map());
   }
   if (
     ts.isCallExpression(node) &&
     ts.isPropertyAccessExpression(node.expression) &&
     ts.isIdentifier(node.expression.expression) &&
     node.expression.expression.text === 'Object' &&
+    !locals.has('Object') && !module.declarations.has('Object') && !module.imports.has('Object') &&
     node.expression.name.text === 'keys' &&
     node.arguments.length === 1 &&
     ts.isIdentifier(node.arguments[0])
@@ -3733,7 +3803,9 @@ function staticLoopValues(
         keys.push(property.name.text);
       else return undefined;
     }
-    return keys;
+    // Object.keys uses ECMAScript own-key ordering, not source declaration order.
+    if (keys.includes('__proto__')) return undefined;
+    return Object.keys(Object.fromEntries(keys.map(key => [key, true])));
   }
   return undefined;
 }
@@ -3778,7 +3850,12 @@ function substituteLoopValue(
             return node;
           return literal(node);
         }
-        return ts.visitEachChild(node, visit, context);
+        const rewritten = ts.visitEachChild(node, visit, context);
+        if (ts.isConditionalExpression(rewritten)) {
+          const decided = literalCondition(rewritten.condition);
+          if (decided !== undefined) return decided ? rewritten.whenTrue : rewritten.whenFalse;
+        }
+        return rewritten;
       };
       return (root) => ts.visitNode(root, visit) as ts.Statement;
     },

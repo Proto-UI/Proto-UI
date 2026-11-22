@@ -1678,6 +1678,7 @@ impl __PuiNativeRecordValue {
         function condition(value: RuleCondition): string {
           if (value.type === 'true' || value.type === 'false') return value.type;
           if (value.type === 'eq') {
+            if (value.left.type === 'meta') throw new Error('Rule Meta must fail GPUI target admission.');
             const signal =
               value.left.type === 'prop'
                 ? `read_props(&${ownerReference()}, false).member(${string(value.left.key)}, false)`

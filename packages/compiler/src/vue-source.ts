@@ -118,7 +118,7 @@ export function emitVueSource(
   let prefix = '__puiVue';
   while ([...names].some((name) => name.startsWith(prefix))) prefix += '_';
   const n = (name: string): string => `${prefix}${name}`;
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix, admitted.value.ruleMetaKeys);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -1011,6 +1011,7 @@ ${controlLabel ? '      getAssociations: () => _props.instanceAssociations,\n' :
 ${
   usesStyle
     ? `    const ${n('Style')} = ${n('CreateStyle')}({
+      ${atoms.ruleMeta(`${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`)}
       ensureSetup() { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('[Vue source] style declaration requires setup'); },
       ensureRuntime() { ${n('Alive')}(); if (${n('Setup')}) throw new Error('[Vue source] style writes require runtime'); },
       isAlive: () => !${n('Disposed')} && (!${n('Disposing')} || ${n('InternalTeardown')}),
@@ -1316,14 +1317,17 @@ ${usesInteraction ? `      ${n('Interaction')}.refresh();` : ''}
       const all = Object.keys(${n('PropSpecs')}).filter((key) => !Object.is(Reflect.get(previous, key), Reflect.get(next, key)));
 ${
   usesRawWatchers
-    ? `      const rawAll = Object.keys({ ...previousRaw, ...raw }).filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(raw, key) || !Object.is(previousRaw[key], raw[key]));
+    ? `      const rawAll = Object.keys({ ...previousRaw, ...raw }).filter(key => !Object.is(previousRaw[key], raw[key]));
       if (rawAll.length) {
-        const nextRaw = Object.freeze({ ...raw }), prevRaw = Object.freeze({ ...previousRaw });
+        const nextRaw = ${n('PropsWindow')}!.raw, prevRaw = Object.freeze({ ...previousRaw });
         function dispatchRaw(allOnly: boolean): void {
           for (const watcher of ${n('RawWatchers')}) {
             if (!watcher.active || (watcher.keys === null) !== allOnly) continue;
             const matched = watcher.keys ? watcher.keys.filter(key => rawAll.includes(key)) : rawAll;
-            if (matched.length) watcher.callback(${n('RunValue')}, nextRaw, prevRaw, { changedKeysAll: rawAll, changedKeysMatched: matched });
+            if (matched.length) {
+              console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+              watcher.callback(${n('RunValue')}, nextRaw, prevRaw, { changedKeysAll: rawAll, changedKeysMatched: matched });
+            }
           }
         }
         dispatchRaw(true); dispatchRaw(false);
@@ -1532,7 +1536,7 @@ ${usesRoot ? `          ${n('RootElement')} = root; ${n('RootEpoch')} = root ? e
             drawnRevision = revision; drawnActivation = active;
             ${n('Requested')} = false;
             const frame: ${n('Frame')} = { epoch, slotUsed: false };
-            const children = ${ssr ? `!${n('Server')} && !${n('Started')} ? ${n('Adopt')}(${n('Record')}.children, () => ${n('Slot')}(frame)) : ` : ''}typeof ${n('Renderer')} === 'function' ? ${n('Children')}(${n('Renderer')}(frame)) : ${ssr ? `${n('Slot')}(frame)` : 'null'};
+            const children = ${ssr ? `!${n('Server')} && !${n('Started')} ? ${n('Adopt')}(${n('Record')}.children, () => ${n('Slot')}(frame)) : ` : ''}typeof ${n('Renderer')} === 'function' ? ${n('Children')}(${n('Renderer')}(frame)) : ${n('Slot')}(frame);
             cached = children == null ? [] : Array.isArray(children) ? children : [children];
           }
 ${

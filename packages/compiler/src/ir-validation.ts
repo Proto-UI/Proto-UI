@@ -1,4 +1,5 @@
 import { callableEffectIssue } from './callable-effects';
+import { RULE_META_TYPES } from './rule-declarations';
 import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
 import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
@@ -1312,7 +1313,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             }
             for (const dependency of declaration.deps) {
               if (
-                dependency.kind === 'prop'
+                dependency.kind === 'meta' ? !Object.hasOwn(RULE_META_TYPES, dependency.key) : dependency.kind === 'prop'
                   ? !props.has(dependency.key)
                   : !stateTypes.has(dependency.id)
               )
@@ -1321,7 +1322,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const check = (condition: RuleCondition): void => {
               if (condition.type === 'eq') {
                 const valueType =
-                  condition.left.type === 'prop'
+                  condition.left.type === 'meta' ? RULE_META_TYPES[condition.left.key] : condition.left.type === 'prop'
                     ? props.get(condition.left.key)
                     : stateTypes.get(condition.left.id);
                 if (!valueType || !acceptsValue(valueType, condition.right))

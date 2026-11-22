@@ -11,8 +11,16 @@ import type { StyleTokenHandle } from './style-plan';
 type CoreCondition = WhenExpr<Record<string, Primitive>>;
 type CoreDependency = RuleDep<Record<string, Primitive>>;
 
-/** The existing Rule WhenExpr language, restricted to portable prop/state identities. */
-export type RuleValue = ({ type: 'prop'; key: string } | { type: 'state'; id: string }) & {
+export const RULE_META_TYPES = Object.freeze({
+  colorScheme: { kind: 'union', members: [{ kind: 'literal', value: 'light' }, { kind: 'literal', value: 'dark' }] } as DataType,
+  'preference.reducedMotion': { kind: 'union', members: ['no-preference', 'reduce', 'unknown'].map(value => ({ kind: 'literal', value })) } as DataType,
+  'preference.reducedTransparency': { kind: 'union', members: ['no-preference', 'reduce', 'unknown'].map(value => ({ kind: 'literal', value })) } as DataType,
+  'preference.contrast': { kind: 'union', members: ['no-preference', 'less', 'more', 'custom', 'unknown'].map(value => ({ kind: 'literal', value })) } as DataType,
+  'preference.forcedColors': { kind: 'union', members: ['none', 'active', 'unknown'].map(value => ({ kind: 'literal', value })) } as DataType,
+});
+export type RuleMetaKey = keyof typeof RULE_META_TYPES;
+/** The existing Rule WhenExpr language and independently specified observable inputs. */
+export type RuleValue = ({ type: 'prop'; key: string } | { type: 'state'; id: string } | { type: 'meta'; key: RuleMetaKey }) & {
   span: SourceSpan;
 };
 export type RuleCondition = (
@@ -24,6 +32,7 @@ export type RuleCondition = (
 export type RuleDependency = (
   | Extract<CoreDependency, { kind: 'prop' }>
   | { kind: 'state'; id: string }
+  | { kind: 'meta'; key: RuleMetaKey }
 ) & { span: SourceSpan };
 export interface RuleStyleOperation {
   kind: 'feedback.style.use';
@@ -202,13 +211,14 @@ export function extractRuleDeclaration(
   const deps: RuleDependency[] = [];
   const depKeys = new Set<string>();
   const dependency = (value: RuleValue): void => {
-    const key = value.type === 'prop' ? `prop:${value.key}` : `state:${value.id}`;
+    const key = value.type === 'state' ? `state:${value.id}` : `${value.type}:${value.key}`;
     if (depKeys.has(key)) return;
     depKeys.add(key);
     deps.push(
-      value.type === 'prop'
-        ? { kind: 'prop', key: value.key, span: value.span }
-        : { kind: 'state', id: value.id, span: value.span }
+      value.type === 'state'
+        ? { kind: 'state', id: value.id, span: value.span }
+        : value.type === 'meta' ? { kind: 'meta', key: value.key, span: value.span }
+        : { kind: 'prop', key: value.key, span: value.span }
     );
   };
   const whenBuilder = (whenCallback.parameters[0].name as ts.Identifier).text;
@@ -310,10 +320,19 @@ export function extractRuleDeclaration(
       dependency(signal);
       return { kind: 'signal', value: signal, type: binding.type };
     }
+    if (operation === 'meta') {
+      arity(expression, 1);
+      const key = parseWhen(expression.arguments[0]);
+      if (key.kind !== 'literal' || typeof key.value !== 'string' || !Object.hasOwn(RULE_META_TYPES, key.value))
+        rejectNode(expression.arguments[0], code, 'Rule meta requires an independently admitted key: colorScheme or the four bounded preference keys.');
+      const signal: RuleValue = { type: 'meta', key: key.value as RuleMetaKey, span };
+      dependency(signal);
+      return { kind: 'signal', value: signal, type: RULE_META_TYPES[signal.key] };
+    }
     rejectNode(
       expression,
       code,
-      `Rule operation ${operation} is not statically supported; context/meta and dynamic extensions are unsupported.`
+      `Rule operation ${operation} is not statically supported; context and dynamic extensions are unsupported.`
     );
   };
   const whenBody = whenCallback.body!;
@@ -434,7 +453,8 @@ export function extractRuleDeclaration(
  */
 export function extractRuleStyleHandle(
   module: SourceModule,
-  expression: ts.Expression
+  expression: ts.Expression,
+  local?: (name: string) => ts.Expression | null | undefined
 ): StyleTokenHandle {
   const active = new Set<string>();
   const declaration = <T>(
@@ -442,6 +462,14 @@ export function extractRuleStyleHandle(
     identifier: ts.Identifier,
     parse: (owner: SourceModule, node: ts.Expression) => T
   ): T => {
+    const lexical = current === module ? local?.(identifier.text) : undefined;
+    if (lexical === null) rejectNode(identifier, code, 'Local style data requires a proven immutable non-escaping literal table.');
+    if (lexical) {
+      const identity = `local:${lexical.pos}:${identifier.text}`;
+      if (active.has(identity)) rejectNode(identifier, code, 'Recursive local style declarations are unsupported.');
+      active.add(identity);
+      try { return parse(current, lexical); } finally { active.delete(identity); }
+    }
     const resolved = current.graph.resolveBinding(current, identifier.text);
     if (!resolved.module || ts.isFunctionDeclaration(resolved.node))
       rejectNode(

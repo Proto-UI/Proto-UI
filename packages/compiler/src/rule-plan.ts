@@ -4,6 +4,7 @@ import { acceptsValue, type DataType } from './data-types';
 import { CompilerRejection, reject } from './diagnostics';
 import type { CompileResult, Primitive, SourceSpan } from './ir';
 import type { RuleCondition, RuleDeclarationIR, RuleDependency, RuleValue } from './rule-declarations';
+import { RULE_META_TYPES, type RuleMetaKey } from './rule-declarations';
 import type { StylePlan } from './style-plan';
 
 export interface RulePlan {
@@ -18,6 +19,7 @@ export interface RuleEvaluationContext {
   props: Readonly<Record<string, Primitive>>;
   /** Portable identity -> current value, not handles/getter callbacks. */
   states: Readonly<Record<string, Primitive>>;
+  meta?: Readonly<Partial<Record<RuleMetaKey, Primitive>>>;
 }
 export interface RuleEvaluation {
   activeRuleIds: readonly number[];
@@ -43,8 +45,8 @@ function fail(message: string, span: SourceSpan): never {
 }
 const dependencyKey = (dependency: RuleDependency | RuleValue): string => {
   if ('kind' in dependency)
-    return dependency.kind === 'prop' ? `prop:${dependency.key}` : `state:${dependency.id}`;
-  return dependency.type === 'prop' ? `prop:${dependency.key}` : `state:${dependency.id}`;
+    return dependency.kind === 'state' ? `state:${dependency.id}` : `${dependency.kind}:${dependency.key}`;
+  return dependency.type === 'state' ? `state:${dependency.id}` : `${dependency.type}:${dependency.key}`;
 };
 
 function record(value: unknown, required: readonly string[], optional: readonly string[], span: SourceSpan): Record<string, unknown> {
@@ -93,13 +95,14 @@ function validateCondition(value: unknown, fallback: SourceSpan, dependencies: S
       record(value, ['type', 'left', 'right', 'span'], [], span);
       const left = record(raw.left, ['type', 'span'], ['key', 'id'], span);
       const leftSpan = sourceLocation(left.span, span);
-      if (left.type === 'prop') {
+      if (left.type === 'prop' || left.type === 'meta') {
         record(raw.left, ['type', 'key', 'span'], [], leftSpan);
         name(left.key, leftSpan);
+        if (left.type === 'meta' && !Object.hasOwn(RULE_META_TYPES, String(left.key))) fail('Unsupported Rule Meta key.', leftSpan);
       } else if (left.type === 'state') {
         record(raw.left, ['type', 'id', 'span'], [], leftSpan);
         name(left.id, leftSpan);
-      } else fail('Only prop/state comparisons are supported by a portable Rule plan.', leftSpan);
+      } else fail('Only declared prop/state/meta comparisons are supported by a portable Rule plan.', leftSpan);
       if (raw.right !== null && !['boolean', 'string', 'number'].includes(typeof raw.right))
         fail('Rule comparisons require concrete finite primitive literals.', span);
       const key = dependencyKey(raw.left as RuleValue);
@@ -149,13 +152,14 @@ export function lowerRulePlan(
       for (const dependency of array(raw.deps, span)) {
         const dep = record(dependency, ['kind', 'span'], ['key', 'id'], span);
         const depSpan = sourceLocation(dep.span, span);
-        if (dep.kind === 'prop') {
+        if (dep.kind === 'prop' || dep.kind === 'meta') {
           record(dependency, ['kind', 'key', 'span'], [], depSpan);
           name(dep.key, depSpan);
+          if (dep.kind === 'meta' && !Object.hasOwn(RULE_META_TYPES, String(dep.key))) fail('Unsupported Rule Meta dependency.', depSpan);
         } else if (dep.kind === 'state') {
           record(dependency, ['kind', 'id', 'span'], [], depSpan);
           name(dep.id, depSpan);
-        } else fail('Only declared prop/state dependencies are supported by this Rule plan.', depSpan);
+        } else fail('Only declared prop/state/meta dependencies are supported by this Rule plan.', depSpan);
         const typed = dependency as RuleDependency;
         const key = dependencyKey(typed);
         if (dependencies.has(key)) fail('Rule dependency identities must not be repeated.', depSpan);
@@ -209,8 +213,8 @@ export function lowerRulePlan(
 }
 
 function readSignal(value: RuleValue, context: RuleEvaluationContext): Primitive | undefined {
-  const values = value.type === 'prop' ? context.props : context.states;
-  const key = value.type === 'prop' ? value.key : value.id;
+  const values: Readonly<Record<string, Primitive | undefined>> = value.type === 'prop' ? context.props : value.type === 'meta' ? context.meta ?? {} : context.states;
+  const key = value.type === 'state' ? value.id : value.key;
   // Prototype members are not authored prop/state values (including a key named "constructor").
   return Object.hasOwn(values, key) ? values[key] : undefined;
 }

@@ -21,7 +21,7 @@ export function emitNativeRule(
   function condition(node: RuleCondition): string {
     if (node.type === 'true' || node.type === 'false') return node.type;
     if (node.type === 'eq') {
-      const signal = node.left.type === 'prop'
+      const signal = node.left.type === 'meta' ? `${style}.meta(${JSON.stringify(node.left.key)})` : node.left.type === 'prop'
         ? `${props}[${JSON.stringify(node.left.key)}]`
         : `${expression(states.get(node.left.id)!)}.get()`;
       return `(${signal} === ${JSON.stringify(node.right)})`;
@@ -41,6 +41,7 @@ export const nativeStyleArtifact = {
 export type NativeStyleHandle = { readonly kind: 'tw'; readonly tokens: readonly string[]; readonly groups: readonly string[] };
 export type NativeRuleHandle = { readonly id: number; dispose(): void };
 export interface NativeStyle {
+  meta(key: string): unknown;
   use(...handles: NativeStyleHandle[]): () => void;
   patch(...handles: NativeStyleHandle[]): void;
   suppress(...handles: NativeStyleHandle[]): void;
@@ -69,11 +70,14 @@ export function createNativeStyle(options: {
   ensureSetup(): void;
   ensureRuntime(): void;
   isAlive(): boolean;
+  getMeta?(key: string): unknown;
+  subscribeMeta?(notify: () => void): () => void;
   project(tokens: readonly string[]): void;
 }): NativeStyle {
   const chunks: Chunk[] = [], rules: Rule[] = [];
   const patches = new Map<string, Patch>();
   let mounted = false, disposed = false, nextRuleId = 1;
+  let releaseMeta: (() => void) | undefined;
   let projected: readonly string[] = [];
   function snapshot(includeRules = mounted): string[] {
     const merged = new Map<string, string>();
@@ -105,6 +109,7 @@ export function createNativeStyle(options: {
     return { handles, active: true };
   }
   const style = {
+    meta(key: string): unknown { return key.startsWith('preference.') && !mounted ? 'unknown' : options.getMeta?.(key); },
     use(...handles: NativeStyleHandle[]): () => void {
       options.ensureSetup();
       const chunk = record(handles);
@@ -146,14 +151,14 @@ export function createNativeStyle(options: {
       } });
     },
     refresh,
-    mount(): void { mounted = true; const next = snapshot(); options.project(next); projected = next; },
-    unmount(): void { mounted = false; projected = []; },
+    mount(): void { mounted = true; releaseMeta ??= options.subscribeMeta?.(refresh); const next = snapshot(); options.project(next); projected = next; },
+    unmount(): void { mounted = false; releaseMeta?.(); releaseMeta = undefined; projected = []; },
     tokens(): readonly string[] { return snapshot(); },
     serverTokens(): readonly string[] {
       if (disposed || !options.isAlive()) throw new Error('[Style] owner is terminally disposed');
       return snapshot(true);
     },
-    dispose(): void { disposed = true; mounted = false; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; },
+    dispose(): void { disposed = true; mounted = false; releaseMeta?.(); releaseMeta = undefined; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; },
   };
   return style;
 }
