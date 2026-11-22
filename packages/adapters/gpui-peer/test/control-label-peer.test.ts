@@ -102,11 +102,14 @@ describe('GPUI peer: real Label and existing control owners', () => {
         label.host.last('projection.install')!.transaction.a11y!.semanticObjectId,
       ]);
       expect(name?.name).not.toMatchObject({ kind: 'text' });
+      expect(target.host.exposeState('checked')).toBe(false);
       label.activate();
       expect(
         target.host.of('expose.signal').filter((m) => m.name === 'checkedChange')
       ).toHaveLength(1);
-      expect(target.host.last('expose.state')).toMatchObject({ name: 'checked', value: true });
+      // Switch also publishes percentage; message order between distinct
+      // exposed fields is not the committed checked-state contract.
+      expect(target.host.exposeState('checked')).toBe(true);
       expect(target.host.of('focus.request')).toHaveLength(1);
       expect(label.host.of('projection.install')[0]!.transaction.focus.targets).toEqual([
         { ref: 'focus-root', sequential: false, programmatic: false },

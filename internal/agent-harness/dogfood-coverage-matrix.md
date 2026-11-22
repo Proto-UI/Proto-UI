@@ -8,6 +8,8 @@ Parent tracker: [#513](https://github.com/Proto-UI/Proto-UI/issues/513). Matrix 
 
 This is the single repository-owned coverage matrix for the planned apps/agent-harness application. It classifies intended user-facing surfaces and the infrastructure immediately behind them. It does not implement the Harness, admit a new Base subject, create a Host Capability, authorize a private ChatUI implementation, or promote any catalog lifecycle.
 
+Actual external application consumers are tracked in the [application consumer inventory](../compiler/application-consumers.md). Shenko is a real Harness consumer; OpenGreendam/verdant consumes generated GPUI Rust. The absent implementation statements below refer to the planned `apps/agent-harness` paths at this ledger's baseline, not to the absence of those applications. Their exact source pins, compiled versus Adapter paths, and accepted journeys must be recorded independently before changing a matrix row.
+
 The catalog remains authoritative for Proto UI meaning. At this baseline, every P, T, M, and HC identity named below is draft unless a cell explicitly says otherwise. A-REACT-18-19-0001, A-WEB-COMPONENT-0001, A-VUE-3-0001, and A-VUE-2-0001 are active Adapter profiles. A draft entity is current cataloged direction, not a stable guarantee. Uncataloged or none means exactly that; the matrix never manufactures an entity to fill a cell.
 
 ## Production host decision

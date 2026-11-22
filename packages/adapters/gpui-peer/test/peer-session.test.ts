@@ -17,13 +17,14 @@ type Harness = { host: ScriptedHost; peer: PeerSession };
 
 function createHarness(
   options: ConstructorParameters<typeof ScriptedHost>[1] = {},
-  props: WireRecord = {}
+  props: WireRecord = {},
+  prototype: Parameters<typeof createPeerSession>[0]['prototype'] = button
 ): Harness {
   const host = new ScriptedHost(SESSION, options);
   const peer = createPeerSession({
     sessionId: SESSION,
     instanceId: INSTANCE,
-    prototype: button,
+    prototype,
     props,
     send: (message) => host.receive(message),
     // Deterministic: run scheduled work inline instead of on a microtask.
@@ -626,10 +627,29 @@ describe('gpui peer: feedback style', () => {
   });
 
   it('sends nothing for a Prototype with no feedback style', async () => {
-    const { host, peer } = createHarness();
+    const activated = vi.fn();
+    const unstyled = definePrototype({
+      name: 'test-unstyled-peer',
+      setup(def) {
+        def.event.on('press.commit', activated);
+      },
+    });
+    const { host, peer } = createHarness({}, {}, unstyled);
     await peer.mount();
     expect(host.last('projection.install')?.transaction.style).toEqual([]);
     host.input('press.commit');
+    expect(activated).toHaveBeenCalledOnce();
+    expect(host.of('style.apply')).toHaveLength(0);
+    await peer.dispose();
+  });
+
+  it('carries Base Button content-selection style without inventing dynamic style changes', async () => {
+    const { host, peer } = createHarness();
+    await peer.mount();
+    // C-CONTENT-SELECTION-AFFORDANCE-0001 is authored by the real Button.
+    expect(host.last('projection.install')?.transaction.style).toEqual(['select-none']);
+    host.input('press.commit');
+    expect(host.of('expose.signal').filter((message) => message.name === 'click')).toHaveLength(1);
     expect(host.of('style.apply')).toHaveLength(0);
     await peer.dispose();
   });
