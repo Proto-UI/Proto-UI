@@ -274,7 +274,10 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
             };
           });
           expect(paint.position, `${runtime}/${name}-thumb-position`).toBe('relative');
-          expect(paint.flexGrow, `${runtime}/${name}-thumb-flex`).toBe('1');
+          // #1701 parks the composed thumb via top/left inside the track's content
+          // box (a flex-1 minimum thumb stayed on flex-start and never met the
+          // padded end), so the host now owns size with flex-grow:0, not flex:1.
+          expect(paint.flexGrow, `${runtime}/${name}-thumb-flex`).toBe('0');
           expect(paint.borderRadius, `${runtime}/${name}-thumb-radius`).not.toBe('0px');
           expect(paint.backgroundColor, `${runtime}/${name}-thumb-fill`).not.toBe(
             'rgba(0, 0, 0, 0)'

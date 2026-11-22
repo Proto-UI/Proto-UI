@@ -217,10 +217,20 @@ export function createTargetAlignmentLease(
           ? surfaceLeft + surfaceWidth - targetLeft - targets.blockTarget.offsetWidth
           : targetLeft - surfaceLeft
         : undefined;
+      // CSS fixed `left`/`right` resolve against the layout viewport.
+      // `innerWidth` includes a classic scrollbar; using it as the RTL
+      // containing-block width parks the popup one scrollbar away from the
+      // anchor (header select never matches its reference and stays unstable).
+      // A zero client box is an environment without layout (unit tests), not a
+      // scrollbar, so keep the window size there.
+      const layoutRoot = doc.documentElement;
+      const viewportWidth = layoutRoot.clientWidth > 0 ? layoutRoot.clientWidth : view.innerWidth;
+      const viewportHeight =
+        layoutRoot.clientHeight > 0 ? layoutRoot.clientHeight : view.innerHeight;
       const result = solveTargetAlignment(
         {
           direction,
-          viewport: { width: view.innerWidth, height: view.innerHeight },
+          viewport: { width: viewportWidth, height: viewportHeight },
           reference: {
             left: reference.left,
             right: reference.right,

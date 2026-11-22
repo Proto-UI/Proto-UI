@@ -2,7 +2,6 @@
 import type { Browser } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
-import { matrixHostsReady } from './demo-matrix-observation';
 import { runS3Journey } from '../../../../../../scripts/analysis/shadow-s3-journey.mjs';
 
 let browser: Browser;
@@ -29,11 +28,10 @@ describe.sequential('S3 complete Tabs and settings native acceptance paths', () 
         page.on('pageerror', (error) => errors.push(error.message));
         try {
           await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s3`);
-          // Match the matrix smoke's real readiness boundary: independent
-          // framework demos finish mounting after the S3 section is ready.
-          // Share its committed-host predicate so a failed preview reports its
-          // real error instead of stalling this readiness wait for 60s.
-          await page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 });
+          // Matrix cells are lazy and are not this Tabs acceptance. The old
+          // whole-page host predicate waited 60s for fixed-family projections
+          // that are outside the section. The journey's ready flag is the gate.
+          await page.waitForSelector('[data-shadow-s3][data-ready="true"]', { timeout: 30_000 });
           page.on('framenavigated', (frame) => {
             if (frame === page.mainFrame())
               errors.push(`Unexpected navigation during S3: ${frame.url()}`);

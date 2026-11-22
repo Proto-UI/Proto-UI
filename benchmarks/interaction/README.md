@@ -4,7 +4,7 @@ This is a **falsifiable experiment harness**, not evidence that Proto UI is corr
 
 ## Run the bounded calibration
 
-Use the repository baseline, Node 22 and `corepack pnpm@10.32.1`. Install the locked workspace dependencies. No extra dependency or model API key is needed. A system Chrome/Chromium executable is required for browser evidence; set `CHROME_PATH` when it is not `/usr/bin/chromium`.
+Use the repository baseline, Node 24 and `corepack pnpm@10.32.1`. Install the locked workspace dependencies. No extra dependency or model API key is needed. A system Chrome/Chromium executable is required for browser evidence; set `CHROME_PATH` when it is not `/usr/bin/chromium`.
 
 ```sh
 corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts

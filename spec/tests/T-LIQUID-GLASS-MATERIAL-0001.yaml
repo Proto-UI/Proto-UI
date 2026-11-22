@@ -38,6 +38,7 @@ implementations:
       - T-LIQUID-GLASS-MATERIAL-0001-CASE-PAINT
     notes:
       - Must run on the exact combined source head after primitive review. Captures actual four-runtime controls and decodes their GPU output for the same-source press negative control.
+      - Opaque-fallback, theme-token, release-tail and idle/hover cases are 0.4/WIP. Default CI does not register them unless PUI_LIQUID_GLASS_INCLUDE_WIP=1. The public Button optical path case stays registered.
       - Visible canvas source-loss/recovery and overlap refusal are exercised on the real browser consumers, together with static reduced-motion and opaque reduced-transparency paths. No native Apple, GPUI, Compiler, Flutter or Qt claim.
 exercises:
   prototypes:

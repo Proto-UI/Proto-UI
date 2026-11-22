@@ -40,6 +40,28 @@ function captureSplitSurfaceIdentity(surface: HTMLElement): string {
   );
 }
 
+// The effects owner publishes data-pui-split-surface="" while the commit that
+// snapshotted the surface is still running. That owned marker is not an
+// external blueprint edit. Any other attribute drift still rejects.
+function sameSplitSurfaceIdentity(recorded: string, surface: HTMLElement): boolean {
+  const live = captureSplitSurfaceIdentity(surface);
+  if (recorded === live) return true;
+  let recordedAttrs: unknown;
+  let liveAttrs: unknown;
+  try {
+    recordedAttrs = JSON.parse(recorded);
+    liveAttrs = JSON.parse(live);
+  } catch {
+    return false;
+  }
+  if (!Array.isArray(recordedAttrs) || !Array.isArray(liveAttrs) || recordedAttrs.length !== 5)
+    return false;
+  if (recordedAttrs[1] != null || liveAttrs[1] !== '' || !hasCurrentSplitSurfacePaint(surface))
+    return false;
+  recordedAttrs[1] = '';
+  return JSON.stringify(recordedAttrs) === JSON.stringify(liveAttrs);
+}
+
 function hasCollapsedSplitTransform(
   computed: CSSStyleDeclaration | undefined,
   Matrix: typeof DOMMatrixReadOnly | undefined
@@ -540,7 +562,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       (!splitSurface ||
         decorationRoot.ownerDocument !== record.splitRoot.document ||
         !hasSameChildren(treeRoot, record.splitRoot.children) ||
-        captureSplitSurfaceIdentity(splitSurface) !== record.splitRoot.identity ||
+        !sameSplitSurfaceIdentity(record.splitRoot.identity, splitSurface) ||
         !hasCurrentSplitSurfacePaint(splitSurface) ||
         isSplitNodeConcealed(splitSurface, host))
     )

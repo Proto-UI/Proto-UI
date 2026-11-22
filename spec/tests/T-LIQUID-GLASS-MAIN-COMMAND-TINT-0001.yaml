@@ -59,6 +59,7 @@ implementations:
     consumesCases: [T-LIQUID-GLASS-MAIN-COMMAND-TINT-0001-CASE-NATIVE]
     notes:
       - Exact-source native fixture and independent actual-size review remain required; local browser launch is unavailable and no previous Toggle or opaque Button receipt is new tint evidence.
+      - The four runtime browser jobs are 0.4/WIP. Default CI does not register them unless PUI_LIQUID_GLASS_INCLUDE_WIP=1. Portable candidate tests in this spec stay required.
 verifies:
   contracts: [C-LIQUID-GLASS-MAIN-COMMAND-TINT-0001]
 exercises:

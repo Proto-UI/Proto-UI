@@ -55,28 +55,62 @@ function virtualReferenceFor(anchor: HTMLElement) {
   return {
     getBoundingClientRect(): DOMRect {
       const rect = anchor.getBoundingClientRect();
-      let dx = 0;
-      let dy = 0;
-      const transform =
-        typeof getComputedStyle === 'function' ? getComputedStyle(anchor).transform : 'none';
-      if (transform && transform !== 'none' && typeof DOMMatrixReadOnly !== 'undefined') {
-        const matrix = new DOMMatrixReadOnly(transform);
-        dx = matrix.m41;
-        dy = matrix.m42;
-      }
+      const shift = ownAnchorTranslation(anchor);
       return {
-        x: rect.x - dx,
-        y: rect.y - dy,
-        left: rect.left - dx,
-        top: rect.top - dy,
-        right: rect.right - dx,
-        bottom: rect.bottom - dy,
+        x: rect.x - shift.x,
+        y: rect.y - shift.y,
+        left: rect.left - shift.x,
+        top: rect.top - shift.y,
+        right: rect.right - shift.x,
+        bottom: rect.bottom - shift.y,
         width: rect.width,
         height: rect.height,
         toJSON: () => ({}),
       } as DOMRect;
     },
   };
+}
+
+/**
+ * The anchor's own paint translation, not an ancestor's. `transform` matrices
+ * do not include the independent CSS `translate` property, which still shifts
+ * `getBoundingClientRect` and would otherwise move the popper basis.
+ */
+function ownAnchorTranslation(anchor: HTMLElement): { x: number; y: number } {
+  let x = 0;
+  let y = 0;
+  if (typeof getComputedStyle !== 'function') return { x, y };
+  const style = getComputedStyle(anchor);
+  const transform = style.transform;
+  if (transform && transform !== 'none' && typeof DOMMatrixReadOnly !== 'undefined') {
+    const matrix = new DOMMatrixReadOnly(transform);
+    x += matrix.m41;
+    y += matrix.m42;
+  }
+  const translate = style.translate;
+  if (translate && translate !== 'none') {
+    const [tx, ty] = translate.trim().split(/\s+/);
+    x += cssLengthToPx(tx, rectBasis(anchor, 'x'));
+    y += cssLengthToPx(ty ?? '0px', rectBasis(anchor, 'y'));
+  }
+  return { x, y };
+}
+
+function rectBasis(anchor: HTMLElement, axis: 'x' | 'y'): number {
+  const rect = anchor.getBoundingClientRect();
+  return axis === 'x' ? rect.width : rect.height;
+}
+
+function cssLengthToPx(value: string | undefined, basis: number): number {
+  if (!value) return 0;
+  const text = value.trim();
+  if (!text || text === 'none') return 0;
+  if (text.endsWith('%')) {
+    const percent = Number.parseFloat(text);
+    return Number.isFinite(percent) ? (percent / 100) * basis : 0;
+  }
+  const pixels = Number.parseFloat(text);
+  return Number.isFinite(pixels) ? pixels : 0;
 }
 
 function positionReference(anchor: HTMLElement, config: AnchoredPositionConfig) {
@@ -250,6 +284,20 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
   };
 }
 
+// computePosition yields before writing coordinates. A portaled custom element
+// is still in normal flow at the end of the document during that gap, and WC
+// entry focus scrolls it into view even when preventScroll is requested. The
+// later fixed coordinates are then solved against the scrolled anchor and stay
+// outside the viewport. Pin the configured strategy inside the viewport before
+// the first await so focus cannot move the document.
+function pinAnchoredStrategy(floating: HTMLElement, strategy: string) {
+  if (floating.style.position === strategy && floating.style.top !== '' && floating.style.left !== '')
+    return;
+  floating.style.position = strategy;
+  if (floating.style.top === '') floating.style.top = '0px';
+  if (floating.style.left === '') floating.style.left = '0px';
+}
+
 function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
   return {
     attach(initial): AnchoredPositionHostLease {
@@ -298,6 +346,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           }
           return;
         }
+        pinAnchoredStrategy(floating, config.strategy);
         if (sizing) {
           const ownSizing = sizing;
           for (let pass = 0; pass < 4; pass++) {
@@ -413,6 +462,16 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
           void position();
         });
+        // autoUpdate records overflow ancestors only once. A scroller that
+        // becomes overflow:auto after the popup opens (nested demo panes)
+        // never notifies that list, so the fixed popper keeps its pre-scroll
+        // coordinates. Element scroll does not bubble, but it is observable
+        // in the capture phase on the document.
+        const ownerDocument = reference.element.ownerDocument;
+        const onCapturedScroll = () => {
+          void position();
+        };
+        ownerDocument.addEventListener('scroll', onCapturedScroll, true);
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
@@ -423,6 +482,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           stopAuto();
           stopRoot();
           stopInvalidation?.();
+          ownerDocument.removeEventListener('scroll', onCapturedScroll, true);
         };
       };
 

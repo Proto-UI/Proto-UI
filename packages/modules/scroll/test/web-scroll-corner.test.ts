@@ -102,6 +102,8 @@ describe('Web composed track corner', () => {
       expect(f.vertical.thumbTarget.style.getPropertyValue('--proto-ui-scroll-thumb-offset')).toBe(
         '66px'
       );
+      expect(f.vertical.thumbTarget.style.top).toBe('66px');
+      expect(f.vertical.thumbTarget.style.transform).toBe('none');
       const writes = vi.spyOn(f.vertical.trackTarget.style, 'setProperty');
       lease.update(f.connection());
       expect(writes.mock.calls.filter(([name]) => name === INSET)).toHaveLength(0);

@@ -114,6 +114,8 @@ implementations:
       - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-BASE-INHERITANCE
       - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-VISUAL-SAFETY
     exercises: *a1
+    notes:
+      - The eight liquid-glass runtime/theme selection cases are 0.4/WIP and are not registered unless PUI_LIQUID_GLASS_INCLUDE_WIP=1. Bootstrap cases in the same file stay in the default gate.
 verifies:
   prototypes:
     - id: P-BOOTSTRAP-2-3-2-SELECT

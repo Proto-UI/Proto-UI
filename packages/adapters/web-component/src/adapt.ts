@@ -1283,7 +1283,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
         const wasConcealing = this._portalConceal.cancel();
-        if (!snapshot.present) setViewDetached(true);
+        // A portaled exit must finish its opacity fade before display:none.
+        // Hiding immediately drops the faded layer and Chromium can repaint
+        // the last opaque frame (the closed-dialog marker flash).
+        const concealOnPortal = !snapshot.present && isWebComponentPortaled(thisEl);
+        if (!snapshot.present && !concealOnPortal) setViewDetached(true);
         const requestVersion = ++latestIntentVersion;
         if (snapshot.present && wasConcealing && owner.hasView) {
           // The retained epoch never unmounted. Reveal it immediately so a
@@ -1316,6 +1320,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                   this._controller !== hostSession.controller
                 )
                   return;
+                if (!snapshot.present) setViewDetached(true);
                 await owner.detachView();
               }
             })

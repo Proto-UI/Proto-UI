@@ -285,7 +285,9 @@ describe('module-scroll: Web scroll surface host', () => {
 
     lease.request({ kind: 'to', axis: 'vertical', position: 0.5 });
     expect(thumb.style.getPropertyValue('--proto-ui-scroll-thumb-offset')).toBe('36px');
-    expect(thumb.style.transform).toContain('var(--proto-ui-scroll-thumb-offset)');
+    expect(thumb.style.top).toBe('36px');
+    expect(thumb.style.transform).toBe('none');
+    expect(thumb.style.flexGrow).toBe('0');
 
     setMetrics(target, {
       clientWidth: 100,
