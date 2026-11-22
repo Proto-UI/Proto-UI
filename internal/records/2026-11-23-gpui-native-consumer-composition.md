@@ -58,3 +58,13 @@ consumer producers succeeded without editing generated Rust. The new native
 fixtures, whole compiler suite and final consumer regeneration remain pending
 on the separate native build machine; these generation receipts do not assert
 their execution or stable platform accessibility acceptance.
+
+The exact-head review of `d2f132213` found one remaining provenance error:
+spreading a possibly absent optional field over an existing undefined field
+incorrectly discarded the previous property on the absent branch. The shared
+spread/assignment overlay now substitutes the previous property for each absent
+alternative, retaining actual own undefined values. Source and independently
+serialized IR negatives preserve the reproducer, with a safe-existing-field
+positive. The focused provenance/Object.assign/flow suite passed 101 tests
+(including 22 provenance cases), and bounded compiler types passed. This
+follow-up changes proof and tests only; native SDK content is unchanged.

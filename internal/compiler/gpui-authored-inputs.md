@@ -22,6 +22,10 @@ The shared source and independent IR checks admit UTF-16 string length, checked 
 
 An authored capture's `render` member retains the callable returned by that exact hook setup. The native lowering follows that nominal provenance to admit scalar or empty render callbacks as well as native renderer callbacks. An absent optional captured renderer keeps the normal default-slot behavior. This does not make arbitrary record members into renderers or add a template interpreter.
 
+For spread and admitted Object.assign, an absent source field preserves the
+previous target property on that branch. It cannot erase an earlier enumerable
+undefined merely because another branch supplies a safe value.
+
 ## Callback delivery and terminal cleanup
 
 A valid Expose emission wakes the native component's observers even when the callback does not modify State or call `run.update()`. The event remains queued until its consumer takes it; observing it does not manufacture a new authored input or duplicate the payload. Invalid emissions cannot schedule a wakeup.
