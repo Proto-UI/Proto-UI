@@ -52,6 +52,6 @@ Use these labels precisely:
 - **Uncataloged:** no support or omission decision has been made in the profile.
 - **No official profile:** the catalog has no official Adapter identity for that host.
 
-Package availability and entity lifecycle are separate. Proto UI 0.2.0 is a published stable ecosystem release (`V-PROTO-UI-0008`), while the current workspace can contain later draft entities and the draft 0.3.0-alpha.0 train. Always combine the release identity, profile lifecycle, exact relations, and executable evidence before making a compatibility claim.
+Package availability and entity lifecycle are separate. Proto UI 0.2.0 is a published stable ecosystem release (`V-PROTO-UI-0008`). Current workspace development follows [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) and its corresponding [version entity](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions); a draft train does not establish publication. Always combine the release identity, profile lifecycle, exact relations, and executable evidence before making a compatibility claim.
 
 For the underlying protocol model, read [Core](/en/specifications/core/). For implementation and contribution paths, continue to [Contribute](/en/contribute/).

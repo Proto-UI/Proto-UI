@@ -54,6 +54,10 @@ type ThumbStyleSnapshot = Readonly<{
   width: string;
   height: string;
   transform: string;
+  top: string;
+  left: string;
+  flexGrow: string;
+  alignSelf: string;
   display: DisplayStyle;
   sizeVar: string;
   offsetVar: string;
@@ -335,6 +339,10 @@ export function createWebScrollSurfaceHost(
             width: thumb.style.width,
             height: thumb.style.height,
             transform: thumb.style.transform,
+            top: thumb.style.top,
+            left: thumb.style.left,
+            flexGrow: thumb.style.flexGrow,
+            alignSelf: thumb.style.alignSelf,
             display: readDisplay(thumb),
             sizeVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-size'),
             offsetVar: thumb.style.getPropertyValue('--proto-ui-scroll-thumb-offset'),
@@ -347,6 +355,10 @@ export function createWebScrollSurfaceHost(
         thumb.style.width = original.width;
         thumb.style.height = original.height;
         thumb.style.transform = original.transform;
+        thumb.style.top = original.top;
+        thumb.style.left = original.left;
+        thumb.style.flexGrow = original.flexGrow;
+        thumb.style.alignSelf = original.alignSelf;
         writeDisplay(thumb, original.display);
         if (original.sizeVar) {
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', original.sizeVar);
@@ -485,14 +497,22 @@ export function createWebScrollSurfaceHost(
           if (originalThumbStyle) writeDisplay(thumb, originalThumbStyle.display);
           thumb.style.setProperty('--proto-ui-scroll-thumb-size', `${thumbExtent}px`);
           thumb.style.setProperty('--proto-ui-scroll-thumb-offset', `${offset}px`);
+          // flex-1 keeps a minimum thumb on the flex start. Size is host-owned;
+          // top/left travels in the track content box, leaving one pixel of
+          // padding at each long-axis end when the scroll position is 1.
+          thumb.style.flexGrow = '0';
+          thumb.style.alignSelf = 'flex-start';
+          thumb.style.transform = 'none';
           if (axis === 'vertical') {
             thumb.style.width = originalThumbStyle?.width ?? '';
             thumb.style.height = 'var(--proto-ui-scroll-thumb-size)';
-            thumb.style.transform = 'translate3d(0, var(--proto-ui-scroll-thumb-offset), 0)';
+            thumb.style.left = originalThumbStyle?.left ?? '';
+            thumb.style.top = `${offset}px`;
           } else {
             thumb.style.height = originalThumbStyle?.height ?? '';
             thumb.style.width = 'var(--proto-ui-scroll-thumb-size)';
-            thumb.style.transform = 'translate3d(var(--proto-ui-scroll-thumb-offset), 0, 0)';
+            thumb.style.top = originalThumbStyle?.top ?? '';
+            thumb.style.left = `${offset}px`;
           }
         }
         restoreInactiveThumbs(active);

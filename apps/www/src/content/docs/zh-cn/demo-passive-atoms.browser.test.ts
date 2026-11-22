@@ -298,6 +298,8 @@ describe.sequential('Public passive atom documentation previews', () => {
               text: node.textContent?.trim(),
               role: node.getAttribute('role'),
               tabIndex: node.tabIndex,
+              display: style.display,
+              emittedStyle: node.getAttribute('data-pui-style'),
               width: node.getBoundingClientRect().width,
               height: node.getBoundingClientRect().height,
               size: Number.parseFloat(style.fontSize),
@@ -314,7 +316,22 @@ describe.sequential('Public passive atom documentation previews', () => {
         });
         // P-BASE-TEXT-PASSIVE / P-BASE-SURFACE-PASSIVE: a visual sample must not gain input ownership.
         expect(facts).toHaveLength(expectedAtoms);
-        for (const fact of facts) {
+        // selectRuntime's shadcn count of 5 includes the Rhea style-scope. That
+        // root is an admitted `display: contents` carrier: it has descendant
+        // text, no box, and no emitted `data-pui-style`. Paint settles on the
+        // following atoms. Indexing facts[0] would read the unsettled scope.
+        const samples = facts.filter((fact) => fact.display !== 'contents');
+        if (family === 'shadcn') {
+          const scopes = facts.filter((fact) => fact.display === 'contents');
+          expect(scopes).toHaveLength(1);
+          expect(scopes[0]?.emittedStyle ?? null).toBeNull();
+          expect(scopes[0]?.role).toBeNull();
+          expect(scopes[0]?.tabIndex).toBe(-1);
+          expect(samples).toHaveLength(expectedAtoms - 1);
+        } else {
+          expect(samples).toHaveLength(expectedAtoms);
+        }
+        for (const fact of samples) {
           expect(fact.text?.length).toBeGreaterThan(0);
           expect(fact.role).toBeNull();
           expect(fact.tabIndex).toBe(-1);
@@ -322,24 +339,24 @@ describe.sequential('Public passive atom documentation previews', () => {
           expect(fact.height).toBeGreaterThan(0);
         }
         if (atom === 'text') {
-          expect(facts[0].text).toBe('A reusable Text atom');
+          expect(samples[0].text).toBe('A reusable Text atom');
           if (family !== 'base') {
-            expect(facts[0].size).toBeGreaterThan(facts[1].size);
-            expect(facts[3].decoration).toContain('underline');
+            expect(samples[0].size).toBeGreaterThan(samples[1].size);
+            expect(samples[3].decoration).toContain('underline');
           }
         } else {
-          expect(facts[0].text).toBe('Outline · rest');
+          expect(samples[0].text).toBe('Outline · rest');
           if (family !== 'base') {
-            expect(facts[2].shadow).not.toBe('none');
+            expect(samples[2].shadow).not.toBe('none');
             if (family === 'shadcn') {
               // Ordinary actionProfile:none preserves supplied elevation, not Button motion.
-              expect(facts[3].transform).toBe('none');
-              expect(facts[3].shadow).not.toBe('none');
-            } else expect(facts[3].transform).not.toBe('none');
+              expect(samples[3].transform).toBe('none');
+              expect(samples[3].shadow).not.toBe('none');
+            } else expect(samples[3].transform).not.toBe('none');
           }
           if (family === 'bootstrap-2-3-2') {
             const buttonPaint = (context: 'default' | 'navbar', state: 'rest' | 'focus') => {
-              const sample = facts.find((fact) => fact.ref === `button-${context}-${state}`);
+              const sample = samples.find((fact) => fact.ref === `button-${context}-${state}`);
               if (!sample) throw new Error(`Missing Button ${context}/${state} example`);
               return {
                 color: sample.color,

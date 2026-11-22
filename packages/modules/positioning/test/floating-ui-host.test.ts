@@ -85,6 +85,23 @@ describe('module-positioning: Floating UI host', () => {
     lease.dispose();
   });
 
+  it('pins the configured strategy inside the viewport before computePosition yields', () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+    });
+    expect(floating.style.position).toBe('fixed');
+    expect(floating.style.top).toBe('0px');
+    expect(floating.style.left).toBe('0px');
+    lease.dispose();
+  });
+
   it('positions against rendered anchor geometry by default even when the anchor carries a translation', async () => {
     // Reviewer counterexample: a legitimate layout translation (e.g. translate(-50%)
     // centering or an application animation) must keep the floating element where
@@ -144,6 +161,30 @@ describe('module-positioning: Floating UI host', () => {
     await flush();
     expect(floating.style.left).toBe('102px');
     expect(floating.style.top).toBe('126px');
+    transformSpy.mockRestore();
+    lease.dispose();
+  });
+
+  it('backs the independent CSS translate property out of the popper basis', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    // Rendered rect includes translate: -1px -1px; layout origin is (100, 100).
+    setRect(anchor, rect(99, 99, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    const transformSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation(
+      () => ({ transform: 'none', translate: '-1px -1px' }) as CSSStyleDeclaration
+    );
+
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: { ...baseConfig, excludeAnchorTranslation: true },
+    });
+    await flush();
+
+    expect(floating.style.left).toBe('100px');
+    expect(floating.style.top).toBe('124px');
     transformSpy.mockRestore();
     lease.dispose();
   });

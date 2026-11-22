@@ -31,7 +31,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "297a53f8a65cac3073858bae809bf985055ff83b4ecbc57c01b15d755891e5fc"
+      "sha256": "5abf6359d556daf21777892ed99cec3b57d18c5102cfcaa9569987ab76086151"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",

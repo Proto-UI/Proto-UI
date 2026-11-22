@@ -1,8 +1,6 @@
 import type { RuntimeId } from './runtimes/ids';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
-import { previewerStartupTask } from './previewer-startup-task';
-
 type PreviewerRoot = HTMLElement & { __previewer__?: { destroy(): unknown } };
 type Client = typeof import('./previewer-client');
 type PendingPreview = {
@@ -24,6 +22,36 @@ export function initPreviewerBootstrap(
   if (!view) return () => {};
   const pending = new Map<PreviewerRoot, PendingPreview>();
   let disposed = false;
+  // One eager init per macrotask. A background postTask per matrix cell never
+  // drains inside the Shadow split budgets, and running every init in one turn
+  // starves the settings controls those tests actually exercise.
+  let eagerTurn: Promise<void> = Promise.resolve();
+  const waitEagerTurn = (signal: AbortSignal) => {
+    signal.throwIfAborted();
+    const turn = eagerTurn.then(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          if (signal.aborted) {
+            reject(signal.reason);
+            return;
+          }
+          const abort = () => {
+            clearTimeout(timer);
+            reject(signal.reason);
+          };
+          const timer = setTimeout(() => {
+            signal.removeEventListener('abort', abort);
+            resolve();
+          }, 0);
+          signal.addEventListener('abort', abort, { once: true });
+        })
+    );
+    eagerTurn = turn.then(
+      () => undefined,
+      () => undefined
+    );
+    return turn;
+  };
   const release = (root: PreviewerRoot) => {
     const entry = pending.get(root);
     if (!entry) return;
@@ -59,7 +87,7 @@ export function initPreviewerBootstrap(
     root.dataset.mounting = '1';
     try {
       const { initPreviewer } = await loadClient();
-      if (root.dataset.lazy !== 'true') await previewerStartupTask(root, entry.owner.signal);
+      if (root.dataset.lazy !== 'true') await waitEagerTurn(entry.owner.signal);
       if (
         disposed ||
         entry.owner.signal.aborted ||

@@ -122,6 +122,26 @@ describe('prototypes/brutalist: dropdown menu', () => {
     styleSpy.mockRestore();
   });
 
+  it('keeps the popper basis on layout when the Trigger uses the CSS translate property', async () => {
+    vi.useFakeTimers();
+    const { trigger, content } = createDropdown({
+      content: { sideOffset: 0, align: 'start', avoidCollisions: false },
+    });
+    setRect(trigger, rect(99, 99, 50, 20));
+    setRect(content, rect(0, 0, 40, 10));
+    const nativeGetComputedStyle = window.getComputedStyle;
+    const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+      if (element === trigger)
+        return { transform: 'none', translate: '-1px -1px' } as CSSStyleDeclaration;
+      return nativeGetComputedStyle(element);
+    });
+    trigger.click();
+    await settle();
+    expect(content.style.left).toBe('100px');
+    expect(content.style.top).toBe('120px');
+    styleSpy.mockRestore();
+  });
+
   it('projects the direct Root entry and inherited menu ownership', async () => {
     // T-BRUTALIST-DROPDOWN-MENU-0001-CASE-1
     vi.useFakeTimers();

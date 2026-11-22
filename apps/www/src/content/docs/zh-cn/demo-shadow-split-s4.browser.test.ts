@@ -136,7 +136,11 @@ describe.sequential('S4 complete public Dialog settings', () => {
         }
         note('startup-wait', 'begin');
         try {
-          await page.waitForFunction(observeS4Startup, undefined, { timeout: 60_000 });
+          // observeS4Startup still records the whole matrix for evidence, but it
+          // is not the Dialog gate. Eager matrix cells stay uninitialized well
+          // past 60s, so that predicate turns a ready S4 section into a timeout.
+          // The journey's own contract is this section's ready flag.
+          await page.waitForSelector('[data-shadow-s4][data-ready="true"]', { timeout: 30_000 });
           startupPassed = true;
         } finally {
           note('startup-wait', startupPassed ? 'return' : 'error');
