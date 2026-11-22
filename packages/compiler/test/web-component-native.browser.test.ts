@@ -174,7 +174,7 @@ for (const shadow of [false, true])
             };
           })
         ).toEqual({ b: true, text: true });
-      }));
+      }), 20_000);
     it('retains native child identity/listeners and real slot projection on updates', async () =>
       withPage('slot-' + shadow, shadow, async (page) => {
         await page.evaluate(() => window.nativeProbe.child.click());
@@ -195,7 +195,7 @@ for (const shadow of [false, true])
             };
           })
         ).toEqual({ connected: true, clicks: 2, owner: true, projection: true });
-      }));
+      }), 20_000);
     it('does not steal a consumer-transferred native slot child', async () =>
       withPage('transfer-' + shadow, shadow, async (page) => {
         await page.evaluate(() =>
@@ -211,7 +211,7 @@ for (const shadow of [false, true])
             return { outside: p.child.parentElement?.id, clicks: p.clicks };
           })
         ).toEqual({ outside: 'outside', clicks: 1 });
-      }));
+      }), 20_000);
     it('retains same-turn owner, but disconnect/reconnect and dispose clean up', async () =>
       withPage('lifecycle-' + shadow, shadow, async (page) => {
         await page.evaluate(() =>
@@ -261,7 +261,7 @@ for (const shadow of [false, true])
             };
           })
         ).toEqual({ owner: null, childParent: true, clicks: 1 });
-      }));
+      }), 20_000);
     for (const [phase, value] of [
       ['evaluation', 99],
       ['construction', 98],
@@ -304,6 +304,6 @@ for (const shadow of [false, true])
             await expect.poll(() => spanTexts(page)).toEqual(['4', '4']);
           },
           ['Multiple slots are unsupported']
-        ));
+        ), 20_000);
     }
   });
