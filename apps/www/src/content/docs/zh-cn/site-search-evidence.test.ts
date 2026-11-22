@@ -15,6 +15,8 @@ import {
   homepageRollbackWasOnTime,
   searchRevealMatchesViewport,
   readIndependentPagefindQueries,
+  installSearchRuntimeTrace,
+  stopSearchRuntimeTrace,
 } from './site-search-evidence';
 
 const source = readFileSync(
@@ -69,6 +71,233 @@ describe('independent Pagefind browser callback transport', () => {
   });
 });
 
+describe('opt-in production runtime diagnosis', () => {
+  function harness() {
+    let now = 100;
+    const mutationObservers: any[] = [];
+    const timingObservers: any[] = [];
+    const host = {
+      dataset: {
+        projectionOwnerHost: 'open-owner',
+        projectionGenerationHost: '1',
+        projectionGenerationState: 'active',
+      },
+      isConnected: true,
+      inert: false,
+      hidden: false,
+      childElementCount: 1,
+      firstElementChild: { localName: 'wc-shadcn-button' },
+      hasAttribute: (name: string) => name === 'data-projection-generation-host',
+    };
+    const open = { dataset: { projectionOwner: 'open-owner' }, children: [host] };
+    const dialog = { dataset: { projectionOwner: 'dialog-owner' }, children: [] as any[] };
+    const root = {
+      isConnected: true,
+      dataset: { searchRuntime: 'wc', searchView: 'ready', searchGeneration: '1' },
+      querySelector(selector: string) {
+        if (selector === '[data-search-command-mount="open"]') return open;
+        if (selector === '[data-search-dialog-mount]') return dialog;
+        throw new Error(`Unexpected descendant query: ${selector}`);
+      },
+    };
+    const window = {} as any;
+    const sandbox = {
+      window,
+      document: {
+        querySelector(selector: string) {
+          if (selector !== 'site-search') throw new Error('Unexpected document traversal');
+          return root;
+        },
+      },
+      URL,
+      location: { origin: 'http://127.0.0.1:4397', href: 'http://127.0.0.1:4397/docs/' },
+      performance: { timeOrigin: 1000, now: () => now },
+      Date: { now: () => 1000 + now },
+      MutationObserver: class {
+        observe = vi.fn();
+        disconnect = vi.fn();
+        constructor(readonly callback: () => void) {
+          mutationObservers.push(this);
+        }
+      },
+      PerformanceObserver: class {
+        static supportedEntryTypes = ['resource', 'longtask', 'paint'];
+        observe = vi.fn();
+        disconnect = vi.fn();
+        pending: any[] = [];
+        takeRecords() {
+          const pending = this.pending;
+          this.pending = [];
+          return pending;
+        }
+        constructor(readonly callback: (list: any) => void) {
+          timingObservers.push(this);
+        }
+      },
+    };
+    const compiled = transformSync(
+      `globalThis.install = ${installSearchRuntimeTrace.toString()};`,
+      { loader: 'ts', target: 'es2022', format: 'cjs', keepNames: true }
+    ).code;
+    runInNewContext(compiled, sandbox);
+    const install = (sandbox as any).install;
+    expect(install.toString()).not.toMatch(/\b__name\s*\(/);
+    install();
+    return {
+      host,
+      open,
+      dialog,
+      root,
+      window,
+      mutationObservers,
+      timingObservers,
+      install,
+      stop: runInNewContext(`(${stopSearchRuntimeTrace.toString()})`, { window }),
+      tick(value: number) {
+        now = value;
+      },
+    };
+  }
+
+  it('records delivered staging/content/active facts without creating readiness or walking descendants', () => {
+    const h = harness();
+    expect(h.root.dataset).toEqual({
+      searchRuntime: 'wc',
+      searchView: 'ready',
+      searchGeneration: '1',
+    });
+    const candidate = {
+      ...h.host,
+      dataset: {
+        projectionOwnerHost: 'dialog-owner',
+        projectionGenerationHost: '2',
+        projectionGenerationState: 'staging',
+      },
+      inert: true,
+      hidden: true,
+      childElementCount: 0,
+      firstElementChild: null as null | { localName: string },
+    };
+    h.dialog.children.push(candidate);
+    h.tick(120);
+    h.mutationObservers[0].callback();
+    candidate.childElementCount = 1;
+    candidate.firstElementChild = { localName: 'vue-shadcn-dialog-root' };
+    h.tick(400);
+    h.mutationObservers[0].callback();
+    candidate.dataset.projectionGenerationState = 'active';
+    candidate.inert = false;
+    candidate.hidden = false;
+    h.tick(450);
+    h.mutationObservers[0].callback();
+    const result = h.stop();
+    expect(result.diagnosticOnly).toBe(true);
+    expect(
+      result.phases
+        .slice(1, 4)
+        .map((phase: any) => [
+          phase.at,
+          phase.facts.mounts[1].hosts[0].state,
+          phase.facts.mounts[1].hosts[0].childCount,
+        ])
+    ).toEqual([
+      [120, 'staging', 0],
+      [400, 'staging', 1],
+      [450, 'active', 1],
+    ]);
+    expect(result.finalPhase.facts.runtime).toBe('wc');
+    expect(h.root.dataset.searchGeneration).toBe('1');
+    expect(h.timingObservers[0].observe).toHaveBeenCalledWith({
+      entryTypes: ['resource', 'longtask'],
+    });
+  });
+
+  it('retains in-flight same-origin timing, excludes old/foreign resources and strips query strings', () => {
+    const h = harness();
+    const resource = {
+      entryType: 'resource',
+      name: 'http://127.0.0.1:4397/_astro/vue.js?token=secret#fragment',
+      startTime: 90,
+      duration: 20,
+      initiatorType: 'script',
+      fetchStart: 91,
+      requestStart: 92,
+      responseStart: 105,
+      responseEnd: 110,
+      transferSize: 300,
+      encodedBodySize: 250,
+      decodedBodySize: 600,
+    };
+    h.timingObservers[0].callback({
+      getEntries: () => [
+        resource,
+        { ...resource, startTime: 10 },
+        { ...resource, name: 'https://other.invalid/foreign.js' },
+        { entryType: 'longtask', startTime: 95, duration: 80 },
+      ],
+    });
+    // Entries not yet delivered by the UA are flushed on explicit diagnostic stop.
+    h.timingObservers[0].pending.push({
+      ...resource,
+      name: 'http://127.0.0.1:4397/_astro/adapter.js',
+    });
+    const result = h.stop();
+    expect(result.resourceCount).toBe(2);
+    expect(result.resources[0]).toEqual({
+      url: 'http://127.0.0.1:4397/_astro/vue.js',
+      initiatorType: 'script',
+      startTime: 90,
+      duration: 20,
+      fetchStart: 91,
+      requestStart: 92,
+      responseStart: 105,
+      responseEnd: 110,
+      transferSize: 300,
+      encodedBodySize: 250,
+      decodedBodySize: 600,
+    });
+    expect(result.longTasks).toEqual([{ startTime: 95, duration: 80 }]);
+    expect(JSON.stringify(result)).not.toContain('secret');
+  });
+
+  it('bounds recorded arrays while retaining truncation counts and the final phase', () => {
+    const h = harness();
+    for (let i = 0; i < 150; i++) {
+      h.root.dataset.searchGeneration = String(i + 2);
+      h.mutationObservers[0].callback();
+    }
+    const tasks = Array.from({ length: 200 }, (_, i) => ({
+      entryType: 'longtask',
+      startTime: 100 + i,
+      duration: 70,
+    }));
+    h.timingObservers[0].callback({ getEntries: () => tasks });
+    const result = h.stop();
+    expect(result.phases).toHaveLength(96);
+    expect(result.phaseCount).toBe(152);
+    expect(result.finalPhase.facts.generation).toBe('151');
+    expect(result.longTasks).toHaveLength(128);
+    expect(result.longTaskCount).toBe(200);
+  });
+
+  it('stops observers once, ignores late deliveries and retires a previous diagnostic', () => {
+    const h = harness();
+    const first = h.stop();
+    h.mutationObservers[0].callback();
+    h.timingObservers[0].callback({
+      getEntries: () => [{ entryType: 'longtask', startTime: 100, duration: 80 }],
+    });
+    expect(h.stop()).toEqual(first);
+    expect(first.longTaskCount).toBe(0);
+    expect(h.mutationObservers[0].disconnect).toHaveBeenCalledTimes(1);
+    expect(h.timingObservers[0].disconnect).toHaveBeenCalledTimes(1);
+    h.install();
+    expect(h.stop().phaseCount).toBe(2);
+    expect(h.mutationObservers[0].disconnect).toHaveBeenCalledTimes(1);
+    expect(h.mutationObservers[1].disconnect).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('Search native reveal geometry oracle', () => {
   const viewport = { viewportTop: 100, viewportBottom: 180 };
 
@@ -119,9 +348,9 @@ describe('Search native reveal geometry oracle', () => {
   });
 
   it('admits an unreachable leading inset only at zero with full physical visibility', () => {
-    expect(
-      searchRevealMatchesViewport(leadingRow, 'end', { ...leadingNative, scrollTop: 0 })
-    ).toBe(true);
+    expect(searchRevealMatchesViewport(leadingRow, 'end', { ...leadingNative, scrollTop: 0 })).toBe(
+      true
+    );
   });
 
   it('rejects the same inset violation away from the corresponding native boundary', () => {
@@ -136,11 +365,10 @@ describe('Search native reveal geometry oracle', () => {
 
   it('rejects physical clipping even when the scroll position is at its maximum', () => {
     expect(
-      searchRevealMatchesViewport(
-        { ...trailingRow, targetBottom: 329 },
-        'start',
-        { ...clampedViewport, physicalTargetBottom: 329 }
-      )
+      searchRevealMatchesViewport({ ...trailingRow, targetBottom: 329 }, 'start', {
+        ...clampedViewport,
+        physicalTargetBottom: 329,
+      })
     ).toBe(false);
   });
 
