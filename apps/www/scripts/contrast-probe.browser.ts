@@ -585,7 +585,12 @@ const supportedSvgFillArea = (glyph: Element, style: CSSStyleDeclaration): boole
   }
 };
 
-const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf = false) => {
+const paintedBoxVisibility = (
+  element: Element,
+  boxes: readonly DOMRect[],
+  clipSelf = false,
+  straightBandWitness = false
+) => {
   const limits: string[] = [];
   const roundedOverflowClips: {
     prototype: string | null;
@@ -600,8 +605,10 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
     overflowX: string;
     overflowY: string;
     fixedPx: boolean;
+    exactClientBox: boolean;
     safeInteriorOverlap: boolean;
     whollyInsideSafeRect: boolean;
+    whollyInsideStraightBand: boolean;
     boxCount: number;
     safeRect: { left: number; right: number; top: number; bottom: number } | null;
   }[] = [];
@@ -643,9 +650,45 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
     if (style.clip !== 'auto') limits.push('unsupported-legacy-clip');
     if (style.clipPath !== 'none' || style.maskImage !== 'none')
       limits.push('unsupported-clip-path-or-mask');
+    // overflow:clip can move its clip edge with overflow-clip-margin's
+    // reference box. This bounded shadow proof only handles client overflow
+    // edges; do not guess at a clip margin or its corner geometry.
+    if (straightBandWitness && (style.overflowX === 'clip' || style.overflowY === 'clip'))
+      limits.push('unsupported-inset-shadow-overflow-clip');
     if (!translationOnly(style)) limits.push('unsupported-transformed-paint');
-    if (style.contain.includes('paint')) limits.push('unsupported-paint-containment');
+    // The shorthand keywords also imply paint containment; content-visibility
+    // auto applies it even while the on-screen content is not skipped.
+    if (
+      /(?:^|\s)(?:paint|content|strict)(?:$|\s)/.test(style.contain) ||
+      style.contentVisibility === 'auto'
+    )
+      limits.push('unsupported-paint-containment');
     const rect = current.getBoundingClientRect();
+    const borderWidths = [
+      style.borderTopWidth,
+      style.borderRightWidth,
+      style.borderBottomWidth,
+      style.borderLeftWidth,
+    ];
+    const borderPixels = borderWidths.map((value) =>
+      /^(?:\d+(?:\.\d+)?|\.\d+)px$/.test(value) ? Number.parseFloat(value) : NaN
+    );
+    // client* rounds to integer CSS pixels. No clipping ancestor may enlarge
+    // a fractional edge when certifying a small inset-shadow patch, including
+    // square ancestors nested inside the rounded container.
+    const exactClientBox =
+      borderPixels.every(Number.isFinite) &&
+      current.clientTop === borderPixels[0] &&
+      current.clientLeft === borderPixels[3] &&
+      current.clientWidth === rect.width - borderPixels[1] - borderPixels[3] &&
+      current.clientHeight === rect.height - borderPixels[0] - borderPixels[2];
+    if (
+      straightBandWitness &&
+      (clipSelf || current !== element) &&
+      (style.overflowX !== 'visible' || style.overflowY !== 'visible') &&
+      !exactClientBox
+    )
+      limits.push('unsupported-inexact-client-overflow-clip');
     // Admit only a small proof domain: fixed-px rounded clipping cannot affect
     // a whole box inside the central inscribed rectangle. Other curved clips
     // remain unknown; intersecting client bounds are not proof of painted ink.
@@ -669,6 +712,7 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
         return [axes[0], axes[1] ?? axes[0]];
       });
       let safelyInside = false;
+      let whollyInsideStraightBand = false;
       let safeInteriorOverlap = false;
       let safeRect: { left: number; right: number; top: number; bottom: number } | null = null;
       const fixedPx = fixed.every((radius) => radius !== null) && translationOnly(style);
@@ -692,6 +736,23 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
             box.top >= safeTop &&
             box.bottom <= safeBottom
         );
+        // A bounded inset-shadow witness may also lie in either straight
+        // interior strip between the corner arcs. This proves only that small
+        // patch; whole-target and numeric readers keep the inscribed rectangle.
+        whollyInsideStraightBand =
+          straightBandWitness &&
+          exactClientBox &&
+          nonempty.every(
+            (box) =>
+              (box.left >= safeLeft &&
+                box.right <= safeRight &&
+                box.top >= rect.top + current.clientTop &&
+                box.bottom <= rect.top + current.clientTop + current.clientHeight) ||
+              (box.top >= safeTop &&
+                box.bottom <= safeBottom &&
+                box.left >= rect.left + current.clientLeft &&
+                box.right <= rect.left + current.clientLeft + current.clientWidth)
+          );
         safeRect = { left: safeLeft, right: safeRight, top: safeTop, bottom: safeBottom };
         safeInteriorOverlap = nonempty.every(
           (box) =>
@@ -705,12 +766,7 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
         generation: current.getAttribute('data-projection-generation'),
         physicalNodeId: stateNodeIdentity(current),
         radii: cornerRadii,
-        borderWidths: [
-          style.borderTopWidth,
-          style.borderRightWidth,
-          style.borderBottomWidth,
-          style.borderLeftWidth,
-        ],
+        borderWidths,
         borderBox: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
         clientBox: {
           x: rect.left + current.clientLeft,
@@ -727,12 +783,15 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
         overflowX: style.overflowX,
         overflowY: style.overflowY,
         fixedPx,
+        exactClientBox,
         safeInteriorOverlap,
         whollyInsideSafeRect: safelyInside,
+        whollyInsideStraightBand,
         boxCount: nonempty.length,
         safeRect,
       });
-      if (!safelyInside) limits.push('unsupported-rounded-overflow-clip');
+      if (!safelyInside && !whollyInsideStraightBand)
+        limits.push('unsupported-rounded-overflow-clip');
     }
     // A non-unit zoom anywhere in the chain invalidates the fixed-CSS-pixel
     // proof above; do not reinterpret transformed physical lengths as radii.
@@ -865,9 +924,81 @@ const paintWitnessBoxes = (element: Element, boxes: readonly DOMRect[]): readonl
   return stroke ? [stroke] : boxes;
 };
 
+// CSS Backgrounds 3 §6.1.1: a zero-offset, zero-blur positive inset spread
+// paints a band inside the padding edge. Certify only small interior patches of
+// an unrounded, single HTML box without native scrollbar geometry. Unsupported
+// shadows stay unknown; this does not supply perimeter/contrast measurements.
+// https://www.w3.org/TR/css-backgrounds-3/#shadow-shape
+const insetShadowWitnessBoxes = (element: Element): DOMRect[] => {
+  if (
+    element.namespaceURI !== 'http://www.w3.org/1999/xhtml' ||
+    element.getClientRects().length !== 1
+  )
+    return [];
+  const style = getComputedStyle(element);
+  if (
+    [
+      style.borderTopLeftRadius,
+      style.borderTopRightRadius,
+      style.borderBottomRightRadius,
+      style.borderBottomLeftRadius,
+    ].some((radius) => radius !== '0px')
+  )
+    return [];
+  const rect = element.getBoundingClientRect();
+  const borders = [
+    style.borderLeftWidth,
+    style.borderTopWidth,
+    style.borderRightWidth,
+    style.borderBottomWidth,
+  ];
+  if (borders.some((border) => !/^(?:\d+(?:\.\d+)?|\.\d+)px$/.test(border))) return [];
+  const [borderLeft, borderTop, borderRight, borderBottom] = borders.map(Number.parseFloat);
+  const width = rect.width - borderLeft - borderRight;
+  const height = rect.height - borderTop - borderBottom;
+  if (
+    !(width > 0 && height > 0) ||
+    width !== element.clientWidth ||
+    height !== element.clientHeight
+  )
+    return [];
+  const parts: string[] = [];
+  let depth = 0,
+    start = 0;
+  for (let index = 0; index < style.boxShadow.length; index++) {
+    const char = style.boxShadow[index];
+    if (char === '(') depth++;
+    if (char === ')') depth--;
+    if (char === ',' && depth === 0) {
+      parts.push(style.boxShadow.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  if (style.boxShadow !== 'none') parts.push(style.boxShadow.slice(start).trim());
+  for (const part of parts) {
+    const match = part.match(/^(.+?)\s+0px\s+0px\s+0px\s+((?:\d+(?:\.\d+)?|\.\d+))px\s+inset$/);
+    if (!match || !nontransparentSourcePaint(match[1])) continue;
+    const spread = Number(match[2]);
+    if (!Number.isFinite(spread) || spread <= 0) continue;
+    const band = Math.min(spread, width / 2, height / 2);
+    const side = band / 2;
+    const left = rect.left + borderLeft,
+      top = rect.top + borderTop;
+    // Keep every patch away from the padding edge and the inner shadow edge.
+    // Source-model visibility below checks all ancestors and the viewport.
+    return [
+      new DOMRect(left + width / 2 - side / 2, top + band / 4, side, side),
+      new DOMRect(left + band / 4, top + height / 2 - side / 2, side, side),
+      new DOMRect(left + width / 2 - side / 2, top + height - (3 * band) / 4, side, side),
+      new DOMRect(left + width - (3 * band) / 4, top + height / 2 - side / 2, side, side),
+    ];
+  }
+  return [];
+};
+
 // This is a bounded source witness, not pixel segmentation or an occlusion
 // renderer. Never borrow ancestor fill to claim an otherwise invisible target.
-const readSupportedPaintWitness = (element: Element) => {
+const readSupportedPaintWitness = (element: Element, includeInsetShadow = false) => {
   type Witness = {
     kind: string;
     physicalNodeId: number;
@@ -961,6 +1092,12 @@ const readSupportedPaintWitness = (element: Element) => {
           return witness(node, 'border', boxes, visibility);
       }
     }
+    if (includeInsetShadow)
+      for (const box of insetShadowWitnessBoxes(node)) {
+        const shadowVisibility = paintedBoxVisibility(node, [box], false, true);
+        if (shadowVisibility.visible && shadowVisibility.classification === 'source-model-visible')
+          return witness(node, 'inset-shadow', [box], shadowVisibility);
+      }
     // Native/replaced content cannot be witnessed by stale defaultValue or DOM
     // fallback text. Their supported box paint still qualifies above.
     if (node.matches('textarea,input,select,canvas,img,video,audio,object,iframe,embed'))
@@ -1001,15 +1138,15 @@ export const readContrastPaintedVisibility = (element: Element) => {
     visibility.limits.length > 0 &&
     visibility.limits.every((limit) => limit === 'unsupported-rounded-overflow-clip')
   ) {
-    const paintWitness = readSupportedPaintWitness(element);
+    const paintWitness = readSupportedPaintWitness(element, true);
     if (paintWitness)
       return {
         ...visibility,
         classification: 'source-model-visible',
         limits: [],
-        // Presence may be established by a real descendant's entire painted
-        // box inside every supported clip. The original target perimeter and
-        // its numeric measurements retain their whole-box limitations.
+        // Presence may be established by a bounded owned paint witness inside
+        // every supported clip. The original target perimeter and its numeric
+        // measurements retain their whole-box limitations.
         boxVisibility: visibility,
         paintWitness,
       };

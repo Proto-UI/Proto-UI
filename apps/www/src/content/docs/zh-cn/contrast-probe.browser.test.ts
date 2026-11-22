@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -61,6 +61,43 @@ const recordCalibrationFile = async (name: string, contents: string | Buffer) =>
   } catch (error) {
     // Diagnostic failures must not replace the original setup/capture/assertion.
     console.error(`[contrast-calibration] ${name} evidence save failed:`, error);
+  }
+};
+const recordPaintWitnessCalibration = async (name: string, png: Buffer, observations: unknown) => {
+  if (!process.env.RUNNER_TEMP) return;
+  try {
+    const hash = (bytes: string | Buffer) => createHash('sha256').update(bytes).digest('hex');
+    const cwd = fileURLToPath(new URL('.', import.meta.url));
+    await recordCalibrationFile(`${name}.png`, png);
+    await recordCalibrationFile(
+      `${name}.json`,
+      JSON.stringify(
+        {
+          sourceHead: execFileSync('git', ['-C', cwd, 'rev-parse', 'HEAD'], {
+            encoding: 'utf8',
+          }).trim(),
+          sourceWorktree: execFileSync('git', ['-C', cwd, 'status', '--porcelain'], {
+            encoding: 'utf8',
+          }),
+          observedAt: new Date().toISOString(),
+          testSourceSha256: hash(await readFile(fileURLToPath(import.meta.url))),
+          probeSourceSha256: hash(
+            await readFile(
+              new URL('../../../../scripts/contrast-probe.browser.ts', import.meta.url)
+            )
+          ),
+          probeBundleSha256: hash(bundle),
+          pngSha256: hash(png),
+          pngSize: { width: png.readUInt32BE(16), height: png.readUInt32BE(20) },
+          observations,
+        },
+        null,
+        2
+      )
+    );
+  } catch (error) {
+    // Retain the original paint assertion if supplemental evidence cannot save.
+    console.error(`[contrast-calibration] ${name} binding failed:`, error);
   }
 };
 const recordCalibrationPhase = async (phase: string, error?: unknown) =>
@@ -494,6 +531,299 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       await context.close();
     }
   });
+
+  it('witnesses a hard inset ring inside rounded overflow without widening whole-box metrics', async () => {
+    const context = await browser.newContext({ viewport: { width: 800, height: 600 } });
+    try {
+      const page = await context.newPage();
+      const cases = [
+        ['hard', '', 'box-shadow:0 0 0 2px black inset'],
+        ['alpha', '', 'box-shadow:0 0 0 2px rgb(0 0 0 / .5) inset'],
+        [
+          'layered',
+          '',
+          'box-shadow:0 0 0 0 rgb(220 235 254),0 0 0 2px black inset,0 0 0 0 transparent',
+        ],
+        ['transparent', '', 'box-shadow:0 0 0 2px transparent inset'],
+        ['zero', '', 'box-shadow:0 0 0 0 black inset'],
+        ['negative', '', 'box-shadow:0 0 0 -2px black inset'],
+        ['blur', '', 'box-shadow:0 0 2px 2px black inset'],
+        ['offset', '', 'box-shadow:1px 0 0 2px black inset'],
+        ['outset', '', 'box-shadow:0 0 0 2px black'],
+        ['target-rounded', '', 'border-radius:5px;box-shadow:0 0 0 2px black inset'],
+        ['percent-clip', 'border-radius:50%', 'box-shadow:0 0 0 2px black inset'],
+        [
+          'corner-clipped',
+          'border-radius:30px',
+          'width:6px;height:6px;box-shadow:0 0 0 2px black inset',
+        ],
+        ['filtered', 'filter:opacity(0)', 'box-shadow:0 0 0 2px black inset'],
+        ['transformed', 'transform:scale(.9)', 'box-shadow:0 0 0 2px black inset'],
+        ['empty', '', ''],
+      ];
+      await page.setContent(
+        fixture(`
+        <style>
+          .ring-grid { display:grid;grid-template-columns:repeat(4,150px);gap:8px;background:white; }
+          .ring-clip { width:140px;height:64px;overflow:hidden;border-radius:5px;border:2px solid white; }
+          .ring-clip > [data-pui-root] { width:140px;height:64px;min-height:0;margin:0;background:transparent;border:0; }
+        </style>
+        <div class="ring-grid">${cases
+          .map(
+            ([id, parent, target]) =>
+              `<div class="ring-clip" style="${parent}"><div data-pui-root data-projection-owner="calibration" data-projection-generation="1" id="${id}" data-demo-ref="${id}" style="${target}"></div></div>`
+          )
+          .join('')}</div>
+      `)
+      );
+      await page.addScriptTag({ content: bundle });
+      const observed = await page.evaluate(
+        (ids) =>
+          Object.fromEntries(
+            ids.map((id) => [
+              id,
+              window.puiContrastProbe.readContrastTargetObservation(document.getElementById(id)!),
+            ])
+          ),
+        cases.map(([id]) => id)
+      );
+      const png = await page.screenshot();
+      const frame = await page.evaluate(
+        (image) =>
+          window.puiContrastProbe.collectContrastFrame({
+            image,
+            family: 'inset-ring-presence-calibration',
+          }),
+        png.toString('base64')
+      );
+      // Verify the native painted pixel inside each claimed patch, independently
+      // of the CSS source-model predicate. The source and screenshot are retained.
+      const pixels = await page.evaluate(
+        async ({ image, observed }) => {
+          const bitmap = new Image();
+          bitmap.src = `data:image/png;base64,${image}`;
+          await bitmap.decode();
+          const canvas = document.createElement('canvas');
+          canvas.width = bitmap.naturalWidth;
+          canvas.height = bitmap.naturalHeight;
+          const context = canvas.getContext('2d')!;
+          context.drawImage(bitmap, 0, 0);
+          return Object.fromEntries(
+            ['hard', 'alpha', 'layered'].map((id) => {
+              const visibility = observed[id].visibility;
+              if (!('paintWitness' in visibility)) return [id, null];
+              const box = visibility.paintWitness.boxes[0];
+              const x = Math.floor(box.x + box.width / 2),
+                y = Math.floor(box.y + box.height / 2);
+              return [id, { x, y, rgba: [...context.getImageData(x, y, 1, 1).data] }];
+            })
+          );
+        },
+        { image: png.toString('base64'), observed }
+      );
+      await recordPaintWitnessCalibration('inset-ring-presence', png, { observed, pixels, frame });
+      for (const id of ['hard', 'alpha', 'layered']) {
+        expect(observed[id].achieved).toBe(true);
+        expect(observed[id].visibility).toMatchObject({
+          classification: 'source-model-visible',
+          paintWitness: { kind: 'inset-shadow' },
+          boxVisibility: {
+            classification: 'unsupported',
+            limits: ['unsupported-rounded-overflow-clip'],
+          },
+        });
+        const wholeBox = surface(frame, id);
+        expect(wholeBox.visibility.classification).toBe('unsupported');
+        expect(wholeBox.visibility.limits).toContain('unsupported-rounded-overflow-clip');
+        expect(wholeBox.exterior).toEqual([]);
+        const inset = wholeBox.shadows.find((shadow) => shadow.inset);
+        expect(inset?.insetVsFill).toBeNull();
+        expect(inset?.receiving).toEqual([]);
+      }
+      expect(pixels.hard?.rgba).toEqual([0, 0, 0, 255]);
+      expect(pixels.layered?.rgba).toEqual([0, 0, 0, 255]);
+      expect(pixels.alpha?.rgba[3]).toBe(255);
+      for (const channel of pixels.alpha!.rgba.slice(0, 3)) {
+        expect(channel).toBeGreaterThanOrEqual(127);
+        expect(channel).toBeLessThanOrEqual(128);
+      }
+      for (const [id] of cases.slice(3)) expect(observed[id].achieved, id).toBe(false);
+    } finally {
+      await context.close();
+    }
+  });
+
+  it.each(['rounded', 'nested-square'] as const)(
+    'withholds inset shadow patches beyond a fractional %s overflow edge',
+    async (clipKind) => {
+      // The small high-DPR viewport resolves both the fractional clip edge and
+      // the outside shadow into distinct native pixels, avoiding DPR1 snapping.
+      const context = await browser.newContext({
+        viewport: { width: 140, height: 100 },
+        deviceScaleFactor: 16,
+      });
+      try {
+        const page = await context.newPage();
+        const ink =
+          '<div id="ink" style="position:absolute;left:100.625px;top:20px;width:1px;height:10px;box-shadow:0 0 0 2px black inset"></div>';
+        const markup =
+          clipKind === 'rounded'
+            ? `<div id="clip" style="position:absolute;left:10px;top:10px;width:100.5625px;height:50px;overflow:hidden;border-radius:5px">
+            <div id="target" style="position:relative;width:100px;height:50px">${ink}</div>
+          </div>`
+            : `<div style="position:absolute;left:10px;top:10px;width:120px;height:70px;overflow:hidden;border-radius:5px">
+            <div id="target" style="position:relative;width:120px;height:70px">
+              <div id="clip" style="position:absolute;left:0;top:0;width:100.5625px;height:50px;overflow:hidden">${ink}</div>
+            </div>
+          </div>`;
+        await page.setContent(
+          fixture(`
+        <style>html,body{margin:0;background:white}</style>
+        ${markup}
+      `)
+        );
+        await page.addScriptTag({ content: bundle });
+        const observed = await page.evaluate(() => {
+          const clip = document.getElementById('clip')!;
+          const ink = document.getElementById('ink')!;
+          return {
+            target: window.puiContrastProbe.readContrastTargetObservation(
+              document.getElementById('target')!
+            ),
+            clip: {
+              width: clip.getBoundingClientRect().width,
+              right: clip.getBoundingClientRect().right,
+              clientWidth: clip.clientWidth,
+            },
+            ink: { left: ink.getBoundingClientRect().left },
+          };
+        });
+        const png = await page.screenshot();
+        const pixel = await page.evaluate(async (image) => {
+          const bitmap = new Image();
+          bitmap.src = `data:image/png;base64,${image}`;
+          await bitmap.decode();
+          const canvas = document.createElement('canvas');
+          canvas.width = bitmap.naturalWidth;
+          canvas.height = bitmap.naturalHeight;
+          const context = canvas.getContext('2d')!;
+          context.drawImage(bitmap, 0, 0);
+          return [
+            ...context.getImageData(110.875 * devicePixelRatio, 35 * devicePixelRatio, 1, 1).data,
+          ];
+        }, png.toString('base64'));
+        await recordPaintWitnessCalibration(`inset-ring-fractional-${clipKind}-clip`, png, {
+          observed,
+          pixel,
+        });
+        expect(observed.clip.width).toBe(100.5625);
+        expect(observed.clip.clientWidth).toBe(101);
+        expect(observed.ink.left).toBeGreaterThan(observed.clip.right);
+        expect(observed.target.achieved).toBe(false);
+        expect(pixel).toEqual([255, 255, 255, 255]);
+      } finally {
+        await context.close();
+      }
+    }
+  );
+
+  it('withholds inset shadow patches excluded by a content-box overflow clip', async () => {
+    const context = await browser.newContext({ viewport: { width: 200, height: 140 } });
+    try {
+      const page = await context.newPage();
+      await page.setContent(
+        fixture(`
+        <style>html,body{margin:0;background:white}</style>
+        <div id="clip" style="position:absolute;left:10px;top:10px;width:100px;height:50px;padding:20px;overflow:clip;overflow-clip-margin:content-box;border-radius:5px">
+          <div id="target" style="position:absolute;left:0;top:0;width:140px;height:90px">
+            <div style="position:absolute;left:50px;top:0;width:20px;height:10px;box-shadow:0 0 0 2px black inset"></div>
+          </div>
+        </div>
+      `)
+      );
+      await page.addScriptTag({ content: bundle });
+      const observed = await page.evaluate(() => ({
+        target: window.puiContrastProbe.readContrastTargetObservation(
+          document.getElementById('target')!
+        ),
+        clipMargin: getComputedStyle(document.getElementById('clip')!).overflowClipMargin,
+      }));
+      const png = await page.screenshot();
+      const pixel = await page.evaluate(async (image) => {
+        const bitmap = new Image();
+        bitmap.src = `data:image/png;base64,${image}`;
+        await bitmap.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.naturalWidth;
+        canvas.height = bitmap.naturalHeight;
+        const context = canvas.getContext('2d')!;
+        context.drawImage(bitmap, 0, 0);
+        return [...context.getImageData(70, 11, 1, 1).data];
+      }, png.toString('base64'));
+      await recordPaintWitnessCalibration('inset-ring-content-clip', png, { observed, pixel });
+      expect(observed.clipMargin).toContain('content-box');
+      expect(observed.target.achieved).toBe(false);
+      expect(pixel).toEqual([255, 255, 255, 255]);
+    } finally {
+      await context.close();
+    }
+  });
+
+  it.each([
+    { name: 'contain-content', contain: 'content', contentVisibility: 'visible' },
+    { name: 'contain-strict', contain: 'strict', contentVisibility: 'visible' },
+    { name: 'content-visibility-auto', contain: 'none', contentVisibility: 'auto' },
+  ])(
+    'withholds inset shadow patches clipped by $name',
+    async ({ name, contain, contentVisibility }) => {
+      const context = await browser.newContext({ viewport: { width: 240, height: 240 } });
+      try {
+        const page = await context.newPage();
+        await page.setContent(
+          fixture(`
+        <style>html,body{margin:0;background:white}</style>
+        <div style="position:absolute;left:10px;top:10px;width:200px;height:200px;overflow:hidden;border-radius:5px">
+          <div id="target" style="position:relative;width:200px;height:200px">
+            <div id="container" style="position:absolute;left:50px;top:50px;width:20px;height:20px;contain:${contain};content-visibility:${contentVisibility}">
+              <div style="position:absolute;left:0;top:-20px;width:20px;height:10px;box-shadow:0 0 0 2px black inset"></div>
+            </div>
+          </div>
+        </div>
+      `)
+        );
+        await page.addScriptTag({ content: bundle });
+        const observed = await page.evaluate(() => {
+          const style = getComputedStyle(document.getElementById('container')!);
+          return {
+            target: window.puiContrastProbe.readContrastTargetObservation(
+              document.getElementById('target')!
+            ),
+            contain: style.contain,
+            contentVisibility: style.contentVisibility,
+          };
+        });
+        const png = await page.screenshot();
+        const pixel = await page.evaluate(async (image) => {
+          const bitmap = new Image();
+          bitmap.src = `data:image/png;base64,${image}`;
+          await bitmap.decode();
+          const canvas = document.createElement('canvas');
+          canvas.width = bitmap.naturalWidth;
+          canvas.height = bitmap.naturalHeight;
+          const context = canvas.getContext('2d')!;
+          context.drawImage(bitmap, 0, 0);
+          return [...context.getImageData(70, 41, 1, 1).data];
+        }, png.toString('base64'));
+        await recordPaintWitnessCalibration(`inset-ring-${name}`, png, { observed, pixel });
+        expect(observed.contain).toBe(contain);
+        expect(observed.contentVisibility).toBe(contentVisibility);
+        expect(observed.target.achieved).toBe(false);
+        expect(pixel).toEqual([255, 255, 255, 255]);
+      } finally {
+        await context.close();
+      }
+    }
+  );
 
   for (const placement of ['target', 'ancestor'] as const) {
     for (const [property, value] of [

@@ -1,5 +1,5 @@
 import type { ExposedStateHandle } from '@proto.ui/core';
-import type { DemoRuntimeApi } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoRuntimeApi } from '../../components/PrototypePreviewer/demo-types';
 
 /** Drawer owns effective disabled, including Root inheritance. Each Button starts
  * disabled until its current public command snapshot reaches the same surface.
