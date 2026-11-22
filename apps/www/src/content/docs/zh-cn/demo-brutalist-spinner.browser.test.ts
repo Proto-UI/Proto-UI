@@ -294,15 +294,16 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
     }
   }, 240_000);
 
-  it.each(TEST_RUNTIMES)(
-    '%s advances real rotation and keeps reduced motion at passive rest',
-    async (runtime) => {
+  it.each(TEST_RUNTIMES.flatMap((runtime) => COLOR_SCHEMES.map((theme) => ({ runtime, theme }))))(
+    '$runtime/$theme advances real rotation and keeps reduced motion at passive rest',
+    async ({ runtime, theme }) => {
       const opened = await openRoute(browser, baseUrl, SPINNER_ROUTE, NARROW_VIEWPORT);
       const observations: Record<string, unknown> = {};
       let failure: string | null = null;
       try {
         await opened.page.emulateMedia({ reducedMotion: 'no-preference' });
         await selectRuntime(opened.page, opened.previewer, runtime, SPINNER_SELECTOR, 5);
+        await applyColorScheme(opened.page, theme);
         const first = roots(opened.previewer).first();
         const motionFacts = await first.evaluate((element) => {
           const style = getComputedStyle(element);
@@ -339,7 +340,7 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
         if (evidenceDir) {
           await mkdir(evidenceDir, { recursive: true });
           await opened.previewer.screenshot({
-            path: join(evidenceDir, `spinner-${runtime}-normal.png`),
+            path: join(evidenceDir, `spinner-${runtime}-${theme}-normal.png`),
           });
         }
 
@@ -376,7 +377,7 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
         }
         if (evidenceDir)
           await opened.previewer.screenshot({
-            path: join(evidenceDir, `spinner-${runtime}-reduced.png`),
+            path: join(evidenceDir, `spinner-${runtime}-${theme}-reduced.png`),
           });
       } catch (error) {
         failure = error instanceof Error ? (error.stack ?? error.message) : String(error);
@@ -385,12 +386,13 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
         if (evidenceDir) {
           await mkdir(evidenceDir, { recursive: true });
           await writeFile(
-            join(evidenceDir, `spinner-${runtime}-motion.json`),
+            join(evidenceDir, `spinner-${runtime}-${theme}-motion.json`),
             JSON.stringify(
               {
                 sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
                 browser: browser.version(),
                 runtime,
+                theme,
                 route: SPINNER_ROUTE,
                 baseUrl,
                 viewport: NARROW_VIEWPORT,
