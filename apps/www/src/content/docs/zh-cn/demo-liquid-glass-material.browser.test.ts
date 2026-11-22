@@ -32,6 +32,54 @@ const safe = {
   'prefers-contrast': 'no-preference',
   'forced-colors': 'none',
 };
+let ownsDeviceMetrics = false;
+async function ownedMetricsScreenshot(clip?: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) {
+  if (!ownsDeviceMetrics) throw new Error('No active CDP metrics owner for this screenshot');
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      (async () => {
+        const bounds = clip ?? (await cdp.send('Page.getLayoutMetrics')).cssContentSize;
+        const result = await cdp.send('Page.captureScreenshot', {
+          format: 'png',
+          captureBeyondViewport: true,
+          clip: { ...bounds, scale: 1 },
+        });
+        return Buffer.from(result.data, 'base64');
+      })(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Owned metrics screenshot: 5000ms timeout')), 5000);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+async function dprCaptureFacts() {
+  return page.evaluate(() => ({
+    dpr: devicePixelRatio,
+    viewport: { width: innerWidth, height: innerHeight },
+    hosts: ['wc', 'react', 'vue', 'vue2'].map((runtime) => {
+      const root = document.querySelector(`[data-material-host="${runtime}"]`),
+        canvas = root?.querySelector<HTMLCanvasElement>('[data-material-backdrop]'),
+        host = root?.querySelector<HTMLElement>('[data-demo-ref="regular"]'),
+        rect = canvas?.getBoundingClientRect();
+      return {
+        runtime,
+        bitmap: canvas ? { width: canvas.width, height: canvas.height } : null,
+        geometry: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
+        revision: host?.dataset.materialSourceRevision ?? null,
+        quality: host?.dataset.materialQuality ?? null,
+        source: host?.dataset.materialSource ?? null,
+      };
+    }),
+  }));
+}
 async function preference(theme: string, overrides: Record<string, string> = {}) {
   await cdp.send('Emulation.setEmulatedMedia', {
     features: Object.entries({ ...safe, 'prefers-color-scheme': theme, ...overrides }).map(
@@ -42,7 +90,24 @@ async function preference(theme: string, overrides: Record<string, string> = {})
 async function capture(name: string) {
   if (evidence) {
     await mkdir(evidence, { recursive: true });
-    await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: true });
+    if (ownsDeviceMetrics) {
+      // The same CDP session owns metrics and capture. Playwright's other
+      // session restores its own cached DPR during Page.captureScreenshot.
+      const before = await dprCaptureFacts();
+      const bytes = await ownedMetricsScreenshot();
+      const after = await dprCaptureFacts();
+      await writeFile(path.join(evidence, `${name}.png`), bytes);
+      observations.push({
+        kind: 'dpr-capture-ownership',
+        name,
+        before,
+        after,
+        screenshotSha256: createHash('sha256').update(bytes).digest('hex'),
+      });
+      expect(after).toEqual(before);
+    } else {
+      await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: true });
+    }
   }
 }
 let qualityWaitSequence = 0;
@@ -53,7 +118,10 @@ type RasterExpectation = {
 };
 async function quality(value: string): Promise<void>;
 async function quality(value: string, raster: RasterExpectation): Promise<Record<string, number>>;
-async function quality(value: string, raster?: RasterExpectation) {
+async function quality(
+  value: string,
+  raster?: RasterExpectation
+): Promise<void | Record<string, number>> {
   const sequence = ++qualityWaitSequence;
   try {
     const ready = await page.waitForFunction(
@@ -239,9 +307,11 @@ async function quality(value: string, raster?: RasterExpectation) {
       try {
         await mkdir(evidence, { recursive: true });
         // The four owned fixture scenes only; a later screenshot is not the snapshot's exact frame.
-        const screenshot = await page
-          .locator('.grid')
-          .screenshot({ path: path.join(evidence, `${name}.png`), timeout: 5000 });
+        const grid = page.locator('.grid');
+        const screenshot = ownsDeviceMetrics
+          ? await ownedMetricsScreenshot((await grid.boundingBox()) ?? undefined)
+          : await grid.screenshot({ path: path.join(evidence, `${name}.png`), timeout: 5000 });
+        if (ownsDeviceMetrics) await writeFile(path.join(evidence, `${name}.png`), screenshot);
         diagnostic.screenshot = `${name}.png`;
         diagnostic.screenshotSha256 = createHash('sha256').update(screenshot).digest('hex');
       } catch (screenshotError) {
@@ -499,29 +569,72 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
         )
         .toBe(true);
       await page.setViewportSize({ width: 1100, height: 1000 });
-      const beforeDpr = await quality('self-optical', {
-        dpr: 1,
-        phase: `${theme}-before-dpr-two`,
-      });
-      await cdp.send('Emulation.setDeviceMetricsOverride', {
-        width: 1100,
-        height: 1000,
-        deviceScaleFactor: 2,
-        mobile: false,
-      });
-      const dprTwo = await quality('self-optical', {
-        dpr: 2,
-        phase: `${theme}-dpr-two`,
-        previousRevisions: beforeDpr,
-      });
-      await capture(`${theme}-dpr-two`);
-      await cdp.send('Emulation.clearDeviceMetricsOverride');
-      await quality('self-optical', {
-        dpr: 1,
-        phase: `${theme}-dpr-restored`,
-        previousRevisions: dprTwo,
-      });
-      await page.setViewportSize({ width: 1440, height: 1050 });
+      let metricsFailed = false;
+      try {
+        ownsDeviceMetrics = true;
+        // Claim the current DPR1 metrics on THIS session first. Clearing a
+        // session that never enabled metrics is a successful Chrome no-op.
+        await cdp.send('Emulation.setDeviceMetricsOverride', {
+          width: 1100,
+          height: 1000,
+          deviceScaleFactor: 1,
+          mobile: false,
+        });
+        const beforeDpr = await quality('self-optical', {
+          dpr: 1,
+          phase: `${theme}-before-dpr-two`,
+        });
+        // Chrome157 changes the DPR getter for a same-size set command without
+        // notifying MQL/RO/resize observers. A complete native metrics reset
+        // also retires any cached override left by a different CDP session.
+        // This covers a metrics transaction with the same final CSS viewport;
+        // it does not establish a physical, DPR-only display transition.
+        await cdp.send('Emulation.clearDeviceMetricsOverride');
+        await cdp.send('Emulation.setDeviceMetricsOverride', {
+          width: 1100,
+          height: 1000,
+          deviceScaleFactor: 2,
+          mobile: false,
+        });
+        const dprTwo = await quality('self-optical', {
+          dpr: 2,
+          phase: `${theme}-dpr-two`,
+          previousRevisions: beforeDpr,
+        });
+        await capture(`${theme}-dpr-two`);
+        await cdp.send('Emulation.clearDeviceMetricsOverride');
+        await cdp.send('Emulation.setDeviceMetricsOverride', {
+          width: 1100,
+          height: 1000,
+          deviceScaleFactor: 1,
+          mobile: false,
+        });
+        await quality('self-optical', {
+          dpr: 1,
+          phase: `${theme}-dpr-restored`,
+          previousRevisions: dprTwo,
+        });
+      } catch (error) {
+        metricsFailed = true;
+        throw error;
+      } finally {
+        // A failed light assertion must not contaminate the dark owner.
+        const cleanupErrors: unknown[] = [];
+        try {
+          await cdp.send('Emulation.clearDeviceMetricsOverride');
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+        ownsDeviceMetrics = false;
+        try {
+          await page.setViewportSize({ width: 1440, height: 1050 });
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+        observations.push({ kind: 'dpr-metrics-cleanup', theme, errors: cleanupErrors.map(String) });
+        if (!metricsFailed && cleanupErrors.length)
+          throw new AggregateError(cleanupErrors, 'DPR metrics cleanup failed');
+      }
       await quality('self-optical');
       // Same-generation inputs are shared, and >16 surfaces keep one live rendering context.
       const beforeStress = await page.evaluate(() =>
