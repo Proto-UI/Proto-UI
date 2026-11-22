@@ -11,9 +11,9 @@
 | 发现 | 实际行为 | 证据与当前状态 |
 | --- | --- | --- |
 | DATEPICKER-REVIEW-001，P2：请求开始时的弹层会话采样太迟 | 最初关闭的 Picker 在公开 State 通知或更早 Calendar Context 订阅者中打开；旧 selection 随后将新弹层关闭。原契约要求请求开始时弹层已经打开。 | 原 `3bd5bcf` 的 State 单/范围 2 条红；首次 request ID 提前发布后原 2 条转绿，但早期 Context 订阅者单/范围 2 条仍红；`593682a` 的单调 id / 当前 provider / Popover 前态修复后原 Context 2 条转绿。原始红绿回执与三阶段完整源码快照均保留。 |
-| DATEPICKER-REVIEW-002，P2：旧 Popover 通知前态绑定了新请求 | request 1 在关闭状态启动；早期 Calendar 订阅者打开弹层；早期 Popover 订阅者已经读到实际 open=true，再提交并接受 request 2。Picker 将最新 id 2 绑定到旧打开通知的 prev.open=false，导致新请求应关闭却保持打开。 | `593682a` 源码在整合 `2430aea` 上，独立单/范围 2 条均红。request 2 返回 true，canonical 均已接受 16 日，最终 open=true 且没有 completion close；应为 false。`compiler-review-picker-context-nested.*`。 |
+| DATEPICKER-REVIEW-002，P2：旧 Popover 通知前态绑定了新请求 | request 1 在关闭状态启动；早期 Calendar 订阅者打开弹层；早期 Popover 订阅者已经读到实际 open=true，再提交并接受 request 2。Picker 将最新 id 2 绑定到旧打开通知的 prev.open=false，导致新请求应关闭却保持打开。 | `593682a` 源码在整合 `2430aea` 上，独立单/范围 2 条均红。request 2 返回 true，canonical 均已接受 16 日，最终 open=true 且没有 completion close；应为 false。`compiler-review-picker-context-nested.*`。相邻旧 close → reopen → 新受控请求 → 延迟 owner 接受也在相同源码上单/范围 2 条均红，`compiler-review-picker-context-oldclose.*`。 |
 
-第二项不是使用旧请求关闭新会话的容错要求，而是当前有效、被接受且在已打开会话内启动的新请求应正常完成。已向实现者指出 Popover 陈旧关闭通知也应只退休其对应请求，而不是清空任意后来请求；后者此刻仅为待核验的相邻边界，没有计作已证实发现。
+第二项不是使用旧请求关闭新会话的容错要求，而是当前有效、被接受且在已打开会话内启动的新请求应正常完成。相邻旧关闭通知的反例由 collections 复核者提出，本路按实现者要求以原 Runtime harness 独立确认：旧 close 的较早订阅者重新打开并发起新受控请求；该请求开始时实际 open=true，稍后普通 owner 接受，却被继续送达的旧 close 退休而不关闭。两个模式均复现，执行前后五个相关源文件 SHA 一致且匹配 2430aea。它归入同一已证实因果绑定缺口。
 
 ## 原生旅程静态审查
 

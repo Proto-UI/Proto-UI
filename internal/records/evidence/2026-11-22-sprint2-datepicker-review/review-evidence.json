@@ -129,6 +129,42 @@
           "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
         }
       ]
+    },
+    {
+      "id": "compiler-review-picker-context-oldclose",
+      "executedSourceCommit": "2430aea",
+      "uncommittedSourceDeltaAtExecution": false,
+      "allSourcesStableBeforeAfterExecution": true,
+      "script": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-oldclose.mts.gz",
+      "receipt": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-oldclose.json",
+      "log": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-oldclose.log.gz",
+      "sources": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+          "sha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840"
+        },
+        {
+          "source": "packages/prototypes/base/src/popover/root.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/popover/root.proto.ts.gz",
+          "sha256": "c0cdf82266f048ce9321bfc9c260b5c5a2a39c0ef5167de3378454a74dbb3a47"
+        },
+        {
+          "source": "packages/prototypes/base/src/popover/shared.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/popover/shared.ts.gz",
+          "sha256": "3d10b3a1583466f190f4f5ac64642b67172243648946cf4dcec97171aee9ca22"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ]
     }
   ],
   "files": [
@@ -320,11 +356,74 @@
       "compression": "gzip"
     },
     {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-oldclose.mts.gz",
+      "sha256": "b331e3f0db6874a254016ab973a6786de8957769089a9f6d58ba9b4711ba62db",
+      "bytes": 2182,
+      "originalSha256": "3c77a1cac6a35d9fd6531d4ff3e28c5d90e06fe8c172ee0e74df5fb740604565",
+      "originalBytes": 6778,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-oldclose.json",
+      "sha256": "2dfd34b8e4468dd91993ff802c66df2c14e4920da2c8e9d8346d5193d57fdd5e",
+      "bytes": 1202,
+      "originalSha256": "2dfd34b8e4468dd91993ff802c66df2c14e4920da2c8e9d8346d5193d57fdd5e",
+      "originalBytes": 1202
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-oldclose.log.gz",
+      "sha256": "e7165777bd311c0c83e85c50513c1b482db9e8083c8ef50b5bcad5dbdc3a6f6c",
+      "bytes": 401,
+      "originalSha256": "2dfd34b8e4468dd91993ff802c66df2c14e4920da2c8e9d8346d5193d57fdd5e",
+      "originalBytes": 1202,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+      "sha256": "8a0980cb176d83390ca2c79cb769b758cc5fb5d806b75e6cfd2849c1952f7247",
+      "bytes": 7700,
+      "originalSha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790",
+      "originalBytes": 35842,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+      "sha256": "2f4e41f46232ca945f4946d44a7fe3604bf1324f5cd21856fce92b4bb60a08fd",
+      "bytes": 1543,
+      "originalSha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840",
+      "originalBytes": 5774,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/popover/root.proto.ts.gz",
+      "sha256": "de33037d811449cd379846ff71c853cda5e73efd80ea378b52ffe5e0745ac11f",
+      "bytes": 1280,
+      "originalSha256": "c0cdf82266f048ce9321bfc9c260b5c5a2a39c0ef5167de3378454a74dbb3a47",
+      "originalBytes": 4472,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/packages/prototypes/base/src/popover/shared.ts.gz",
+      "sha256": "140a27c9d3da98dcd6bfcde868b523669ee2674120c7a383575734a8159620cb",
+      "bytes": 820,
+      "originalSha256": "3d10b3a1583466f190f4f5ac64642b67172243648946cf4dcec97171aee9ca22",
+      "originalBytes": 2592,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/oldclose-before/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+      "sha256": "71e9aed50808e76d23284ad3a4c0e14ce1c62213952e3bef57280104ec742c80",
+      "bytes": 2600,
+      "originalSha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09",
+      "originalBytes": 6240,
+      "compression": "gzip"
+    },
+    {
       "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/original-source-bindings.json",
-      "sha256": "014e0eb452e4fbf5fae04cc0699eb9935bb7db5b68bc4c8285ee80f7259c3f01",
-      "bytes": 9826,
-      "originalSha256": "014e0eb452e4fbf5fae04cc0699eb9935bb7db5b68bc4c8285ee80f7259c3f01",
-      "originalBytes": 9826
+      "sha256": "023adc9afb2778707b06fdcfb78b8870b3b8a15e1055d093de65ce5ffa13fd95",
+      "bytes": 12568,
+      "originalSha256": "023adc9afb2778707b06fdcfb78b8870b3b8a15e1055d093de65ce5ffa13fd95",
+      "originalBytes": 12568
     }
   ]
 }
