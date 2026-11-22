@@ -43,17 +43,28 @@ async function sampleMotion(spinners: Locator) {
   return spinners.evaluateAll(async (elements) => {
     const frames: Array<
       Array<{
+        frame: number;
+        frameTime: number;
         at: number;
         transform: string;
         animations: Array<{ name: string; state: string; time: number | null }>;
       }>
     > = elements.map(() => []);
-    const start = performance.now();
+    let startFrameTime: number | null = null;
+    let previousFrameTime: number | null = null;
+    let frame = 0;
     // Observe actual frame progression. Do not wait for the infinite animation
     // to become idle, pause it, or substitute a synthetic clock.
     while (true) {
+      const frameTime = await new Promise<number>((resolve) => requestAnimationFrame(resolve));
+      if (previousFrameTime !== null && frameTime <= previousFrameTime) continue;
+      startFrameTime ??= frameTime;
+      previousFrameTime = frameTime;
+      frame += 1;
       elements.forEach((element, index) => {
         frames[index].push({
+          frame,
+          frameTime,
           at: performance.now(),
           transform: getComputedStyle(element).transform,
           animations: element.getAnimations().map((animation) => ({
@@ -63,8 +74,9 @@ async function sampleMotion(spinners: Locator) {
           })),
         });
       });
-      if (performance.now() - start >= 120) break;
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      // A slow first CSSOM read must not consume the observation window before
+      // we have observed another real frame. Keep the nominal window at 120ms.
+      if (frame >= 2 && frameTime - startFrameTime >= 120) break;
     }
     return frames;
   });

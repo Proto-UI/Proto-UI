@@ -57,6 +57,7 @@ const MIN_BOUNDARY_CONTRAST = 3;
 let browser: Browser;
 let devServer: ChildProcess | null = null;
 let baseUrl = '';
+let sourceCanaryBaseUrl = '';
 let serverOutput = '';
 let styleGeneration: ReturnType<typeof createStyleGenerationOwner> | null = null;
 
@@ -758,6 +759,23 @@ async function buttonFills(
 
 beforeAll(async () => {
   baseUrl = await startServer();
+  // Public journeys can target a production preview; the controlled owner
+  // canary needs an explicit source-module origin supplied by that runner.
+  const requestedSourceBaseUrl = process.env.PROTO_UI_BROWSER_SOURCE_BASE_URL?.trim().replace(
+    /\/$/,
+    ''
+  );
+  sourceCanaryBaseUrl = requestedSourceBaseUrl || baseUrl;
+  console.info(
+    'BRUTALIST_CONTROL_EVIDENCE_ORIGINS',
+    JSON.stringify({
+      publicBaseUrl: baseUrl,
+      canaryBaseUrl: sourceCanaryBaseUrl,
+      canaryServerMode: requestedSourceBaseUrl
+        ? 'explicit-source-module-server'
+        : 'documentation-server',
+    })
+  );
   browser = await chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
@@ -843,7 +861,8 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     });
     try {
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 24);
+        // The authored demo has 25 prototype nodes, including the destructive command.
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 25);
         const trigger = previewer
           .locator(
             '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
@@ -1596,8 +1615,16 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       width: 1440,
       height: 900,
     });
+    let canaryContext: BrowserContext | undefined;
 
     try {
+      canaryContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      const canaryPage = await canaryContext.newPage();
+      await canaryPage.emulateMedia({ colorScheme: 'light' });
+      await canaryPage.goto(`${sourceCanaryBaseUrl}${BUTTON_ROUTE}`, { waitUntil: 'networkidle' });
+      await canaryPage.locator('[data-previewer-id]').first().waitFor({ state: 'visible' });
+      await applyHostTheme(canaryPage, 'light');
+
       // Pinned for the whole case, and never changed again. Dark is then reached
       // only through the host theme, so a media-query implementation cannot
       // satisfy any measurement below.
@@ -1684,14 +1711,14 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         // Exercise arbitrary values through a test-owned real candidate's
         // public owner channel. The Website Light/Dark integration above stays
         // unchanged; direct child writes bypass its theme owner (#764).
-        const owner = await createCanaryThemeOwner(page, runtime);
+        const owner = await createCanaryThemeOwner(canaryPage, runtime);
         let scope: JSHandle<HTMLElement> | undefined;
         let canaryFailed = false;
         try {
           scope = await owner.getProperty('mount');
-          const baseline = await buttonFills(page, scope);
-          await applyCanaryTheme(page, owner, true);
-          const canary = await buttonFills(page, scope);
+          const baseline = await buttonFills(canaryPage, scope);
+          await applyCanaryTheme(canaryPage, owner, true);
+          const canary = await buttonFills(canaryPage, scope);
           for (const [ref, fill] of Object.entries(canary)) {
             const key = ref as keyof typeof BUTTON_FILLS;
             const label = `${runtime}/canary/${ref}`;
@@ -1711,8 +1738,8 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
             expect(fill.background, `${label}/fixed`).toBe(baseline[key].background);
             expect(fill.color, `${label}/fixed-ink`).toBe(baseline[key].color);
           }
-          await applyCanaryTheme(page, owner, false);
-          expect(await buttonFills(page, scope), `${runtime}/canary/owner-restored`).toEqual(
+          await applyCanaryTheme(canaryPage, owner, false);
+          expect(await buttonFills(canaryPage, scope), `${runtime}/canary/owner-restored`).toEqual(
             baseline
           );
         } catch (error) {
@@ -1742,7 +1769,14 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
             );
             console.info(
               'BUTTON_CANARY_OWNER_EVIDENCE',
-              JSON.stringify({ runtime, outcome: canaryFailed ? 'failed' : 'passed', ...evidence })
+              JSON.stringify({
+                runtime,
+                evidenceKind: 'source-canary',
+                publicOrigin: new URL(baseUrl).origin,
+                canaryOrigin: new URL(sourceCanaryBaseUrl).origin,
+                outcome: canaryFailed ? 'failed' : 'passed',
+                ...evidence,
+              })
             );
           } catch (error) {
             console.warn('BUTTON_CANARY_OWNER_EVIDENCE unavailable', error);
@@ -1779,7 +1813,11 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         }
       }
     } finally {
-      await context.close();
+      try {
+        await canaryContext?.close();
+      } finally {
+        await context.close();
+      }
     }
   }, 240_000);
 });

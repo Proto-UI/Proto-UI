@@ -17,6 +17,14 @@ import {
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  SOURCE_CANARY_SUITE,
+  SOURCE_STOP_BUDGET_MS,
+  createOwnedSourceServer,
+  inspectSourceCanary,
+  sourceServerHash,
+  suiteOrigins,
+} from './sprint3-source-server.mjs';
 
 const repository = path.resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const docs = 'apps/www/src/content/docs/zh-cn/';
@@ -173,6 +181,7 @@ function sourceState() {
     worktreeStatus: git('status', '--porcelain', '--untracked-files=normal'),
     lockSha256: hash(readFileSync(path.join(repository, 'pnpm-lock.yaml'))),
     runnerSha256: hash(readFileSync(fileURLToPath(import.meta.url))),
+    sourceServerSha256: sourceServerHash(),
   };
 }
 
@@ -181,7 +190,7 @@ export function sourceProblems(actual, expected) {
   if (!/^[a-f0-9]{40}$/.test(expected.head ?? '') || actual.head !== expected.head)
     problems.push('Checkout does not match the exact candidate SHA.');
   if (actual.worktreeStatus) problems.push('Candidate checkout is dirty.');
-  for (const key of ['tree', 'lockSha256', 'runnerSha256'])
+  for (const key of ['tree', 'lockSha256', 'runnerSha256', 'sourceServerSha256'])
     if (expected[key] && actual[key] !== expected[key]) problems.push(`Source drift: ${key}.`);
   return problems;
 }
@@ -497,6 +506,7 @@ function initialize(output) {
       'Native Chromium and browser AX observations do not certify OS assistive technology or physical mobile devices.',
       'This bounded inventory does not replace historical #1042/#1175, non-Web criteria, the whitepaper workflow, or a full repository regression cycle.',
       'Preparation and process deadlines are resource limits; the original input, phase and interaction assertions are unchanged.',
+      'The controls source canary is supplemental source proof from a separately owned dev server; public journeys still use the owned production preview.',
     ],
     errors: sourceProblems(source, { head: expectedHead }),
     build: { status: 'not-run' },
@@ -563,12 +573,25 @@ async function execute(output, ledger) {
       const captures = path.join(directory, 'captures');
       mkdirSync(captures, { recursive: true });
       row.startedAt = now();
+      const suiteDeadline = Math.min(deadline, Date.now() + row.seconds * 1_000);
+      let sourceOwner;
+      let sourceBinding;
       row.status = 'running';
       save();
       try {
         if (!row.sourceSha256) throw new Error(`Missing planned suite: ${row.file}`);
+        if (row.id === SOURCE_CANARY_SUITE) {
+          sourceOwner = createOwnedSourceServer({
+            root: path.join(repository, 'apps/www'),
+            directory: path.join(directory, 'source-canary'),
+            source: ledger.source,
+            deadline: suiteDeadline,
+            signal: abort.signal,
+          });
+          sourceBinding = await sourceOwner.ready();
+        }
         const env = {
-          ...process.env,
+          ...suiteOrigins(process.env, row, preview?.url, sourceBinding?.url),
           CANDIDATE_SHA: ledger.expectedHead,
           PROTO_UI_RUNTIME_EVIDENCE_DIR: captures,
           PROTO_UI_BROWSER_EVIDENCE_DIR: path.join(captures, 'button'),
@@ -578,14 +601,13 @@ async function execute(output, ledger) {
         };
         delete env.PROTO_UI_SPINNER_BROWSER_RUNTIME;
         delete env.PROTO_UI_SCROLL_CORNER_CAPTURE_ONLY;
-        delete env.PROTO_UI_BROWSER_BASE_URL;
-        if (row.surface === 'production-docs') env.PROTO_UI_BROWSER_BASE_URL = preview.url;
         json(path.join(directory, 'source.json'), {
           ...ledger.source,
           suite: row.file,
           suiteSha256: row.sourceSha256,
           surface: row.surface,
           preview: row.surface === 'production-docs' ? ledger.preview : null,
+          sourceCanary: sourceBinding ?? null,
         });
         row.sourceReceiptSha256 = hash(readFileSync(path.join(directory, 'source.json')));
         const reportFile = path.join(directory, 'vitest.json');
@@ -607,8 +629,14 @@ async function execute(output, ledger) {
           cwd: repository,
           env,
           log: path.join(directory, 'browser.log'),
-          timeoutMs: budget(row.seconds),
-          signal: abort.signal,
+          // Source startup/probes consume this row's original budget. Reserve
+          // its bounded cleanup grace, without extending the suite or runner.
+          timeoutMs: sourceOwner
+            ? Math.max(1, suiteDeadline - Date.now() - SOURCE_STOP_BUDGET_MS)
+            : budget(row.seconds),
+          signal: sourceOwner
+            ? AbortSignal.any([abort.signal, sourceOwner.failureSignal])
+            : abort.signal,
         });
         const problems = [];
         if (
@@ -639,7 +667,7 @@ async function execute(output, ledger) {
           : 'none-produced; see native state/assertion JSON and logs';
         row.problems = problems;
         row.status =
-          row.process.stopReason === 'interrupted'
+          row.process.stopReason === 'interrupted' && abort.signal.aborted
             ? 'interrupted'
             : problems.length
               ? 'failed'
@@ -648,6 +676,21 @@ async function execute(output, ledger) {
         row.status = 'failed';
         row.reason = String(error);
       } finally {
+        if (sourceOwner) {
+          try {
+            row.sourceCanary = await sourceOwner.close();
+            if (row.sourceCanary.status !== 'passed') {
+              row.status = 'failed';
+              row.problems = [...(row.problems ?? []), ...row.sourceCanary.terminal.problems];
+            }
+          } catch (error) {
+            row.status = 'failed';
+            row.problems = [
+              ...(row.problems ?? []),
+              `Source producer sealing failed: ${String(error)}`,
+            ];
+          }
+        }
         row.finishedAt = now();
         json(path.join(directory, 'result.json'), row);
         save();
@@ -664,7 +707,7 @@ async function execute(output, ledger) {
       save();
       const result = await runCommand('corepack', ['pnpm@10.32.1', 'docs:build'], {
         cwd: repository,
-        env: process.env,
+        env: suiteOrigins(process.env, { surface: 'fixture' }),
         log: path.join(output, 'build.log'),
         timeoutMs: budget(600),
         signal: abort.signal,
@@ -808,6 +851,15 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
     const directory = path.join(output, row.id);
     const observed = inspectInventory(path.join(directory, 'captures'));
     const problems = [...observed.errors];
+    if (row.id === SOURCE_CANARY_SUITE && (row.executionStatus === 'passed' || row.sourceCanary)) {
+      const sourceEvidence = inspectSourceCanary(
+        path.join(directory, 'source-canary'),
+        row.sourceCanary,
+        ledger.source
+      );
+      row.observedSourceCanaryArtifacts = sourceEvidence.observedArtifacts;
+      problems.push(...sourceEvidence.problems);
+    }
     let directoryOwned = false;
     try {
       directoryOwned = canonicalPath(directory) === path.resolve(directory);
@@ -884,6 +936,7 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
     ),
     '',
     `Production build: ${ledger.build.status}.`,
+    `Supplemental controls source producer: ${ledger.suites.find((row) => row.id === SOURCE_CANARY_SUITE)?.sourceCanary?.status ?? 'not produced'}. Public journeys remain production-preview evidence.`,
     '',
     ...ledger.limits.map((limit) => `- ${limit}`),
     '',

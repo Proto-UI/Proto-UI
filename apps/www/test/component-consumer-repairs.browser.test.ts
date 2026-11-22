@@ -20,6 +20,7 @@ declare global {
   }
 }
 let browser: Browser, bundle: string, css: string;
+let initialPage: Page | undefined;
 const output = path.join(
   process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? tmpdir(),
   'component-consumer-repairs'
@@ -84,6 +85,12 @@ beforeAll(async () => {
     headless: true,
     chromiumSandbox: true,
   });
+  // First renderer creation is suite startup. The first fixture consumes this
+  // actual blank page; later cases still allocate their own independent pages.
+  initialPage = await browser.newPage({
+    viewport: { width: 1200, height: 800 },
+    reducedMotion: 'reduce',
+  });
 }, 60_000);
 afterAll(async () => {
   await browser?.close();
@@ -95,10 +102,15 @@ async function fixture(
   runtime: Parameters<typeof mount>[2],
   options: Parameters<typeof mount>[3] = {}
 ) {
-  const page = await browser.newPage({
-    viewport: { width: 1200, height: 800 },
-    reducedMotion: 'reduce',
-  });
+  // Claim before any await so the prepared page belongs to exactly one fixture.
+  const preparedPage = initialPage;
+  initialPage = undefined;
+  const page =
+    preparedPage ??
+    (await browser.newPage({
+      viewport: { width: 1200, height: 800 },
+      reducedMotion: 'reduce',
+    }));
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.route('**/*', (route) => route.abort());

@@ -109,10 +109,29 @@ describe('real Shadcn Drawer source physical presentation', () => {
         samples.push({ stage: 'leaving', ...leaving });
         expect(leaving.contentPhase).toBe('leaving');
         expect(leaving.detached).toBe(false);
-        await target(true);
-        const reversal = await sample();
+        // Separate browser calls can straddle a leave frame. Compare the real
+        // reopen boundary in one synchronous task and retain the earlier gap.
+        const { before: reversalBefore, after: reversal } = await page.evaluate(() => {
+          const fixture = (window as any).fixture;
+          const before = fixture.sample();
+          fixture.target(true);
+          const after = fixture.sample();
+          return { before, after };
+        });
+        samples.push({
+          stage: 'reversal-before',
+          ...reversalBefore,
+          elapsedSinceLeavingMs: reversalBefore.time - leaving.time,
+          yDeltaSinceLeavingPx: reversalBefore.rect.y - leaving.rect.y,
+        });
         samples.push({ stage: 'reversal', ...reversal });
-        expect(Math.abs(reversal.rect.y - leaving.rect.y)).toBeLessThan(15);
+        expect(reversalBefore.contentPhase).toBe('leaving');
+        expect(reversalBefore.maskPhase).toBe('leaving');
+        expect(reversalBefore.detached).toBe(false);
+        expect(reversal.contentPhase).toBe('entering');
+        expect(reversal.maskPhase).toBe('entering');
+        expect(reversal.detached).toBe(false);
+        expect(Math.abs(reversal.rect.y - reversalBefore.rect.y)).toBeLessThan(15);
         await page.waitForTimeout(600);
         expect((await sample()).contentPhase).toBe('entered');
         await page.emulateMedia({ reducedMotion: 'reduce' });
