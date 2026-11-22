@@ -855,7 +855,11 @@ async function writeJson(file: string, value: unknown) {
 async function captureFailureDiagnostics(page: Page, id: string, capture: Journey['capture']) {
   const previewer = page
     .locator(
-      id === 'shadcn-drawer' ? '[data-demo-id="demo-shadcn-drawer-snap"]' : '[data-previewer-id]'
+      id === 'shadcn-drawer'
+        ? '[data-demo-id="demo-shadcn-drawer-snap"]'
+        : id.startsWith('shadcn-calendar')
+          ? '[data-demo-id="demo-shadcn-calendar"]'
+          : '[data-previewer-id]'
     )
     .first();
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
@@ -894,7 +898,9 @@ async function runCase(testCase: Case) {
     .locator(
       testCase.component === 'drawer'
         ? '[data-demo-id="demo-shadcn-drawer-snap"]'
-        : '[data-previewer-id]'
+        : testCase.component === 'calendar'
+          ? '[data-demo-id="demo-shadcn-calendar"]'
+          : '[data-previewer-id]'
     )
     .first();
   const screenshots: Screenshot[] = [];
