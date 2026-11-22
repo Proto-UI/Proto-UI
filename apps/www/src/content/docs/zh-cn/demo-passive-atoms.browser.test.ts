@@ -192,7 +192,10 @@ describe.sequential('Public passive atom documentation previews', () => {
           ? 10
           : atom === 'surface' && family === 'liquid-glass'
             ? 5
-            : 4;
+            // Rhea examples add one public style-scope root around the four atoms.
+            : family === 'shadcn'
+              ? 5
+              : 4;
       const context = await browser.newContext({
         viewport: { width: 1280, height: 1000 },
         colorScheme: 'light',

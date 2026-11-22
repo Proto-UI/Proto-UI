@@ -108,11 +108,11 @@ export default {
     className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
     children: [
       materialStage('uncontrolledStage', [
-        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-2' },
+        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-3' },
         select('uncontrolled', { defaultValue: 'alpha' }),
       ]),
       materialStage('disabledStage', [
-        { kind: 'box', children: ['Disabled selection'], className: 'text-sm mb-2' },
+        { kind: 'box', children: ['Disabled selection'], className: 'text-sm mb-3' },
         select('disabled', { defaultValue: 'beta', disabled: true }),
       ]),
       materialStage('controlledStage', [
@@ -125,14 +125,14 @@ export default {
           kind: 'box',
           ref: 'requestStatus',
           attrs: { 'aria-live': 'polite' },
-          className: 'text-sm break-words mb-2',
+          className: 'text-sm break-words mb-3',
           children: ['No pending request.'],
         },
         {
           kind: 'proto',
           prototypeId: 'liquid-glass-button',
           ref: 'accept',
-          className: 'min-w-0 max-w-full mb-2',
+          className: 'min-w-0 max-w-full mb-3',
           children: [
             {
               kind: 'box',
