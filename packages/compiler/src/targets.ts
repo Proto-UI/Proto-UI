@@ -3,7 +3,11 @@ import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
-import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
+import {
+  GPUI_UNAVAILABLE_OPERATIONS,
+  GPUI_MISSING_FOCUS_TREE,
+  gpuiIntrinsicSupported,
+} from './gpui-capabilities';
 import {
   observableSemantics,
   type ObservableSemantics,
@@ -728,7 +732,8 @@ export function checkTargetOperations(
       case 'intrinsic':
         if (
           value.name === 'string' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
         )
           diagnostic(
             'PUI4003',
@@ -737,7 +742,8 @@ export function checkTargetOperations(
           );
         if (
           value.name === 'object.assign' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
         )
           diagnostic('PUI4003', `Object.assign is not implemented by ${selected.id}.`, value.span);
         break;

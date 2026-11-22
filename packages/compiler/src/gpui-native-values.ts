@@ -34,14 +34,14 @@ pub fn value_error(message:&str)->! {
 }
 pub fn typeof_value(value:&Value)->Value { Value::string(match value {
     Value::Undefined=>"undefined",Value::Number(_)|Value::Json(Json::Number(_))=>"number",
-    Value::Json(Json::Bool(_))=>"boolean",Value::Json(Json::String(_))|Value::CaughtStringUnit(_)=>"string",
+    Value::Json(Json::Bool(_))=>"boolean",Value::Json(Json::String(_))|Value::CaughtStringUnit(_)|Value::Utf16String(_)=>"string",
     Value::Function(_)|Value::NativeFunction{..}|Value::Renderer(_)=>"function",_=>"object",
 }) }
 pub fn property_key(value:&Value)->String { match value {
     Value::Number(value) if *value==0.=>"0".into(),Value::Number(value) if *value==f64::INFINITY=>"Infinity".into(),
     Value::Number(value) if *value==f64::NEG_INFINITY=>"-Infinity".into(),_=>value.scalar_text(),
 } }
-impl Value { pub fn error_message(&self)->String{if matches!(self,Self::Undefined){String::new()}else{self.scalar_text()}} }
+impl Value { pub fn error_message_value(&self)->Self{if matches!(self,Self::Undefined){Self::string("")}else{self.string_value()}} }
 pub fn number_is_finite(value:&Value)->Value { Value::boolean(match value {
     Value::Number(value)=>value.is_finite(),Value::Json(Json::Number(value))=>value.as_f64().is_some_and(f64::is_finite),_=>false,
 }) }
@@ -51,6 +51,7 @@ pub fn has_own(value:&Value,key:&Value)->Value {
         Value::Json(Json::Object(record))=>record.contains_key(&key),
         Value::Array(items)=>key=="length"||key.parse::<usize>().ok().is_some_and(|index|index.to_string()==key&&index<items.len()),
         Value::Json(Json::String(text))=>key=="length"||key.parse::<usize>().ok().is_some_and(|index|index.to_string()==key&&index<text.encode_utf16().count()),
+        Value::CaughtStringUnit(_)|Value::Utf16String(_)=>key=="length"||key.parse::<usize>().ok().is_some_and(|index|index.to_string()==key&&index<value.string_units().len()),
         Value::Undefined|Value::Json(Json::Null)=>value_type_error("Cannot inspect own properties of a nullish value"),_=>false,
     })
 }
@@ -59,6 +60,7 @@ pub fn own_entries(value:Value)->BTreeMap<String,Value> { match value {
     Value::Json(Json::Object(record))=>record.into_iter().map(|(key,value)|(key,Value::json(value))).collect(),
     Value::Array(items)=>items.iter().enumerate().map(|(index,value)|(index.to_string(),value.clone())).collect(),
     Value::Json(Json::String(text))=>text.encode_utf16().enumerate().map(|(index,value)|(index.to_string(),Value::CaughtStringUnit(value))).collect(),
+    Value::CaughtStringUnit(_)|Value::Utf16String(_)=>value.string_units().into_iter().enumerate().map(|(index,value)|(index.to_string(),Value::CaughtStringUnit(value))).collect(),
     _=>BTreeMap::new(),
 } }
 pub fn array_every(value:Value,callback:Value)->Value {

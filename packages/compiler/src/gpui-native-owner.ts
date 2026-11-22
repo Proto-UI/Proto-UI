@@ -25,15 +25,15 @@ pub type Callback = Rc<dyn Fn(Vec<Value>) -> Value>;
 pub type NativeRenderer = Rc<dyn Fn(Vec<Value>) -> NativeSnapshot>;
 // A native helper is an ordinary typed closure with its own runtime identity.
 // Its identity is independent of both its FunctionIR declaration and child snapshots.
-pub struct NativeCallable<F:?Sized> { pub identity:Rc<()>, pub call:Rc<F> }
+pub struct NativeCallable<F:?Sized> { pub identity:Rc<()>, pub call:Rc<F>, pub ordinary:Option<Value> }
 impl<F:?Sized> Clone for NativeCallable<F> {
-    fn clone(&self)->Self { Self { identity:self.identity.clone(), call:self.call.clone() } }
+    fn clone(&self)->Self { Self { identity:self.identity.clone(), call:self.call.clone(), ordinary:self.ordinary.clone() } }
 }
 impl<F:?Sized> NativeCallable<F> {
     pub fn truthy(&self)->bool { true }
     pub fn nullish(&self)->bool { false }
     pub fn equals_native<G:?Sized>(&self,other:&NativeCallable<G>)->bool { Rc::ptr_eq(&self.identity,&other.identity) }
-    pub fn equals_value(&self,other:&Value)->bool { matches!(other,Value::NativeFunction{identity,..} if Rc::ptr_eq(&self.identity,identity)) }
+    pub fn equals_value(&self,other:&Value)->bool { self.ordinary.as_ref().map(|value|strict_equal(value,other)).unwrap_or_else(||matches!(other,Value::NativeFunction{identity,..} if Rc::ptr_eq(&self.identity,identity))) }
 }
 pub type NativeFrame = Rc<dyn Fn(&OwnerRef,&FocusHandle,&str,&Drive,&[NativeSnapshot],&mut usize)->Vec<AnyElement>>;
 #[derive(Clone)]
@@ -60,7 +60,7 @@ impl NativeSnapshot {
     pub fn equals(&self,other:&Self)->bool{match(&self.observation,&other.observation){(Some(a),Some(b))=>strict_equal(a,b),(None,None)=>Rc::ptr_eq(&self.identity,&other.identity),_=>false}}
     pub fn equals_value(&self,other:&Value)->bool{self.observation.as_ref().is_some_and(|value|strict_equal(value,other))}
     pub fn invalid(value:Value)->Self{let mut result=Self::empty();result.observation=Some(value);result.valid=false;result}
-    pub fn text_value(value:Value)->Self{assert!(matches!(&value,Value::Number(_)|Value::Json(Json::String(_)|Json::Number(_))),"native text children require string or number");let text=value.scalar_text();let frame_text=text.clone();Self{identity:Rc::new(()),observation:Some(value),valid:true,slot_count:0,frame:Rc::new(move|_,_,_,_,_,index|{*index+=1;vec![frame_text.clone().into_any_element()]}),text:Rc::new(move|_|text.clone())}}
+    pub fn text_value(value:Value)->Self{assert!(value.is_string()||matches!(&value,Value::Number(_)|Value::Json(Json::Number(_))),"native text children require string or number");let text=value.scalar_text();let frame_text=text.clone();Self{identity:Rc::new(()),observation:Some(value),valid:true,slot_count:0,frame:Rc::new(move|_,_,_,_,_,index|{*index+=1;vec![frame_text.clone().into_any_element()]}),text:Rc::new(move|_|text.clone())}}
     // These are ordinary native child factories, not tagged template/IR nodes.
     pub fn sequence(children:Vec<Self>,observation:Option<Value>)->Self{let valid=children.iter().all(|child|child.valid);let slot_count=children.iter().fold(0u8,|count,child|count.saturating_add(child.slot_count).min(2));let frame_children=children.clone();Self{identity:Rc::new(()),observation:Some(observation.unwrap_or_else(||Value::Opaque(Rc::new(())))),valid,slot_count,
         frame:Rc::new(move|owner,focus,path,drive,slot,index|{let mut result=Vec::new();for child in &frame_children{result.extend((child.frame)(owner,focus,path,drive,slot,index));}result}),
@@ -83,7 +83,7 @@ pub fn assert_native_slot_children(children:&[NativeSnapshot]) {
 }
 #[derive(Clone)]
 pub enum Value {
-    Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16),
+    Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16), Utf16String(Rc<Vec<u16>>),
     Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(NativeRenderer), Owner(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
     Style(Vec<(String, String)>), Resource(Rc<Cell<bool>>),
     Input(Rc<Input>),
@@ -116,6 +116,8 @@ pub fn take_native_failures(owner:&OwnerRef)->Vec<NativeFailure>{std::mem::take(
 impl Value {
     pub fn json(value: Json) -> Self { match value { Json::Object(entries)=>record_map(entries.into_iter().map(|(key,value)|(key,Self::json(value))).collect()),Json::Array(items)=>Self::Array(Rc::new(items.into_iter().map(Self::json).collect())),Json::Number(number)=>Self::Number(number.as_f64().expect("JSON number")),other=>Self::Json(other) } }
     pub fn string(value: &str) -> Self { Self::Json(Json::String(value.into())) }
+    pub fn from_string_units(units:Vec<u16>)->Self{match String::from_utf16(&units){Ok(text)=>Self::string(&text),Err(_)=>Self::Utf16String(Rc::new(units))}}
+    pub fn is_string(&self)->bool{matches!(self,Self::Json(Json::String(_))|Self::CaughtStringUnit(_)|Self::Utf16String(_))}
     pub fn boolean(value: bool) -> Self { Self::Json(Json::Bool(value)) }
     pub fn number(value: f64) -> Self { Self::Number(value) }
     pub fn try_data(&self) -> Option<Json> { match self {
@@ -123,12 +125,14 @@ impl Value {
         Self::Json(value) => Some(value.clone()),
         Self::Record(entries) => entries.fields.borrow().iter().map(|(key,value)|Some((key.clone(),value.try_data()?))).collect::<Option<Map<String,Json>>>().map(Json::Object),
         Self::Array(items) => items.iter().map(Self::try_data).collect::<Option<Vec<_>>>().map(Json::Array),
+        Self::CaughtStringUnit(_)|Self::Utf16String(_) => String::from_utf16(&self.string_units()).ok().map(Json::String),
         _ => None,
     } }
     pub fn data(&self) -> Json { match self {
         Self::Number(value)=>{if !value.is_finite(){value_type_error("non-finite portable data")}Json::from(*value)},Self::Json(value) => value.clone(),
         Self::Record(value) => Json::Object(value.fields.borrow().iter().map(|(k,v)|(k.clone(),v.data())).collect()),
         Self::Array(value) => Json::Array(value.iter().map(Self::data).collect()),
+        Self::CaughtStringUnit(_)|Self::Utf16String(_) => self.try_data().unwrap_or_else(||value_type_error("unpaired UTF-16 units cannot cross the native UTF-8 data boundary")),
         _ => value_type_error("semantic capability is not portable data"),
     } }
     pub fn member(&self, key: &str, optional: bool) -> Self { match self {
@@ -149,17 +153,22 @@ impl Value {
         Self::Json(Json::String(value)) => key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|value.encode_utf16().nth(index)).map(Self::CaughtStringUnit).unwrap_or(Self::Undefined),
         Self::CaughtStringUnit(_) if key=="length" => Self::number(1.),
         Self::CaughtStringUnit(value) if key=="0" => Self::CaughtStringUnit(*value),
+        Self::Utf16String(units) if key=="length" => Self::number(units.len()as f64),
+        Self::Utf16String(units) => key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|units.get(index)).map(|value|Self::CaughtStringUnit(*value)).unwrap_or(Self::Undefined),
         Self::Array(items) => if key=="length" { Self::number(items.len()as f64) } else { key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|items.get(index).cloned()).unwrap_or(Self::Undefined) },
         Self::Json(Json::Array(items)) => if key=="length" { Self::number(items.len()as f64) } else { key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|items.get(index).cloned()).map(Self::json).unwrap_or(Self::Undefined) },
         Self::Record(_) | Self::Json(Json::Object(_)) => self.member(key,optional),
         _ => Self::Undefined,
     } }
-    pub fn text(&self) -> String { match self { Self::Json(Json::String(v))=>v.clone(), Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()), _=>value_type_error("expected string or number") } }
+    pub fn text(&self) -> String { match self { Self::Json(Json::String(v))=>v.clone(),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>String::from_utf16(&self.string_units()).unwrap_or_else(|_|value_type_error("unpaired UTF-16 units cannot cross the native UTF-8 text boundary")), Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()), _=>value_type_error("expected string or number") } }
+    pub fn string_units(&self)->Vec<u16>{match self{Self::Json(Json::String(value))=>value.encode_utf16().collect(),Self::CaughtStringUnit(value)=>vec![*value],Self::Utf16String(units)=>(**units).clone(),_=>value_type_error("expected string")}}
+    pub fn string_value(&self)->Self{if self.is_string(){self.clone()}else{Self::string(&self.scalar_text())}}
+    pub fn scalar_units(&self)->Vec<u16>{if self.is_string(){self.string_units()}else{self.scalar_text().encode_utf16().collect()}}
     pub fn bool(&self) -> bool { match self {Self::Json(Json::Bool(v))=>*v,_=>value_type_error("expected boolean")} }
     pub fn num(&self) -> f64 { match self {Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),_=>value_type_error("expected number")} }
-    pub fn truthy(&self)->bool{match self{Self::Undefined|Self::Json(Json::Null)=>false,Self::Json(Json::Bool(v))=>*v,Self::Number(v)=>*v!=0.&&!v.is_nan(),Self::Json(Json::Number(v))=>v.as_f64().is_some_and(|v|v!=0.&&!v.is_nan()),Self::Json(Json::String(v))=>!v.is_empty(),_=>true}}
-    pub fn scalar_text(&self)->String{match self{Self::Undefined=>"undefined".into(),Self::Json(Json::Null)=>"null".into(),Self::Json(Json::Bool(v))=>v.to_string(),Self::Json(Json::String(v))=>v.clone(),Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()),_=>panic!("structured coercion is not admitted")}}
-    pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>ecma_string_number(v),Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
+    pub fn truthy(&self)->bool{match self{Self::Undefined|Self::Json(Json::Null)=>false,Self::Json(Json::Bool(v))=>*v,Self::Number(v)=>*v!=0.&&!v.is_nan(),Self::Json(Json::Number(v))=>v.as_f64().is_some_and(|v|v!=0.&&!v.is_nan()),Self::Json(Json::String(v))=>!v.is_empty(),Self::Utf16String(units)=>!units.is_empty(),_=>true}}
+    pub fn scalar_text(&self)->String{match self{Self::Undefined=>"undefined".into(),Self::Json(Json::Null)=>"null".into(),Self::Json(Json::Bool(v))=>v.to_string(),Self::Json(Json::String(v))=>v.clone(),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>self.text(),Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()),_=>panic!("structured coercion is not admitted")}}
+    pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>ecma_string_number(v),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>String::from_utf16(&self.string_units()).map(|text|ecma_string_number(&text)).unwrap_or(f64::NAN),Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
     pub fn nullish(&self) -> bool { matches!(self,Self::Undefined|Self::Json(Json::Null)) }
     pub fn call(&self,args:Vec<Self>)->Result<Self,Self>{catch_authored(||self.call_authored(args))}
     // Compiler-emitted authored composition stays in one exception scope.
@@ -170,18 +179,14 @@ impl Value {
     pub fn items(&self) -> Vec<Self> { match self {Self::Array(v)=>(**v).clone(),Self::Json(Json::Array(v))=>v.iter().cloned().map(Self::json).collect(),_=>value_type_error("expected array")} }
 }
 pub fn strict_equal(a:&Value,b:&Value)->bool {
-    match (a,b) {
-        (Value::CaughtStringUnit(a),Value::CaughtStringUnit(b))=>return a==b,
-        (Value::CaughtStringUnit(unit),Value::Json(Json::String(text)))|(Value::Json(Json::String(text)),Value::CaughtStringUnit(unit))=>return text.encode_utf16().eq(std::iter::once(*unit)),
-        _=>{},
-    }
+    if a.is_string()&&b.is_string(){return a.string_units()==b.string_units()}
     match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::ContextKey(a),Value::ContextKey(b))=>a==b,(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))|(Value::BorrowedState(a),Value::BorrowedState(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.identity()==b.identity(),(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
 fn same_value(a:&Value,b:&Value)->bool{
     if matches!(a,Value::Number(_)|Value::Json(Json::Number(_)))&&matches!(b,Value::Number(_)|Value::Json(Json::Number(_))){
         let a=a.num();let b=b.num();a.to_bits()==b.to_bits()||(a.is_nan()&&b.is_nan())
     }else{strict_equal(a,b)}
 }
-pub fn add(a:Value,b:Value)->Value {if matches!(&a,Value::Json(Json::String(_)))||matches!(&b,Value::Json(Json::String(_))){Value::string(&(a.scalar_text()+&b.scalar_text()))}else{Value::number(a.scalar_number()+b.scalar_number())}}
+pub fn add(a:Value,b:Value)->Value {if a.is_string()||b.is_string(){let mut units=a.scalar_units();units.extend(b.scalar_units());Value::from_string_units(units)}else{Value::number(a.scalar_number()+b.scalar_number())}}
 pub fn record(entries:Vec<(&str,Value)>)->Value{record_map(entries.into_iter().map(|(k,v)|(k.to_owned(),v)).collect())}
 // The unwind payload is Send; authored values retain their original UI-thread
 // identity in a private slot. Only this exact marker, on its creating thread,
@@ -475,7 +480,7 @@ fn normalize_state(kind:&str,value:Value,spec:&Value,initial:bool)->Value{
     match kind{
         "bool"=>{value.bool();},
         "string"|"enum"=>{
-            if !matches!(value,Value::Json(Json::String(_))){value_error("State string required")}
+            if !value.is_string(){value_error("State string required")}
             let options=spec.member("options",true);
             if options.nullish()&&kind=="enum"{value_error("enum options required")}
             if !options.nullish()&&!options.items().iter().any(|option|strict_equal(option,&value)){value_error("State value outside options")}

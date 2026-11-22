@@ -287,8 +287,13 @@ export function conditionRefinements(
     const [array, search] = condition.arguments;
     // Only an immutable binding can carry this proof beyond the comparison.
     // The receiver is checked again by portable intrinsic admission.
-    if (search?.kind === 'reference' && fresh(search) &&
-      array && typeof array.type !== 'string' && array.type.kind === 'array')
+    if (
+      search?.kind === 'reference' &&
+      fresh(search) &&
+      array &&
+      typeof array.type !== 'string' &&
+      array.type.kind === 'array'
+    )
       return [[search.name, array.type.element]];
     return [];
   }
@@ -485,7 +490,7 @@ function ordinaryRefinement(
   const narrow = (type: ValueType): ValueType => {
     if (
       runtimeType &&
-      valueAlternatives(type).includes('unknown') &&
+      valueAlternatives(type).some((member) => member === 'unknown' || member === 'exception') &&
       equal &&
       ['boolean', 'number', 'string', 'undefined'].includes(runtimeType)
     )
@@ -513,7 +518,7 @@ function ordinaryRefinement(
               ? member
               : typeof member !== 'string' && member.kind === 'callable'
                 ? 'function'
-                : member === 'unknown'
+                : member === 'unknown' || member === 'exception'
                   ? undefined
                   : 'object';
           return kind === undefined || (kind === runtimeType) === equal;
@@ -523,7 +528,7 @@ function ordinaryRefinement(
           const domain =
             typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
               ? member
-              : member === 'unknown'
+              : member === 'unknown' || member === 'exception'
                 ? undefined
                 : 'object';
           return domain === undefined || domain === typeof constant || !equal;

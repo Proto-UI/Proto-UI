@@ -3,8 +3,11 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
+import ts from 'typescript';
 import { parsePrototype } from '../../../src/parser.ts';
 import { emitGpuiSource } from '../../../src/gpui-source.ts';
+import { compileFile } from '../../../src/compile.ts';
 
 const fixture = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(fixture, '../../../../..');
@@ -297,6 +300,54 @@ for (let index = 0; index < 512; index++) {
   seed = BigInt.asUintN(64, seed ^ (seed << 17n));
   addBitPattern(seed);
 }
+// Execute the unchanged pure fixture in JavaScript as an independent language
+// oracle. The stub records public methods only; it implements no compiler atoms.
+const scalarSource = readFileSync(path.join(fixture, 'scalars.proto.ts'), 'utf8');
+const scalarModule = { exports: {} };
+runInNewContext(
+  ts.transpileModule(scalarSource, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText,
+  {
+    module: scalarModule,
+    exports: scalarModule.exports,
+    require(id) {
+      if (id !== '@proto.ui/core') throw new Error(`Unexpected scalar oracle import ${id}`);
+      return { definePrototype: (definition) => definition };
+    },
+  },
+  { filename: 'scalars.proto.ts', timeout: 1000 }
+);
+const scalarMethods = new Map();
+scalarModule.exports.default.setup({
+  expose: { method: (name, callback) => scalarMethods.set(name, callback) },
+});
+function nativeNumberBits(value) {
+  if (typeof value === 'number') {
+    const bytes = new DataView(new ArrayBuffer(8));
+    bytes.setFloat64(0, value);
+    return bytes.getBigUint64(0).toString(16);
+  }
+  if (Array.isArray(value)) return value.map(nativeNumberBits);
+  if (value && typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, nativeNumberBits(item)])
+    );
+  return null;
+}
+const nativeCases = [
+  'typedCallable',
+  'typedCallable',
+  'typedDefaults',
+  'numericLiterals',
+  'membership',
+  'assignment',
+  'assignmentFailure',
+  'caughtUnits',
+].map((method) => {
+  const expected = scalarMethods.get(method)();
+  return { method, expected, numberBits: nativeNumberBits(expected) };
+});
 const scalarReference =
   JSON.stringify(
     {
@@ -327,6 +378,7 @@ const scalarReference =
         negativeInfinity: -1 / 0 + '',
         nan: 0 / 0 + '',
       },
+      nativeCases,
     },
     null,
     2
@@ -340,6 +392,29 @@ if (existsSync(lockfile)) {
   receipt.lockSha256 = digest(readFileSync(lockfile));
 }
 receipt.consumerManifestSha256 = digest(readFileSync(rootManifest));
+// Preserve the real current Base Button as a negative consumer. Its authored
+// ControlLabel participation is not yet admitted by the non-Web profile; do not
+// delete that behavior or certify a historical Button source as current support.
+const buttonPath = 'packages/prototypes/base/src/button/button.proto.ts';
+const buttonResult = await compileFile(path.join(repository, buttonPath), {
+  profile: 'gpui-source-v1',
+});
+if (
+  buttonResult.ok ||
+  !buttonResult.diagnostics.some(
+    (entry) => entry.code === 'PUI4003' && entry.message.includes('controlLabel')
+  )
+)
+  throw new Error(
+    'Current Base Button admission changed; update its native acceptance matrix explicitly.'
+  );
+receipt.unsupportedConsumers = [
+  {
+    source: buttonPath,
+    sha256: digest(readFileSync(path.join(repository, buttonPath))),
+    diagnostics: buttonResult.diagnostics,
+  },
+];
 writeFileSync(path.join(output, 'source-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
 console.log(
   JSON.stringify({
