@@ -28,6 +28,8 @@ import {
 } from '../../../../test/helpers/accordion-activation-observation';
 let activation: ReturnType<typeof createAccordionActivationObservation> = null;
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
+// Liquid Glass accordion journeys are 0.4/WIP. Base, Shadcn and Brutalist stay on the 0.3 gate.
+const includeLiquidWip = process.env.PUI_LIQUID_GLASS_INCLUDE_WIP === '1';
 const route = (family: string, locale = 'en') => `/${locale}/ui-libraries/${family}/accordion/`;
 let browser: Browser,
   baseUrl = '';
@@ -267,7 +269,9 @@ afterAll(async () => {
 describe.sequential('Accordion five families / four native Web consumers', () => {
   for (const family of families)
     for (const runtime of RUNTIMES)
-      it(`${family} ${runtime} preserves activation, natural Tab, ownership, relationships and repeatable lifetime`, async () => {
+      it.skipIf(family === 'liquid-glass' && !includeLiquidWip)(
+        `${family} ${runtime} preserves activation, natural Tab, ownership, relationships and repeatable lifetime`,
+        async () => {
         const { context, page, previewer } = await openRoute(browser, baseUrl, route(family), {
           width: 1280,
           height: 1000,
@@ -447,9 +451,13 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             } catch {}
           }
         }
-      }, 90_000);
+        },
+        90_000
+      );
   for (const family of families)
-    it(`${family} Chinese 320px / 200% text keeps long labels and overflow inside the page`, async () => {
+    it.skipIf(family === 'liquid-glass' && !includeLiquidWip)(
+      `${family} Chinese 320px / 200% text keeps long labels and overflow inside the page`,
+      async () => {
       const { context, page, previewer } = await openRoute(
         browser,
         baseUrl,
@@ -497,7 +505,9 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
       } finally {
         await context.close();
       }
-    }, 90_000);
+      },
+      90_000
+    );
   for (const runtime of RUNTIMES) {
     for (const scenario of [
       { width: 1180, rootPercent: 100 },

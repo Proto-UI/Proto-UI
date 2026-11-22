@@ -20,6 +20,8 @@ import {
 } from './browser-harness';
 
 const families = ['bootstrap-2-3-2', 'liquid-glass'] as const;
+// Liquid Glass selection paint is 0.4/WIP. Bootstrap cases in this file stay on the 0.3 path.
+const includeLiquidWip = process.env.PUI_LIQUID_GLASS_INCLUDE_WIP === '1';
 const route = (family: string, component = 'select') => `/en/ui-libraries/${family}/${component}/`;
 let browser: Browser;
 let baseUrl = '';
@@ -166,7 +168,9 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
   for (const family of families)
     for (const runtime of RUNTIMES)
       for (const theme of ['light', 'dark'] as const) {
-        it(`${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`, async () => {
+        it.skipIf(family === 'liquid-glass' && !includeLiquidWip)(
+          `${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`,
+          async () => {
           const { context, page, previewer } = await openRoute(browser, baseUrl, route(family), {
             width: 1440,
             height: 1000,
@@ -510,7 +514,9 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           } finally {
             await context.close();
           }
-        }, 120_000);
+          },
+          120_000
+        );
       }
 });
 

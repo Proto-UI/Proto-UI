@@ -128,6 +128,7 @@ implementations:
     consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-OPTICS]
     notes:
       - Actual dynamic canvas background, press/rest, zero-refraction, opaque, source revocation and overlap controls must bind the exact published head.
+      - Default 0.3 CI skips the opaque-fallback, theme-token, release-tail and idle/hover cases unless PUI_LIQUID_GLASS_INCLUDE_WIP=1. Skipping them does not admit optical conformance.
       - No arbitrary DOM capture, native engine, cross-language or full Compiler equivalence follows from this finite profile.
 exercises:
   contracts: [C-FEEDBACK-MATERIAL-0001]

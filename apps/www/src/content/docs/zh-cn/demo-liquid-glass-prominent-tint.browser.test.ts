@@ -38,6 +38,8 @@ import type { captureProminentTintFrame } from './liquid-prominent-tint-capture'
 // Native only in official exact-candidate CI. Independent bounded shard per
 // runtime; all semantic cases remain present. No local browser fallback.
 const route = '/en/test/liquid-glass-prominent-tint/';
+// Whole file is Liquid Glass 0.4/WIP. The four runtime jobs stay opt-in, not a 0.3 gate.
+const includeLiquidWip = process.env.PUI_LIQUID_GLASS_INCLUDE_WIP === '1';
 const evidenceRoot = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
 const output = evidenceRoot ? path.join(evidenceRoot, 'prominent-tint') : null;
 const revision = {
@@ -499,7 +501,7 @@ for (const runtime of runtimes)
               captureCoverage.set(`${name}-${source}-${phase}-${control}`, { status: 'not-run' });
         }
         describe(`${name} source-bound prominent tint`, () => {
-          it(
+          it.skipIf(!includeLiquidWip)(
             'retains the real five-state journey and paired source evidence',
             () =>
               runCase(name, async () => {
@@ -669,7 +671,7 @@ for (const runtime of runtimes)
       coverage.set(name, { status: 'not-run' });
       behaviorCoverage.set(name, 'not-run');
       describe(name, () => {
-        it(
+        it.skipIf(!includeLiquidWip)(
           'separates focus, preferences, unsafe source, cancellation and recovery',
           () =>
             runCase(name, async () => {
