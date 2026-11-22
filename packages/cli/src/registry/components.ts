@@ -266,6 +266,26 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'BaseFieldTextarea',
           elementName: 'proto-ui-base-field-textarea',
         },
+        {
+          prototypeImport: 'fieldCheckbox',
+          exportBaseName: 'BaseFieldCheckbox',
+          elementName: 'proto-ui-base-field-checkbox',
+        },
+        {
+          prototypeImport: 'fieldRadioGroup',
+          exportBaseName: 'BaseFieldRadioGroup',
+          elementName: 'proto-ui-base-field-radio-group',
+        },
+        {
+          prototypeImport: 'fieldSwitch',
+          exportBaseName: 'BaseFieldSwitch',
+          elementName: 'proto-ui-base-field-switch',
+        },
+        {
+          prototypeImport: 'fieldSelectTrigger',
+          exportBaseName: 'BaseFieldSelectTrigger',
+          elementName: 'proto-ui-base-field-select-trigger',
+        },
       ],
       { stylePreset: null }
     ),
@@ -323,6 +343,16 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'ShadcnFieldSwitch',
           elementName: 'proto-ui-shadcn-field-switch',
         },
+        {
+          prototypeImport: 'fieldCheckbox',
+          exportBaseName: 'ShadcnFieldCheckbox',
+          elementName: 'proto-ui-shadcn-field-checkbox',
+        },
+        {
+          prototypeImport: 'fieldRadioGroup',
+          exportBaseName: 'ShadcnFieldRadioGroup',
+          elementName: 'proto-ui-shadcn-field-radio-group',
+        },
       ],
       { stylePreset: 'shadcn' }
     ),
@@ -369,6 +399,21 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           prototypeImport: 'fieldTextarea',
           exportBaseName: 'BrutalistFieldTextarea',
           elementName: 'proto-ui-brutalist-field-textarea',
+        },
+        {
+          prototypeImport: 'fieldCheckbox',
+          exportBaseName: 'BrutalistFieldCheckbox',
+          elementName: 'proto-ui-brutalist-field-checkbox',
+        },
+        {
+          prototypeImport: 'fieldRadioGroup',
+          exportBaseName: 'BrutalistFieldRadioGroup',
+          elementName: 'proto-ui-brutalist-field-radio-group',
+        },
+        {
+          prototypeImport: 'fieldSwitch',
+          exportBaseName: 'BrutalistFieldSwitch',
+          elementName: 'proto-ui-brutalist-field-switch',
         },
       ],
       { stylePreset: 'brutalist' }

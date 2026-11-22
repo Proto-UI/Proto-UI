@@ -51,6 +51,11 @@ describe('Field package/CLI closure', () => {
         expect(code).toContain(`from '@proto.ui/prototypes-${family}/field'`);
         for (const role of ['Root', 'Label', 'Control', 'Description', 'Error', 'Validity'])
           expect(code).toContain(`field${role}`);
+        if (['base', 'shadcn', 'brutalist'].includes(family)) {
+          for (const role of ['Textarea', 'Checkbox', 'RadioGroup', 'Switch'])
+            expect(code).toContain(`field${role}`);
+          if (family !== 'brutalist') expect(code).toContain('fieldSelectTrigger');
+        }
       }
       expect(listComponentChoices().some((i) => i.value === `${family}-field`)).toBe(false);
       const tokens = await collectProtoStyleTokens(
