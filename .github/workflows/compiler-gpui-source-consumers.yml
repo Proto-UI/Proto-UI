@@ -8,6 +8,11 @@ on:
         type: boolean
         required: false
         default: false
+      website_shader_evidence:
+        description: 'Also collect full Website source and original Docs evidence for this exact ref'
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 
 permissions:
@@ -23,6 +28,12 @@ jobs:
   package-budgets:
     if: github.event_name == 'workflow_dispatch' && inputs.package_budget_evidence == true
     uses: ./.github/workflows/package-budget-evidence.yml
+    permissions:
+      contents: read
+
+  website-shader-evidence:
+    if: github.event_name == 'workflow_dispatch' && inputs.website_shader_evidence == true
+    uses: ./.github/workflows/website-shader-ownership-evidence.yml
     permissions:
       contents: read
 
