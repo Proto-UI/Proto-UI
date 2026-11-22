@@ -81,6 +81,24 @@ pub fn text_snapshot(owner:&OwnerWeak)->Value{
     if !text.declared{return Value::Json(Json::Null)}
     record(vec![("value",Value::string(&text.value)),("composing",Value::boolean(text.composing))])
 }
+pub fn text_reset_value(owner:&OwnerWeak,value:Value)->Value{
+    let owner=runtime(owner);
+    if !ready(&owner){return Value::boolean(false)}
+    if !matches!(value,Value::Undefined|Value::Json(Json::String(_))){return Value::boolean(false)}
+    let mut o=owner.borrow_mut();let text=&mut o.modules.text;
+    if !text.declared||!text.initialized{return Value::boolean(false)}
+    let next=if text.controlled{text.value.clone()}else{
+        canonical_text(&if matches!(value,Value::Undefined){text_or(field(&text.patch,"defaultValue"),"")}else{value.text()},text.multiline)
+    };
+    let accepted=!text.controlled;
+    // A reset is an editing-lease replacement, not an input/change proposal.
+    // Old IME handles and queued controlled restoration cannot write through.
+    text.lease_epoch=text.lease_epoch.wrapping_add(1);text.value=next;
+    text.editor=text.value.clone().into();text.selection=text.editor.len()..text.editor.len();
+    text.reversed=false;text.marked=None;text.composing=false;text.drag_anchor=None;text.geometry=None;
+    text.undo.clear();text.redo.clear();text.changed=false;text.viewport=Default::default();text.reveal_caret=true;
+    o.dirty=true;Value::boolean(accepted)
+}
 pub fn text_detach(owner:&OwnerRef){
     let mut o=owner.borrow_mut();let text=&mut o.modules.text;
     text.lease_epoch=text.lease_epoch.wrapping_add(1);text.composing=false;text.marked=None;text.drag_anchor=None;text.geometry=None;
@@ -89,6 +107,25 @@ pub fn text_detach(owner:&OwnerRef){
 }
 pub fn text_supported(owner:&OwnerRef)->bool{owner.borrow().modules.text.supported}
 pub fn text_disabled(owner:&OwnerRef)->bool{bool_or(field(&owner.borrow().modules.text.patch,"disabled"),false)}
+/// Only the current mounted text owner can claim composition keys. A retired
+/// view's retained editor is not an IME session in another native view.
+pub fn text_is_composing(owner:&OwnerRef)->bool{
+    if !ready(owner){return false}let o=owner.borrow();o.modules.text.supported&&o.modules.text.composing
+}
+/// Apply a source-authored UTF-16 selection request to this exact live editor.
+/// Selection itself is permitted in readonly text, but cannot disturb a marked
+/// range, a disabled owner, another window, or a detached editing lease.
+pub fn text_select_utf16(owner:&OwnerRef,start:usize,end:usize,window:&mut Window,cx:&mut App)->bool{
+    if !ready(owner)||!text_supported(owner)||text_disabled(owner){return false}
+    let focus={let mut o=owner.borrow_mut();
+        if o.window_id!=Some(window.window_handle().window_id()){return false}
+        let text=&mut o.modules.text;if text.composing{return false}
+        text.selection=utf16_range(&text.editor,start..end.max(start));text.reversed=false;
+        text.drag_anchor=None;text.reveal_caret=true;o.dirty=true;o.modules.focus.native.clone()
+    };
+    if let Some(focus)=focus{window.notify_text_selection_changed(&focus);}
+    text_drive(owner,window,cx);true
+}
 pub fn text_accessible(owner:&OwnerRef,node:&mut gpui::accesskit::Node){
     let o=owner.borrow();let text=&o.modules.text;if !text.supported{return}
     node.set_value(text.editor.as_ref());
@@ -324,6 +361,9 @@ pub fn text_scroll(owner:&OwnerRef,event:&gpui::ScrollWheelEvent,window:&mut Win
 }
 pub fn text_key_down(owner:&OwnerRef,event:&gpui::KeyDownEvent,window:&mut Window,cx:&mut App)->bool{
     if !text_supported(owner)||text_disabled(owner){return false}
+    // The platform IME owns candidate navigation, deletion and confirmation.
+    // App-level editing must not rewrite the active provisional text.
+    if text_is_composing(owner){return true}
     let named=crate::gpui_native_key::named_key(&event.keystroke.key);let key=named.as_deref().unwrap_or(event.keystroke.key.as_str());
     let command=event.keystroke.modifiers.platform||event.keystroke.modifiers.control;
     if command&&matches!(key,"c"|"C"|"x"|"X"){
@@ -375,4 +415,115 @@ pub fn text_pointer_move(owner:&OwnerRef,event:&gpui::MouseMoveEvent,window:&mut
         else if let(Some(anchor),Some(geometry))=(text.drag_anchor,text.geometry.as_ref()){let target=geometry.index(event.position);text.selection=anchor.min(target)..anchor.max(target);text.reversed=target<anchor;text.reveal_caret=true;o.dirty=true;true}else{false}};
     if changed{text_drive(owner,window,cx);}
 }
+#[cfg(all(test, feature="test-support"))]
+mod text_owner_tests {
+    use super::*;
+    use gpui::{AppContext, InputHandler, Render, Context, TestAppContext, WindowHandle};
+
+    struct Empty;
+    impl Render for Empty {
+        fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement{div()}
+    }
+    fn open(cx:&mut TestAppContext)->WindowHandle<Empty>{
+        cx.update(|cx|cx.open_window(Default::default(),|_,cx|cx.new(|_|Empty)).unwrap())
+    }
+    fn text_owner(window:&Window,value:&str)->OwnerRef{
+        text_owner_mode(window,value,false)
+    }
+    fn text_owner_mode(window:&Window,value:&str,controlled:bool)->OwnerRef{
+        let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        let weak=Rc::downgrade(&owner);text_declaration(&weak,false);text_setup(&weak);
+        {let mut o=owner.borrow_mut();o.phase="callback";o.mounted=true;o.window_id=Some(window.window_handle().window_id());o.bounds=Some(Bounds::default());}
+        text_sync(&weak,record(vec![(if controlled{"value"}else{"defaultValue"},Value::string(value)),("valueMode",Value::string(if controlled{"controlled"}else{"uncontrolled"}))]));owner
+    }
+    fn input(owner:&OwnerRef)->NativeTextInput{NativeTextInput{owner:Rc::downgrade(owner),epoch:owner.borrow().modules.text.lease_epoch}}
+
+    #[gpui::test]
+    fn source_selection_snaps_utf16_and_obeys_exact_live_owner(cx:&mut TestAppContext){
+        let window=open(cx);let other=open(cx);
+        let owner=window.update(cx,|_,window,cx|{
+            let owner=text_owner(window,"a😀候b");
+            assert!(text_select_utf16(&owner,2,3,window,cx));
+            assert_eq!(input(&owner).selected_text_range(false,window,cx).unwrap().range,1..3);
+            assert!(text_select_utf16(&owner,2,2,window,cx));
+            assert_eq!(input(&owner).selected_text_range(false,window,cx).unwrap().range,1..1);
+            assert!(text_select_utf16(&owner,999,1000,window,cx));
+            assert_eq!(input(&owner).selected_text_range(false,window,cx).unwrap().range,5..5);
+            text_sync(&Rc::downgrade(&owner),record(vec![("readOnly",Value::boolean(true))]));
+            assert!(text_select_utf16(&owner,0,5,window,cx),"readonly text remains selectable");
+            text_sync(&Rc::downgrade(&owner),record(vec![("disabled",Value::boolean(true))]));
+            assert!(!text_select_utf16(&owner,0,0,window,cx));
+            text_sync(&Rc::downgrade(&owner),record(vec![("disabled",Value::boolean(false))]));
+            owner
+        }).unwrap();
+        other.update(cx,|_,window,cx|assert!(!text_select_utf16(&owner,0,0,window,cx))).unwrap();
+        window.update(cx,|_,window,cx|{
+            owner.borrow_mut().mounted=false;
+            assert!(!text_select_utf16(&owner,0,0,window,cx));
+            owner.borrow_mut().mounted=true;Owner::dispose(&owner);
+            assert!(!text_select_utf16(&owner,0,0,window,cx));
+        }).unwrap();
+    }
+
+    #[gpui::test]
+    fn composition_keys_cannot_edit_but_live_ime_can_replace(cx:&mut TestAppContext){
+        let window=open(cx);
+        window.update(cx,|_,window,cx|{
+            let owner=text_owner(window,"old");let mut editor=input(&owner);
+            editor.replace_and_mark_text_in_range(Some(0..3),"候😀",Some(3..3),window,cx);
+            assert!(text_is_composing(&owner));
+            let before=owner.borrow().modules.text.editor.clone();
+            let selection=editor.selected_text_range(false,window,cx).unwrap().range;
+            assert!(!text_select_utf16(&owner,0,0,window,cx));
+            for key in ["enter","escape","left","right","home","end","backspace","delete","ctrl-z","ctrl-v"]{
+                let key=gpui::Keystroke::parse(key).unwrap();
+                assert!(text_key_down(&owner,&gpui::KeyDownEvent{keystroke:key,is_held:false},window,cx));
+                assert_eq!(owner.borrow().modules.text.editor,before);
+                assert_eq!(editor.selected_text_range(false,window,cx).unwrap().range,selection);
+                assert!(text_is_composing(&owner));
+            }
+            editor.replace_text_in_range(None,"选😀",window,cx);
+            assert!(!text_is_composing(&owner));
+            assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"选😀");
+            text_detach(&owner);owner.borrow_mut().mounted=false;
+            assert!(!text_is_composing(&owner));
+            owner.borrow_mut().mounted=true;
+            editor.replace_text_in_range(None,"stale",window,cx);
+            assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"选😀","retired IME lease cannot edit a remount");
+            Owner::dispose(&owner);
+        }).unwrap();
+    }
+
+    #[gpui::test]
+    fn reset_replaces_editing_lease_and_keeps_controlled_authority(cx:&mut TestAppContext){
+        let window=open(cx);
+        window.update(cx,|_,window,cx|{
+            let owner=text_owner(window,"seed");let mut old=input(&owner);
+            old.replace_and_mark_text_in_range(Some(0..4),"候选",Some(2..2),window,cx);
+            assert!(text_is_composing(&owner));
+            assert!(text_reset_value(&Rc::downgrade(&owner),Value::string("fresh\r\n😀")).bool());
+            assert!(!text_is_composing(&owner));
+            assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"fresh😀");
+            old.replace_text_in_range(None,"stale",window,cx);
+            assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"fresh😀");
+            let undo=gpui::KeyDownEvent{keystroke:gpui::Keystroke::parse("ctrl-z").unwrap(),is_held:false};
+            text_key_down(&owner,&undo,window,cx);
+            assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"fresh😀","reset cannot undo into the retired draft");
+            assert!(text_reset_value(&Rc::downgrade(&owner),Value::Undefined).bool());
+            assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"seed");
+
+            let controlled=text_owner_mode(window,"truth",true);let mut old_controlled=input(&controlled);
+            old_controlled.replace_and_mark_text_in_range(Some(0..5),"candidate",Some(9..9),window,cx);
+            assert!(!text_reset_value(&Rc::downgrade(&controlled),Value::string("ignored")).bool());
+            assert!(!text_is_composing(&controlled));
+            assert_eq!(text_snapshot(&Rc::downgrade(&controlled)).member("value",false).text(),"truth");
+            old_controlled.replace_text_in_range(None,"stale",window,cx);
+            assert_eq!(controlled.borrow().modules.text.editor.as_ref(),"truth");
+            controlled.borrow_mut().mounted=false;
+            assert!(!text_reset_value(&Rc::downgrade(&controlled),Value::string("detached")).bool());
+            Owner::dispose(&owner);Owner::dispose(&controlled);
+        }).unwrap();
+    }
+}
+
 `;

@@ -318,6 +318,12 @@ export function emitJavaScriptValue(
           return `String(${args.join(', ')})`;
         case 'number.isFinite':
           return `Number.isFinite(${args.join(', ')})`;
+        case 'number':
+          return `Number(${args.join(', ')})`;
+        case 'math.floor':
+          return `Math.floor(${args[0]})`;
+        case 'math.round':
+          return `Math.round(${args[0]})`;
         case 'string':
           return `String(${args[0]})`;
         case 'object.freeze':

@@ -228,6 +228,7 @@ export function emitGpuiSource(
     'hitParticipation.registerRegion',
     'hitParticipation.unregisterRegion',
     'scroll.configure',
+    'scroll.sync',
     'scroll.request',
     'scroll.getSnapshot',
     'collection.configure',
@@ -238,6 +239,7 @@ export function emitGpuiSource(
     'hook.asTextControl',
     'textControl.on',
     'textControl.sync',
+    'textControl.resetValue',
     'textControl.snapshot',
     'hook.asImageView',
     'imageView.on',
@@ -1520,7 +1522,16 @@ impl __PuiNativeRecordValue {
         switch (node.name) {
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
+          case 'number':
+            return args.length
+              ? `Value::number((${args[0]}).scalar_number())`
+              : 'Value::number(0.)';
+          case 'math.floor':
+            return `Value::number((${args[0]}).num().floor())`;
+          case 'math.round':
+            return `math_round(${args[0]})`;
           case 'string': {
+            if (!args.length) return 'Value::string("")';
             // GPUI values coerce scalars exactly as ECMAScript does; a
             // structured or unknown argument has no admitted native coercion.
             const type = node.arguments[0].type;
@@ -1894,7 +1905,7 @@ impl __PuiNativeRecordValue {
           case 'accessible.role':
             return `accessible_role(${receiverOwner()}, ${argument(0)})`;
           case 'accessible.state':
-            return `accessible_state(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
+            return `accessible_state(${receiverOwner()}, ${argument(0)}, ${argument(1)}, ${argument(2)})`;
           case 'accessible.action':
             return `accessible_action_spec(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'accessible.nameFromContent':
@@ -1982,6 +1993,8 @@ impl __PuiNativeRecordValue {
             return builtin(`scroll_setup(&${ownerReference()})`);
           case 'scroll.configure':
             return `scroll_configure(${receiverOwner()}, ${argument(0)})`;
+          case 'scroll.sync':
+            return `scroll_sync(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.request':
             return `scroll_request(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.getSnapshot':
@@ -1992,6 +2005,8 @@ impl __PuiNativeRecordValue {
             return `text_on(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'textControl.sync':
             return `text_sync(${receiverOwner()}, ${argument(0)})`;
+          case 'textControl.resetValue':
+            return `text_reset_value(${receiverOwner()}, ${argument(0)})`;
           case 'textControl.snapshot':
             return `text_snapshot(${receiverOwner()})`;
           case 'hook.asImageView':

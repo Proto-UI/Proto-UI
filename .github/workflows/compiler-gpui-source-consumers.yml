@@ -108,6 +108,7 @@ jobs:
             --output "$RUNNER_TEMP/gpui-evidence/numeric-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test a11y_value -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-consumer.log"
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" -p proto-ui-gpui-native --features test-support --lib -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-input-atoms.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

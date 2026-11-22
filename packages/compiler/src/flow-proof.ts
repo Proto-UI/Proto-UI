@@ -7,6 +7,11 @@ export interface FlowMark {
   heap: number;
   cell: number;
 }
+export interface FlowCheckpoint {
+  calls: number;
+  heap: number;
+  cells: ReadonlyMap<string, number>;
+}
 
 /** Only executable checked nodes participate; retained source and type views do not. */
 export function writtenMemberFields(value: unknown): ReadonlySet<string> {
@@ -90,6 +95,23 @@ export class FlowProof {
   private readonly cells = new Map<string, number>();
   private readonly observations = new WeakMap<object, FlowMark>();
   constructor(private readonly writtenFields: ReadonlySet<string>) {}
+
+  checkpoint(): FlowCheckpoint {
+    return { calls: this.calls, heap: this.heap, cells: new Map(this.cells) };
+  }
+  restore(checkpoint: FlowCheckpoint): void {
+    this.calls = checkpoint.calls;
+    this.heap = checkpoint.heap;
+    this.cells.clear();
+    for (const [key, value] of checkpoint.cells) this.cells.set(key, value);
+  }
+  merge(a: FlowCheckpoint, b: FlowCheckpoint): void {
+    this.calls = Math.max(a.calls, b.calls);
+    this.heap = Math.max(a.heap, b.heap);
+    this.cells.clear();
+    for (const key of new Set([...a.cells.keys(), ...b.cells.keys()]))
+      this.cells.set(key, Math.max(a.cells.get(key) ?? 0, b.cells.get(key) ?? 0));
+  }
 
   mark(key: string): FlowMark {
     return { calls: this.calls, heap: this.heap, cell: this.cells.get(key) ?? 0 };

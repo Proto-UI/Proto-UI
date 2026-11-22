@@ -1,0 +1,105 @@
+id: T-COMPILER-GPUI-AUTHORED-INPUT-0001
+type: test
+title: Generated GPUI activation, conditional accessibility and editing-lease execution
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  These executable source-to-native tests exercise the actual emitted components and SDK host atoms. The GPUI test platform does not establish OS accessibility or real IME delivery; source-bound native receipts and independent review are required separately.
+
+cases:
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-ACTIVATION
+    title: Assistive activation executes authored policy before outward signaling
+    covers: [C-A11Y-0001-F, C-A11Y-0001-DECLARATION-LIFETIME]
+    expectation: Default and Expose activation enter press.commit, explicit host inputs retain their route, disabled policy executes, and retired owners cannot deliver.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION
+    title: Current State controls whether an accessibility fact is applicable
+    covers: [C-A11Y-0001-STATE-CONDITION, C-A11Y-0001-STATE-CONDITION-VALIDITY]
+    expectation: The native node omits inactive facts and restores their current values, declaration replacement includes the condition, and invalid runtime conditions remain unmodified while omitted.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT
+    title: Text reset and native selection preserve editing authority
+    covers:
+      [
+        C-TEXT-CONTROL-0001-RESET,
+        C-TEXT-CONTROL-0001-D,
+        C-TEXT-CONTROL-0001-E,
+        C-TEXT-CONTROL-0001-F,
+        C-TEXT-CONTROL-0001-G,
+        C-TEXT-CONTROL-0001-I,
+      ]
+    expectation: Reset retires IME and history, controlled truth is retained, UTF-16 selection snaps whole codepoints and rejects wrong windows or inactive leases, and ordinary editing cannot disturb composition.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA
+    title: Checked scalar and readonly data source executes unchanged
+    covers:
+      [
+        C-COMPILER-SCALAR-INPUT-0001-LENGTH,
+        C-COMPILER-SCALAR-INPUT-0001-CONVERSION,
+        C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
+        C-COMPILER-SCALAR-INPUT-0001-READONLY,
+      ]
+    expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries.
+implementations:
+  - id: checked-authored-inputs
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/gpui-authored-inputs.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
+      ]
+  - id: generated-native-inputs
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-ACTIVATION,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
+      ]
+  - id: native-editor-leases
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/src/gpui-native-text.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT]
+    notes:
+      [
+        Execute the generated SDK library tests with the test-support feature; never patch emitted Rust.,
+      ]
+verifies:
+  contracts:
+    - id: C-COMPILER-SCALAR-INPUT-0001
+      anchors:
+        [
+          C-COMPILER-SCALAR-INPUT-0001-LENGTH,
+          C-COMPILER-SCALAR-INPUT-0001-CONVERSION,
+          C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
+          C-COMPILER-SCALAR-INPUT-0001-READONLY,
+        ]
+    - id: C-TEXT-CONTROL-0001
+      anchors:
+        [
+          C-TEXT-CONTROL-0001-RESET,
+          C-TEXT-CONTROL-0001-D,
+          C-TEXT-CONTROL-0001-E,
+          C-TEXT-CONTROL-0001-F,
+          C-TEXT-CONTROL-0001-G,
+          C-TEXT-CONTROL-0001-I,
+        ]
+    - id: C-A11Y-0001
+      anchors:
+        [
+          C-A11Y-0001-F,
+          C-A11Y-0001-DECLARATION-LIFETIME,
+          C-A11Y-0001-STATE-CONDITION,
+          C-A11Y-0001-STATE-CONDITION-VALIDITY,
+        ]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Bind source admission and native execution to generic activation, applicability, scalar and editing-lease criteria.
+tags: [compiler, gpui, input, accessibility, text-control]

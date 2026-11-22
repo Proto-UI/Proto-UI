@@ -41,6 +41,22 @@ const manifest = await readFile(path.join(component, 'Cargo.toml'), 'utf8');
 const provenance = JSON.parse(await readFile(path.join(component, 'provenance.json'), 'utf8'));
 const name = /^\s*name\s*=\s*"([^"]+)"/m.exec(manifest)?.[1];
 if (!name) throw new Error('Missing emitted package name.');
+const controls = [];
+for (const stem of ['activation', 'host-activation', 'text']) {
+  const result = await compileFile(path.join(fixture, stem + '.proto.ts'), {
+    root: fixture,
+    profile: 'gpui-source-v1',
+    nativeSdkPath: '../component/.proto-ui/gpui-native',
+    ...(workspace ? { gpuiDependency: 'workspace' } : {}),
+  });
+  if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+  const written = await writeCompilation(result.value, path.join(output, stem));
+  if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+  const manifest = await readFile(path.join(output, stem, 'Cargo.toml'), 'utf8');
+  const name = /^\s*name\s*=\s*"([^"]+)"/m.exec(manifest)?.[1];
+  if (!name) throw new Error('Missing emitted control package name: ' + stem);
+  controls.push({ stem, name });
+}
 await writeFile(
   path.join(output, 'Cargo.toml'),
   `[package]
@@ -51,14 +67,15 @@ publish = false
 
 [workspace]
 resolver = "2"
-members = ["component", "component/.proto-ui/gpui-native"]
+members = ["component", ${controls.map((control) => JSON.stringify(control.stem)).join(', ')}, "component/.proto-ui/gpui-native"]
 
 [workspace.dependencies]
 gpui = { git = ${JSON.stringify(git)}, rev = ${JSON.stringify(rev)} }
 
 [dependencies]
 component = { package = ${JSON.stringify(name)}, path = "component" }
-proto-ui-gpui-native = { path = "component/.proto-ui/gpui-native" }
+${controls.map((control) => `${control.stem.replaceAll('-', '_')} = { package = ${JSON.stringify(control.name)}, path = ${JSON.stringify(control.stem)} }`).join('\n')}
+proto-ui-gpui-native = { path = "component/.proto-ui/gpui-native", features = ["test-support"] }
 gpui = { workspace = true, features = ["test-support"] }
 serde_json = "1.0"
 `,
@@ -75,6 +92,12 @@ const receipt = {
   compilerProfile: 'gpui-source-v1',
   gpui: { git, rev, workspace },
   sourceSha256: sha256(await readFile(path.join(fixture, 'value.proto.ts'))),
+  controls: await Promise.all(
+    controls.map(async (control) => ({
+      ...control,
+      sourceSha256: sha256(await readFile(path.join(fixture, control.stem + '.proto.ts'))),
+    }))
+  ),
   consumerSha256: sha256(await readFile(path.join(fixture, 'consumer.rs'))),
   generatedPackageName: name,
   nativeSdk: provenance.nativeSdk,

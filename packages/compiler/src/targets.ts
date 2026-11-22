@@ -3,6 +3,7 @@ import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
 import { declaredSetValueEvent } from './a11y-event-types';
+import { valueAlternatives } from './value-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
 import {
@@ -472,6 +473,8 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     operations: [
       ...nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
       'eventControl.requestDefaultActionPrevention',
+      'textControl.resetValue',
+      'scroll.sync',
     ],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
@@ -723,6 +726,17 @@ export function checkTargetOperations(
       case 'operation':
         operation(value.operation, value.span);
         if (
+          selected.mode === 'source' &&
+          selected.id !== 'gpui-source-v1' &&
+          value.operation === 'accessible.state' &&
+          value.arguments.length > 2
+        )
+          diagnostic(
+            'PUI4003',
+            `Conditional accessibility State projection is not implemented by ${selected.id}.`,
+            value.span
+          );
+        if (
           selected.id === 'gpui-source-v1' &&
           value.operation === 'accessible.action' &&
           value.arguments[0]?.kind === 'literal' &&
@@ -743,8 +757,24 @@ export function checkTargetOperations(
         break;
       case 'intrinsic':
         if (
+          selected.id === 'gpui-source-v1' &&
           value.name === 'string' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          value.arguments.some((argument) =>
+            valueAlternatives(argument.type).some((member) =>
+              typeof member === 'string'
+                ? !['string', 'number', 'boolean', 'null', 'void'].includes(member)
+                : member.kind !== 'literal'
+            )
+          )
+        )
+          diagnostic(
+            'PUI4003',
+            'GPUI String conversion requires a checked scalar operand.',
+            value.span
+          );
+        if (
+          value.name === 'string' &&
+          !['react', 'vue', 'vue2', 'web-component', 'gpui'].includes(selected.framework)
         )
           diagnostic(
             'PUI4003',
