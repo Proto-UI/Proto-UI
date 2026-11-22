@@ -1,45 +1,60 @@
-name: Sprint 2 original acceptance artifact audit
-run-name: Sprint 2 acceptance audit f8e7d12 run 45029016292
+name: Sprint 2 original Git object transport
+run-name: Sprint 2 transport 4541dfb (original authors retained)
 on:
   workflow_dispatch:
 permissions:
   contents: read
-  actions: read
 concurrency:
-  group: sprint2-original-acceptance-audit
+  group: sprint2-original-object-publication
   cancel-in-progress: false
 jobs:
-  audit-source-bound-artifact:
+  verify-original-objects:
     if: ${{ github.repository == 'Proto-UI/Proto-UI' && github.ref == 'refs/heads/sprint2/transport-20261122-01' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Read the exact product source for the original receipt validator
-        uses: actions/checkout@v4
-        with:
-          ref: f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7
-          path: candidate
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Read and verify original acceptance artifacts
+      - name: Verify original objects and fast-forward ancestry without executing them
+        run: node .sprint2-transport/publish-candidate.mjs verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sprint2-transport-verification-${{ github.run_id }}
+          path: ${{ runner.temp }}/sprint2-transport-verify.json
+          if-no-files-found: error
+          retention-days: 30
+  publish-exact-candidate:
+    needs: verify-original-objects
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Import original commits and push one exact lease to the authorized PR branch
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node .sprint2-transport/audit-acceptance.mjs
-      - name: Preserve read-only verification and original failure outputs
+        run: node .sprint2-transport/publish-candidate.mjs publish
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: sprint2-acceptance-audit-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/sprint2-acceptance-audit/audit.json
-            ${{ runner.temp }}/sprint2-acceptance-audit/original-receipt.json
-            ${{ runner.temp }}/sprint2-acceptance-audit/*-original.log
-            ${{ runner.temp }}/sprint2-acceptance-audit/*-report.json
+          name: sprint2-transport-publication-${{ github.run_id }}
+          path: ${{ runner.temp }}/sprint2-transport-publish.json
           if-no-files-found: error
           retention-days: 30
