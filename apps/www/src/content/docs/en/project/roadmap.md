@@ -5,7 +5,9 @@ description: 'The current stage of Proto UI and the main direction of its evolut
 
 # Roadmap
 
-Proto UI is currently in its v0 stage. The **0.2** line reached its stable release with [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) on August 13, 2026. Current work therefore focuses on post-0.2 stabilization: closing documentation and architecture gaps exposed by real project trials, strengthening evidence, and preparing the v0.3 direction without presenting any unpublished alpha train as current availability. Later v0 and v1 milestones do not carry a fixed calendar-date promise.
+Proto UI is currently in its v0 stage. The **0.2** line reached its stable release with [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) on August 13, 2026. Current development follows the [0.3 delivery plan](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/release-0.3-plan.md), which records the committed scope, target dates, feature freeze and acceptance stages. Those targets do not waive unfinished acceptance criteria or establish publication.
+
+The workspace version comes from [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) and its corresponding [version entity](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions). Keep unpublished development separate from the stable install path. The [private compiler](https://github.com/Proto-UI/Proto-UI/blob/main/packages/compiler/README.md) already has bounded implementations; its profile-specific evidence does not establish a published compiler release or full native-host conformance.
 
 At this stage, the priority is not to expand surface-level features as quickly as possible. Instead, the focus is on completing the foundational protocol loop first: making sure the core information pathways, execution semantics, and cross-host translation model have a stable and verifiable basis.
 

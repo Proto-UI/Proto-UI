@@ -44,6 +44,27 @@ Adapter package intended to be used together with Proto UI prototypes and the sh
 npm install @proto.ui/adapter-web-component@0.3.0-alpha.2
 ```
 
+## Styling the composed host
+
+`AdaptToWebComponent` registers the custom-element tag supplied through `registerAs`; that tag is the DOM host that document CSS styles. Some composed families add a wrapper whose public tag differs from the raw prototype name. The Shadcn switch is the current example: the generated facade exports `ShadcnSwitchElement` as `<proto-ui-shadcn-switch>` (Root plus Thumb), while the raw adapter target is separately registered as `<proto-ui-shadcn-switch-root>`.
+
+Track geometry belongs on the composed tag. For a compact profile, the switch pair is:
+
+```css
+proto-ui-shadcn-switch {
+  width: 2rem;
+  height: 1.25rem;
+  padding-inline: 0;
+  border-width: 2px;
+}
+
+proto-ui-shadcn-switch-thumb[data-checked] {
+  --pui-translate-x: calc(100% - 4px);
+}
+```
+
+CSS that targets `proto-ui-shadcn-switch-root` does not reach the composed instance. Thumb-only rules still apply, so a custom thumb can travel inside the default `w-11 h-6` track and appear stranded before the checked edge. See [#1720](https://github.com/Proto-UI/Proto-UI/issues/1720) for the measured case. When a composed wrapper exists, style the tag exported by the generated Web Components facade.
+
 ## Experimental Shadow split profile
 
 The current source supports an opt-in experimental Shadow split profile. Its initial S1–S5 acceptance is complete, but the spec remains draft; this is not a claim about an earlier published package or general Shadow DOM compatibility.
