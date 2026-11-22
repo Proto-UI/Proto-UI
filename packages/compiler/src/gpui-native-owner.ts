@@ -174,6 +174,9 @@ impl Value {
 }
 pub fn strict_equal(a:&Value,b:&Value)->bool {
     match (a,b) {
+        // Callback handles are retained references to one owner. Comparing
+        // clones observes identity without granting a new callback scope.
+        (Value::Owner(a),Value::Owner(b))=>return Weak::ptr_eq(a,b),
         (Value::CaughtStringUnit(a),Value::CaughtStringUnit(b))=>return a==b,
         (Value::CaughtStringUnit(unit),Value::Json(Json::String(text)))|(Value::Json(Json::String(text)),Value::CaughtStringUnit(unit))=>return text.encode_utf16().eq(std::iter::once(*unit)),
         _=>{},
@@ -1057,6 +1060,24 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
     if let Some(target)=&target{prevented|=dispatch_root_route(target,"key.up",fields.clone());}
     for owner in &owners{let end={let mut owner=owner.borrow_mut();if owner.press.key.as_deref()==key.as_deref(){owner.press.key.take().is_some()}else{false}};if end{prevented|=dispatch_root_route(owner,"press.end",press_fields("press.end",&fields));}}
     if prevented{window.prevent_default();cx.stop_propagation();}drive_owners(window,cx);
+}
+
+#[cfg(all(test,feature="test-support"))]
+mod callback_handle_identity_tests {
+    use super::*;
+    #[test]
+    fn retained_callback_handles_keep_identity_without_reviving_disposed_authority(){
+        let first=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        let second=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        let handle=capability(&Rc::downgrade(&first));let retained=handle.clone();
+        assert!(strict_equal(&handle,&retained));
+        assert!(strict_equal(&handle,&capability(&Rc::downgrade(&first))));
+        assert!(!strict_equal(&handle,&capability(&Rc::downgrade(&second))));
+        assert!(!strict_equal(&handle,&Value::HostTarget(Rc::downgrade(&first))));
+        Owner::finish(&first,Value::Undefined);Owner::dispose(&first);
+        assert!(strict_equal(&handle,&retained),"reference identity survives retirement");
+        assert!(catch_authored(||runtime(&handle.owner())).is_err(),"identity is not callback authority");
+    }
 }
 ` +
   gpuiNativeValuesSource +

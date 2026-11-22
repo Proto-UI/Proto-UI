@@ -192,6 +192,15 @@ pub fn text_blur(owner:&OwnerRef,window:&mut Window,cx:&mut App){
     if changed&&!owner.borrow().disposed&&owner.borrow().mounted&&owner.borrow().present{text_event(owner,"change",&value,false,None,None,window,cx);}
 }
 pub struct NativeTextInput {owner:OwnerWeak,epoch:u64}
+/// Native consumer evidence can exercise the production InputHandler lease.
+/// This does not create an editor, replace a lease, or change authored State.
+#[cfg(feature="test-support")]
+pub fn native_text_input_for_test(owner:&OwnerRef,window:&Window)->Option<NativeTextInput>{
+    if !ready(owner){return None}
+    let o=owner.borrow();let text=&o.modules.text;
+    if o.window_id!=Some(window.window_handle().window_id())||!text.supported||!text.declared||!text.initialized{return None}
+    Some(NativeTextInput{owner:Rc::downgrade(owner),epoch:text.lease_epoch})
+}
 impl NativeTextInput {
     fn replace(&mut self,range:Option<Range<usize>>,input:&str,input_type:Option<&str>,window:&mut Window,cx:&mut App){
         let Some(owner)=self.live().filter(text_editable)else{return};
@@ -448,6 +457,7 @@ mod text_owner_tests {
         let window=open(cx);let other=open(cx);
         let owner=window.update(cx,|_,window,cx|{
             let owner=text_owner(window,"a😀候b");
+            assert!(native_text_input_for_test(&owner,window).is_some());
             assert!(text_select_utf16(&owner,2,3,window,cx));
             assert_eq!(input(&owner).selected_text_range(false,window,cx).unwrap().range,1..3);
             assert!(text_select_utf16(&owner,2,2,window,cx));
@@ -461,12 +471,14 @@ mod text_owner_tests {
             text_sync(&Rc::downgrade(&owner),record(vec![("disabled",Value::boolean(false))]));
             owner
         }).unwrap();
-        other.update(cx,|_,window,cx|assert!(!text_select_utf16(&owner,0,0,window,cx))).unwrap();
+        other.update(cx,|_,window,cx|{assert!(!text_select_utf16(&owner,0,0,window,cx));assert!(native_text_input_for_test(&owner,window).is_none());}).unwrap();
         window.update(cx,|_,window,cx|{
             owner.borrow_mut().mounted=false;
             assert!(!text_select_utf16(&owner,0,0,window,cx));
+            assert!(native_text_input_for_test(&owner,window).is_none());
             owner.borrow_mut().mounted=true;Owner::dispose(&owner);
             assert!(!text_select_utf16(&owner,0,0,window,cx));
+            assert!(native_text_input_for_test(&owner,window).is_none());
         }).unwrap();
     }
 
