@@ -4,8 +4,9 @@ description: '覆盖在 Base Tooltip family 之上的 shadcn 草案呈现。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import { shadcnTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页以 **Shadcn Rhea** 为目标，支持profile的parts均显式选择Rhea；下文headless触发器/action-body缺口仍开放，尚不称整页外观统一。这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
@@ -31,11 +32,24 @@ Content 选择 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e
 
 相关 entities 仍为 `draft`；本页描述当前 cataloged direction，而不是稳定 compatibility guarantee。
 
-## 安装
+## 当前源码安装与用法
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tooltip" manager="npm" />
+以下文件面向当前 0.3 源码包，包括 Vue 2.6 Adapter；工作区版本号不代表这些包已经发布到 npm。从已有宿主应用开始，把 CLI、`@proto.ui/prototypes-shadcn` 与对应 Adapter 从**同一个已审查源码版本**安装。仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 从这些 tarball 安装完整声明的 `@proto.ui/*` 依赖闭包。[稳定版 Quick Start](/zh-cn/start-here/quick-start/) 仍是独立的已发布版本路线。
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+按宿主使用 `@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`。React 与 Vue 保留原应用挂载入口。Vue 2 要求 Vue `>=2.6.0 <2.7`；把 CLI 版本换成 `@latest` 不能让安装结果自动等同于源码预览。
+
+安装配套包后，在应用目录运行本地 CLI。保留生成的 CSS：Base 的 presence 与 positioning 也需要其中的结构规则。下方小型 `tooltip-demo.css` 由应用拥有，不替代这些规则。
+
+```sh
+node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
+node node_modules/@proto.ui/cli/bin/proto-ui.js add wc shadcn-tooltip --no-install --no-interactive
+```
+
+将 `wc` 换为 `react`、`vue` 或 `vue2`，生成对应 facade。下方使用真实生成的四个 part 导出与 WC 标签；`--no-install` 的前提是配套包已经安装。Trigger 与 Content 显式选择 Rhea，Trigger 的被动外观仍由应用拥有。
+
+复制一个宿主的文件。WC HTML 加入已有文档，`src/main.ts` 只加载一次；React 与 Vue 保留应用原有入口并使用下方 `App` 组件。如果应用已经加载 `proto-ui-style.css`，保留一个导入入口即可。一个 Group 拥有两个非受控 Root，每个 Root 各有一个独立 Trigger 和一个不含交互控件的 Content。
+
+<CodeExample files={shadcnTooltipFiles} initialHost="wc" label="Shadcn Tooltip 完整宿主用法" />
 
 ## 在 Button 上使用 Tooltip
 

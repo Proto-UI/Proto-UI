@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { chmod, copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -51,6 +51,106 @@ test('diagram evidence keeps explicit triggers and exact-head checkout read-only
   assert.equal(job.env.CANDIDATE_SHA, '${{ github.event.pull_request.head.sha || github.sha }}');
   assert.equal(checkout.with.ref, '${{ env.CANDIDATE_SHA }}');
   assert.equal(checkout.with['persist-credentials'], false);
+});
+
+test('a clean checkout reaches style generation before binding and retains generator failure', async () => {
+  const build = job.steps.find((step) => step.id === 'build');
+  const lines = build.run.trim().split('\n');
+  const bind = lines.findIndex((line) =>
+    line.includes('node apps/www/scripts/whitepaper-diagram-build.mjs begin-build')
+  );
+  assert.ok(bind >= 0, 'the shared build must bind its source before Astro starts');
+  // Execute the actual shell prelude without recursively running this test suite.
+  // The failing process substitute writes no CSS; it proves ordering and failure
+  // propagation only. Real generation and production/native acceptance are separate.
+  const prelude = lines
+    .slice(0, bind + 1)
+    .filter((line) => !line.trim().startsWith('node --test '))
+    .join('\n');
+  const directory = await mkdtemp(path.join(tmpdir(), 'pui clean diagram workflow '));
+  try {
+    const root = path.join(directory, 'checkout');
+    const bin = path.join(directory, 'bin');
+    const evidence = path.join(directory, 'evidence');
+    await Promise.all([mkdir(root), mkdir(bin), mkdir(evidence)]);
+    for (const relative of [
+      'apps/www/scripts/whitepaper-diagram-build.mjs',
+      'apps/www/scripts/contrast-provenance.mjs',
+      'apps/www/scripts/whitepaper-diagram-evidence-receipts.mjs',
+      'apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs',
+      'apps/www/src/styles/proto-ui-style.css',
+    ]) {
+      const destination = path.join(root, relative);
+      await mkdir(path.dirname(destination), { recursive: true });
+      await copyFile(new URL(`../../../${relative}`, import.meta.url), destination);
+    }
+    const git = (args) => {
+      const result = spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+      assert.equal(result.status, 0, result.stderr);
+      return result.stdout.trim();
+    };
+    git(['init', '-q']);
+    git(['add', '.']);
+    git([
+      '-c',
+      'user.name=Diagram fixture',
+      '-c',
+      'user.email=fixture@example.invalid',
+      '-c',
+      'commit.gpgsign=false',
+      '-c',
+      'core.hooksPath=/dev/null',
+      'commit',
+      '-qm',
+      'clean source fixture',
+    ]);
+    const env = {
+      ...process.env,
+      CANDIDATE_SHA: git(['rev-parse', 'HEAD']),
+      DIAGRAM_EVIDENCE_DIR: evidence,
+    };
+    assert.equal(git(['status', '--porcelain=v1', '--untracked-files=all']), '');
+    const unprepared = spawnSync(
+      process.execPath,
+      ['apps/www/scripts/whitepaper-diagram-build.mjs', 'begin-build'],
+      { cwd: root, env, encoding: 'utf8', timeout: 10000 }
+    );
+    assert.equal(unprepared.status, 1, unprepared.stderr);
+    assert.match(
+      unprepared.stderr,
+      /Contrast provenance requires generated CSS: apps\/www\/src\/styles\/proto-ui-tokens.generated\.css/
+    );
+    const substitute = path.join(bin, 'corepack');
+    await writeFile(
+      substitute,
+      `#!${process.execPath}\n` +
+        `process.stdout.write(JSON.stringify(process.argv.slice(2))+'\\n');\n` +
+        `process.stderr.write('deliberate generator failure, no CSS emitted\\n');\n` +
+        `process.exit(19);\n`
+    );
+    await chmod(substitute, 0o755);
+    const result = spawnSync('bash', ['-e', '-c', prelude], {
+      cwd: root,
+      env: { ...env, PATH: `${bin}${path.delimiter}${process.env.PATH}` },
+      encoding: 'utf8',
+      timeout: 10000,
+    });
+    assert.equal(result.status, 19, result.stderr || result.stdout);
+    const log = await readFile(path.join(evidence, 'generate.log'), 'utf8');
+    assert.deepEqual(JSON.parse(log.split('\n')[0]), [
+      'pnpm@10.32.1',
+      '--filter',
+      'apps-www',
+      'run',
+      'generate:proto-ui-style',
+    ]);
+    assert.match(log, /deliberate generator failure, no CSS emitted/);
+    await assert.rejects(readFile(path.join(evidence, 'build-start.json')), { code: 'ENOENT' });
+    await assert.rejects(readFile(path.join(evidence, 'build.json')), { code: 'ENOENT' });
+    assert.equal(git(['status', '--porcelain=v1', '--untracked-files=all']), '');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test('authored capture requires its shared build but survives an earlier profile failure', () => {

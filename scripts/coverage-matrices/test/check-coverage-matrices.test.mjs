@@ -17669,7 +17669,7 @@ for (const helper of ['browser-harness', 'site-search-evidence']) {
 
 for (const [source, specifiers] of [
   ['Homepage/homepage-text.ts', ['@proto.ui/prototypes-base/text']],
-  ['InstallCommandCard.astro', ['@proto.ui/adapter-web-component']],
+  ['install-command-card-client.ts', ['@proto.ui/adapter-web-component']],
   [
     'site-link-recipes.ts',
     [
@@ -17730,6 +17730,7 @@ for (const [source, specifiers] of [
       source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
     const sourceBound =
       source === 'site-search-commands.ts' ||
+      source === 'install-command-card-client.ts' ||
       nativeLinkSource ||
       source === 'site-shadcn-controls.ts';
     const content = sourceBound

@@ -7,6 +7,8 @@ sidebar:
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import { brutalistTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 
 <BrutalistPageStyle />
 
@@ -21,6 +23,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 Brutalist Tooltip 公开四个 Base Tooltip 投影入口：Group 继承同域 delay defaults、warm-window 与 active Tooltip 协调；Root 负责受控或非受控 open state；Trigger 负责 hover/focus 路由和无障碍描述关联；Content 负责 presence、锚定 portal 定位、Escape dismissal 与 `role="tooltip"`。
 
 Group、Root 与 Trigger 是当前编目的 draft 透明投影，具有明确的 Brutalist package identity，且不新增第二套 props、state、timing、events、accessibility 或 visual owner。只有 Content 增加 5px 圆角的中性 surface。上方交互示例通过一个真实 Group 组合两个非受控 sibling Tooltip，并可在 Web Components、React、Vue 与 Vue 2 之间切换。Content 通过 renderer-owned portal 保持挂载时，将文档 host 从 Light 切换到 Dark 会通过 `--pui-foreground` 与 `--pui-secondary-background` 重绘同一个 surface。
+
+## 当前源码安装与用法
+
+以下文件面向当前 0.3 源码包，包括 Vue 2.6 Adapter；工作区版本号不代表这些包已经发布到 npm。从已有宿主应用开始，把 CLI、`@proto.ui/prototypes-brutalist` 与对应 Adapter 从**同一个已审查源码版本**安装。仓库的 [仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) 生成本地 tarball，[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) 从这些 tarball 安装完整声明的 `@proto.ui/*` 依赖闭包。[稳定版 Quick Start](/zh-cn/start-here/quick-start/) 仍是独立的已发布版本路线。
+
+按宿主使用 `@proto.ui/adapter-web-component`、`@proto.ui/adapter-react`、`@proto.ui/adapter-vue` 或 `@proto.ui/adapter-vue2`。React 与 Vue 保留原应用挂载入口。 React 示例把 `react-dom` 的 `createPortal` 传入 Adapter，使 Content 使用 renderer-owned portal。Vue 2 要求 Vue `>=2.6.0 <2.7`；把 CLI 版本换成 `@latest` 不能让安装结果自动等同于源码预览。
+
+安装配套包后，在应用目录运行本地 CLI。保留生成的 CSS：Base 的 presence 与 positioning 也需要其中的结构规则。下方小型 `tooltip-demo.css` 由应用拥有，不替代这些规则。
+
+```sh
+node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes brutalist
+```
+
+Brutalist Tooltip 提供 `@proto.ui/prototypes-brutalist/tooltip` 公共导出，但**没有 `proto-ui add` 目标**。下方直接适配这些导出；WC 示例通过公开 Adapter 注册自己的 `app-brutalist-tooltip-*` 标签，并使用 `setElementProps` 设置输入。Brutalist preset 提供该家族的 token 与生成样式规则。
+
+复制一个宿主的文件。WC HTML 加入已有文档，`src/main.ts` 只加载一次；React 与 Vue 保留应用原有入口并使用下方 `App` 组件。如果应用已经加载 `proto-ui-style.css`，保留一个导入入口即可。一个 Group 拥有两个非受控 Root，每个 Root 各有一个独立 Trigger 和一个不含交互控件的 Content。
+
+<CodeExample
+  files={brutalistTooltipFiles}
+  initialHost="wc"
+  label="Brutalist Tooltip 完整宿主用法"
+/>
 
 ## 在 Button 上使用 Tooltip
 
@@ -48,7 +72,7 @@ Button 保留 role、name、click signal、disabled state 与唯一焦点 owner�
 
 ## API
 
-Tooltip 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+Brutalist Tooltip 以上述当前源码包的公共导出为依据，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}

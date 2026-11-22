@@ -18,6 +18,9 @@ let baseUrl = '';
 const evidence = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
 const firstDescription = 'View account settings and profile details.';
 const secondDescription = 'Review recent alerts and notification preferences.';
+// Closed Content need not have a physical node in every Adapter. Readiness
+// observes the two real focus subjects; the journey proves both Contents later.
+const triggerSelector = '[data-pui-root][tabindex="0"]';
 const cases = (['en', 'zh-cn'] as const).flatMap((locale) =>
   RUNTIMES.map((runtime) => ({ locale, runtime }))
 );
@@ -68,11 +71,9 @@ it.each(cases)(
     let failure: string | null = null;
     page.on('pageerror', (error) => errors.push(error.message));
     const subject = (text: string) =>
-      previewer
-        .locator('.host [data-pui-root][tabindex="0"]')
-        .filter({ hasText: new RegExp(`^${text}$`) });
+      previewer.locator(`.host ${triggerSelector}`).filter({ hasText: new RegExp(`^${text}$`) });
     try {
-      await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
+      await selectRuntime(page, previewer, runtime, triggerSelector, 2);
       const account = subject('Account');
       const notifications = subject('Notifications');
       expect(await account.count()).toBe(1);
@@ -112,7 +113,7 @@ it.each(cases)(
       const retired = await notifications.elementHandle();
       if (!retired) throw new Error('Expected the first owner before runtime replacement');
       const replacement = runtime === 'wc' ? 'react' : 'wc';
-      await selectRuntime(page, previewer, replacement, '[data-pui-root]', 7);
+      await selectRuntime(page, previewer, replacement, triggerSelector, 2);
       expect(await retired.evaluate((element) => element.isConnected)).toBe(false);
       await retired.dispose();
       await expect.poll(() => page.getByRole('tooltip').count()).toBe(0);

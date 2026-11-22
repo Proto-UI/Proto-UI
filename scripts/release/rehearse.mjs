@@ -71,8 +71,32 @@ const steps = [
     'corepack',
     [packageManager, '-s', 'release:stage', '--', '--out-dir', join(artifactDir, 'staging')],
   ],
-  ['React tarball consumer', 'corepack', [packageManager, '-s', 'release:smoke:react']],
-  ['CLI multi-host tarball consumer', 'corepack', [packageManager, '-s', 'release:smoke:cli']],
+  [
+    'React tarball consumer',
+    'corepack',
+    [
+      packageManager,
+      '-s',
+      'release:smoke:react',
+      '--',
+      '--keep',
+      '--work-dir',
+      join(artifactDir, 'react-consumer'),
+    ],
+  ],
+  [
+    'CLI multi-host tarball consumer',
+    'corepack',
+    [
+      packageManager,
+      '-s',
+      'release:smoke:cli',
+      '--',
+      '--keep',
+      '--work-dir',
+      join(artifactDir, 'cli-consumer'),
+    ],
+  ],
   ['Documentation build', 'corepack', [packageManager, '-s', 'docs:build']],
 ];
 

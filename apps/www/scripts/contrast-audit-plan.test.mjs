@@ -1397,13 +1397,13 @@ test('new journeys match the actual recipe association and uncontrolled domain i
 test('new source-bound plans keep naming and default-L1 observations separate from full family acceptance', async () => {
   const { transform } = await import('esbuild');
   const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
-  const start = source.indexOf('function plannedStates('),
+  const start = source.indexOf('const passiveFamilies ='),
     end = source.indexOf('// Populate this matrix', start);
   const plannedStates = new Function(
-    'passiveFamilies',
     'contrastHeldBinaryTargets',
     (await transform(source.slice(start, end), { loader: 'ts' })).code + ';return plannedStates;'
-  )(new Set(['badge', 'card', 'skeleton', 'separator', 'spinner']), contrastHeldBinaryTargets);
+  )(contrastHeldBinaryTargets);
+  assert.deepEqual(plannedStates('image'), ['rest']);
   assert.deepEqual(plannedStates('label'), [
     'rest',
     'label-hover',

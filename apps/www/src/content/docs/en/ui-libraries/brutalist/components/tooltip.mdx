@@ -7,6 +7,8 @@ sidebar:
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import { brutalistTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 
 <BrutalistPageStyle />
 
@@ -21,6 +23,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 Brutalist Tooltip publishes four Base Tooltip projection entries: Group inherits same-domain delay defaults, warm-window behavior, and active Tooltip coordination; Root owns controlled or uncontrolled open state; Trigger owns hover/focus routing and accessible-description linkage; Content owns presence, anchored portal positioning, Escape dismissal, and `role="tooltip"`.
 
 Group, Root, and Trigger are current draft transparent projections with cataloged Brutalist package identities; they add no second props, state, timing, event, accessibility, or visual owner. Only Content adds the 5px rounded neutral surface. The interactive demo uses one real Group to compose two uncontrolled sibling Tooltips and can switch among Web Components, React, Vue, and Vue 2. While Content stays mounted through its renderer-owned portal, changing the documentation host from Light to Dark repaints the same surface through `--pui-foreground` and `--pui-secondary-background`.
+
+## Current-source installation and Usage
+
+These files target the current 0.3 source packages, including the Vue 2.6 Adapter. They do not claim that the workspace version is published to npm. Start with an existing host application and install the CLI, `@proto.ui/prototypes-brutalist` and that host's Adapter from **the same reviewed source revision**. The repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) produces local tarballs; its [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) installs the complete declared `@proto.ui/*` dependency closure from those tarballs. The [stable Quick Start](/en/start-here/quick-start/) remains a separate published-version route.
+
+Use `@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue` or `@proto.ui/adapter-vue2` for the selected host. React and Vue keep their existing application mount entry. The React example passes `createPortal` from `react-dom` into the Adapter so Content uses the renderer-owned portal. Vue 2 requires Vue `>=2.6.0 <2.7`; replacing the CLI version with `@latest` does not make a source preview reproducible.
+
+After installing the matching packages, run the local CLI in the application directory. Keep the generated CSS: Base presence and positioning also need its structural rules. The small `tooltip-demo.css` below belongs to the application and does not replace those rules.
+
+```sh
+node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes brutalist
+```
+
+Brutalist Tooltip has public `@proto.ui/prototypes-brutalist/tooltip` exports but **no `proto-ui add` target**. These files adapt those exports directly; the WC example registers its own `app-brutalist-tooltip-*` tags with the public Adapter and sets inputs through `setElementProps`. The Brutalist preset supplies its family tokens and generated style rules.
+
+Copy the files for one host. Add the WC HTML to your existing document and load `src/main.ts` once; for React or Vue, keep the app's usual mount entry and use the provided `App` component. Import `proto-ui-style.css` once if the application already loads it. One Group owns two uncontrolled Roots, and each Root has one standalone Trigger and one non-interactive Content.
+
+<CodeExample
+  files={brutalistTooltipFiles}
+  initialHost="wc"
+  label="Brutalist Tooltip complete host Usage"
+/>
 
 ## Tooltip on a Button
 
@@ -48,7 +72,7 @@ For a command inside a real ShadowRoot, use the [same-tree portal scene recipe](
 
 ## API
 
-Tooltip is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+Brutalist Tooltip is documented against the current source package exports above; there is no public `proto-ui add` target. Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}

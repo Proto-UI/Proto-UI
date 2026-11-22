@@ -407,7 +407,10 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
   }),
-  'apps/www/src/components/InstallCommandCard.astro': Object.freeze({
+  // The reviewed extracted client owns the same manager selection. Its exact
+  // importer bytes remain required; this does not admit sibling helpers.
+  'apps/www/src/components/install-command-card-client.ts': Object.freeze({
+    sourceSha256: 'dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64',
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({

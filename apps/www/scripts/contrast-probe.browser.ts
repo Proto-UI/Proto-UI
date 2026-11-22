@@ -49,6 +49,10 @@ interface ContrastShadow {
 }
 interface ContrastSurface {
   prototype: string | undefined;
+  owner: string | null;
+  generation: string | null;
+  hostNodeId: number;
+  physicalNodeId: number;
   ref: string | null;
   role: string | null;
   inactive: boolean;
@@ -132,6 +136,7 @@ export interface ContrastFrame {
   generation: string;
   theme: string | undefined;
   devicePixelRatio: number;
+  raster: { width: number; height: number };
   stateFingerprint: string;
   surfaces: ContrastSurface[];
 }
@@ -210,6 +215,47 @@ const authoredProjectionRootFilter = (
   };
 };
 
+const declaredNativeEditor = (
+  host: HTMLElement,
+  owner: string,
+  generation: string
+): HTMLElement => {
+  const kind =
+    host.dataset.projectionPrototype === 'brutalist-textarea-root'
+      ? 'Textarea'
+      : host.dataset.projectionPrototype === 'brutalist-input-root'
+        ? 'Input'
+        : null;
+  if (!kind) return host;
+  const editors: (HTMLInputElement | HTMLTextAreaElement)[] = [];
+  const visited = new Set<Node>();
+  const findEditor = (node: Node) => {
+    if (visited.has(node)) return;
+    visited.add(node);
+    if (
+      (kind === 'Input' && node instanceof HTMLInputElement) ||
+      (kind === 'Textarea' && node instanceof HTMLTextAreaElement)
+    )
+      editors.push(node as HTMLInputElement | HTMLTextAreaElement);
+    for (const child of composedChildren(node)) findEditor(child);
+  };
+  findEditor(host);
+  if (editors.length !== 1)
+    throw new Error(`Declared ${kind} requires exactly one current native editor target.`);
+  const element = editors[0];
+  for (let current: Element | null = element; current; current = composedParent(current)) {
+    const targetOwner = current.getAttribute('data-projection-owner');
+    const targetGeneration = current.getAttribute('data-projection-generation');
+    if (
+      (targetOwner !== null && targetOwner !== owner) ||
+      (targetGeneration !== null && targetGeneration !== generation)
+    )
+      throw new Error(`Declared ${kind} native editor crosses a foreign projection lease.`);
+    if (current === host) break;
+  }
+  return element;
+};
+
 const currentProjection = (
   scope: HTMLElement | null,
   boundary: ContrastAuthoredBoundary | null = null
@@ -232,36 +278,10 @@ const currentProjection = (
     }
   };
   visit(document);
-  const surfaces = roots.map((host) => {
-    const editor = host.dataset.projectionPrototype === 'brutalist-textarea-root';
-    let element: HTMLElement | null = host;
-    if (editor) {
-      const editors: HTMLTextAreaElement[] = [];
-      const visited = new Set<Node>();
-      const findEditor = (node: Node) => {
-        if (visited.has(node)) return;
-        visited.add(node);
-        if (node instanceof HTMLTextAreaElement) editors.push(node);
-        for (const child of composedChildren(node)) findEditor(child);
-      };
-      findEditor(host);
-      if (editors.length !== 1)
-        throw new Error('Declared Textarea requires exactly one current native editor target.');
-      element = editors[0];
-      for (let current: Element | null = element; current; current = composedParent(current)) {
-        const targetOwner = current.getAttribute('data-projection-owner');
-        const targetGeneration = current.getAttribute('data-projection-generation');
-        if (
-          (targetOwner !== null && targetOwner !== owner) ||
-          (targetGeneration !== null && targetGeneration !== generation)
-        )
-          throw new Error('Declared Textarea native editor crosses a foreign projection lease.');
-        if (current === host) break;
-      }
-    }
-    if (!element) throw new Error('Declared Textarea has no current native editor target.');
-    return { host, element };
-  });
+  const surfaces = roots.map((host) => ({
+    host,
+    element: declaredNativeEditor(host, owner, generation),
+  }));
   return { scope, owner, generation, surfaces };
 };
 
@@ -269,6 +289,10 @@ const currentProjection = (
 // They live only in the instrument; the subject DOM and author state are untouched.
 const stateNodes = new WeakMap<Node, number>();
 let nextStateNode = 1;
+const stateNodeIdentity = (node: Node): number => {
+  if (!stateNodes.has(node)) stateNodes.set(node, nextStateNode++);
+  return stateNodes.get(node)!;
+};
 const stateProperties = [
   'display',
   'visibility',
@@ -352,12 +376,12 @@ const readContrastStateInScope = (
 ): string => {
   const { owner, generation, surfaces } = currentProjection(scope, boundary);
   const snapshot = (node: Node): unknown => {
-    if (!stateNodes.has(node)) stateNodes.set(node, nextStateNode++);
+    const id = stateNodeIdentity(node);
     if (!(node instanceof Element)) {
       const range = document.createRange();
       range.selectNodeContents(node);
       return {
-        id: stateNodes.get(node),
+        id,
         text: node.textContent,
         rects: [...range.getClientRects()].map((box) => [box.x, box.y, box.width, box.height]),
       };
@@ -369,13 +393,10 @@ const readContrastStateInScope = (
     const rect = node.getBoundingClientRect();
     const assigned =
       node instanceof HTMLSlotElement
-        ? node.assignedNodes({ flatten: true }).map((child) => {
-            if (!stateNodes.has(child)) stateNodes.set(child, nextStateNode++);
-            return stateNodes.get(child);
-          })
+        ? node.assignedNodes({ flatten: true }).map(stateNodeIdentity)
         : null;
     return {
-      id: stateNodes.get(node),
+      id,
       tag: node.tagName,
       attributes: [...node.attributes].map(({ name, value }) => [name, value]).sort(),
       rect: [rect.x, rect.y, rect.width, rect.height],
@@ -570,7 +591,12 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
     prototype: string | null;
     owner: string | null;
     generation: string | null;
+    physicalNodeId: number;
     radii: string[];
+    borderWidths: string[];
+    borderBox: { x: number; y: number; width: number; height: number };
+    clientBox: { x: number; y: number; width: number; height: number };
+    targetBoxes: { x: number; y: number; width: number; height: number }[];
     overflowX: string;
     overflowY: string;
     fixedPx: boolean;
@@ -677,7 +703,27 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
         prototype: current.getAttribute('data-projection-prototype'),
         owner: current.getAttribute('data-projection-owner'),
         generation: current.getAttribute('data-projection-generation'),
+        physicalNodeId: stateNodeIdentity(current),
         radii: cornerRadii,
+        borderWidths: [
+          style.borderTopWidth,
+          style.borderRightWidth,
+          style.borderBottomWidth,
+          style.borderLeftWidth,
+        ],
+        borderBox: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        clientBox: {
+          x: rect.left + current.clientLeft,
+          y: rect.top + current.clientTop,
+          width: current.clientWidth,
+          height: current.clientHeight,
+        },
+        targetBoxes: nonempty.map((box) => ({
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height,
+        })),
         overflowX: style.overflowX,
         overflowY: style.overflowY,
         fixedPx,
@@ -929,10 +975,15 @@ export const readContrastPaintedVisibility = (element: Element) =>
 // this is a source-model observation, not proof against arbitrary occlusion.
 export const readContrastTargetObservation = (element: Element) => {
   const visibility = readContrastPaintedVisibility(element);
+  const rect = element.getBoundingClientRect();
   return {
     achieved: visibility.visible && visibility.classification === 'source-model-visible',
     visibility,
     prototype: element.getAttribute('data-projection-prototype'),
+    owner: element.getAttribute('data-projection-owner'),
+    generation: element.getAttribute('data-projection-generation'),
+    physicalNodeId: stateNodeIdentity(element),
+    rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
     text: element.textContent,
     focused: document.activeElement === element,
     focusVisible: element.matches(':focus-visible'),
@@ -1157,6 +1208,16 @@ export const readContrastAuditSubject = (subject: ContrastAuditSubject) => {
     },
   };
 };
+// The passive reader uses the same authored boundary as anatomy and numeric
+// facts. Keep foreign in-content claims and extra current-owner body roots for
+// rejection; runtime picker Roots surrounding the retained consumer are not
+// authored parts, even though their metadata carries the same render lease.
+export const readSubjectContrastRoots = (subject: ContrastAuditSubject): HTMLElement[] => {
+  const boundary = readContrastAuditSubject(subject);
+  return [...document.querySelectorAll<HTMLElement>('[data-pui-root]')].filter(
+    authoredProjectionRootFilter(boundary.scope, boundary)
+  );
+};
 const requireContrastAuditSubject = (subject: ContrastAuditSubject) => {
   const boundary = readContrastAuditSubject(subject);
   if (!boundary.observation.achieved)
@@ -1182,7 +1243,16 @@ const readContrastAnatomyInScope = (
   const surfaces = roots.map((element, uid) => {
     let parent = composedParent(element);
     while (parent && !indices.has(parent as HTMLElement)) parent = composedParent(parent);
-    const visibility = readContrastPaintedVisibility(element);
+    const currentLease =
+      element.dataset.projectionOwner === owner &&
+      element.dataset.projectionGeneration === generation;
+    // Input's WC host wraps the actual editor. Bind focus and paint to that
+    // same physical editor used by the strict primary and fingerprint readers.
+    const physical =
+      element.dataset.projectionPrototype === 'brutalist-input-root' && currentLease
+        ? declaredNativeEditor(element, owner!, generation!)
+        : element;
+    const visibility = readContrastPaintedVisibility(physical);
     // TextControl's WC Adapter keeps its native editor as a direct owned
     // part; the other Web Adapters use the native input itself as the root.
     // Missing or ambiguous physical editors do not imply valid=false.
@@ -1218,12 +1288,10 @@ const readContrastAnatomyInScope = (
       ariaSelected: element.getAttribute('aria-selected'),
       ariaExpanded: element.getAttribute('aria-expanded'),
       ariaInvalid: validityTarget?.getAttribute('aria-invalid') ?? null,
-      hovered: element.matches(':hover'),
-      focused: document.activeElement === element,
+      hovered: physical.matches(':hover'),
+      focused: document.activeElement === physical,
       withinContent: !!authoredContent?.contains(element),
-      currentLease:
-        element.dataset.projectionOwner === owner &&
-        element.dataset.projectionGeneration === generation,
+      currentLease,
       painted: visibility.visible && visibility.classification === 'source-model-visible',
       visibility,
     };
@@ -1472,6 +1540,7 @@ const collectContrastFrameInScope = async (
     generation,
     theme: document.documentElement.dataset.theme,
     devicePixelRatio,
+    raster: { width: raster.width, height: raster.height },
     stateFingerprint,
     surfaces: surfaces.map(({ host, element }) => {
       const style = getComputedStyle(element),
@@ -1837,6 +1906,10 @@ const collectContrastFrameInScope = async (
       });
       return {
         prototype: host.dataset.projectionPrototype,
+        owner: host.getAttribute('data-projection-owner'),
+        generation: host.getAttribute('data-projection-generation'),
+        hostNodeId: stateNodeIdentity(host),
+        physicalNodeId: stateNodeIdentity(element),
         ref: host.dataset.demoRef ?? null,
         role: host.getAttribute('role'),
         inactive,

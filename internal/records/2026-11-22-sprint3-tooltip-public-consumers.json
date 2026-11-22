@@ -1,0 +1,1056 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-22T12:44:55.670344+00:00",
+  "scope": "Sprint 3 Tooltip public consumers; observed local install, build and synthetic DOM evidence; native acceptance pending",
+  "issues": [1455, 1042, 1175],
+  "result": "partial",
+  "productSource": {
+    "head": "c8a5cfdfbd3054f6ea11794c68d316d6c151ccfa",
+    "tree": "433459491224e6ec0f6482289b39a8b82fd4b4a7",
+    "status": ""
+  },
+  "documentationCommit": "016cfa1b903d35d3087999641e61e27113f6db78",
+  "rootCliRepair": "520428abf087a53748bf5ef1b3c9da5ca2e105a0",
+  "releaseVersion": "0.3.0-alpha.2",
+  "toolchain": {
+    "node": "24.22.3",
+    "pnpm": "10.32.1",
+    "npm": "11.14.1",
+    "typescript": "5.9.3",
+    "esbuild": "0.25.12",
+    "react": "19.2.6",
+    "reactDom": "19.2.6",
+    "vue": "3.5.31",
+    "vueCompilerSfc": "3.5.31",
+    "vue2": "2.6.14",
+    "vueTemplateCompiler": "2.6.14",
+    "vueTemplateEs2015Compiler": "1.9.1",
+    "happyDom": "15.11.7"
+  },
+  "packageScope": {
+    "selected": 46,
+    "fullDefaultPublicPackInventory": 47,
+    "omitted": "@proto.ui/prototypes-lucide",
+    "omissionReason": "Not reached by the selected CLI, four Adapters, Base, Shadcn and Brutalist Tooltip dependency closure.",
+    "fullBOMAcceptance": "not claimed",
+    "packages": [
+      "@proto.ui/adapter-base",
+      "@proto.ui/adapter-react",
+      "@proto.ui/adapter-vue",
+      "@proto.ui/adapter-vue2",
+      "@proto.ui/adapter-web-component",
+      "@proto.ui/cli",
+      "@proto.ui/core",
+      "@proto.ui/hooks",
+      "@proto.ui/module-a11y",
+      "@proto.ui/module-anatomy",
+      "@proto.ui/module-as-trigger",
+      "@proto.ui/module-axis-input",
+      "@proto.ui/module-base",
+      "@proto.ui/module-boundary",
+      "@proto.ui/module-collection",
+      "@proto.ui/module-context",
+      "@proto.ui/module-control-label",
+      "@proto.ui/module-event",
+      "@proto.ui/module-expose",
+      "@proto.ui/module-expose-event",
+      "@proto.ui/module-expose-state",
+      "@proto.ui/module-expose-state-web",
+      "@proto.ui/module-feedback",
+      "@proto.ui/module-focus",
+      "@proto.ui/module-hit-participation",
+      "@proto.ui/module-image-view",
+      "@proto.ui/module-native-link",
+      "@proto.ui/module-overlay",
+      "@proto.ui/module-positioning",
+      "@proto.ui/module-presence",
+      "@proto.ui/module-props",
+      "@proto.ui/module-rule",
+      "@proto.ui/module-rule-expose-state-web",
+      "@proto.ui/module-rule-meta",
+      "@proto.ui/module-scroll",
+      "@proto.ui/module-state",
+      "@proto.ui/module-state-accessibility",
+      "@proto.ui/module-state-interaction",
+      "@proto.ui/module-table-structure",
+      "@proto.ui/module-test-sys",
+      "@proto.ui/module-text-control",
+      "@proto.ui/prototypes-base",
+      "@proto.ui/prototypes-brutalist",
+      "@proto.ui/prototypes-shadcn",
+      "@proto.ui/runtime",
+      "@proto.ui/types"
+    ],
+    "releaseCommand": [
+      "node",
+      "scripts/release/publish.mjs",
+      "--pack",
+      "--only",
+      "@proto.ui/adapter-base,@proto.ui/adapter-react,@proto.ui/adapter-vue,@proto.ui/adapter-vue2,@proto.ui/adapter-web-component,@proto.ui/cli,@proto.ui/core,@proto.ui/hooks,@proto.ui/module-a11y,@proto.ui/module-anatomy,@proto.ui/module-as-trigger,@proto.ui/module-axis-input,@proto.ui/module-base,@proto.ui/module-boundary,@proto.ui/module-collection,@proto.ui/module-context,@proto.ui/module-control-label,@proto.ui/module-event,@proto.ui/module-expose,@proto.ui/module-expose-event,@proto.ui/module-expose-state,@proto.ui/module-expose-state-web,@proto.ui/module-feedback,@proto.ui/module-focus,@proto.ui/module-hit-participation,@proto.ui/module-image-view,@proto.ui/module-native-link,@proto.ui/module-overlay,@proto.ui/module-positioning,@proto.ui/module-presence,@proto.ui/module-props,@proto.ui/module-rule,@proto.ui/module-rule-expose-state-web,@proto.ui/module-rule-meta,@proto.ui/module-scroll,@proto.ui/module-state,@proto.ui/module-state-accessibility,@proto.ui/module-state-interaction,@proto.ui/module-table-structure,@proto.ui/module-test-sys,@proto.ui/module-text-control,@proto.ui/prototypes-base,@proto.ui/prototypes-brutalist,@proto.ui/prototypes-shadcn,@proto.ui/runtime,@proto.ui/types",
+      "--out-dir",
+      "/workspace/scratch/828b7e591003/s3-tooltip-usage-evidence/c8a5cfdf/packed-release"
+    ],
+    "sourceBefore": {
+      "head": "c8a5cfdfbd3054f6ea11794c68d316d6c151ccfa",
+      "tree": "433459491224e6ec0f6482289b39a8b82fd4b4a7",
+      "status": ""
+    },
+    "sourceAfter": {
+      "head": "c8a5cfdfbd3054f6ea11794c68d316d6c151ccfa",
+      "tree": "433459491224e6ec0f6482289b39a8b82fd4b4a7",
+      "status": ""
+    }
+  },
+  "archives": [
+    {
+      "id": "native",
+      "filename": "tooltip-public-consumers-c8a5cf.tar.gz",
+      "localPath": "/workspace/scratch/828b7e591003/s3-tooltip-usage-evidence/c8a5cfdf/tooltip-public-consumers-c8a5cf.tar.gz",
+      "root": "tooltip-public-consumers-c8a5cf",
+      "sha256": "d4e598f872d92c4ae69c4aec871e98a37d81e55c7723ee7b0a30909c176da776",
+      "bytes": 16255621,
+      "payloadFiles": 371,
+      "manifest": "ARCHIVE-FILES.json",
+      "manifestSha256": "7e5392b6c1ebde30f11036c5ac09233c10ab616524e6af8fb832ee98eb33c843",
+      "manifestScope": "Payload files; manifest itself is one additional regular archive entry",
+      "readback": "all manifest entries verified byte count and SHA256"
+    },
+    {
+      "id": "history",
+      "filename": "tooltip-public-consumers-history.tar.gz",
+      "localPath": "/workspace/scratch/828b7e591003/s3-tooltip-usage-evidence/c8a5cfdf/tooltip-public-consumers-history.tar.gz",
+      "root": "tooltip-public-consumers-history",
+      "sha256": "8a0ff2bc26bf2321a50a33e88edc1ea2ce3d9946ba6e73465f87a7ebda8e2885",
+      "bytes": 1934121,
+      "payloadFiles": 157,
+      "manifest": "ARCHIVE-FILES.json",
+      "manifestSha256": "72bb8eca45134f5d61ed4fc5b963a9563e200b0d293a20d99d9356972642b8a4",
+      "manifestScope": "Payload files; manifest itself is one additional regular archive entry",
+      "readback": "all manifest entries verified byte count and SHA256"
+    }
+  ],
+  "consumers": [
+    {
+      "family": "base",
+      "host": "wc",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "strict TypeScript and browser esbuild bundle",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/base-wc",
+      "authoredFiles": [
+        {
+          "path": "src/main.ts",
+          "sha256": "9aa57bd556cdedff99c90e8048fad5f223f481605b4688e06c9635092f22a4d6"
+        },
+        {
+          "path": "index.html",
+          "sha256": "451e6eaefe8dc5678d6be47b63913cb30c8f776e5e750264c8fcf01ac73fe996"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "3dc61599967eb56c0a286616111a26797e0c71ddde878f41393a3b206b4e3844",
+          "bytes": 1523851
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "10ca4b6e75073b062838af4d313c97356c0526f13bd32ef6ae6a6d0a0c5129c2",
+          "bytes": 3041726
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "30cf34ddf6d363d8c4947aadd4320dea6b7e7764d4f7a0db83b59bd620718482",
+          "bytes": 966
+        }
+      ]
+    },
+    {
+      "family": "shadcn",
+      "host": "wc",
+      "publicRoute": "actual CLI shadcn-tooltip generated facade",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "strict TypeScript and browser esbuild bundle",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/shadcn-wc",
+      "authoredFiles": [
+        {
+          "path": "src/main.ts",
+          "sha256": "70f9d408fd6986d14f0643268e9d6e96b02375939c9b5ead7e46004a67c23c08"
+        },
+        {
+          "path": "index.html",
+          "sha256": "3c73aed66185e94782bcc3ee57cb61641dee5ff43715adb2ceb8a3612792deff"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "17624bd4b8a02efd62b4172dd9c5aef1bd5d3667c94061871c8ac184504665c7",
+          "bytes": 1531061
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "7fcc0f577deab7483bf1fa2e72339618b855ba814090f17eb1b9d96add47fd9b",
+          "bytes": 3061022
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "9076b284a96ce295aad593844f394dcb6f96a32de91895bc63598232ba862a1b",
+          "bytes": 1010
+        }
+      ]
+    },
+    {
+      "family": "brutalist",
+      "host": "wc",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "strict TypeScript and browser esbuild bundle",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/brutalist-wc",
+      "authoredFiles": [
+        {
+          "path": "src/main.ts",
+          "sha256": "23e6c7074c60d464f6ee715bc2edfe8ff91295820cbf59576f734f934215c528"
+        },
+        {
+          "path": "index.html",
+          "sha256": "58650eef9f9b0de10df72a5ca06ef48b0f76e03c78a254f6f823e86544c3d227"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "48eeefe579404597dd3ca77f9e48c7f7108a26a9c56bfa7e0f16292aa66ac5f3",
+          "bytes": 69031
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "fc560c285aac4e903729bb6f1b7dfcfd4c0427e0ce41d06f4427b94decd2e49f",
+          "bytes": 107248
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "ab39220371481b91f38ec1b892d034cdd3fd0f3926258a978d41911894c0dc1c",
+          "bytes": 1524732
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "c71cc1fe8eab105265b7d5e4b108eefc92270c5ce41dfb8847fa23c7267f3db5",
+          "bytes": 3044235
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "3bf1171477c230051b584aea5d9187400942d659be30dc26e9ce46f051f1811a",
+          "bytes": 988
+        }
+      ]
+    },
+    {
+      "family": "base",
+      "host": "react",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "strict TypeScript and browser esbuild bundle",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/base-react",
+      "authoredFiles": [
+        {
+          "path": "src/App.tsx",
+          "sha256": "4dae7890711437ec1a9b0b1ad0cb27836fe7b3e010359b3cc616b47e17b0d798"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "c81898618e0b471cbd3700984a08ae19845cbbfa7c65983d5c6a33e999f1787d",
+          "bytes": 1875683
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "6ab8221b6747690e464bd2e3d56777232949464ed2992d439e7c384ab49a1079",
+          "bytes": 3453880
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "2952c2ca2a8e156aed8c7d630bbf349e09688e380aac0f3df13d5d05c56f6a69",
+          "bytes": 316
+        }
+      ]
+    },
+    {
+      "family": "shadcn",
+      "host": "react",
+      "publicRoute": "actual CLI shadcn-tooltip generated facade",
+      "installation": "passed",
+      "freshBuild": "failed",
+      "freshBuildExitCode": -9,
+      "recoveryBuild": "passed; unchanged App; Node heap limit 512 MiB",
+      "compilerEvidence": "strict TypeScript and browser esbuild bundle",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/shadcn-react",
+      "authoredFiles": [
+        {
+          "path": "src/App.tsx",
+          "sha256": "3acc16acc3d8238b76b64dcaa4c79df7fd5ac9fbe8fcc66dffb57f384088c9ea"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "4d094e672a216cfb94185a17e7decc2d819efe35aa3dcb6aaf4cc1b7028d373e",
+          "bytes": 1882544
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "fbfd483309917c31727bdb2cee5813142b51d8a415c11948802c93413c83c500",
+          "bytes": 3472694
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "6589d26cedc3ab2bc325dade3bf45765fc2d146d794a976d1f0f471f136b30eb",
+          "bytes": 320
+        }
+      ]
+    },
+    {
+      "family": "brutalist",
+      "host": "react",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "strict TypeScript and browser esbuild bundle",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/brutalist-react",
+      "authoredFiles": [
+        {
+          "path": "src/App.tsx",
+          "sha256": "402bb7f71f66d2470097aaf6d056950f0268feb6e41986850ed1087b7fe61faf"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "48eeefe579404597dd3ca77f9e48c7f7108a26a9c56bfa7e0f16292aa66ac5f3",
+          "bytes": 69031
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "fc560c285aac4e903729bb6f1b7dfcfd4c0427e0ce41d06f4427b94decd2e49f",
+          "bytes": 107248
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "4ca6ae41c07bc367787ca4fea86626010d836f7a728955f197d21ebddf4cebc6",
+          "bytes": 1876535
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "dce63ad1f769c9ed65185e629c7fcae5c26df48d7194d7d1c5e0a79d1079d953",
+          "bytes": 3456509
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "0f169cbf05c45aeecad448ad18102bfcfd2917302346dd5f733711bedd4621b5",
+          "bytes": 326
+        }
+      ]
+    },
+    {
+      "family": "base",
+      "host": "vue",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "official SFC compiler and browser esbuild bundle; full Vue typecheck not run",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/base-vue",
+      "authoredFiles": [
+        {
+          "path": "src/App.vue",
+          "sha256": "683fc530fdfed6b899a81fd82d9af6019c9c684f85e631bf9b42eb9ee19eefd2"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "bd9d283b674221d24d082fc0603049057f973ac6fcea7b88bdd0d9241aa93dca",
+          "bytes": 1642480
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "0a24fc91b88cb2c523d839fc1ad0ab0eb0d2d8ab47613e27038ffb7dde941a9d",
+          "bytes": 3221061
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "0e1110c84c1d5be585e4bf765143ffdd770a7a114e6e6c276ff2ed3d1a23c40e",
+          "bytes": 312
+        }
+      ]
+    },
+    {
+      "family": "shadcn",
+      "host": "vue",
+      "publicRoute": "actual CLI shadcn-tooltip generated facade",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "official SFC compiler and browser esbuild bundle; full Vue typecheck not run",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/shadcn-vue",
+      "authoredFiles": [
+        {
+          "path": "src/App.vue",
+          "sha256": "f5456dbabaa44f7c1e967a095a23c0741fcd77db01fe1a56e39b0ba2c22b8b1c"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "fb88784b5567ffa2a352548cce8c9c337cf8e2ba79b52ba6185a28434d3ad069",
+          "bytes": 1649444
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "b1105dacf8938cb15d75e330beb2c25aefaa7e9de0919f5cfe08d2ae06c1a8c4",
+          "bytes": 3240226
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "4cdb0dfb8e90f2f00771d1c66a22a3338190c3232ebcdbc9e2245b8554f2d8ff",
+          "bytes": 316
+        }
+      ]
+    },
+    {
+      "family": "brutalist",
+      "host": "vue",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "official SFC compiler and browser esbuild bundle; full Vue typecheck not run",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/brutalist-vue",
+      "authoredFiles": [
+        {
+          "path": "src/App.vue",
+          "sha256": "37f9b159bb820afd66846d42fef3766864ca0ab11f446dac7eb69cab58ae6286"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "48eeefe579404597dd3ca77f9e48c7f7108a26a9c56bfa7e0f16292aa66ac5f3",
+          "bytes": 69031
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "fc560c285aac4e903729bb6f1b7dfcfd4c0427e0ce41d06f4427b94decd2e49f",
+          "bytes": 107248
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "87ed7369e000b4dde76dd1f4637518dd29c5172efe41b8deb272c27e16909b3c",
+          "bytes": 1643312
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "8e15b2ecd0be6a29b4487766d2277903ee29a432f40add62798c68211ab208ca",
+          "bytes": 3223622
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "078020dbc81c7ef09f1404636577c52dad02eb027d2e9fa6b411546e341b9ba1",
+          "bytes": 322
+        }
+      ]
+    },
+    {
+      "family": "base",
+      "host": "vue2",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "official SFC compiler and browser esbuild bundle; full Vue typecheck not run",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/base-vue2",
+      "authoredFiles": [
+        {
+          "path": "src/App.vue",
+          "sha256": "22d1dc6ed0e3efa0da60eedb33026ac267d5d6516335a7e06f606f2bbda7dd07"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "b81255abe1f12d240475480c2eb46c8a593f2d8803a0630c521206076a10ebbd",
+          "bytes": 1464491
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "4c81d343704ace39bb477c2d8bf69f2cc656ffe8bdfbaacff13387a0999a1d23",
+          "bytes": 2933404
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "59d8560f97e98dfc466548e95ae19f1746f55386c766b6f3678a270523ddae81",
+          "bytes": 314
+        }
+      ]
+    },
+    {
+      "family": "shadcn",
+      "host": "vue2",
+      "publicRoute": "actual CLI shadcn-tooltip generated facade",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "official SFC compiler and browser esbuild bundle; full Vue typecheck not run",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/shadcn-vue2",
+      "authoredFiles": [
+        {
+          "path": "src/App.vue",
+          "sha256": "557e599c18bb671496fded4853a4331e82006859fc0040b8c9838b7f9170eda9"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "fa9e4ab899ee530dc3733f61670de3460f4f6c8ee04190fcbf9605ff2aaf130f",
+          "bytes": 172635
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "be80c3a4541738f53d21545d7f497593efd6d33c42671a50f70858e130602340",
+          "bytes": 272622
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "6d15f096ce26dd0d55b9f89ca4abb2b568837a2108e4471555f80a5dc2d7b503",
+          "bytes": 1471421
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "e48f70a47dc4a328e5a718b3740209bdbd721532c5285d0206222ee4b37a01b5",
+          "bytes": 2952513
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "dbb71f74e1b318cb4e76716c61c3940b83bbae1c6fd3f1d2ffa4aee5ebf48a31",
+          "bytes": 318
+        }
+      ]
+    },
+    {
+      "family": "brutalist",
+      "host": "vue2",
+      "publicRoute": "real public prototype subpath and host Adapter; unsupported add is expected rejection",
+      "installation": "passed",
+      "freshBuild": "passed",
+      "freshBuildExitCode": 0,
+      "recoveryBuild": "not-required",
+      "compilerEvidence": "official SFC compiler and browser esbuild bundle; full Vue typecheck not run",
+      "preparedNativeInput": "passed",
+      "nativeBrowser": "not-run",
+      "archive": "native",
+      "path": "current/brutalist-vue2",
+      "authoredFiles": [
+        {
+          "path": "src/App.vue",
+          "sha256": "6c17c94197c375b8f3823100a699b978fe4f314e548796e13e9e1ef4ed374bea"
+        },
+        {
+          "path": "src/tooltip-demo.css",
+          "sha256": "811212ab656129c46b9633b2afae8833c64f04c0ae5d8e7ef6c0024f4fa050b1"
+        }
+      ],
+      "outputHashes": [
+        {
+          "path": "dist/app.css",
+          "sha256": "48eeefe579404597dd3ca77f9e48c7f7108a26a9c56bfa7e0f16292aa66ac5f3",
+          "bytes": 69031
+        },
+        {
+          "path": "dist/app.css.map",
+          "sha256": "fc560c285aac4e903729bb6f1b7dfcfd4c0427e0ce41d06f4427b94decd2e49f",
+          "bytes": 107248
+        },
+        {
+          "path": "dist/app.js",
+          "sha256": "bc86d2acb01467cb5cae0879a4be5a074d92d9d1b8b24a102aa671332e5fb415",
+          "bytes": 1465453
+        },
+        {
+          "path": "dist/app.js.map",
+          "sha256": "2c16b262172b504f06e0ec330b74ec4cb77aa0815fc26ad6d2b87e0a2b18db62",
+          "bytes": 2936014
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "8d3f721dfd2a9be2f46c787361088446985ba00069bc6e39c54f4211ea30c22a",
+          "bytes": 324
+        }
+      ]
+    }
+  ],
+  "receipts": {
+    "pack": {
+      "archive": "native",
+      "path": "evidence/pack-execution.json",
+      "sha256": "8792a65fbe380c70ed65380b35ab896c4fd88e2cbc07386c043af37d908e774d",
+      "bytes": 3460
+    },
+    "freshFailed": {
+      "archive": "native",
+      "path": "current/preparation-ancestry/original-failed-execution.json",
+      "sha256": "79a423ff2d43c99252a9e4141d83b7d0f61e78fce4238a9490fe95fac99061e9",
+      "bytes": 643661
+    },
+    "recovery": {
+      "archive": "native",
+      "path": "current/preparation-ancestry/shadcn-react-recovery.json",
+      "sha256": "de5162bf6c4603d00b12385eb1ca5e125515e1e2ceb210700fe9485c70c2fbe6",
+      "bytes": 430988
+    },
+    "preparedNativeInputs": {
+      "archive": "native",
+      "path": "current/execution.json",
+      "sha256": "1a60a350749f86d4259ecb92a5d5bbfecf0281a85f343ed430ec8e7cb9e46b80",
+      "bytes": 653270
+    },
+    "initialNpm": {
+      "archive": "history",
+      "path": "current-history/consumers/execution.json",
+      "sha256": "62f099255a4b8141acdd449a04b6deacbc858bd7d41d78cb522620f3ed7bb27e",
+      "bytes": 75440
+    },
+    "initialPnpm": {
+      "archive": "history",
+      "path": "baseline-history/consumers-830287/execution.json",
+      "sha256": "17f1817881def7cf1ace63ef24dcad95fe86d0ddce06d753e433782e5f578300",
+      "bytes": 16085
+    },
+    "oldSynthetic": {
+      "archive": "native",
+      "path": "baseline/shadcn-react/synthetic-portal.json",
+      "sha256": "42899cc4ec94241a1b9d3cc0d5a72a9f9c5645b0b6628c611182f61219524ab9",
+      "bytes": 1070
+    },
+    "newSynthetic": {
+      "archive": "native",
+      "path": "current/shadcn-react/synthetic-portal.json",
+      "sha256": "cba64be31ed5cb76fbb0faa9f2b5dcc3f9ec724bcd748a4c4add2533f2767f1a",
+      "bytes": 840
+    },
+    "cleanupControls": {
+      "archive": "native",
+      "path": "evidence/native-cleanup-tests.log",
+      "sha256": "5bfa853d1ecde158af3d14f709e8f74ba6bb04ff204b79a7f5a3965167273918",
+      "bytes": 353
+    },
+    "aggregateControls": {
+      "archive": "native",
+      "path": "evidence/native-preflight-controls/result.json",
+      "sha256": "6725cccbec4a73149d01f0da6405fd07b23ea3c103dabea55bb3e3a87b3be57f",
+      "bytes": 880
+    }
+  },
+  "sameAppRegression": {
+    "appSha256": "3acc16acc3d8238b76b64dcaa4c79df7fd5ac9fbe8fcc66dffb57f384088c9ea",
+    "oldStatus": "failed",
+    "newStatus": "passed",
+    "oldFacadeSha256": "b613b34eae7c05baf8e4abfbdd49dd168d699449bc1a6ecf86aaf487c791bc54",
+    "newFacadeSha256": "19e81f737dabd82544767134d2d183dea2efcc67899ba57a2f12ff07cb1035e4",
+    "oldWitness": [
+      {
+        "stage": "actual public App focused",
+        "descriptionId": "pui-tooltip-1-content",
+        "description": "View account settings and profile details.",
+        "contentConnected": true,
+        "inBody": true,
+        "insideAuthoredApp": true,
+        "actualParent": "DIV"
+      },
+      {
+        "stage": "actual React root unmount",
+        "remainingContent": 0,
+        "remainingPortals": 0
+      }
+    ],
+    "newWitness": [
+      {
+        "stage": "actual public App focused",
+        "descriptionId": "pui-tooltip-1-content",
+        "description": "View account settings and profile details.",
+        "contentConnected": true,
+        "inBody": true,
+        "insideAuthoredApp": false,
+        "actualParent": "DIV"
+      },
+      {
+        "stage": "actual React root unmount",
+        "remainingContent": 0,
+        "remainingPortals": 0
+      }
+    ],
+    "boundary": "happy-dom synthetic DOM ownership only; not native layout/trusted input/physical AT"
+  },
+  "retainedFailures": [
+    {
+      "phase": "original public Code negative",
+      "result": "4/4 failed against the original private imports or missing host Code.",
+      "receipt": "history:baseline-history/baseline-public-code.log"
+    },
+    {
+      "phase": "initial new unit fixture",
+      "result": "12 passed / 4 failed; the test fixture used the wrong registry field. Correcting that field produced the final 16/16 result.",
+      "receipt": "history:baseline-history/public-usage-unit-first.log"
+    },
+    {
+      "phase": "original pnpm consumers",
+      "result": "12 installation failures: pnpm attempted registry resolution of unavailable transitive 0.3.0-alpha.2 dependencies despite local root tarballs. No build or native verdict.",
+      "receipt": "history:baseline-history/consumers-830287/execution.json"
+    },
+    {
+      "phase": "sameApp original CLI",
+      "result": "Installation, strict TypeScript and bundle passed. Connected Content with the correct description remains inline, so the body portal assertion fails.",
+      "receipt": "native:baseline/shadcn-react/synthetic-portal.json"
+    },
+    {
+      "phase": "fresh bound c8npm round",
+      "result": "11 passed / 1 build terminated by SIGKILL; the original aggregate remains failed.",
+      "receipt": "native:current/preparation-ancestry/original-failed-execution.json"
+    },
+    {
+      "phase": "controlled recovery",
+      "result": "Only the failed build was repeated with a 512 MiB Node heap limit, exit 0. App, installed bytes, generated facade, source and pack remained unchanged; the original failure was not rewritten.",
+      "receipt": "native:current/preparation-ancestry/shadcn-react-recovery.json"
+    }
+  ],
+  "initialAndPreparedBuildOutputs": "All 12 first npm dist output inventories exactly match the prepared current inputs. This readback does not retroactively replace the earlier verification boundary.",
+  "evidenceIntegrity": {
+    "tarballs": "46 actual tarballs checked by SHA512 integrity and SHA1 shasum against the original manifest; 3,505 shipped file hashes.",
+    "installed": "Every selected Proto UI package shipped file matches its corresponding tarball before and after each successful build. Recovery rechecked the same installed App.",
+    "source": "Exact clean c8a5 HEAD, tree and working status, plus author and helper hashes, checked before and after execution.",
+    "negative": "The old CLI tarball has the same 0.3.0-alpha.2 version and was actually rejected against the current manifest.",
+    "nativeAggregate": "Passed preparation required before importing Playwright or opening the listener. Default 12-row execution requires pack binding and source readback. The explicit historical single-row path also rejects a failed aggregate.",
+    "negativeAggregateControls": "Twelve passed rows plus a failed aggregate, and one passed row plus a failed aggregate, each rejected with exit 1 before browser startup.",
+    "cleanup": "A browser.close rejection cannot skip closure of the actual HTTP server. Cleanup failures are retained. Three of three controls passed.",
+    "independentReadback": "The website agent independently read the sources and recalculated ancestor hashes. No related finding remains. This review ran no additional native check or build."
+  },
+  "pending": [
+    "Run 12 current native consumers in Chrome 145 with its sandbox enabled.",
+    "Run the original one-row native body portal negative and establish connected inline Content before the expected rejection.",
+    "Inspect actual PNG captures and publish subject-appropriate review evidence.",
+    "Final root head CI, integration acceptance and the complete 47-package BOM remain separately bound.",
+    "Actual Shenko Tooltip adoption, physical OS assistive technology, non-DOM/GPUI and experimental family conditions are not accepted by these application fixtures."
+  ],
+  "runnerAndHelperInventory": [
+    {
+      "archive": "native",
+      "path": "evidence/verify-native.mjs",
+      "sha256": "ea9c173c28aacc48b8215b5fe480839297173c5fff0d7f707dee0cc5c079f7b8",
+      "bytes": 12036,
+      "purpose": "Pending current twelve-row and historical one-row Chromium execution.",
+      "entryCommand": "node evidence/verify-native.mjs current /absolute/path/to/repository /absolute/path/to/new-current-output"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/native-cleanup.mjs",
+      "sha256": "64c0a95c065297ae1f26f33c8d6316ba601d9ab740d000f972ca27f7b7854b8f",
+      "bytes": 552,
+      "purpose": "Imported native cleanup helper.",
+      "entryCommand": null
+    },
+    {
+      "archive": "native",
+      "path": "evidence/native-cleanup.test.mjs",
+      "sha256": "86948aac6aff7af5ea94d48aa806196cc916d4c456d48dacd7215c19f32fae59",
+      "bytes": 1679,
+      "purpose": "Executed three controls with real HTTP listeners.",
+      "entryCommand": "node --test native-cleanup.test.mjs"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/verify-consumers-bound.py",
+      "sha256": "22c3bed10d2a1f552e08eea3687992c4b541667c800526f9db4a3ffb5b034e88",
+      "bytes": 11298,
+      "purpose": "Executed the strengthened twelve-row preparation; eleven passed and one build received SIGKILL.",
+      "entryCommand": "python verify-consumers-bound.py"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/consumer_integrity.py",
+      "sha256": "983c1508cf042e93f0033055bb34b90303d1cdeb1913755cfff4a7624aa7e3e3",
+      "bytes": 4192,
+      "purpose": "Imported pack, source and installed-byte verifier.",
+      "entryCommand": null
+    },
+    {
+      "archive": "native",
+      "path": "evidence/build-consumer.mjs",
+      "sha256": "4defe4e9880abc4e6a469fba86b3a06568755368680a70c811c885f2562c84c6",
+      "bytes": 4311,
+      "purpose": "Copied to each actual App as build.mjs.",
+      "entryCommand": "node build.mjs"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/observe-react-portal.mjs",
+      "sha256": "ab1dac361585af090650d597a80eea2e7bffd1ac9a1f2ac66f69d6eb7092861f",
+      "bytes": 3809,
+      "purpose": "Executed the same App synthetic DOM negative and positive.",
+      "entryCommand": "node observe-react-portal.mjs /absolute/path/to/installed/shadcn-react"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/run-bound.py",
+      "sha256": "80a801059809d057de5c1edf5d60a78a0183a230efedb9f9a11e1d6fe4d9358a",
+      "bytes": 2635,
+      "purpose": "Executed the strengthened round wrapper; its failed aggregate is retained.",
+      "entryCommand": "python run-bound.py"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/recover-shadcn-react.py",
+      "sha256": "792b8f1697e38e2852e439779b482e4fd02e3e90a70a3d93b654210b5dd5da24",
+      "bytes": 4095,
+      "purpose": "Executed recovery of only the SIGKILL row against its unchanged App.",
+      "entryCommand": "python recover-shadcn-react.py"
+    },
+    {
+      "archive": "native",
+      "path": "evidence/prepare-native-inputs.py",
+      "sha256": "21da8c78e87a8d31108b45c37f09395082370ed99030f1a30fa48e239f66a557",
+      "bytes": 5000,
+      "purpose": "Executed the explicit eleven-plus-one input composition; not a browser run.",
+      "entryCommand": "python prepare-native-inputs.py"
+    },
+    {
+      "archive": "history",
+      "path": "baseline-history/verify-consumers.py",
+      "sha256": "ed0669ec33c3cf7ce56c1a5fb0b0bcae571291fae1edbef68d80041fabfa4858",
+      "bytes": 8066,
+      "purpose": "Executed the original twelve pnpm installation failures.",
+      "entryCommand": "python verify-consumers.py"
+    },
+    {
+      "archive": "history",
+      "path": "baseline-history/verify-baseline-react.py",
+      "sha256": "dbe6f0e95688c51f96a3af6ab0608143b80ccc1e1fedc5de41ed43884eb46619",
+      "bytes": 8407,
+      "purpose": "Executed the original CLI Shadcn React installation and build.",
+      "entryCommand": "python verify-baseline-react.py"
+    },
+    {
+      "archive": "history",
+      "path": "baseline-history/build-consumer.mjs",
+      "sha256": "3b43e69d5e5bb57bdf267bf93a870890af8ba29bd173d0bbb946405d970f2757",
+      "bytes": 4239,
+      "purpose": "Original baseline build helper.",
+      "entryCommand": "node build.mjs"
+    },
+    {
+      "archive": "history",
+      "path": "baseline-history/observe-react-portal.mjs",
+      "sha256": "ab1dac361585af090650d597a80eea2e7bffd1ac9a1f2ac66f69d6eb7092861f",
+      "bytes": 3809,
+      "purpose": "Original synthetic DOM negative driver.",
+      "entryCommand": "node observe-react-portal.mjs /absolute/path/to/baseline-react-830287/shadcn-react"
+    },
+    {
+      "archive": "history",
+      "path": "current-history/run-final.py",
+      "sha256": "8e1e6d79174f7fead274ce806a1e62726e39a9316f1c168d27f8fe6d1e653bd7",
+      "bytes": 3885,
+      "purpose": "Executed the first c8 pack, twelve npm consumers and synthetic DOM pipeline.",
+      "entryCommand": "python run-final.py"
+    },
+    {
+      "archive": "history",
+      "path": "current-history/verify-consumers.py",
+      "sha256": "174d439218947072ef521b9eb428747c7791994ce08e50743dcd42a424495302",
+      "bytes": 9036,
+      "purpose": "Executed the first c8 twelve-row npm preparation.",
+      "entryCommand": "python verify-consumers.py"
+    },
+    {
+      "archive": "history",
+      "path": "current-history/package-native-evidence.py",
+      "sha256": "a46a496e4e17b985864cf4f694c37bb40d02d82bc07c801f2146b81112d92db4",
+      "bytes": 3810,
+      "purpose": "Created the immutable archive with 371 payload files.",
+      "entryCommand": "python package-native-evidence.py"
+    },
+    {
+      "archive": "history",
+      "path": "current-history/package-history-evidence.py",
+      "sha256": "9a49e67e57e3413ead94504c53145186d763c3d323581017fbc3ef17a3ff3b21",
+      "bytes": 3199,
+      "purpose": "Created the immutable historical supplement.",
+      "entryCommand": "python package-history-evidence.py"
+    }
+  ]
+}
