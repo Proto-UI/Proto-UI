@@ -18,7 +18,7 @@ const condition = (when: string) =>
   const enabled=def.state.bool('enabled',true);a.state('pressed',value,{when:${when}});`);
 
 describe('native authored input atoms', () => {
-  it.each(['activation', 'host-activation', 'text'])(
+  it.each(['activation', 'host-activation', 'text', 'press-modifiers'])(
     'compiles the unchanged authored %s control',
     (name) => {
       const result = compilePrototype(source(name), { profile: 'gpui-source-v1' });
