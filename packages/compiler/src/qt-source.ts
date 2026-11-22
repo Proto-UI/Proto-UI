@@ -531,7 +531,7 @@ ${eventDispatch}
         { path: '.proto-ui/qt/QtPresentation.mjs', contents: qtPresentationSource, kind: 'source' },
         {
           path: '.proto-ui/qt/QtTableProjection.mjs',
-          contents: qtTableProjectionSource,
+          contents: qtTableProjectionSource(),
           kind: 'source',
         },
         { path: '.proto-ui/qt/QtNode.qml', contents: qtNodeSource, kind: 'source' },

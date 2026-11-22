@@ -185,6 +185,35 @@ export function plannedNativeInteractionArtifacts(
   semanticEvents: readonly string[],
   stateAttributes: Readonly<Record<string, string>>
 ) {
+  // Plans describe host implementation units, never component identities or
+  // authored behavior. Repeated edits/target changes reuse these immutable
+  // trusted templates while all source parsing/checking/emission still runs.
+  const key = JSON.stringify([
+    plan.features,
+    plan.modulesPath,
+    plan.interactionPath,
+    semanticEvents,
+    stateAttributes,
+  ]);
+  let artifacts = plannedArtifactsCache.get(key);
+  if (!artifacts) {
+    artifacts = buildPlannedNativeInteractionArtifacts(plan, semanticEvents, stateAttributes);
+    if (plannedArtifactsCache.size === 8)
+      plannedArtifactsCache.delete(plannedArtifactsCache.keys().next().value!);
+    plannedArtifactsCache.set(key, artifacts);
+  }
+  return artifacts.map((artifact) => ({ ...artifact }));
+}
+const plannedArtifactsCache = new Map<
+  string,
+  ReturnType<typeof buildPlannedNativeInteractionArtifacts>
+>();
+
+function buildPlannedNativeInteractionArtifacts(
+  plan: NativeSupportPlan,
+  semanticEvents: readonly string[],
+  stateAttributes: Readonly<Record<string, string>>
+) {
   const interaction = domInteractionTemplate(semanticEvents, stateAttributes);
   const ownership = file(
     'ownership-v2',
