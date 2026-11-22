@@ -2,6 +2,17 @@
 // Playwright can serialize them without importing page-side dependencies.
 export type InteractiveFact = { role: string; name: string; selector?: string };
 
+/** Original complete-matrix predicate, shared with the real-scroll controls. */
+export function matrixPreviewersInitialized(runtimeCount: number): boolean {
+  const demos = document.querySelectorAll('.demo-matrix__item').length;
+  const previewers = document.querySelectorAll('[data-previewer-id]').length;
+  const initialized = document.querySelectorAll('[data-previewer-id][data-inited="1"]').length;
+  const unavailable = document.querySelectorAll('.demo-matrix__adapter[data-unavailable]').length;
+  return (
+    demos > 0 && previewers === demos * runtimeCount - unavailable && initialized === previewers
+  );
+}
+
 export function matrixHostsReady(): boolean {
   const hosts = [...document.querySelectorAll<HTMLElement>('[data-previewer-id] .host')];
   return (
@@ -153,6 +164,9 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
       adapter: root.closest('.demo-matrix__adapter')?.getAttribute('aria-label') ?? null,
       previewerId: root.dataset.previewerId ?? null,
       initialized: root.dataset.inited === '1',
+      lazy: root.dataset.lazy ?? null,
+      lazyObserved: root.dataset.lazyObserved ?? null,
+      mounting: root.dataset.mounting ?? null,
       projectionMode: root.dataset.projectionMode ?? null,
       projectionState: root.dataset.projectionState ?? null,
       hostPresent: !!host,
@@ -169,6 +183,7 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
   return {
     demos,
     runtimeCount,
+    documentReadyState: document.readyState,
     unavailable,
     expectedPreviewers: demos * runtimeCount - unavailable,
     previewers: roots.length,
@@ -180,6 +195,8 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
     notReadyRows: notReady.slice(0, 1000),
     previewErrors: errors.slice(0, 1000),
     truncated: uninitialized.length > 1000 || notReady.length > 1000 || errors.length > 1000,
+    activation:
+      (window as typeof window & { __puiMatrixActivation?: unknown }).__puiMatrixActivation ?? null,
   };
 }
 

@@ -14,6 +14,7 @@ import {
 
 import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
 import { collectMatrixAccessibilityFacts } from './demo-matrix-accessibility';
+import { waitForMatrixInitialization } from './demo-matrix-activation';
 
 const MATRIX_ROUTE = '/zh-cn/internal/demo-matrix/';
 
@@ -223,25 +224,7 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
 
 async function waitForMatrix(page: Page): Promise<void> {
   await observeMatrixWait(page, 'inited-count', () =>
-    page.waitForFunction(
-      (runtimeCount) => {
-        const demos = document.querySelectorAll('.demo-matrix__item').length;
-        const previewers = document.querySelectorAll('[data-previewer-id]').length;
-        const initialized = document.querySelectorAll(
-          '[data-previewer-id][data-inited="1"]'
-        ).length;
-        const unavailable = document.querySelectorAll(
-          '.demo-matrix__adapter[data-unavailable]'
-        ).length;
-        return (
-          demos > 0 &&
-          previewers === demos * runtimeCount - unavailable &&
-          initialized === previewers
-        );
-      },
-      RUNTIMES.length,
-      { timeout: 60_000 }
-    )
+    waitForMatrixInitialization(page, RUNTIMES.length)
   );
 
   // A connected skeleton or laid-out staging generation is not a completed
