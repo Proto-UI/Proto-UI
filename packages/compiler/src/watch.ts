@@ -134,6 +134,7 @@ export async function watchProject(
   let requestedRoot: string;
   let dependencies: Set<string>;
   let dependencyRoots = new Set<string>();
+  let nativeSdkRoots = new Set<string>();
   let resolutionFiles = new Set<string>();
   try {
     requestedRoot = path.resolve(options.root);
@@ -282,6 +283,16 @@ export async function watchProject(
 
   function relevant(filename: string): boolean {
     if (filename === root || inside(filename, root)) return true;
+    // The caller explicitly selected this native SDK. Added source/build inputs
+    // must invalidate its checked inventory as well as modifications to known files.
+    if (
+      options.profile === 'gpui-source-v1' &&
+      options.nativeSdkPath &&
+      path.isAbsolute(options.nativeSdkPath) &&
+      inside(options.nativeSdkPath, filename)
+    )
+      return true;
+    if ([...nativeSdkRoots].some((directory) => inside(directory, filename))) return true;
     for (const dependency of dependencies)
       if (dependency === filename || inside(filename, dependency)) return true;
     return false;
@@ -471,6 +482,7 @@ export async function watchProject(
       }
       if (closed) return;
       project = result.ok ? result.value.project : result.project;
+      nativeSdkRoots = new Set(project?.nativeSdkRoots ?? []);
       const nextRoots = new Set(
         (project?.dependencyRoots ?? []).map((directory) => path.resolve(directory))
       );

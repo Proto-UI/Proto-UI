@@ -18,6 +18,24 @@ CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 \
 
 The producer copies the fixture's checked-in `Cargo.lock`. Add `--offline` when the dependency cache is complete. One job and disabled debug symbols bound the memory used to compile GPUI; these settings do not change the authored program or replace native behavior. The dedicated CI workflow runs the default SDK check and the same native consumers on Linux and macOS, retaining the exact source revision, source and artifact hashes, and compiler/test logs. A committed workflow is a reproducible gate, not evidence that a remote run has already passed.
 
+## Dependency identity admission
+
+Before building, verify the actual resolved graph:
+
+```sh
+node scripts/gpui/check-cargo-graph.mjs \
+  --manifest-path /tmp/proto-native-consumers/transition/Cargo.toml \
+  --git https://github.com/zed-industries/zed \
+  --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+  --toolchain 1.98.1 --output /tmp/proto-native-cargo-graph.json
+```
+
+The gate invokes `cargo metadata --locked --all-features --format-version 1` without `--filter-platform`. It traverses every workspace member's resolved dependencies and requires exactly one actual `gpui` package and one shared `proto-ui-gpui-native` package. GPUI's Git URL, requested revision and resolved commit must all match. Renaming a dependency, placing it in a build/dev or target-specific table, or expressing it through a TOML subtable does not hide its package identity. Other packages' revision fields are unrelated to this check. The receipt retains the command and raw metadata digest beside the complete metadata; failure to obtain a locked graph is a failure, with no `--no-deps` fallback or successful skip.
+
+This resolves all features of workspace members for all targets. External dependency features follow Cargo's selected resolution; this is not every feature combination. Native builds, framework consumers and OS input remain separate evidence. `scripts/gpui/test/cargo-graph.test.mjs` uses real, dependency-free local Git packages to verify Cargo's parsing, target/build/dev/optional reachability, duplicate package detection and lock enforcement. That resolver fixture does not replace execution against GPUI; CI requires Cargo for it rather than counting a missing toolchain as a pass.
+
+`produce-workspace.mjs` separately emits two ordinary components under a host-selected modern GPUI workspace pin. The first owns the bundled SDK and the second references that same SDK with `nativeSdkPath`. The consumer passes the first component's owner into the second, so a Cargo check verifies both GPUI and SDK cross-crate type identity. It takes an absent absolute output directory and a full revision, and does not change emitted Rust. Its first dependency resolution must establish and retain that host workspace's own lock; it does not reuse this default-profile lock as evidence for a different GPUI source.
+
 ## What the consumer checks
 
 - The generated validation consumer also exercises the GPUI Scroll outcome boundary: authored `request({kind:'to',axis:'vertical',position:0.5}).kind`, all five existing position request kinds, undeclared/unmounted/axis rejection, retained callable disposal, and cancellation of pending end work across a native view epoch. These checks establish delivery outcomes; the empty native surface does not establish nonzero overflow distances or physical scrolling. GPUI has no synchronous attachment transaction, so it does not manufacture `queued`. Anatomy `reveal` remains an existing unsupported native request kind; the shared request/outcome type does not establish GPUI reveal geometry or selected 0.3 reveal acceptance. Its existing invalid-kind failure is preserved.
@@ -54,40 +72,13 @@ Native callbacks without a return channel report failures through stderr and the
 
 ## Explicit capability boundary
 
-The native SDK's `gpui_native_move` module realizes the draft
-`C-MOVE-GESTURE-0001` / `HC-MOVE-GESTURE-0001` immediate mouse and direct-touch slice.
-Native consumers attach an `OwnerWeak` and `MoveGestureBinding` after construction,
-including before first paint. Recognition waits for committed mount, the same
-window's physical hitbox and HitParticipation eligibility. No portable author
-coordinate API or `asMove` / `asDrag` hook is added.
+The native SDK's `gpui_native_move` module realizes the draft `C-MOVE-GESTURE-0001` / `HC-MOVE-GESTURE-0001` immediate mouse and direct-touch slice. Native consumers attach an `OwnerWeak` and `MoveGestureBinding` after construction, including before first paint. Recognition waits for committed mount, the same window's physical hitbox and HitParticipation eligibility. No portable author coordinate API or `asMove` / `asDrag` hook is added.
 
-`MoveGestureSample.position` subtracts the live target hitbox origin. `delta` and
-`total_delta` measure pointer displacement in window coordinates, preserving motion
-when the target's origin changes. Samples include modifiers and monotonic milliseconds.
-The axis remains a recognition hint. Directional activation returns an unsupported error.
+`MoveGestureSample.position` subtracts the live target hitbox origin. `delta` and `total_delta` measure pointer displacement in window coordinates, preserving motion when the target's origin changes. Samples include modifiers and monotonic milliseconds. The axis remains a recognition hint. Directional activation returns an unsupported error.
 
-Mouse move/up listeners run during native capture and are qualified by the exact
-target owner and window. An accepted contact continues outside its initial hit region
-within that window; exit, missing primary-button ownership and window blur cancel it.
-For touch, GPUI offers the contact at its original position and keeps delivering
-it to the window after the binding claims the drag. The same lease receives move
-and terminal samples in capture. A competing contact cannot take over the lease.
-Replacement, detach, owner disposal and lease disposal terminate accepted sessions
-with explicit reasons. `cancel` leaves the binding attached for a subsequent contact;
-`dispose` and Rust `Drop` release it. Cancellation callbacks receive optional live
-Window/App context because lifecycle teardown can occur without either host reference.
-Callbacks run after registry and owner borrows have ended.
+Mouse move/up listeners run during native capture and are qualified by the exact target owner and window. An accepted contact continues outside its initial hit region within that window; exit, missing primary-button ownership and window blur cancel it. For touch, GPUI offers the contact at its original position and keeps delivering it to the window after the binding claims the drag. The same lease receives move and terminal samples in capture. A competing contact cannot take over the lease. Replacement, detach, owner disposal and lease disposal terminate accepted sessions with explicit reasons. `cancel` leaves the binding attached for a subsequent contact; `dispose` and Rust `Drop` release it. Cancellation callbacks receive optional live Window/App context because lifecycle teardown can occur without either host reference. Callbacks run after registry and owner borrows have ended.
 
-The `move_gesture_*` tests in the same full `ordinary.rs` consumer exercise early
-attachment, local samples, movement outside the initial bounds, modifiers, release
-before a downstream child's stopped bubble, restart after cancellation, detach,
-disposal, cross-window isolation and loss of ownership. The touch controls dispatch
-raw GPUI contacts through the gesture recognizer, covering refusal, competing
-inputs, cancellation and target replacement. Run the complete consumer command
-above to verify framework dispatch. OS-device delivery requires platform tests.
-No new Cargo feature is required on the published pin. A workspace-selected modern
-GPUI revision uses the existing `gpui-modern-element-api` SDK feature for its element
-ABI; this move module introduces no additional ABI feature or dependency.
+The `move_gesture_*` tests in the same full `ordinary.rs` consumer exercise early attachment, local samples, movement outside the initial bounds, modifiers, release before a downstream child's stopped bubble, restart after cancellation, detach, disposal, cross-window isolation and loss of ownership. The touch controls dispatch raw GPUI contacts through the gesture recognizer, covering refusal, competing inputs, cancellation and target replacement. Both mouse and touch release controls use a terminal position different from the preceding move and assert the final position/displacement, so dropping the terminal sample cannot pass unnoticed. Run the complete consumer command above to verify framework dispatch. OS-device delivery requires platform tests. No new Cargo feature is required on the published pin. A workspace-selected modern GPUI revision uses the existing `gpui-modern-element-api` SDK feature for its element ABI; this move module introduces no additional ABI feature or dependency.
 
 The pinned published GPUI revision lacks `Window::resolve_focus_entry`, `focus_tree_generation` and `observe_focus_tree`. Default compilation rejects physical FocusEntry operations and Scope's `entryFallback: 'entry'` with a specific diagnostic. Manual SDK entry points also reject them. Ordinary focus, logical scope navigation and roving do not need those APIs and are exercised here. The disabled `experimental-focus-tree` feature preserves research source for a separately verified local upstream patch; enabling it against the pinned published dependency is not supported.
 

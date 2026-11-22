@@ -1,5 +1,5 @@
 import { lstat, mkdir, readFile } from 'node:fs/promises';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { compileFile, diffCompilation, writeCompilation } from './compile';
 import { migrateNativeSupport } from './native-support-migration';
@@ -10,6 +10,8 @@ import {
   gpuiNativeSdkFiles,
   GPUI_NATIVE_SDK_PATH,
   GPUI_NATIVE_SDK_VERSION,
+  gpuiNativeSdkIdentity,
+  gpuiNativeSdkInventory,
 } from './gpui-native-sdk';
 import { writeArtifactSet, type OutputArtifact } from './artifact-output';
 import { watchProject, type ProjectWatch, type ProjectWatchReport } from './watch';
@@ -38,6 +40,7 @@ interface Options {
   output?: string;
   profile?: string;
   nativeSdkPath?: string;
+  gpuiDependency?: 'workspace';
   json?: boolean;
 }
 interface ParsedArguments {
@@ -77,13 +80,16 @@ Options:
     .join(', ')}.
                      Default: react-runtime-v1; no implicit target fallback.
   --native-sdk-path <dir>  GPUI SDK source crate shared by composed prototypes.
-                     Omit to bundle the editable SDK in the output directory.
+                     Omit to bundle the compiler-owned SDK in the output directory.
+  --gpui-dependency workspace  Inherit the host's workspace GPUI dependency in both
+                      generated components and emit-gpui-sdk output; omission uses the profile pin.
   --config <file>    Explicit JSON configuration file; no automatic discovery.
   --json             Machine-readable result and diagnostics on stdout.
   --help             Print this help.
 
 Configuration is a JSON object with only these fields:
-  entry, root, export, output, profile, nativeSdkPath: non-empty strings; json: boolean.
+  entry, root, export, output, profile, nativeSdkPath: non-empty strings;
+  gpuiDependency: "workspace"; json: boolean.
 Paths in configuration are relative to the configuration file's directory.
 Command-line paths are relative to cwd; command-line values override configuration.
 check/inspect/explain ignore configured output and never write.
@@ -170,6 +176,7 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
         '--output',
         '--profile',
         '--native-sdk-path',
+        '--gpui-dependency',
         '--config',
         '--json',
         '--help',
@@ -209,6 +216,13 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
       case 'native-sdk-path':
         result.options.nativeSdkPath = checked;
         break;
+      case 'gpui-dependency':
+        if (checked !== 'workspace')
+          throw new CliUsageError(
+            '--gpui-dependency accepts only workspace; omit it for the profile pin'
+          );
+        result.options.gpuiDependency = checked;
+        break;
       case 'config':
         result.config = checked;
         break;
@@ -244,6 +258,14 @@ async function readConfiguration(filename: string): Promise<Options> {
         break;
       case 'profile':
         options.profile = nonEmptyString(value, key, filename);
+        break;
+      case 'gpuiDependency':
+        if (value !== 'workspace')
+          throw new CliUsageError(
+            'gpuiDependency accepts only workspace; omit it for the profile pin',
+            filename
+          );
+        options.gpuiDependency = value;
         break;
       case 'json':
         if (typeof value !== 'boolean') throw new CliUsageError('json must be a boolean', filename);
@@ -376,6 +398,8 @@ async function runWatch(
           return;
         }
         reloaded.profile = selected.value.id;
+        if (reloaded.gpuiDependency && selected.value.id !== 'gpui-source-v1')
+          throw new CliUsageError('gpuiDependency is only valid for gpui-source-v1', config);
       } catch (error) {
         if (!(error instanceof CliUsageError)) throw error;
         rejected(
@@ -395,6 +419,7 @@ async function runWatch(
           reloaded.output,
           reloaded.profile,
           reloaded.nativeSdkPath,
+          reloaded.gpuiDependency,
         ]) !==
         JSON.stringify([
           options.entry,
@@ -403,6 +428,7 @@ async function runWatch(
           options.output,
           options.profile,
           options.nativeSdkPath,
+          options.gpuiDependency,
         ])
       ) {
         restart = reloaded;
@@ -492,6 +518,7 @@ async function runWatch(
         entries: [path.resolve(cwd, options.entry!)],
         exportName: options.export,
         profile: options.profile,
+        gpuiDependency: options.gpuiDependency,
         nativeSdkPath:
           options.nativeSdkPath === undefined
             ? undefined
@@ -550,9 +577,11 @@ async function runWatch(
 
 /** argv excludes the executable and script names. Input modules are parsed, never imported. */
 /** The shared SDK crate rooted at the output directory, with its provenance manifest. */
-export function gpuiSdkArtifacts(): OutputArtifact[] {
+export function gpuiSdkArtifacts(gpuiDependency?: 'workspace'): OutputArtifact[] {
   const prefix = `${GPUI_NATIVE_SDK_PATH}/`;
-  const files: OutputArtifact[] = gpuiNativeSdkFiles().map((file) => ({
+  const useWorkspace = gpuiDependency === 'workspace';
+  const identity = gpuiNativeSdkIdentity(useWorkspace);
+  const files: OutputArtifact[] = gpuiNativeSdkFiles(useWorkspace).map((file) => ({
     path: file.path.slice(prefix.length),
     kind: file.kind,
     contents: file.contents,
@@ -560,11 +589,9 @@ export function gpuiSdkArtifacts(): OutputArtifact[] {
   const manifest = {
     sdk: 'proto-ui-gpui-native',
     version: GPUI_NATIVE_SDK_VERSION,
-    artifacts: files.map((file) => ({
-      path: file.path,
-      kind: file.kind,
-      sha256: createHash('sha256').update(file.contents).digest('hex'),
-    })),
+    dependencyMode: identity.dependencyMode,
+    contentSha256: identity.contentSha256,
+    artifacts: gpuiNativeSdkInventory(useWorkspace),
   };
   return [
     ...files,
@@ -627,9 +654,12 @@ export async function runCompilerCli(
         options.nativeSdkPath !== undefined
       )
         throw new CliUsageError(
-          'emit-gpui-sdk accepts only output, json and explicit configuration'
+          'emit-gpui-sdk accepts only output, gpuiDependency, json and explicit configuration'
         );
-      const written = await writeArtifactSet(gpuiSdkArtifacts(), path.resolve(cwd, options.output));
+      const written = await writeArtifactSet(
+        gpuiSdkArtifacts(options.gpuiDependency),
+        path.resolve(cwd, options.output)
+      );
       if (!written.ok) return fail(written.diagnostics, failureExit(written.diagnostics));
       if (json)
         stdout(
@@ -650,7 +680,8 @@ export async function runCompilerCli(
         options.root !== undefined ||
         options.export !== undefined ||
         options.profile !== undefined ||
-        options.nativeSdkPath !== undefined
+        options.nativeSdkPath !== undefined ||
+        options.gpuiDependency !== undefined
       )
         throw new CliUsageError(
           'migrate-native-support accepts only an entry plan, output, json and explicit configuration'
@@ -678,6 +709,8 @@ export async function runCompilerCli(
       );
     const selected = resolveTargetProfile(options.profile ?? 'react-runtime-v1');
     if (!selected.ok) return fail(selected.diagnostics, 1);
+    if (options.gpuiDependency && selected.value.id !== 'gpui-source-v1')
+      throw new CliUsageError('--gpui-dependency is only valid for gpui-source-v1');
     if (command === 'watch')
       return await runWatch(
         { ...options, profile: selected.value.id },
@@ -692,6 +725,7 @@ export async function runCompilerCli(
       root: path.resolve(cwd, options.root ?? cwd),
       exportName: options.export,
       profile: selected.value.id,
+      gpuiDependency: options.gpuiDependency,
       nativeSdkPath:
         options.nativeSdkPath === undefined ? undefined : path.resolve(cwd, options.nativeSdkPath),
     };
