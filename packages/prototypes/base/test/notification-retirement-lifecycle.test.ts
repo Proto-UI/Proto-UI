@@ -185,6 +185,52 @@ function runtimeHarness() {
   };
 }
 
+it.each(['normal', 'owner', 'owner-round-trip', 'nested-reset', 'dispose'] as const)(
+  'FieldSwitch reset preserves the entry lease during preview teardown: %s',
+  async (boundary) => {
+    const h = runtimeHarness();
+    const control = h.make(fieldSwitch, null, { checked: false });
+    let off = () => {},
+      fired = false,
+      disposed: Promise<void> | undefined;
+    const proposals: boolean[] = [];
+    try {
+      await control.session.mount();
+      h.setActionCallback((name, detail) => {
+        if (name !== 'checkedChange') return;
+        proposals.push(detail.checked);
+        control.session.controller.applyRawProps({ checked: detail.checked });
+      });
+      control.session.invokeInCallbackScope(() =>
+        control.target.dispatchEvent(new Event('pointer.down'))
+      );
+      expect(control.exposes.pressed.get()).toBe(true);
+      off = control.exposes.pressed.subscribe((event: { next: boolean }) => {
+        if (event.next !== false || fired) return;
+        fired = true;
+        if (boundary === 'owner' || boundary === 'owner-round-trip') {
+          control.session.controller.applyRawProps({ checked: true });
+          if (boundary === 'owner-round-trip')
+            control.session.controller.applyRawProps({ checked: false });
+        } else if (boundary === 'nested-reset') control.exposes.resetValue();
+        else if (boundary === 'dispose') disposed = control.session.dispose();
+      });
+      expect(() =>
+        control.session.invokeInCallbackScope(() => control.exposes.resetValue())
+      ).not.toThrow();
+      expect(fired).toBe(true);
+      expect(proposals).toEqual(
+        boundary === 'normal' || boundary === 'nested-reset' ? [false] : []
+      );
+      if (boundary !== 'dispose') expect(control.exposes.checked.get()).toBe(boundary === 'owner');
+      await disposed;
+    } finally {
+      off();
+      await control.session.dispose();
+    }
+  }
+);
+
 it.each(['unmount', 'dispose', 'remount', 'owner', 'owner-round-trip'] as const)(
   'Radio no-op focus notification retires after focused subscriber %s',
   async (boundary) => {
