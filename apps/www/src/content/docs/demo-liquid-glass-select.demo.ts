@@ -96,7 +96,7 @@ function materialStage(ref: string, children: DemoNode[]): Extract<DemoNode, { k
     materialStage: { mountRef: `${ref}Flow`, overlayRef: `${ref}Overlay` },
     children: [
       { kind: 'box', ref: `${ref}Flow`, children },
-      { kind: 'box', ref: `${ref}Overlay`, children: [] },
+      { kind: 'box', ref: `${ref}Overlay`, className: 'mt-4', children: [] },
     ],
   };
 }

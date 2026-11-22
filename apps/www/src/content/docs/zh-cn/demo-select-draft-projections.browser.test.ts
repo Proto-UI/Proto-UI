@@ -69,13 +69,82 @@ async function selectMaterialSnapshot(previewer: Locator, phase: string) {
           height: value.height,
         };
       };
+      // Record categories instead of embedding image data URLs in observations.
+      const cssValue = (value: string | undefined) =>
+        !value ? 'unavailable' : /url\s*\(/i.test(value) ? 'url' : value;
+      const paint = (css: CSSStyleDeclaration) => ({
+        content: cssValue(css.content),
+        display: css.display,
+        visibility: css.visibility,
+        opacity: css.opacity,
+        position: css.position,
+        left: css.left,
+        top: css.top,
+        right: css.right,
+        bottom: css.bottom,
+        width: css.width,
+        height: css.height,
+        zIndex: css.zIndex,
+        backgroundColor: css.backgroundColor,
+        backgroundImage: cssValue(css.backgroundImage),
+        borderImageSource: cssValue(css.borderImageSource),
+        border: ['top', 'right', 'bottom', 'left'].map((side) => ({
+          side,
+          width: css.getPropertyValue(`border-${side}-width`),
+          style: css.getPropertyValue(`border-${side}-style`),
+          color: css.getPropertyValue(`border-${side}-color`),
+        })),
+        boxShadow: cssValue(css.boxShadow),
+        textShadow: cssValue(css.textShadow),
+        outlineStyle: css.outlineStyle,
+        outlineWidth: css.outlineWidth,
+        outlineOffset: css.outlineOffset,
+        outlineColor: css.outlineColor,
+        filter: cssValue(css.filter),
+        backdropFilter: cssValue(css.backdropFilter),
+        transform: cssValue(css.transform),
+        rotate: cssValue(css.rotate),
+        scale: cssValue(css.scale),
+        translate: cssValue(css.translate),
+        perspective: cssValue(css.perspective),
+        clip: cssValue(css.clip),
+        clipPath: cssValue(css.clipPath),
+        maskImage: cssValue(css.maskImage),
+        mixBlendMode: css.mixBlendMode,
+        appearance: css.appearance,
+      });
+      const pseudo = (node: Element, name: string) => {
+        try {
+          return paint(getComputedStyle(node, name));
+        } catch (error) {
+          return { observationError: String(error) };
+        }
+      };
       const describe = (node: HTMLElement) => {
         const css = getComputedStyle(node);
+        const directText = Array.from(node.childNodes).filter(
+          (child) => child.nodeType === Node.TEXT_NODE
+        );
         return {
           tag: node.tagName,
+          namespace: node.namespaceURI,
+          constructorName: node.constructor.name,
+          customizedBuiltIn: node.getAttribute('is'),
           ref: node.dataset.demoRef ?? null,
           role: node.getAttribute('role'),
           connected: node.isConnected,
+          childElementCount: node.childElementCount,
+          directTextNodeCount: directText.length,
+          directTextCharacterCount: directText.reduce(
+            (count, child) => count + (child.textContent?.length ?? 0),
+            0
+          ),
+          directNonWhitespaceText: directText.some((child) => !!child.textContent?.trim()),
+          shadowRootObservation: node.shadowRoot ? 'open' : 'none-or-closed-unobservable',
+          owningSceneRef:
+            node.closest('[data-material-scene]')?.getAttribute('data-demo-ref') ?? null,
+          projectionPrototype: node.dataset.projectionPrototype ?? null,
+          privateCarrierOwner: 'unavailable; public marker does not prove ownership',
           bounds: rect(node),
           quality: node.dataset.materialQuality ?? null,
           reason: node.dataset.materialReason ?? null,
@@ -90,6 +159,12 @@ async function selectMaterialSnapshot(previewer: Locator, phase: string) {
           overflowY: css.overflowY,
           contain: css.contain,
           transform: css.transform,
+          marginTop: css.marginTop,
+          marginBottom: css.marginBottom,
+          whiteSpace: css.whiteSpace,
+          ownPaint: paint(css),
+          beforePaint: pseudo(node, '::before'),
+          afterPaint: pseudo(node, '::after'),
         };
       };
       const stages = Array.from(
@@ -510,6 +585,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                     rootFontPx: 32,
                     geometry,
                     stageEvidence,
+                    materialEvidence,
                     errors,
                     opticalPaintClaim: false,
                     gpuiClaim: false,

@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-22",
+  "kind": "bounded Select demo layout correction and native diagnostic observation",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "baseHead": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+  "baseTree": "25916f297a3ea49b501dec569527cdf69cf04fc2",
+  "candidateSourceFiles": [
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a"
+    }
+  ],
+  "scope": {
+    "productChange": "Add className mt-4 to the existing explicitly declared materialStage Overlay box, shared by the four Liquid Select examples.",
+    "observationChange": "Read-only CSS paint, pseudo, geometry, namespace, direct-text and public-owner fields; successful flow JSON also retains materialEvidence. URL-valued CSS is classified rather than embedding image payloads.",
+    "unchanged": [
+      "source.ts and contact-carrier.ts admission",
+      "original source tests",
+      "contactPaintOutset",
+      "optical thresholds",
+      "existing sideOffset16 and Uncontrolled heading mb-4",
+      "public Select/Portal/Base interaction semantics",
+      "original 24 native case identities and every expect chain and timeout"
+    ],
+    "notClaimed": [
+      "native result for this candidate",
+      "stable material footprint/reservation API",
+      "safe generic zero-area foreign elements",
+      "physical coordinate invariance of later stages",
+      "any-font or any-viewport optical acceptance"
+    ]
+  },
+  "authority": [
+    {
+      "id": "C-MATERIAL-PAINT-FOOTPRINT-0001",
+      "status": "draft",
+      "anchors": [
+        "C-MATERIAL-PAINT-FOOTPRINT-0001-SAFETY",
+        "C-MATERIAL-PAINT-FOOTPRINT-0001-UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "T-MATERIAL-PAINT-FOOTPRINT-0001",
+      "status": "draft",
+      "anchors": ["T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-SAFETY"]
+    },
+    {
+      "id": "C-FEEDBACK-MATERIAL-0001",
+      "status": "draft",
+      "anchors": ["C-FEEDBACK-MATERIAL-0001-SAFETY", "C-FEEDBACK-MATERIAL-0001-QUALITY"]
+    }
+  ],
+  "historicalNative": {
+    "runId": 44963404765,
+    "attempt": 1,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44963404765",
+    "head": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+    "tree": "25916f297a3ea49b501dec569527cdf69cf04fc2",
+    "jobId": 137026967353,
+    "conclusion": "failure",
+    "files": 1,
+    "cases": 24,
+    "passed": 16,
+    "failed": 8,
+    "skipped": 0,
+    "durationSeconds": 312.9,
+    "outerTruncation": false,
+    "testSha256": "bd20d31dc560991e5cd3856563e1be143bd0b12e9eb1883069274b0b0e73f5b1",
+    "artifactId": 14730149866,
+    "zipBytes": 2943873,
+    "zipSha256": "ff11a737802c73ebf8c1e36e25d8cd48ba36b45f399a0db96861e9da197b8bb5",
+    "archiveCloseoutSha256": "6d315d913a805fa0c65359e7a8c1b09b524b1d726a752244871eaa3fc6f86ad4",
+    "manifestSha256": "b109a9753b749cd9fe484b0e7fd813ecc9c63b11a4563b6af8303e7ce7b589b0",
+    "oldRuntimeThemeIdentityCount": 8,
+    "allEight": {
+      "beforeOpenTrigger": "self-optical/rendered",
+      "popupVisibleTrigger": "opaque-fallback/source-overlapping-content",
+      "assertionFailureTrigger": "opaque-fallback/source-overlapping-content",
+      "popupSurface": "self-optical/rendered",
+      "firstFailure": "demo-select-draft-projections.browser.test.ts:328:18 Trigger self-optical poll after original 20000ms",
+      "triggerRect": {
+        "left": 480,
+        "top": 508.5,
+        "right": 573.8125,
+        "bottom": 546.5,
+        "width": 93.8125,
+        "height": 38
+      },
+      "overlayRect": {
+        "left": 480,
+        "top": 546.5,
+        "right": 912,
+        "bottom": 546.5,
+        "width": 432,
+        "height": 0
+      },
+      "overlayOpacityBefore": 0,
+      "overlayOpacityOpen": 1,
+      "surfaceRect": {
+        "left": 480,
+        "top": 562.5,
+        "right": 672,
+        "bottom": 941.5,
+        "width": 192,
+        "height": 379
+      },
+      "sourceStageBefore": {
+        "left": 448,
+        "top": 440.5,
+        "width": 496,
+        "height": 138
+      },
+      "sourceStageOpen": {
+        "left": 448,
+        "top": 440.5,
+        "width": 496,
+        "height": 565
+      },
+      "derivedTriggerOutsetFromUnchangedProfile": 9,
+      "recordedPopupGap": 16,
+      "liquidLaterSelectionControlledRtlReached": false
+    },
+    "limitations": [
+      "Original probe does not identify internal first rejected source candidate.",
+      "Original probe lacks shadow/outline/border/filter/direct-text observations.",
+      "A passing prior Surface assertion does not make the following Trigger assertion pass."
+    ]
+  },
+  "decision": {
+    "rejectedGenericGuard": "A simple positive-area intersection change or tag+CSS empty-container admission cannot reliably exclude a closed ShadowRoot on a standard DIV. Null shadowRoot is none-or-closed, not proof of no foreign paint. Keep the existing conservative source behavior.",
+    "exploratoryControls": {
+      "created": true,
+      "executed": false,
+      "redRunClaimed": false,
+      "inProductTree": false,
+      "scratchPatchSha256": "b67248aeb2faaada4d668f623e522d83e80bbe1bcbb3e0adfe15d5d17adfc07d"
+    },
+    "selectedLayout": "Use ordinary CSS spacing on the already explicit owned Overlay part. Do not ignore it by ref/attribute, hide it, skip its subtree or change source rules.",
+    "layoutHypothesis": "The recorded mount origin equals Trigger.bottom and lies in its 9px expansion. An actual 16px margin would move that zero-height origin 7px beyond the expansion. mt-4 uses authored CSS spacing; actual computed margin, stage growth and popup placement must be remeasured.",
+    "positioningOwner": "packages/prototypes/base/src/select/content.proto.ts syncPosition retains strategy fixed and sideOffset props; margin does not author another sideOffset. Native coordinates are pending.",
+    "layoutEffects": "The mount follows Flow; its margin does not edit Trigger borderbox/hitbox CSS. It can increase stage flow height and move later stages. Narrow, RTL and 200% font effects remain original native acceptance."
+  },
+  "validation": {
+    "node": "24.22.3",
+    "pnpm": "10.32.1",
+    "install": {
+      "command": "corepack pnpm@10.32.1 install --offline --frozen-lockfile",
+      "exitCode": 0,
+      "logSha256": "4e4ef7669d10c985a208060378c6512fbbc43541aa1d89004a57eb85e6d942ab",
+      "manualDependencySymlinks": false
+    },
+    "focused": {
+      "command": "corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json",
+      "exitCode": 0,
+      "files": 2,
+      "cases": 18,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 1.41,
+      "logSha256": "a5ee35be249ab61026d47c4b79775b9344d7f27c8bb52b56a7febb0c7a045b95",
+      "reportSha256": "3c2237f4a7ce64bb74b89889bbba10ec74677c12dde2eee38ac0c78adf98134c",
+      "caseResults": [
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime finds declarations under a cloned wrapper without a top-level flag",
+          "status": "passed",
+          "durationMs": 2.4071839999999725,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime rejects duplicate refs, nested stages, invalid targets and dynamic mode before DOM effects",
+          "status": "passed",
+          "durationMs": 2.351069999999993,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime keeps one original setup and identical public API/refs, and disposes every attachment once",
+          "status": "passed",
+          "durationMs": 3.665606999999966,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime validates every actual DOM ref before the first attachment",
+          "status": "passed",
+          "durationMs": 1.3310920000000124,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime preserves a falsy primary and cleanup error after partial attachment failure",
+          "status": "passed",
+          "durationMs": 1.4689759999999978,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime retires every stage when setup throws, without replacing its original exception",
+          "status": "passed",
+          "durationMs": 0.8627039999999511,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime never delivers original setup after a reentrant attachment invalidates the generation",
+          "status": "passed",
+          "durationMs": 0.9223029999999994,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "fullName": "single-tree static material stage admission and lifetime cleans user setup once when that setup reclaims its own host",
+          "status": "passed",
+          "durationMs": 0.8789280000000304,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "bootstrap-2-3-2 Select demo intrinsic-width recipe uses zero-minimum explicit tracks in both outer and RTL grids",
+          "status": "passed",
+          "durationMs": 42.45938699999999,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "bootstrap-2-3-2 Select demo intrinsic-width recipe allows ordinary demo copy to wrap at intrinsic sizing boundaries",
+          "status": "passed",
+          "durationMs": 9.967348000000015,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "bootstrap-2-3-2 Select demo intrinsic-width recipe keeps the real Button and full accessible label while overriding inherited nowrap on its child",
+          "status": "passed",
+          "durationMs": 11.435914000000025,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "bootstrap-2-3-2 Select demo intrinsic-width recipe does not conceal content, impose fixed height, or replace existing selection behavior",
+          "status": "passed",
+          "durationMs": 4.1220859999999675,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "liquid-glass Select demo intrinsic-width recipe uses zero-minimum explicit tracks in both outer and RTL grids",
+          "status": "passed",
+          "durationMs": 19.056267999999932,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "liquid-glass Select demo intrinsic-width recipe allows ordinary demo copy to wrap at intrinsic sizing boundaries",
+          "status": "passed",
+          "durationMs": 2.424419000000057,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "liquid-glass Select demo intrinsic-width recipe keeps the real Button and full accessible label while overriding inherited nowrap on its child",
+          "status": "passed",
+          "durationMs": 2.549726000000078,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "liquid-glass Select demo intrinsic-width recipe does not conceal content, impose fixed height, or replace existing selection behavior",
+          "status": "passed",
+          "durationMs": 1.3339960000000701,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "uses only an opt-in Select preview inset and removes duplicate narrow demo padding",
+          "status": "passed",
+          "durationMs": 1.302769000000012,
+          "failureMessages": []
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+          "fullName": "keeps all four Liquid examples in independent declared static stages",
+          "status": "passed",
+          "durationMs": 1.7020240000000513,
+          "failureMessages": []
+        }
+      ],
+      "boundary": "Existing source/compiled-CSS, stage declaration and lifecycle controls; not browser layout or optical acceptance."
+    },
+    "preservation": {
+      "base": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "beforeSha256": "bd20d31dc560991e5cd3856563e1be143bd0b12e9eb1883069274b0b0e73f5b1",
+      "afterSha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+      "originalExpectCallTextPreserved": true,
+      "originalItNamesAndTimeoutsPreserved": true,
+      "setupAndTeardownTimeoutsPreserved": true,
+      "testCalls": [
+        {
+          "expression": "it",
+          "name": "`${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`",
+          "timeout": "120_000"
+        },
+        {
+          "expression": "it",
+          "name": "`${family}/${runtime}: document Text stays selectable beside nonselectable Select content`",
+          "timeout": "90_000"
+        }
+      ],
+      "sourceAndSourceTestsUnchanged": [
+        {
+          "path": "packages/adapters/base/src/material/source.ts",
+          "sha256": "f5082ba9831994abe8c5c5c175b83753441817ca64d13738b6978f0951259bc2",
+          "byteIdentical": true
+        },
+        {
+          "path": "packages/adapters/base/src/material/contact-carrier.ts",
+          "sha256": "120755cda4df81dc6d16d1be68769d71e90e00e577ee3b4aed7e60e8f8c52d4a",
+          "byteIdentical": true
+        },
+        {
+          "path": "packages/adapters/base/test/web-material-source.test.ts",
+          "sha256": "a4cf9dc850b0e51f4ad021fdb560f39781dc98429186dcaba0563b1ae6678d76",
+          "byteIdentical": true
+        }
+      ],
+      "allOutsideSnapshotAndSuccessEvidenceStructurallyUnchanged": true,
+      "exploratoryGuardControls": {
+        "executed": false,
+        "retainedPatch": "exploratory-controls-not-run.diff",
+        "restoredFromProductTree": true
+      },
+      "nativeExecution": "not run for candidate",
+      "expectRootedCallExpressionNodeCount": 130
+    },
+    "format": "Prettier check passed on both changed source files; git diff --check passed.",
+    "workspaceTypes": "Not run by this worker; integration owner will validate exact integrated candidate.",
+    "native": "Not run for this candidate; root owns new exact-head targeted/full cycle."
+  },
+  "nextAcceptance": {
+    "owner": "root",
+    "required": [
+      "Integrate the signed-off source correction and retain original native identity.",
+      "Run all 24 original Select owner-native cases on the new exact head.",
+      "Verify before/open/success public paint, actual Overlay marginTop/rect, Flow/Trigger/Surface rects, and 320px/200% RTL behavior.",
+      "Preserve whole-cycle Material and other original failures separately."
+    ]
+  }
+}
