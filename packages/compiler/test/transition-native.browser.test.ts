@@ -18,6 +18,7 @@ declare global {
 }
 
 let browser: Browser;
+let bootstrapRetired = false;
 const targets = ['react', 'vue', 'vue2', 'wc'] as const;
 const fixtures = new Map<
   TransitionTarget,
@@ -28,9 +29,12 @@ const fixtures = new Map<
 // that preparation budget and left every lifecycle case unexecuted.
 for (const target of targets) {
   beforeAll(async () => {
+    if (bootstrapRetired) throw new Error('Transition native bootstrap owner retired');
     const start = performance.now();
     console.log(`Preparing Transition native ${target}: ordinary + prepared`);
     const built = await buildTransitionNativeFixture(target);
+    if (bootstrapRetired)
+      throw new Error(`Transition ${target} preparation completed after teardown`);
     fixtures.set(target, built);
     const elapsedMs = performance.now() - start;
     await writeFile(
@@ -53,15 +57,22 @@ for (const target of targets) {
   }, 60_000);
 }
 beforeAll(async () => {
-  browser = await chromium.launch({
+  if (bootstrapRetired) throw new Error('Transition native bootstrap owner retired');
+  const launched = await chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
     chromiumSandbox: true,
   });
+  if (bootstrapRetired) {
+    await launched.close();
+    throw new Error('Transition browser launch completed after bootstrap teardown');
+  }
+  browser = launched;
   for (const built of fixtures.values())
     await writeFile(path.join(built.evidenceDir, 'browser-version.txt'), browser.version());
 }, 60_000);
 afterAll(async () => {
+  bootstrapRetired = true;
   await browser?.close();
 });
 
@@ -335,7 +346,7 @@ it.each(cases)(
       const retired = await page.evaluate(() =>
         window.transitionNative.fixture.retiredEnter('old')
       );
-      expect(retired.connected).toBe(false);
+      expect(retired).toMatchObject({ capturedWhileAlive: true, invocation: 1, connected: false });
       const disposed = await read('old', 'past retired deadline');
       expect(disposed.disposed).toBe(true);
       expect(disposed.events.map((event) => event.name)).toEqual(['beforeEnter']);
@@ -356,6 +367,14 @@ it.each(cases)(
       await operate('replacement', 'enter');
       expect(await read('replacement', 'fresh owner')).toMatchObject({
         phase: 'entering',
+        rendered: true,
+      });
+      expect(
+        await page.evaluate(() => window.transitionNative.fixture.retiredEnter('retired'))
+      ).toMatchObject({ capturedWhileAlive: true, invocation: 1, connected: false });
+      expect(await read('replacement', 'after retained old enter invocation')).toMatchObject({
+        phase: 'entering',
+        present: true,
         rendered: true,
       });
       await phase('replacement', 'entered');

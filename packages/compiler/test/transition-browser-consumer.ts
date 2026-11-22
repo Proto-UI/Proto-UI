@@ -25,6 +25,8 @@ type Owner = {
   release: (() => void) | null;
   disposed: boolean;
   reenter: boolean;
+  retainedEnter: (() => void) | null;
+  retainedEnterCalls: number;
   target: TransitionTarget;
   dispose(): void;
 };
@@ -112,6 +114,8 @@ export function createTransitionBrowserFixture(generated: Generated) {
         release: null,
         disposed: false,
         reenter: false,
+        retainedEnter: null,
+        retainedEnterCalls: 0,
         target,
         dispose() {},
       };
@@ -188,6 +192,12 @@ export function createTransitionBrowserFixture(generated: Generated) {
         };
       }
       await settled(target);
+      // Retain the public callable while this owner is alive. A later
+      // getExposes() lookup can itself reject after disposal and would never
+      // exercise the externally retained reference whose lifetime we test.
+      owner.retainedEnter = owner.handle.getExposes().controls.enter;
+      if (typeof owner.retainedEnter !== 'function')
+        throw new Error(`Owner ${id} did not expose a callable enter control`);
     },
     read(id: string) {
       const owner = owners.get(id)!;
@@ -237,14 +247,26 @@ export function createTransitionBrowserFixture(generated: Generated) {
     },
     async retiredEnter(id: string) {
       const owner = owners.get(id)!;
+      if (!owner.disposed || !owner.retainedEnter)
+        throw new Error('Retired-control probe requires a previously captured live control');
       let rejected = false;
+      let rejection: string | null = null;
+      owner.retainedEnterCalls += 1;
       try {
-        owner.handle.getExposes().controls.enter();
-      } catch {
+        Reflect.apply(owner.retainedEnter, undefined, []);
+      } catch (error) {
         rejected = true;
+        rejection = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
       }
       await settled(owner.target);
-      return { rejected, connected: owner.host.isConnected, rendered: Boolean(view(owner)) };
+      return {
+        capturedWhileAlive: true,
+        invocation: owner.retainedEnterCalls,
+        rejected,
+        rejection,
+        connected: owner.host.isConnected,
+        rendered: Boolean(view(owner)),
+      };
     },
   };
 }
