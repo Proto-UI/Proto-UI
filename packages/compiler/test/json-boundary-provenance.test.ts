@@ -24,6 +24,32 @@ const optionalOverlay = (hidden: string) => `
   const view:Readonly<{value:string}>=merged;`;
 
 describe('outward JSON retains actual ordinary-value provenance', () => {
+  const pointerSource = (payload: string) => `
+    import {definePrototype} from '@proto.ui/core';
+    export default definePrototype({name:'optional-root-data',setup(def){
+      def.expose.event('changed',{payload:'json'});
+      def.event.on('pointer.move',(run,event)=>run.expose.emit('changed',${payload}));
+    }});`;
+
+  it('keeps optional root scalar alternatives at the existing root void boundary', () => {
+    const result = compilePrototype(pointerSource('event.pointerType'), {
+      profile: 'react-dom-source-v1',
+    });
+    expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+    if (!result.ok) return;
+    expect(validateIR(JSON.parse(JSON.stringify(result.value.ir))).ok).toBe(true);
+  });
+
+  it.each(['{value:event.pointerType}', '[event.pointerType]'])(
+    'retains the nested undefined rejection for %s',
+    (payload) => {
+      const result = parsePrototype(pointerSource(payload));
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.diagnostics[0].message).toContain('declared data boundary');
+    }
+  );
+
   const negative = [
     ['hidden undefined', view('undefined'), `run.expose.emit('changed',view);`],
     ['hidden nested undefined', view('{nested:undefined}'), `run.expose.emit('changed',view);`],
