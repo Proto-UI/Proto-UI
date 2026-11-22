@@ -436,7 +436,7 @@ export function emitReactSource(
         const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
         switch (value.kind) {
           case 'const':
-            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
+            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(value.expression, depth)};\n`;
           case 'return':

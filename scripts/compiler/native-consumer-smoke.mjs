@@ -455,9 +455,11 @@ for(const file of sources){
   mkdirSync(path.dirname(output),{recursive:true});writeFileSync(output,result.outputText);
   if(!result.sourceMapText)throw new Error('Missing executable source map '+file.path);
   const map=JSON.parse(result.sourceMapText);
-  if(!map.mappings||!map.sourcesContent?.includes(source))throw new Error('Executable map lost generated source '+file.path);
+  const emitted=ts.createSourceFile(output,result.outputText,ts.ScriptTarget.ESNext,true,ts.ScriptKind.JS);
+  const erasedOnly=emitted.statements.every(node=>ts.isExportDeclaration(node)&&!node.moduleSpecifier&&node.exportClause&&ts.isNamedExports(node.exportClause)&&node.exportClause.elements.length===0);
+  if((!map.mappings&&!erasedOnly)||!map.sourcesContent?.includes(source))throw new Error('Executable map lost generated source '+file.path);
   writeFileSync(output+'.map',result.sourceMapText);
-  built.push({source:file.path,output,bytes:Buffer.byteLength(result.outputText),map:output+'.map',mapBytes:Buffer.byteLength(result.sourceMapText)});
+  built.push({source:file.path,output,bytes:Buffer.byteLength(result.outputText),map:output+'.map',mapBytes:Buffer.byteLength(result.sourceMapText),erasedOnly});
 }
 writeFileSync('build-report.json',JSON.stringify({typescript:ts.version,mode:'Strict target/helper TypeScript check followed by executable ESM emission; JavaScript component bodies are not checkJs-validated',typecheck:{errors:typeErrors.length,checkJs:false},files:built},null,2)+'\\n');
 console.log('NATIVE_BUILD_OK',JSON.stringify(built));`;

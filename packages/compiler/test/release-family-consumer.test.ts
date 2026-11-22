@@ -115,3 +115,26 @@ it('expands only proven static enumeration and rejects container mutation, escap
       ok: false,
     });
 });
+
+it('resolves module style data in its declaration scope while preserving local style tables', () => {
+  for (const expression of ['TEXT', 'LOCAL["token"]']) {
+    const compiled = compilePrototype(
+      `import {definePrototype,tw} from '@proto.ui/core';
+      const PARTS=['bg-red'];const TEXT=PARTS.join(' ');
+      export default definePrototype({name:'style-module-scope',setup(def){
+        const PARTS=['bg-white'];const LOCAL={token:'bg-black'};
+        def.feedback.style.use(tw(${expression}));
+      }});`,
+      { profile: 'react-dom-source-v1' }
+    );
+    expect(compiled.ok, JSON.stringify(compiled)).toBe(true);
+    if (compiled.ok) {
+      const expected = expression === 'TEXT' ? 'bg-red' : 'bg-black';
+      expect(JSON.stringify(compiled.value.ir.setup)).toContain(expected);
+      const effects = compiled.value.ir.setup.body.filter(
+        (statement) => statement.kind === 'effect'
+      );
+      expect(JSON.stringify(effects)).not.toContain('bg-white');
+    }
+  }
+});

@@ -457,12 +457,13 @@ export function extractRuleStyleHandle(
   local?: (name: string) => ts.Expression | null | undefined
 ): StyleTokenHandle {
   const active = new Set<string>();
+  let lexicalEnvironment = true;
   const declaration = <T>(
     current: SourceModule,
     identifier: ts.Identifier,
     parse: (owner: SourceModule, node: ts.Expression) => T
   ): T => {
-    const lexical = current === module ? local?.(identifier.text) : undefined;
+    const lexical = lexicalEnvironment && current === module ? local?.(identifier.text) : undefined;
     if (lexical === null) rejectNode(identifier, code, 'Local style data requires a proven immutable non-escaping literal table.');
     if (lexical) {
       const identity = `local:${lexical.pos}:${identifier.text}`;
@@ -481,9 +482,12 @@ export function extractRuleStyleHandle(
     if (active.has(identity))
       rejectNode(identifier, code, 'Recursive style declarations are unsupported.');
     active.add(identity);
+    const previousEnvironment = lexicalEnvironment;
+    lexicalEnvironment = false;
     try {
       return parse(resolved.module, resolved.node);
     } finally {
+      lexicalEnvironment = previousEnvironment;
       active.delete(identity);
     }
   };

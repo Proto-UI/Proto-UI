@@ -680,7 +680,7 @@ export function emitVueSource(
         .replaceAll('\u2029', '\\u2029');
       const origin = `${indent}// Source ${sourceFile}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
       } else if (statement.kind === 'effect')
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {

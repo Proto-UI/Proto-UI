@@ -404,7 +404,7 @@ export function emitWebComponentSource(
       return formatJavaScriptValueType(type, typeName);
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
-    if (type === 'exception') return 'unknown';
+    if (type === 'exception' || type === 'unknown') return 'unknown';
     if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (isDataValueType(type))
       return interacting && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
@@ -715,7 +715,7 @@ export function emitWebComponentSource(
         switch (statement.kind) {
           case 'const':
             nativeScope = nativeScope.bind(statement.name, statement.value);
-            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
           case 'return':
@@ -1246,7 +1246,7 @@ ${
 ${
   styled
     ? `  const ${p}Style = ${p}CreateNativeStyle({ensureSetup, ensureRuntime: runtime, isAlive: () => alive,
-    ${atoms.ruleMeta(ssr ? "host.document" : "host.ownerDocument")}
+    ${atoms.ruleMeta(ssr ? 'host.document' : 'host.ownerDocument')}
     project(tokens) { ${ssr ? "host.attribute('data-pui-style', tokens.length ? tokens.join(' ') : null);" : "if (tokens.length) host.setAttribute('data-pui-style', tokens.join(' ')); else host.removeAttribute('data-pui-style');"} }});\n`
     : ''
 }
