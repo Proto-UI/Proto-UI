@@ -28,16 +28,22 @@ function setupRoot(def: DefHandle<DatePickerRootProps, DatePickerRootExposes>) {
   let lastCompletion = 0;
   let lastRequest = 0;
   let requestSessionOpen = false;
+  const observeRequest = (id: number, open: boolean) => {
+    if (id <= lastRequest) return;
+    lastRequest = id;
+    requestSessionOpen = mounted && open;
+  };
   def.context.subscribe(CALENDAR_CONTEXT, (run, next) => {
+    // A nested request may already own the provider while an older delivery
+    // finishes notifying its remaining subscribers.
+    if (next.selectionRequestId !== run.context.read(CALENDAR_CONTEXT).selectionRequestId) return;
     const open = run.context.read(POPOVER_CONTEXT).open;
-    if (next.selectionRequestId !== lastRequest) {
-      lastRequest = next.selectionRequestId;
-      requestSessionOpen = mounted && open;
-    }
+    observeRequest(next.selectionRequestId, open);
     const completion = next.selectionCommit;
-    if (!completion || completion.id === lastCompletion) return;
+    if (!completion || completion.id <= lastCompletion) return;
     lastCompletion = completion.id;
     if (
+      completion.id !== lastRequest ||
       !mounted ||
       !requestSessionOpen ||
       !completion.complete ||
@@ -48,7 +54,11 @@ function setupRoot(def: DefHandle<DatePickerRootProps, DatePickerRootExposes>) {
       return;
     requestPopoverOpen(run, false, 'date-selection', completion.reason);
   });
-  def.context.subscribe(POPOVER_CONTEXT, (_run, next) => {
+  def.context.subscribe(POPOVER_CONTEXT, (run, next, prev) => {
+    // An earlier Calendar subscriber can change the popup before our Calendar
+    // callback runs. Its actual previous open fact still identifies the session
+    // at request start; a later Calendar delivery must not recapture a new one.
+    observeRequest(run.context.read(CALENDAR_CONTEXT).selectionRequestId, prev.open);
     if (!next.open) requestSessionOpen = false;
   });
   def.lifecycle.onMounted(() => {

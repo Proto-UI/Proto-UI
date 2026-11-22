@@ -417,6 +417,17 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       proposalDelivered: false,
     };
     pendingNavigation = null;
+    // Freeze the request's consumer session before any public State can notify.
+    // A State observer may open/reopen a Picker; that later session must never
+    // be captured as the one this selection is allowed to complete.
+    current.context.update(CALENDAR_CONTEXT, { ...c, selectionRequestId: id });
+    if (
+      owner !== current ||
+      viewEpoch !== epoch ||
+      selectionId !== id ||
+      pendingSelection?.id !== id
+    )
+      return true;
     if (c.mode === 'multiple') {
       if (!current.props.isProvided('values')) values = [...nextValues];
     } else if (c.mode === 'range') {

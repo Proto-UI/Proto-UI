@@ -3,7 +3,8 @@ import { definePrototype } from '@proto.ui/core';
 import * as autocomplete from '../src/autocomplete';
 import * as combobox from '../src/combobox';
 import * as command from '../src/command';
-import { datePickerRoot, datePickerDay } from '../src/date-picker';
+import { datePickerRoot, datePickerDay, asDatePickerRoot } from '../src/date-picker';
+import { asCalendarRoot, CALENDAR_CONTEXT } from '../src/calendar';
 import { formRoot } from '../src/form';
 import { FORM_FAMILY, FORM_CONTEXT } from '../src/form/shared';
 import { createRuntimeSession } from '@proto.ui/runtime';
@@ -201,6 +202,60 @@ for (const mode of ['single', 'range'] as const) {
   );
 }
 
+for (const mode of ['single', 'range'] as const) {
+  it.each([false, true])(
+    `Date Picker ${mode} retires a request when an earlier Context subscriber opens a new session (initial open: %s)`,
+    async (initialOpen) => {
+      const { make, actions } = runtimeHarness();
+      let root: ReturnType<typeof make>;
+      let observed = false;
+      const proto = definePrototype({
+        name: `context-first-picker-${mode}-${initialOpen}`,
+        setup(def) {
+          asCalendarRoot();
+          def.context.subscribe(CALENDAR_CONTEXT, (_run, next) => {
+            if (!next.selectionRequestId || observed) return;
+            observed = true;
+            if (initialOpen) root.exposes.close('context-subscriber');
+            root.exposes.openPopover('context-subscriber');
+          });
+          asDatePickerRoot();
+        },
+      });
+      const initial =
+        mode === 'single'
+          ? { defaultValue: '2026-10-10' }
+          : { defaultRange: { from: '2026-10-10' } };
+      root = make(proto, null, {
+        ...initial,
+        mode,
+        defaultMonth: '2026-10',
+        defaultOpen: initialOpen,
+      });
+      await root.session.mount();
+      try {
+        root.session.invokeInCallbackScope(() => root.exposes.requestValue('2026-10-15'));
+        expect(observed).toBe(true);
+        expect(root.exposes.open.get()).toBe(true);
+        expect(actions).toEqual([
+          ...(initialOpen ? ['openChange', 'openChange'] : ['openChange']),
+          mode === 'single' ? 'valueChange' : 'rangeChange',
+        ]);
+        actions.length = 0;
+        root.session.invokeInCallbackScope(() =>
+          mode === 'single'
+            ? root.exposes.requestValue('2026-10-16')
+            : root.exposes.requestRange({ from: '2026-10-10', to: '2026-10-16' })
+        );
+        expect(root.exposes.open.get()).toBe(false);
+        expect(actions).toEqual([mode === 'single' ? 'valueChange' : 'rangeChange', 'openChange']);
+      } finally {
+        await root.session.dispose();
+      }
+    }
+  );
+}
+
 it.each(['accepted', 'refused', 'invalid'] as const)(
   'Date Picker keeps the current completion when a nested proposal is %s',
   async (nested) => {
@@ -259,6 +314,49 @@ it('Date Picker does not close a popup first opened inside the proposal callback
     await root.session.dispose();
   }
 });
+
+for (const mode of ['single', 'range'] as const) {
+  it.each([false, true])(
+    `Date Picker ${mode} freezes the request session before public State observers (initial open: %s)`,
+    async (initialOpen) => {
+      const { make, actions } = runtimeHarness();
+      const initial =
+        mode === 'single'
+          ? { defaultValue: '2026-10-10' }
+          : { defaultRange: { from: '2026-10-10' } };
+      const root = make(datePickerRoot, null, {
+        ...initial,
+        mode,
+        defaultMonth: '2026-10',
+        defaultOpen: initialOpen,
+      });
+      await root.session.mount();
+      let observed = false;
+      const state = mode === 'single' ? root.exposes.value : root.exposes.selectedCount;
+      const off = state.subscribe((event: any) => {
+        if (event.type !== 'next' || observed) return;
+        observed = true;
+        if (initialOpen) root.exposes.close('state-subscriber');
+        root.exposes.openPopover('state-subscriber');
+      });
+      try {
+        root.session.invokeInCallbackScope(() => root.exposes.requestValue('2026-10-15'));
+        expect(observed).toBe(true);
+        expect(root.exposes.open.get()).toBe(true);
+        expect(mode === 'single' ? root.exposes.value.get() : root.exposes.getRange()).toEqual(
+          mode === 'single' ? '2026-10-15' : { from: '2026-10-10', to: '2026-10-15' }
+        );
+        expect(actions).toEqual([
+          ...(initialOpen ? ['openChange', 'openChange'] : ['openChange']),
+          mode === 'single' ? 'valueChange' : 'rangeChange',
+        ]);
+      } finally {
+        off();
+        await root.session.dispose();
+      }
+    }
+  );
+}
 
 it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
   'Form reset ends its cached Field traversal after %s',
