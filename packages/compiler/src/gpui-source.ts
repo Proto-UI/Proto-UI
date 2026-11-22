@@ -2356,7 +2356,7 @@ impl __PuiNativeRecordValue {
       )
       .join(', ');
     typedMethods.push(`    pub fn method_${index}(&self, ${parameters}${parameters ? ', ' : ''}window: &mut Window, cx: &mut App) -> Result<${portableReturn ? rustType(returnType, exposure.span) : 'Value'}, Value> {
-        catch_authored(|| {
+        let outcome = catch_authored(|| {
         refresh_native_atoms(&self.owner, window, cx);
           #[cfg(feature = "experimental-focus-tree")] refresh_native_entry(&self.owner, window);
         let arguments = vec![${args}];
@@ -2370,7 +2370,9 @@ impl __PuiNativeRecordValue {
         serde_json::from_value(result).expect("checked exposed method result")`
             : 'result'
         }
-        })
+        });
+        if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
+        outcome
     }`);
     const checks =
       exposure.parameters
@@ -2508,7 +2510,7 @@ impl __PuiNativeRecordValue {
       pub fn owner(&self) -> OwnerWeak { Rc::downgrade(&self.owner) }
       pub fn state(&self, name: &str) -> Result<Json, Value> { catch_authored(|| { let state=self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed State")); state.get().data() }) }
       pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App) -> Result<Json, Value> {
-          catch_authored(|| {
+          let outcome = catch_authored(|| {
           refresh_native_atoms(&self.owner, window, cx);
           #[cfg(feature = "experimental-focus-tree")] refresh_native_entry(&self.owner, window);
           let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
@@ -2516,7 +2518,9 @@ impl __PuiNativeRecordValue {
           let result = invoke(&self.owner, "expose-method", &callback, arguments);
           let drive = self.owner.borrow().native_drive.clone(); if let Some(drive) = drive { drive(window, cx); }
           if matches!(result, Value::Undefined) { Json::Null } else { result.data() }
-          })
+          });
+          if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
+          outcome
       }
       pub fn host_target(&self) -> Result<Value, Value> { catch_authored(|| { ensure(&self.owner()); Value::HostTarget(self.owner()) }) }
       pub fn take_events(&self) -> Vec<(String, Json)> { std::mem::take(&mut self.owner.borrow_mut().emitted) }
@@ -2626,7 +2630,11 @@ impl __PuiNativeRecordValue {
       #[cfg(feature="test-support")]
       pub fn native_resource_counts(&self) -> Json { let mut counts=native::gpui_native_owner::native_resource_counts(&self.owner); counts["nativeSubscriptions"] = Json::from(self._focus_subscriptions.len() + usize::from(self._window_activation.is_some()) + usize::from(self._focus_lost.is_some()) + usize::from(self._global_key_capture.is_some()) + usize::from(self._entry_readiness.is_some())); counts }
       pub fn handle(&self) -> ${componentName}Handle { ${componentName}Handle { owner: self.owner.clone() } }
-      pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_props(&self.owner, raw))?; self.drive(window, cx) }
+      pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
+          let outcome = catch_authored(|| replace_props(&self.owner, raw));
+          if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
+          outcome?; self.drive(window, cx)
+      }
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
       fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {
@@ -2662,14 +2670,20 @@ impl __PuiNativeRecordValue {
           self._entry_readiness = Some((window_id, subscription));
       }
       pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
-          catch_authored(|| {
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
+          let mut dirty = false;
+          let result = catch_authored(|| {
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); dirty = true; return; }
           modules_drive(&self.owner, &self.focus, window, cx);
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); dirty = true; return; }
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           drive_queued_focus(&self.owner, window, cx);
-          let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty); if dirty { cx.notify(); }
-          })
+          dirty = std::mem::take(&mut self.owner.borrow_mut().dirty);
+          });
+          // A render-time prop watcher or a terminal callback may publish an
+          // event even after ordinary drawing consumed dirty. Wake observers
+          // once after this native lease; do not request an authored render.
+          if !notify_native_events(&self.owner, cx) && dirty { cx.notify(); }
+          result
       }
   }
   impl Drop for ${componentName} { fn drop(&mut self) { native_host_callback(&self.owner, "drop", || Owner::dispose(&self.owner)); } }
