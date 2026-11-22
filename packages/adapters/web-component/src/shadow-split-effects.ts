@@ -693,7 +693,12 @@ export function createShadowSplitEffectsPort({
     flushing = true;
     const previous = applied;
     const next = latest;
+    const suppressInitialTransition = !previous;
     try {
+      // The surface is already connected, so the first opacity publication
+      // would otherwise transition from the unpainted value. Settle it first.
+      if (suppressInitialTransition)
+        surface.style.setProperty('transition-property', 'none', 'important');
       // Removing the final owned opacity token also transitions to default 1.
       // Capture only the native transition created by this owned write.
       // Subsequent equal projections must not acquire a different animation.
@@ -711,6 +716,10 @@ export function createShadowSplitEffectsPort({
       surface.setAttribute(SHADOW_SPLIT_SURFACE_ATTR, '');
       applier.apply(next.surface);
       applied = next;
+      if (suppressInitialTransition) {
+        void surface.ownerDocument.defaultView?.getComputedStyle(surface).opacity;
+        surface.style.removeProperty('transition-property');
+      }
       if (before) zeroOpacityTransition = captureZeroOpacityTransition(eligible, before);
       else if (zeroOpacityTransition && !isCurrentOpacityTarget(zeroOpacityTransition.target))
         zeroOpacityTransition = null;
@@ -731,6 +740,11 @@ export function createShadowSplitEffectsPort({
       applied = latest = previous;
       zeroOpacityTransition = null;
       flushRequested = false;
+      if (suppressInitialTransition) {
+        try {
+          surface.style.removeProperty('transition-property');
+        } catch {}
+      }
       throw error;
     } finally {
       flushing = false;
