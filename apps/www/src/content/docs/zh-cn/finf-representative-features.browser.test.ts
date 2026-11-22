@@ -853,12 +853,13 @@ async function writeJson(file: string, value: unknown) {
 }
 
 async function captureFailureDiagnostics(page: Page, id: string, capture: Journey['capture']) {
+  const calendarFamily = /^shadcn-calendar/.test(id) ? 'shadcn' : null;
   const previewer = page
     .locator(
       id === 'shadcn-drawer'
         ? '[data-demo-id="demo-shadcn-drawer-snap"]'
-        : id.startsWith('shadcn-calendar')
-          ? '[data-demo-id="demo-shadcn-calendar"]'
+        : calendarFamily
+          ? `[data-demo-id="demo-${calendarFamily}-calendar"]`
           : '[data-previewer-id]'
     )
     .first();
@@ -899,7 +900,7 @@ async function runCase(testCase: Case) {
       testCase.component === 'drawer'
         ? '[data-demo-id="demo-shadcn-drawer-snap"]'
         : testCase.component === 'calendar'
-          ? '[data-demo-id="demo-shadcn-calendar"]'
+          ? `[data-demo-id="demo-${testCase.family}-calendar"]`
           : '[data-previewer-id]'
     )
     .first();
