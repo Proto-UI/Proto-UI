@@ -19052,6 +19052,10 @@ for (const [relative, allowed] of [
     '../../../../../../packages/adapters/base/src/material/program',
   ],
   ['apps/www/src/pages/en/test/liquid-glass-portal.astro', '@proto.ui/adapter-base/web-material'],
+  [
+    'apps/www/src/pages/en/test/liquid-glass-hover.astro',
+    '@proto.ui/prototypes-liquid-glass/button',
+  ],
 ]) {
   test(`diagnostic import review rejects owner, body and edge drift: ${path.basename(relative)}`, () => {
     const root = createRoot();
