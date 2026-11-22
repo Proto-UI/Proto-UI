@@ -175,6 +175,52 @@ function createHarness(
 }
 
 describe('module-scroll: fake host contract', () => {
+  it('queues semantic pause in attachment order and rejects absent or retired host support', () => {
+    const h = createHarness(false);
+    expect(h.surface.pauseFollowing()).toEqual({ kind: 'rejected', reason: 'not-mounted' });
+    const commands: string[] = [];
+    h.vault.attach([
+      [
+        SCROLL_SURFACE_HOST_CAP,
+        {
+          support: { system: true, composed: false },
+          attach(connection) {
+            connection.onFacts(snapshot('pending', 'pending'));
+            return {
+              update() {},
+              dispose() {},
+              request(request) {
+                commands.push(request.kind);
+              },
+              pauseFollowing() {
+                commands.push('pause');
+                connection.onFacts(snapshot('paused', 'rejected'));
+                return true;
+              },
+            };
+          },
+        } satisfies ScrollSurfaceHost,
+      ],
+    ]);
+    h.surface.endFollow.state.watch((_run, event) => {
+      if (event.type !== 'next' || event.next !== 'pending') return;
+      expect(h.surface.request({ kind: 'to-end', axis: 'vertical' })).toEqual({ kind: 'queued' });
+      expect(h.surface.pauseFollowing()).toEqual({ kind: 'queued' });
+    });
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    expect(commands).toEqual(['to-end', 'pause']);
+    expect(h.surface.endFollow.state.get()).toBe('paused');
+    h.module.hooks.onMountPhase?.('detached', 1);
+    expect(h.surface.pauseFollowing()).toEqual({ kind: 'rejected', reason: 'not-mounted' });
+    expect(commands).toEqual(['to-end', 'pause']);
+    const unsupported = createHarness();
+    unsupported.module.hooks.onMountPhase?.('mounted', 1);
+    expect(unsupported.surface.pauseFollowing()).toEqual({
+      kind: 'rejected',
+      reason: 'unavailable',
+    });
+  });
+
   it('synchronizes only axes in a live callback and leaves observed facts to the host', () => {
     const h = createHarness();
     expect(() => h.surface.sync({ axes: 'horizontal' })).toThrow(/illegal phase/);

@@ -40,6 +40,11 @@ cases:
     covers:
       - C-SCROLL-END-FOLLOW-0001-REFLOW
     expectation: following-realigns-to-end-and-paused-emits-no-end-movement
+  - id: T-SCROLL-END-FOLLOW-0001-CASE-PAUSE
+    title: semantic pause preserves reader position and retires with its owner
+    covers:
+      - C-SCROLL-END-FOLLOW-0001-PAUSE
+    expectation: pending-cancelled-without-position-or-focus-write-and-no-layout-only-resume
   - id: T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
     title: replacement disposal and late callbacks cannot update a later epoch
     covers:
@@ -77,6 +82,7 @@ implementations:
       - T-SCROLL-END-FOLLOW-0001-CASE-APPEND
       - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
       - T-SCROLL-END-FOLLOW-0001-CASE-REFLOW
+      - T-SCROLL-END-FOLLOW-0001-CASE-PAUSE
       - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
       - T-SCROLL-END-FOLLOW-0001-CASE-A11Y
     notes:
@@ -90,6 +96,7 @@ implementations:
       - T-SCROLL-END-FOLLOW-0001-CASE-POLICY
       - T-SCROLL-END-FOLLOW-0001-CASE-INTERRUPT-RESUME
       - T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
+      - T-SCROLL-END-FOLLOW-0001-CASE-PAUSE
     notes:
       - A deterministic fake Host Capability proves portable fact/request routing, no-host rejection, replacement disposal, and stale-epoch fact suppression.
   - id: scroll-end-follow-web-adapter-journey

@@ -1288,6 +1288,19 @@ export function createWebScrollSurfaceHost(
           if (disposed) return;
           executeRequest(request);
         },
+        pauseFollowing() {
+          if (disposed || !policyCurrent()) return false;
+          const axis = configuredFollowAxis();
+          if (!axis) return false;
+          cancelScheduledEnd(true);
+          endFollowState = 'paused';
+          // A pause at the current end must survive a no-motion layout report.
+          // Real reader input or an explicit to-end request clears this marker.
+          requestedDepartureAxis = axis;
+          syncAnchorObservation();
+          publish();
+          return !disposed && policyCurrent();
+        },
         reveal(subject, axis, isCurrentTarget) {
           if (axis !== 'vertical' || !isAxisEnabled(axis)) return false;
           const current = () => policyCurrent() && isCurrentTarget() && policyCurrent();

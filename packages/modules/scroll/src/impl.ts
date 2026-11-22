@@ -44,6 +44,7 @@ const EMPTY_AXIS: ScrollAxisSnapshot = Object.freeze({
 
 const END_FOLLOW_OFF = Object.freeze({ mode: 'off' as const });
 const ANCHOR_OFF = Object.freeze({ mode: 'off' as const });
+type LeaseCommand = ScrollSurfacePositionRequest | Readonly<{ kind: 'pause-following' }>;
 
 const DEFAULT_CONFIG: ScrollSurfaceConfig = Object.freeze({
   axes: 'both',
@@ -74,7 +75,7 @@ export class ScrollModuleImpl extends ModuleBase {
   private refreshAfterRetirement = false;
   private leaseEpoch = 0;
   private snapshotEpoch = 0;
-  private attachingLease: { epoch: number; requests: ScrollSurfacePositionRequest[] } | null = null;
+  private attachingLease: { epoch: number; requests: LeaseCommand[] } | null = null;
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
@@ -157,6 +158,7 @@ export class ScrollModuleImpl extends ModuleBase {
       sync: (patch) => this.sync(patch),
       bindComposedChrome: (binding) => this.bindComposedChrome(binding),
       request: (request) => this.request(request),
+      pauseFollowing: () => this.pauseFollowing(),
       getSnapshot: () => this.getSnapshot(),
     };
   }
@@ -267,6 +269,25 @@ export class ScrollModuleImpl extends ModuleBase {
     }
     this.lease.request(normalized);
     return { kind: 'dispatched' };
+  }
+
+  pauseFollowing(): ScrollSurfaceRequestOutcome {
+    if (!this.declared) return { kind: 'rejected', reason: 'not-declared' };
+    if (!this.mounted) return { kind: 'rejected', reason: 'not-mounted' };
+    if (
+      this.config.endFollow.mode === 'off' ||
+      (this.availabilitySession && !this.bindingIsCurrent(this.leaseEpoch, this.currentBinding))
+    )
+      return { kind: 'rejected', reason: 'unavailable' };
+    // Initial fact watchers may pause before attach returns. Preserve their
+    // order alongside end requests and retire them with the same lease epoch.
+    if (this.attachingLease?.epoch === this.leaseEpoch) {
+      this.attachingLease.requests.push({ kind: 'pause-following' });
+      return { kind: 'queued' };
+    }
+    return this.lease?.pauseFollowing?.()
+      ? { kind: 'dispatched' }
+      : { kind: 'rejected', reason: 'unavailable' };
   }
 
   private reveal(request: ScrollSurfaceRevealRequest, epoch: number): ScrollSurfaceRequestOutcome {
@@ -509,7 +530,7 @@ export class ScrollModuleImpl extends ModuleBase {
     if (!this.bindingIsCurrent(epoch, binding)) return;
     this.currentBinding = binding;
     this.acquiringEpoch = epoch;
-    const attaching = { epoch, requests: [] as ScrollSurfacePositionRequest[] };
+    const attaching = { epoch, requests: [] as LeaseCommand[] };
     let initial: ScrollSurfaceSnapshot | undefined;
     let admitted = false;
     let returned: ScrollSurfaceHostLease | null = null;
@@ -540,7 +561,8 @@ export class ScrollModuleImpl extends ModuleBase {
       this.applySnapshot(initial);
       for (const request of attaching.requests) {
         if (!this.bindingIsCurrent(epoch, binding) || this.lease !== returned) break;
-        returned.request(request);
+        if (request.kind === 'pause-following') returned.pauseFollowing?.();
+        else returned.request(request);
       }
     } catch (error) {
       if (epoch === this.leaseEpoch) {
@@ -593,7 +615,7 @@ export class ScrollModuleImpl extends ModuleBase {
       return;
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
-    const attaching = { epoch, requests: [] as ScrollSurfacePositionRequest[] };
+    const attaching = { epoch, requests: [] as LeaseCommand[] };
     this.attachingLease = attaching;
     try {
       this.set(this.projectionOwned, projection);
@@ -612,7 +634,8 @@ export class ScrollModuleImpl extends ModuleBase {
       // rather than overtaking requests emitted by earlier fact watchers.
       for (const request of attaching.requests) {
         if (this.lease !== lease || epoch !== this.leaseEpoch) break;
-        lease.request(request);
+        if (request.kind === 'pause-following') lease.pauseFollowing?.();
+        else lease.request(request);
       }
     } finally {
       if (this.attachingLease === attaching) this.attachingLease = null;

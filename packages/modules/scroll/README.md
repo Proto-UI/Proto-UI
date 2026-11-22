@@ -25,6 +25,8 @@ scroll.configure({
 
 The handle exposes per-axis `atEnd` plus read-only `endFollow.state` and `endFollow.requestStatus` facts. A jump control sends `scroll.request({ kind: 'to-end', axis: 'vertical' })`; it never receives a DOM node, offset, extent, or pixel threshold.
 
+A reader interaction or restoration of an application-owned history anchor can call `scroll.pauseFollowing()`. This cancels pending end movement and reports `paused` without moving the viewport, changing focus, or modifying the application's anchor. A layout notification at the end does not undo the pause. Real reader arrival or an explicit `to-end` request resumes following. The command returns the same delivery outcome vocabulary as `request`; unsupported, disabled, detached, and retired leases reject it. Requests during attachment preserve their order and retire with that attachment's epoch. The Base and design-family MessageScroller viewport exposes this method as `pauseFollowing` alongside `jumpToEnd` and the observed follow facts.
+
 The policy is off by default. The host owns proximity, layout observation, coalescing, input interruption, and direct end movement. Message counts, unread state, focus, announcements, visual-anchor preservation, and virtualization remain separate owners.
 
 ## Target reveal (draft Web runtime)

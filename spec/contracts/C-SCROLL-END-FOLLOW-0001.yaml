@@ -41,6 +41,10 @@ criteria:
     text:
       zh-CN: Reader 自然到达 logical end 时，`while-at-end` lease 必须恢复 following；显式 `to-end` request 必须先报告 pending，再在 host layout 应用后报告 applied 并恢复 matching follow axis，无法应用的 request 必须报告 rejected。
       en: When the reader naturally reaches the logical end, a `while-at-end` lease must resume following; an explicit `to-end` request must report `pending`, then report `applied` after host-layout application and resume the matching follow axis, while a request that cannot be applied must report `rejected`.
+  - id: C-SCROLL-END-FOLLOW-0001-PAUSE
+    text:
+      zh-CN: Composition 可因阅读选择或历史阅读恢复发送无几何输入的 `pauseFollowing()`；当前启用的 lease 必须取消 pending end movement、报告 paused，且不得改变位置、焦点或 App anchor。仅位于 end 的 layout 通知不得撤销该暂停；reader 自然到达或显式 `to-end` 恢复 following。命令在 attach 中按原顺序排队、随 epoch 退休；无宿主支持、disabled 或过期 lease 必须拒绝，不得宣称成功。
+      en: A composition may send geometry-free `pauseFollowing()` for reading interaction or history restoration. The current enabled lease must cancel pending end movement and report paused without changing position, focus, or an application anchor. A layout notification at end alone must not undo this pause; reader arrival or explicit `to-end` resumes following. Commands queued during attachment preserve order and retire with their epoch; unsupported, disabled, or retired leases must reject instead of claiming success.
   - id: C-SCROLL-END-FOLLOW-0001-REFLOW
     text:
       zh-CN: Viewport resize、reflow 与 content collapse/expand 必须经过同一 lease/state 规则；following lease 可重新对齐 logical end，paused lease 不得发出 end movement。本契约不保证 #520 所属的 away-from-end visual-anchor preservation。
