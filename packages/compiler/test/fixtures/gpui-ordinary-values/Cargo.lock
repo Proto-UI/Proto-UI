@@ -2526,6 +2526,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-ui-gpui-consumer-external-scroll"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "proto-ui-gpui-consumer-focus-scope"
 version = "0.1.0"
 dependencies = [
@@ -2736,6 +2746,7 @@ dependencies = [
  "proto-ui-gpui-consumer-context-child",
  "proto-ui-gpui-consumer-created-failure",
  "proto-ui-gpui-consumer-duplicate",
+ "proto-ui-gpui-consumer-external-scroll",
  "proto-ui-gpui-consumer-focus-scope",
  "proto-ui-gpui-consumer-focus-target",
  "proto-ui-gpui-consumer-hook-conditional",
