@@ -1,12 +1,15 @@
 import {
   defineAsHook,
   definePrototype,
+  delay,
+  type DelayTask,
   type DefHandle,
   type RunHandle,
   type RendererHandle,
 } from '@proto.ui/core';
-import { asAccessible } from '@proto.ui/hooks';
-import { FIELD_CONTEXT } from '../field/shared';
+import { asAccessible, asControlLabel } from '@proto.ui/hooks';
+import { FIELD_CONTEXT, FIELD_LABEL_PAIR } from '../field/shared';
+import { asOptionalFieldControl } from '../field/control-binding.proto';
 import { SLIDER_VALUES_CONTEXT, SLIDER_VALUES_FAMILY } from './values-shared';
 import {
   acceptValuesOwner,
@@ -26,6 +29,7 @@ import type {
 } from './values-types';
 
 function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
+  const field = asOptionalFieldControl();
   def.anatomy.claim(SLIDER_VALUES_FAMILY, { role: 'root' });
   def.props.define({
     value: { type: 'any', empty: 'fallback' },
@@ -134,8 +138,15 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     direction: 'ltr',
     label: '',
     phase: 'idle',
+    interacting: false,
+    activeIndex: -1,
   });
   let run: RunHandle<SliderValuesRootProps> | null = null;
+  let fieldFingerprint: string | null = null,
+    groupFocused = false,
+    resetting = false;
+  let focusTask: DelayTask | null = null;
+  const fieldTasks = new Set<DelayTask>();
   const bump = () => revision.set((revision.get() + 1) % Number.MAX_SAFE_INTEGER);
   // Exposed State notifications are synchronous external callback boundaries.
   // Once onUnmounted retires the receiver, stop the old frame before any next
@@ -167,7 +178,39 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       max.get()
     );
   const live = () => !!run && created.get() && !retired.get();
-  const eligible = () => live() && ready.get() && !disabled.get() && !readOnly.get();
+  const eligible = (reset = false) =>
+    live() && ready.get() && (reset || (!disabled.get() && !readOnly.get()));
+  const fieldValue = () => (valueShape.get() === 'scalar' ? values.get()[0] : [...values.get()]);
+  const reportField = () => {
+    if (!live() || !run || !ownerInitialized.get()) return;
+    const current = run,
+      before = revision.get();
+    if (!current.context.tryRead(FIELD_CONTEXT)) {
+      fieldFingerprint = null;
+      return;
+    }
+    field.setPolicy({ disabled: !ready.get(), readOnly: false });
+    if (!live() || current !== run || before !== revision.get()) return;
+    const value = fieldValue(),
+      fingerprint = JSON.stringify(value);
+    const changed = fieldFingerprint !== null && fieldFingerprint !== fingerprint;
+    fieldFingerprint = fingerprint;
+    field.report({
+      value,
+      initialValue:
+        creationShape.get() === 'scalar' ? creationValues.get()[0] : [...creationValues.get()],
+      focused: groupFocused,
+      reason: 'sync',
+    });
+    if (!changed || resetting || !live() || current !== run || before !== revision.get()) return;
+    // Outward owner callbacks finish before validation; every accepted canonical
+    // change owns its task, while reset/retirement cancels unfinished reports.
+    const task = delay(0, () => {
+      fieldTasks.delete(task);
+      if (live()) field.report({ value: fieldValue(), focused: groupFocused, reason: 'change' });
+    });
+    fieldTasks.add(task);
+  };
   const mapping = (wanted = -1) => {
     if (!run) return false;
     const parts = run.anatomy.partsOf(SLIDER_VALUES_FAMILY, 'thumb');
@@ -318,7 +361,10 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       direction: direction.get() as 'ltr' | 'rtl',
       label: label.get(),
       phase: phase.get(),
+      interacting: interacting.get(),
+      activeIndex: activeIndex.get(),
     });
+    if (live()) reportField();
   };
   // A single declared busy fact protects the idle notification itself against
   // nested edits. Props are still received and drained, never discarded.
@@ -373,8 +419,14 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     run.expose.emit('valueCommit', event);
     return true;
   };
-  const request = (input: unknown, index: number, reason: string, immediate = false) => {
-    if (!eligible() || working.get() || !run) return false;
+  const request = (
+    input: unknown,
+    index: number,
+    reason: string,
+    immediate = false,
+    reset = false
+  ) => {
+    if (!eligible(reset) || working.get() || !run) return false;
     const owner = acceptValuesOwner(input);
     if (!owner.ok) {
       diagnostic.set(owner.reason);
@@ -396,7 +448,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       phase.set('publishing');
       if (!live()) return false;
       const canceled = veto.get();
-      if (!reconcilePending() || !eligible() || revision.get() !== before) {
+      if (!reconcilePending() || !eligible(reset) || revision.get() !== before) {
         settle();
         return false;
       }
@@ -407,13 +459,13 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       if (!controlled.get()) {
         values.set(owner.rawValues);
         if (!live()) return false;
-        if (!reconcilePending() || !eligible() || revision.get() !== before) {
+        if (!reconcilePending() || !eligible(reset) || revision.get() !== before) {
           settle();
           return false;
         }
         valueShape.set(owner.shape);
         if (!live()) return false;
-        if (!reconcilePending() || !eligible() || revision.get() !== before) {
+        if (!reconcilePending() || !eligible(reset) || revision.get() !== before) {
           settle();
           return false;
         }
@@ -428,7 +480,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       diagnostic.set('');
       if (!live()) return false;
       const settled = settle();
-      if (!settled || !eligible() || revision.get() !== before) return false;
+      if (!settled || !eligible(reset) || revision.get() !== before) return false;
       if (immediate) {
         commit();
         settle();
@@ -470,8 +522,8 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       ? request(next, -1, 'imperative')
       : false
   );
-  // Logical numerical input only. A future input owner must establish origin,
-  // capture and conversion outside this entry; no host event is synthesized.
+  // Logical numerical input only. Track independently consumes shared input
+  // origin and displacement facts; no host event is synthesized here.
   def.expose.method('requestInteractionValue', (next) => {
     if (!eligible() || working.get() || !interacting.get()) return false;
     const before = revision.get();
@@ -565,6 +617,11 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     if (!eligible() || working.get()) return false;
     working.set(true);
     try {
+      if (!pendingCommit.get() && interacting.get()) {
+        clearSession();
+        settle();
+        return false;
+      }
       const done = commit();
       settle();
       return done;
@@ -588,9 +645,52 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       if (live()) working.set(false);
     }
   });
-  def.expose.method('resetValue', () =>
-    live() ? request(unwrap(creationValues.get(), creationShape.get()), -1, 'reset') : false
-  );
+  def.expose.method('resetValue', () => {
+    if (!live() || working.get()) return false;
+    for (const task of fieldTasks) task.cancel();
+    fieldTasks.clear();
+    resetting = true;
+    try {
+      invalidate();
+      if (!live()) return false;
+      flush();
+      return request(unwrap(creationValues.get(), creationShape.get()), -1, 'reset', false, true);
+    } finally {
+      resetting = false;
+    }
+  });
+  const focusSelf = () => {
+    if (!live() || !run || disabled.get()) return;
+    for (const part of run.anatomy.order.partsOf(SLIDER_VALUES_FAMILY, 'thumb')) {
+      const getInfo = part.getExpose('getSlotInfo');
+      const info = typeof getInfo === 'function' ? getInfo() : null;
+      if (!info || info.disabled) continue;
+      const focus = part.getExpose('focusSelf');
+      if (typeof focus === 'function') focus();
+      return;
+    }
+  };
+  def.expose.method('focusSelf', focusSelf);
+  asControlLabel().target((_current, request) => {
+    if (request.isCurrent()) focusSelf();
+  }, FIELD_LABEL_PAIR);
+  const scheduleFocus = () => {
+    if (!live() || !run?.context.tryRead(FIELD_CONTEXT)) return;
+    focusTask?.cancel();
+    focusTask = delay(0, () => {
+      focusTask = null;
+      if (!live() || !run) return;
+      const focused = run.anatomy
+        .partsOf(SLIDER_VALUES_FAMILY, 'thumb')
+        .some(
+          (part) => (part.getExpose('focused') as { get?(): boolean } | null)?.get?.() === true
+        );
+      const reason = groupFocused && !focused ? 'blur' : 'sync';
+      groupFocused = focused;
+      field.report({ value: fieldValue(), focused, reason });
+    });
+  };
+  def.expose.method('__focus', scheduleFocus);
   def.expose.method('invalidateParts', () => {
     if (!live()) return;
     partsDirty.set(true);
@@ -612,6 +712,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     run = current;
     partsDirty.set(true);
     flush();
+    scheduleFocus();
   });
   def.lifecycle.onCreated((current) => {
     run = current;
@@ -630,6 +731,12 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     flush();
   });
   def.lifecycle.onUnmounted(() => {
+    focusTask?.cancel();
+    focusTask = null;
+    for (const task of fieldTasks) task.cancel();
+    fieldTasks.clear();
+    groupFocused = false;
+    fieldFingerprint = null;
     retired.set(true);
     ready.set(false);
     veto.set(true);
@@ -641,6 +748,9 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
   def.lifecycle.onBeforeDispose(() => {
     // Terminal disposal can also happen without any mounted epoch.
     run = null;
+    focusTask?.cancel();
+    for (const task of fieldTasks) task.cancel();
+    fieldTasks.clear();
     retired.set(true);
   });
   return (r: RendererHandle<any>) => r.slot();

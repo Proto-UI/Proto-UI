@@ -33,10 +33,10 @@ criteria:
         singleton roles fail closed; nested Roots never share values, requests or IDREF targets.
   - id: C-FIELD-0001-VALUES
     text:
-      zh-CN: 值域为 null、有限数值、boolean、string 或稠密自有元素 string[]，边界返回防御性副本。required 将
+      zh-CN: 值域为 null、有限数值、boolean、string 或同质稠密自有元素 string[] 或有限 number[]，拒绝混合/稀疏/非有限数组，边界返回防御性副本。required 将
         null、false、空字符串和空数组判为空；0、空白字符串及包含空字符串的非空数组有效。不隐式 trim/coerce，不校验任意对象。可选空字符串跳过长度；Root
         minLength/maxLength 仅按非空字符串 UTF-16 code units 计数，并投射默认编辑器。
-      en: Admitted values are null, finite number, boolean, string or a dense own-item string array; values and
+      en: Admitted values are null, finite number, boolean, string or a homogeneous dense own-item string or finite-number array; mixed, sparse and nonfinite arrays are rejected; values and
         result snapshots are defensively copied. required treats null, false, empty string and empty array as
         empty; 0, whitespace and a nonempty array containing an empty string are filled. No trim, coercion or
         generic object validation occurs. Optional empty strings bypass length checks; Root
@@ -161,6 +161,9 @@ openQuestions:
     blocks:
       - activation:C-FIELD-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Admitted homogeneous finite-number arrays for grouped numeric controls; mixed, sparse and nonfinite arrays remain invalid.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Admitted a draft Field contract candidate within the user-directed Finf scope; no stable or complete

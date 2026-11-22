@@ -33,7 +33,7 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
       });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
     });
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),
@@ -98,8 +98,12 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
         when: (w) => w.all(w.state(style).eq(id), w.not(w.meta('colorScheme').eq('dark'))),
         intent: (i) => i.feedback.style.to(paint).use(tw('bg-clip-padding')),
       });
-    // Values has no pressed/input-origin fact. Do not manufacture upstream
-    // Nova/Lyra/Mira active:ring from a second pointer/Trigger owner.
+    // Activity is the sole Root interaction's selected slot, never a second
+    // pointer/Trigger owner on Thumb.
+    def.rule({
+      when: (w) => w.all(w.state(state.dragging).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.to(paint).use(tw('ring-4 ring-ring/50')),
+    });
     return (r) => {
       const content = inherited.render!(r);
       return Array.isArray(content)

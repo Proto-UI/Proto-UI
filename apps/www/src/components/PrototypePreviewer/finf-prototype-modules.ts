@@ -4,6 +4,30 @@ import { registerPrototype } from './registry';
 // Explicit source slices. This registry does not confer catalog or release admission.
 // Runtime-selected preview loaders keep unselected source families out of eager initialization.
 export const finfPrototypeModules: Record<string, () => Promise<void>> = {
+  'brutalist-slider-values-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-values-root', module.sliderValuesRoot);
+  },
+  'brutalist-slider-values-track': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-values-track', module.sliderValuesTrack);
+  },
+  'brutalist-slider-values-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-values-thumb', module.sliderValuesThumb);
+  },
+  'brutalist-slider-values-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-values-indicator', module.sliderValuesIndicator);
+  },
+  'brutalist-slider-values-label': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-values-label', module.sliderValuesLabel);
+  },
+  'brutalist-slider-values-value': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-values-value', module.sliderValuesValue);
+  },
   'shadcn-async-region-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/async-region');
     registerExactPrototype('shadcn-async-region-root', module.asyncRegionRoot);

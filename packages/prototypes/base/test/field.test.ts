@@ -243,16 +243,30 @@ describe('Field finite value and negative boundaries', () => {
       expect(f.root.getExposes().invalid.get()).toBe(invalid);
     }
   );
-  it('generic bridge refuses non-finite, object, nonstring-array and callback values without poisoning canonical validity', async () => {
+  it('generic bridge refuses non-finite, object, mixed-array and callback values without poisoning canonical validity', async () => {
     const f = genericFixture('accepted', { externalValidation: true });
     document.body.append(f.root);
     await flush();
     const root = f.root.getExposes(),
       control = f.control.getExposes();
     const request = root.validate();
-    for (const value of [Infinity, NaN, {}, [1], () => {}, undefined])
+    for (const value of [Infinity, NaN, {}, [1, 'x'], [NaN], new Array(1), () => {}, undefined])
       expect(control.reportField({ value, reason: 'input' })).toBe(false);
     expect(root.resolveValidation(request, { invalid: false })).toBe(true);
+  });
+  it('generic bridge admits numeric arrays as defensive canonical snapshots', async () => {
+    const f = genericFixture('accepted', { externalValidation: true });
+    document.body.append(f.root);
+    await flush();
+    const supplied = [1, 2];
+    const control = f.control.getExposes();
+    expect(control.reportField({ value: supplied, reason: 'sync' })).toBe(true);
+    supplied[0] = 999;
+    const snapshot = control.__fieldSnapshot();
+    expect(snapshot.value).toEqual([1, 2]);
+    snapshot.value[1] = 888;
+    expect(control.__fieldSnapshot().value).toEqual([1, 2]);
+    expect(f.root.getExposes().getValidity().filled).toBe(true);
   });
   it('length is explicit UTF-16 string length and optional empty values bypass length', async () => {
     const f = await mount(fixture({ minLength: 3, maxLength: 4, validationMode: 'onChange' }));

@@ -230,6 +230,20 @@ function decimalPlaces(value: number): number {
   return Math.max(0, (coefficient.split('.')[1]?.length ?? 0) - Number(exponent));
 }
 
+/** Min-relative pointer quantization precedes the independent collision operation. */
+export function sliderValuesPointer(value: number, policy: SliderValuesPolicy): number | null {
+  if (!Number.isFinite(value) || validateValuesPolicy(policy)) return null;
+  const offset = value - policy.min,
+    units = offset / policy.step;
+  const stepped = Math.round(units) * policy.step,
+    nearest = stepped + policy.min;
+  if (![offset, units, stepped, nearest].every(Number.isFinite)) return null;
+  const precision = Math.max(decimalPlaces(policy.step), decimalPlaces(policy.min));
+  if (precision > 100) return null;
+  const rounded = Number(nearest.toFixed(precision));
+  return Number.isFinite(rounded) ? bounded(rounded, policy.min, policy.max) : null;
+}
+
 function recognizedKey(key: string): boolean {
   return (
     key === 'ArrowUp' ||

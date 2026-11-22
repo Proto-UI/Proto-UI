@@ -29,6 +29,8 @@ export type SliderValuesContext = {
   direction: 'ltr' | 'rtl';
   label: string;
   phase: string;
+  interacting: boolean;
+  activeIndex: number;
 };
 export const SLIDER_VALUES_CONTEXT = createContextKey<SliderValuesContext>('base-slider-values');
 export function sliderValuesMethod(run: RunHandle<any>, key: string, ...args: unknown[]) {
