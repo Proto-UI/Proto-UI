@@ -1,5 +1,5 @@
 import { gpuiExpressionChildren } from './gpui-lexical-names';
-import { isDataValueType } from './ir';
+import { serializableDataType } from './value-types';
 import type { ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
 
 export type PortableModuleBinding = NonNullable<PrototypeIR['moduleBindings']>[number];
@@ -123,14 +123,14 @@ export function portableDataMethods(
     );
     const result =
       fn.context === 'helper' &&
-      isDataValueType(fn.returnType) &&
+      serializableDataType(fn.returnType) !== undefined &&
       (fn.captures ?? []).every((capture) => {
         const captured = moduleFunction(capture, locals);
         return capture.storage === 'value' && captured !== undefined;
       }) &&
       fn.parameters.every((parameter) => {
         if (
-          !isDataValueType(parameter.type) ||
+          serializableDataType(parameter.type) === undefined ||
           (parameter.default && !expression(parameter.default, locals))
         )
           return false;

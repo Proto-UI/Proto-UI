@@ -87,6 +87,18 @@
       "import": "./dist/select/index.js",
       "default": "./dist/select/index.js"
     },
+    "./selectable-row": {
+      "proto": "./src/selectable-row/index.ts",
+      "types": "./dist/selectable-row/index.d.ts",
+      "import": "./dist/selectable-row/index.js",
+      "default": "./dist/selectable-row/index.js"
+    },
+    "./native-file-input": {
+      "proto": "./src/native-file-input/index.ts",
+      "types": "./dist/native-file-input/index.d.ts",
+      "import": "./dist/native-file-input/index.js",
+      "default": "./dist/native-file-input/index.js"
+    },
     "./switch": {
       "proto": "./src/switch/index.ts",
       "types": "./dist/switch/index.d.ts",
@@ -572,6 +584,8 @@
     "src/menubar/index.ts",
     "src/message-scroller/index.ts",
     "src/message-scroller/message-scroller.proto.ts",
+    "src/message-scroller/reading-plan.ts",
+    "src/message-scroller/reading.proto.ts",
     "src/message-scroller/types.ts",
     "src/meter/index.ts",
     "src/meter/indicator.proto.ts",
@@ -581,6 +595,9 @@
     "src/meter/track.proto.ts",
     "src/meter/types.ts",
     "src/meter/value.proto.ts",
+    "src/native-file-input/index.ts",
+    "src/native-file-input/root.proto.ts",
+    "src/native-file-input/types.ts",
     "src/navigation-menu/index.ts",
     "src/number-field/control.proto.ts",
     "src/number-field/decrement.proto.ts",
@@ -589,6 +606,7 @@
     "src/number-field/index.ts",
     "src/number-field/input.proto.ts",
     "src/number-field/label.proto.ts",
+    "src/number-field/range.ts",
     "src/number-field/root.proto.ts",
     "src/number-field/shared.ts",
     "src/number-field/types.ts",
@@ -647,6 +665,9 @@
     "src/select/types.ts",
     "src/select/value.proto.ts",
     "src/select/viewport.proto.ts",
+    "src/selectable-row/index.ts",
+    "src/selectable-row/root.proto.ts",
+    "src/selectable-row/types.ts",
     "src/separator/index.ts",
     "src/separator/root.proto.ts",
     "src/separator/types.ts",

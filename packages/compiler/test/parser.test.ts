@@ -9,17 +9,22 @@ const buttonSource = readFileSync(
   fileURLToPath(new URL('../../prototypes/base/src/button/button.proto.ts', import.meta.url)),
   'utf8'
 );
+const buttonTypes = readFileSync(
+  fileURLToPath(new URL('../../prototypes/base/src/button/types.ts', import.meta.url)),
+  'utf8'
+);
+const buttonOptions = { fileName: 'button.proto.ts', files: { 'types.ts': buttonTypes } };
 const simple = `import { definePrototype } from '@proto.ui/core';\nexport default definePrototype({ name: 'simple', setup(def) {} });`;
 
 describe('restricted TypeScript frontend', () => {
   it('analyzes actual Base Button and changes IR when a callback result changes', () => {
-    const original = parsePrototype(buttonSource, { fileName: 'button.proto.ts' });
+    const original = parsePrototype(buttonSource, buttonOptions);
     const mutant = parsePrototype(
       buttonSource.replace(
         "hovered.set(true, 'reason: button pointer.enter => hovered')",
         "hovered.set(false, 'reason: button pointer.enter => hovered')"
       ),
-      { fileName: 'button.proto.ts' }
+      buttonOptions
     );
     expect(original.ok).toBe(true);
     expect(mutant.ok).toBe(true);
@@ -36,7 +41,7 @@ describe('restricted TypeScript frontend', () => {
     expect(mutant.value.setup).not.toEqual(original.value.setup);
     expect(mutant.value.source.sha256).not.toBe(original.value.source.sha256);
     expect(JSON.parse(JSON.stringify(original.value))).toEqual(original.value);
-    expect(parsePrototype(buttonSource, { fileName: 'button.proto.ts' })).toEqual(original);
+    expect(parsePrototype(buttonSource, buttonOptions)).toEqual(original);
   });
 
   it('keeps valid __default lexical binding distinct from an inline default export', () => {
@@ -157,7 +162,7 @@ import {asButton as applyButton} from './button.proto';
 export default definePrototype({name:'caller',setup(def){applyButton();}});`;
     const result = parsePrototype(caller, {
       fileName: 'caller.proto.ts',
-      files: { 'button.proto.ts': buttonSource },
+      files: { 'button.proto.ts': buttonSource, 'types.ts': buttonTypes },
     });
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));

@@ -16,8 +16,9 @@ import type { DrawerContentProps, DrawerContentExposes } from './types';
 import { drawerExtentModel } from './extent-model';
 export { drawerExtentModel } from './extent-model';
 
-function nearest(points: number[], value: number): number {
-  const finite = Number.isFinite(value) ? value : points[points.length - 1];
+function nearest(points: readonly number[], value: number): number {
+  // The accepted extent model always supplies at least one resting point.
+  const finite = Number.isFinite(value) ? value : points[points.length - 1]!;
   return points.reduce((best, point) =>
     Math.abs(point - finite) <= Math.abs(best - finite) ? point : best
   );
@@ -64,23 +65,21 @@ export function setupDrawerSnap(
     releaseMethod = null;
     leaseGeneration = 0;
     ownerId = null;
-    let failed = false;
-    let failure: unknown;
     try {
       admitted.set(false, 'reason: drawer declaration released');
       onAdmissionChange(false);
     } catch (error) {
-      failed = true;
-      failure = error;
-    }
-    try {
-      release?.(instanceId, oldGeneration);
-    } catch (error) {
-      if (failed)
-        throw new AggregateError([failure, error], '[Drawer] Content and Root release failed.');
+      try {
+        release?.(instanceId, oldGeneration);
+      } catch (releaseError) {
+        throw new AggregateError(
+          [error, releaseError],
+          '[Drawer] Content and Root release failed.'
+        );
+      }
       throw error;
     }
-    if (failed) throw failure;
+    release?.(instanceId, oldGeneration);
   };
   const admit = (run: RunHandle<DrawerContentProps>) => {
     if (declarationDisposed) throw new Error('[Drawer] Disposed Content cannot acquire admission.');
@@ -260,10 +259,10 @@ export function setupDrawerSnap(
       if (!isCurrent()) return;
     }
     if (!dragging.get()) return;
-    const lowerBound = intrinsic ? 0 : run.props.get().dragDismissible === false ? points[0] : 0;
+    const lowerBound = intrinsic ? 0 : run.props.get().dragDismissible === false ? points[0]! : 0;
     const next = Math.max(
       lowerBound,
-      Math.min(intrinsic ? 1 : points[points.length - 1], start + sample.totalDelta * start)
+      Math.min(intrinsic ? 1 : points[points.length - 1]!, start + sample.totalDelta * start)
     );
     dragProgress.set(next, 'reason: drawer normalized drag preview');
     if (!isCurrent()) return;
@@ -275,7 +274,7 @@ export function setupDrawerSnap(
     dragging.set(false, 'reason: drawer drag end');
     if (!isCurrent()) return;
     const configured = run.props.get().dragDismissThreshold;
-    const ceiling = intrinsic ? 1 : points[0];
+    const ceiling = intrinsic ? 1 : points[0]!;
     const threshold =
       typeof configured === 'number' && Number.isFinite(configured)
         ? Math.max(0, Math.min(ceiling, configured))
@@ -294,10 +293,12 @@ export function setupDrawerSnap(
     const validSide = ['top', 'right', 'bottom', 'left'].includes(nextSide);
     const horizontal = nextSide === 'left' || nextSide === 'right';
     const model = drawerExtentModel({
-      ...raw,
+      snapPoints: raw.snapPoints,
+      snapPoint: raw.snapPoint,
+      defaultSnapPoint: raw.defaultSnapPoint,
       side: nextSide,
-      minExtent: raw.minExtent == null ? props.minExtent : raw.minExtent,
-      maxExtent: raw.maxExtent == null ? (horizontal ? undefined : props.maxExtent) : raw.maxExtent,
+      minExtent: raw.minExtent ?? props.minExtent,
+      maxExtent: raw.maxExtent ?? (horizontal ? undefined : props.maxExtent),
     });
     contactRevision++;
     if (!validSide || model.status === 'invalid') {

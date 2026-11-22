@@ -24,6 +24,9 @@ export type {
 
 export type TextareaRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
 
+// An absent controlled value resolves to null; other fields have declared defaults.
+type ResolvedTextareaProps = Readonly<Omit<TextareaRootProps, 'value'> & { value?: string | null }>;
+
 /** Definition-time composition only. The ordinary Textarea entry keeps explicit label associations. */
 export function setupTextareaRoot(
   def: DefHandle<TextareaRootProps, TextareaRootExposes>,
@@ -136,7 +139,7 @@ export function setupTextareaRoot(
     viewEpoch++;
   });
 
-  const sync = (props: Readonly<TextareaRootProps>, report = true) => {
+  const sync = (props: ResolvedTextareaProps, report = true) => {
     const isControlled = typeof props.value === 'string';
     const nextDisabled = binding ? binding.state.fieldDisabled.get() : (props.disabled ?? false);
     const nextReadOnly = binding ? binding.state.fieldReadOnly.get() : (props.readOnly ?? false);

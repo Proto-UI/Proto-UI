@@ -10,6 +10,7 @@ import { nativeHostAtomPlan, emitNativeHostAtom, type NativeHostAtomPlan } from 
 import {
   nativeAuthoredHooksArtifact,
   emitAuthoredHookDefinition,
+  emitUnreachedAuthoredHookCall,
   emitPrivilegedHookCall,
 } from './native-authored-hooks';
 import {
@@ -17,7 +18,9 @@ import {
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
+  emitJavaScriptBinary,
   emitJavaScriptParameters,
+  emitJavaScriptSignatureParameters,
   emitUninvokedJavaScriptFunction,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -101,8 +104,10 @@ const SUPPORTED: Record<string, true> = {
   'context.provide': true,
   'context.subscribe': true,
   'context.trySubscribe': true,
+  'context.trySubscribeAncestor': true,
   'context.read': true,
   'context.tryRead': true,
+  'context.tryReadAncestor': true,
   'context.update': true,
   'context.tryUpdate': true,
   'render.read.context.read': true,
@@ -302,9 +307,16 @@ export function emitWebComponentSource(
       for (const token of (node.handle as { tokens: string[] }).tokens) cssTokens.add(token);
     if (node.kind === 'rule')
       for (const op of (
-        node.declaration as { intent: { ops: { handles: { tokens: string[] }[] }[] } }
+        node.declaration as {
+          intent: {
+            ops: {
+              handles: ({ kind: 'tw'; tokens: string[] } | { kind: 'reference'; id: string })[];
+            }[];
+          };
+        }
       ).intent.ops)
-        for (const handle of op.handles) for (const token of handle.tokens) cssTokens.add(token);
+        for (const handle of op.handles)
+          if (handle.kind === 'tw') for (const token of handle.tokens) cssTokens.add(token);
     if (
       node.kind === 'style-handle' ||
       node.kind === 'rule' ||
@@ -405,6 +417,8 @@ export function emitWebComponentSource(
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
     if (type === 'exception') return 'unknown';
+    if (type === 'public-expose') return 'unknown';
+    if (type === 'public-method') return '(...args: unknown[]) => unknown';
     if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (isDataValueType(type))
       return interacting && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
@@ -546,7 +560,7 @@ export function emitWebComponentSource(
   }
 
   function parameters(values: readonly ParameterIR[]): string {
-    return emitJavaScriptParameters(values, (value) => expr(value, 0), typeName);
+    return emitJavaScriptSignatureParameters(values, typeName);
   }
 
   function fn(node: FunctionIR, depth: number): string {
@@ -580,6 +594,7 @@ export function emitWebComponentSource(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         return emitJavaScriptValue(node, (item) => expr(item, depth), typeName, true, {
           plan: callBoundaries,
           wrap: `${prefix}WrapPublic`,
@@ -619,7 +634,7 @@ export function emitWebComponentSource(
       case 'unary':
         return `(${node.operator}${expr(node.operand, depth)})`;
       case 'binary':
-        return `(${expr(node.left, depth)} ${node.operator} ${expr(node.right, depth)})`;
+        return emitJavaScriptBinary(node, (item) => expr(item, depth));
       case 'array':
         return `[${node.elements.map((value) => expr(value, depth)).join(', ')}]`;
       case 'record':
@@ -627,9 +642,11 @@ export function emitWebComponentSource(
       case 'function':
         return fn(node.function, depth);
       case 'helper-call':
-        return `${node.name}(${node.arguments.map((value) => expr(value, depth)).join(', ')})`;
+        return `${node.name}(${node.arguments.map((value, index) => `${node.spread?.[index] ? '...' : ''}${expr(value, depth)}`).join(', ')})`;
       case 'authored-hook':
-        return `${hooks.get(node.hookId)}(${(node.arguments ?? []).map((item) => expr(item, depth)).join(', ')})`;
+        return reachedHooks.has(node.hookId)
+          ? `${hooks.get(node.hookId)}(${(node.arguments ?? []).map((item) => expr(item, depth)).join(', ')})`
+          : emitUnreachedAuthoredHookCall(node, (item) => expr(item, depth), typeName);
       case 'static-capability':
         return staticNames.get(node.declarationId)!;
       case 'operation': {
@@ -678,6 +695,7 @@ export function emitWebComponentSource(
           [
             'context.read',
             'context.tryRead',
+            'context.tryReadAncestor',
             'render.read.context.read',
             'render.read.context.tryRead',
           ].includes(node.operation)
@@ -707,7 +725,7 @@ export function emitWebComponentSource(
         switch (statement.kind) {
           case 'const':
             nativeScope = nativeScope.bind(statement.name, statement.value);
-            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array', 'array-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
           case 'return':
@@ -731,6 +749,19 @@ export function emitWebComponentSource(
               }
             };
             return `${origin}${indent}try {\n${branch(statement.body)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${branch(statement.catch.body, statement.catch.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
+          }
+          case 'while':
+          case 'for-of': {
+            const saved = nativeScope;
+            try {
+              const header =
+                statement.kind === 'while'
+                  ? `while (${expr(statement.condition, depth)})`
+                  : `for (const ${statement.name} of ${expr(statement.iterable, depth)})`;
+              return `${origin}${indent}${header} {\n${statements(statement.body, depth + 1, nativeRenderer)}${indent}}\n`;
+            } finally {
+              nativeScope = saved;
+            }
           }
           case 'if': {
             const branch = (body: readonly StatementIR[]) => {
@@ -778,7 +809,7 @@ export function emitWebComponentSource(
           ? `${prefix}ExternalState<${entry.type}>`
           : entry.kind === 'value'
             ? typeName(entry.type)
-            : `(${entry.parameters.map((parameter) => `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`).join(', ')}) => ${typeName(entry.returnType)}`;
+            : `(${parameters(entry.parameters)}) => ${typeName(entry.returnType)}`;
       return `  ${JSON.stringify(entry.name)}: ${type};`;
     })
     .join('\n');
@@ -954,6 +985,7 @@ ${support.server}
             version: 2 as const,
             id: supportPlan.id,
             features: [...supportPlan.features],
+            ...(supportPlan.inputs.length ? { inputs: [...supportPlan.inputs] } : {}),
           },
           ...(environment
             ? {
@@ -1128,6 +1160,7 @@ export default ${className};
                 version: 2 as const,
                 id: supportPlan.id,
                 features: [...supportPlan.features],
+                ...(supportPlan.inputs.length ? { inputs: [...supportPlan.inputs] } : {}),
               },
             }
           : {}),
@@ -1156,8 +1189,8 @@ function nativeHelpers(
   const contextTypes = context
     ? `type ${p}ContextKey<T> = object & {readonly __contextValue?: T};
 type ${p}ContextRead = Readonly<{read<T>(key: ${p}ContextKey<T>): T; tryRead<T>(key: ${p}ContextKey<T>): T | null}>;
-type ${p}ContextRun = ${p}ContextRead & {update<T>(key: ${p}ContextKey<T>, next: T | ((prev: T) => T)): void; tryUpdate<T>(key: ${p}ContextKey<T>, next: T | ((prev: T) => T)): boolean};
-type ${p}ContextDef = {provide<T>(key: ${p}ContextKey<T>, value: T): void; subscribe<T>(key: ${p}ContextKey<T>, callback?: (run: ${p}Run, next: T, prev: T) => void): () => void; trySubscribe<T>(key: ${p}ContextKey<T>, callback?: (run: ${p}Run, next: T | null, prev: T | null) => void): () => void};
+type ${p}ContextRun = ${p}ContextRead & {tryReadAncestor<T>(key: ${p}ContextKey<T>): T | null; update<T>(key: ${p}ContextKey<T>, next: T | ((prev: T) => T)): void; tryUpdate<T>(key: ${p}ContextKey<T>, next: T | ((prev: T) => T)): boolean};
+type ${p}ContextDef = {provide<T>(key: ${p}ContextKey<T>, value: T): void; subscribe<T>(key: ${p}ContextKey<T>, callback?: (run: ${p}Run, next: T, prev: T) => void): () => void; trySubscribe<T>(key: ${p}ContextKey<T>, callback?: (run: ${p}Run, next: T | null, prev: T | null) => void): () => void; trySubscribeAncestor<T>(key: ${p}ContextKey<T>, callback?: (run: ${p}Run, next: T | null, prev: T | null) => void): () => void};
 ${
   ssr
     ? ''
@@ -1180,7 +1213,7 @@ ${
   return `type ${p}ExternalState<T> = { get(): T; subscribe(cb: (event: {type: 'next'; prev: T; next: T; reason?: unknown}) => void): () => void; unsubscribe(off: () => void): void; spec: Readonly<${p}StateOptions & {kind: string}> };
 type ${p}Scalar = string | number | boolean | null;
 type ${p}Snapshot = Readonly<Record<string, unknown>>;
-type ${p}PropSpec = {type: string; schema?: Parameters<typeof ${p}Accepts>[0]; default?: unknown; options?: readonly string[]; empty?: 'accept' | 'fallback' | 'error'; range?: {min?: number; max?: number}};
+type ${p}PropSpec = {type: string; schema?: Parameters<typeof ${p}Accepts>[0]; default?: unknown; options?: readonly string[]; empty?: 'accept' | 'fallback' | 'error'; range?: {min?: number; max?: number}; validator?: (value: never) => boolean};
 type ${p}StateOptions = {options?: readonly ${p}Scalar[]; min?: number; max?: number; step?: number; clamp?: boolean};
 type ${p}State<T extends ${p}Scalar = ${p}Scalar> = {get(): T; setDefault(next: T): void; set(next: T, reason?: unknown): void; external: ${p}ExternalState<T>; subscribers: Set<Function>};
 ${contextTypes}type ${p}PropsRead = Readonly<{get(): ${p}PropsSnapshot; getRaw(): Readonly<Record<string, unknown>>; isProvided(key: string): boolean}>;
@@ -1308,6 +1341,7 @@ ${
     ? `      context: Object.freeze({
         read<T>(key: ${p}ContextKey<T>): T { check(); return context.read(key) as T; },
         tryRead<T>(key: ${p}ContextKey<T>): T | null { check(); return context.tryRead(key) as T | null; },
+        tryReadAncestor<T>(key: ${p}ContextKey<T>): T | null { check(); return context.tryReadAncestor(key) as T | null; },
         update<T>(key: ${p}ContextKey<T>, next: T | ((prev: T) => T)) { check(); runtime(); context.update(key, next); },
         tryUpdate<T>(key: ${p}ContextKey<T>, next: T | ((prev: T) => T)) { check(); runtime(); return context.tryUpdate(key, next); },
       }),\n`
@@ -1340,8 +1374,10 @@ ${ssr ? '  host.bindContext(context);\n' : ''}
   }
   function valid(spec: ${p}PropSpec, value: unknown): boolean {
     if (spec.schema === undefined) throw new Error('Missing checked Props schema');
-    return ${p}Accepts(spec.schema, value) && (!spec.options || spec.options.includes(value as string)) &&
-      (!spec.range || (typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity)));
+    if (!${p}Accepts(spec.schema, value) || spec.options && !spec.options.includes(value as string) ||
+      spec.range && !(typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity))) return false;
+    try { return spec.validator ? !!spec.validator(value as never) : true; }
+    catch { return false; }
   }
   function resolve(strict: boolean): ${p}Snapshot {
     const next: Record<string, unknown> = Object.create(null);
@@ -1575,6 +1611,7 @@ ${
       provide(key, value) { ensureSetup(); context.provide(key, value); },
       subscribe(key, callback) { ensureSetup(); return context.subscribe(key, 'required', callback ? (next, prev) => { invoke(callback, [next, prev]); } : undefined); },
       trySubscribe(key, callback) { ensureSetup(); return context.subscribe(key, 'optional', callback ? (next, prev) => { invoke(callback, [next, prev]); } : undefined); },
+      trySubscribeAncestor(key, callback) { ensureSetup(); return context.subscribe(key, 'optional', callback ? (next, prev) => { invoke(callback, [next, prev]); } : undefined, 'ancestor'); },
     },\n`
     : ''
 }    props: {
@@ -1583,6 +1620,7 @@ ${
         const merged = {...specs};
         for (const key of Object.keys(input)) {
           const next = input[key], prev = specs[key];
+          if (prev?.validator && prev.validator !== next.validator) throw new Error('Prop validator replacement or removal is disallowed');
           if (!['boolean', 'number', 'string', 'enum', 'object', 'any'].includes(next.type)) throw new Error('Unsupported prop type');
           if (next.empty !== undefined && !['accept', 'fallback', 'error'].includes(next.empty)) throw new Error('Invalid prop empty policy');
           if (next.range && ((next.range.min !== undefined && (typeof next.range.min !== 'number' || Number.isNaN(next.range.min))) || (next.range.max !== undefined && (typeof next.range.max !== 'number' || Number.isNaN(next.range.max))))) throw new Error('Invalid prop range');

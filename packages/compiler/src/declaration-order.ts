@@ -1,6 +1,33 @@
 import { reject } from './diagnostics';
 import type { StatementIR } from './ir';
 
+/** Insert invocation-local initialization without moving authored declarations forward. */
+export function prependInvocationStatements(
+  body: readonly StatementIR[],
+  prologue: readonly StatementIR[]
+): StatementIR[] {
+  if (!prologue.length) return [...body];
+  let hoisted = 0;
+  while (hoisted < body.length) {
+    const statement = body[hoisted];
+    if (statement.kind !== 'const' || statement.declarationPosition === undefined) break;
+    hoisted++;
+  }
+  // Creating these checked function values is inert. Their ordinary binding
+  // hoisting stays intact; structural discovery still follows the prologue
+  // and each function's original authored position.
+  return [
+    ...body.slice(0, hoisted).map((statement) => ({
+      ...statement,
+      declarationPosition:
+        (statement as Extract<StatementIR, { kind: 'const' }>).declarationPosition! +
+        prologue.length,
+    })),
+    ...prologue,
+    ...body.slice(hoisted),
+  ];
+}
+
 /** Restore definition order while leaving the ordinary hoisted binding order intact. */
 export function structuralStatementOrder(body: readonly StatementIR[]): readonly StatementIR[] {
   const positions = new Map<number, StatementIR>();

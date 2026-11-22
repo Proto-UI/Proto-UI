@@ -14,6 +14,7 @@ import { nativeHostAtomPlan, emitNativeHostAtom, type NativeHostAtomPlan } from 
 import {
   nativeAuthoredHooksArtifact,
   emitAuthoredHookDefinition,
+  emitUnreachedAuthoredHookCall,
   emitPrivilegedHookCall,
 } from './native-authored-hooks';
 import {
@@ -21,7 +22,9 @@ import {
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
+  emitJavaScriptBinary,
   emitJavaScriptParameters,
+  emitJavaScriptSignatureParameters,
   emitUninvokedJavaScriptFunction,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -258,7 +261,10 @@ export function emitVue2Source(
       else if (statement.kind === 'effect') inspect(statement.expression);
       else if (statement.kind === 'return' && statement.value) inspect(statement.value);
       else if (statement.kind === 'throw') inspect(statement.value);
-      else if (statement.kind === 'try') {
+      else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        inspect(statement.kind === 'while' ? statement.condition : statement.iterable);
+        inspectBody(statement.body);
+      } else if (statement.kind === 'try') {
         inspectBody(statement.body);
         if (statement.catch) inspectBody(statement.catch.body);
         if (statement.finally) inspectBody(statement.finally);
@@ -379,12 +385,7 @@ export function emitVue2Source(
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values
-      .map(
-        (parameter) =>
-          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
-      )
-      .join(', ');
+    return emitJavaScriptSignatureParameters(values, typeName);
   }
   function fn(value: FunctionIR, depth: number): string {
     if (!reachedFunctions.has(value)) return emitUninvokedJavaScriptFunction(value, false);
@@ -439,6 +440,7 @@ export function emitVue2Source(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false, {
           plan: callBoundaries,
           wrap: `${prefix}WrapPublic`,
@@ -485,7 +487,7 @@ export function emitVue2Source(
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
-        return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
+        return emitJavaScriptBinary(value, (item) => expression(item, depth), false);
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
@@ -493,9 +495,16 @@ export function emitVue2Source(
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
-        return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        return `${value.name}(${value.arguments.map((item, index) => `${value.spread?.[index] ? '...' : ''}${expression(item, depth)}`).join(', ')})`;
       case 'authored-hook':
-        return `${aliases.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
+        return reachedHooks.has(value.hookId)
+          ? `${aliases.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`
+          : emitUnreachedAuthoredHookCall(
+              value,
+              (item) => expression(item, depth),
+              typeName,
+              false
+            );
       case 'static-capability':
         return staticNames.get(value.declarationId)!;
       case 'operation': {
@@ -558,7 +567,7 @@ export function emitVue2Source(
     for (const statement of statements) {
       const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        output += `${origin}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `${indent}/** @type {${typeName(statement.value.type)}} */\n` : ''}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${['lexical-cell', 'record', 'object-spread', 'array', 'array-spread'].includes(statement.value.kind) ? `${indent}/** @type {${typeName(statement.value.type)}} */\n` : ''}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
         nativeScope = nativeScope.bind(statement.name, statement.value);
       } else if (statement.kind === 'effect') {
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
@@ -568,6 +577,21 @@ export function emitVue2Source(
       } else if (statement.kind === 'throw') {
         output += `${origin}${indent}throw ${expression(statement.value, depth)};\n`;
         break;
+      } else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        const saved = nativeScope;
+        const input = expression(
+          statement.kind === 'while' ? statement.condition : statement.iterable,
+          depth
+        );
+        let nested: string;
+        try {
+          if (statement.kind === 'for-of')
+            nativeScope = nativeScope.parameter(statement.name, undefined, nativeScope, null);
+          nested = body(statement.body, depth + 1, new Set(deadBindings));
+        } finally {
+          nativeScope = saved;
+        }
+        output += `${origin}${indent}${statement.kind === 'while' ? `while (${input})` : `for (const ${statement.name} of ${input})`} {\n${nested}${indent}}\n`;
       } else if (statement.kind === 'try') {
         const branch = (items: readonly StatementIR[], name?: string) => {
           const saved = nativeScope;
@@ -771,13 +795,13 @@ ${atoms.delay ? `  const ${prefix}Delay = ${prefix}Owner.delay;` : ''}${atoms.pr
 ${hooks}
   ${
     ir.setup.returnType === 'void'
-      ? `(${fn(ir.setup, 1)})(${prefix}Owner.def); return;`
+      ? `(${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${prefix}Owner.def` : ''}); return;`
       : nativeTemplate
         ? `/** @type {((renderer: ${prefix}NativeRenderer) => ${nativeTemplate.resultType}) | void} */
-  const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
+  const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${prefix}Owner.def` : ''});
   if (typeof ${prefix}AuthoredRenderer !== 'function') return ${prefix}AuthoredRenderer;
   return (/** @param {${prefix}NativeRenderer} ${prefix}Renderer */ (${prefix}Renderer) => ${nativeTemplate.publication(`${prefix}AuthoredRenderer(${prefix}Renderer)`)});`
-        : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`
+        : `return (${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${prefix}Owner.def` : ''});`
   }
 }
 
@@ -873,6 +897,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
                 version: 2 as const,
                 id: supportPlan.id,
                 features: [...supportPlan.features],
+                ...(supportPlan.inputs.length ? { inputs: [...supportPlan.inputs] } : {}),
               },
             }
           : {}),
@@ -932,7 +957,7 @@ ${
     : ''
 }/** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: PUIDataType } | { kind: 'union', members: readonly PUIDataType[] } | { kind: 'record', fields: readonly { name: string, type: PUIDataType, optional?: boolean }[] }} PUIDataType */
 /** @typedef {Readonly<Record<string, unknown>>} PUIRawProps */
-/** @typedef {{ type: 'boolean' | 'number' | 'string' | 'object' | 'any' | 'enum', empty?: 'accept' | 'fallback' | 'error', default?: unknown, options?: readonly string[], range?: { min?: number, max?: number } }} PUIPropSpec */
+/** @typedef {{ type: 'boolean' | 'number' | 'string' | 'object' | 'any' | 'enum', empty?: 'accept' | 'fallback' | 'error', default?: unknown, options?: readonly string[], range?: { min?: number, max?: number }, validator?: (value: never) => boolean }} PUIPropSpec */
 /** @typedef {{ options?: readonly (boolean | string | number)[], min?: unknown, max?: unknown, step?: unknown, clamp?: boolean } & Record<string, unknown>} PUIStateConfiguration */
 /** @typedef {'bool' | 'string' | 'enum' | 'number.discrete' | 'number.range'} PUIStateKind */
 /** @typedef {ReturnType<typeof PUICreateOwner>} PUIOwner */
@@ -1176,7 +1201,9 @@ ${
     const spec = specs[key];
     if (!PUIJson(value) || !PUIAccepts(types[key], value)) return false;
     if (spec.type === 'enum' && (typeof value !== 'string' || !spec.options?.includes(value))) return false;
-    return !spec.range || typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity);
+    if (spec.range && !(typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity))) return false;
+    try { return spec.validator ? !!spec.validator(/** @type {never} */ (value)) : true; }
+    catch { return false; }
   };
   /** @param {PUIRawProps} input @param {boolean} strict */
   const resolveProps = (input, strict) => {
@@ -1506,6 +1533,7 @@ ${
       if (PUIOwn(spec, 'default') && !PUIJson(spec.default)) throw new Error('[Vue2 native] non-JSON prop default: ' + key);
       const prior = next[key];
       if (prior) {
+        if (prior.validator && prior.validator !== spec.validator) throw new Error('[Vue2 native] validator replacement or removal is disallowed: ' + key);
         if (prior.type !== spec.type || PUIOwn(spec, 'empty') && spec.empty !== undefined && rank[spec.empty] > rank[prior.empty ?? 'fallback']) throw new Error('[Vue2 native] conflicting prop declaration: ' + key);
         if (prior.options && !prior.options.every((value) => spec.options && spec.options.includes(value))) throw new Error('[Vue2 native] prop options cannot narrow: ' + key);
         if (prior.range && spec.range && ((spec.range.min ?? -Infinity) > (prior.range.min ?? -Infinity) || (spec.range.max ?? Infinity) < (prior.range.max ?? Infinity))) throw new Error('[Vue2 native] prop range cannot narrow: ' + key);

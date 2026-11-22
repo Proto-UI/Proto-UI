@@ -16,6 +16,7 @@ export function ordinaryValueChildren(value: ExpressionIR): readonly ExpressionI
     case 'intrinsic':
       return value.arguments;
     case 'object-spread':
+    case 'array-spread':
       return value.parts.map((part) => part.value);
     default:
       return undefined;

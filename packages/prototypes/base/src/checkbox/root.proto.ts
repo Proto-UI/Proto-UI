@@ -1,9 +1,10 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import type { ProtoEventPayload } from '@proto.ui/types';
 import { asAccessible, asFocusable, asTrigger, asControlLabel } from '@proto.ui/hooks';
 import { CHECKBOX_CONTEXT, CHECKBOX_FAMILY } from './shared';
 import type { CheckboxRootAsHookContract, CheckboxRootExposes, CheckboxRootProps } from './types';
 
-function isEnterKeyboardCommit(ev: { key?: unknown } | undefined): boolean {
+function isEnterKeyboardCommit(ev: ProtoEventPayload | undefined): boolean {
   return ev?.key === 'Enter';
 }
 
@@ -23,18 +24,22 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
     checked: { type: 'boolean', empty: 'fallback' },
     defaultChecked: { type: 'boolean', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
+    required: { type: 'boolean', empty: 'fallback' },
     indeterminate: { type: 'boolean', empty: 'fallback' },
     defaultIndeterminate: { type: 'boolean', empty: 'fallback' },
   });
   def.props.setDefaults({
     defaultChecked: false,
     disabled: false,
+    required: false,
     defaultIndeterminate: false,
   });
 
   // P-BASE-CHECKBOX-CHECKED-EXPOSE, P-BASE-CHECKBOX-DISABLED-EXPOSE
   const checked = def.state.bool('checked', false);
   const disabled = def.state.bool('disabled', false);
+  // P-BASE-CHECKBOX-REQUIRED: one owned fact for the public control and a11y.
+  const required = def.state.bool('required', false);
   // P-BASE-CHECKBOX-POINTER-HOVER
   const hovered = def.state.bool('hovered', false);
   // P-BASE-CHECKBOX-PRESS-LIFECYCLE
@@ -55,6 +60,7 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
   def.expose.state('checked', checked);
   def.expose.state('indeterminate', indeterminate);
   def.expose.state('disabled', disabled);
+  def.expose.state('required', required);
   def.expose.state('hovered', hovered);
   def.expose.state('focused', focused);
   def.expose.state('focusVisible', focusVisible);
@@ -75,6 +81,7 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
   // P-BASE-CHECKBOX-A11Y-CHECKED, P-BASE-CHECKBOX-A11Y-MIXED
   accessible.state('checked', checkedA11y);
   accessible.state('disabled', disabled);
+  accessible.state('required', required);
   accessible.action('activate', { event: 'checkedChange' });
 
   let controlledChecked = false;
@@ -99,7 +106,10 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
     });
   };
 
-  const emitCheckedChange = (run: RunHandle<CheckboxRootProps>, detail: { checked: boolean; indeterminate: boolean }) => {
+  const emitCheckedChange = (
+    run: RunHandle<CheckboxRootProps>,
+    detail: { checked: boolean; indeterminate: boolean }
+  ) => {
     run.expose.emit('checkedChange', detail);
   };
 
@@ -120,6 +130,7 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
   // P-BASE-CHECKBOX-CONTROLLED-CHECKED, P-BASE-CHECKBOX-CONTROLLED-EMITS-NEXT
   // P-BASE-CHECKBOX-UNCONTROLLED-UPDATES-CHECKED
   def.lifecycle.onCreated((run) => {
+    required.set(!!run.props.get().required, 'reason: checkbox root initialize required');
     controlledChecked = run.props.isProvided('checked');
     controlledIndeterminate = run.props.isProvided('indeterminate');
     checked.set(
@@ -163,6 +174,10 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
     syncDisabled(run, !!next.disabled);
   });
 
+  def.props.watch(['required'], (_run, next) => {
+    required.set(!!next.required, 'reason: checkbox root sync required');
+  });
+
   // P-BASE-CHECKBOX-KEYBOARD-SPACE-ACTIVATION, P-BASE-CHECKBOX-KEYBOARD-ENTER-NOT-ACTIVATION
   // P-BASE-CHECKBOX-KEYBOARD-SPACE-PREVENT-DEFAULT
   def.event.onGlobal('key.down', (_run, ev) => {
@@ -201,7 +216,11 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
 
   // P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED, P-BASE-CHECKBOX-ACTIVATION-CLEARS-INDETERMINATE
   // P-BASE-CHECKBOX-DISABLED-SUPPRESS-ACTIVATION
-  const activate = (run: RunHandle<CheckboxRootProps>, isCurrent: () => boolean = () => true, event?: { key?: unknown }) => {
+  const activate = (
+    run: RunHandle<CheckboxRootProps>,
+    isCurrent: () => boolean = () => true,
+    event?: ProtoEventPayload
+  ) => {
     pressed.set(false, 'reason: checkbox root press.commit => pressed');
     if (disabled.get() || isEnterKeyboardCommit(event)) return;
     if (!isCurrent()) return;
@@ -250,7 +269,8 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
  * - P-BASE-CHECKBOX-INDETERMINATE-CHANGE-DEFERRED: `indeterminateChange` remains transitional because controlled direct props need a clear request path.
  * - P-BASE-CHECKBOX-INDETERMINATE-AUTHOR-CAPABILITY: asHook returns the indeterminate state handle; arbitrary post-mounted external state writes still need a future state observation or explicit sync capability to publish context immediately.
  * - P-BASE-CHECKBOX-PROP-LABEL-DEFERRED: accessible naming uses content/a11y projection; no `label` prop is accepted.
- * - P-BASE-CHECKBOX-FORM-INTEGRATION-DEFERRED: awaits Form prototype cataloging.
+ * - P-BASE-CHECKBOX-FORM-INTEGRATION-DEFERRED: required is an owned control fact;
+ *   native form submission and validation remain with the explicit form composition.
  * - P-BASE-CHECKBOX-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.
  * - P-BASE-CHECKBOX-AGGREGATE-DEFERRED: group/tree summary modeling is deferred beyond this atomic checkbox.
  */

@@ -6,7 +6,7 @@ since: 0.3.0-alpha.1
 lifecycleRationale:
   zh-CN: 'Draft 实现方向，稳定准入需要独立审查及浏览器/native 证据。'
   en: 'Draft implementation direction. Stable admission requires independent review and browser/native evidence.'
-summary: Base messageScroller protocol with shared Proto UI lifecycle and anatomy boundaries.
+summary: Base messageScroller composes shared end-follow and an opt-in finite-data stable-key reading owner within the same Scroll Surface lifecycle.
 statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
@@ -15,6 +15,22 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BASE-MESSAGE-SCROLLER-KEYED-READING-OWNER
+    text:
+      zh-CN: '`asMessageScrollerReading` 是 MessageScroller viewport 之后显式组合的公开 Hook。它关闭同一 Scroll Surface 的 preserve-visible 策略，拥有稳定 key 的阅读锚点和恢复 hint；不得同时启用另一个可见锚点 owner。应用仅提供 opaque key、相对 viewport 的 start/end、primary 分类、scrollOffset 和 viewportSize，不向原型传递 DOM、消息模型或存储。'
+      en: 'asMessageScrollerReading is a public Hook explicitly composed after the MessageScroller viewport. It disables preserve-visible on the same Scroll Surface and owns stable-key reading anchors and restoration hints; a second visible-anchor owner must not run concurrently. The application supplies only opaque keys, viewport-relative start/end, primary classification, scrollOffset and viewportSize, never DOM nodes, message models or storage.'
+  - id: P-BASE-MESSAGE-SCROLLER-KEYED-CAPTURE
+    text:
+      zh-CN: 'first-crossing 按声明 inset 选择第一个 end 越线条目；visible-preferred 只看 viewport 内可见条目，优先第一个 primary，再回退第一个可见条目。精确 key 优先；启用 readingPredecessor 时再查 previousKey；两者缺失才使用已保存的绝对位置。index 不是替代身份。所有滚动由 Scroll.request(by) 发出，clamp 与实际执行时机仍归共享宿主。'
+      en: 'first-crossing selects the first entry whose end crosses the declared inset; visible-preferred considers only visible viewport entries, preferring the first primary before the first visible fallback. Exact key wins, then previousKey when readingPredecessor is enabled, then the saved absolute position. Index is never a replacement identity. Movement uses Scroll.request(by); clamping and execution timing remain with the shared host.'
+  - id: P-BASE-MESSAGE-SCROLLER-RESTORATION-LIFETIME
+    text:
+      zh-CN: 'beginReading 的初始 hint 穿过空内容、前驱/位置回退、零高精确命中和后到子布局，不能被程序滚动报告覆盖。pointer/key/wheel 与内容 focus/backfill 交接才退休 hint；resumeReading 明确回到末尾。selectionchange 的程序恢复回报不得重复 pause 或退休 hint。挂载 epoch 与 restore ticket 拒绝旧回报；宿主只回传 request 后真实 offset，原型以此消除异步 scroll 重复记锚点。'
+      en: 'The initial beginReading hint survives empty content, predecessor/offset fallback, zero-height exact matches and late child layout; programmatic scroll reports do not overwrite it. Pointer/key/wheel and content focus/backfill handoffs retire the hint, while resumeReading explicitly returns to the tail. Programmatic selectionchange replay must neither pause repeatedly nor retire the hint. Mount epochs and restore tickets reject stale reports; the host reports the actual offset after a request so the prototype suppresses duplicate anchor capture from asynchronous scroll events.'
+  - id: P-BASE-MESSAGE-SCROLLER-SELECTION-RESTORE
+    text:
+      zh-CN: '选区仅在历史阅读、已保存 key 仍匹配、端点有效、文本长度足够、host 提供的 prefixMatches 成立且当前选区折叠时恢复；相同已恢复记录不重复恢复。应用负责读取文本/端点、提供内容一致事实和执行 Range，资格、去重及 lease 取消由同一个阅读 Hook 拥有。公开有限数据 helper 与原型采用同一计划，不保留应用替代状态机。'
+      en: 'Selection restore requires history reading, a matching saved key, valid endpoints, sufficient text length, a true host-provided prefixMatches fact and a collapsed current selection; an already restored identical record is not replayed. The application reads text/endpoints, supplies content-equality facts and executes Range operations; eligibility, deduplication and lease cancellation belong to the same reading Hook. Public finite-data helpers and the prototype share one plan rather than maintaining an application replacement state machine.'
 dependsOn:
   contracts:
     - C-PROPS-0001
@@ -31,6 +47,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-MESSAGE-SCROLLER
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added the opt-in public stable-key reading Hook, finite capture/restore/selection plans and explicit host measurement and lease boundaries; browser and native admission remains draft.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base messageScroller family as draft.

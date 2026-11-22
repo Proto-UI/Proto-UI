@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { reject } from './diagnostics';
+import { CompilerRejection, reject } from './diagnostics';
 import type { ParseOptions, SourceSpan } from './ir';
 import {
   isLocalSourceSpecifier,
@@ -18,6 +18,7 @@ import {
 } from './static-declarations';
 import type { ModuleDeclarationIR } from './ir';
 import { hookAdmission } from './hook-admission';
+import { extractRuleStyleHandle } from './rule-declarations';
 import {
   identifier,
   isSourceFunction,
@@ -49,6 +50,18 @@ export interface Imported {
   node: ts.Node;
 }
 type SourceExport = string | Imported | { expression: ts.CallExpression };
+interface SourceDescriptor {
+  name: string;
+  setup: FunctionNode;
+  setupModule: SourceModule;
+  projectHandle?: FunctionNode;
+  projectModule?: SourceModule;
+  configure?: FunctionNode;
+  configureModule?: SourceModule;
+  mode?: 'once' | 'multiple' | 'configurable';
+  modules: ModuleDeclarationIR[];
+  span: SourceSpan;
+}
 export type ResolvedSourceBinding =
   | { module: SourceModule; name: string; node: ts.Expression | ts.FunctionDeclaration }
   | { module: null; name: string; imported: Imported };
@@ -72,6 +85,10 @@ export const CORE_FUNCTIONS = {
   delay: 'scheduler.delay',
   snapshotPresentationCompletionConfig: 'presentation.snapshotCompletion',
 } as const;
+// Public host composition utilities may occur in the same source export graph
+// as Prototypes. They are recognized as imports only: reaching them from a
+// compiled owner still has no semantic operation and is rejected by the parser.
+const HOST_CORE_IMPORTS: ReadonlySet<string> = new Set(['createControlLabelRef']);
 const CORE_DECLARATIONS: Record<string, true> = {
   createContextKey: true,
   tw: true,
@@ -85,9 +102,10 @@ function admittedPackageSymbol(module: string, name: string): boolean {
       Object.hasOwn(FACTORIES, name) ||
       Object.hasOwn(CORE_DECLARATIONS, name) ||
       Object.hasOwn(CORE_FUNCTIONS, name) ||
-      Object.hasOwn(STATIC_CORE_VALUES, name)
+      Object.hasOwn(STATIC_CORE_VALUES, name) ||
+      HOST_CORE_IMPORTS.has(name)
     );
-  if (module === '@proto.ui/hooks') return hookAdmission(name)?.status === 'admitted';
+  if (module === '@proto.ui/hooks') return hookAdmission(name) !== undefined;
   return (
     Object.hasOwn(STATIC_MODULE_FACTORIES[module] ?? {}, name) ||
     !!STATIC_PACKAGE_CAPABILITIES[module]?.includes(name)
@@ -103,6 +121,7 @@ export class SourceGraph {
   readonly sourceImports: Readonly<Record<string, string>>;
   private readonly loading = new Set<string>();
   private readonly exportReads = new Map<SourceModule, ts.ExportAssignment>();
+  private readonly descriptorReads = new Set<ts.CallExpression>();
 
   constructor(input: string, options: ParseOptions) {
     this.sources = Object.create(null);
@@ -236,21 +255,16 @@ export class SourceGraph {
           );
         for (const { name, exported, node } of bindings) {
           const hook = specifier === '@proto.ui/hooks' ? hookAdmission(exported) : undefined;
-          if (hook?.status === 'unsupported' && !Object.hasOwn(this.sourceImports, specifier))
-            rejectNode(
-              node,
-              'PUI1003',
-              `Unsupported import ${exported} from ${specifier}: ${hook.reason}`
-            );
           if (
             !Object.hasOwn(this.sourceImports, specifier) &&
             (specifier === '@proto.ui/core'
               ? !Object.hasOwn(FACTORIES, exported) &&
                 !Object.hasOwn(CORE_DECLARATIONS, exported) &&
                 !Object.hasOwn(CORE_FUNCTIONS, exported) &&
-                !Object.hasOwn(STATIC_CORE_VALUES, exported)
+                !Object.hasOwn(STATIC_CORE_VALUES, exported) &&
+                !HOST_CORE_IMPORTS.has(exported)
               : specifier === '@proto.ui/hooks'
-                ? hook?.status !== 'admitted'
+                ? hook === undefined
                 : Object.hasOwn(STATIC_MODULE_FACTORIES, specifier)
                   ? !Object.hasOwn(STATIC_MODULE_FACTORIES[specifier], exported)
                   : Object.hasOwn(STATIC_PACKAGE_CAPABILITIES, specifier)
@@ -293,7 +307,10 @@ export class SourceGraph {
                 'PUI1004',
                 'Shared module mutable storage requires pure scalar data; owner closures and capabilities cannot escape into module storage.'
               );
-            if (!ts.isIdentifier(value) && staticDataInitializer(value)) {
+            if (
+              !ts.isIdentifier(value) &&
+              staticDataInitializer(value, (call) => this.staticStyleCall(result, call))
+            ) {
               this.add(result, identifier(declaration.name), value, statement);
               continue;
             }
@@ -436,11 +453,19 @@ export class SourceGraph {
       for (const [name, declaration] of module.declarations) {
         if (!ts.isIdentifier(declaration)) continue;
         const target = this.resolveBinding(module, name);
-        if (target.module !== null && !isSourceFunction(target.node))
+        if (
+          target.module !== null &&
+          !isSourceFunction(target.node) &&
+          (target.module.mutableBindings.has(target.name) ||
+            !ts.isExpression(target.node) ||
+            !staticDataInitializer(target.node, (call) =>
+              this.staticStyleCall(target.module!, call)
+            ))
+        )
           rejectNode(
             declaration,
             'PUI1004',
-            'Module aliases require a static function or an admitted package symbol.'
+            'Module aliases require immutable static data, a function, or an admitted package symbol.'
           );
       }
     }
@@ -456,6 +481,28 @@ export class SourceGraph {
     return binding.module === null && binding.imported.module === '@proto.ui/core'
       ? binding.name
       : undefined;
+  }
+
+  /** Resolve immutable token data through the same checked extractor as setup
+   * style declarations. No authored function or module initializer is run. */
+  private staticStyleCall(module: SourceModule, call: ts.CallExpression): boolean {
+    if (
+      !ts.isIdentifier(call.expression) ||
+      this.resolveCoreImport(module, call.expression.text) !== 'tw'
+    )
+      return false;
+    try {
+      extractRuleStyleHandle(module, call);
+    } catch (error) {
+      if (error instanceof CompilerRejection)
+        rejectNode(
+          call,
+          'PUI1004',
+          `Top-level style declarations require immutable static tokens: ${error.message}`
+        );
+      throw error;
+    }
+    return true;
   }
 
   resolveExport(module: SourceModule, name: string): ResolvedSourceBinding {
@@ -663,6 +710,30 @@ export class SourceGraph {
     return { module, node, factory };
   }
 
+  /** Finite module literals, preserving the identity of any admitted intrinsic. */
+  staticDataDeclaration(module: SourceModule, node: ts.Expression): boolean {
+    if (!staticDataInitializer(node)) return false;
+    let valid = true;
+    const visit = (child: ts.Node): void => {
+      const global =
+        ts.isNewExpression(child) && ts.isIdentifier(child.expression)
+          ? child.expression.text
+          : ts.isCallExpression(child) &&
+              ts.isPropertyAccessExpression(child.expression) &&
+              ts.isIdentifier(child.expression.expression)
+            ? child.expression.expression.text
+            : undefined;
+      if (
+        (global === 'Object' || global === 'Set') &&
+        (module.imports.has(global) || module.declarations.has(global))
+      )
+        valid = false;
+      ts.forEachChild(child, visit);
+    };
+    visit(node);
+    return valid;
+  }
+
   /** The module requirements of `<hook>.modules`, when `<hook>` resolves to a
    *  static `defineHook`/`defineAsHook` declaration; otherwise undefined. */
   private inheritedModules(
@@ -686,23 +757,47 @@ export class SourceGraph {
     return this.descriptor(resolved.module, resolved.node).modules;
   }
 
-  descriptor(
-    module: SourceModule,
-    node: ts.CallExpression
-  ): {
-    name: string;
-    setup: FunctionNode;
-    setupModule: SourceModule;
-    projectHandle?: FunctionNode;
-    projectModule?: SourceModule;
-    configure?: FunctionNode;
-    configureModule?: SourceModule;
-    mode?: 'once' | 'multiple' | 'configurable';
-    modules: ModuleDeclarationIR[];
-    span: SourceSpan;
-  } {
-    if (node.arguments.length !== 1 || !ts.isObjectLiteralExpression(node.arguments[0]))
-      rejectNode(node, 'PUI1006', 'Definition requires one literal object.');
+  descriptor(module: SourceModule, node: ts.CallExpression): SourceDescriptor {
+    if (this.descriptorReads.has(node))
+      rejectNode(node, 'PUI1008', 'Cyclic static prototype/asHook descriptor.');
+    this.descriptorReads.add(node);
+    try {
+      return this.readDescriptor(module, node);
+    } finally {
+      this.descriptorReads.delete(node);
+    }
+  }
+
+  private readDescriptor(module: SourceModule, node: ts.CallExpression): SourceDescriptor {
+    const factory = ts.isIdentifier(node.expression)
+      ? this.resolveCoreImport(module, node.expression.text)
+      : undefined;
+    if (node.arguments.length !== 1)
+      rejectNode(node, 'PUI1006', 'Definition requires one static descriptor.');
+    const input = unwrapSourceExpression(node.arguments[0]);
+    if (!ts.isObjectLiteralExpression(input)) {
+      // defineAsHook accepts an actual Prototype object. Resolve its checked
+      // source declaration; do not execute an import, copy a setup body into the
+      // caller module, or drop its inherited Module requirements.
+      if (factory !== 'defineAsHook')
+        rejectNode(input, 'PUI1006', 'Definition requires one literal object.');
+      let owner = module;
+      let definition: ts.Expression | ts.FunctionDeclaration = input;
+      if (ts.isIdentifier(input)) {
+        const resolved = this.resolveBinding(module, input.text);
+        if (resolved.module === null)
+          rejectNode(input, 'PUI1006', 'asHook requires a checked source Prototype definition.');
+        owner = resolved.module;
+        definition = resolved.node;
+      }
+      if (
+        !ts.isCallExpression(definition) ||
+        !ts.isIdentifier(definition.expression) ||
+        this.resolveCoreImport(owner, definition.expression.text) !== 'definePrototype'
+      )
+        rejectNode(input, 'PUI1006', 'asHook requires a checked source Prototype definition.');
+      return this.descriptor(owner, definition);
+    }
     let name: string | undefined;
     let setup: FunctionNode | undefined;
     let setupModule = module;
@@ -711,12 +806,9 @@ export class SourceGraph {
       configure: FunctionNode | undefined,
       configureModule: SourceModule | undefined,
       mode: 'once' | 'multiple' | 'configurable' | undefined;
-    const factory = ts.isIdentifier(node.expression)
-      ? this.resolveCoreImport(module, node.expression.text)
-      : undefined;
     const modules: ModuleDeclarationIR[] = [];
     const keys = new Set<string>();
-    for (const property of node.arguments[0].properties) {
+    for (const property of input.properties) {
       if (
         !ts.isPropertyAssignment(property) &&
         !ts.isMethodDeclaration(property) &&

@@ -1,9 +1,8 @@
 // @vitest-environment node
 import ts from 'typescript';
 import { expect, it } from 'vitest';
-import { CompilerRejection } from '../src/diagnostics';
 import { extractRuleDeclaration } from '../src/rule-declarations';
-import { lowerRulePlan } from '../src/rule-plan';
+import { evaluateRulePlan, lowerRulePlan } from '../src/rule-plan';
 function extract(operator: 'eq' | 'gte') {
   const file = ts.createSourceFile(
     'numeric.proto.ts',
@@ -22,21 +21,18 @@ function extract(operator: 'eq' | 'gte') {
     resolveStyle: () => ({ kind: 'tw', tokens: ['text-sm'] }),
   });
 }
-it('retains explicit source-profile rejection until complete compiler gte admission', () => {
-  try {
-    extract('gte');
-    throw new Error('gte was unexpectedly admitted');
-  } catch (error) {
-    expect(error).toBeInstanceOf(CompilerRejection);
-    expect((error as CompilerRejection).diagnostic).toMatchObject({
-      code: 'PUI1024',
-      category: 'unsupported-input',
-    });
-  }
+it('admits the finite gte threshold through the source profile', () => {
+  const result = lowerRulePlan([extract('gte')]);
+  if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+  expect(
+    evaluateRulePlan(result.value, { props: { count: 4 }, states: {} }).activeRuleIds.length
+  ).toBe(1);
 });
-it('does not silently interpret a serialized gte as another portable-plan operator', () => {
+it('keeps serialized gte numeric and rejects a malformed threshold', () => {
   const rule = JSON.parse(JSON.stringify(extract('eq')));
   rule.when.type = 'gte';
+  expect(lowerRulePlan([rule]).ok).toBe(true);
+  rule.when.right = '4';
   expect(lowerRulePlan([rule])).toMatchObject({
     ok: false,
     diagnostics: [{ code: 'PUI2024', category: 'invalid-ir' }],

@@ -6,7 +6,8 @@ export function domInteractionTemplate(
 ): string {
   return `// Native DOM interaction v1. No Proto package, interpreter or template rendering dependency.
 import { createNativeControlLabel } from './control-label-v1';
-import { type NativeControlLabel, createNativeAdapterModules, noteNativeFocusRequest, type NativeAccessibleExtension, type NativeModuleCapabilities, type NativeAdapterModuleOptions, type NativeStateEvent, type NativeOwnedState, type NativeOwnedStateSpec } from './adapter-modules-v1';
+import { observeDirectionalPointerDown, observeDirectionalPointerUp, suppressDirectionalClick } from '../host-web/move-click-arbitration-v1';
+import { type NativeConfig, type NativeControlLabel, createNativeAdapterModules, noteNativeFocusRequest, type NativeAccessibleExtension, type NativeModuleCapabilities, type NativeAdapterModuleOptions, type NativeStateEvent, type NativeOwnedState, type NativeOwnedStateSpec } from './adapter-modules-v1';
 export type { NativeModuleCapability, NativeAnatomy, NativeAnatomyFamily, NativeAnatomyPart, NativeAnatomyOrder, NativeAnatomy as NativeAnatomyChannel } from './adapter-modules-v1';
 export type NativeState<T = unknown> = { get(): T };
 export type NativeObservedState<T> = NativeState<T> & { watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
@@ -100,6 +101,7 @@ export function createNativeInteraction<Run>(options: {
   const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
   let sequence = 0, suppressKeyboardClick = false, pressKey: string | null = null, pointer: number | null = null;
   let globalPressKey: string | null = null, globalPointer: number | null = null, suppressGlobalKeyboardClick = false;
+  let keyboardClickVersion = 0, globalKeyboardClickVersion = 0;
   let pointerCancelled = false;
   function alive() { if (disposed || !options.isAlive()) throw new Error('[Interaction] invalid after terminal disposal.'); }
   function active(epoch = generation, target = root) { return !disposed && options.isAlive() && !!target && target === root && options.getRoot() === target && generation === epoch && rootOwners.get(target)?.identity === identity; }
@@ -145,7 +147,7 @@ export function createNativeInteraction<Run>(options: {
     if (key === 'sort') return typeof value === 'string' && ['none', 'ascending', 'descending', 'other'].includes(value) ? value : null;
     if (key === 'current') return typeof value === 'boolean' ? String(value) : typeof value === 'string' && ['false', 'true', 'page', 'step', 'location', 'date', 'time'].includes(value) ? value : null;
     if (value === null || value === undefined || value === '') return null;
-    if (key === 'valueNow' && typeof value === 'string' && /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) && Number.isFinite(Number(value))) return value;
+    if (['valueMin', 'valueMax', 'valueNow'].includes(key) && typeof value === 'string' && /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) && Number.isFinite(Number(value))) return value;
     if (['valueMin', 'valueMax', 'valueNow'].includes(key)) return typeof value === 'number' && Number.isFinite(value) ? String(value) : null;
     if (key === 'valueText') return typeof value === 'string' ? value : null;
     if (key === 'rowCount' || key === 'columnCount' || key === 'setSize') return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0) ? String(value) : null;
@@ -359,6 +361,7 @@ export function createNativeInteraction<Run>(options: {
       for (const [nativeName, semanticName] of [['pointerdown','pointer.down'],['pointermove','pointer.move'],['pointerup','pointer.up'],['pointercancel','pointer.cancel'],['pointerenter','pointer.enter'],['pointerleave','pointer.leave']] as const) {
         listen(target, nativeName, (native: PointerEvent) => {
           if (!owns(native)) return;
+          if (__nativeFeature('axis-input')) { if (nativeName === 'pointerdown') observeDirectionalPointerDown(target, native); else if (nativeName === 'pointerup') observeDirectionalPointerUp(target, native); }
           rootEmit(semanticName, native);
           if (!valid()) return;
           if (nativeName === 'pointerdown') { keyboard = false; suppressKeyboardClick = false; if (!disabled && native.button === 0 && pointer === null) { pointer = native.pointerId; pointerCancelled = false; rootEmit('press.start', native); } }
@@ -370,30 +373,59 @@ export function createNativeInteraction<Run>(options: {
       // pointerup, so a real pointerup+click sequence cannot double-activate.
       listen(global, 'pointerup', (native: PointerEvent) => { if (pointer === native.pointerId && !owns(native)) { rootEmit('press.cancel', native); pointer = null; pointerCancelled = true; } });
       listen(global, 'pointercancel', (native: PointerEvent) => { if (pointer === native.pointerId) { rootEmit('pointer.cancel', native); rootEmit('press.cancel', native); pointer = null; pointerCancelled = true; } });
-      listen(global, 'keydown', (native: KeyboardEvent) => {
-        keyboard = true; globalEmit('key.down', native);
-        if (native.key === 'Enter' || native.key === ' ') {
-          if (globalPressKey === null) { globalPressKey = native.key; globalEmit('press.start', native); }
-          suppressGlobalKeyboardClick = true; globalEmit('press.commit', native);
-        } else suppressGlobalKeyboardClick = false;
+      const handledKeys = new WeakSet<Event>();
+      // A marker belongs to one dispatch, even when a host reuses an Event object.
+      // Capture runs before both the physical route and the Window fallback.
+      for (const name of ['keydown', 'keyup']) {
+        listen(global, name, native => { handledKeys.delete(native); }, { capture: true });
+        listen(target, name, native => { handledKeys.delete(native); }, { capture: true });
+      }
+      const rootKeyDown = (native: KeyboardEvent) => {
         if (!valid() || !owns(native)) return;
+        handledKeys.add(native); keyboard = true;
         rootEmit('key.down', native);
         if (native.key !== 'Enter' && native.key !== ' ') { suppressKeyboardClick = false; return; }
         if (disabled) return;
         if (pressKey === null) { pressKey = native.key; rootEmit('press.start', native); }
         // Match the admitted router: Enter/Space commit on keydown, including repeat.
         // The exact repeat flag reaches callbacks; authors may suppress repeat there.
-        if (!disabled) { suppressKeyboardClick = true; rootEmit('press.commit', native); }
-      });
-      listen(global, 'keyup', (native: KeyboardEvent) => {
-        globalEmit('key.up', native);
-        if (globalPressKey === native.key) { globalEmit('press.end', native); globalPressKey = null; }
+        if (!disabled) { suppressKeyboardClick = true; ++keyboardClickVersion; rootEmit('press.commit', native); }
+      };
+      const rootKeyUp = (native: KeyboardEvent) => {
+        if (!valid()) return;
+        if (native.key === 'Enter' || native.key === ' ') {
+          const released = keyboardClickVersion;
+          queueMicrotask(() => { if (valid() && released === keyboardClickVersion) suppressKeyboardClick = false; });
+        }
+        handledKeys.add(native);
         if (owns(native)) rootEmit('key.up', native);
         if (pressKey === native.key) { rootEmit('press.end', native); pressKey = null; }
+      };
+      // Root input is delivered at its physical target, before a host composition
+      // boundary can stop bubbling. Window remains the global/fallback route.
+      listen(target, 'keydown', rootKeyDown);
+      listen(target, 'keyup', rootKeyUp);
+      listen(global, 'keydown', (native: KeyboardEvent) => {
+        keyboard = true; globalEmit('key.down', native);
+        if (native.key === 'Enter' || native.key === ' ') {
+          if (globalPressKey === null) { globalPressKey = native.key; globalEmit('press.start', native); }
+          suppressGlobalKeyboardClick = true; ++globalKeyboardClickVersion; globalEmit('press.commit', native);
+        } else suppressGlobalKeyboardClick = false;
+        if (!handledKeys.has(native)) rootKeyDown(native);
+      });
+      listen(global, 'keyup', (native: KeyboardEvent) => {
+        if (native.key === 'Enter' || native.key === ' ') {
+          const released = globalKeyboardClickVersion;
+          queueMicrotask(() => { if (valid() && released === globalKeyboardClickVersion) suppressGlobalKeyboardClick = false; });
+        }
+        globalEmit('key.up', native);
+        if (globalPressKey === native.key) { globalEmit('press.end', native); globalPressKey = null; }
+        if (!handledKeys.has(native)) rootKeyUp(native);
       });
       listen(target, 'click', (native: MouseEvent) => {
         // Expose click is CustomEvent: only native mouse-shaped input activates.
         if (!owns(native) || typeof native.clientX !== 'number' || typeof native.button !== 'number' || typeof native.detail !== 'number') return;
+        if (__nativeFeature('axis-input') && suppressDirectionalClick(target, native)) return;
         if (suppressKeyboardClick && native.detail === 0) { suppressKeyboardClick = false; return; }
         suppressKeyboardClick = false;
         if (pointerCancelled) { pointerCancelled = false; return; }
@@ -430,6 +462,7 @@ export function createNativeInteraction<Run>(options: {
       }
       listen(global, 'click', (native: MouseEvent) => {
         if (typeof native.clientX !== 'number' || typeof native.button !== 'number' || typeof native.detail !== 'number' || native.button !== 0) return;
+        if (__nativeFeature('axis-input') && suppressDirectionalClick(target, native)) return;
         if (suppressGlobalKeyboardClick && native.detail === 0) { suppressGlobalKeyboardClick = false; return; }
         suppressGlobalKeyboardClick = false; globalEmit('press.commit', native);
       });
@@ -454,7 +487,7 @@ export function createNativeInteraction<Run>(options: {
   }
   const modules: NativeModuleCapabilities<Run> = createNativeAdapterModules<Run>({
     ensureSetup: options.ensureSetup, ensureRuntime: options.ensureRuntime, ensureEvent: options.ensureEvent,
-    isAlive: () => !disposed && options.isAlive(), isReady: options.isReady, invoke: options.invoke, getRun: options.getRun,
+    isAlive: () => !disposed && options.isAlive(), isSetupComplete: options.isSetupComplete, isReady: options.isReady, invoke: options.invoke, getRun: options.getRun,
     getResolvedProps: options.getResolvedProps, getRoot: options.getRoot, getHost: options.getHost,
     declarations: options.declarations ?? [],
     identity,
@@ -499,15 +532,18 @@ export function createNativeInteraction<Run>(options: {
     positioning: modules.positioning,
     asFocusEntry: () => modules.asFocusEntry(), asFocusRoving: () => modules.asFocusRoving(), asFocusScope: () => modules.asFocusScope(),
     asCollection: () => modules.asCollection(), asCollectionItem: () => modules.asCollectionItem(),
-    asBoundary: () => modules.asBoundary(), asHitParticipation: () => modules.asHitParticipation(),
+    asBoundary: () => modules.asBoundary(), asHitParticipation: (config?: NativeConfig) => modules.asHitParticipation(config),
     asOverlay: () => modules.asOverlay(), asScrollSurface: () => modules.asScrollSurface(),
     asTextControl: () => modules.asTextControl(), asImageView: () => modules.asImageView(),
+    asNativeLink: () => modules.asNativeLink(),
+    asAxisInput: () => modules.asAxisInput(),
     asTableStructure: (partRole: string) => modules.asTableStructure(partRole),
     configureFocusable: (config) => modules.configureFocusable(config),
     setNavParticipation: (value) => modules.setNavParticipation(value),
     setRovingStatus: (status) => modules.setRovingStatus(status),
     focus: (request) => modules.focus(request), blur: () => modules.blur(),
     rootTag: () => modules.rootTag(), rootProperties: () => modules.rootProperties(), portalTarget: () => modules.portalTarget(),
+    commitHost: () => modules.commitHost(),
     projectAttributes: combinedProjectAttributes, adoptAttributes,
     refresh() { modules.refresh(); refresh(); if (__nativeFeature('control-label')) controlLabel?.refresh(); if (__nativeFeature('focus') && hasPendingFocus && deliverable() && root!.isConnected && !disabled) { const request = pendingFocus; hasPendingFocus = false; options.invoke(() => focus.focusSelf(request)); } },
     mount() { mount(); modules.mount(); if (__nativeFeature('control-label')) controlLabel?.mount(); },

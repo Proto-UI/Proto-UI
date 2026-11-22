@@ -20,6 +20,136 @@ export function isSourceFunction(node: ts.Node): node is FunctionNode {
   );
 }
 
+/** Static object parameter patterns are invocation-local property snapshots. */
+export function lowerObjectParameterPatterns(
+  node: FunctionNode,
+  fresh: () => string
+): FunctionNode {
+  if (!node.parameters.some((parameter) => !ts.isIdentifier(parameter.name))) return node;
+  if (!node.body) rejectNode(node, 'PUI1004', 'A destructured parameter requires a function body.');
+  // Moving a pattern into the body is equivalent only when no later parameter
+  // default can observe it. Do not reorder default effects or approximate rest.
+  if (node.parameters.some((parameter) => parameter.initializer || parameter.dotDotDotToken))
+    rejectNode(node, 'PUI1004', 'Destructured parameters with defaults or rest are not admitted.');
+  const f = ts.factory;
+  const ranged = <T extends ts.Node>(value: T, from: ts.Node): T => ts.setTextRange(value, from);
+  const declarations: ts.VariableDeclaration[] = [];
+  const parameters = node.parameters.map((parameter) => {
+    if (ts.isIdentifier(parameter.name)) return parameter;
+    const pattern = parameter.name;
+    if (!ts.isObjectBindingPattern(pattern) || parameter.questionToken)
+      rejectNode(
+        pattern,
+        'PUI1004',
+        'Only required static object parameter patterns are admitted.'
+      );
+    if (!pattern.elements.length)
+      rejectNode(
+        pattern,
+        'PUI1004',
+        'An empty parameter pattern requires an explicit object-coercibility lowering.'
+      );
+    const name = fresh();
+    for (const element of pattern.elements) {
+      if (element.dotDotDotToken || element.initializer || !ts.isIdentifier(element.name))
+        rejectNode(
+          element,
+          'PUI1004',
+          'Parameter patterns require simple fields without defaults or rest.'
+        );
+      const key = element.propertyName ?? element.name;
+      if (!ts.isIdentifier(key) && !ts.isStringLiteral(key))
+        rejectNode(key, 'PUI1004', 'A destructured parameter key must be a static name.');
+      const read = f.createElementAccessExpression(
+        ranged(f.createIdentifier(name), pattern),
+        ranged(f.createStringLiteral(key.text), key)
+      );
+      declarations.push(
+        ranged(
+          f.createVariableDeclaration(element.name, undefined, undefined, ranged(read, element)),
+          element
+        )
+      );
+    }
+    return f.updateParameterDeclaration(
+      parameter,
+      parameter.modifiers,
+      undefined,
+      ranged(f.createIdentifier(name), pattern),
+      undefined,
+      parameter.type,
+      undefined
+    );
+  });
+  const bindings = ranged(
+    f.createVariableStatement(
+      undefined,
+      ranged(f.createVariableDeclarationList(declarations, ts.NodeFlags.Let), node)
+    ),
+    node
+  );
+  const body = ranged(
+    f.createBlock(
+      [
+        bindings,
+        ...(ts.isBlock(node.body)
+          ? node.body.statements
+          : [ranged(f.createReturnStatement(node.body), node.body)]),
+      ],
+      true
+    ),
+    node.body
+  );
+  const lowered = ts.isArrowFunction(node)
+    ? f.updateArrowFunction(
+        node,
+        node.modifiers,
+        node.typeParameters,
+        parameters,
+        node.type,
+        node.equalsGreaterThanToken,
+        body
+      )
+    : ts.isFunctionDeclaration(node)
+      ? f.updateFunctionDeclaration(
+          node,
+          node.modifiers,
+          node.asteriskToken,
+          node.name,
+          node.typeParameters,
+          parameters,
+          node.type,
+          body
+        )
+      : ts.isFunctionExpression(node)
+        ? f.updateFunctionExpression(
+            node,
+            node.modifiers,
+            node.asteriskToken,
+            node.name,
+            node.typeParameters,
+            parameters,
+            node.type,
+            body
+          )
+        : f.updateMethodDeclaration(
+            node,
+            node.modifiers,
+            node.asteriskToken,
+            node.name,
+            node.questionToken,
+            node.typeParameters,
+            parameters,
+            node.type,
+            body
+          );
+  (lowered as { parent: ts.Node }).parent = node.parent;
+  (
+    ts as typeof ts & { setParentRecursive<T extends ts.Node>(node: T, incremental?: boolean): T }
+  ).setParentRecursive(lowered, true);
+  return lowered;
+}
+
 export function unwrapSourceExpression(node: ts.Expression): ts.Expression {
   while (
     ts.isParenthesizedExpression(node) ||
@@ -54,15 +184,26 @@ export function scalarInitializer(node: ts.Expression): boolean {
  * non-constant `join` is rejected where it is lowered. Nothing is executed at
  * module load beyond building the literal value.
  */
-export function staticDataInitializer(node: ts.Expression): boolean {
+export function staticDataInitializer(
+  node: ts.Expression,
+  staticCall?: (node: ts.CallExpression) => boolean
+): boolean {
   node = unwrapSourceExpression(node);
   if (scalarInitializer(node) || node.kind === ts.SyntaxKind.NullKeyword) return true;
   if (ts.isIdentifier(node)) return true;
+  if (
+    ts.isNewExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === 'Set' &&
+    (node.arguments?.length ?? 0) <= 1 &&
+    (!node.arguments?.length || staticDataInitializer(node.arguments[0], staticCall))
+  )
+    return true;
   if (ts.isArrayLiteralExpression(node))
     return node.elements.every((element) =>
       ts.isSpreadElement(element)
         ? ts.isIdentifier(element.expression)
-        : staticDataInitializer(element)
+        : staticDataInitializer(element, staticCall)
     );
   if (ts.isObjectLiteralExpression(node))
     return node.properties.every(
@@ -71,9 +212,20 @@ export function staticDataInitializer(node: ts.Expression): boolean {
           (ts.isIdentifier(property.name) ||
             ts.isStringLiteral(property.name) ||
             ts.isNumericLiteral(property.name)) &&
-          staticDataInitializer(property.initializer)) ||
+          staticDataInitializer(property.initializer, staticCall)) ||
         (ts.isSpreadAssignment(property) && ts.isIdentifier(property.expression))
     );
+  if (ts.isCallExpression(node)) {
+    if (staticCall?.(node)) return true;
+    if (
+      ts.isPropertyAccessExpression(node.expression) &&
+      ts.isIdentifier(node.expression.expression) &&
+      node.expression.expression.text === 'Object' &&
+      node.expression.name.text === 'freeze' &&
+      node.arguments.length === 1
+    )
+      return staticDataInitializer(node.arguments[0], staticCall);
+  }
   return staticJoin(node) !== undefined;
 }
 

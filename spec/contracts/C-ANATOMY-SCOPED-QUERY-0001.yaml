@@ -15,7 +15,7 @@ criteria:
       en: An unknown, forged, retired, other-family or out-of-current-domain ancestor returns an empty array. A retained PartView does not keep membership alive. Reparenting is evaluated against current logical ancestry. Results expose only existing safe PartView operations, never instance tokens or host targets.
   - id: C-ANATOMY-SCOPED-QUERY-0001-PHASE
     text:
-      en: The author query is available on callback RunHandle and readonly RenderReadHandle, is runtime-only like ordinary Anatomy queries, and uses the existing module implementation. No Adapter, component or compiler branch supplies the query.
+      en: The author query is available on callback RunHandle and readonly RenderReadHandle and is runtime-only like ordinary Anatomy queries. The module and admitted native source lowering implement the same current-domain logical query. No Adapter or component-specific compiler branch selects descendants or exposes physical targets.
 dependsOn:
   contracts: [C-ANATOMY-0001, C-ANATOMY-0002]
 verifies:
@@ -23,6 +23,8 @@ verifies:
 sources:
   - path: packages/modules/anatomy/src/impl.ts
   - path: packages/core/src/handles.ts
+  - path: packages/compiler/src/operations.ts
+  - path: packages/compiler/src/native-support/dom-modules.template.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

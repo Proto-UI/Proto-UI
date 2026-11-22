@@ -48,7 +48,7 @@ describe('ordinary flow facts are tied to current binding values', () => {
       throw new Error('missing after-write observation');
     const read = last.expression.arguments[1];
     if (read.kind !== 'lexical-read') throw new Error('missing mutable read');
-    expect(read.type).toEqual({ kind: 'union', members: ['number', 'null'] });
+    expect(read.type).toEqual('null');
     read.type = 'number';
     expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
   });

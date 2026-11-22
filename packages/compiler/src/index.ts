@@ -1,4 +1,5 @@
 export { parsePrototype } from './parser';
+export type { SourceRootIdentity } from './source-loader';
 export {
   compilePrototype,
   compileFile,

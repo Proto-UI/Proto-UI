@@ -6,7 +6,6 @@ import {
 import type { NativeSupportPlan } from './native-support/plan';
 export { planNativeSupport } from './native-support/plan';
 import {
-  isDataValueType,
   type CompilerDiagnostic,
   type ExpressionIR,
   type FunctionIR,
@@ -14,6 +13,7 @@ import {
   type StatementIR,
 } from './ir';
 import { isAssignable } from './data-types';
+import { serializableDataType } from './value-types';
 import { FOCUS_OPTIONS_TYPE } from './operations';
 import { nativeImageViewArtifact } from './native-image-view';
 import { nativeControlLabelArtifact } from './native-control-label';
@@ -70,6 +70,7 @@ const stateAttributes: Record<string, string> = {
   rowSpan: 'aria-rowspan',
   columnSpan: 'aria-colspan',
   readOnly: 'aria-readonly',
+  required: 'aria-required',
   selected: 'aria-selected',
   modal: 'aria-modal',
   hidden: 'aria-hidden',
@@ -91,6 +92,24 @@ export function validateNativeInteraction(
   reached?: ReadonlySet<FunctionIR>
 ): CompilerDiagnostic[] {
   const diagnostics: CompilerDiagnostic[] = [];
+  const nativeLinkDeclaration = ir.moduleDeclarations.find(
+    (entry) => entry.id === '@proto.ui/native-link/declaration'
+  );
+  if (
+    nativeLinkDeclaration &&
+    ir.moduleDeclarations.some(
+      (entry) =>
+        entry.id === '@proto.ui/text-control/declaration' ||
+        entry.id === '@proto.ui/image-view/declaration'
+    )
+  ) {
+    diagnostics.push({
+      code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED',
+      category: 'unsupported-input',
+      message: 'One physical Root cannot combine Native Link with Text Control or Image View.',
+      span: nativeLinkDeclaration.span,
+    });
+  }
   function reject(expression: ExpressionIR, message: string) {
     diagnostics.push({
       code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED',
@@ -134,6 +153,36 @@ export function validateNativeInteraction(
     function expression(value: ExpressionIR) {
       if (value.kind === 'operation') {
         const args = value.arguments;
+        if (
+          value.operation === 'hook.asHitParticipation' ||
+          value.operation === 'hitParticipation.configure'
+        )
+          shape(args[0], ['mode', 'debugLabel', 'meta'], value);
+        if (value.operation === 'hitParticipation.registerSelfRegion')
+          shape(args[0], ['role', 'mode', 'meta'], value);
+        if (value.operation === 'hitParticipation.registerRegion')
+          shape(args[1], ['role', 'mode', 'meta'], value);
+        if (value.operation === 'hook.asNativeLink' && !nativeLinkDeclaration)
+          reject(value, 'Native Link requires its static native-link declaration.');
+        if (
+          value.operation === 'nativeLink.on' &&
+          args[0]?.kind === 'literal' &&
+          args[0].value !== 'navigate'
+        )
+          reject(value, 'Native Link only exposes navigate observations.');
+        if (value.operation === 'nativeLink.sync') {
+          const options = shape(args[0], ['href', 'target', 'rel', 'disabled'], value);
+          for (const option of options)
+            for (const entry of option.value.entries) {
+              for (const { value: setting } of resolve(entry.value, option.scope)) {
+                if (setting?.type !== (entry.key === 'disabled' ? 'boolean' : 'string'))
+                  reject(
+                    entry.value,
+                    `Native Link ${entry.key} must be ${entry.key === 'disabled' ? 'boolean' : 'string'}.`
+                  );
+              }
+            }
+        }
         if (value.operation === 'event.on' || value.operation === 'event.onGlobal') {
           const types = args[0] ? resolve(args[0]) : [];
           if (
@@ -194,12 +243,13 @@ export function validateNativeInteraction(
                   reject(entry.value, 'Native focus ' + entry.key + ' must be boolean.');
               }
         }
+        const focusOptions = args[0] && serializableDataType(args[0].type);
         if (
           value.operation === 'focus.focusSelf' &&
           args[0] &&
           !(
-            isDataValueType(args[0].type) &&
-            isAssignable(args[0].type, { kind: 'union', members: [FOCUS_OPTIONS_TYPE, 'void'] })
+            focusOptions &&
+            isAssignable(focusOptions, { kind: 'union', members: [FOCUS_OPTIONS_TYPE, 'void'] })
           )
         ) {
           const alternatives = shape(args[0], ['reason', 'preventScroll'], value);
@@ -253,6 +303,8 @@ export function validateNativeInteraction(
       else if (value.kind === 'rule') {
         expression(value.receiver);
         value.states.forEach((entry) => expression(entry.value));
+        value.styles?.forEach((entry) => expression(entry.value));
+        value.targets?.forEach((entry) => expression(entry.value));
       }
     }
     function statements(body: readonly StatementIR[]) {
@@ -264,7 +316,14 @@ export function validateNativeInteraction(
         else if (statement.kind === 'return') {
           if (statement.value) expression(statement.value);
         } else if (statement.kind === 'throw') expression(statement.value);
-        else if (statement.kind === 'try') {
+        else if (statement.kind === 'while' || statement.kind === 'for-of') {
+          expression(statement.kind === 'while' ? statement.condition : statement.iterable);
+          const saved = bindings;
+          if (statement.kind === 'for-of')
+            bindings = bindings.parameter(statement.name, undefined, saved, null);
+          statements(statement.body);
+          bindings = saved;
+        } else if (statement.kind === 'try') {
           const saved = bindings;
           statements(statement.body);
           bindings = saved;
@@ -360,15 +419,12 @@ export function nativeInteractionArtifacts(
     return [ownership, nativeTextControlArtifact(selection === 'text-single')];
   const source =
     "import { rootOwners, logicalOwners, exposeSignals, defaultPreventedSamples, type RootOwner } from './ownership-v1';\n" +
-    omitSupportDeclarations(options.controlLabel
-      ? fullNativeInteractionTemplate(semanticEvents, stateAttributes, options)
-      : nativeInteractionArtifact.contents, [
-      'RootOwner',
-      'rootOwners',
-      'logicalOwners',
-      'exposeSignals',
-      'defaultPreventedSamples',
-    ]);
+    omitSupportDeclarations(
+      options.controlLabel
+        ? fullNativeInteractionTemplate(semanticEvents, stateAttributes, options)
+        : nativeInteractionArtifact.contents,
+      ['RootOwner', 'rootOwners', 'logicalOwners', 'exposeSignals', 'defaultPreventedSamples']
+    );
   // Keep the established component import ABI. Explicit directory migration
   // reassembles old/new artifacts into one actual helper instance; untouched
   // legacy support is not silently overwritten or claimed compatible.

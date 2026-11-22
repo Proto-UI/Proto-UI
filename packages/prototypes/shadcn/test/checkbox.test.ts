@@ -321,6 +321,7 @@ describe('prototypes/shadcn: checkbox', () => {
       'hovered',
       'indeterminate',
       'pressed',
+      'required',
     ]);
 
     // Writing the derived names on the Indicator changes nothing: only the Root

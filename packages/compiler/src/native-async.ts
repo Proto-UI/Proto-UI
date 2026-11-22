@@ -1,4 +1,8 @@
 import type { ExpressionIR, GeneratedModule, Operation, ValueType } from './ir';
+import {
+  nativePresencePresentationArtifact,
+  webPresenceArtifacts,
+} from './native-support/web-presence';
 
 export const nativeMetaArtifact: NonNullable<GeneratedModule['supportingFiles']>[number] = {
   path: '.proto-ui/meta/web-snapshot-v1.ts',
@@ -39,17 +43,21 @@ export function readNativeWebMeta(doc: Document | undefined, key: string): unkno
 
 export function nativeHostAtomPlan(operations: readonly Operation[], prefix: string) {
   const delay = operations.includes('scheduler.delay');
-  const presence = operations.some((operation) => operation.startsWith('presence.'));
+  const presentation = operations.includes('feedback.style.presence');
+  const presence =
+    presentation || operations.some((operation) => operation.startsWith('presence.'));
   const snapshot = presence || operations.includes('presentation.snapshotCompletion');
   const meta = operations.includes('meta.get');
   const files = [
     ...(delay ? [nativeDelayArtifact] : []),
     ...(snapshot ? [nativePresenceArtifact] : []),
+    ...(presentation ? [...webPresenceArtifacts(), nativePresencePresentationArtifact] : []),
     ...(meta ? [nativeMetaArtifact] : []),
   ];
   return {
     delay,
     presence,
+    presentation,
     snapshot,
     meta,
     files,
@@ -60,6 +68,9 @@ export function nativeHostAtomPlan(operations: readonly Operation[], prefix: str
         : '',
       snapshot
         ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion, type NativePresenceOwner as ${prefix}PresenceOwner } from './.proto-ui/async/presence-owner-v1';`
+        : '',
+      presentation
+        ? `import { createNativePresencePresentation as ${prefix}CreatePresencePresentation } from './.proto-ui/async/presence-presentation-v1';`
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
@@ -73,6 +84,9 @@ export function nativeHostAtomPlan(operations: readonly Operation[], prefix: str
         : '',
       snapshot
         ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion } from './.proto-ui/async/presence-owner-v1';\n/** @template Run @typedef {import('./.proto-ui/async/presence-owner-v1').NativePresenceOwner<Run>} ${prefix}PresenceOwner */`
+        : '',
+      presentation
+        ? `import { createNativePresencePresentation as ${prefix}CreatePresencePresentation } from './.proto-ui/async/presence-presentation-v1';`
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
@@ -102,15 +116,21 @@ export function nativeHostAtomPlan(operations: readonly Operation[], prefix: str
       document: string;
       run: string;
       typed?: boolean;
+      root?: string;
+      tokens?: string;
+      project?: string;
+      watch?: string;
     }): string {
       const typed = options.typed !== false;
       return [
         delay
           ? `const ${prefix}Delay = ${prefix}CreateDelay({ runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invoke}; }, report: error => console.error('[Delay] callback failed', error) });`
           : '',
-        presence
-          ? `const ${prefix}Presence = ${prefix}CreatePresence${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; } });`
-          : '',
+        presentation
+          ? `const ${prefix}Presence = ${prefix}CreatePresencePresentation${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; }, root: () => ${options.root ?? 'null'}, tokens: () => ${options.tokens ?? '[]'}, project: tokens => { ${options.project ?? ''}; }, watch: (source, callback) => { ${options.watch ?? "throw new Error('[Presence] State subscription is not available');"} } });`
+          : presence
+            ? `const ${prefix}Presence = ${prefix}CreatePresence${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; } });`
+            : '',
         meta
           ? `const ${prefix}Meta = ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${prefix}ReadMeta(${options.document}, key);`
           : '',
@@ -141,6 +161,9 @@ export function emitNativeHostAtom(
       return `${prefix}SnapshotCompletion(${args()})`;
     case 'presence.owner':
       body = `${prefix}Presence.owner()`;
+      break;
+    case 'feedback.style.presence':
+      body = `${prefix}Presence.declare(${args()})`;
       break;
     case 'presence.publish':
       body = `${prefix}Presence.publish(${args()})`;

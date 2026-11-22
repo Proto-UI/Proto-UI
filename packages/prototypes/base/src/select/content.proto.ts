@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, delay, tw, type DefHandle } from '@proto.ui/core';
-import type { AnatomyPartView, AsHookResult, RunHandle } from '@proto.ui/core';
+import type { AnatomyPartView, AsHookResult, DelayTask, RunHandle } from '@proto.ui/core';
 import { asAccessible, asBoundary, asFocusRoving, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { useTypeaheadNavigation } from '../behaviors';
 import { createSelectAlignmentController } from './alignment-controller';
@@ -31,11 +31,7 @@ function projectSelectContentHandle(
   return { stateHandles: { open, alignmentFull }, asTransition };
 }
 
-function setupSelectContent(
-  def: DefHandle<SelectContentProps, SelectContentExposes>,
-  _options?: void,
-  api?: { store: Record<string, unknown> }
-): void {
+function setupSelectContent(def: DefHandle<SelectContentProps, SelectContentExposes>): void {
   const accessible = asAccessible();
   def.anatomy.claim(SELECT_FAMILY, { role: 'content' });
   def.props.define({
@@ -106,9 +102,9 @@ function setupSelectContent(
   def.expose.state('alignmentDiagnostic', alignmentDiagnostic);
   let alignment: ReturnType<typeof createSelectAlignmentController> | null = null;
   const blocked = () =>
-    alignment?.phase === 'structure-invalid' ||
-    alignment?.phase === 'unsupported-selection' ||
-    alignment?.phase === 'geometry-unavailable';
+    alignment?.getPhase() === 'structure-invalid' ||
+    alignment?.getPhase() === 'unsupported-selection' ||
+    alignment?.getPhase() === 'geometry-unavailable';
   const transition = asTransition();
   transition.configure({ coldEntryPreparation: true, enterDuration: 0, leaveDuration: 0 });
   overlay.bindPresence({
@@ -123,11 +119,10 @@ function setupSelectContent(
     present: transition.isPresent,
   });
 
-  const store = (api?.store ?? {}) as { run: any };
-  store.run = null;
+  let activeRun: RunHandle<SelectContentProps> | null = null;
   let currentContext: SelectContextValue | null = null;
   let ownerDisposed = false;
-  let entryTask: { cancel(): void } | null = null;
+  let entryTask: DelayTask | null = null;
   let entryCancelled = false;
   let presentationAborted = false;
   type EntryFocusAttempt = {
@@ -153,7 +148,7 @@ function setupSelectContent(
   };
   def.expose.method('__cancelPendingEntry', cancelPendingEntry);
 
-  const readContext = (run: any): SelectContextValue | null => {
+  const readContext = (run: RunHandle<SelectContentProps>): SelectContextValue | null => {
     if (ownerDisposed) return null;
     try {
       return run.context.read(SELECT_CONTEXT);
@@ -163,12 +158,14 @@ function setupSelectContent(
     }
   };
 
-  const getNavigationEntries = (run: any) =>
+  const getNavigationEntries = (run: RunHandle<SelectContentProps>) =>
     run.anatomy.order
       .partsOf(SELECT_FAMILY, 'item')
-      .map((item: any) => ({
-        part: item as AnatomyPartView,
-        snapshot: item.getExpose('getCollectionItem')?.() as Record<string, unknown> | undefined,
+      .map((item: AnatomyPartView) => ({
+        part: item,
+        snapshot: (
+          item.getExpose('getCollectionItem') as (() => Record<string, unknown>) | undefined
+        )?.(),
         focusSelf: item.getExpose('focusSelf') as
           | ((options?: {
               reason?: 'programmatic' | 'keyboard' | 'pointer';
@@ -179,6 +176,8 @@ function setupSelectContent(
         focused: !!(item.getExpose('focused') as { get?: () => boolean } | null)?.get?.(),
       }))
       .filter((entry: any) => entry.snapshot?.disabled !== true);
+
+  type NavigationEntry = ReturnType<typeof getNavigationEntries>[number];
 
   useTypeaheadNavigation({
     isEnabled: (run) => {
@@ -191,9 +190,11 @@ function setupSelectContent(
     },
     getEntries: (run) =>
       getNavigationEntries(run).filter((entry: any) => !!entry.snapshot && !!entry.focusSelf),
-    getCurrentIndex: (_run, entries) => entries.findIndex((entry: any) => entry.focused),
-    getText: (entry: any) => String(entry.snapshot?.textValue || entry.snapshot?.value || ''),
-    onMatch: (run, entry: any) =>
+    getCurrentIndex: (_run, entries: readonly NavigationEntry[]) =>
+      entries.findIndex((entry) => entry.focused),
+    getText: (entry: NavigationEntry) =>
+      String(entry.snapshot?.textValue || entry.snapshot?.value || ''),
+    onMatch: (run, entry: NavigationEntry) =>
       entry.focusSelf?.({
         reason: 'keyboard',
         preventScroll: run.props.get().position === 'item-aligned',
@@ -214,9 +215,10 @@ function setupSelectContent(
     const entry = getNavigationEntries(run).find(
       (candidate: any) => String(candidate.snapshot?.value ?? '') === candidateValue
     );
-    if (!entry?.focusSelf) return null;
-    if (options.defer) entry.focusSelf(options);
-    else applyEntryFocus(run, entry.part, () => entry.focusSelf(options), current);
+    const focusSelf = entry?.focusSelf;
+    if (!entry || !focusSelf) return null;
+    if (options.defer) focusSelf(options);
+    else applyEntryFocus(run, entry.part, () => focusSelf(options), current);
     return entry.part;
   };
 
@@ -299,13 +301,13 @@ function setupSelectContent(
     // identity until the focus fact or a newer owner arrives.
   };
 
-  const scheduleOpenFocusAction = (run: any) => {
+  const scheduleOpenFocusAction = (run: RunHandle<SelectContentProps>) => {
     if (
       entryCancelled ||
       blocked() ||
-      alignment?.phase === 'unsettled' ||
-      alignment?.phase === 'full-pending' ||
-      alignment?.phase === 'valid'
+      alignment?.getPhase() === 'unsettled' ||
+      alignment?.getPhase() === 'full-pending' ||
+      alignment?.getPhase() === 'valid'
     )
       return;
     entryTask?.cancel();
@@ -317,7 +319,7 @@ function setupSelectContent(
     });
   };
 
-  const syncPosition = (run: any) => {
+  const syncPosition = (run: RunHandle<SelectContentProps>) => {
     const props = run.props.get();
     overlay.updatePosition({
       placement: props.side,
@@ -331,7 +333,10 @@ function setupSelectContent(
     });
   };
 
-  const focusTrigger = (run: any, reason: 'keyboard' | 'pointer' | 'programmatic') => {
+  const focusTrigger = (
+    run: RunHandle<SelectContentProps>,
+    reason: 'keyboard' | 'pointer' | 'programmatic'
+  ) => {
     const trigger = run.anatomy.partsOf(SELECT_FAMILY, 'trigger')[0] ?? null;
     const focusSelf = trigger?.getExpose('focusSelf') as
       | ((options?: { reason?: 'keyboard' | 'pointer' | 'programmatic' }) => void)
@@ -345,7 +350,7 @@ function setupSelectContent(
   );
 
   let entryActive = false;
-  const isCurrentPresentation = (run: any, ctx: SelectContextValue) => {
+  const isCurrentPresentation = (run: RunHandle<SelectContentProps>, ctx: SelectContextValue) => {
     if (currentContext !== ctx) return false;
     const latest = readContext(run);
     return (
@@ -356,7 +361,11 @@ function setupSelectContent(
       (latest.collectionRevision ?? 0) === (ctx.collectionRevision ?? 0)
     );
   };
-  const applyPresentation = (run: any, ctx: SelectContextValue, reason: string) => {
+  const applyPresentation = (
+    run: RunHandle<SelectContentProps>,
+    ctx: SelectContextValue,
+    reason: string
+  ) => {
     if (!isCurrentPresentation(run, ctx)) return;
     if (!blocked()) presentationAborted = false;
     else if (!presentationAborted) {
@@ -383,14 +392,14 @@ function setupSelectContent(
       transition.controls.enter();
       if (!isCurrentPresentation(run, ctx)) return;
       const ready =
-        alignment?.phase === 'legacy' ||
-        alignment?.phase === 'popper' ||
-        alignment?.phase === 'valid';
+        alignment?.getPhase() === 'legacy' ||
+        alignment?.getPhase() === 'popper' ||
+        alignment?.getPhase() === 'valid';
       if (ready && !entryActive) {
         entryActive = true;
         focusScope.activate({ reason: ctx.requestFocusReason ?? 'programmatic' });
         if (!isCurrentPresentation(run, ctx)) return;
-        if (alignment?.phase === 'legacy' || alignment?.phase === 'popper')
+        if (alignment?.getPhase() === 'legacy' || alignment?.getPhase() === 'popper')
           scheduleOpenFocusAction(run);
       } else if (!ready) {
         entryTask?.cancel();
@@ -398,7 +407,7 @@ function setupSelectContent(
         // Size remeasurement is not withdrawal of an already accepted entry.
         // Deactivating here clears the shared focused/active owner even when
         // native focus never moved; activating a manual scope cannot restore it.
-        if (!alignment?.retainsPendingFocusScope) {
+        if (!alignment?.retainsPendingFocusScope()) {
           if (entryActive) focusScope.deactivate({ reason: 'programmatic' });
           entryActive = false;
         }
@@ -422,17 +431,7 @@ function setupSelectContent(
     };
     // Bound Overlay leave can synchronously retire a preparing view.
     const preparing = transition.transitionState.get() === 'preparing';
-    let focusFailed = false;
-    let focusError: unknown;
-    if (preparing) {
-      try {
-        returnFocus();
-      } catch (error) {
-        focusFailed = true;
-        focusError = error;
-      }
-    }
-    try {
+    const finishClose = () => {
       if (preparing && !isCurrentPresentation(run, ctx)) return;
       overlay.close(blocked() ? 'select.presentation-abort' : reason);
       if (!isCurrentPresentation(run, ctx)) return;
@@ -442,11 +441,27 @@ function setupSelectContent(
         transition.controls.complete();
       if (!isCurrentPresentation(run, ctx)) return;
       if (!preparing) returnFocus();
-    } finally {
-      if (focusFailed) throw focusError;
+    };
+    if (preparing) {
+      try {
+        returnFocus();
+      } catch (error) {
+        // Complete retirement even on a focus failure, retaining the original
+        // caught exception if cleanup also fails or returns early.
+        try {
+          finishClose();
+        } finally {
+          throw error;
+        }
+      }
     }
+    finishClose();
   };
-  const updateOpen = (run: any, ctx: SelectContextValue, reason: string) => {
+  const updateOpen = (
+    run: RunHandle<SelectContentProps>,
+    ctx: SelectContextValue,
+    reason: string
+  ) => {
     currentContext = ctx;
     if (!ctx.open) entryCancelled = false;
     contentId.set(createSelectContentId(ctx.rootId), 'reason: select content identity sync');
@@ -459,16 +474,17 @@ function setupSelectContent(
   alignment = createSelectAlignmentController({
     overlay,
     changed(run) {
-      if (!alignment) return;
-      const phase = alignment.phase;
-      alignmentFull.set(alignment.surfacePaint, 'reason: select composition');
-      if (ownerDisposed || alignment.phase !== phase) return;
+      const controller = alignment;
+      if (!controller) return;
+      const phase = controller.getPhase();
+      alignmentFull.set(controller.getSurfacePaint(), 'reason: select composition');
+      if (ownerDisposed || alignment !== controller || controller.getPhase() !== phase) return;
       const wasHidden = alignmentHidden.get();
       alignmentHidden.set(
         !['legacy', 'popper', 'valid'].includes(phase),
         'reason: select alignment admission'
       );
-      if (ownerDisposed || alignment.phase !== phase) return;
+      if (ownerDisposed || alignment !== controller || controller.getPhase() !== phase) return;
       if (
         !wasHidden &&
         phase === 'full-pending' &&
@@ -476,10 +492,10 @@ function setupSelectContent(
       ) {
         transition.controls.leave();
         transition.controls.enter();
-        if (ownerDisposed || alignment.phase !== phase) return;
+        if (ownerDisposed || alignment !== controller || controller.getPhase() !== phase) return;
       }
-      alignmentDiagnostic.set(alignment.diagnostic, 'reason: select alignment diagnostic');
-      if (ownerDisposed || alignment.phase !== phase) return;
+      alignmentDiagnostic.set(controller.getDiagnostic(), 'reason: select alignment diagnostic');
+      if (ownerDisposed || alignment !== controller || controller.getPhase() !== phase) return;
       const ctx = readContext(run);
       if (!ctx) return;
       currentContext = ctx;
@@ -527,7 +543,7 @@ function setupSelectContent(
     if (event.type !== 'next') return;
     if (
       event.next === 'preparing' &&
-      (alignment?.phase === 'legacy' || alignment?.phase === 'popper')
+      (alignment?.getPhase() === 'legacy' || alignment?.getPhase() === 'popper')
     )
       transition.controls.capturePreparation()?.();
     if (event.next === 'preparing' || event.next === 'entering' || event.next === 'entered')
@@ -575,7 +591,7 @@ function setupSelectContent(
     updateOpen(run, ctx, 'reason: lifecycle.onCreated => select content sync');
   });
   def.lifecycle.onMounted((run) => {
-    store.run = run;
+    activeRun = run;
     const trigger = run.anatomy.partsOf(SELECT_FAMILY, 'trigger')[0] ?? null;
     if (trigger) overlay.registerAnchorPart(trigger);
     syncPosition(run);
@@ -592,7 +608,7 @@ function setupSelectContent(
 
   overlay.open.watch((_ctx, event) => {
     if (event.type !== 'next' || event.next || event.reason !== 'escape') return;
-    const run = store.run;
+    const run = activeRun;
     const ctx = currentContext;
     if (!run || !ctx?.open) return;
     requestSelectOpen(run, {
@@ -604,7 +620,7 @@ function setupSelectContent(
   });
 
   boundary.subscribeOutside(() => {
-    const run = store.run;
+    const run = activeRun;
     const ctx = currentContext;
     if (!run || !ctx?.open || ctx.disabled) return;
     requestSelectOpen(run, { open: false, reason: 'outside.press', focusReason: 'pointer' });
@@ -615,7 +631,7 @@ function setupSelectContent(
     cancelEntryFocus();
     entryTask?.cancel();
     entryTask = null;
-    store.run = null;
+    activeRun = null;
     currentContext = null;
   });
 

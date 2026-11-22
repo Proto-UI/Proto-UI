@@ -2,7 +2,7 @@
 
 Portfolio navigation: [active prototype and four-family matrix](../coverage-matrices/prototype-coverage-matrix.md), tracked by [#870](https://github.com/Proto-UI/Proto-UI/issues/870). This Harness ledger retains all 63 consumer row IDs and #513/#514 completion rules. Private Message/Code Block or generic end-follow implementation does not imply completed Harness consumption.
 
-Status: authoritative for Agent Harness dogfood planning at repository commit ddac15dae7016d995fcb0cb5afb334b495c0a842; non-normative for Proto UI semantics.
+Status: retains the Agent Harness dogfood row baseline at repository commit ddac15dae7016d995fcb0cb5afb334b495c0a842; current direction below supersedes incompatible historical presentation decisions. Non-normative for Proto UI semantics.
 
 Parent tracker: [#513](https://github.com/Proto-UI/Proto-UI/issues/513). Matrix task: [#514](https://github.com/Proto-UI/Proto-UI/issues/514).
 
@@ -10,7 +10,21 @@ This is the single repository-owned coverage matrix for the planned apps/agent-h
 
 The catalog remains authoritative for Proto UI meaning. At this baseline, every P, T, M, and HC identity named below is draft unless a cell explicitly says otherwise. A-REACT-18-19-0001, A-WEB-COMPONENT-0001, A-VUE-3-0001, and A-VUE-2-0001 are active Adapter profiles. A draft entity is current cataloged direction, not a stable guarantee. Uncataloged or none means exactly that; the matrix never manufactures an entity to fill a cell.
 
-## Production host decision
+## Current external consumers
+
+The Sprint 7 consumer instruction identifies [Shenko](https://github.com/cyjin-yl/shenko) as the real React Harness. Its Inspect timeline and IM conversation consume the Shadcn Message Scroller through the React Adapter; App-owned stable entry anchors and persistence remain explicit. [Verdant](https://github.com/OpenGreendam/verdant) is a separate GPUI compiler consumer. The [consumer inventory](../records/2026-11-22-sprint-7-real-consumers.md) binds their source and realization paths; the [Harness execution record](../records/2026-11-22-sprint-7-harness.md) records the follow-tail results and limits.
+
+The current user identifies Shenko as the application to exercise for this Sprint. Its evidence does not rename the historical `apps/agent-harness` paths, promote the 63 retained rows to `dogfooded`, or satisfy #514's original complete matrix. Shenko's fixed Inspector and task/file displays also do not establish #522's resizable Inspector or #523's two admitted Tree fixtures. The two editor rows retain #531's research result, the engine infrastructure exemption, their fallback surfaces and re-review triggers under #745.
+
+## Current direction and retained planning baseline
+
+The 2026-10-27 user direction retained in [#745](https://github.com/Proto-UI/Proto-UI/issues/745) and [#746](https://github.com/Proto-UI/Proto-UI/issues/746) explicitly supersedes incompatible historical Brutalist-only presentation, mandatory persistent three-column layout, always-expanded activity and parallel Agent lanes. Current work uses repository-owned Proto Shadcn at an exact source pin and retains React 19. It targets one continuous subject/mainline with nonblocking public activity and an on-demand desktop nonmodal/mobile modal Inspector. Task, authorization, recovery and result facts remain App-owned. This direction does not import upstream Shadcn/Radix implementations or certify the current App against every retained row.
+
+The original 63 row IDs, source paths, evidence debts and editor exemptions below remain a historical planning denominator. Their old presentation wording is not authority to reverse the current direction. Future row implementation or migration must bind the actual application source and evidence and preserve original semantic conditions; this bounded recovery changes no row state or count.
+
+## Historical production host decision
+
+The following decision is retained at the baseline above. Its incompatible family and fixed-layout constraints were superseded by the current direction; its source identities and applicable ownership/equivalence conditions remain traceable.
 
 The recommended primary production host for apps/agent-harness is React 19 through the active A-REACT-18-19-0001 profile, whose governed peer range is React >=18.2.0 <20. This is a non-normative application decision owned by #514. It must not be extrapolated to [#420](https://github.com/Proto-UI/Proto-UI/issues/420), whose website program independently chooses generated Web Components.
 

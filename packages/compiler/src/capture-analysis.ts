@@ -1,4 +1,4 @@
-import type { AuthoredHookIR, ExpressionIR, FunctionIR, HookCaptureIR, StatementIR } from './ir';
+import type { AuthoredHookIR, FunctionIR, HookCaptureIR, StatementIR } from './ir';
 import { reject } from './diagnostics';
 import { traceSetupOperations, traceHookContributions } from './callable-effects';
 import { functionValueType, valueAssignable } from './value-types';
@@ -14,14 +14,13 @@ export function deriveHookCapture(
   const states = new Map<string, HookCaptureIR['states'][number]>();
   const methods = new Map<string, HookCaptureIR['methods'][number]>();
   const children = new Map<string, HookCaptureIR['children'][number]>();
-  const definiteIntroductions = new Map<ExpressionIR, string>();
+  let definite: ReadonlySet<string> = new Set();
   const issue = traceSetupOperations(
     setup,
     moduleBindings,
     {
-      operation(value, introduced, definite) {
+      operation(value, introduced) {
         for (const state of introduced) states.set(state.name, state);
-        if (definite) definiteIntroductions.set(value, introduced[0].name);
         for (const child of privilegedHookCaptures(value)) children.set(child.id, child);
         const key = value.arguments[0];
         if (key?.kind !== 'literal' || typeof key.value !== 'string') return;
@@ -40,30 +39,13 @@ export function deriveHookCapture(
         const name = hookNames.get(value.hookId);
         if (name) children.set(value.hookId, { id: value.hookId, name });
       },
+      complete(names) {
+        definite = names;
+      },
     },
     hooks
   );
   if (issue) reject('PUI1007', issue.message, issue.span);
-  const definite = new Set<string>();
-  for (const statement of setup.body) {
-    if (statement.kind === 'return' || statement.kind === 'throw') break;
-    if (statement.kind === 'if' || statement.kind === 'try') {
-      // A reachable return in either branch can bypass later declarations.
-      const returns = (body: readonly StatementIR[]): boolean => body.some((item) =>
-        item.kind === 'return' || (item.kind === 'if' &&
-          (returns(item.then) || returns(item.otherwise))) || (item.kind === 'try' &&
-          (returns(item.body) || returns(item.catch?.body ?? []) || returns(item.finally ?? []))));
-      if (returns([statement])) break;
-      continue;
-    }
-    const value = statement.kind === 'const' ? statement.value : statement.expression;
-    const introduced = definiteIntroductions.get(value);
-    if (introduced !== undefined) definite.add(introduced);
-    if (value.kind !== 'operation' || !value.operation.startsWith('state.')) continue;
-    const key = value.arguments[0];
-    if (key?.kind === 'literal' && typeof key.value === 'string' && stateValue(value.type))
-      definite.add(key.value);
-  }
   for (const [name, state] of states)
     if (definite.has(name)) states.set(name, { ...state, definite: true });
   return {

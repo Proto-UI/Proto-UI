@@ -344,7 +344,7 @@ describe('new helper language cannot widen phase or capture authority', () => {
     }
   );
 
-  it('rejects rest metadata even when an ordinary-array call would otherwise match', () => {
+  it('rejects an array argument where a boolean rest signature requires a boolean', () => {
     expect(
       parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'rest-signature',setup(){const apply=(current:(...values:boolean[])=>boolean)=>current([true]);}});`)
@@ -352,8 +352,8 @@ describe('new helper language cannot widen phase or capture authority', () => {
       ok: false,
       diagnostics: [
         {
-          code: 'PUI1020',
-          message: 'Rest parameters in callable type signatures are unsupported.',
+          code: 'PUI1006',
+          message: 'Callable argument 1 type mismatch.',
         },
       ],
     });
@@ -378,7 +378,7 @@ describe('new helper language cannot widen phase or capture authority', () => {
     ];
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI2002', message: 'Unknown IR field.' }],
+      diagnostics: [{ code: 'PUI2002', message: 'Unknown IR field default.' }],
     });
   });
 });

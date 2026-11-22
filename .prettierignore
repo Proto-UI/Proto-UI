@@ -10,6 +10,7 @@ native/gpui/fixtures/
 # Pinned MIT upstream artifacts; checksums bind their unmodified UTF-8 LF bytes.
 scripts/agent-operations/vendor/modeltrace/
 # Coverage views are generated and checked byte-for-byte by prototype-coverage.mjs.
+internal/coverage-matrices/prototype-coverage-matrix.json
 internal/coverage-matrices/prototype-coverage-matrix.md
 internal/coverage-matrices/finf-delivery-checklist.md
 # Exact pre-migration Issue body snapshots retain their original formatting.
@@ -23,3 +24,12 @@ scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
 
 # Exact audited shader bytes and legal text are emitted by the checked generator.
 packages/adapters/base/src/material/liquidgl-kernel.generated.ts
+
+# The inherited Sprint 7 comparison is a byte-bound reproduction, including
+# its source/protocol, unmodified A2UI material, raw receipts and dated record.
+# Preserve those inputs during merge staging; their generators and source-hash
+# checks remain responsible for verification. New observations use new records.
+scripts/analysis/declarative-agent-ui/
+internal/records/2026-11-22-sprint-7-declarative-agent-ui.md
+internal/records/2026-11-22-sprint-7-harness-evidence/
+internal/records/evidence/2026-11-22-s7-declarative/

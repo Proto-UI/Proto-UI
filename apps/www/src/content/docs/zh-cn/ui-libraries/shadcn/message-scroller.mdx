@@ -35,6 +35,8 @@ Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Vi
 
 这些属性属于 Root。
 
+需要稳定 key 历史位置和选区恢复时，可在 authored composition 中于实际 Shadcn viewport 之后调用公开的 Base `asMessageScrollerReading`。它在同一 Scroll Surface 上拥有锚点选择、精确 key／前驱恢复、初始 hint 退休及选区恢复资格；Shadcn 不添加竞争策略。Hook 关闭 generic `preserve-visible`，消费有限宿主测量事实并发出共享滚动请求。opaque 内容身份、DOM／Range 和存储仍归应用。具体属性、方法和未完成验收边界见 [Base Message Scroller 阅读 API](/zh-cn/ui-libraries/base/message-scroller/#稳定-key-阅读组合)。
+
 ## 参考
 
 <SpecEntityLinks

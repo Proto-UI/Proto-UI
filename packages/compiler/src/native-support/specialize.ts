@@ -24,9 +24,12 @@ const members: Readonly<Record<string, NativeSupportFeature>> = {
   asBoundary: 'boundary',
   asHitParticipation: 'hit',
   asOverlay: 'overlay',
+  registerTargetAlignment: 'target-alignment',
   asScrollSurface: 'scroll',
   asTextControl: 'text',
   asImageView: 'image',
+  asNativeLink: 'native-link',
+  asAxisInput: 'axis-input',
   asTableStructure: 'table',
   configureFocusable: 'focus',
   setFocusDisabled: 'focus',
@@ -98,7 +101,9 @@ function specialize(source: string, plan: NativeSupportPlan): string {
           return bool(next.expression) ? next.thenStatement : next.elseStatement;
         if (
           ts.isInterfaceDeclaration(next) &&
-          ['NativeModuleCapabilities', 'NativeAccessibleExtension'].includes(next.name.text)
+          ['NativeModuleCapabilities', 'NativeAccessibleExtension', 'NativeOverlay'].includes(
+            next.name.text
+          )
         )
           return factory.updateInterfaceDeclaration(
             next,
@@ -132,7 +137,7 @@ function specialize(source: string, plan: NativeSupportPlan): string {
         if (
           ts.isVariableDeclaration(next) &&
           ts.isIdentifier(next.name) &&
-          ['capabilities', 'accessible'].includes(next.name.text) &&
+          ['capabilities', 'accessible', 'overlay'].includes(next.name.text) &&
           next.initializer &&
           ts.isObjectLiteralExpression(next.initializer)
         )

@@ -151,6 +151,9 @@ function facts() {
   vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
+    // HTML measures the layout viewport, not the repeated control box below.
+    // The alignment host uses this viewport to clamp the popup at its edges.
+    if (this === document.documentElement) return 1024;
     return this.offsetWidth - (this.tagName === 'BASE-SELECT-SURFACE' ? 2 : 0);
   });
   vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
@@ -172,6 +175,7 @@ function facts() {
   vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
+    if (this === document.documentElement) return 768;
     return this.tagName === 'BASE-SELECT-ITEM' ? this.offsetHeight : 108;
   });
   vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (

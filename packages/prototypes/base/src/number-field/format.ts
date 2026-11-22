@@ -41,8 +41,8 @@ const clean = (text: string) =>
 
 /** Pure portable format/parse policy. No editor, selection or host objects. */
 export function createNumberFieldFormat(
-  locale?: string,
-  options?: NumberFieldFormatOptions
+  locale?: string | null,
+  options?: NumberFieldFormatOptions | null
 ): NumberFieldFormat {
   if (!locale && !options) return plain();
   try {
@@ -79,7 +79,7 @@ export function createNumberFieldFormat(
       const parts = formatter.formatToParts(value);
       const first = parts.findIndex((part) => part.type === 'integer');
       let last = parts.length - 1;
-      while (last >= 0 && !['integer', 'fraction'].includes(parts[last].type)) last--;
+      while (last >= 0 && !['integer', 'fraction'].includes(parts[last]!.type)) last--;
       return {
         prefix: clean(
           parts
@@ -119,14 +119,15 @@ export function createNumberFieldFormat(
       const parts = source.split(decimal);
       if (parts.length > 2) return INVALID;
       const [integer, fraction] = parts;
-      const chunks = integer.split(group);
+      // String.split always supplies a first element, including for an empty string.
+      const chunks = integer!.split(group);
       if (
         chunks.length > 1 &&
         (!chunks.every((chunk) => /^\d+$/.test(chunk)) ||
           chunks.at(-1)!.length !== primary ||
           chunks.slice(1, -1).some((chunk) => chunk.length !== secondary) ||
-          chunks[0].length < 1 ||
-          chunks[0].length > secondary)
+          chunks[0]!.length < 1 ||
+          chunks[0]!.length > secondary)
       )
         return INVALID;
       const whole = chunks.join('');
@@ -149,9 +150,10 @@ export function createNumberFieldFormat(
         const characters = [...source];
         const isDigit = (char: string) => digits.has(char) || /^[0-9\uff10-\uff19]$/.test(char);
         const first = characters.findIndex(isDigit);
+        if (first < 0) return INVALID;
         let last = characters.length - 1;
-        while (last >= first && !isDigit(characters[last])) last--;
-        if (first < 0 || last < first) return INVALID;
+        while (last >= first && !isDigit(characters[last]!)) last--;
+        if (last < first) return INVALID;
         const result = numeric(characters.slice(first, last + 1).join(''));
         if (result.kind !== 'number') return INVALID;
         const actualPrefix = characters.slice(0, first).join('');

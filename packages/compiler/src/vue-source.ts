@@ -11,6 +11,7 @@ import { nativeHostAtomPlan, emitNativeHostAtom } from './native-async';
 import {
   nativeAuthoredHooksArtifact,
   emitAuthoredHookDefinition,
+  emitUnreachedAuthoredHookCall,
   emitPrivilegedHookCall,
 } from './native-authored-hooks';
 import { ordinaryValueChildren } from './value-children';
@@ -19,7 +20,9 @@ import {
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
+  emitJavaScriptBinary,
   emitJavaScriptParameters,
+  emitJavaScriptSignatureParameters,
   emitUninvokedJavaScriptFunction,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -168,6 +171,8 @@ export function emitVueSource(
       case 'rule':
         usesStyle = true;
         node.states.forEach((state) => inspect(state.value));
+        node.styles?.forEach((style) => inspect(style.value));
+        node.targets?.forEach((style) => inspect(style.value));
         break;
       case 'member':
         inspect(node.object);
@@ -274,7 +279,10 @@ export function emitVueSource(
       else if (statement.kind === 'return') {
         if (statement.value) inspect(statement.value);
       } else if (statement.kind === 'throw') inspect(statement.value);
-      else if (statement.kind === 'try') {
+      else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        inspect(statement.kind === 'while' ? statement.condition : statement.iterable);
+        inspectBody(statement.body);
+      } else if (statement.kind === 'try') {
         inspectBody(statement.body);
         if (statement.catch) inspectBody(statement.catch.body);
         if (statement.finally) inspectBody(statement.finally);
@@ -327,6 +335,8 @@ export function emitVueSource(
     if (typeof type !== 'string' && !isDataValueType(type))
       return formatJavaScriptValueType(type, typeName);
     if (type === 'exception') return 'unknown';
+    if (type === 'public-expose') return 'unknown';
+    if (type === 'public-method') return '(...args: unknown[]) => unknown';
     if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (isDataValueType(type)) return formatDataType(type);
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
@@ -409,12 +419,7 @@ export function emitVueSource(
     }
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values
-      .map(
-        (parameter) =>
-          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
-      )
-      .join(', ');
+    return emitJavaScriptSignatureParameters(values, typeName);
   }
   function fn(value: FunctionIR, depth: number): string {
     if (!reached.has(value)) return emitUninvokedJavaScriptFunction(value);
@@ -436,6 +441,7 @@ export function emitVueSource(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         return emitJavaScriptValue(node, (item) => expression(item, depth), typeName, true, {
           plan: callBoundaries,
           wrap: `${prefix}WrapPublic`,
@@ -476,7 +482,7 @@ export function emitVueSource(
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
       case 'binary':
-        return `(${expression(node.left, depth)} ${node.operator} ${expression(node.right, depth)})`;
+        return emitJavaScriptBinary(node, (item) => expression(item, depth));
       case 'array':
         return `[${node.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
@@ -484,9 +490,11 @@ export function emitVueSource(
       case 'function':
         return fn(node.function, depth);
       case 'helper-call':
-        return `${node.name}(${node.arguments.map((arg) => expression(arg, depth)).join(', ')})`;
+        return `${node.name}(${node.arguments.map((arg, index) => `${node.spread?.[index] ? '...' : ''}${expression(arg, depth)}`).join(', ')})`;
       case 'authored-hook':
-        return `${hookNames.get(node.hookId)}(${(node.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
+        return hooks.has(node.hookId)
+          ? `${hookNames.get(node.hookId)}(${(node.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`
+          : emitUnreachedAuthoredHookCall(node, (item) => expression(item, depth), typeName);
       case 'static-capability':
         return staticNames.get(node.declarationId)!;
       case 'operation': {
@@ -596,21 +604,24 @@ export function emitVueSource(
           case 'context.provide':
             return `${n('Scope')}.provide(${args.join(', ')})`;
           case 'context.subscribe':
-          case 'context.trySubscribe': {
+          case 'context.trySubscribe':
+          case 'context.trySubscribeAncestor': {
             const key = node.arguments[0];
             if (key.kind !== 'context-key')
               throw new Error('Checked Context subscription requires a key declaration.');
-            const valueType = `${formatDataType(ir.contextKeys.find((entry) => entry.id === key.keyId)!.type)}${node.operation === 'context.trySubscribe' ? ' | null' : ''}`;
+            const valueType = `${formatDataType(ir.contextKeys.find((entry) => entry.id === key.keyId)!.type)}${node.operation !== 'context.subscribe' ? ' | null' : ''}`;
             const callback = node.arguments[1];
             const invocation =
               callback?.kind === 'function'
                 ? `(${args[1]})(${[n('RunValue'), `next as ${valueType}`, `prev as ${valueType}`].slice(0, callback.function.parameters.length).join(', ')})`
                 : `Reflect.apply(${args[1]}, undefined, [${n('RunValue')}, next, prev])`;
-            return `${n('Scope')}.subscribe(${args[0]}, '${node.operation === 'context.subscribe' ? 'required' : 'optional'}'${callback ? `, (next, prev) => ${invocation}` : ''})`;
+            return `${n('Scope')}.subscribe(${args[0]}, '${node.operation === 'context.subscribe' ? 'required' : 'optional'}', ${callback ? `(next, prev) => ${invocation}` : 'undefined'}${node.operation === 'context.trySubscribeAncestor' ? ", 'ancestor'" : ''})`;
           }
           case 'context.read':
           case 'context.tryRead':
             return `(${n('ReadContext')}(${receiver}, ${args[0]}, ${node.operation === 'context.tryRead'}) as ${typeName(node.type)})`;
+          case 'context.tryReadAncestor':
+            return `(${n('ReadAncestorContext')}(${receiver}, ${args[0]}) as ${typeName(node.type)})`;
           case 'context.update':
           case 'context.tryUpdate':
             return `(${n('UpdateContext')}(${receiver}, ${args.join(', ')}, ${node.operation === 'context.tryUpdate'}) as ${node.operation === 'context.tryUpdate' ? 'boolean' : 'void'})`;
@@ -680,7 +691,7 @@ export function emitVueSource(
         .replaceAll('\u2029', '\\u2029');
       const origin = `${indent}// Source ${sourceFile}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array', 'array-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
       } else if (statement.kind === 'effect')
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
@@ -691,6 +702,10 @@ export function emitVueSource(
         break;
       } else if (statement.kind === 'try')
         output += `${origin}${indent}try {\n${statements(statement.body, depth + 1, new Set(deadBindings))}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${statements(statement.catch.body, depth + 1, new Set(deadBindings))}${indent}}` : ''}${statement.finally ? ` finally {\n${statements(statement.finally, depth + 1, new Set(deadBindings))}${indent}}` : ''}\n`;
+      else if (statement.kind === 'while')
+        output += `${origin}${indent}while (${expression(statement.condition, depth)}) {\n${statements(statement.body, depth + 1, new Set(deadBindings))}${indent}}\n`;
+      else if (statement.kind === 'for-of')
+        output += `${origin}${indent}for (const ${statement.name} of ${expression(statement.iterable, depth)}) {\n${statements(statement.body, depth + 1, new Set(deadBindings))}${indent}}\n`;
       else
         output += `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${statements(statement.then, depth + 1, new Set(deadBindings))}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1, new Set(deadBindings))}${indent}}` : ''}\n`;
     }
@@ -782,6 +797,9 @@ ${ir.contextKeys.map((key) => `      [${contextNames.get(key.id)}, (value: unkno
     function ${n('ReadContext')}(run: ${n('Run')}, key: object, optional: boolean): unknown {
       ${n('RequireRun')}(run); return optional ? ${n('Scope')}.tryRead(key) : ${n('Scope')}.read(key);
     }
+    function ${n('ReadAncestorContext')}(run: ${n('Run')}, key: object): unknown {
+      ${n('RequireRun')}(run); return ${n('Scope')}.tryReadAncestor(key);
+    }
     function ${n('UpdateContext')}(run: ${n('Run')}, key: object, value: unknown, optional: boolean): void | boolean {
       ${n('RequireRun')}(run); return optional ? ${n('Scope')}.tryUpdate(key, value) : ${n('Scope')}.update(key, value);
     }
@@ -834,7 +852,7 @@ ${usesStyle ? `type ${n('Def')} = Readonly<{ feedback: Readonly<{ style: ${n('Na
 type ${n('Run')} = Readonly<{ readonly owner: symbol${usesStyle ? `; readonly feedback: ${n('Def')}['feedback']` : ''} }>;
 type ${n('StateEvent')}<T> = { type: 'next'; prev: T; next: T; reason?: unknown } | {type:'disconnect';reason:'unmount'};
 type ${n('Spec')} = Readonly<{ kind: 'bool' | 'enum' | 'string' | 'number.range' | 'number.discrete'; options?: readonly (string | number)[]; min?: number; max?: number; step?: number; clamp?: boolean }>;
-type ${n('PropSpec')} = { type: unknown; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; range?: { min?: number; max?: number }; options?: readonly unknown[] };
+type ${n('PropSpec')} = { type: unknown; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; range?: { min?: number; max?: number }; options?: readonly unknown[]; validator?: (value: never) => boolean };
 type ${n('WatchInfo')} = { changedKeysAll: string[]; changedKeysMatched: string[] };
 export type ${n('PublicState')}<T> = { get(): T; subscribe(callback: (event: ${n('StateEvent')}<T>) => void): () => void; unsubscribe(off: () => void): void; readonly spec: ${n('Spec')} };
 type ${n('State')}<T> = ${n('PublicState')}<T> & { setDefault(next: T): void; set(next: T, reason?: unknown): void };
@@ -1215,7 +1233,9 @@ ${hasAuthoredHooks ? `      ${n('Authored')}.method(key, callback);` : ''}
     }
     function ${n('ValidProp')}(key: string, value: unknown): boolean {
       const spec = ${n('PropSpecs')}[key];
-      return ${n('PropChecks')}[key](value) && (!spec.options || spec.options.includes(value)) && (!spec.range || typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity));
+      if (!${n('PropChecks')}[key](value) || spec.options && !spec.options.includes(value) || spec.range && !(typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity))) return false;
+      try { return spec.validator ? !!spec.validator(value as never) : true; }
+      catch { return false; }
     }
     function ${n('ResolveProps')}(raw: Record<string, unknown>, strict: boolean): Readonly<GeneratedResolvedProps> {
       const next: Record<string, unknown> = Object.create(null);
@@ -1244,15 +1264,18 @@ ${hasAuthoredHooks ? `      ${n('Authored')}.method(key, callback);` : ''}
       return snapshot;
     }
     function ${n('DefineProps')}(declarations: Record<string, ${n('PropSpec')}>): void {
+      const merged = { ...${n('PropSpecs')} };
       for (const key of Object.keys(declarations)) {
-        const incoming = declarations[key], previous = ${n('PropSpecs')}[key];
+        const incoming = declarations[key], previous = merged[key];
+        if (previous?.validator && previous.validator !== incoming.validator) throw new Error('[Vue source] validator replacement or removal is disallowed');
         if (!Object.hasOwn(${n('PropChecks')}, key)) throw new Error('[Vue source] undeclared prop schema');
         const rank = (empty: string) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
         if (previous && incoming.empty && rank(incoming.empty) > rank(previous.empty ?? 'fallback')) throw new Error('[Vue source] props cannot become stricter');
         if (previous?.options && (!incoming.options || previous.options.some((value) => !incoming.options!.includes(value)))) throw new Error('[Vue source] prop options cannot narrow');
         if (previous?.range && ((incoming.range?.min ?? -Infinity) > (previous.range.min ?? -Infinity) || (incoming.range?.max ?? Infinity) < (previous.range.max ?? Infinity))) throw new Error('[Vue source] prop range cannot narrow');
-        ${n('PropSpecs')}[key] = { ...previous, ...incoming, ...(previous ? { empty: previous.empty ?? 'fallback' } : {}), ...(previous && Object.hasOwn(previous, 'default') ? { default: previous.default } : {}) };
+        merged[key] = { ...previous, ...incoming, ...(previous ? { empty: previous.empty ?? 'fallback' } : {}), ...(previous && Object.hasOwn(previous, 'default') ? { default: previous.default } : {}) };
       }
+      Object.assign(${n('PropSpecs')}, merged);
       ${n('Props')} = ${n('ResolveProps')}(${n('RawProps')}, false);
 ${usesStyle ? `      ${n('Style')}.refresh();` : ''}
 ${usesInteraction ? `      ${n('Interaction')}.refresh();` : ''}
@@ -1394,7 +1417,7 @@ ${
     : `    const ${n('Renderer')} = ((): ((frame: ${n('Frame')}) => ${n('Vue')}.VNodeChild) | void => {`
 }
       try {
-        const renderer = (${fn(ir.setup, 3)})(${usesStyle ? n('DefValue') : 'undefined'});
+        const renderer = (${fn(ir.setup, 3)})(${ir.setup.parameters.length ? (usesStyle ? n('DefValue') : 'undefined') : ''});
 ${usesRoot ? `        ${n('Setup')} = false;` : ''}
         ${n('RawProps')} = ${ssr ? `${n('Server')} || !${n('Record')} ? ${n('GetHostProps')}() : ${n('Decode')}(${n('Record')}.raw) as Record<string, unknown>` : `${n('GetHostProps')}()`};
 ${
@@ -1738,6 +1761,7 @@ export default ${componentName};
                 version: 2 as const,
                 id: supportPlan.id,
                 features: [...supportPlan.features],
+                ...(supportPlan.inputs.length ? { inputs: [...supportPlan.inputs] } : {}),
               },
             }
           : {}),

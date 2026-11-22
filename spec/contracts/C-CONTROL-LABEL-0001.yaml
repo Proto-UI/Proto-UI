@@ -4,11 +4,11 @@ title: Explicit control-label association separates accessible naming from activ
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: The bounded independent Label and eight-target direction is accepted for implementation; complete paired Web input, lifecycle, projection and assistive-technology evidence is still required before stable admission.
+  en: The bounded independent Label and declared target direction is accepted for implementation; complete paired Web input, lifecycle, projection and assistive-technology evidence is still required before stable admission.
 summary: One opaque reference authorizes one independent Label and one participating control without adding a Label part to the control's anatomy or introducing a general action bus.
 statement:
-  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item; each target declares its own participation and keeps its existing operation owners; Text Control activation is focus-only. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item; their association is exercised through the Prototype packages and their Adapters.
-  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item；每个目标自行声明参与并保留既有操作所有者；Text Control 的关联 activation 仅请求 focus。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断；这些目标的关联通过 Prototype 包与其 Adapter 使用。
+  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle, Toggle Group Item, standalone Select Trigger and Number Field Input. Each target declares its own participation and keeps its existing operation owners; text editors and Select Trigger use focus-only activation. Compiler admission is checked for each actual target definition and backend through the same ControlLabel protocol; unsupported definitions keep an explicit diagnostic and passing association props alone never establishes support.
+  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle、Toggle Group Item、独立 Select Trigger 与 Number Field Input。各目标自行声明参与，文本编辑器与 Select Trigger 的关联 activation 只请求 focus。Compiler 按真实目标定义和后端核对同一 ControlLabel 协议的准入；不支持的定义保留明确诊断，单独传入关联属性不代表已支持。
 criteria:
   - id: C-CONTROL-LABEL-0001-IDENTITY
     text:
@@ -38,6 +38,9 @@ criteria:
   - id: C-CONTROL-LABEL-0001-FOCUS
     text:
       en: When an accepted actionable label requests focus, the target uses its existing focus owner under the same disabled and lifecycle checks. Reentrant focus or outward callbacks that disable, detach or replace either participant invalidate subsequent work from the old request. Naming remains available for a disabled target while activation and focus are suppressed.
+  - id: C-CONTROL-LABEL-0001-STANDALONE-EDITORS
+    text:
+      en: Standalone Select Trigger and Number Field Input accept explicit associations and use their current focus owners under the same disabled and live-request guards. The label does not open the popup, change selection, parse a draft or step a number. Existing author names and Number Field label-part relations remain authoritative; an activation-only Label may preserve them. The explicit Field variants retain their anatomy-pair association and reject simultaneous explicit pairing.
   - id: C-CONTROL-LABEL-0001-CONTENT
     text:
       en: >-
@@ -80,12 +83,16 @@ references:
       P-BASE-BUTTON,
       P-BASE-TOGGLE,
       P-BASE-TOGGLE-GROUP,
+      P-BASE-SELECT-TRIGGER,
+      P-BASE-NUMBER-FIELD,
     ]
 sources:
   - path: packages/modules/control-label/src/anatomy-pair.ts
   - path: packages/modules/control-label/test/anatomy-pair.test.ts
   - path: packages/core/src/control-label.ts
   - path: packages/prototypes/base/src/label/root.proto.ts
+  - path: packages/prototypes/base/src/select/trigger.proto.ts
+  - path: packages/prototypes/base/src/number-field/input.proto.ts
   - path: packages/core/src/a11y.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
@@ -112,4 +119,7 @@ revisions:
   - version: 0.3.0-alpha.2
     change: clarified
     summary: Named the Compiler admission boundary for the declared association target set; Toggle Group Item stays a declared target and the Toggle Group Root and Item definitions keep their explicit unsupported diagnostic.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added focus-only explicit Label participation to standalone Select Trigger and Number Field Input, preserving author names, numeric and popup owners and the separate Field anatomy pairing; compiler admission remains definition- and backend-specific.
 tags: [label, accessibility, association, activation, lifecycle]

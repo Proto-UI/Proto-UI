@@ -10,12 +10,15 @@ export interface CheckboxRootProps {
   checked?: boolean;
   defaultChecked?: boolean;
   disabled?: boolean;
+  /** Requirement fact for this checked control; validation belongs to its form composition. */
+  required?: boolean;
   indeterminate?: boolean;
   defaultIndeterminate?: boolean;
 }
 
 export type CheckboxRootExposes = {
   disabled: ExposeState<boolean>;
+  required: ExposeState<boolean>;
   hovered: ExposeState<boolean>;
   focused: ExposeState<boolean>;
   focusVisible: ExposeState<boolean>;
@@ -29,6 +32,7 @@ export type CheckboxRootExposes = {
 
 export type CheckboxRootStateHandles = {
   disabled: State<boolean>;
+  required: State<boolean>;
   hovered: State<boolean>;
   focused: ObservedStateHandle<boolean, CheckboxRootProps>;
   focusVisible: ObservedStateHandle<boolean, CheckboxRootProps>;

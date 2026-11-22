@@ -20,6 +20,16 @@ export type {
   InputValueChangeDetail,
 } from './types';
 
+// Props resolution uses null for an omitted value or enum without a fallback.
+// These are resolved facts, distinct from the consumer's optional raw props.
+type ResolvedInputProps = Readonly<
+  Omit<InputRootProps, 'value' | 'inputMode' | 'enterKeyHint'> & {
+    value?: string | null;
+    inputMode?: InputRootProps['inputMode'] | null;
+    enterKeyHint?: InputRootProps['enterKeyHint'] | null;
+  }
+>;
+
 function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   const accessible = asAccessible();
   def.props.define({
@@ -104,7 +114,7 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   accessible.relation('labelledBy', { target: labelledBy });
   accessible.relation('describedBy', { target: describedBy });
 
-  const sync = (props: Readonly<InputRootProps>) => {
+  const sync = (props: ResolvedInputProps) => {
     const controlled = typeof props.value === 'string';
     const nextDisabled = props.disabled ?? false;
     disabled.set(nextDisabled, 'reason: input sync disabled');
@@ -125,8 +135,8 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
       autoComplete: props.autoComplete ?? '',
       minLength: props.minLength ?? -1,
       maxLength: props.maxLength ?? -1,
-      inputMode: props.inputMode,
-      enterKeyHint: props.enterKeyHint,
+      inputMode: props.inputMode ?? undefined,
+      enterKeyHint: props.enterKeyHint ?? undefined,
     });
     value.set(control.snapshot()?.value ?? '', 'reason: input sync value');
   };

@@ -8,7 +8,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-The Checkbox base prototype provides checked, unchecked, disabled, and indeterminate interactions on top of Toggle semantics.
+The Checkbox base prototype owns checked, unchecked, disabled, and indeterminate interactions, together with the required control fact.
 
 <div>
   <PrototypePreviewer
@@ -23,10 +23,10 @@ The Checkbox base prototype provides checked, unchecked, disabled, and indetermi
 
 Checkbox is split into root and indicator parts connected through the anatomy system.
 
-- **Root** (`base-checkbox-root`) manages Toggle state (`checked`, `checkedChange`), disabled behavior, and the additional `indeterminate` state.
+- **Root** (`base-checkbox-root`) owns `checked`, `checkedChange`, disabled behavior, the `indeterminate` state, and the `required` fact.
 - **Indicator** (`base-checkbox-indicator`) reads the root `checked` and `indeterminate` states through anatomy runtime access and reflects them for rendering. It does not own checkbox state.
 
-The `base-checkbox` anatomy family uses a `contains` relation from root to indicator. A checkbox is expected to have at least one indicator, and may have more than one indicator when multiple visual surfaces need the same indicator semantics.
+The `base-checkbox` anatomy family uses a `contains` relation from root to indicator. Indicators are optional, and multiple visual surfaces can read the same root state through separate indicators.
 
 In the Web Components preview runtime, prototype IDs are registered with a `wc-` tag prefix: `wc-base-checkbox-root` and `wc-base-checkbox-indicator`.
 
@@ -52,11 +52,16 @@ Checkbox is workspace source. There is no public `proto-ui add` target. Passing 
   rows={[
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />
 
 These props belong to Root. Indicator has no props.
+
+Root and `asCheckboxRoot()` expose `checked`, `indeterminate`, `disabled`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`.
+
+The `required` prop initializes and updates one owned state, which also supplies the accessible required fact. It does not change the checked value or prevent unchecking. Native form constraint validation, submission, and Field validation remain responsibilities of an explicit composition; the atomic Checkbox does not create a hidden form input or install a Field binding automatically.
 
 ## References
 

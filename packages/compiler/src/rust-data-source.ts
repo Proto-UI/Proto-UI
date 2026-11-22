@@ -5,6 +5,7 @@ import { relationalOperandKind } from './expression-types';
 import { gpuiLexicalNames } from './gpui-lexical-names';
 import { validateIR } from './ir-validation';
 import { isDataValueType, statementsTerminate } from './ir';
+import { serializableDataType } from './value-types';
 import type {
   CompileResult,
   ExpressionIR,
@@ -226,6 +227,10 @@ export function emitRustDataSource(
   }
   function data(type: ExpressionIR['type'], span = ir.setup.span): DataType {
     if (isDataValueType(type)) return type;
+    if (typeof type !== 'string' && type.kind === 'value-array') {
+      const schema = serializableDataType(type);
+      if (schema !== undefined) return schema;
+    }
     if (typeof type !== 'string' && type.kind === 'object' && !type.index)
       return {
         kind: 'record',

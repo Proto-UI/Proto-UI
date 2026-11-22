@@ -6,9 +6,10 @@ import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
 import type { ObservableSemantics } from './observable-semantics';
 import type { GpuiNativeSdkIdentity } from './gpui-native-sdk';
+import type { EcmaIntrinsicName } from './ecmascript-values';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
-export const IR_VERSION = 7 as const;
+export const IR_VERSION = 8 as const;
 
 export interface SourceSpan {
   file: string;
@@ -52,6 +53,8 @@ export interface StaticCapabilityIR {
   span: SourceSpan;
 }
 export const MODULE_CAPABILITY_TYPES = [
+  'decoration-target',
+  'decoration-style',
   'control-label',
   'control-label-handle',
   'control-label-request',
@@ -62,6 +65,8 @@ export const MODULE_CAPABILITY_TYPES = [
   'focus-roving-key',
   'anatomy-family',
   'anatomy-part',
+  'public-expose',
+  'public-method',
   'anatomy-parts',
   'anatomy-order',
   'collection',
@@ -73,6 +78,8 @@ export const MODULE_CAPABILITY_TYPES = [
   'scroll',
   'text-control',
   'image-view',
+  'native-link',
+  'axis-input',
   'table-structure',
   'scroll-axis',
   'scroll-follow',
@@ -116,6 +123,9 @@ export type ModuleCapabilityType = (typeof MODULE_CAPABILITY_TYPES)[number];
 /** Ordinary lexical values retain structure without becoming public JSON data. */
 export type StructuredValueType =
   | { kind: 'callable'; parameters: ParameterIR[]; returnType: ValueType }
+  | { kind: 'value-array'; element: ValueType; readonly?: boolean; minimumLength?: number }
+  | { kind: 'set'; element: ValueType; readonly?: boolean }
+  | { kind: 'map'; key: ValueType; value: ValueType; readonly?: boolean }
   | {
       kind: 'object';
       fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[];
@@ -134,6 +144,8 @@ export type ValueType =
   | `optional:${ModuleCapabilityType}`
   | 'unknown'
   | 'exception'
+  | 'regexp'
+  | 'intl-number-format'
   | 'def'
   | 'run'
   | 'authored-result'
@@ -220,6 +232,7 @@ export function isPublicValueType(type: ValueType): boolean {
         isPublicValueType(type.returnType)
       );
     if (type.kind === 'value-union') return type.members.every(isPublicValueType);
+    if (type.kind === 'value-array') return isPublicValueType(type.element);
     return false;
   }
   const name = type.replace(/^(nullable|optional):/, '');
@@ -250,12 +263,23 @@ export function isCapabilityAssignable(actual: ValueType, expected: ValueType): 
   );
 }
 
+/** Public State method surface from Core's Owned/Borrowed/Observed contract. */
+export function stateHandleHasMethod(type: ValueType, name: string): boolean | undefined {
+  if (typeof type !== 'string' || !/^(state|borrowed|observed):(boolean|number|string)$/.test(type))
+    return undefined;
+  if (name === 'get') return true;
+  if (name === 'watch') return !type.startsWith('state:');
+  if (name === 'set' || name === 'setDefault') return !type.startsWith('observed:');
+  return undefined;
+}
+
 export type Operation = SemanticOperation;
 
 export interface ParameterIR {
   name: string;
   type: ValueType;
   optional?: boolean;
+  rest?: boolean;
   bindingId?: string;
   /** Evaluated at invocation, left to right, only for missing/undefined arguments. */
   default?: ExpressionIR;
@@ -291,15 +315,24 @@ export type ExpressionIR = ExpressionBase &
         declaration: RuleDeclarationIR;
         receiver: ExpressionIR;
         states: readonly { id: string; value: ExpressionIR }[];
+        styles?: readonly { id: string; value: ExpressionIR }[];
+        targets?: readonly { id: string; value: ExpressionIR }[];
       }
     | { kind: 'member'; object: ExpressionIR; property: string; optional: boolean }
     | { kind: 'member-write'; object: ExpressionIR; property: string; value: ExpressionIR }
     | { kind: 'element'; object: ExpressionIR; index: ExpressionIR; optional: boolean }
     | { kind: 'conditional'; condition: ExpressionIR; then: ExpressionIR; otherwise: ExpressionIR }
-    | { kind: 'call'; callee: ExpressionIR; arguments: ExpressionIR[]; optional: boolean }
+    | {
+        kind: 'call';
+        callee: ExpressionIR;
+        arguments: ExpressionIR[];
+        optional: boolean;
+        spread?: boolean[];
+      }
     | {
         kind: 'intrinsic';
         name:
+          | EcmaIntrinsicName
           | 'number.isFinite'
           | 'string'
           | 'object.freeze'
@@ -307,9 +340,40 @@ export type ExpressionIR = ExpressionBase &
           | 'object.hasOwn'
           | 'array.every'
           | 'array.includes'
+          | 'array.some'
+          | 'array.filter'
+          | 'array.find'
+          | 'array.findIndex'
+          | 'array.map'
+          | 'array.flatMap'
+          | 'array.forEach'
+          | 'array.slice'
+          | 'array.from'
+          | 'array.sort'
+          | 'array.reduce'
+          | 'array.push'
+          | 'array.shift'
+          | 'array.pop'
+          | 'array.join'
+          | 'array.isArray'
+          | 'json.stringify'
+          | 'set.create'
+          | 'set.add'
+          | 'set.has'
+          | 'set.delete'
+          | 'set.clear'
+          | 'map.create'
+          | 'map.get'
+          | 'map.set'
+          | 'map.has'
+          | 'map.delete'
+          | 'map.clear'
+          | 'array.at'
           | 'typeof'
           | 'error';
         arguments: ExpressionIR[];
+        /** Nullish collection receivers skip the call and its arguments. */
+        optional?: boolean;
       }
     | {
         kind: 'object-spread';
@@ -333,6 +397,7 @@ export type ExpressionIR = ExpressionBase &
           | '*'
           | '/'
           | '%'
+          | 'in'
           | '&&'
           | '||'
           | '??';
@@ -340,6 +405,7 @@ export type ExpressionIR = ExpressionBase &
         right: ExpressionIR;
       }
     | { kind: 'array'; elements: ExpressionIR[] }
+    | { kind: 'array-spread'; parts: { spread: boolean; value: ExpressionIR }[] }
     | { kind: 'record'; entries: { key: string; value: ExpressionIR }[] }
     | {
         kind: 'operation';
@@ -351,7 +417,7 @@ export type ExpressionIR = ExpressionBase &
         inputPayloadType?: 'event' | 'host-event' | 'a11y-value-event';
         arguments: ExpressionIR[];
       }
-    | { kind: 'helper-call'; name: string; arguments: ExpressionIR[] }
+    | { kind: 'helper-call'; name: string; arguments: ExpressionIR[]; spread?: boolean[] }
     | { kind: 'authored-hook'; hookId: string; arguments?: ExpressionIR[] }
     | { kind: 'function'; function: FunctionIR }
   );
@@ -367,6 +433,15 @@ export type StatementIR =
       span: SourceSpan;
     }
   | { kind: 'effect'; expression: ExpressionIR; span: SourceSpan }
+  | { kind: 'while'; condition: ExpressionIR; body: StatementIR[]; span: SourceSpan }
+  | {
+      kind: 'for-of';
+      name: string;
+      bindingId?: string;
+      iterable: ExpressionIR;
+      body: StatementIR[];
+      span: SourceSpan;
+    }
   | {
       kind: 'if';
       condition: ExpressionIR;
@@ -498,7 +573,12 @@ export interface GeneratedModule {
     irVersion: typeof IR_VERSION;
     backend: CompilerProfile;
     /** Reconstructable compile-time support selection, checked against emitted file bytes. */
-    nativeSupport?: { version: 2; id: string; features: readonly string[] };
+    nativeSupport?: {
+      version: 2;
+      id: string;
+      features: readonly string[];
+      inputs?: readonly { file: string; sha256: string }[];
+    };
     /** Expected native SDK bytes; file checking/publication verifies shared references. */
     nativeSdk?: GpuiNativeSdkIdentity & { path: string; bundled: boolean };
     /** Statically selected package exports and the package manifests that selected them. */

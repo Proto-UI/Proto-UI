@@ -1274,9 +1274,9 @@ function projectedStateAttributeValue(key: string, value: unknown): string | und
           ['false', 'true', 'page', 'step', 'location', 'date', 'time'].includes(value)
         ? value
         : undefined;
-  // Range readouts use a string state so indeterminate can withdraw valueNow.
+  // Range readouts use canonical numeric text so nullable values/bounds can withdraw facts.
   if (
-    key === 'valueNow' &&
+    (key === 'valueMin' || key === 'valueMax' || key === 'valueNow') &&
     typeof value === 'string' &&
     /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) &&
     Number.isFinite(Number(value))

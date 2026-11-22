@@ -37,11 +37,13 @@ Number Field is workspace source. There is no public `proto-ui add` target. Pass
   rows={[
     { name: 'value', type: 'number | null', default: '—' },
     { name: 'defaultValue', type: 'number | null', default: '0' },
-    { name: 'min', type: 'number', default: '0' },
-    { name: 'max', type: 'number', default: '100' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
     { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'name', type: 'string', default: "''" },
     { name: 'allowEmpty', type: 'boolean', default: 'false' },
@@ -54,6 +56,10 @@ Number Field is workspace source. There is no public `proto-ui add` target. Pass
 />
 
 These props belong to Root.
+
+Omitted bounds retain 0/100; explicit `null` removes that bound. `snapToStep={false}` preserves finite initial and edited values while `step` still controls increments. Without a bound, Home/End retain native editor movement for that direction.
+
+`required` combines with any enclosing Field requirement. Input and Control expose the resolved requirement and apply it to both the native editor and accessibility. This does not change nullable value ownership or submit the form.
 
 ## References
 

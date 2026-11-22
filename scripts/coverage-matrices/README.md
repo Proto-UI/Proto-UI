@@ -58,13 +58,15 @@ The modeled executable-navigation profile currently covers proven native Locatio
 
 ## Exact Retry virtual-module inputs
 
+The 2026-11-22 Compiler-consumer source reconciliation uses the existing manually maintained exact source/import records; `prototype-coverage.mjs --write` generates a different portfolio and does not refresh these Website bindings. The current Astro-config fingerprint is renewed only for two documentation sidebar entries (Native File Input and Selectable Row), after comparing against the previously reviewed Git blob `f56047b026e0cbbfbfa1bc9c63388160bf656104`. The other four Retry-profile inputs are unchanged. The Website matrix separately records the actual Native File Input Adapter example and reviews the four older source-body deltas before renewing their fingerprints. This reconciliation changes no row's blocked/research disposition and supplies no build, browser, assistive-technology or Compiler-output result.
+
 The current Retry profile admits only `virtual:proto-ui/runtime-retry-urls` from `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` and the three `runtimes/{react,vue,vue2}-runtime.ts` owners in that same directory. The internal `virtual:proto-ui/runtime-retry-imports` probe is not an authored import allowance. Other owners, near-match IDs, HTML and public assets remain outside this profile.
 
 Every current-profile input below must be a regular file at its exact authored path, with no repository-local symlink component, and match its raw-byte SHA-256. Successful admission includes all five files as promotion evidence metadata; recording a helper elsewhere cannot replace this conjunction.
 
 | Input | SHA-256 |
 | --- | --- |
-| `apps/www/astro.config.mjs` | `eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7` |
+| `apps/www/astro.config.mjs` | `fae7fd7ec4adfde8a9d493c14b73491f485c29b36db8ec405d89b6525f68d47f` |
 | `apps/www/scripts/runtime-retry-urls.mjs` | `510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224` |
 | `apps/www/scripts/contrast-provenance.mjs` | `a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a` |
 | `apps/www/src/utils/proto-ui-source.mjs` | `b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833` |
@@ -175,6 +177,8 @@ Null/empty-namespace `setAttributeNS` resource mutations on proven HTML/XHTML sc
 The same native-entry lexical inventory also supports bounded aliases and static object destructuring of browser `navigator.serviceWorker` and `location` receivers. Literal/const `javascript:` writes to native location/href and `assign`/`replace` calls remain unverified executable navigation; service-worker registrations retain the existing unresolved/external worker entry rules. Business/shadowed receivers and ordinary navigation are controls. Opaque navigation arguments remain unverified for promotion. Arbitrary getter, aggregate-object, reflective, bound-function and interprocedural receiver provenance is outside this profile. These are source checks; production verification remains a separate Rollup graph check. See the [Location interface](https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-location-interface) and [ServiceWorkerContainer](https://w3c.github.io/ServiceWorker/#serviceworkercontainer-interface).
 
 ### Current Website runtime ownership
+
+The Native File Input documentation example has one separately reviewed single-host profile: `NativeFileInputPreview.astro` dynamically imports only its exact `native-file-input-preview.ts` host boundary. Production validation requires module-edge provenance, one dynamic-only client chunk, the real React Adapter and Base Native File Input prototype, and no other framework host or Adapter outside that React Adapter dependency closure. Its native input root cannot be represented by the current div/span DemoSpec profile. The surrounding file-name status and browser-file option bridge remain a blocked authored composition; admitting this exact demonstration does not supply a general shell/runtime exemption or Compiler-consumer evidence. Historical graphs without this optional documentation page retain their previous scope; when the entry is present, all of its exact profile checks apply.
 
 The Pagefind `@vite-ignore` import is reviewed for the exact `url` expression in `apps/www/src/components/site-search-owner.ts`. The allowance requires the raw SHA-256 of that importer and of `apps/www/src/components/site-pagefind-resource.ts` at their recorded paths. The resource validates a same-origin HTTP(S) bundle and derives `pagefind.js` for the probe and import. Missing or changed companion bytes invalidate the allowance. The check binds the reviewed source pair and expression. It does not trace arbitrary runtime URL data flow or inspect deployed Pagefind assets.
 

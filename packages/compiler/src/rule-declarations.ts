@@ -11,25 +11,33 @@ import type { StyleTokenHandle } from './style-plan';
 type CoreCondition = WhenExpr<Record<string, Primitive>>;
 type CoreDependency = RuleDep<Record<string, Primitive>>;
 
-/** The existing Rule WhenExpr language, restricted to portable prop/state identities. */
-export type RuleValue = ({ type: 'prop'; key: string } | { type: 'state'; id: string }) & {
+/** The existing Rule WhenExpr language over portable source identities. */
+export type RuleValue = (
+  | { type: 'prop'; key: string }
+  | { type: 'state'; id: string }
+  | { type: 'meta'; key: string }
+) & {
   span: SourceSpan;
 };
 export type RuleCondition = (
   | Extract<CoreCondition, { type: 'true' | 'false' }>
   | (Omit<Extract<CoreCondition, { type: 'eq' }>, 'left'> & { left: RuleValue })
+  | (Omit<Extract<CoreCondition, { type: 'gte' }>, 'left'> & { left: RuleValue })
   | { type: 'not'; expr: RuleCondition }
   | { type: 'all' | 'any'; exprs: RuleCondition[] }
 ) & { span: SourceSpan };
 export type RuleDependency = (
   | Extract<CoreDependency, { kind: 'prop' }>
   | { kind: 'state'; id: string }
+  | { kind: 'meta'; key: string }
 ) & { span: SourceSpan };
+export type RuleStyleOperand = StyleTokenHandle | { kind: 'reference'; id: string };
 export interface RuleStyleOperation {
   kind: 'feedback.style.use';
   /** Stable within this declaration, including when the declaration is inactive. */
   id: string;
-  handles: StyleTokenHandle[];
+  handles: RuleStyleOperand[];
+  target?: { id: string };
   span: SourceSpan;
 }
 export interface RuleDeclarationIR {
@@ -55,12 +63,17 @@ export interface RuleDeclarationContext {
   resolveState(expression: ts.Expression): RuleStateBinding | undefined;
   /** Use the shared style extractor/source graph to admit declarations and trusted factories. */
   resolveStyle(expression: ts.Expression): StyleTokenHandle | undefined;
+  /** First-class checked handles transported through ordinary helper parameters. */
+  resolveStyleReference?(expression: ts.Expression): { id: string } | undefined;
+  resolveTarget?(expression: ts.Expression): { id: string } | undefined;
+  /** Optional checked lexical constants, including a known omitted optional argument. */
+  resolveStatic?(expression: ts.Expression): { value: Primitive | undefined } | undefined;
 }
 
 type Callback = ts.ArrowFunction | ts.FunctionExpression | ts.MethodDeclaration;
 type WhenPart =
   | { kind: 'condition'; value: RuleCondition }
-  | { kind: 'signal'; value: RuleValue; type: DataType }
+  | { kind: 'signal'; value: RuleValue; type?: DataType }
   | { kind: 'literal'; value: Primitive };
 const code = 'PUI1024';
 const tokenType: DataType = {
@@ -126,6 +139,198 @@ function literal(node: ts.Expression): Primitive | undefined {
     return Number.isFinite(value) ? value : undefined;
   }
   return undefined;
+}
+
+/** A When/Intent builder runs once at declaration time. Hoist a pure captured
+ * choice to that same setup point, then check each selected declaration normally.
+ * This is source-language lowering, not a component name or optional-state recipe.
+ */
+export function liftRuleDeclarationConditional(
+  node: ts.CallExpression
+): ts.ConditionalExpression | undefined {
+  const linkParents = (parent: ts.Node): void =>
+    ts.forEachChild(parent, (child) => {
+      Object.defineProperty(child, 'parent', { value: parent, configurable: true, writable: true });
+      linkParents(child);
+    });
+  if (node.arguments.length !== 1 || !ts.isObjectLiteralExpression(node.arguments[0]))
+    return undefined;
+  for (const field of node.arguments[0].properties) {
+    if (!ts.isPropertyAssignment(field) || !['when', 'intent'].includes(propertyName(field.name)))
+      continue;
+    const value = unwrap(field.initializer);
+    if (!ts.isArrowFunction(value) && !ts.isFunctionExpression(value)) continue;
+    const locals = new Set<string>();
+    const collect = (part: ts.Node): void => {
+      if ((ts.isParameter(part) || ts.isVariableDeclaration(part)) && ts.isIdentifier(part.name))
+        locals.add(part.name.text);
+      ts.forEachChild(part, collect);
+    };
+    collect(value);
+    const pureCapture = (part: ts.Expression): boolean => {
+      part = unwrap(part);
+      if (literal(part) !== undefined) return true;
+      if (ts.isIdentifier(part)) return !locals.has(part.text);
+      if (ts.isPropertyAccessExpression(part)) return pureCapture(part.expression);
+      if (ts.isPrefixUnaryExpression(part) && part.operator === ts.SyntaxKind.ExclamationToken)
+        return pureCapture(part.operand);
+      return (
+        ts.isBinaryExpression(part) &&
+        [
+          ts.SyntaxKind.EqualsEqualsEqualsToken,
+          ts.SyntaxKind.ExclamationEqualsEqualsToken,
+          ts.SyntaxKind.AmpersandAmpersandToken,
+          ts.SyntaxKind.BarBarToken,
+          ts.SyntaxKind.QuestionQuestionToken,
+        ].includes(part.operatorToken.kind) &&
+        pureCapture(part.left) &&
+        pureCapture(part.right)
+      );
+    };
+    let choice: ts.ConditionalExpression | undefined;
+    const find = (part: ts.Node): void => {
+      if (choice) return;
+      if (ts.isConditionalExpression(part) && pureCapture(part.condition)) {
+        choice = part;
+        return;
+      }
+      ts.forEachChild(part, find);
+    };
+    find(value.body);
+    if (!choice) continue;
+    const selected = choice;
+    const branch = (replacement: ts.Expression): ts.CallExpression => {
+      const transformed = ts.transform(node, [
+        (context) => {
+          const visit: ts.Visitor = (part) =>
+            part === selected ? replacement : ts.visitEachChild(part, visit, context);
+          return (root) => ts.visitNode(root, visit) as ts.CallExpression;
+        },
+      ]);
+      const result = transformed.transformed[0];
+      transformed.dispose();
+      ts.setOriginalNode(result, node);
+      ts.setTextRange(result, node);
+      Object.defineProperty(result, 'parent', {
+        value: node.parent,
+        configurable: true,
+        writable: true,
+      });
+      return result;
+    };
+    const lifted = ts.factory.createConditionalExpression(
+      selected.condition,
+      undefined,
+      branch(selected.whenTrue),
+      undefined,
+      branch(selected.whenFalse)
+    );
+    ts.setOriginalNode(lifted, node);
+    ts.setTextRange(lifted, node);
+    Object.defineProperty(lifted, 'parent', {
+      value: node.parent,
+      configurable: true,
+      writable: true,
+    });
+    linkParents(lifted);
+    return lifted;
+  }
+  return undefined;
+}
+
+/** Retain a finite style choice at its original evaluation point. Each branch
+ * still has to resolve to a trusted tw call with completely static tokens. */
+export function liftStyleCallConditional(
+  node: ts.CallExpression
+): ts.ConditionalExpression | undefined {
+  if (node.arguments.length !== 1 || node.questionDotToken || node.typeArguments?.length)
+    return undefined;
+  const choice = unwrap(node.arguments[0]);
+  if (!ts.isConditionalExpression(choice)) return undefined;
+  const branch = (value: ts.Expression) => {
+    const call = ts.factory.updateCallExpression(node, node.expression, undefined, [value]);
+    ts.setOriginalNode(call, node);
+    ts.setTextRange(call, node);
+    return call;
+  };
+  const result = ts.factory.createConditionalExpression(
+    choice.condition,
+    undefined,
+    branch(choice.whenTrue),
+    undefined,
+    branch(choice.whenFalse)
+  );
+  ts.setOriginalNode(result, node);
+  ts.setTextRange(result, node);
+  Object.defineProperty(result, 'parent', {
+    value: node.parent,
+    configurable: true,
+    writable: true,
+  });
+  const parents = (parent: ts.Node): void =>
+    ts.forEachChild(parent, (child) => {
+      Object.defineProperty(child, 'parent', { value: parent, configurable: true, writable: true });
+      parents(child);
+    });
+  parents(result);
+  return result;
+}
+
+/** Spread of a literal argument list has the same ordered builder calls as
+ * spelling those arguments out. A captured conditional is lifted first, so
+ * each selected list remains finite; arbitrary iterable values stay rejected. */
+export function lowerRuleLiteralArgumentSpreads(
+  node: ts.CallExpression
+): ts.CallExpression | undefined {
+  let changed = false;
+  const transformed = ts.transform(node, [
+    (context) => {
+      const argumentsOf = (items: readonly ts.Expression[]): ts.Expression[] =>
+        items.flatMap((item) => {
+          if (!ts.isSpreadElement(item)) return [item];
+          const value = unwrap(item.expression);
+          if (!ts.isArrayLiteralExpression(value) || value.elements.some(ts.isOmittedExpression))
+            return [item];
+          changed = true;
+          return argumentsOf(value.elements as readonly ts.Expression[]);
+        });
+      const visit: ts.Visitor = (part) => {
+        const visited = ts.visitEachChild(part, visit, context);
+        if (!ts.isCallExpression(visited) || !visited.arguments.some(ts.isSpreadElement))
+          return visited;
+        const args = argumentsOf(visited.arguments);
+        if (
+          args.length === visited.arguments.length &&
+          args.every((arg, index) => arg === visited.arguments[index])
+        )
+          return visited;
+        return ts.factory.updateCallExpression(
+          visited,
+          visited.expression,
+          visited.typeArguments,
+          args
+        );
+      };
+      return (root) => ts.visitNode(root, visit) as ts.CallExpression;
+    },
+  ]);
+  const result = transformed.transformed[0];
+  transformed.dispose();
+  if (!changed) return undefined;
+  ts.setOriginalNode(result, node);
+  ts.setTextRange(result, node);
+  Object.defineProperty(result, 'parent', {
+    value: node.parent,
+    configurable: true,
+    writable: true,
+  });
+  const parents = (parent: ts.Node): void =>
+    ts.forEachChild(parent, (child) => {
+      Object.defineProperty(child, 'parent', { value: parent, configurable: true, writable: true });
+      parents(child);
+    });
+  parents(result);
+  return result;
 }
 
 function ordinaryCall(node: ts.CallExpression): void {
@@ -202,13 +407,13 @@ export function extractRuleDeclaration(
   const deps: RuleDependency[] = [];
   const depKeys = new Set<string>();
   const dependency = (value: RuleValue): void => {
-    const key = value.type === 'prop' ? `prop:${value.key}` : `state:${value.id}`;
+    const key = value.type === 'state' ? `state:${value.id}` : `${value.type}:${value.key}`;
     if (depKeys.has(key)) return;
     depKeys.add(key);
     deps.push(
-      value.type === 'prop'
-        ? { kind: 'prop', key: value.key, span: value.span }
-        : { kind: 'state', id: value.id, span: value.span }
+      value.type === 'state'
+        ? { kind: 'state', id: value.id, span: value.span }
+        : { kind: value.type, key: value.key, span: value.span }
     );
   };
   const whenBuilder = (whenCallback.parameters[0].name as ts.Identifier).text;
@@ -229,6 +434,12 @@ export function extractRuleDeclaration(
     const span = sourceSpan(original);
     const value = literal(expression);
     if (value !== undefined) return { kind: 'literal', value };
+    const constant = context.resolveStatic?.(expression);
+    if (constant && constant.value !== undefined) return { kind: 'literal', value: constant.value };
+    if (ts.isConditionalExpression(expression)) {
+      const selected = context.resolveStatic?.(expression.condition);
+      if (selected) return parseWhen(selected.value ? expression.whenTrue : expression.whenFalse);
+    }
     if (ts.isIdentifier(expression)) {
       const alias = whenAliases.get(expression.text);
       if (alias) return alias;
@@ -245,18 +456,33 @@ export function extractRuleDeclaration(
     if (callee.questionDotToken)
       rejectNode(callee, code, 'Optional rule builder access is unsupported.');
     const operation = callee.name.text;
-    if (operation === 'eq') {
+    if (operation === 'eq' || operation === 'gte') {
       arity(expression, 1);
       const left = parseWhen(callee.expression);
       const right = parseWhen(expression.arguments[0]);
       if (left.kind !== 'signal')
-        rejectNode(callee.expression, code, 'Rule equality requires a declared prop/state signal.');
-      if (right.kind !== 'literal' || !acceptsValue(left.type, right.value))
+        rejectNode(
+          callee.expression,
+          code,
+          'Rule comparison requires a declared prop/state/meta signal.'
+        );
+      if (
+        right.kind !== 'literal' ||
+        (left.type && operation === 'eq' && !acceptsValue(left.type, right.value))
+      )
         rejectNode(
           expression.arguments[0],
           code,
           'Rule comparison requires a concrete literal compatible with its declared data type.'
         );
+      if (operation === 'gte') {
+        if (typeof right.value !== 'number' || !Number.isFinite(right.value))
+          rejectNode(expression.arguments[0], code, 'Rule gte requires a finite numeric literal.');
+        return {
+          kind: 'condition',
+          value: { type: 'gte', left: left.value, right: right.value, span },
+        };
+      }
       return {
         kind: 'condition',
         value: { type: 'eq', left: left.value, right: right.value, span },
@@ -310,10 +536,23 @@ export function extractRuleDeclaration(
       dependency(signal);
       return { kind: 'signal', value: signal, type: binding.type };
     }
+    if (operation === 'meta') {
+      arity(expression, 1);
+      const key = parseWhen(expression.arguments[0]);
+      if (key.kind !== 'literal' || typeof key.value !== 'string' || !key.value.length)
+        rejectNode(
+          expression.arguments[0],
+          code,
+          'Rule meta keys must be nonempty concrete strings.'
+        );
+      const signal: RuleValue = { type: 'meta', key: key.value, span };
+      dependency(signal);
+      return { kind: 'signal', value: signal };
+    }
     rejectNode(
       expression,
       code,
-      `Rule operation ${operation} is not statically supported; context/meta and dynamic extensions are unsupported.`
+      `Rule operation ${operation} is not statically supported; context and dynamic extensions are unsupported.`
     );
   };
   const whenBody = whenCallback.body!;
@@ -336,13 +575,14 @@ export function extractRuleDeclaration(
   } else when = condition(whenBody);
 
   const intentBuilder = (intentCallback.parameters[0].name as ts.Identifier).text;
-  const styleAliases = new Map<string, StyleTokenHandle>();
-  const styleHandle = (expression: ts.Expression): StyleTokenHandle => {
+  const styleAliases = new Map<string, RuleStyleOperand>();
+  const styleHandle = (expression: ts.Expression): RuleStyleOperand => {
     const input = unwrap(expression);
-    const handle =
-      ts.isIdentifier(input) && styleAliases.has(input.text)
-        ? styleAliases.get(input.text)
-        : context.resolveStyle(input);
+    if (ts.isIdentifier(input) && styleAliases.has(input.text))
+      return styleAliases.get(input.text)!;
+    const reference = context.resolveStyleReference?.(input);
+    if (reference) return { kind: 'reference', id: reference.id };
+    const handle = context.resolveStyle(input);
     if (
       !handle ||
       !acceptsValue(tokenType, handle) ||
@@ -369,11 +609,38 @@ export function extractRuleDeclaration(
     ordinaryCall(call);
     let receiver: ts.Expression = call.expression;
     const path: string[] = [];
+    let target: { id: string } | undefined;
     while (ts.isPropertyAccessExpression(receiver)) {
       if (receiver.questionDotToken)
         rejectNode(receiver, code, 'Optional rule intent access is unsupported.');
       path.unshift(receiver.name.text);
       receiver = receiver.expression;
+    }
+    if (
+      path.join('.') === 'use' &&
+      ts.isCallExpression(receiver) &&
+      ts.isPropertyAccessExpression(receiver.expression) &&
+      receiver.expression.name.text === 'to'
+    ) {
+      ordinaryCall(receiver);
+      if (receiver.arguments.length !== 1)
+        rejectNode(receiver, code, 'A decoration style target requires one owned target.');
+      target = context.resolveTarget?.(receiver.arguments[0]);
+      if (!target)
+        rejectNode(
+          receiver.arguments[0],
+          code,
+          'Rule decoration styles require a checked owned decoration target.'
+        );
+      path.length = 0;
+      path.push('use');
+      receiver = receiver.expression.expression;
+      while (ts.isPropertyAccessExpression(receiver)) {
+        if (receiver.questionDotToken)
+          rejectNode(receiver, code, 'Optional rule target access is unsupported.');
+        path.unshift(receiver.name.text);
+        receiver = receiver.expression;
+      }
     }
     if (
       !ts.isIdentifier(receiver) ||
@@ -389,6 +656,7 @@ export function extractRuleDeclaration(
       kind: 'feedback.style.use',
       id: `rule:${context.id}:style:${ops.length}`,
       handles: call.arguments.map(styleHandle),
+      ...(target ? { target } : {}),
       span: sourceSpan(expression),
     });
   };
@@ -434,7 +702,8 @@ export function extractRuleDeclaration(
  */
 export function extractRuleStyleHandle(
   module: SourceModule,
-  expression: ts.Expression
+  expression: ts.Expression,
+  resolveLocal?: (name: string) => ts.Expression | undefined
 ): StyleTokenHandle {
   const active = new Set<string>();
   const declaration = <T>(
@@ -442,8 +711,24 @@ export function extractRuleStyleHandle(
     identifier: ts.Identifier,
     parse: (owner: SourceModule, node: ts.Expression) => T
   ): T => {
+    const local = current === module ? resolveLocal?.(identifier.text) : undefined;
+    if (local) {
+      const identity = `${current.file.fileName}#local:${identifier.text}`;
+      if (active.has(identity))
+        rejectNode(identifier, code, 'Recursive style declarations are unsupported.');
+      active.add(identity);
+      try {
+        return parse(current, local);
+      } finally {
+        active.delete(identity);
+      }
+    }
     const resolved = current.graph.resolveBinding(current, identifier.text);
-    if (!resolved.module || ts.isFunctionDeclaration(resolved.node))
+    if (
+      !resolved.module ||
+      ts.isFunctionDeclaration(resolved.node) ||
+      resolved.module.mutableBindings.has(resolved.name)
+    )
       rejectNode(
         identifier,
         code,
@@ -470,11 +755,27 @@ export function extractRuleStyleHandle(
         (text, span) => text + stringValue(owner, span.expression) + span.literal.text,
         value.head.text
       );
-    if (ts.isElementAccessExpression(value)) {
-      const key = stringValue(owner, value.argumentExpression);
-      const table = (current: SourceModule, object: ts.Expression): string => {
+    if (ts.isElementAccessExpression(value) || ts.isPropertyAccessExpression(value)) {
+      const key = ts.isPropertyAccessExpression(value)
+        ? value.name.text
+        : stringValue(owner, value.argumentExpression);
+      const table = (
+        current: SourceModule,
+        object: ts.Expression,
+        key: string,
+        selected: (owner: SourceModule, value: ts.Expression) => string
+      ): string => {
         object = unwrap(object);
-        if (ts.isIdentifier(object)) return declaration(current, object, table);
+        if (ts.isIdentifier(object))
+          return declaration(current, object, (owner, value) => table(owner, value, key, selected));
+        if (ts.isElementAccessExpression(object) || ts.isPropertyAccessExpression(object)) {
+          const parentKey = ts.isPropertyAccessExpression(object)
+            ? object.name.text
+            : stringValue(current, object.argumentExpression);
+          return table(current, object.expression, parentKey, (owner, value) =>
+            table(owner, value, key, selected)
+          );
+        }
         if (!ts.isObjectLiteralExpression(object))
           rejectNode(
             object,
@@ -488,9 +789,9 @@ export function extractRuleStyleHandle(
             item.name.text === key
         ) as ts.PropertyAssignment | undefined;
         if (!property) rejectNode(value, code, `Static style table has no entry ${key}.`);
-        return stringValue(current, property.initializer);
+        return selected(current, property.initializer);
       };
-      return table(owner, value.expression);
+      return table(owner, value.expression, key, stringValue);
     }
     // A static string list joined by a literal separator is the same string
     // the module-data admission folds (source-language.md).

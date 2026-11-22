@@ -1523,12 +1523,8 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
       expect(result.ok).toBe(false);
       if (!result.ok)
         expect(
-          result.diagnostics.some((item) =>
-            item.message.includes(
-              kind === 'array'
-                ? 'Data arrays cannot contain semantic handles'
-                : 'IR expression type mismatch.'
-            )
+          result.diagnostics.some(
+            (item) => item.code === 'PUI2002' && item.message === 'IR expression type mismatch.'
           )
         ).toBe(true);
     }

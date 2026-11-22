@@ -42,7 +42,9 @@ describe('ordinary functions and authored hook lifecycles', () => {
       "def.expose.method('write',()=>focusVisible.set(true));",
       "def.expose.method('write',()=>byName?.set(true));",
     ]) {
-      const rejected = parsePrototype(source.replace("def.expose.method('read'", `${write}def.expose.method('read'`));
+      const rejected = parsePrototype(
+        source.replace("def.expose.method('read'", `${write}def.expose.method('read'`)
+      );
       expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
     }
   });
@@ -51,20 +53,23 @@ describe('ordinary functions and authored hook lifecycles', () => {
     const ir = checked(`${core}
       const install=defineAsHook({name:'named-state',setup(def){const flag=def.state.bool('flag',true);}});
       export default definePrototype({name:'owner',setup(def){const {flag}=install().stateHandles;def.expose.method('read',()=>flag.get());}});`);
-    expect(ir.hooks[0].capture?.states).toEqual([{name:'flag',type:'state:boolean',definite:true}]);
-    const forged=JSON.parse(JSON.stringify(ir));
+    expect(ir.hooks[0].capture?.states).toEqual([
+      { name: 'flag', type: 'state:boolean', definite: true },
+    ]);
+    const forged = JSON.parse(JSON.stringify(ir));
     delete forged.hooks[0].capture.states[0].definite;
-    expect(validateIR(forged)).toMatchObject({ok:false});
+    expect(validateIR(forged)).toMatchObject({ ok: false });
   });
 
   it.each([
     `if(true){def.state.bool('flag',true);}`,
     `try{def.state.bool('flag',true);}finally{}`,
     `const declare=()=>def.state.bool('flag',true);declare();`,
-  ])('keeps non-definite named states optional: %s', (body) => {
-    const ir=checked(`${core}const install=defineAsHook({name:'optional-state',setup(def){${body}}});
+  ])('proves named states across successful setup control flow: %s', (body) => {
+    const ir =
+      checked(`${core}const install=defineAsHook({name:'optional-state',setup(def){${body}}});
       export default definePrototype({name:'owner',setup(def){const handles=install().stateHandles;if(handles){const flag=handles.flag;if(flag){def.expose.method('read',()=>flag.get());}}}});`);
-    expect(ir.hooks[0].capture?.states.every((state)=>!state.definite)).toBe(true);
+    expect(ir.hooks[0].capture?.states.every((state) => state.definite)).toBe(true);
   });
 
   it.each(['once', 'multiple', 'configurable'] as const)(
@@ -83,7 +88,9 @@ describe('ordinary functions and authored hook lifecycles', () => {
         setup: { phase: 'setup', context: 'helper' },
         configure: { phase: 'setup', context: 'helper', returnType: 'void' },
       });
-      expect(ir.hooks[0].capture?.states).toEqual([{ name: 'count', type: 'state:number', definite: true }]);
+      expect(ir.hooks[0].capture?.states).toEqual([
+        { name: 'count', type: 'state:number', definite: true },
+      ]);
     }
   );
 
@@ -218,7 +225,9 @@ describe('ordinary functions and authored hook lifecycles', () => {
     const ir = checked(
       `${core}const install=defineAsHook({name:'capture',setup(def){${body}const unused=()=>def.state.bool('unreached',false);}});export default definePrototype({name:'owner',setup(def){const h=install();def.expose.method('read',()=>h.getState('flag')?.get());}});`
     );
-    expect(ir.hooks[0].capture?.states).toEqual([{ name: 'flag', type: 'state:boolean' }]);
+    expect(ir.hooks[0].capture?.states).toEqual([
+      { name: 'flag', type: 'state:boolean', definite: true },
+    ]);
     const forged = JSON.parse(JSON.stringify(ir));
     forged.hooks[0].capture.states = [];
     expect(validateIR(forged)).toMatchObject({

@@ -75,17 +75,24 @@ it('dispatches keyed raw snapshot diffs through a real generated React owner', a
   expect(() => exposed.calls()).toThrow(/dispos|alive|terminal/i);
 }, 30_000);
 
-it('retains target and source admission boundaries outside keyed React raw watch', () => {
+it('checks the implemented raw-watch targets and retains source admission boundaries', () => {
   for (const profile of [
     'vue-source-v1',
     'vue2-source-v1',
     'web-component-source-v1',
     'gpui-source-v1',
   ]) {
-    expect(compilePrototype(source, { profile })).toMatchObject({
-      ok: false,
-      diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
-    });
+    const compiled = compilePrototype(source, { profile });
+    // These are source-admission checks. The generated React owner above
+    // separately exercises runtime ordering, cancellation, and disposal.
+    if (profile === 'vue-source-v1' || profile === 'web-component-source-v1') {
+      expect(compiled.ok, JSON.stringify(compiled.ok ? {} : compiled.diagnostics)).toBe(true);
+    } else {
+      expect(compiled).toMatchObject({
+        ok: false,
+        diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
+      });
+    }
   }
   expect(
     compilePrototype(
@@ -95,10 +102,7 @@ it('retains target and source admission boundaries outside keyed React raw watch
       ),
       { profile: 'react-dom-source-v1' }
     )
-  ).toMatchObject({
-    ok: false,
-    diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
-  });
+  ).toMatchObject({ ok: true });
   expect(
     compilePrototype(source.replace("['value','extra']", '[]'), { profile: 'react-dom-source-v1' })
   ).toMatchObject({ ok: false });

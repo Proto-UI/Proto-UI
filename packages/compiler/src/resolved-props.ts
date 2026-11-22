@@ -1,5 +1,38 @@
 import { acceptsValue } from './data-types';
-import type { ExpressionIR, PrototypeIR, StatementIR } from './ir';
+import { traceSetupOperations } from './callable-effects';
+import type { ExpressionIR, PrototypeIR, StaticValue } from './ir';
+
+/** Literal data only: never run a validator, helper, getter, or host operation. */
+function staticPropValue(expression: ExpressionIR | undefined): StaticValue | undefined {
+  if (!expression) return undefined;
+  if (expression.kind === 'literal')
+    return typeof expression.value !== 'number' || Number.isFinite(expression.value)
+      ? expression.value
+      : undefined;
+  if (expression.kind === 'narrow') return staticPropValue(expression.value);
+  if (expression.kind === 'unary' && (expression.operator === '-' || expression.operator === '+')) {
+    const operand = staticPropValue(expression.operand);
+    return typeof operand === 'number'
+      ? expression.operator === '-'
+        ? -operand
+        : operand
+      : undefined;
+  }
+  if (expression.kind === 'array') {
+    const values = expression.elements.map(staticPropValue);
+    return values.every((value): value is StaticValue => value !== undefined) ? values : undefined;
+  }
+  if (expression.kind === 'record') {
+    const entries = expression.entries.map(
+      (entry) => [entry.key, staticPropValue(entry.value)] as const
+    );
+    if (entries.some(([, value]) => value === undefined)) return undefined;
+    return Object.fromEntries(entries.sort(([a], [b]) => a.localeCompare(b))) as {
+      readonly [key: string]: StaticValue;
+    };
+  }
+  return undefined;
+}
 
 /** Prove native resolved Props from checked declarations and unconditional default layers. */
 export function resolvedPropFacts(ir: PrototypeIR): {
@@ -34,69 +67,72 @@ export function resolvedPropFacts(ir: PrototypeIR): {
   for (const hook of ir.hooks) visit(hook.setup);
   for (const binding of ir.moduleBindings ?? []) visit(binding.value);
   const guaranteed = new Set<Operation>();
-  // A conditional without an early setup exit cannot bypass a later declaration.
-  // Presence is separate from whether repeated declarations prove a non-null value.
-  const canExit = (body: readonly StatementIR[]): boolean =>
-    body.some(
-      (statement) =>
-        statement.kind === 'return' ||
-        statement.kind === 'throw' ||
-        (statement.kind === 'if' && (canExit(statement.then) || canExit(statement.otherwise))) ||
-        (statement.kind === 'try' &&
-          (canExit(statement.body) ||
-            (!!statement.catch && canExit(statement.catch.body)) ||
-            (!!statement.finally && canExit(statement.finally))))
-    );
-  for (const statement of ir.setup.body) {
-    if (
-      statement.kind === 'return' ||
-      statement.kind === 'throw' ||
-      (statement.kind === 'if' && (canExit(statement.then) || canExit(statement.otherwise))) ||
-      (statement.kind === 'try' && canExit([statement]))
-    )
-      break;
-    if (statement.kind === 'effect' && statement.expression.kind === 'operation')
-      guaranteed.add(statement.expression);
-  }
+  // Inherited prototypes and installed hooks contribute real declarations too.
+  // Use the checked call graph's successful-path intersection, rather than
+  // treating every syntactically contained closure as an executed declaration.
+  const traceIssue = traceSetupOperations(
+    ir.setup,
+    ir.moduleBindings ?? [],
+    {
+      operation() {},
+      hook() {},
+      completePropOperations(operations) {
+        for (const operation of operations) guaranteed.add(operation);
+      },
+    },
+    ir.hooks
+  );
+  if (traceIssue) guaranteed.clear();
   const required = new Set<string>(),
     nonNull = new Set<string>();
   for (const prop of ir.props) {
     const declarations = definitions.get(prop.name) ?? [];
     if (declarations.some((declaration) => guaranteed.has(declaration))) required.add(prop.name);
-    if (declarations.length !== 1 || !guaranteed.has(declarations[0])) continue;
-    const record = declarations[0].arguments[0];
-    const spec =
-      record.kind === 'record'
+    if (!declarations.some((declaration) => guaranteed.has(declaration))) continue;
+    const specifications = declarations.map((declaration) => {
+      const record = declaration.arguments[0];
+      return record.kind === 'record'
         ? record.entries.find((entry) => entry.key === prop.name)?.value
         : undefined;
+    });
+    const spec = specifications[0];
     if (opaque || spec?.kind !== 'record') continue;
+    // Identical Base/Shadcn refinements do not weaken a declared fallback.
+    // Different or opaque refinements keep the conservative nullable result.
+    const specification = staticPropValue(spec);
+    if (
+      specification === undefined ||
+      specifications.some(
+        (candidate) => JSON.stringify(staticPropValue(candidate)) !== JSON.stringify(specification)
+      )
+    )
+      continue;
     const fields = new Map(spec.entries.map((entry) => [entry.key, entry.value]));
+    // A user validator can reject an otherwise valid literal fallback. Its
+    // authored function is not evaluated by the native type proof.
+    if (fields.has('validator')) continue;
     const empty = fields.get('empty');
     if (empty && (empty.kind !== 'literal' || empty.value === 'accept')) continue;
     const valid = (value: ExpressionIR | undefined): boolean => {
-      if (
-        value?.kind !== 'literal' ||
-        value.value === null ||
-        !acceptsValue(prop.type, value.value)
-      )
+      const candidate = staticPropValue(value);
+      if (candidate === undefined || candidate === null || !acceptsValue(prop.type, candidate))
         return false;
       const options = fields.get('options');
       if (
         options &&
         (options.kind !== 'array' ||
-          !options.elements.some(
-            (option) => option.kind === 'literal' && option.value === value.value
-          ))
+          !options.elements.some((option) => staticPropValue(option) === candidate))
       )
         return false;
       const range = fields.get('range');
       if (range) {
-        if (range.kind !== 'record' || typeof value.value !== 'number') return false;
+        if (range.kind !== 'record' || typeof candidate !== 'number') return false;
         for (const entry of range.entries) {
-          if (entry.value.kind !== 'literal' || typeof entry.value.value !== 'number') return false;
+          const bound = staticPropValue(entry.value);
+          if (typeof bound !== 'number') return false;
           if (
-            (entry.key === 'min' && value.value < entry.value.value) ||
-            (entry.key === 'max' && value.value > entry.value.value)
+            (entry.key === 'min' && candidate < bound) ||
+            (entry.key === 'max' && candidate > bound)
           )
             return false;
         }

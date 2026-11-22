@@ -1,0 +1,41 @@
+id: P-BASE-NATIVE-FILE-INPUT
+type: prototype
+title: Native File Input separates control policy from host file selection
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: The bounded control policy is extracted from a real Compiler consumer. Native picker, file selection, label activation and assistive-technology observations remain separate acceptance obligations; source compilation alone does not establish them.
+summary: One native file input uses Proto availability, required, naming and focus semantics while retaining the host picker and file values.
+statement:
+  en: Native File Input declares portable disabled, required and ariaLabel policy on a single physical native file-input root. Its host projects the same disabled and required facts to native attributes and owns FileList, picker invocation, accept/multiple configuration, native change delivery and clearing. The prototype never coerces files into portable JSON or replaces the native picker with an action button.
+criteria:
+  - id: P-BASE-NATIVE-FILE-INPUT-POLICY
+    text:
+      en: disabled and required default to false, ariaLabel to an empty string. Accepted changes project accessibility state and name and expose disabled and required. Removing a prop restores its declared default. Reentrant synchronization and logical disposal cannot let an older update overwrite a later accepted policy.
+  - id: P-BASE-NATIVE-FILE-INPUT-FOCUS
+    text:
+      en: Focus participation, focused and focusVisible observations and focusSelf/blurSelf use the shared Focus protocol. Disabled input rejects focusSelf and normal focus participation; re-enabling restores current participation without replaying picker activation. A current ControlLabel request may focus the enabled subject but does not synthesize a click or picker permission.
+  - id: P-BASE-NATIVE-FILE-INPUT-HOST
+    text:
+      en: The Web consumer supplies one actual input root with type file and projects the same accepted disabled and required facts to its native fields. Browser-owned role, keyboard activation, chooser permissions, accept/multiple options, FileList identity, change events and clearing remain host behavior. No text-control value or portable valueChange event is declared, and no selected file path is invented.
+  - id: P-BASE-NATIVE-FILE-INPUT-ENTRIES
+    text:
+      en: The package root and /native-file-input source subpath export nativeFileInput, asNativeFileInput and their props/expose types. Both authoring entries use the same setup. A host bridge may transport native refs and file events but cannot replace the prototype's focus or policy state with application listeners.
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-PROPS-0001, C-AS-FOCUSABLE-0001, C-CONTROL-LABEL-0001]
+verifies:
+  tests: [T-NATIVE-FILE-INPUT-0001]
+sources:
+  - path: packages/prototypes/base/src/native-file-input/root.proto.ts
+  - path: packages/prototypes/base/src/native-file-input/types.ts
+  - path: packages/prototypes/base/src/native-file-input/index.ts
+openQuestions:
+  - id: P-BASE-NATIVE-FILE-INPUT-Q-NATIVE-EVIDENCE
+    question:
+      en: Have independent native picker, physical disabled/required, label-focus, lifecycle and assistive-technology observations established this bounded host composition?
+    blocks: [activation:P-BASE-NATIVE-FILE-INPUT]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define a shared native-file control policy while keeping file values and OS picker mechanics on the explicit host boundary.
+tags: [prototype, base, native, file-input]

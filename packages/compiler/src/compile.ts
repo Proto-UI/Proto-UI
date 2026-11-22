@@ -20,7 +20,7 @@ import {
   type OutputArtifact,
 } from './artifact-output';
 import { sourceName } from './source-resolution';
-import { FileSourceGraph, type FileSourceSnapshot } from './source-loader';
+import { FileSourceGraph, type FileSourceSnapshot, type SourceRootIdentity } from './source-loader';
 import { CompilerRejection } from './diagnostics';
 import { attachEmitterMap, generatedSourcePath } from './emitter-map';
 import type { CompileResult, GeneratedModule, ParseOptions, PrototypeIR, SourceSpan } from './ir';
@@ -32,6 +32,8 @@ export interface Compilation {
 }
 export interface CompileOptions extends ParseOptions {
   componentName?: string;
+  /** Explicit React DOM host root, checked against any authored physical-root declaration. */
+  rootTag?: string;
   profile?: string | TargetSelection;
   /** GPUI source dependency shared by composed prototypes; omission bundles the editable SDK. */
   nativeSdkPath?: string;
@@ -40,8 +42,11 @@ export interface CompileOptions extends ParseOptions {
 }
 export interface FileCompileOptions {
   root?: string;
+  /** Stable logical identities for canonical external source roots; physical paths remain audited. */
+  sourceRootIdentities?: readonly SourceRootIdentity[];
   exportName?: string;
   componentName?: string;
+  rootTag?: string;
   profile?: string | TargetSelection;
   nativeSdkPath?: string;
   gpuiDependency?: 'workspace';
@@ -57,12 +62,26 @@ export function compilePrototype(
   if (!parsed.ok) return parsed;
   const profile = resolveTargetProfile(options.profile ?? 'react-runtime-v1');
   if (!profile.ok) return profile;
+  if (options.rootTag !== undefined && profile.value.id !== 'react-dom-source-v1') {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message: 'Explicit rootTag is currently implemented only by react-dom-source-v1.',
+          span: parsed.value.setup.span,
+        },
+      ],
+    };
+  }
   const admitted = checkTargetOperations(parsed.value, profile.value);
   if (!admitted.ok) return admitted;
   let emitted: CompileResult<GeneratedModule>;
   const emitOptions = {
     componentName: options.componentName,
     propsUpdatePolicy: profile.value.observableSemantics.props.update,
+    rootTag: options.rootTag,
   };
   switch (profile.value.id) {
     case 'react-runtime-v1':
@@ -175,7 +194,7 @@ export async function compileFile(
   try {
     if (!snapshot) {
       const root = await realpath(options.root ?? process.cwd());
-      const graph = new FileSourceGraph(root);
+      const graph = new FileSourceGraph(root, undefined, options.sourceRootIdentities);
       const loaded = await graph.load(
         await graph.entry(path.isAbsolute(entry) ? entry : path.resolve(root, entry))
       );
@@ -207,6 +226,7 @@ export async function compileFile(
       sourceImports: snapshot.sourceImports,
       exportName: options.exportName,
       componentName: options.componentName,
+      rootTag: options.rootTag,
       profile: options.profile,
       nativeSdkPath: options.nativeSdkPath,
       gpuiDependency: options.gpuiDependency,

@@ -136,6 +136,24 @@ export function emitPrivilegedHookCall(options: {
   return `${manager}.privileged(${JSON.stringify(name)}, () => ${callee}(${value.arguments.map(emit).join(', ')})${observed.length ? `, ${JSON.stringify(observed)}` : ''})`;
 }
 
+/** A checked closed-demand proof may exclude a call inside a retained branch. */
+export function emitUnreachedAuthoredHookCall(
+  value: Extract<ExpressionIR, { kind: 'authored-hook' }>,
+  emit: (value: ExpressionIR) => string,
+  typeName: (type: ValueType) => string,
+  typed = true
+): string {
+  // Preserve ordinary call argument evaluation before the explicit failure,
+  // just as an uninvoked authored function preserves its allocation and arity.
+  // No body, owner capability, or fabricated empty hook is delivered here.
+  const parameters = typed ? '...args: unknown[]' : '...args';
+  const annotation = typed ? `: ${typeName(value.type)}` : '';
+  const documentation = typed
+    ? ''
+    : `/** @param {...unknown} args @returns {${typeName(value.type)}} */ `;
+  return `(${documentation}(${parameters})${annotation} => { throw new Error('[Compiler] unreachable authored hook invoked'); })(${(value.arguments ?? []).map(emit).join(', ')})`;
+}
+
 export function emitAuthoredHookDefinition(options: {
   hook: AuthoredHookIR;
   name: string;

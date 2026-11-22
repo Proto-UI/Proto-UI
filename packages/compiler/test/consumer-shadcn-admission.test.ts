@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
+import { validateIR } from '../src/ir-validation';
 import { mountNativeOwner, nativeOwnerProfiles } from './native-owner-consumer';
 
 const cleanup: (() => Promise<void>)[] = [];
@@ -31,12 +32,12 @@ describe('source forms the shadcn families use', () => {
       ]);
     });
 
-  it('rejects String() with other than one argument', () => {
+  it('rejects String() with more than one argument', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'x',setup(def){def.expose.method('t',()=>String(1,2));}});`);
     expect(parsed).toMatchObject({
       ok: false,
-      diagnostics: [{ message: expect.stringContaining('exactly one argument') }],
+      diagnostics: [{ message: expect.stringContaining('zero or one') }],
     });
   });
 
@@ -90,16 +91,15 @@ describe('source forms the shadcn families use', () => {
     expect(ir.match(/"rule.declare"/g)?.length).toBe(2 + 2 * 3);
   });
 
-  it('keeps for...of over non-static data unsupported', () => {
+  it('preserves checked runtime arrays in for...of', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'x',setup(def){
         const list=[1,2];
         for (const item of list) { def.expose.method('m',()=>item); }
       }});`);
-    expect(parsed).toMatchObject({
-      ok: false,
-      diagnostics: [{ message: expect.stringContaining('ForOfStatement') }],
-    });
+    expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    expect(validateIR(JSON.parse(JSON.stringify(parsed.value))).ok).toBe(true);
   });
 
   // watchAll observes every declared prop; watchRaw observes named raw keys,
