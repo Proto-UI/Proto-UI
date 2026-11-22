@@ -407,3 +407,48 @@ test('timeout cleans only the owned detached descendant and retains a failed ter
   }
   assert.doesNotThrow(() => process.kill(sentinel.pid, 0), 'Unrelated process remains alive');
 });
+
+test('an immediate owner exit cannot hide a reparented detached child between lineage polls', async (t) => {
+  const directory = temporary(t);
+  const sentinel = spawn(process.execPath, ['-e', 'setInterval(()=>{},1000)'], { stdio: 'ignore' });
+  t.after(() => sentinel.kill('SIGKILL'));
+  let childPid;
+  t.after(() => {
+    if (childPid)
+      try {
+        process.kill(childPid, 'SIGKILL');
+      } catch {}
+  });
+  const program =
+    "const {spawn}=require('node:child_process');const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{detached:true,stdio:'ignore'});console.log('owned='+child.pid);child.unref();";
+  const result = await runSprint1Command(
+    {
+      id: 'immediate-orphan-control',
+      executable: process.execPath,
+      args: ['-e', program],
+      timeoutMs: 2000,
+    },
+    directory,
+    { cleanupMs: 300 }
+  );
+  childPid = Number(/owned=(\d+)/.exec(readFileSync(result.logFile, 'utf8'))?.[1]);
+  assert.ok(childPid > 0);
+  assert.equal(result.exitCode, 0, 'Retain the producer exit separately from cleanup acceptance');
+  assert.ok(result.cleanupErrors.includes('Command exited with live owned descendants'));
+  assert.deepEqual(result.survivors, []);
+  try {
+    const stat = readFileSync(`/proc/${childPid}/stat`, 'utf8');
+    assert.equal(stat.slice(stat.lastIndexOf(')') + 2).split(' ')[0], 'Z');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  assert.doesNotThrow(
+    () => process.kill(sentinel.pid, 0),
+    'A different process does not inherit the marker'
+  );
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /PROTO_UI_SPRINT1_PROCESS_OWNER=/,
+    'Environment contents are not evidence output'
+  );
+});

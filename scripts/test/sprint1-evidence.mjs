@@ -2,7 +2,8 @@
 // importing it starts no process, server or browser.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { createWriteStream, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { createWriteStream, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { executeGeneralChecks } from './general-ci.mjs';
@@ -258,9 +259,10 @@ export function assertSprint1StepEvidence(step, sourceSha, repo = root) {
   };
 }
 
-// Every signal target is a process observed below this invocation's child PID,
-// with its Linux start time rechecked before signaling. Detached Astro/Chrome
-// children are included; names, ports and other runners' processes are not.
+// Every signal target is observed below this invocation's child PID or carries
+// its exact random inherited marker. Start times are rechecked before signals.
+// The marker recovers an early orphan after its short-lived parent exits between
+// observations. Other processes' environment bytes are never printed or retained.
 function processFact(pid) {
   try {
     const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
@@ -276,7 +278,7 @@ function liveOwned(owned) {
     return current?.started === saved.started && !['Z', 'X'].includes(current.state);
   });
 }
-function observeChildren(leader, owned) {
+function observeChildren(leader, owned, ownership) {
   const facts = readdirSync('/proc')
     .filter((name) => /^\d+$/.test(name))
     .map(processFact)
@@ -287,7 +289,32 @@ function observeChildren(leader, owned) {
     if (fact) {
       owned.set(leader, fact);
       selected.add(leader);
+      ownership.started ??= Number(fact.started);
     }
+  }
+  for (const fact of facts) {
+    const key = `${fact.pid}/${fact.started}`;
+    if (
+      selected.has(fact.pid) ||
+      ownership.unmarked.has(key) ||
+      Number(fact.started) < (ownership.started ?? 0)
+    )
+      continue;
+    let matches = false;
+    try {
+      // Limit marker inspection to new processes owned by this UID.
+      // Cache negative identities, so old unrelated processes are not rescanned.
+      if (statSync(`/proc/${fact.pid}`).uid === ownership.uid) {
+        const environment = readFileSync(`/proc/${fact.pid}/environ`);
+        matches = Buffer.concat([Buffer.from([0]), environment]).includes(ownership.match);
+      }
+    } catch {
+      /* A process may exit or deny inspection between /proc reads. */
+    }
+    if (matches) {
+      owned.set(fact.pid, fact);
+      selected.add(fact.pid);
+    } else ownership.unmarked.add(key);
   }
   let added;
   do {
@@ -312,6 +339,13 @@ export async function runSprint1Command(
   const logFile = path.join(directory, `${step.id}.log`);
   const log = createWriteStream(logFile);
   const owned = new Map();
+  const marker = randomUUID();
+  const ownership = {
+    uid: process.geteuid(),
+    started: null,
+    unmarked: new Set(),
+    match: Buffer.from(`\0PROTO_UI_SPRINT1_PROCESS_OWNER=${marker}\0`),
+  };
   let child,
     timer,
     drainTimer,
@@ -322,7 +356,7 @@ export async function runSprint1Command(
   let termination = { exitCode: null, signal: null };
   const cleanupErrors = [];
   const signalOwned = (kind) => {
-    if (child?.pid) observeChildren(child.pid, owned);
+    if (child?.pid) observeChildren(child.pid, owned, ownership);
     for (const entry of liveOwned(owned).reverse()) {
       try {
         process.kill(entry.pid, kind);
@@ -339,7 +373,7 @@ export async function runSprint1Command(
       clearTimeout(drainTimer);
       clearInterval(observer);
       signal?.removeEventListener('abort', abort);
-      if (child?.pid) observeChildren(child.pid, owned);
+      if (child?.pid) observeChildren(child.pid, owned, ownership);
       // Give normally closing descendants one event turn before diagnosing a leak.
       if (!timedOut && !interrupted && liveOwned(owned).length) await delay(100);
       const leaked = !timedOut && !interrupted && liveOwned(owned).length > 0;
@@ -378,7 +412,7 @@ export async function runSprint1Command(
       cleanupErrors.push(`Evidence log: ${String(error)}`);
       void finish();
     });
-    const childEnv = { ...env, ...step.env };
+    const childEnv = { ...env, ...step.env, PROTO_UI_SPRINT1_PROCESS_OWNER: marker };
     // Each native runner owns its server; an inherited URL could certify a stale tree.
     delete childEnv.PROTO_UI_BROWSER_BASE_URL;
     delete childEnv.PUI_BROWSER_FAIL_FAST;
@@ -397,7 +431,7 @@ export async function runSprint1Command(
       };
       child.stdout.on('data', output);
       child.stderr.on('data', output);
-      child.once('spawn', () => observeChildren(child.pid, owned));
+      child.once('spawn', () => observeChildren(child.pid, owned, ownership));
       child.once('error', (error) => {
         termination.error = String(error);
         void finish();
@@ -409,7 +443,7 @@ export async function runSprint1Command(
       });
       child.once('close', () => void finish());
       observer = setInterval(() => {
-        if (child.pid) observeChildren(child.pid, owned);
+        if (child.pid) observeChildren(child.pid, owned, ownership);
       }, 500);
       timer = setTimeout(() => {
         timedOut = true;
