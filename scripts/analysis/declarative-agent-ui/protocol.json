@@ -27,7 +27,7 @@
   ],
   "cases": [
     { "id": "initial", "expected": "exactly one selected General tab and one visible matching panel" },
-    { "id": "tab-entry", "expected": "native Tab enters the selected tab" },
+    { "id": "tab-entry", "expected": "native Tab enters the selected tab and establishes one roving trigger tab stop; before entry a group-level delegating tab stop is permitted" },
     { "id": "right", "expected": "Right focuses Privacy; manual keeps General selected, automatic selects Privacy" },
     { "id": "activate", "expected": "native Enter selects Privacy and shows its content" },
     { "id": "wrap", "expected": "Left from General focuses Notifications and Right returns to General; selection follows only in automatic mode; exactly one roving tab stop" },
