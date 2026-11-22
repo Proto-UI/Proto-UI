@@ -222,14 +222,26 @@ export function setupMenuItemPaint<
       intent: (i) => i.feedback.style.use(tw(inset)),
     });
   }
-  cdef.rule({
-    when: (w) =>
-      w.all(
-        w.prop('variant').eq('default'),
-        w.any(w.state(states.focused).eq(true), w.state(states.focusVisible).eq(true))
-      ),
-    intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
-  });
+  // Menubar item focus must be a pure exposed-state rule. A prop gate or any()
+  // stays in the evaluator and writes resolved bg-accent, so
+  // rule-expose-state-web never emits data-[focused]:bg-accent.
+  // Focused and focus-visible are the same exposed focus fact for this item;
+  // native policy refuses the focus: variant and keeps the data- attribute.
+  if (kind === 'menubar') {
+    cdef.rule({
+      when: (w) => w.state(states.focused).eq(true),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+    });
+  } else {
+    cdef.rule({
+      when: (w) =>
+        w.all(
+          w.prop('variant').eq('default'),
+          w.any(w.state(states.focused).eq(true), w.state(states.focusVisible).eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+    });
+  }
   cdef.rule({
     when: (w) => w.prop('variant').eq('destructive'),
     intent: (i) => i.feedback.style.use(tw('text-destructive')),
