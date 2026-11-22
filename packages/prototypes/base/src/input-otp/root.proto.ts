@@ -5,6 +5,8 @@ import {
   type DefHandle,
   type RunHandle,
   type RendererHandle,
+  type TextControlSelection,
+  canonicalizeTextControlSelection,
 } from '@proto.ui/core';
 import { INPUT_OTP_CONTEXT, INPUT_OTP_FAMILY, normalizeOtp } from './shared';
 import type { InputOtpRootProps, InputOtpRootExposes, InputOtpRootAsHookContract } from './types';
@@ -57,10 +59,12 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
     name: '',
     label: 'One-time code',
     focused: false,
+    selection: null,
   });
   let run: RunHandle<InputOtpRootProps> | null = null,
     lastComplete = '';
   let viewEpoch = 0;
+  let selection: TextControlSelection | null = null;
   const normalize = (text: string) =>
     normalizeOtp(text, run?.props.get().length ?? 6, run?.props.get().pattern ?? 'numeric');
   const publish = () => {
@@ -93,6 +97,7 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
       name: p.name ?? '',
       label: p.ariaLabel ?? 'One-time code',
       focused: focused.get(),
+      selection,
     });
   };
   const request = (next: string) => {
@@ -119,7 +124,24 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
   def.expose.method('requestValue', request);
   def.expose.method('clear', () => request(''));
   def.expose.method('__focus', (next) => {
+    if (!run) return;
+    if (!next) selection = null;
     focused.set(!!next, 'reason: OTP editor focus');
+    publish();
+  });
+  def.expose.method('__selection', (next, editorValue) => {
+    if (!run) return;
+    const observed =
+      editorValue === value.get()
+        ? canonicalizeTextControlSelection(next, value.get(), 'single')
+        : null;
+    if (
+      selection?.start === observed?.start &&
+      selection?.end === observed?.end &&
+      selection?.direction === observed?.direction
+    )
+      return;
+    selection = observed;
     publish();
   });
   def.expose.method('focusInput', () => {
@@ -130,9 +152,16 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
     return true;
   });
   def.context.trySubscribe(FIELD_CONTEXT, () => publish());
+  def.anatomy.subscribeParts(INPUT_OTP_FAMILY, 'input', (_current, parts) => {
+    if (!run || parts.length === 1) return;
+    selection = null;
+    focused.set(false, 'reason: OTP editor lease retired');
+    publish();
+  });
   let initialValue: string = '';
   def.expose.method('resetValue', () => {
     if (!run) return false;
+    selection = null;
     const next = normalize(initialValue);
     if (!run.props.isProvided('value')) value.set(next, 'reason: input-otp value reset');
     publish();
@@ -168,6 +197,7 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
   });
   def.lifecycle.onUnmounted(() => {
     viewEpoch++;
+    selection = null;
     focused.set(false, 'reason: OTP detach');
     run = null;
   });

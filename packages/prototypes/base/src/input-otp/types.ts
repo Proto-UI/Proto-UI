@@ -1,4 +1,10 @@
-import type { ExposeEvent, ExposeMethod, ExposeState, State } from '@proto.ui/core';
+import type {
+  ExposeEvent,
+  ExposeMethod,
+  ExposeState,
+  State,
+  TextControlSelection,
+} from '@proto.ui/core';
 export interface InputOtpRootProps {
   value?: string;
   defaultValue?: string;
@@ -26,6 +32,7 @@ export type InputOtpRootExposes = {
   clear: ExposeMethod<() => boolean>;
   focusInput: ExposeMethod<() => boolean>;
   __focus: ExposeMethod<(focused: boolean) => void>;
+  __selection: ExposeMethod<(selection: TextControlSelection | null, editorValue: string) => void>;
   valueChange: ExposeEvent<{ value: string }>;
   completed: ExposeEvent<{ value: string }>;
 };

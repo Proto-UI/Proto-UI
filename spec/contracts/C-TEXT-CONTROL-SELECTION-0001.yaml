@@ -1,0 +1,45 @@
+id: C-TEXT-CONTROL-SELECTION-0001
+type: contract
+title: Text Control exposes host-owned selection and caret facts
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: The Sprint 2 selection prerequisite is implemented as a bounded draft; independent four-Web and native acceptance remains required before stable admission.
+  zh-CN: Sprint 2 的选择前置能力以有界 draft 实现；稳定准入仍需要独立四 Web 与原生验收。
+summary: Read-only UTF-16 selection observations share the Text Control value and mount lease without introducing a second editor owner.
+statement:
+  en: Text Control may observe the host editor's selection, including a collapsed caret, through normalized event and snapshot facts. Only the host owns selection changes. Consumers must not infer a caret from value length or acquire a raw editor reference.
+  zh-CN: Text Control 通过标准化事件与快照观察宿主 editor 的选择区间及折叠光标；选择变更仍归宿主所有。消费者不得从文本长度推断光标，亦不得取得原生 editor 引用。
+criteria:
+  - id: C-TEXT-CONTROL-SELECTION-0001-FACTS
+    text:
+      en: A selection is an immutable {start, end, direction} record. Start and end are ordered nonnegative integer UTF-16 offsets into the event's canonical value; direction is forward, backward or none. Missing, throwing or invalid host facts produce null, never a guessed end caret. Source offsets are normalized together with CR/LF and single-line sanitization.
+      zh-CN: 选择为不可变的 {start, end, direction}；start/end 是事件 canonical value 内有序非负整数 UTF-16 偏移，direction 为 forward、backward 或 none。缺失、读取失败或无效事实返回 null，不能猜测末尾光标；源偏移须随 CR/LF 与单行规范化一起转换。
+  - id: C-TEXT-CONTROL-SELECTION-0001-OBSERVATION
+    text:
+      en: Editing events may include selection facts; selectionchange observes selection without proposing or accepting a value. Snapshot selection is null when no current lease exists or the physical candidate differs from the snapshot's canonical owner value. Existing hosts may omit selection, which means unknown. No selection-setting patch or request is admitted.
+      zh-CN: 编辑事件可携带选择事实；selectionchange 只观察选择，不提出或接受文本值。无当前 lease 或物理 candidate 与快照 canonical owner value 不同时，快照选择为 null。旧宿主省略 selection 表示未知；本契约不准入设置选择的 patch 或 request。
+  - id: C-TEXT-CONTROL-SELECTION-0001-LIFETIME
+    text:
+      en: Selection listeners and deferred notifications belong to one editor mount lease. Detach, reset, replacement and disposal retire them; a stale callback cannot change a replacement owner. Unrelated synchronization preserves native selection and IME. Rejected controlled values restore with the retained selection bounded to the restored value.
+      zh-CN: 选择监听与延迟通知只属于一个 editor mount lease；detach、reset、替换与 dispose 撤销旧通知，旧回调不能改变新 owner。无关同步保留选择和 IME，受控拒绝恢复值并将保留选择限定在恢复文本范围内。
+  - id: C-TEXT-CONTROL-SELECTION-0001-OTP
+    text:
+      en: OTP Slot activity follows the focused editor's real selection. A collapsed caret activates its insertion slot, bounded by the final slot; a noncollapsed selection activates the covered slots. Unknown selection or a blurred, disabled or read-only editor activates no slot. Selection alone never changes OTP value, completion or form reports.
+      zh-CN: OTP Slot 活动态跟随已聚焦 editor 的真实选择；折叠光标对应插入槽并限制到末槽，非折叠选择激活覆盖槽。未知选择、失焦、disabled 或 readOnly 时无活动槽。单独选择变化不得改变 OTP 值、完成事件或表单报告。
+dependsOn:
+  contracts:
+    - C-TEXT-CONTROL-0001
+verifies:
+  tests:
+    - T-TEXT-CONTROL-SELECTION-0001
+sources:
+  - path: packages/core/src/text-control.ts
+  - path: packages/modules/text-control/src/impl.ts
+  - path: packages/modules/text-control/src/web.ts
+  - path: packages/prototypes/base/src/input-otp/
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Defined read-only selection facts and their OTP consumer independently of host or compiler implementation.
+tags: [text-control, selection, caret, input-otp]

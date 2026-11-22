@@ -11,7 +11,11 @@ import type {
   TextControlSnapshot,
   TextControlValueMode,
 } from '@proto.ui/core';
-import { canonicalizeTextControlValue, getModuleDeclaration } from '@proto.ui/core';
+import {
+  canonicalizeTextControlSelection,
+  canonicalizeTextControlValue,
+  getModuleDeclaration,
+} from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
 import {
@@ -147,7 +151,21 @@ export class TextControlModuleImpl extends ModuleBase {
   }
 
   snapshot(): TextControlSnapshot | null {
-    return this.declared ? Object.freeze({ value: this.value, composing: this.composing }) : null;
+    if (!this.declared) return null;
+    let selection = null;
+    try {
+      const host = this.lease?.snapshot();
+      if (host && this.canonicalize(host.value) === this.value) {
+        selection = canonicalizeTextControlSelection(
+          host.selection,
+          host.value,
+          this.declaration?.lineMode ?? 'multiline'
+        );
+      }
+    } catch {
+      // An unavailable selection observation does not invalidate canonical value ownership.
+    }
+    return Object.freeze({ value: this.value, composing: this.composing, selection });
   }
 
   protected override onCapsEpoch(): void {
@@ -217,9 +235,16 @@ export class TextControlModuleImpl extends ModuleBase {
     const generation = ++this.eventGeneration;
     // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
     const canonicalEvent: TextControlEvent = Object.freeze({
-      ...event,
+      type: event.type,
       value: this.canonicalize(event.value),
+      composing: event.composing,
       data: typeof event.data === 'string' ? this.canonicalize(event.data) : event.data,
+      inputType: event.inputType,
+      selection: canonicalizeTextControlSelection(
+        event.selection,
+        event.value,
+        this.declaration?.lineMode ?? 'multiline'
+      ),
     });
     // CallbackScope may drain older props before it invokes our listener.
     // Protect both a starting composition and a finishing native candidate

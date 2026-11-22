@@ -32,6 +32,10 @@ export function setupInputOtpInput(def: DefHandle<InputOtpInputProps>, field = f
   a.name(label);
   a.state('disabled', disabled);
   a.state('readOnly', readOnly);
+  const syncSelection = (run: RunHandle<InputOtpInputProps>) => {
+    const snapshot = control.snapshot();
+    otpMethod(run, '__selection', snapshot?.selection ?? null, snapshot?.value ?? '');
+  };
   const sync = (run: RunHandle<InputOtpInputProps>) => {
     const c = run.context.read(INPUT_OTP_CONTEXT);
     binding?.setPolicy({ disabled: c.controlDisabled, readOnly: c.controlReadOnly });
@@ -57,10 +61,12 @@ export function setupInputOtpInput(def: DefHandle<InputOtpInputProps>, field = f
       maxLength: c.length,
       placeholder: run.props.get().placeholder ?? '',
     });
+    syncSelection(run);
   };
   let currentRun: RunHandle<InputOtpInputProps> | null = null;
   def.lifecycle.onMounted((run) => {
     currentRun = run;
+    syncSelection(run);
   });
   def.lifecycle.onUnmounted(() => {
     currentRun = null;
@@ -77,6 +83,9 @@ export function setupInputOtpInput(def: DefHandle<InputOtpInputProps>, field = f
   def.context.subscribe(INPUT_OTP_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   def.props.watchAll(sync);
+  control.on('selectionchange', (run, event) => {
+    otpMethod(run, '__selection', event.selection ?? null, event.value);
+  });
   control.on('compositionstart', (run) => {
     binding?.report({
       value: run.context.read(INPUT_OTP_CONTEXT).value,
@@ -110,6 +119,7 @@ export function setupInputOtpInput(def: DefHandle<InputOtpInputProps>, field = f
   focus.focused.watch((run, e) => {
     if (e.type === 'next') {
       otpMethod(run, '__focus', e.next);
+      if (e.next) syncSelection(run);
       binding?.report({
         value: run.context.read(INPUT_OTP_CONTEXT).value,
         focused: e.next,
