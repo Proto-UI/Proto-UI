@@ -1,0 +1,37 @@
+{
+  "kind": "sprint5-retained-process-evidence",
+  "publicHead": "ecf057b681e8b2eeaa43ef36bf6d2c5a060a4d81",
+  "publicTree": "41dad8f7c40e7bbc0652d4f3b6cea8f1a675da18",
+  "entries": [
+    {
+      "path": "runtime-peer-tests.log.gz",
+      "uncompressedSha256": "2fc9dd2a480582a93b73e9542ac1819598c265eeef20235a1b4abdc7f9be2200",
+      "uncompressedBytes": 469339
+    },
+    {
+      "path": "wasm-tests-before-preview-fix.log.gz",
+      "uncompressedSha256": "c7a3fe7746bc91a113b15c83683def70d4524176f99f09699d6f19a86fa2d28a",
+      "uncompressedBytes": 116229
+    },
+    {
+      "path": "browser-second-receipt-summary.json.gz",
+      "uncompressedSha256": "f3bc82139844ef8a31cfcd6e81fa0141cd9efeb33ecf49f4b84ef0fdac8d41f3",
+      "uncompressedBytes": 730565
+    },
+    {
+      "path": "adapter-first-control-label-action-enabled.png",
+      "sha256": "9804d40e9eb8b5ac0405f983d8822b6e698135abdd9d966a13a8e50367517453",
+      "bytes": 3499
+    },
+    {
+      "path": "adapter-first-control-label-action-disabled.png",
+      "sha256": "9804d40e9eb8b5ac0405f983d8822b6e698135abdd9d966a13a8e50367517453",
+      "bytes": 3499
+    }
+  ],
+  "limitations": [
+    "Browser JSON is an extracted report summary: large sourceFiles/buildManifest members were not transferred; it is not a replacement for the original complete remote receipt.",
+    "The prior WASM process is retained at its actual working-source observation; do not silently bind it to later preview delivery fixes.",
+    "Both first macOS captures have zero nonblack content RGB pixels; the original successful PNG writes do not establish visual success."
+  ]
+}

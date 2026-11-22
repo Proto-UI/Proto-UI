@@ -100,6 +100,21 @@ jobs:
               printf 'missing-capture:%s\t1\n' "$capture" >> "$EVIDENCE/suite-exits.tsv"
               failed=1
             fi
+            # File creation alone previously accepted all-black content.
+            # Require the native exact-window content gate's retained receipt.
+            if node -e '
+              const r = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+              if (r.rule !== "two-label-content-v1" || r.passed !== true || r.pixelGatePassed !== true ||
+                  !Number.isInteger(r.platformFrames?.callbacks) || r.platformFrames.callbacks < 2 ||
+                  r.platformFrames.visible !== true || r.platformFrames.error != null ||
+                  r.labels?.length !== 2 || r.labels[0].label !== "passive" || r.labels[1].label !== "actionable" ||
+                  !r.labels.every(label => label.passed === true)) process.exit(1);
+            ' "$EVIDENCE/accesskit/${capture%.png}.pixels.json"; then
+              printf 'pixel-content:%s\t0\n' "$capture" >> "$EVIDENCE/suite-exits.tsv"
+            else
+              printf 'pixel-content:%s\t1\n' "$capture" >> "$EVIDENCE/suite-exits.tsv"
+              failed=1
+            fi
           done
           if [ "$failed" -eq 0 ]; then
             shasum -a 256 "$EVIDENCE"/accesskit/control-label-*.png > "$EVIDENCE/capture-sha256.txt"

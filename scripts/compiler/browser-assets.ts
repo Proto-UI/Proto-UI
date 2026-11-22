@@ -9,6 +9,7 @@ import { FileSourceGraph } from '../../packages/compiler/src/source-loader';
 import {
   assertSameInputFiles,
   digest,
+  hashInputFiles,
   hashMetafileInputs,
   mergeInputFiles,
   snapshotBrowserRepositoryInputs,
@@ -30,7 +31,7 @@ export interface BrowserSourceAsset {
   sourceGraphSha256: string;
 }
 
-async function bundleTarget(entry: string, external: string[] = []) {
+async function bundleTarget(entry: string, alias: Record<string, string> = {}) {
   const result = await build({
     absWorkingDir: root,
     entryPoints: [entry],
@@ -41,7 +42,7 @@ async function bundleTarget(entry: string, external: string[] = []) {
     target: 'es2022',
     minify: true,
     metafile: true,
-    external,
+    alias,
     define: {
       'process.env.NODE_ENV': '"production"',
       '__VUE_OPTIONS_API__': 'true',
@@ -86,21 +87,22 @@ async function browserDeliveryInputs() {
   return hashMetafileInputs(result.metafile);
 }
 
-/** An uncached build is also the independent current-source receipt oracle. */
-export async function buildBrowserAssets(
-  directory = path.join(root, '.cache/compiler-browser')
-): Promise<Map<string, string>> {
-  const before = await snapshotBrowserRepositoryInputs();
-  const compiler = await buildBrowserCompiler(directory);
+/** Real framework packages, including an explicit ESM boundary for React's CJS entries. */
+export async function buildBrowserTargets() {
   const assets = new Map<string, string>();
-  assets.set('compiler.js', await readFile(path.join(directory, 'compiler.js'), 'utf8'));
-  assets.set('build.json', await readFile(path.join(directory, 'build.json'), 'utf8'));
-  const react = await bundleTarget(compilerRequire.resolve('react'));
-  const reactDom = await bundleTarget(compilerRequire.resolve('react-dom'), ['react']);
-  const reactClient = await bundleTarget(compilerRequire.resolve('react-dom/client'), [
-    'react',
-    'react-dom',
-  ]);
+  const targetRoot = path.join(root, 'scripts/compiler/browser-targets');
+  const reactRuntime = await bundleTarget(path.join(targetRoot, 'react-runtime.mjs'), {
+    react: compilerRequire.resolve('react'),
+    'react-dom': compilerRequire.resolve('react-dom'),
+    'react-dom/client': compilerRequire.resolve('react-dom/client'),
+  });
+  const facade = async (file: string) => ({
+    code: await readFile(path.join(targetRoot, file), 'utf8'),
+    inputFiles: await hashInputFiles([path.join(targetRoot, file)]),
+  });
+  const react = await facade('react.mjs');
+  const reactDom = await facade('react-dom.mjs');
+  const reactClient = await facade('react-client.mjs');
   const vue = await bundleTarget(compilerRequire.resolve('vue/dist/vue.runtime.esm-bundler.js'));
   const vue2 = await bundleTarget(wwwRequire.resolve('vue2-runtime/dist/vue.runtime.esm.js'));
   const floatingRequire = createRequire(
@@ -110,6 +112,7 @@ export async function buildBrowserAssets(
   const targets = {
     'web-component-source-v1': { '@floating-ui/dom': floating },
     'react-dom-source-v1': {
+      'pui:target/react-runtime': reactRuntime,
       react,
       'react-dom': reactDom,
       'react-dom/client': reactClient,
@@ -151,6 +154,20 @@ export async function buildBrowserAssets(
       })
     );
   }
+  return { assets, targetInputs, targetModulesSha256 };
+}
+
+/** An uncached build is also the independent current-source receipt oracle. */
+export async function buildBrowserAssets(
+  directory = path.join(root, '.cache/compiler-browser')
+): Promise<Map<string, string>> {
+  const before = await snapshotBrowserRepositoryInputs();
+  const compiler = await buildBrowserCompiler(directory);
+  const assets = new Map<string, string>();
+  assets.set('compiler.js', await readFile(path.join(directory, 'compiler.js'), 'utf8'));
+  assets.set('build.json', await readFile(path.join(directory, 'build.json'), 'utf8'));
+  const { assets: targets, targetInputs, targetModulesSha256 } = await buildBrowserTargets();
+  for (const [name, contents] of targets) assets.set(name, contents);
   const deliveryInputs = await browserDeliveryInputs();
   const after = await snapshotBrowserRepositoryInputs();
   assertSameInputFiles(before, after);

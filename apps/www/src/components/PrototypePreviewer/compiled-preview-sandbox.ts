@@ -43,21 +43,27 @@ export function compiledPreviewDocument(
   return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${token}' blob:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; child-src 'none';"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:0;font:14px/1.5 system-ui,sans-serif;color:#202124;background:transparent}#stage{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;min-height:150px;padding:16px;box-sizing:border-box}#stage>[data-preview-item]{padding:8px 16px;border:1px solid #adb5bd;border-radius:6px}#stage>[data-preview-item]:focus-visible{outline:2px solid #2563eb;outline-offset:3px}[aria-disabled=true]{opacity:.45}</style></head><body><div id="stage"></div><script nonce="${token}">
 const input=${payload};
 const send=(type,detail={})=>parent.postMessage({type,revision:input.revision,token:input.token,...detail},'*');
-const urls=[];let retire=()=>{},closed=false;
-const eventProps=(index)=>Object.fromEntries(input.preview.events.map(name=>['on'+name[0].toUpperCase()+name.slice(1),()=>{if(!closed)send('preview-event',{name,index});}]));
-const error=(value)=>{if(!closed)send('preview-error',{message:String(value&&value.message||value).slice(0,2000)});};
+const urls=[],cleanupFailures=[],secondaryFailures=[];let retire=()=>{},closed=false,failed=false,retiring=false;
+const eventProps=(index)=>Object.fromEntries(input.preview.events.map(name=>['on'+name[0].toUpperCase()+name.slice(1),()=>{if(!closed&&!failed)send('preview-event',{name,index});}]));
+const error=(value)=>{if(retiring)cleanupFailures.push(value);else if(!closed){if(failed)secondaryFailures.push(value);else{failed=true;send('preview-error',{message:String(value&&value.message||value).slice(0,2000)});}}};
 addEventListener('error',(event)=>error(event.error||event.message));
 addEventListener('unhandledrejection',(event)=>error(event.reason));
 // Admission rejects authored anchors/forms; additionally suppress native defaults
 // from trusted delivery code. CSP alone does not prevent frame self-navigation.
 addEventListener('click',(event)=>{if(event.composedPath().some(node=>node&&node.tagName==='A'&&node.hasAttribute('href')))event.preventDefault();},true);
 addEventListener('submit',(event)=>event.preventDefault(),true);
-addEventListener('message',(event)=>{
+addEventListener('message',async(event)=>{
   const message=event.data;
   if(event.source!==parent||!message||message.type!=='dispose'||message.token!==input.token||message.revision!==input.revision||closed)return;
-  closed=true;
-  try{retire();}catch(failure){send('cleanup-error',{message:String(failure).slice(0,2000)});}
-  finally{document.getElementById('stage').replaceChildren();for(const url of urls)URL.revokeObjectURL(url);send('disposed');}
+  closed=true;retiring=true;
+  try{await retire();}catch(failure){cleanupFailures.push(failure);}
+  finally{
+    try{document.getElementById('stage').replaceChildren();}catch(failure){cleanupFailures.push(failure);}
+    for(const url of urls){try{URL.revokeObjectURL(url);}catch(failure){cleanupFailures.push(failure);}}
+    const failures=[...secondaryFailures.map(value=>'Secondary preview error: '+String(value&&value.message||value)),...cleanupFailures.map(value=>'Cleanup error: '+String(value&&value.message||value))];
+    if(failures.length)send('cleanup-error',{message:failures.join(' | ').slice(0,2000)});
+    retiring=false;send('disposed');
+  }
 });
 (async()=>{
   const modules={...input.target.modules,...input.preview.modules,'pui:preview-budget':input.budget};
@@ -76,22 +82,22 @@ addEventListener('message',(event)=>{
     retire=()=>{const failures=[];for(const owner of owners){try{owner.dispose();}catch(error){failures.push(error);}}if(failures.length)throw new AggregateError(failures,'Preview cleanup failed.');};
     for(const [index,item] of input.items.entries()){
       const element=document.createElement('compiled-preview-control');element.dataset.previewItem='';element.textContent=item.text||'';
-      for(const name of input.preview.events)element.addEventListener(name,event=>{if(!closed&&event instanceof CustomEvent&&event.target===element)send('preview-event',{name,index});});
+      for(const name of input.preview.events)element.addEventListener(name,event=>{if(!closed&&!failed&&event instanceof CustomEvent&&event.target===element)send('preview-event',{name,index});});
       owners.push(element);element.setProps(item.props);stage.append(element);
     }
   }else if(input.target.profile==='react-dom-source-v1'){
-    const React=await import('react');const {createRoot}=await import('react-dom/client');if(closed)return;
-    const root=createRoot(stage);retire=()=>root.unmount();root.render(React.createElement(React.Fragment,null,...input.items.map((item,index)=>React.createElement(component,{...item.props,...eventProps(index),key:index,'data-preview-item':''},item.text||''))));
+    const React=await import('react');const {createRoot}=await import('react-dom/client');const {flushSync}=await import('react-dom');if(closed)return;
+    const root=createRoot(stage,{onUncaughtError:error});retire=()=>root.unmount();flushSync(()=>root.render(React.createElement(React.Fragment,null,...input.items.map((item,index)=>React.createElement(component,{...item.props,...eventProps(index),key:index,'data-preview-item':''},item.text||'')))));
   }else if(input.target.profile==='vue-source-v1'){
     const Vue=await import('vue');if(closed)return;
-    const app=Vue.createApp({render:()=>input.items.map((item,index)=>Vue.h(component,{...item.props,...eventProps(index),'data-preview-item':''},{default:()=>item.text||''}))});retire=()=>app.unmount();app.mount(stage);
+    const app=Vue.createApp({render:()=>input.items.map((item,index)=>Vue.h(component,{...item.props,...eventProps(index),'data-preview-item':''},{default:()=>item.text||''}))});app.config.errorHandler=error;retire=()=>app.unmount();app.mount(stage);
   }else if(input.target.profile==='vue2-source-v1'){
-    const {default:Vue}=await import('vue');if(closed)return;
-    const app=new Vue({render(h){return h('div',input.items.map((item,index)=>h(component,{props:item.props,on:Object.fromEntries(input.preview.events.map(name=>[name,()=>{if(!closed)send('preview-event',{name,index});}])),attrs:{'data-preview-item':''}},[item.text||''])));}});
+    const {default:Vue}=await import('vue');if(closed)return;Vue.config.errorHandler=error;
+    const app=new Vue({render(h){return h('div',input.items.map((item,index)=>h(component,{props:item.props,on:Object.fromEntries(input.preview.events.map(name=>[name,()=>{if(!closed&&!failed)send('preview-event',{name,index});}])),attrs:{'data-preview-item':''}},[item.text||''])));}});
     retire=()=>app.$destroy();stage.append(app.$mount().$el);
   }else throw new Error('Unsupported preview target '+input.target.profile);
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  if(!closed)send('preview-ready',{profile:input.target.profile});
+  if(!closed&&!failed)send('preview-ready',{profile:input.target.profile});
 })().catch(error);
 </script></body></html>`;
 }

@@ -1539,7 +1539,7 @@ ${usesRoot ? `          ${n('RootElement')} = root; ${n('RootEpoch')} = root ? e
             drawnRevision = revision; drawnActivation = active;
             ${n('Requested')} = false;
             const frame: ${n('Frame')} = { epoch, slotUsed: false };
-            const children = ${ssr ? `!${n('Server')} && !${n('Started')} ? ${n('Adopt')}(${n('Record')}.children, () => ${n('Slot')}(frame)) : ` : ''}typeof ${n('Renderer')} === 'function' ? ${n('Children')}(${n('Renderer')}(frame)) : ${ssr ? `${n('Slot')}(frame)` : 'null'};
+            const children = ${ssr ? `!${n('Server')} && !${n('Started')} ? ${n('Adopt')}(${n('Record')}.children, () => ${n('Slot')}(frame)) : ` : ''}typeof ${n('Renderer')} === 'function' ? ${n('Children')}(${n('Renderer')}(frame)) : ${n('Slot')}(frame);
             cached = children == null ? [] : Array.isArray(children) ? children : [children];
           }
 ${

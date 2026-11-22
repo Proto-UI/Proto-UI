@@ -74,3 +74,7 @@ jobs:
     needs: site-startup-theme
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/select-item-sizing-evidence.yml
+  compiler-browser:
+    needs: select-item-sizing
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/compiler-browser-acceptance.yml

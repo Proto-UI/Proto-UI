@@ -1,0 +1,88 @@
+name: Canonical compiler browser acceptance
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compiler-browser-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the real source and locked toolchain
+        run: |
+          set -euo pipefail
+          PUI_EVIDENCE_DIR="$RUNNER_TEMP/compiler-browser-acceptance"
+          printf 'PUI_EVIDENCE_DIR=%s\n' "$PUI_EVIDENCE_DIR" >> "$GITHUB_ENV"
+          mkdir -p "$PUI_EVIDENCE_DIR"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git rev-parse HEAD > "$PUI_EVIDENCE_DIR/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$PUI_EVIDENCE_DIR/source-tree.txt"
+          sha256sum pnpm-lock.yaml > "$PUI_EVIDENCE_DIR/dependency-lock.sha256"
+          node --version > "$PUI_EVIDENCE_DIR/node.txt"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          corepack pnpm@10.32.1 --version > "$PUI_EVIDENCE_DIR/pnpm.txt"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          "$CHROME" --version > "$PUI_EVIDENCE_DIR/browser.txt"
+          printf 'PUI_CHROME_EXECUTABLE=%s\n' "$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Install and record Chinese fonts for the bilingual captures
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
+            > "$PUI_EVIDENCE_DIR/font-environment.txt"
+          fc-match 'Noto Sans CJK SC' >> "$PUI_EVIDENCE_DIR/font-environment.txt"
+      - name: Run the cold bilingual four-target browser journey
+        run: |
+          set -euo pipefail
+          node --import tsx scripts/analysis/browser-compiler-browser.mts \
+            2>&1 | tee "$PUI_EVIDENCE_DIR/browser-run.log"
+      - name: Independently rebuild and verify the complete execution receipt
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFile, writeFile } from 'node:fs/promises';
+          import path from 'node:path';
+          import { createBrowserDeliveryIndex } from './scripts/compiler/browser-delivery-index.mjs';
+          const receipt = JSON.parse(await readFile(path.join(process.env.PUI_EVIDENCE_DIR, 'receipt.json'), 'utf8'));
+          assert.equal(receipt.head, process.env.CANDIDATE_SHA);
+          assert.ok(receipt.cases.length > 0);
+          assert.ok(receipt.cases.every((entry) => entry.status === 'passed'));
+          const index = await createBrowserDeliveryIndex({ receipt });
+          const rows = index.pages.flatMap((page) => page.targets ?? []);
+          assert.equal(rows.length, 8, 'two actual documentation pages must each exercise four targets');
+          assert.ok(rows.every((row) => row.status === 'browser-executed-awaiting-independent-acceptance'));
+          await writeFile(path.join(process.env.PUI_EVIDENCE_DIR, 'verified-delivery.json'), JSON.stringify(index, null, 2) + '\n');
+          JS
+      - name: Retain original images, failures and source-bound receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-browser-acceptance-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}
+          path: ${{ env.PUI_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
