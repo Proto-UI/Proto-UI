@@ -175,6 +175,84 @@ function runtimeHarness() {
 }
 
 it.each([fieldControl, fieldTextarea])(
+  '$name reset stops after its controlled callback synchronously disposes the actual Runtime',
+  async (proto) => {
+    const h = runtimeHarness();
+    const root = h.make(fieldRoot);
+    const control = h.make(proto, root.target, { value: 'owner' });
+    let disposed: Promise<void> | undefined;
+    try {
+      await root.session.mount();
+      await control.session.mount();
+      h.setActionCallback((name) => {
+        if (name === 'valueChange') disposed = control.session.dispose();
+      });
+      expect(() =>
+        control.session.invokeInCallbackScope(() => control.exposes.resetValue())
+      ).not.toThrow();
+      expect(disposed).toBeDefined();
+      await disposed;
+      expect(h.actions).toEqual(['valueChange']);
+    } finally {
+      await control.session.dispose();
+      await root.session.dispose();
+    }
+  }
+);
+
+for (const proto of [fieldControl, fieldTextarea])
+  it.each(['reset-proposal', 'composition-state'] as const)(
+    `${proto.name} reset preserves a newer composition started from %s`,
+    async (boundary) => {
+      const h = runtimeHarness();
+      const root = h.make(fieldRoot, null, {
+        externalValidation: true,
+        validationMode: 'onChange',
+      });
+      const control = h.make(proto, root.target, { value: 'owner' });
+      let started = false;
+      let stop: (() => void) | undefined;
+      const beginNewComposition = () => {
+        if (started) return;
+        started = true;
+        control.composition('compositionstart', 'new candidate');
+      };
+      try {
+        await root.session.mount();
+        await control.session.mount();
+        control.composition('compositionstart', 'old candidate');
+        if (boundary === 'reset-proposal')
+          h.setActionCallback((name) => {
+            if (name === 'valueChange') beginNewComposition();
+          });
+        else
+          stop = control.exposes.composing.subscribe((event: any) => {
+            if (event.type === 'next' && !event.next) beginNewComposition();
+          });
+        h.actions.length = 0;
+        control.session.invokeInCallbackScope(() =>
+          expect(control.exposes.resetValue()).toBe(false)
+        );
+        expect(started).toBe(true);
+        expect(control.exposes.composing.get()).toBe(true);
+        expect(control.exposes.__fieldSnapshot()).toMatchObject({
+          value: 'owner',
+          composing: true,
+          active: true,
+        });
+        root.session.invokeInCallbackScope(() => expect(root.exposes.validate()).toBeNull());
+        expect(h.actions).not.toContain('validationRequest');
+        expect(h.actions).not.toContain('compositionEnd');
+      } finally {
+        stop?.();
+        h.setActionCallback(() => {});
+        await control.session.dispose();
+        await root.session.dispose();
+      }
+    }
+  );
+
+it.each([fieldControl, fieldTextarea])(
   '$name retires the Field composition snapshot and allows validation after rejoining',
   async (proto) => {
     const { make, actions } = runtimeHarness();
@@ -276,7 +354,10 @@ const cases = [
     name: 'Number Field commit',
     proto: numberFieldRoot,
     state: null,
-    prepare: (x: any) => x.requestInput('2', true),
+    // A commit cannot interrupt composition. A controlled, unaccepted draft
+    // leaves the request pending until commit without claiming an active IME.
+    props: { value: 0 },
+    prepare: (x: any) => x.requestInput('2', false),
     request: (x: any) => x.commitValue(),
     event: 'valueCommit',
     callback: 'valueChange',

@@ -137,13 +137,17 @@ export function setupTextareaRoot(
   };
   let currentView: RunHandle<TextareaRootProps> | null = null;
   let viewEpoch = 0;
+  let editingEpoch = 0;
   let initialValue = '';
   def.expose.method('resetValue', () => {
     if (!currentView) return false;
     const current = currentView,
-      epoch = viewEpoch;
+      epoch = viewEpoch,
+      edit = ++editingEpoch;
+    const isCurrent = () => currentView === current && viewEpoch === epoch && editingEpoch === edit;
     controlledReports.cancel();
     const changed = control.resetValue(initialValue);
+    if (!isCurrent()) return changed;
     if (!changed && typeof current.props.get().value === 'string')
       current.expose.emit('valueChange', {
         value: initialValue,
@@ -151,11 +155,11 @@ export function setupTextareaRoot(
         data: null,
         inputType: null,
       });
-    if (currentView !== current || viewEpoch !== epoch) return changed;
+    if (!isCurrent()) return changed;
     value.set(control.snapshot()?.value ?? value.get(), 'reason: textarea reset canonical value');
-    if (currentView !== current || viewEpoch !== epoch) return changed;
+    if (!isCurrent()) return changed;
     composing.set(false, 'reason: textarea reset composition');
-    if (currentView === current && viewEpoch === epoch) reportField();
+    if (isCurrent()) reportField();
     return changed;
   });
   def.lifecycle.onMounted((run) => {
@@ -256,11 +260,12 @@ export function setupTextareaRoot(
   );
 
   control.on('input', (run, event) => {
-    const epoch = viewEpoch;
+    const epoch = viewEpoch,
+      edit = ++editingEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea input value');
-    if (currentView !== run || viewEpoch !== epoch) return;
+    if (currentView !== run || viewEpoch !== epoch || editingEpoch !== edit) return;
     composing.set(event.composing, 'reason: textarea input composing');
-    if (currentView !== run || viewEpoch !== epoch) return;
+    if (currentView !== run || viewEpoch !== epoch || editingEpoch !== edit) return;
     const detail: TextareaValueChangeDetail = Object.freeze({
       value: event.value,
       composing: event.composing,
@@ -268,14 +273,17 @@ export function setupTextareaRoot(
       inputType: event.inputType,
     });
     run.expose.emit('valueChange', detail);
-    if (binding && currentView === run && epoch === viewEpoch) notifyEdit(run, 'input');
+    if (binding && currentView === run && epoch === viewEpoch && editingEpoch === edit)
+      notifyEdit(run, 'input');
   });
   control.on('change', (run, event) => {
-    const epoch = viewEpoch;
+    const epoch = viewEpoch,
+      edit = ++editingEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea change value');
-    if (currentView !== run || viewEpoch !== epoch) return;
+    if (currentView !== run || viewEpoch !== epoch || editingEpoch !== edit) return;
     run.expose.emit('change', Object.freeze({ value: event.value }));
-    if (binding && currentView === run && epoch === viewEpoch) notifyEdit(run, 'change');
+    if (binding && currentView === run && epoch === viewEpoch && editingEpoch === edit)
+      notifyEdit(run, 'change');
   });
 
   const emitComposition = (
@@ -291,23 +299,28 @@ export function setupTextareaRoot(
   };
   control.on('compositionstart', (run, event) => {
     controlledReports.cancel();
-    const epoch = viewEpoch;
+    const epoch = viewEpoch,
+      edit = ++editingEpoch;
     composing.set(true, 'reason: textarea composition start');
-    if (currentView !== run || viewEpoch !== epoch) return;
+    if (currentView !== run || viewEpoch !== epoch || editingEpoch !== edit) return;
     emitComposition(run, 'compositionStart', event);
-    if (binding && currentView === run && epoch === viewEpoch) reportField();
+    if (binding && currentView === run && epoch === viewEpoch && editingEpoch === edit)
+      reportField();
   });
   control.on('compositionupdate', (run, event) => {
+    editingEpoch++;
     emitComposition(run, 'compositionUpdate', event);
   });
   control.on('compositionend', (run, event) => {
-    const epoch = viewEpoch;
+    const epoch = viewEpoch,
+      edit = ++editingEpoch;
     composing.set(false, 'reason: textarea composition end');
-    if (currentView !== run || viewEpoch !== epoch) return;
+    if (currentView !== run || viewEpoch !== epoch || editingEpoch !== edit) return;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea composition end value');
-    if (currentView !== run || viewEpoch !== epoch) return;
+    if (currentView !== run || viewEpoch !== epoch || editingEpoch !== edit) return;
     emitComposition(run, 'compositionEnd', event);
-    if (binding && currentView === run && epoch === viewEpoch) notifyEdit(run, 'compositionend');
+    if (binding && currentView === run && epoch === viewEpoch && editingEpoch === edit)
+      notifyEdit(run, 'compositionend');
   });
   return () => null;
 }

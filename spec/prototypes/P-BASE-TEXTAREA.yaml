@@ -12,6 +12,10 @@ criteria:
     text:
       zh-CN: resetValue() 复位到实例首次 canonical 值，退役当前 composition 与排队 Field 编辑通知。非受控直接恢复；受控仅发 valueChange 提案，owner 拒绝时保留原值。disabled/readOnly 不阻止显式复位。此编辑器操作不创建 Form owner、native form 或提交行为；终止实例与卸载 view 不能执行旧复位。
       en: resetValue() returns an editor to its instance's initial canonical value and retires composition and queued Field edit notifications. Uncontrolled editors restore directly; controlled editors only propose valueChange and preserve their value on refusal. Disabled/readonly do not block explicit reset. This editor operation creates no Form owner, native form or submission behavior, and retired instances/views cannot execute old resets.
+  - id: P-BASE-TEXTAREA-RESET-REENTRY
+    text:
+      zh-CN: reset 与编辑的 outward 回调或状态通知若同步卸载、dispose、递归 reset 或开始新输入/组合会话，旧 continuation 必须停止，不得覆盖新 composing 或 Field 快照；所有显式 Field 投影复用此边界。
+      en: If reset/edit outward callbacks or state notifications synchronously unmount, dispose, reset again, or start newer input/composition, the older continuation must stop without overwriting newer composing or Field snapshots; every explicit Field projection reuses this boundary.
   - id: P-BASE-TEXTAREA-FIELD-CONTROLLED-REPORT
     text:
       zh-CN: 显式 Field 组合的受控候选编辑遵循 P-BASE-FIELD-CONTROL-CONTROLLED-REPORT：在有界任务中读取普通 owner 提交后的 canonical 值，拒绝候选不进入 Field，reset/策略/组合输入/view 退休撤销排队通知。独立 Textarea 不安装 Field 通知任务。

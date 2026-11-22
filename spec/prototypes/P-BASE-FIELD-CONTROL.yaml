@@ -11,6 +11,10 @@ statement:
   zh-CN: The control realizes its exact part of C-FIELD-0001, without a second state owner or host escape.
   en: The control realizes its exact part of C-FIELD-0001, without a second state owner or host escape.
 criteria:
+  - id: P-BASE-FIELD-CONTROL-RESET-REENTRY
+    text:
+      zh-CN: resetValue 与编辑回调的 continuation 在同步卸载、dispose、递归 reset 或新输入/组合会话开始后必须退休。旧 reset 不得继续读取退休 RunHandle，也不得覆盖新 composing 或 Field 快照；受控 reset 仍仅提案，拒绝时保留 canonical 值。
+      en: A resetValue or edit callback continuation retires after synchronous unmount, disposal, recursive reset, or a newer input/composition session. An older reset must not read retired RunHandles or overwrite newer composing/Field snapshots; controlled reset remains a proposal and preserves canonical value on refusal.
   - id: P-BASE-FIELD-CONTROL-SEMANTICS
     text:
       zh-CN: Implements C-FIELD-0001-OWNER, C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS, C-FIELD-0001-HOST for the control atom; preserves its documented JSON Props, exposes and lifecycle.
