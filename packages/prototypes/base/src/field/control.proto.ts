@@ -8,6 +8,7 @@ import { asAccessible, asFocusable, asTextControl, asControlLabel } from '@proto
 import { declareTextControl } from '@proto.ui/module-text-control';
 import { asFieldControl } from './control-binding.proto';
 import { FIELD_CONTEXT, FIELD_LABEL_PAIR } from './shared';
+import { createControlledEditReport } from './controlled-edit-report';
 import type { FieldControlAsHookContract, FieldControlExposes, FieldControlProps } from './types';
 
 function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes>) {
@@ -85,12 +86,34 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
   let initialValue = '',
     resetRun: RunHandle<FieldControlProps> | null = null;
   let viewEpoch = 0;
+  const reportEdit = (reason: 'input' | 'change' | 'compositionend' | 'sync') => {
+    if (!resetRun) return;
+    binding.report({
+      value: control.snapshot()?.value ?? value.get(),
+      focused: focused.get(),
+      composing: composing.get(),
+      reason,
+    });
+  };
+  const controlledReports = createControlledEditReport(reportEdit);
+  const notifyEdit = (
+    run: RunHandle<FieldControlProps>,
+    reason: 'input' | 'change' | 'compositionend'
+  ) => {
+    if (typeof run.props.get().value === 'string') {
+      const revision = controlledReports.revision();
+      reportEdit('sync');
+      if (resetRun === run && controlledReports.revision() === revision)
+        controlledReports.schedule(reason);
+    } else reportEdit(reason);
+  };
   def.expose.method(
     '__implicitSubmitEligible',
     () => focused.get() && !composing.get() && !control.snapshot()?.composing
   );
   def.expose.method('resetValue', () => {
     if (!resetRun) return false;
+    controlledReports.cancel();
     const changed = control.resetValue(initialValue);
     if (!changed && typeof resetRun.props.get().value === 'string')
       resetRun.expose.emit('valueChange', {
@@ -113,15 +136,23 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     resetRun = run;
   });
   def.lifecycle.onUnmounted(() => {
+    controlledReports.cancel();
     viewEpoch++;
     resetRun = null;
     composing.set(false, 'reason: field control view composition retired');
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    controlledReports.cancel();
+    viewEpoch++;
+    resetRun = null;
   });
   let minLength = -1,
     maxLength = -1;
   const sync = (props: Readonly<FieldControlProps>) => {
     const controlled = typeof props.value === 'string';
     const nextDisabled = binding.state.fieldDisabled.get();
+    if (disabled.get() !== nextDisabled || readOnly.get() !== binding.state.fieldReadOnly.get())
+      controlledReports.cancel();
     disabled.set(nextDisabled, 'reason: field control sync disabled');
     readOnly.set(binding.state.fieldReadOnly.get(), 'reason: field control sync readonly');
     ariaLabel.set(props.ariaLabel ?? '', 'reason: field control sync aria label');
@@ -213,12 +244,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     // Re-read the module after a synchronous controlled-owner response.
     value.set(control.snapshot()?.value ?? value.get(), 'reason: field canonical owner value');
     if (resetRun !== run || viewEpoch !== epoch) return;
-    binding.report({
-      value: value.get(),
-      composing: event.composing,
-      focused: focused.get(),
-      reason: 'input',
-    });
+    notifyEdit(run, 'input');
   });
   control.on('change', (run, event) => {
     const epoch = viewEpoch;
@@ -229,12 +255,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     // A change-only commit is canonical input too. Re-read after the controlled owner's callback.
     value.set(control.snapshot()?.value ?? value.get(), 'reason: field change owner value');
     if (resetRun !== run || viewEpoch !== epoch) return;
-    binding.report({
-      value: value.get(),
-      composing: event.composing,
-      focused: focused.get(),
-      reason: 'change',
-    });
+    notifyEdit(run, 'change');
   });
   const emitComposition = (
     run: RunHandle<FieldControlProps>,
@@ -248,6 +269,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     run.expose.emit(eventName, detail);
   };
   control.on('compositionstart', (run, event) => {
+    controlledReports.cancel();
     const epoch = viewEpoch;
     composing.set(true, 'reason: field control composition start');
     if (resetRun !== run || viewEpoch !== epoch) return;
@@ -267,13 +289,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     if (resetRun !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionEnd', event);
     if (resetRun !== run || viewEpoch !== epoch) return;
-    binding.report({
-      value: value.get(),
-      // A synchronous owner callback may already have started a newer composition.
-      composing: composing.get(),
-      focused: focused.get(),
-      reason: 'compositionend',
-    });
+    notifyEdit(run, 'compositionend');
   });
   return () => null;
 }

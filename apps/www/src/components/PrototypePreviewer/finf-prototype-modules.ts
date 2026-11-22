@@ -456,6 +456,14 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/field');
     registerExactPrototype('shadcn-field-textarea', module.fieldTextarea);
   },
+  'base-field-textarea': async () => {
+    const module = await import('@proto.ui/prototypes-base/field');
+    registerExactPrototype('base-field-textarea', module.fieldTextarea);
+  },
+  'brutalist-field-textarea': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/field');
+    registerExactPrototype('brutalist-field-textarea', module.fieldTextarea);
+  },
   'shadcn-field-select-trigger': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/field');
     registerExactPrototype('shadcn-field-select-trigger', module.fieldSelectTrigger);

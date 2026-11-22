@@ -56,6 +56,10 @@ Base 不提供 child renderer，也不提供视觉样式。应用作者应在这
 - 源码：[packages/prototypes/base/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/textarea)
 - 测试：[textarea.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/textarea.test.ts)
 
+## 复位与 Field 组合
+
+当前 0.3 源码公开 `resetValue()`：非受控编辑器恢复实例创建时的值，受控编辑器提出该值并等待 owner。显式复位在 readOnly 或 disabled 下仍可用，并退役组合输入。通过 `@proto.ui/prototypes-base/field` 的 `fieldTextarea` 获取同一个多行编辑器的 Field 命名、描述、错误与校验组合；见[版本化 Form 配方](../form/)。
+
 ## API
 
 Textarea 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。

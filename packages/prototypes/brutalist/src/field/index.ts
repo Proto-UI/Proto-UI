@@ -7,6 +7,7 @@ export {
 } from './description.proto';
 export { default as fieldError, default as brutalistFieldError } from './error.proto';
 export { default as fieldValidity, default as brutalistFieldValidity } from './validity.proto';
+export { default as fieldTextarea, default as brutalistFieldTextarea } from './textarea.proto';
 export type {
   FieldRootProps,
   FieldRootExposes,
@@ -20,4 +21,6 @@ export type {
   FieldErrorExposes,
   FieldValidityProps,
   FieldValidityExposes,
+  FieldTextareaProps,
+  FieldTextareaExposes,
 } from '@proto.ui/prototypes-base/field';

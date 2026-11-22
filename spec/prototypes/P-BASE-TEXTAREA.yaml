@@ -8,6 +8,14 @@ statement:
   zh-CN: Base Textarea 通过 Text Control host boundary 拥有一个 logical multiline editor，由 adapter 选择物理宿主目标；当前 Web profile 使用一个原生 textarea。它固定 controlled/uncontrolled value ownership，标准化 input/change/IME event，投影 property 与 textbox 无障碍信息，并提供物理 focus/blur；它不拥有 form workflow、validation message、auto-resize、rich-text composition 或系统 editing chrome。
   en: Base Textarea owns one logical multiline editor through the Text Control host boundary while the adapter selects the physical host target; the current Web profile uses one native textarea. It fixes controlled or uncontrolled value ownership, normalizes input/change/IME events, projects properties and textbox accessibility, and exposes physical focus and blur; it does not own form workflow, validation messages, auto-resize, rich-text composition, or system editing chrome.
 criteria:
+  - id: P-BASE-TEXTAREA-RESET
+    text:
+      zh-CN: resetValue() 复位到实例首次 canonical 值，退役当前 composition 与排队 Field 编辑通知。非受控直接恢复；受控仅发 valueChange 提案，owner 拒绝时保留原值。disabled/readOnly 不阻止显式复位。此编辑器操作不创建 Form owner、native form 或提交行为；终止实例与卸载 view 不能执行旧复位。
+      en: resetValue() returns an editor to its instance's initial canonical value and retires composition and queued Field edit notifications. Uncontrolled editors restore directly; controlled editors only propose valueChange and preserve their value on refusal. Disabled/readonly do not block explicit reset. This editor operation creates no Form owner, native form or submission behavior, and retired instances/views cannot execute old resets.
+  - id: P-BASE-TEXTAREA-FIELD-CONTROLLED-REPORT
+    text:
+      zh-CN: 显式 Field 组合的受控候选编辑遵循 P-BASE-FIELD-CONTROL-CONTROLLED-REPORT：在有界任务中读取普通 owner 提交后的 canonical 值，拒绝候选不进入 Field，reset/策略/组合输入/view 退休撤销排队通知。独立 Textarea 不安装 Field 通知任务。
+      en: 'An explicit Field composition follows P-BASE-FIELD-CONTROL-CONTROLLED-REPORT for controlled candidate edits: a bounded task reads the canonical value after ordinary owner commits, rejected text never enters Field, and reset/policy/composition/view retirement revoke queued notifications. An ordinary independent Textarea installs no Field notification task.'
   - id: P-BASE-TEXTAREA-FIELD-COMPOSITION
     text:
       en: The optional Field composition explicitly uses the public definition-time setupTextareaRoot fieldBinding option and the same editor. Field retains validity and anatomy relationships; ordinary Textarea retains explicit independent Label associations and external ID relations. Consuming existing Field facts is not ownership of a validator or validation messages. This does not revise the auto-resize or form workflow exclusions.
@@ -71,6 +79,9 @@ verifies:
   tests:
     - T-BASE-TEXTAREA-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: extended
+    summary: Define explicit editor reset and controlled Field report timing for ordinary four-host Form consumers.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Admit explicit optional Field composition through shared setup without changing ordinary Textarea association or editing defaults.

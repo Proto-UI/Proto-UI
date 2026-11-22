@@ -173,6 +173,7 @@ describe('Base Field canonical ownership and lifecycle', () => {
     await input(f, 'attempt');
     expect(editor(f).value).toBe('canonical');
     expect(f.root.getExposes().getValidity().dirty).toBe(false);
+    await until(() => f.requests.length === 1);
     expect(f.requests.at(-1).value).toBe('canonical');
     expect(
       f.root

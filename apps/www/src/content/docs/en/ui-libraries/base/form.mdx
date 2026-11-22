@@ -22,9 +22,15 @@ FormSubmit and FormReset expose typed disabled, hovered, pressed, focused and fo
 
 Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
 
+## Versioned validation and nested controls
+
+<PrototypePreviewer demoId="demo-base-form-validation" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+This public recipe holds actual external validation requests in its consumer. Submit starts validation; Return success or Return error delivers the current `requestId` through `resolveValidation`. Edit, reset or change readOnly before returning an older result to see its rejection. Cancel submit retires the Form attempt; an independent Field may still accept its current validation result without completing that canceled submission. A new submit supersedes the previous attempt. Controlled editor notifications read the canonical value after the framework commits the owner response; rejected text never becomes a Field value. The account value stays controlled by the application, and nested Fieldsets govern the Checkbox Group and multiline notes. Disabling the parent group omits its fields from submitted values without rewriting their owners. Form reset restores uncontrolled baselines and asks the controlled owner to restore its initial value. The demo owns no network request.
+
 ## API
 
-Form is workspace source. There is no public `proto-ui add` target.
+The source CLI registry provides `base-form`. Use the exact source revision and matching workspace build when consuming the current 0.3 draft; this page does not claim that an older published package contains the new recipe.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}

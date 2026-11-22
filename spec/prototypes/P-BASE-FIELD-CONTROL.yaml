@@ -5,9 +5,7 @@ status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
   zh-CN: Finf Field 的 draft 契约及投影。稳定准入仍需独立审查、精确 head 的原生输入、辅助技术、视觉/材质与 GPUI 证据；synthetic DOM 测试不建立这些保证。
-  en: Draft Finf Field contract and projections. Stable admission requires independent review and exact-head
-    native input, assistive technology, visual/material and GPUI evidence; synthetic DOM checks do not
-    establish those guarantees.
+  en: Draft Finf Field contract and projections. Stable admission requires independent review and exact-head native input, assistive technology, visual/material and GPUI evidence; synthetic DOM checks do not establish those guarantees.
 summary: Governed atomic Field control and public authoring entry.
 statement:
   zh-CN: The control realizes its exact part of C-FIELD-0001, without a second state owner or host escape.
@@ -15,10 +13,12 @@ statement:
 criteria:
   - id: P-BASE-FIELD-CONTROL-SEMANTICS
     text:
-      zh-CN: Implements C-FIELD-0001-OWNER, C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS, C-FIELD-0001-HOST for the
-        control atom; preserves its documented JSON Props, exposes and lifecycle.
-      en: Implements C-FIELD-0001-OWNER, C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS, C-FIELD-0001-HOST for the
-        control atom; preserves its documented JSON Props, exposes and lifecycle.
+      zh-CN: Implements C-FIELD-0001-OWNER, C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS, C-FIELD-0001-HOST for the control atom; preserves its documented JSON Props, exposes and lifecycle.
+      en: Implements C-FIELD-0001-OWNER, C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS, C-FIELD-0001-HOST for the control atom; preserves its documented JSON Props, exposes and lifecycle.
+  - id: P-BASE-FIELD-CONTROL-CONTROLLED-REPORT
+    text:
+      zh-CN: 受控编辑的 Field 候选编辑通知在当前 outward 回调与普通框架提交之后的一个有界任务中读取 canonical owner 值；同栈多个受控通知合并为最后一次。拒绝候选仍可按 onChange 校验保留的 canonical 值，候选文本不得成为 Field 值。同步快照持续报告，reset、compositionstart、disabled/readOnly 改变或 view/instance 退休撤销未交付通知；manual/blur 不等待此任务。
+      en: Controlled-edit Field candidate notifications read the canonical owner value in one bounded task after the current outward callbacks and ordinary framework commit; same-turn controlled notifications coalesce to the latest. A rejected candidate may still trigger onChange validation of the retained canonical value, never of rejected text. Synchronous snapshots remain reported. Reset, compositionstart, disabled/readOnly changes and view/instance retirement revoke queued notifications; manual/blur do not wait for this task.
 dependsOn:
   contracts:
     - C-FIELD-0001
@@ -32,6 +32,9 @@ sources:
   - path: packages/prototypes/base/src/field/types.ts
   - path: packages/prototypes/base/src/field/control-binding.proto.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Define controlled candidate report timing across ordinary synchronous and queued framework commits while preserving canonical-value validation on rejection.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the independent Field atom with explicit source and native evidence boundaries.

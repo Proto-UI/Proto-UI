@@ -1,4 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import { createControlledEditReport } from '../field/controlled-edit-report';
 import { asAccessible, asFocusable, asTextControl, asControlLabel } from '@proto.ui/hooks';
 import { asOptionalFieldControl } from '../field/control-binding.proto';
 import { FIELD_LABEL_PAIR } from '../field/shared';
@@ -119,19 +120,57 @@ export function setupTextareaRoot(
       composing: composing.get(),
       reason,
     });
+  const controlledReports = createControlledEditReport((reason) => {
+    if (currentView) reportField(reason);
+  });
+  const notifyEdit = (
+    run: RunHandle<TextareaRootProps>,
+    reason: 'input' | 'change' | 'compositionend'
+  ) => {
+    if (!binding) return;
+    if (typeof run.props.get().value === 'string') {
+      const revision = controlledReports.revision();
+      reportField();
+      if (currentView === run && controlledReports.revision() === revision)
+        controlledReports.schedule(reason);
+    } else reportField(reason);
+  };
   let currentView: RunHandle<TextareaRootProps> | null = null;
   let viewEpoch = 0;
+  let initialValue = '';
+  def.expose.method('resetValue', () => {
+    if (!currentView) return false;
+    const current = currentView,
+      epoch = viewEpoch;
+    controlledReports.cancel();
+    const changed = control.resetValue(initialValue);
+    if (!changed && typeof current.props.get().value === 'string')
+      current.expose.emit('valueChange', {
+        value: initialValue,
+        composing: false,
+        data: null,
+        inputType: null,
+      });
+    if (currentView !== current || viewEpoch !== epoch) return changed;
+    value.set(control.snapshot()?.value ?? value.get(), 'reason: textarea reset canonical value');
+    if (currentView !== current || viewEpoch !== epoch) return changed;
+    composing.set(false, 'reason: textarea reset composition');
+    if (currentView === current && viewEpoch === epoch) reportField();
+    return changed;
+  });
   def.lifecycle.onMounted((run) => {
     currentView = run;
     reportField();
   });
   def.lifecycle.onUnmounted(() => {
+    controlledReports.cancel();
     currentView = null;
     viewEpoch++;
     // A later view retains value ownership, not the retired host's IME session.
     composing.set(false, 'reason: textarea view composition retired');
   });
   def.lifecycle.onBeforeDispose(() => {
+    controlledReports.cancel();
     currentView = null;
     viewEpoch++;
   });
@@ -141,6 +180,8 @@ export function setupTextareaRoot(
     const nextDisabled = binding ? binding.state.fieldDisabled.get() : (props.disabled ?? false);
     const nextReadOnly = binding ? binding.state.fieldReadOnly.get() : (props.readOnly ?? false);
     const nextRequired = binding ? binding.state.fieldRequired.get() : (props.required ?? false);
+    if (disabled.get() !== nextDisabled || readOnly.get() !== nextReadOnly)
+      controlledReports.cancel();
     disabled.set(nextDisabled, 'reason: textarea sync disabled');
     readOnly.set(nextReadOnly, 'reason: textarea sync readonly');
     ariaLabel.set(props.ariaLabel ?? '', 'reason: textarea sync aria label');
@@ -189,7 +230,10 @@ export function setupTextareaRoot(
     def.lifecycle.onCreated(checkRelations);
     def.props.watchRaw(['labelledBy', 'describedBy'], checkRelations);
   }
-  def.lifecycle.onCreated((run) => sync(run.props.get()));
+  def.lifecycle.onCreated((run) => {
+    sync(run.props.get());
+    initialValue = value.get();
+  });
   def.props.watch(
     [
       'value',
@@ -224,14 +268,14 @@ export function setupTextareaRoot(
       inputType: event.inputType,
     });
     run.expose.emit('valueChange', detail);
-    if (binding && currentView === run && epoch === viewEpoch) reportField('input');
+    if (binding && currentView === run && epoch === viewEpoch) notifyEdit(run, 'input');
   });
   control.on('change', (run, event) => {
     const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea change value');
     if (currentView !== run || viewEpoch !== epoch) return;
     run.expose.emit('change', Object.freeze({ value: event.value }));
-    if (binding && currentView === run && epoch === viewEpoch) reportField('change');
+    if (binding && currentView === run && epoch === viewEpoch) notifyEdit(run, 'change');
   });
 
   const emitComposition = (
@@ -246,6 +290,7 @@ export function setupTextareaRoot(
     run.expose.emit(eventName, detail);
   };
   control.on('compositionstart', (run, event) => {
+    controlledReports.cancel();
     const epoch = viewEpoch;
     composing.set(true, 'reason: textarea composition start');
     if (currentView !== run || viewEpoch !== epoch) return;
@@ -262,7 +307,7 @@ export function setupTextareaRoot(
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea composition end value');
     if (currentView !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionEnd', event);
-    if (binding && currentView === run && epoch === viewEpoch) reportField('compositionend');
+    if (binding && currentView === run && epoch === viewEpoch) notifyEdit(run, 'compositionend');
   });
   return () => null;
 }

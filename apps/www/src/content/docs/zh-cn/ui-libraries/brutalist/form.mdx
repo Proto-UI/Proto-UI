@@ -22,9 +22,15 @@ FormSubmit 与 FormReset 提供明确类型的 disabled、hovered、pressed、fo
 
 当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。
 
+## 版本化校验与嵌套控件
+
+<PrototypePreviewer demoId="demo-brutalist-form-validation" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+此公开配方由消费者保留真实外部校验请求。提交会开始校验；“返回成功”或“返回错误”通过 `resolveValidation` 交回当前 `requestId`。可先编辑、复位或切换 readOnly，再返回旧结果，观察过期结果被拒绝。取消提交只退役 Form 的提交尝试；独立 Field 仍可接受当前校验结果，但不会完成已取消的提交。新的提交会取代上一次尝试。受控编辑通知在框架提交 owner 回应后读取 canonical 值，被拒绝的候选文本不会成为 Field 值。账号值由应用受控管理，嵌套 Fieldset 统一管理 Checkbox Group 与多行备注。禁用父组会从提交值中省略其字段，不改写控件所有者；Form 复位恢复非受控初值，并向受控所有者请求初值。示例不发起网络请求。
+
 ## API
 
-Form 是工作区源码，没有公开的 `proto-ui add` 目标。
+源码 CLI 注册 `brutalist-form`。消费当前 0.3 draft 时应固定精确源码版本并使用对应工作区构建；本页不声称旧发布包已包含新配方。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
