@@ -124,6 +124,7 @@ test('the fixed serial selection preserves the full original criteria and bounde
   const steps = sprint1Plan('/tmp/simulated-sprint1', 'a'.repeat(40));
   assert.equal(steps.length, 11);
   assert.equal(new Set(steps.map((step) => step.id)).size, steps.length);
+  assert.equal(SPRINT1_TOTAL_MS, 80 * 60_000);
   assert.ok(
     steps.reduce((sum, step) => sum + step.timeoutMs + SPRINT1_CLEANUP_MS, 0) < SPRINT1_TOTAL_MS
   );
@@ -131,6 +132,7 @@ test('the fixed serial selection preserves the full original criteria and bounde
     SPRINT1_NODE_SUITES.includes('scripts/analysis/test/number-field-ime-evidence.test.mjs')
   );
   for (const suite of [
+    'apps/www/src/content/docs/zh-cn/demo-matrix-activation.test.ts',
     'packages/compiler/test/props-update-policy.test.ts',
     'packages/prototypes/base/test/select-legacy-slot.test.ts',
     'packages/compiler/test/diagnostic-origin.test.ts',
@@ -139,6 +141,18 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'packages/prototypes/base/test/number-field-format.test.ts',
   ])
     assert.ok(SPRINT1_UNIT_SUITES.includes(suite));
+  assert.equal(SPRINT1_UNIT_SUITES.length, 27);
+  const search = steps.find((step) => step.id === 'search-native');
+  assert.equal(search.timeoutMs, 1_200_000);
+  assert.deepEqual(search.suites, [
+    'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
+  ]);
+  assert.ok(
+    search.args.every(
+      (arg) => !/^--(?:testNamePattern|testTimeout|hookTimeout|bail)(?:=|$)/.test(arg)
+    ),
+    'Producer budget must not filter Search cases or override their original limits'
+  );
   const release = steps.find((step) => step.id === 'number-field-0.3');
   assert.equal(release.env.PUI_BROWSER_FAMILIES, 'base,shadcn,brutalist');
   assert.equal(release.env.PUI_BROWSER_RUNTIMES, 'wc,react,vue,vue2');
@@ -191,10 +205,11 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   ])
     assert.ok(original.run.includes(suite));
   const job = workflow.jobs.sprint1;
-  assert.equal(job['timeout-minutes'], 80);
+  assert.equal(job['timeout-minutes'], 90);
   assert.equal(job.strategy, undefined, 'Heavy operations run in one serial worker');
   const execute = job.steps.find((step) => step.run?.includes('sprint1-evidence.mjs run'));
   assert.equal(execute.if, '${{ !cancelled() }}');
+  assert.equal(execute['timeout-minutes'] * 60_000, SPRINT1_TOTAL_MS);
   assert.equal(execute['continue-on-error'], undefined);
   assert.equal(
     job.steps.find((step) => step.run?.includes('sprint1-evidence.mjs finish')).if,

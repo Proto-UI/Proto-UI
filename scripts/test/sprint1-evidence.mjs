@@ -19,6 +19,7 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'apps/www/src/components/site-search-commands.recovery.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix-observation.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-matrix-activation.test.ts',
   'apps/www/src/components/site-search-commands.test.ts',
   'apps/www/src/components/site-search-commands.public-mode.test.ts',
   'apps/www/src/components/site-search-commands.disposal.test.ts',
@@ -54,7 +55,7 @@ export const SPRINT1_NODE_SUITES = Object.freeze([
 ]);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const runtimes = ['wc', 'react', 'vue', 'vue2'];
-export const SPRINT1_TOTAL_MS = 72 * 60_000;
+export const SPRINT1_TOTAL_MS = 80 * 60_000;
 export const SPRINT1_CLEANUP_MS = 5_000;
 export const SPRINT1_MATRIX_CASE =
   'Website Demo Matrix browser smoke mounts every demo in every official Web adapter';
@@ -134,7 +135,12 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
     vitest(
       'search-native',
       ['apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts'],
-      900
+      // The complete serial Search producer exhausted its previous 900s window
+      // before writing terminal Vitest JSON. Preserve that failed attempt and
+      // allow the unchanged 83-case suite enough acquisition/reporting time;
+      // every case, assertion and original 1000ms readiness limit remains owned
+      // by that suite. This outer resource allowance proves no product speedup.
+      1200
     ),
     vitest('ownership-native', SPRINT1_BROWSER_SUITES.slice(2), 180),
     node(
@@ -477,7 +483,7 @@ export function prepareSprint1(directory, repo = root, expectedSha = process.env
     runId: process.env.GITHUB_RUN_ID ?? null,
     runAttempt: process.env.GITHUB_RUN_ATTEMPT ?? null,
     boundary:
-      'Selected Sprint 1 checks; full scheduled cycle, physical IME/AT, non-Web and real applications remain separate.',
+      'Selected Sprint 1 checks; producer timeouts bound serial acquisition and terminal reporting while original per-case readiness limits and assertions remain unchanged. Prior timed-out producers remain failed evidence. Full scheduled cycle, physical IME/AT, non-Web and real applications remain separate.',
   };
   writeJson(path.join(directory, 'plan.json'), plan);
   writeJson(path.join(directory, 'progress.json'), { current: null, results: [] });
