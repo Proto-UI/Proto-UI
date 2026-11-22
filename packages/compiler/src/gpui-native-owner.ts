@@ -13,6 +13,7 @@ import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
+import { gpuiNativeSelectionSource } from './gpui-native-selection';
 
 export const gpuiNativeOwnerSource =
   String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
@@ -715,6 +716,7 @@ pub fn native_presentation(owner:&OwnerRef,tokens:&[String])->(gpui::StyleRefine
     use crate::gpui_native_style::{themes,ColorScheme,Substitution,LengthContext,evaluate_length};
     let(vocabulary,theme)={let o=owner.borrow();(o.style_vocabulary,themes().get(&o.theme,if o.dark{ColorScheme::Dark}else{ColorScheme::Light}).expect("unknown design language"))};
     let mut resolved=vocabulary.resolve_all(tokens.iter().map(String::as_str));assert!(resolved.unknown.is_empty(),"unmapped style tokens: {:?}",resolved.unknown);
+    take_native_content_selection(&mut resolved);
     let local:BTreeMap<_,_>=resolved.declarations.extract_if(..,|property,_|property.starts_with("--")).collect();
     let substitute=|value:&str|match theme.substitute_with(value,&local){Substitution::Resolved(text)=>text,other=>panic!("unresolved style declaration: {:?}",other)};
     for value in resolved.declarations.values_mut(){*value=substitute(value);}
@@ -1069,4 +1071,5 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
   gpuiNativeImageSource +
   gpuiNativePositioningSource +
   gpuiNativeOverlaySource +
-  gpuiNativeControlLabelSource;
+  gpuiNativeControlLabelSource +
+  gpuiNativeSelectionSource;
