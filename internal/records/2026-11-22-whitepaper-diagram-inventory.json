@@ -1,0 +1,547 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.whitepaper-diagram-inventory",
+  "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+  "tree": "513879bf79a93cc9325f5193fa0559e16ea57108",
+  "scope": "Source preservation and semantic disposition. This inventory is not visual, browser, assistive-technology or release acceptance.",
+  "assets": [
+    {
+      "asset": "apps/www/public/diagrams/information-flow-model.svg",
+      "kind": "retained-legacy",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/information-flow-model.svg",
+        "blob": "e58e8717709654ef9270dd36acf8476926e7610c",
+        "sha256": "8872c725119cf0533bdc44de2c3424332e584b35cb25284c17045a779d7c544c"
+      },
+      "captureProfile": "information-flow-model",
+      "disposition": "keep",
+      "reason": "Keep the canonical chapter 2 comparison and the original State/Lifecycle/Meta content. Anatomy does not rename Meta; these internal dimensions are not additional channels. Draft legacy articles are retained references, not production routes.",
+      "path": "apps/www/public/diagrams/information-flow-model.svg",
+      "blob": "e58e8717709654ef9270dd36acf8476926e7610c",
+      "sha256": "8872c725119cf0533bdc44de2c3424332e584b35cb25284c17045a779d7c544c",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md",
+          "blob": "d5f100680a1b89c7e7c1d610cacb913b3578526f",
+          "sha256": "05c6ff350ab6133feef386a6939bf176482ec9ec7366d547ac52af25efb8d0de",
+          "line": 94,
+          "locale": "en",
+          "status": "canonical-article"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/information-flow-model.md",
+          "blob": "054b36fe02fea47e1af729b8210fcad5e67ae2b4",
+          "sha256": "b93c9d34018bab411398ab7ab4479211ec426ac5f4bf4cccd28bb4b0c66a45bf",
+          "line": 107,
+          "locale": "en",
+          "status": "retained-draft"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md",
+          "blob": "e28ad3118bac377b86ad40a0d4c89c784993f4d8",
+          "sha256": "1d4c80e40b4156f69797d326cc1d27dfb305cf709d7f57b4b1d79b832de4cb2e",
+          "line": 94,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/information-flow-model.md",
+          "blob": "b1c6d4b99bb0a67135c81b2e7b4710d5d59a57be",
+          "sha256": "f3acbecf99d957df5e43b32802f2442c682b14bd00581ca787aab84720cf072a",
+          "line": 106,
+          "locale": "zh-cn",
+          "status": "retained-draft"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-component-anatomy.en.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "anatomy",
+      "captureProfile": "component-anatomy",
+      "disposition": "keep",
+      "reason": "Keep the Root/Thumb ownership comparison and the independent Select parts. The fixed Caret is a boundary example, not a new Base part or a prescribed Host tree.",
+      "path": "apps/www/public/diagrams/whitepaper-component-anatomy.en.svg",
+      "blob": "02f64ca46fd0e0ca23daabbf633b8319e49275b4",
+      "sha256": "b198d0969717417504b0631ed58b6b6698b4243dfc5a2d4475e038b61a4c8157",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/3-component-boundary.md",
+          "blob": "64199a9b3e6e0bbeb72fd0fbe16a48b616be490f",
+          "sha256": "8f6349c3b844df393c8fd3d0945617e2f87ba9f8d615e18555ffa8c5af1c1e17",
+          "line": 142,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-component-anatomy.zh-cn.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "anatomy",
+      "captureProfile": "component-anatomy",
+      "disposition": "keep",
+      "reason": "Keep the Root/Thumb ownership comparison and the independent Select parts. The fixed Caret is a boundary example, not a new Base part or a prescribed Host tree.",
+      "path": "apps/www/public/diagrams/whitepaper-component-anatomy.zh-cn.svg",
+      "blob": "996706dbcb8b554b2a9410720de54a9825f1b33a",
+      "sha256": "fca77c8262744dcc370ba89e8239d43c28122db5f6b4cfecb9ee46b4a5bd1184",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md",
+          "blob": "de724fff2dfadbeafc101cba3c83e06250ebe1d9",
+          "sha256": "0d454d776303bde8c20454560d595788eaabff0b1298e3392fd2febf1e7374ee",
+          "line": 142,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-component-boundary.en.svg",
+      "kind": "authored-export",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/whitepaper-component-boundary.en.svg",
+        "blob": "045dce3678f86a3d8475c38daa5b49b8dc4c737b",
+        "sha256": "ce48c9b752d386511c7a72b06caa92d62135d5f48fc435a4a05a40928d1008ad"
+      },
+      "captureProfile": null,
+      "disposition": "keep",
+      "reason": "Keep the author layout: independent Event/Props/Expose/Context requires a Component; Feedback-only structure may remain attached. Preserve the distinction between may and must.",
+      "path": "apps/www/public/diagrams/whitepaper-component-boundary.en.svg",
+      "blob": "045dce3678f86a3d8475c38daa5b49b8dc4c737b",
+      "sha256": "ce48c9b752d386511c7a72b06caa92d62135d5f48fc435a4a05a40928d1008ad",
+      "originalDrawing": "Author-held; no original drawing hash is available.",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/3-component-boundary.md",
+          "blob": "64199a9b3e6e0bbeb72fd0fbe16a48b616be490f",
+          "sha256": "8f6349c3b844df393c8fd3d0945617e2f87ba9f8d615e18555ffa8c5af1c1e17",
+          "line": 58,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-component-boundary.zh-cn.svg",
+      "kind": "authored-export",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/whitepaper-component-boundary.zh-cn.svg",
+        "blob": "9c0505000f17fca3a6e78b77c6df517404f77d37",
+        "sha256": "6838c093ab755de5b9b92b0cfc534d01d5c66f0d36a33936e8551dc07183df0b"
+      },
+      "captureProfile": null,
+      "disposition": "keep",
+      "reason": "Keep the author layout: independent Event/Props/Expose/Context requires a Component; Feedback-only structure may remain attached. Preserve the distinction between may and must.",
+      "path": "apps/www/public/diagrams/whitepaper-component-boundary.zh-cn.svg",
+      "blob": "9c0505000f17fca3a6e78b77c6df517404f77d37",
+      "sha256": "6838c093ab755de5b9b92b0cfc534d01d5c66f0d36a33936e8551dc07183df0b",
+      "originalDrawing": "Author-held; no original drawing hash is available.",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md",
+          "blob": "de724fff2dfadbeafc101cba3c83e06250ebe1d9",
+          "sha256": "0d454d776303bde8c20454560d595788eaabff0b1298e3392fd2febf1e7374ee",
+          "line": 58,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-conditional-consistency.en.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "consistency",
+      "captureProfile": "conditional-consistency",
+      "disposition": "keep",
+      "reason": "Keep the obligations baseline and aligned condition-to-comparison rows. The rows are not automatic tiers and do not claim complete cross-Host evidence.",
+      "path": "apps/www/public/diagrams/whitepaper-conditional-consistency.en.svg",
+      "blob": "9b6880c173db4d2084d4bedd4759adfc37628e07",
+      "sha256": "5d24f0d566cbcfb8bba47c43336e12afe7424137424294182bfffe81bf827e1a",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/6-consistency-boundary.md",
+          "blob": "1e09148a5af4f7aee4eb3eeb79636d6d0c38a6a8",
+          "sha256": "02c09c4b3005a424f0446b32d9eb83dd2bbe15f17d70d9ea399785ca07cc7a57",
+          "line": 101,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-conditional-consistency.zh-cn.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "consistency",
+      "captureProfile": "conditional-consistency",
+      "disposition": "keep",
+      "reason": "Keep the obligations baseline and aligned condition-to-comparison rows. The rows are not automatic tiers and do not claim complete cross-Host evidence.",
+      "path": "apps/www/public/diagrams/whitepaper-conditional-consistency.zh-cn.svg",
+      "blob": "01f32480c256b1ffd40a6ec0603df89eb85bbe07",
+      "sha256": "9eaaf1b5c7f69ca6fe8cdbe6808d43695b1115830d83b003849c7ba15a529fb7",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/6-consistency-boundary.md",
+          "blob": "cca55d202ba86026da2b5cee60cbf600a919f2c8",
+          "sha256": "0bcd49be82a0b2fbac791e29487d1c3cd52a5adf631db3602370d310319d0f78",
+          "line": 101,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-evolution-feedback.en.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "evolution",
+      "captureProfile": "evolution-feedback",
+      "disposition": "keep",
+      "reason": "Keep the three concurrent work lines, evidence, four alternative diagnoses and explicit revise/test-again loop. The mobile layout preserves the same meaning; its readability requires its own evidence.",
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.en.svg",
+      "blob": "57d5c19153300a095c5f7525fa4d7c6ff0c4d1f7",
+      "sha256": "d1b31fde58a0866b8a8a7c77d01ef6f25cd3209505c847532930a31b55ad6682",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md",
+          "blob": "0abe3604e728baedd74e1e6b493cbb46acf95d40",
+          "sha256": "72cb0fbcf72ede21fa055a1a260fce754c6477c9278624dacdf503c0b6eeb64c",
+          "line": 103,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.en.svg",
+      "kind": "generated",
+      "originalInventory": false,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "evolutionMobile",
+      "captureProfile": "evolution-feedback",
+      "disposition": "keep",
+      "reason": "Keep the three concurrent work lines, evidence, four alternative diagnoses and explicit revise/test-again loop. The mobile layout preserves the same meaning; its readability requires its own evidence.",
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.en.svg",
+      "blob": "82c18a758e3c3232ce688482293f161377bdec34",
+      "sha256": "6919296ee9f2fa4577d38d298fead37dc48be422747e404d0dbe4b77897cba83",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md",
+          "blob": "0abe3604e728baedd74e1e6b493cbb46acf95d40",
+          "sha256": "72cb0fbcf72ede21fa055a1a260fce754c6477c9278624dacdf503c0b6eeb64c",
+          "line": 102,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg",
+      "kind": "generated",
+      "originalInventory": false,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "evolutionMobile",
+      "captureProfile": "evolution-feedback",
+      "disposition": "keep",
+      "reason": "Keep the three concurrent work lines, evidence, four alternative diagnoses and explicit revise/test-again loop. The mobile layout preserves the same meaning; its readability requires its own evidence.",
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg",
+      "blob": "ee9ae4e7d64573b2b75e527a0d3760e0b9c5a8ae",
+      "sha256": "4212899c398bbbe114a58434214efab4201a17576ed1ea49fe46b7ecb67ad7aa",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md",
+          "blob": "bf334f7205af38ca660af8ec508c870cb4db9d4b",
+          "sha256": "69028887a3abd3fa47b5b56190c440ee3624398b98936bdc77a4e2c9ca6a6772",
+          "line": 102,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-evolution-feedback.zh-cn.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "evolution",
+      "captureProfile": "evolution-feedback",
+      "disposition": "keep",
+      "reason": "Keep the three concurrent work lines, evidence, four alternative diagnoses and explicit revise/test-again loop. The mobile layout preserves the same meaning; its readability requires its own evidence.",
+      "path": "apps/www/public/diagrams/whitepaper-evolution-feedback.zh-cn.svg",
+      "blob": "031336af15136b822c462a4f55e3ef9006b3ee7c",
+      "sha256": "e6331476ff25de268950ccfb3fcc4f481f495c69b54432459a2baaf52b95ad69",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md",
+          "blob": "bf334f7205af38ca660af8ec508c870cb4db9d4b",
+          "sha256": "69028887a3abd3fa47b5b56190c440ee3624398b98936bdc77a4e2c9ca6a6772",
+          "line": 103,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-information-channels.svg",
+      "kind": "authored-export",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/whitepaper-information-channels.svg",
+        "blob": "5ad13500b6e9b082bcec61f7691b9ad5a56d6dce",
+        "sha256": "965d5958766b2a6c25981ac7121620efaa7a5dcc808cea9b9b0ae16cd65df410"
+      },
+      "captureProfile": null,
+      "disposition": "keep",
+      "reason": "Keep the five directed relations between User, App Maker and Component. Context allows both directions without specifying callback scheduling; the bilingual article supplies the explanation.",
+      "path": "apps/www/public/diagrams/whitepaper-information-channels.svg",
+      "blob": "5ad13500b6e9b082bcec61f7691b9ad5a56d6dce",
+      "sha256": "965d5958766b2a6c25981ac7121620efaa7a5dcc808cea9b9b0ae16cd65df410",
+      "originalDrawing": "Author-held; no original drawing hash is available.",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/2-interaction-relations.md",
+          "blob": "d5f100680a1b89c7e7c1d610cacb913b3578526f",
+          "sha256": "05c6ff350ab6133feef386a6939bf176482ec9ec7366d547ac52af25efb8d0de",
+          "line": 66,
+          "locale": "en",
+          "status": "canonical-article"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md",
+          "blob": "e28ad3118bac377b86ad40a0d4c89c784993f4d8",
+          "sha256": "1d4c80e40b4156f69797d326cc1d27dfb305cf709d7f57b4b1d79b832de4cb2e",
+          "line": 66,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-lifecycle.svg",
+      "kind": "authored-export",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/whitepaper-lifecycle.svg",
+        "blob": "03324e1098971351927cdd1d75ed799ec6a1901b",
+        "sha256": "e5398677762c992a738ab12ac44122f1e462a246ac000e63e8c4cf6324279529"
+      },
+      "captureProfile": null,
+      "disposition": "keep",
+      "reason": "Keep the author timeline separating setup, repeatable mount epochs and terminal disposal. A repeated mount is not a new instance and detach is not terminal disposal.",
+      "path": "apps/www/public/diagrams/whitepaper-lifecycle.svg",
+      "blob": "03324e1098971351927cdd1d75ed799ec6a1901b",
+      "sha256": "e5398677762c992a738ab12ac44122f1e462a246ac000e63e8c4cf6324279529",
+      "originalDrawing": "Author-held; no original drawing hash is available.",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/4-semantics-beyond-channels.md",
+          "blob": "6bb1274cb80429c17baa05edc464937ab4d231dd",
+          "sha256": "31491b709323c67ad3acd50e367c9d571a68c64ff75677891fc6295128646c11",
+          "line": 98,
+          "locale": "en",
+          "status": "canonical-article"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/4-semantics-beyond-channels.md",
+          "blob": "56673bc286632d7c3e259fabd86fbd782f36ade9",
+          "sha256": "c4e65efe36aff6768d1ced56e99a28d1c0a81a287330fcaae87f8f7a547b0c5f",
+          "line": 98,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-switch-activation.en.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "activation",
+      "captureProfile": "switch-activation",
+      "disposition": "keep",
+      "reason": "Keep the landed uncontrolled, enabled Switch example: Root owns checked; Expose reaches App Maker; Context reaches Thumb; both request their own Feedback. Arrow placement does not promise synchronous callbacks.",
+      "path": "apps/www/public/diagrams/whitepaper-switch-activation.en.svg",
+      "blob": "f4aa42f5710c5e4c3c9355cd6724b598d6deb752",
+      "sha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/4-semantics-beyond-channels.md",
+          "blob": "6bb1274cb80429c17baa05edc464937ab4d231dd",
+          "sha256": "31491b709323c67ad3acd50e367c9d571a68c64ff75677891fc6295128646c11",
+          "line": 281,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-switch-activation.zh-cn.svg",
+      "kind": "generated",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/scripts/generate-whitepaper-diagrams.mjs",
+        "blob": "06257f7de19c36d3d98b418816b2d11db866a537",
+        "sha256": "a6c07589f3ba7e5ba1e7392db4118efeb1b65247d67e65a051bc1e471994367f"
+      },
+      "entrypoint": "activation",
+      "captureProfile": "switch-activation",
+      "disposition": "keep",
+      "reason": "Keep the landed uncontrolled, enabled Switch example: Root owns checked; Expose reaches App Maker; Context reaches Thumb; both request their own Feedback. Arrow placement does not promise synchronous callbacks.",
+      "path": "apps/www/public/diagrams/whitepaper-switch-activation.zh-cn.svg",
+      "blob": "067dd38101e7c783bdcc982f19cb258c82be8e71",
+      "sha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/4-semantics-beyond-channels.md",
+          "blob": "56673bc286632d7c3e259fabd86fbd782f36ade9",
+          "sha256": "c4e65efe36aff6768d1ced56e99a28d1c0a81a287330fcaae87f8f7a547b0c5f",
+          "line": 278,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-translation-responsibility.en.svg",
+      "kind": "authored-export",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/whitepaper-translation-responsibility.en.svg",
+        "blob": "9040792a24fd6b552c954dc6cb68366b110d416b",
+        "sha256": "0dd63f4072a5907cb66858503052155e5212a9c478ad3164bf9a6e3744fe67b7"
+      },
+      "captureProfile": null,
+      "disposition": "keep",
+      "reason": "Keep the runtime Adapter responsibility map, required host facts/operations and attribution. Its illustrative Flutter/Qt targets do not promise equal delivery or describe the thin compiler path.",
+      "path": "apps/www/public/diagrams/whitepaper-translation-responsibility.en.svg",
+      "blob": "9040792a24fd6b552c954dc6cb68366b110d416b",
+      "sha256": "0dd63f4072a5907cb66858503052155e5212a9c478ad3164bf9a6e3744fe67b7",
+      "originalDrawing": "Author-held; no original drawing hash is available.",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/en/whitepaper/5-translation-layer.md",
+          "blob": "5c2aee200b6d17bb515a3d8a28d78b55d4be04c4",
+          "sha256": "8ba726cedbdb4b75b06f5e55c161972efe5c3c4e5868f8d5a7c010d7bc27ecf7",
+          "line": 87,
+          "locale": "en",
+          "status": "canonical-article"
+        }
+      ]
+    },
+    {
+      "asset": "apps/www/public/diagrams/whitepaper-translation-responsibility.zh-cn.svg",
+      "kind": "authored-export",
+      "originalInventory": true,
+      "editableSource": {
+        "path": "apps/www/public/diagrams/whitepaper-translation-responsibility.zh-cn.svg",
+        "blob": "0d64bfbd7ef83eb4c86d586cdfec14ffe414589a",
+        "sha256": "eb5f2bf6facfd1e9ea16159e1810b4c5ea6765bcb06c1f7ed413464535a3c2eb"
+      },
+      "captureProfile": null,
+      "disposition": "keep",
+      "reason": "Keep the runtime Adapter responsibility map, required host facts/operations and attribution. Its illustrative Flutter/Qt targets do not promise equal delivery or describe the thin compiler path.",
+      "path": "apps/www/public/diagrams/whitepaper-translation-responsibility.zh-cn.svg",
+      "blob": "0d64bfbd7ef83eb4c86d586cdfec14ffe414589a",
+      "sha256": "eb5f2bf6facfd1e9ea16159e1810b4c5ea6765bcb06c1f7ed413464535a3c2eb",
+      "originalDrawing": "Author-held; no original drawing hash is available.",
+      "references": [
+        {
+          "path": "apps/www/src/content/docs/zh-cn/whitepaper/5-translation-layer.md",
+          "blob": "b3b0ed4cb1c0fcba8d6d1ec1cec4fd15f28eb189",
+          "sha256": "a65561867a662ed974f72452a1e6e88006b0225b4120e3941926ee5f3f0dcf86",
+          "line": 87,
+          "locale": "zh-cn",
+          "status": "canonical-article"
+        }
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "path": "apps/www/public/diagrams/README.md",
+      "blob": "35f4fffa5beb1f56220770994cfa9a7d587ab04b",
+      "sha256": "0885249dd99658270aa9d96c9b1edd64f12374cdb6621674dba9213010235b0b"
+    },
+    {
+      "path": "apps/www/public/diagrams/licenses/Devicon-MIT.txt",
+      "blob": "fcc9b6677248224a60d060ccc6851eb420fa003d",
+      "sha256": "121194741d4a915b9f5890fdd6dd95121f9b1f816517c792358d72d7c838d664"
+    },
+    {
+      "path": "apps/www/public/diagrams/licenses/Excalifont-OFL.txt",
+      "blob": "2eed9c4fe56b6d78037b3105e6c7587700c36b9c",
+      "sha256": "29e737f5542aff88dbd3dfe80cae8d108fc82afd1c0953046435b6fdeb19f973"
+    },
+    {
+      "path": "apps/www/public/diagrams/licenses/Xiaolai-OFL.txt",
+      "blob": "2fea47d54ff4649dd34cb528d28b974c3aceb966",
+      "sha256": "0df7e09be4c2c850a48bd8beb9cd64b343aad49cd5d3f6cfb2ad2e3d28a56ca4"
+    },
+    {
+      "path": "apps/www/public/diagrams/licenses/Nunito-OFL.txt",
+      "blob": "c8210f08ca3cece05b4f7baa428afe8e1abe3293",
+      "sha256": "580df76c95a1ec5ab878ceb25bb3d85c6a076804e9c970c8c6972aea775fdf65"
+    },
+    {
+      "path": "apps/www/scripts/whitepaper-diagram-fonts.json",
+      "blob": "f6b1d761232161300543d5fd9558762001b833e5",
+      "sha256": "6b09d89cb7c228443979e9e1f7f48531dbe9c6c4e2c03ba81c7a1bf8094ed268"
+    }
+  ],
+  "counts": {
+    "assets": 17,
+    "originalInventory": 15,
+    "additionalResponsiveVariants": 2,
+    "references": 22,
+    "canonicalReferences": 20,
+    "retainedDraftReferences": 2
+  }
+}
