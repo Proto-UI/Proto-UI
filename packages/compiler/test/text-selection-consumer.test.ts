@@ -46,6 +46,85 @@ export default definePrototype({name:'selection-consumer',
 // These are actual framework consumers in Happy DOM, not OS IME or browser paint evidence.
 for (const profile of nativeOwnerProfiles)
   describe(profile, () => {
+    for (const queued of [false, true])
+      it(`preserves candidate caret across same-owner editing callbacks and ${queued ? 'queued' : 'synchronous'} acceptance`, async () => {
+        const callbacks = ['input', 'change', 'compositionend']
+          .map(
+            (type) =>
+              `editor.on('${type}',(run,event)=>{editor.sync({value:editor.snapshot()?.value ?? ''});candidate.set(event.value);});`
+          )
+          .join('\n');
+        const owner = await mountNativeOwner(
+          `import {definePrototype} from '@proto.ui/core';
+          import {asTextControl} from '@proto.ui/hooks';import {declareTextControl} from '@proto.ui/module-text-control';
+          export default definePrototype({name:'editing-owner-callback',modules:[declareTextControl({content:'plain-text',lineMode:'single',engine:'host'})],setup(def){
+            const editor=asTextControl();const candidate=def.state.string('candidate','');
+            def.expose.state('candidate',candidate);def.expose.method('read',()=>editor.snapshot());
+            def.expose.method('accept',(value:string)=>editor.sync({value}));
+            def.lifecycle.onCreated(()=>editor.sync({valueMode:'controlled',value:'5'}));
+            ${callbacks}return()=>null;
+          }});`,
+          profile
+        );
+        let active = true;
+        cleanup.push(async () => {
+          active = false;
+          await owner.dispose();
+        });
+        await owner.flush();
+        const api = owner.handle.getExposes();
+        const target = (owner.host.firstElementChild?.shadowRoot ?? owner.host).querySelector(
+          'input'
+        )!;
+        const off = api.candidate.subscribe((event: { next: string }) => {
+          if (queued)
+            queueMicrotask(() => {
+              if (active) api.accept(event.next);
+            });
+          else api.accept(event.next);
+        });
+        let next = '5';
+        for (const [type, digit] of [
+          ['input', '6'],
+          ['change', '7'],
+          ['compositionend', '8'],
+        ]) {
+          next += digit;
+          await owner.act(() => {
+            target.value = next;
+            target.setSelectionRange(next.length, next.length);
+            target.dispatchEvent(new Event(type, { bubbles: true }));
+          });
+          expect(target.value).toBe(next);
+          expect(api.read()).toEqual({
+            value: next,
+            composing: false,
+            selection: { start: next.length, end: next.length, direction: 'none' },
+          });
+        }
+        off();
+        const projected: string[] = [];
+        const changeOwner = api.candidate.subscribe(() => {
+          api.accept('q');
+          projected.push(target.value);
+          api.accept('5678');
+          projected.push(target.value);
+        });
+        await owner.act(() => {
+          target.value = 'a new physical candidate';
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        expect(projected).toEqual(['q', '5678']);
+        changeOwner();
+        await owner.act(() => {
+          target.value = '56789';
+          target.setSelectionRange(5, 5);
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        expect(target.value).toBe('5678');
+        expect(api.read().selection.start).toBe(4);
+      }, 30_000);
+
     for (const controlled of [false, true])
       it(`observes selection independently of ${controlled ? 'controlled' : 'uncontrolled'} value and retires its lease`, async () => {
         const owner = await mountNativeOwner(source(controlled), profile);

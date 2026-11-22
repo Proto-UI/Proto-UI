@@ -907,8 +907,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (['placeholder','name','autoComplete','inputMode','enterKeyHint','wrap'].includes(key)) { if (value === '') target.removeAttribute(key.toLowerCase()); else target.setAttribute(key.toLowerCase(), String(value)); }
     }
     if (typeof textPatch.defaultValue === 'string' && target.defaultValue !== textPatch.defaultValue) target.defaultValue = canonicalText(textPatch.defaultValue);
-    // Selection-only observations may update semantic states before an input
-    // event arrives. Attribute refresh must not commit or reject that candidate.
+    // Observations may refresh semantic state while an editing callback owns a
+    // native candidate. Attribute refresh must not commit or reject that candidate.
     if (restoreValue) restoreTextValue(target);
     queueTextSelection?.();
   }
@@ -921,13 +921,14 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     },
     sync(patch) {
       runtime('textControl.sync');
+      const previousValue = textValue;
       if (textDeclaration?.config.lineMode === 'single' && (patch.rows !== undefined || patch.wrap !== undefined)) throw new Error('[TextControl] rows/wrap require multiline declaration.');
       if (!textInitialized) { textMode = String(patch.valueMode ?? 'uncontrolled'); if (!['controlled','uncontrolled'].includes(textMode)) throw new Error('[TextControl] invalid value mode.'); textValue = canonicalText(String(textMode === 'controlled' ? patch.value ?? '' : patch.defaultValue ?? '')); textInitialized = true; }
       textPatch = { ...textPatch, ...patch, valueMode: textMode,
         ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
         ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
       if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
-      applyText(!(textObservation?.epoch === generation && textObservation.ownerValue === textValue)); requestPresentation();
+      applyText(!(textObservation?.epoch === generation && textObservation.ownerValue === textValue && previousValue === textValue)); requestPresentation();
     },
     snapshot() { alive(); const target = ready() ? root as HTMLInputElement | HTMLTextAreaElement : null; return textDeclared ? Object.freeze({ value: textValue, composing: textComposing, selection: target && canonicalText(target.value) === textValue ? readTextSelection(target, target.value) : null }) : null; },
   };
@@ -966,7 +967,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       const source = target.value, value = canonicalText(source);
       if (textMode === 'uncontrolled' && (type === 'input' || type === 'change')) textValue = value;
       const event = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null, selection: readTextSelection(target, source) });
-      for (const callback of [...textListeners.get(type) ?? []]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; options.invoke(() => callback(options.getRun(), event)); }
+      const previous = textObservation;
+      const observation = textMode === 'controlled' && ['input','change','compositionend'].includes(type) && value !== textValue ? { epoch, ownerValue: textValue } : null;
+      if (observation) textObservation = observation;
+      try { for (const callback of [...textListeners.get(type) ?? []]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; options.invoke(() => callback(options.getRun(), event)); } }
+      finally { if (observation && textObservation === observation) textObservation = previous; }
       if (textMode === 'controlled' && (type === 'compositionend' || (type === 'input' || type === 'change') && !textComposing)) queueMicrotask(() => { if (current()) applyText(true); });
     });
     queueTextSelection();
