@@ -264,10 +264,10 @@ fn assistive_activation_enters_authored_press_before_expose_and_disabled_policy(
         let handle = host.component.read(cx).handle();
         assert_eq!(action_from_name("activate"), gpui::AccessibleAction::Click);
         assert!(dispatch_accessibility_action(&handle.owner, "activate", None));
-        assert_eq!(handle.take_events(), vec![("invoked".into(), json!({"count":2,"selected":true}))]);
+        assert_eq!(handle.take_events(), vec![("invoked".into(), json!({"count":2.0,"selected":true}))]);
         assert_eq!(handle.state("count").unwrap_or_else(|_| panic!("count state")).as_f64(), Some(2.));
         assert!(dispatch(&handle.owner, "press.commit", false, event_fields("press.commit")));
-        assert_eq!(handle.take_events(), vec![("invoked".into(), json!({"count":4,"selected":false}))]);
+        assert_eq!(handle.take_events(), vec![("invoked".into(), json!({"count":4.0,"selected":false}))]);
         handle.call("setDisabled", vec![json!(true)], window, cx).unwrap_or_else(|_| panic!("disable"));
         assert!(!dispatch_accessibility_action(&handle.owner, "activate", None));
         assert!(handle.take_events().is_empty());
@@ -290,7 +290,7 @@ fn explicit_host_activation_keeps_its_authored_route_without_trigger(cx: &mut Te
         // No portable default prevention was requested by this host extension.
         assert!(!dispatch_accessibility_action(&handle.owner, "activate", None));
         assert_eq!(handle.state("count").unwrap_or_else(|_| panic!("count state")).as_f64(), Some(7.));
-        assert_eq!(handle.take_events(), vec![("changed".into(), json!({"count":7}))]);
+        assert_eq!(handle.take_events(), vec![("changed".into(), json!({"count":7.0}))]);
         assert!(handle.take_failures().is_empty());
     }).unwrap();
 }
@@ -342,7 +342,7 @@ fn generated_text_reset_retains_controlled_truth_and_utf16_scalar_semantics(cx: 
             let handle = host.component.read(cx).handle();
             assert_eq!(handle.call("reset", vec![json!("a\r\n😀候b")], window, cx).unwrap_or_else(|_| panic!("reset")), json!(!controlled));
             assert_eq!(handle.call("value", vec![], window, cx).unwrap_or_else(|_| panic!("value")), json!(if controlled {"truth"} else {"a😀候b"}));
-            assert_eq!(handle.call("length", vec![], window, cx).unwrap_or_else(|_| panic!("length")), json!(5));
+            assert_eq!(handle.call("length", vec![], window, cx).unwrap_or_else(|_| panic!("length")).as_f64(), Some(5.0));
             assert_eq!(handle.call("composing", vec![], window, cx).unwrap_or_else(|_| panic!("composing")), json!(false));
             for (value, floor, round, negative) in [(1.5,1.,2.,false),(-1.5,-2.,-1.,true),(-0.5,-1.,0.,true),(0.49999999999999994,0.,0.,false)] {
                 assert_eq!(handle.call("math", vec![json!(value)], window, cx).unwrap_or_else(|_| panic!("math")), json!({"floor":floor,"round":round,"negative":negative}));
