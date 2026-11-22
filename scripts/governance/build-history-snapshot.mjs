@@ -2,6 +2,8 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { digest, readPages } from './history-audit.mjs';
+import { readHistoryArchive } from './decode-history-archive.mjs';
+import { assertNativeCaptureIdentity } from './history-source-bindings.mjs';
 
 const [input, output, cutoff = '2026-11-22T10:22:30Z'] = process.argv.slice(2);
 if (!input || !output || !Number.isFinite(Date.parse(cutoff))) {
@@ -110,21 +112,28 @@ for (const file of [
     }
   }
 }
-const pullRequests = await Promise.all(
-  files
-    .filter((file) => /^pr-\d+\.json$/.test(file))
-    .sort()
-    .map(async (file) => JSON.parse(await readFile(join(input, file), 'utf8')))
+const nativeRawCaptures = new Map(
+  await Promise.all(
+    files
+      .filter((file) => /^(?:pr|inline|timeline)-\d+\.json$/.test(file))
+      .sort()
+      .map(async (file) => [file, JSON.parse(await readFile(join(input, file), 'utf8'))])
+  )
 );
-const inlinePages = files.some((file) => /^inline-\d+\.json$/.test(file))
-  ? await pages('inline')
-  : [];
-const issueTimeline = await Promise.all(
-  files
-    .filter((file) => /^timeline-\d+\.json$/.test(file))
-    .sort()
-    .map(async (file) => JSON.parse(await readFile(join(input, file), 'utf8')))
-);
+const pullRequests = [...nativeRawCaptures]
+  .filter(([file]) => /^pr-\d+\.json$/.test(file))
+  .map(([, value]) => value);
+const inlinePages = [...nativeRawCaptures]
+  .filter(([file]) => /^inline-\d+\.json$/.test(file))
+  .map(([file, rows]) => ({
+    page: Number(file.match(/-(\d+)\.json$/)[1]),
+    rows,
+    sha256: digest(rows),
+  }))
+  .sort((a, b) => a.page - b.page);
+const issueTimeline = [...nativeRawCaptures]
+  .filter(([file]) => /^timeline-\d+\.json$/.test(file))
+  .map(([, value]) => value);
 const snapshot = {
   schemaVersion: 1,
   repository: 'Proto-UI/Proto-UI',
@@ -151,14 +160,11 @@ const snapshot = {
 // Both native indexes bind the complete capture and every individual source
 // file hash. They are kept in one archive, not duplicated in this snapshot.
 const directory = '2026-11-22-sprint-7-history-sources';
+const { sourceCaptures, indexes } = await readHistoryArchive(join(dirname(output), directory));
+const nativeBinding = assertNativeCaptureIdentity(nativeRawCaptures, sourceCaptures);
 snapshot.nativeSourceArchive = {
   directory,
-  indexes: await Promise.all(
-    ['index.json', 'timeline.index.json'].map(async (path) => ({
-      path,
-      sha256: digest(await readFile(join(dirname(output), directory, path), 'utf8')),
-    }))
-  ),
+  indexes,
 };
 delete snapshot.pullRequests;
 delete snapshot.inlinePages;
@@ -168,6 +174,7 @@ console.log(
   JSON.stringify({
     objects: numbers.size,
     pullRequestSnapshots: pullRequests.length,
+    nativeSourceCapturesVerified: nativeBinding.captures,
     originalSourceVersions: originalSources.length,
     compressedFile: output,
   })

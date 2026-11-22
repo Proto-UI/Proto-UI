@@ -1,0 +1,47 @@
+[
+  {
+    "path": "scripts/governance/history-source-bindings.mjs",
+    "sha256": "728af159aa3e0330af68e724c5644f6b8f093bacb681f1301a593a006bd30c94",
+    "bytes": 2393
+  },
+  {
+    "path": "scripts/governance/history-source-bindings.test.mjs",
+    "sha256": "590dbfdfb05a158355ce0a909cd71b3df54787158ff424f4afbef0676cb03d1b",
+    "bytes": 4793
+  },
+  {
+    "path": "scripts/governance/history-archive-binding.test.mjs",
+    "sha256": "a89a301b987bfe9dc9c76cf9dba4858d489b4336330c183159de81bc53966666",
+    "bytes": 4280
+  },
+  {
+    "path": "scripts/governance/build-history-snapshot.mjs",
+    "sha256": "0032db92c8a46fb022ad33c7ce60bbed6d2b3ebe4bba40f99744eea6dc820a0b",
+    "bytes": 6608
+  },
+  {
+    "path": "scripts/governance/reconcile-history-decisions.mjs",
+    "sha256": "7b11f5874218d46762531855fc71feac8ab5fa63d024c9ceb844cffe346a1074",
+    "bytes": 18473
+  },
+  {
+    "path": "scripts/governance/decode-history-archive.mjs",
+    "sha256": "ff4f4af1160d7460bce1f68f690136c8b4462fa4cd10f4fb197ac059566f482e",
+    "bytes": 6339
+  },
+  {
+    "path": "scripts/governance/history-files.mjs",
+    "sha256": "5a9c955aded03816bca643c773fc5408bd4cb8e6e8d4fb02e55fa9397aab8d8d",
+    "bytes": 2303
+  },
+  {
+    "path": "scripts/governance/history-audit.mjs",
+    "sha256": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
+    "bytes": 22253
+  },
+  {
+    "path": "scripts/governance/history-audit.test.mjs",
+    "sha256": "4b59bef34093c90ea86dff6708325848f0cfb7f242a322071b460bff40e8366e",
+    "bytes": 9178
+  }
+]

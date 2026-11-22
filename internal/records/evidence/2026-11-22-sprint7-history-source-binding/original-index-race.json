@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/workspace/scratch/eb30117f7b2a/s27-workflow/node-v24.22.1-linux-x64/bin/node",
+    "--test",
+    "--test-name-pattern=index replaced after",
+    "history-archive-binding.test.mjs"
+  ],
+  "cwd": "/workspace/scratch/eb30117f7b2a/history-index-binding-red-20261122",
+  "exitCode": 1,
+  "expectedExitCode": 1,
+  "reason": "The unmodified original reader checks index A then decodes replaced index B; the behavioral assertion observes source-b instead of bound source-a.",
+  "sources": [
+    {
+      "path": "decode-history-archive.mjs",
+      "sha256": "21c9839438533b3457c70b81ae4b596cb27d55eaa6b5455ec3b68615f931ea7a",
+      "sourceHead": "d8da090538873fefd555753f60d3fce69f3cbee9"
+    },
+    {
+      "path": "history-files.mjs",
+      "sha256": "5503054586be4e43ccdb00d13ce0b4815c9e99ffa910c28ab887a2000f23cd5a",
+      "sourceHead": "d8da090538873fefd555753f60d3fce69f3cbee9"
+    }
+  ],
+  "testSha256": "a89a301b987bfe9dc9c76cf9dba4858d489b4336330c183159de81bc53966666",
+  "stdoutSha256": "09a2dbebb124452073d1c2ea92ac8b7598ee8038bea2fad87c33d0888612290e",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

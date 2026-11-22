@@ -8,6 +8,7 @@ import {
   pullRequestDisposition,
 } from './history-audit.mjs';
 import { readHistoryJSON, readHistorySnapshot } from './history-files.mjs';
+import { bindManualReadings } from './history-source-bindings.mjs';
 
 const [snapshotPath, manualPath, output] = process.argv.slice(2);
 if (!snapshotPath || !manualPath || !output)
@@ -15,11 +16,6 @@ if (!snapshotPath || !manualPath || !output)
     'Usage: reconcile-history-decisions.mjs SNAPSHOT.json.gz MANUAL_DECISIONS.json OUTPUT.json'
   );
 const snapshot = await readHistorySnapshot(snapshotPath);
-const manual = new Map(
-  (await readHistoryJSON(manualPath))
-    .filter((row) => row.reviewMethod.startsWith('Read the complete'))
-    .map((row) => [row.number, row])
-);
 const objects = readPages(snapshot.issuePages, 'issues').filter(
   (row) => row.created_at <= snapshot.membershipCutoff
 );
@@ -30,6 +26,7 @@ for (const comment of readPages(snapshot.commentPages, 'comments')) {
     comments.get(Number(comment.issue_url.split('/').at(-1)))?.push(comment);
 }
 for (const rows of comments.values()) rows.sort((a, b) => a.id - b.id);
+const manual = bindManualReadings(await readHistoryJSON(manualPath), objects, comments);
 const metadata = new Map(snapshot.pullRequests.map((row) => [row.pullRequest.number, row]));
 const timelines = new Map(snapshot.issueTimeline.map((row) => [row.issue.number, row]));
 const inlineComments = snapshot.inlinePages?.length

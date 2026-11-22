@@ -6,7 +6,9 @@ import { pathToFileURL } from 'node:url';
 
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
 export async function readHistoryArchive(directory, output = null) {
-  const index = JSON.parse(await readFile(join(directory, 'index.json'), 'utf8'));
+  const indexBytes = await readFile(join(directory, 'index.json'));
+  const index = JSON.parse(indexBytes);
+  const indexes = [{ path: 'index.json', sha256: sha(indexBytes) }];
   const chunks = [];
   let offset = 0;
   for (const part of index.parts) {
@@ -40,7 +42,10 @@ export async function readHistoryArchive(directory, output = null) {
         const key = value.$s7commit;
         if (!Object.hasOwn(archive.commits, key) || active.has(key))
           throw new Error('missing or cyclic commit source');
-        if (!resolvedCommits.has(key)) resolvedCommits.set(key, { commit: resolve(archive.commits[key], new Set([...active, key])) });
+        if (!resolvedCommits.has(key))
+          resolvedCommits.set(key, {
+            commit: resolve(archive.commits[key], new Set([...active, key])),
+          });
         return resolvedCommits.get(key);
       }
       return Object.fromEntries(
@@ -55,7 +60,9 @@ export async function readHistoryArchive(directory, output = null) {
   // against the individual capture hashes, not only the compressed transport.
   function captureJSON(value) {
     const compact = JSON.stringify(value);
-    let quoted = false, escaped = false, start = 0;
+    let quoted = false,
+      escaped = false,
+      start = 0;
     const chunks = [];
     for (let index = 0; index < compact.length; index++) {
       const character = compact[index];
@@ -96,9 +103,8 @@ export async function readHistoryArchive(directory, output = null) {
       () => false
     )
   ) {
-    const timelineIndex = JSON.parse(
-      await readFile(join(directory, 'timeline.index.json'), 'utf8')
-    );
+    const timelineIndexBytes = await readFile(join(directory, 'timeline.index.json'));
+    const timelineIndex = JSON.parse(timelineIndexBytes);
     if (timelineIndex.path !== 'timeline.json.gz')
       throw new Error('unexpected timeline archive path');
     const compressed = await readFile(join(directory, timelineIndex.path));
@@ -116,10 +122,12 @@ export async function readHistoryArchive(directory, output = null) {
     }
     if (captures.length !== timelineIndex.issues || captures.length !== sourceHashes.size)
       throw new Error('timeline population mismatch');
+    indexes.push({ path: 'timeline.index.json', sha256: sha(timelineIndexBytes) });
     timelineCount = captures.length;
   }
   return {
     sourceCaptures,
+    indexes,
     counts: {
       restoredFiles: written,
       pullRequests: index.pullRequests,

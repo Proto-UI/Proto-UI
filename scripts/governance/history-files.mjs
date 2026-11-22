@@ -20,13 +20,21 @@ export async function readHistorySnapshot(path) {
   if (!/^[a-zA-Z0-9.-]+$/.test(native.directory))
     throw new Error('invalid native source archive directory');
   const directory = resolve(dirname(path), native.directory);
+  const expectedIndexes = new Map();
   for (const entry of native.indexes) {
-    if (!['index.json', 'timeline.index.json'].includes(entry.path))
+    if (
+      !['index.json', 'timeline.index.json'].includes(entry.path) ||
+      expectedIndexes.has(entry.path)
+    )
       throw new Error('invalid native source index');
-    if (hash(await readFile(resolve(directory, entry.path))) !== entry.sha256)
+    expectedIndexes.set(entry.path, entry.sha256);
+  }
+  const { sourceCaptures, indexes } = await readHistoryArchive(directory);
+  if (indexes.length !== expectedIndexes.size) throw new Error('native source index set changed');
+  for (const entry of indexes) {
+    if (expectedIndexes.get(entry.path) !== entry.sha256)
       throw new Error(`native source index changed: ${entry.path}`);
   }
-  const { sourceCaptures } = await readHistoryArchive(directory);
   snapshot.pullRequests = [...sourceCaptures]
     .filter(([name]) => /^pr-/.test(name))
     .map(([, value]) => value)
