@@ -228,6 +228,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     complete: boolean;
     reason: CalendarSelectionReason;
     allowMinimumProgress: boolean;
+    notified: boolean;
   } | null = null;
   def.expose.method('getValues', () => [...values]);
   def.expose.method('getRange', () => ({ ...range }));
@@ -274,12 +275,17 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
             ? calendarRangeAvailable(next.range, p)
             : dateAvailable(next.value, next.min, next.max, next.unavailable));
       if (eligible && key === pending.expected) {
-        next.selectionCommit = {
-          id: pending.id,
-          complete: pending.complete,
-          reason: pending.reason,
-        };
-        completedSelection = true;
+        // The owner callback may retire this view or supersede its request.
+        // Publish canonical selection now, but defer dependent completion until
+        // the matching change notification has returned to the live invocation.
+        if (pending.notified) {
+          next.selectionCommit = {
+            id: pending.id,
+            complete: pending.complete,
+            reason: pending.reason,
+          };
+          completedSelection = true;
+        }
       } else if (
         next.disabled ||
         next.readOnly ||
@@ -409,6 +415,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       complete: c.mode === 'single' || (c.mode === 'range' && !!nextRange.from && !!nextRange.to),
       reason,
       allowMinimumProgress,
+      notified: false,
     };
     pendingNavigation = null;
     if (c.mode === 'multiple') {
@@ -424,6 +431,11 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     if (c.mode === 'multiple') current.expose.emit('valuesChange', { values: [...nextValues] });
     else if (c.mode === 'range') current.expose.emit('rangeChange', { range: { ...nextRange } });
     else current.expose.emit('valueChange', { value: nextValue });
+    if (owner !== current || viewEpoch !== epoch || selectionId !== id) return true;
+    if (pendingSelection?.id === id) {
+      pendingSelection.notified = true;
+      publish(current);
+    }
     return true;
   };
   def.expose.method('requestValues', (next: readonly string[]) => {

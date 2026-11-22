@@ -90,6 +90,7 @@ function runtimeHarness() {
               actions.push(name);
               if (
                 name === 'valueChange' ||
+                name === 'rangeChange' ||
                 name === 'execute' ||
                 name === 'openChange' ||
                 name === 'validationRequest'
@@ -146,6 +147,53 @@ it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
     }
   }
 );
+
+for (const mode of ['single', 'range'] as const)
+  for (const controlled of [false, true])
+    it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
+      `Date Picker ${mode} ${controlled ? 'controlled' : 'uncontrolled'} completion waits for its live selection callback after %s`,
+      async (operation) => {
+        const { make, actions, setActionCallback } = runtimeHarness();
+        const initial =
+          mode === 'single'
+            ? { [controlled ? 'value' : 'defaultValue']: '2026-10-01' }
+            : { [controlled ? 'range' : 'defaultRange']: { from: '2026-10-01' } };
+        const props = { mode, defaultMonth: '2026-10', defaultOpen: true, ...initial };
+        const root = make(datePickerRoot, null, props);
+        const day = make(datePickerDay, root.target, { date: '2026-10-15' });
+        await root.session.mount();
+        await day.session.mount();
+        const change = mode === 'single' ? 'valueChange' : 'rangeChange';
+        const callbackOpen: boolean[] = [];
+        setActionCallback((name) => {
+          if (name !== change) return;
+          callbackOpen.push(root.exposes.open.get());
+          if (controlled)
+            root.session.controller.applyRawProps({
+              ...props,
+              ...(mode === 'single'
+                ? { value: '2026-10-15' }
+                : { range: { from: '2026-10-01', to: '2026-10-15' } }),
+            });
+          callbackOpen.push(root.exposes.open.get());
+          if (operation === 'normal') return;
+          void day.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+          void root.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+          if (operation === 'remount') {
+            void root.session.mount();
+            void day.session.mount();
+          }
+        });
+        try {
+          expect(() => day.target.dispatchEvent(new Event('press.commit'))).not.toThrow();
+          expect(callbackOpen).toEqual([true, true]);
+          expect(actions).toEqual(operation === 'normal' ? [change, 'openChange'] : [change]);
+        } finally {
+          await day.session.dispose();
+          await root.session.dispose();
+        }
+      }
+    );
 
 it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
   'Form reset ends its cached Field traversal after %s',
