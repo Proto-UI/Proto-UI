@@ -73,6 +73,7 @@ import {
   checkedCall,
   arrayEveryCallbackParameters,
   intrinsicResult,
+  publishedDataType,
   valueAlternatives,
   canNarrowValue,
   erasesRuntimeAuthority,
@@ -1092,12 +1093,16 @@ class Frontend {
         const branch = (truth: boolean): Scope => this.refinedScope(scope, condition, truth);
         const thenScope = branch(true),
           elseScope = branch(false);
+        const beforeBranch = this.flow.snapshot();
         const then = this.statements(
           module,
           ts.isBlock(node.thenStatement) ? node.thenStatement.statements : [node.thenStatement],
           thenScope,
           phase
         );
+        this.normalizeFlow(thenScope);
+        const afterThen = this.flow.snapshot();
+        this.flow.restore(beforeBranch);
         const otherwise = node.elseStatement
           ? this.statements(
               module,
@@ -1106,12 +1111,16 @@ class Frontend {
               phase
             )
           : [];
+        this.normalizeFlow(elseScope);
+        const afterElse = this.flow.snapshot();
         output.push({ kind: 'if', condition, then, otherwise, span });
         const continuing = statementsTerminate(then)
           ? elseScope
           : statementsTerminate(otherwise)
             ? thenScope
             : undefined;
+        if (continuing) this.flow.restore(continuing === thenScope ? afterThen : afterElse);
+        else this.flow.join(beforeBranch, afterThen, afterElse);
         if (continuing)
           for (const [name, binding] of scope) {
             const next = continuing.get(name)!;
@@ -2455,23 +2464,24 @@ class Frontend {
     const span = sourceSpan(node);
     if (
       ts.isIdentifier(node.expression) &&
-      node.expression.text === 'String' &&
-      !scope.has('String') &&
-      !module.declarations.has('String') &&
-      !module.imports.has('String')
+      (node.expression.text === 'String' || node.expression.text === 'Number') &&
+      !scope.has(node.expression.text) &&
+      !module.declarations.has(node.expression.text) &&
+      !module.imports.has(node.expression.text)
     ) {
+      const name = node.expression.text === 'Number' ? 'number' : 'string';
       if (node.questionDotToken)
-        rejectNode(node, 'PUI1006', 'String does not admit optional calls.');
+        rejectNode(node, 'PUI1006', `${node.expression.text} does not admit optional calls.`);
       const args = node.arguments.map((argument) =>
         this.expression(module, argument, scope, phase)
       );
       return {
         kind: 'intrinsic',
-        name: 'string',
+        name,
         arguments: args,
         type: this.checkedValue(node, () =>
           intrinsicResult(
-            'string',
+            name,
             args.map((arg) => arg.type)
           )
         ),
@@ -2490,13 +2500,17 @@ class Frontend {
         const name =
           owner.text === 'Number' && property === 'isFinite'
             ? 'number.isFinite'
-            : owner.text === 'Object' && property === 'freeze'
-              ? 'object.freeze'
-              : owner.text === 'Object' && property === 'hasOwn'
-                ? 'object.hasOwn'
-                : owner.text === 'Object' && property === 'assign'
-                  ? 'object.assign'
-                  : undefined;
+            : owner.text === 'Math' && property === 'round'
+              ? 'math.round'
+              : owner.text === 'Math' && property === 'floor'
+                ? 'math.floor'
+                : owner.text === 'Object' && property === 'freeze'
+                  ? 'object.freeze'
+                  : owner.text === 'Object' && property === 'hasOwn'
+                    ? 'object.hasOwn'
+                    : owner.text === 'Object' && property === 'assign'
+                      ? 'object.assign'
+                      : undefined;
         if (name) {
           if (
             name === 'object.assign' &&
@@ -3109,9 +3123,9 @@ class Frontend {
     if (operation === 'expose.emit') {
       const names = finiteStringKeys(args[0])!;
       const kind = this.eventKinds.get(names[0])!;
-      const payload = args[1]?.type ?? 'void';
+      const payload = publishedDataType(args[1]?.type ?? 'void');
       if (
-        !isDataValueType(payload) ||
+        payload === undefined ||
         (kind === 'void' && payload !== 'void') ||
         (kind === 'json' && payload === 'void')
       )

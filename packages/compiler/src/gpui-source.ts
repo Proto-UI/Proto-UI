@@ -1,5 +1,6 @@
 import { validateIR, validIdentifier } from './ir-validation';
 import { pruneDeadValues } from './demand-pruning';
+import { rustMathRound } from './rust-scalar-intrinsics';
 import { createHash } from 'node:crypto';
 import { checkTargetOperations, TARGET_PROFILES } from './targets';
 import { OPERATION_RULES } from './operations';
@@ -239,6 +240,7 @@ export function emitGpuiSource(
     'textControl.on',
     'textControl.sync',
     'textControl.snapshot',
+    'textControl.resetValue',
     'hook.asImageView',
     'imageView.on',
     'imageView.sync',
@@ -1196,12 +1198,13 @@ impl __PuiNativeRecordValue {
     const result = scalarShapes.length
       ? snapshotData({ kind: 'union', items: scalarShapes }, 'callback(arguments)')
       : 'panic!("checked native renderer entry has no scalar callback alternative")';
-    // Capture the evaluated callable once. Only projection invokes it; native
-    // repaint never re-runs a factory or reconstructs a lexical environment.
+    // Evaluate once and retain the original callable for identity and direct
+    // scalar calls. Only projection uses its checked snapshot conversion;
+    // native repaint never re-runs a factory or lexical environment.
     return `{ let callable=${value}; match callable {
-      Value::NativeFunction{render,..} => Value::Renderer(render),
-      Value::Renderer(render) => Value::Renderer(render),
-      Value::Function(callback) => Value::Renderer(Rc::new(move |arguments:Vec<Value>| { ${result} })),
+      Value::NativeFunction{identity,render} => capture_renderer(Value::NativeFunction{identity,render:render.clone()},render),
+      Value::Renderer(adapter) => Value::Renderer(adapter),
+      Value::Function(callback) => capture_renderer(Value::Function(callback.clone()),Rc::new(move |arguments:Vec<Value>| { ${result} })),
       _ => panic!("checked setup result must be a callable")
     } }`;
   }
@@ -1308,7 +1311,10 @@ impl __PuiNativeRecordValue {
       depth + 1,
       true,
       nativeReturn,
-      fn === ir.setup,
+      // Authored hook setup captures a renderer just as root setup does. Convert
+      // its checked scalar/null return at that boundary, before it is carried
+      // through the hook's ordinary captured handle record.
+      fn === ir.setup || ir.hooks.some((hook) => hook.setup === fn),
       recordReturn
     );
     templateScope = savedTemplateScope;
@@ -1518,9 +1524,18 @@ impl __PuiNativeRecordValue {
       case 'intrinsic': {
         const args = node.arguments.map((argument) => expression(argument, environment, depth));
         switch (node.name) {
+          case 'number':
+            return args.length
+              ? `Value::number((${args[0]}).scalar_number())`
+              : 'Value::number(0.0)';
           case 'number.isFinite':
             return `number_is_finite(&(${args[0]}))`;
+          case 'math.round':
+            return `Value::number(${rustMathRound(`(${args[0]}).scalar_number()`)})`;
+          case 'math.floor':
+            return `Value::number((${args[0]}).scalar_number().floor())`;
           case 'string': {
+            if (!args.length) return 'Value::string("")';
             // GPUI values coerce scalars exactly as ECMAScript does; a
             // structured or unknown argument has no admitted native coercion.
             const type = node.arguments[0].type;
@@ -1671,7 +1686,7 @@ impl __PuiNativeRecordValue {
         return functionValue(node.function, environment, depth);
 
       case 'authored-hook':
-        return `${hookNames.get(node.hookId)}(capability(&${ownerReference()}), ${node.arguments?.[0] ? expression(node.arguments[0], environment, depth) : 'Value::Undefined'})`;
+        return `${hookNames.get(node.hookId)}(definition_capability(&${ownerReference()}), ${node.arguments?.[0] ? expression(node.arguments[0], environment, depth) : 'Value::Undefined'})`;
       case 'static-capability':
         return `Value::StaticCapability(&${staticArtifacts.find((declaration) => declaration.id === node.declarationId)!.name}::DECLARATION)`;
       case 'rule': {
@@ -1894,7 +1909,7 @@ impl __PuiNativeRecordValue {
           case 'accessible.role':
             return `accessible_role(${receiverOwner()}, ${argument(0)})`;
           case 'accessible.state':
-            return `accessible_state(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
+            return `accessible_state(${receiverOwner()}, ${argument(0)}, ${argument(1)}, ${argument(2)})`;
           case 'accessible.action':
             return `accessible_action_spec(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'accessible.nameFromContent':
@@ -1994,6 +2009,8 @@ impl __PuiNativeRecordValue {
             return `text_sync(${receiverOwner()}, ${argument(0)})`;
           case 'textControl.snapshot':
             return `text_snapshot(${receiverOwner()})`;
+          case 'textControl.resetValue':
+            return `text_reset_value(${receiverOwner()}, ${argument(0)})`;
           case 'hook.asImageView':
             return builtin(`image_setup(&${ownerReference()})`);
           case 'imageView.on':
@@ -2579,7 +2596,7 @@ impl __PuiNativeRecordValue {
           configure_native_atoms(&owner_ref, ${admittedAnalysis.operations.includes('scheduler.delay')}, ${admittedAnalysis.operations.includes('meta.get')});
           refresh_native_atoms(&owner_ref, window, cx);
           let _lexical_owner = enter_lexical_owner(&owner);
-          let renderer = ${setupCallable}.call_authored(vec![capability(&owner)]);
+          let renderer = ${setupCallable}.call_authored(vec![definition_capability(&owner)]);
           Owner::finish(&owner_ref, renderer);
           let focus_subscriptions = if native_focus_observation_needed(&owner_ref) {
           let focus_owner = owner_ref.clone();
@@ -2593,6 +2610,7 @@ impl __PuiNativeRecordValue {
               dispatch(&focus_owner, "host:focus", false, event_fields("host:focus"));
               if ready(&focus_owner) && focus_owner.borrow().epoch == epoch { view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); }
               });
+              notify_native_change(cx);
           });
           let blur_owner = owner_ref.clone();
           let on_blur = cx.on_blur(&focus, window, move |view, window, cx| {
@@ -2606,6 +2624,7 @@ impl __PuiNativeRecordValue {
               dispatch(&blur_owner, "host:blur", false, event_fields("host:blur"));
               if ready(&blur_owner) && blur_owner.borrow().epoch == epoch { view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); }
               });
+              notify_native_change(cx);
           });
           vec![on_focus, on_blur]
           } else { Vec::new() };
@@ -2630,12 +2649,14 @@ impl __PuiNativeRecordValue {
           self._window_activation.take();
           let owner = self.owner.clone();
           let subscription = cx.observe_window_activation(window, move |view, window, cx| {
+              let deactivated = owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active();
               native_host_callback(&owner, "window-activation", || {
-                  if owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active() {
+                  if deactivated {
                       native_window_blur(&owner);
                       view.drive(window, cx).unwrap_or_else(|error| throw_value(error));
                   }
               });
+              if deactivated { notify_native_change(cx); }
           });
           self._window_activation = Some((id, subscription));
       }

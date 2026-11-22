@@ -1,0 +1,135 @@
+# Compiler boundaries found by native control consumers
+
+## Context and scope
+
+The current user requested that native application controls use authored Proto-UI compiler components and that missing reusable capabilities return upstream. The coordinated candidate is based on `52101cba4ed4cd2a6966823dc51655e58b7c63ab` on `feat/native-control-consumers-20261123`. This record describes that working candidate and its observed tests, not a published package, merged revision or future final compiler pin.
+
+The changes preserve the separation required by the [thin compiler standard](../compiler/atomic-lowering-completion.md): application source owns control policy and state transitions; compiler work lowers checked ordinary expressions and generic host capabilities. No component name, application path, export spelling or package identity selects a knob, text field or editor protocol.
+
+The new [scalar contract](../../spec/contracts/C-COMPILER-SCALAR-0001.yaml) and [test mapping](../../spec/tests/T-COMPILER-SCALAR-0001.yaml) remain **draft**. They define a bounded private admission slice. They do not promote the GPUI profile, establish full JavaScript coercion, or substitute generated Rust data tests for native component or OS interaction evidence.
+
+## Definition and evidence map
+
+| Changed boundary | Governing definition or bounded owner | Executable evidence and limits |
+| --- | --- | --- |
+| Ordinary scalar conversion, rounding and UTF-16 length | `C-COMPILER-SCALAR-0001`; pure extraction additionally retains `C-COMPILER-RUST-DATA-0001-CLOSURE`, `-TYPED` and `-DEPENDENCIES` | `packages/compiler/test/scalar-conversions.test.ts`, `scalar-round.test.ts` and `string-coercion.test.ts` separate source admission, negative IR, actual headless Cargo execution and generated browser consumers. Dedicated mounted GPUI scalar-boundary acceptance remains missing in the draft test mapping. |
+| Conditional accessibility state | `C-A11Y-0001-STATE-CONDITION`, `-STATE-CONDITION-VALIDITY`, `-STATE-CONDITION-LIFECYCLE` and `-DECLARATION-LIFETIME` | `packages/compiler/test/conditional-accessible-state.test.ts` covers generated browser owners, last registration, current value on reactivation, owned-attribute withdrawal, remount and invalid conditions. The SDK's `conditional_state_tests` exercise real AccessKit projection after generation; both projection tests passed in the emitted SDK native run described below. |
+| Empty authored text renderer | `P-BASE-INPUT-PHYSICAL-TARGET`; top-level empty normalization is related to `C-TEMPLATE-0004-B` | `packages/compiler/test/text-reset-native.test.ts` uses an actual authored `return () => null` TextControl consumer across the four browser source profiles. The Web Component host normalizes an empty render to an empty native fragment while retaining its one infrastructure editor. This does not broaden nested child normalization or certify the whole Template contract. |
+| Frozen and readonly outward data | Private closed-source admission in [source-language.md](../compiler/source-language.md); `C-EXPOSE-EVENT-0002-C` supplies JSON payload intent, not a universal completed validation guarantee | `packages/compiler/test/readonly-text-boundary.test.ts` permits finite readonly data through the existing copying event boundary while rejecting hidden State capabilities and writes to readonly fields. It does not promote the broader Expose Event payload contract or erase unknown values into trusted data. |
+| Effects in mutually exclusive branches | Private closed-source proof rules in [source-language.md](../compiler/source-language.md), independently rechecked at serialized IR ingress | `packages/compiler/test/terminating-flow-branch.test.ts` preserves a captured-handle proof only on the distinct continuing path. Existing flow, nominal normalization and exception regressions check that a call or write on a continuing path still invalidates mutable observations. This is compile-time proof bookkeeping, not a new runtime state machine or public control-flow guarantee. |
+| Explicit text reset | `P-BASE-INPUT-EDITING-RESET`, `-VALUE-OWNERSHIP`, `-EVENTS-AND-IME`; related TextControl lease, ownership and canonicalization criteria `C-TEXT-CONTROL-0001-D`, `-F`, `-G`, `-I` | `packages/prototypes/base/test/input-reset.test.ts` exercises the actual Input prototype and Runtime host. `packages/compiler/test/text-reset-native.test.ts` independently exercises generated browser owners. Both distinguish uncontrolled reset from controlled refusal, retire composition and reject the old callback tail without synthesizing input/change. Three actual emitted SDK tests also passed for composition, UTF-16 selection and reset; physical OS IME remains a separate layer. |
+| Change-only canonical commit | `C-TEXT-CONTROL-0001-CHANGE-COMMIT` and `C-TEXT-CONTROL-0001-D` | Definition tracing found that the generated DOM host advanced uncontrolled canonical text only on `input`. The candidate now also handles `change` without a preceding `input`, and restores controlled authority after `change`. Eight additional real generated-owner cases passed across React, Vue, Vue2 and Web Component. |
+| Shared directly named Input editor | `P-BASE-INPUT-EDITOR-HOOK`; the full InputRoot retains `P-BASE-INPUT-EXTERNAL-LABEL` and `C-CONTROL-LABEL-0001` | `packages/prototypes/base/test/input-editor.test.ts` constructs a real standalone `asInputEditor` consumer. It observes borrowed state, exposed focus/reset, one native editor, direct naming, disabled focus refusal, reset and controlled authority. The same test confirms real Label pairing on InputRoot and explicit association rejection on the standalone editor. Existing full Input and family tests retain their own coverage. |
+| Existing native viewport binding | `C-SCROLL-0001-B`, `-C`, `-D`, `-E`; `HC-SCROLL-SURFACE-0001-B`, `-C`, `-D`, `-J` identify the applicable host ownership and cleanup requirements | `packages/compiler/src/gpui-native-scroll.ts` authors three emitted `scroll_engine_tests` for exact engine identity, declaration admission, replacement, retirement and event-loop input notification. A downstream 200-row virtual-list consumer exercises the actual native viewport and page offset. All three SDK tests passed natively. The notification fixture explicitly supplies committed bounds; it does not substitute for actual viewport mounting. Downstream viewport composition remains a separate integration gate; the map does not claim the full Scroll contract. |
+
+The private compiler's readonly event projection and branch proof rules have no independent stable catalog entity in this slice. This record maps their bounded implementation evidence; it does not claim that an internal record creates new normative public guarantees.
+
+## Scalar admission and native limits
+
+`Number` accepts zero or one proven scalar. It preserves numeric-string grammar, signed zero and the distinction between omission and explicit undefined. `String` keeps its wider JavaScript-host behavior, while GPUI and pure Rust extraction accept only zero or one proven scalar. Opaque unknown, arrays, objects, callable values and capabilities do not gain native coercion authority. Local or imported `Number`, `String` and `Math` bindings remain ordinary bindings.
+
+`Math.round` preserves halfway values toward positive infinity, negative zero and precision boundaries; directly using Rust's rounding rule or `floor(x + 0.5)` would disagree. `Math.floor` retains source-language semantics. A checked string's length is its UTF-16 code-unit count, including two units for an astral character. These expressions do not change finite public-data validation or owner lifetime.
+
+Source compilation succeeds for the five implemented source profiles in the focused fixtures. Actual emitted headless Rust is executed separately. Direct Qt/Flutter String remains explicitly unsupported, and the test map does not infer other experimental-target support from shared parser or emitter code.
+
+## Input and native mechanism boundaries
+
+`asInputEditor` contains the same directly named single-line editing semantics used by InputRoot: value ownership, composition, text hints, accessibility, physical focus and explicit reset. `asInputRoot` composes it with the actual independent ControlLabel target. The factorization preserves the full Root API and borrowed state projection; it does not replace an unsupported native Label protocol with a no-op.
+
+The GPUI SDK adds narrow host mechanisms for authored selection requests and explicit reset. Selection requests name UTF-16 positions, are clamped and snapped by the native editor, and require the exact live mounted owner and native window; composing or disabled owners cannot accept them. Readonly selection remains permitted. The source decides whether to select all, position a caret or step numeric text. The SDK does not add application-specific text commands.
+
+Normal application key handling cannot edit or navigate a marked native composition, while the live platform IME replacement route remains able to commit. Reset retires the native input-handler lease and undo history; stale handlers cannot overwrite the reset or a remounted editor. These statements identify the intended generic mechanism and its authored tests. The three emitted native SDK tests now pass with actual `NativeTextInput` and `TestAppContext`; real OS IME acceptance remains pending.
+
+## Binding an existing native scroll engine
+
+`attach_scroll_engine(OwnerWeak, ScrollHandle) -> Result<ScrollEngineLease, String>` binds the exact engine already owned by a physical GPUI viewport, including a `UniformList` base handle, to a source-declared ScrollSurface. An owner without a Scroll declaration is rejected. Only one external binding is admitted per owner, and the compiler root omits its own `track_scroll` while the external engine is attached. Requests, snapshots and follow behavior then use that same handle; no second viewport or mirrored offset is introduced.
+
+`ScrollEngineLease::notify_input` checks mounted readiness, the current engine binding generation and native window before reporting physical input. Explicit disposal or Drop restores the fallback engine and retires queued end-follow work; dropping an older lease cannot detach a replacement binding. These are host mechanisms, not authored access to a raw native scroll target. The mounted consumer must also demonstrate view detach/remount retirement; binding-generation identity by itself is not presented as proof of every view-epoch cleanup path.
+
+Input notification uses `Window::refresh`, which can schedule a redraw from an ordinary native event callback. The workspace GPUI implementation of `request_animation_frame` reads `current_view`; that operation requires a rendering view and panicked when used from this event-loop boundary. Requests issued during actual scroll layout retain their existing animation-frame path. This is a host scheduling repair and does not move scroll policy into Rust.
+
+## Observed tests and retained failures
+
+The local JavaScript runs used Node `v24.22.3`. Rust scalar execution used Rust/Cargo `1.98.1` with an existing dependency cache. Tests run on the working candidate do not certify a later combined commit; final integration owns the fresh producer, native execution and exact pin.
+
+| Command scope | Observed result | What it establishes |
+| --- | --- | --- |
+| `terminating-flow-branch`, `reviewer-flow-recheck`, `ordinary-flow-soundness`, `nominal-flow-normalization`, `exception-flow`, and the previous `string-coercion` suite | Initial run: **109 passed, 1 failed** | The failure was the old blanket assertion that GPUI rejects every String conversion. It was retained as a real failure and corrected to match the newly bounded draft admission. |
+| The five flow/nominal/exception files from that run | **89 passed** | Continuing-path invalidation and the existing checked-flow regressions. |
+| Revised `packages/compiler/test/string-coercion.test.ts` | **25 passed** | Bounded GPUI scalar success, opaque/structured negative controls, preserved Qt/Flutter refusal, and actual browser String behavior. This separate run is not presented as a rerun of all six files together. |
+| `packages/compiler/test/scalar-conversions.test.ts` | **13 passed**, including generated Rust | Actual numeric conversion, floor, text formatting, UTF-16 length and finite-boundary behavior, plus compiler admission/negative cases. |
+| `packages/compiler/test/scalar-round.test.ts` | **14 passed**, including generated Rust | Numeric rounding admission and actual bit-level ties, signed-zero and precision edges. |
+| `readonly-text-boundary.test.ts` and the earlier `text-reset-native.test.ts` | **23 passed**: 11 readonly cases and 12 reset cases | Source/IR boundary checks and actual generated browser reset consumers; this is not native GPUI execution. |
+| Expanded `packages/compiler/test/text-reset-native.test.ts` | **20 passed** | The preceding 12 reset cases plus eight change-only ownership cases across four generated browser source profiles. |
+| `packages/compiler/test/conditional-accessible-state.test.ts` | **13 passed** | Actual generated browser owner projections, replacement/remount behavior and checked condition rejection. This does not execute the two GPUI SDK tests. |
+| `input.test.ts`, `input-reset.test.ts`, `text-control-composition-lifecycle.test.ts`, `control-label.projections.test.ts` | **57 passed**: 6 + 4 + 36 + 11 | Existing Input/family behavior, reset, composition lease and real ControlLabel projections after the factorization. |
+| New `packages/prototypes/base/test/input-editor.test.ts` | **3 passed** | Standalone hook behavior and the explicit distinction between direct naming and paired Label participation. |
+| Final combined compiler/Input run: the ten focused files above, plus `gpui-style-selection.test.ts` and `gpui-hook-renderer.test.ts` | **123 passed across 12 files; zero skipped** | Includes the revised String cases, both actual emitted Rust numerical executions, all 20 browser reset/change cases, standalone and full Input tests, one style-producer parity case and five hook-renderer cases. This is source/browser/headless-Rust evidence, separate from the native SDK and application suites. |
+
+The first scalar-conversion execution attempt with the custom Rust compiler passed its generated unit test but failed the Cargo doctest phase because `rustdoc` was not on that invocation's executable path. A subsequent invocation provided the matching `RUSTDOC` and completed **13/13**. This environment correction did not remove or skip assertions. The generated crate's `serde_json` support is resolved into a lockfile before `cargo test --locked`; prepared offline environments can set `CARGO_NET_OFFLINE=true`, while an ordinary cold cache may fetch the declared dependency.
+
+Independent review also found a concrete same-owner `RefCell` panic: `accessible_state` read a condition after taking a mutable owner borrow. The candidate now validates the condition before acquiring that borrow. Two emitted SDK tests cover inactive/reactivated projection and replacement by an unconditional declaration; both now passed in the actual emitted SDK test run.
+
+## Native integration discoveries and bounded repairs
+
+A real downstream `verdant-app` test run reached **202 passes and 23 failures out of 225**, with no ignored cases. That result is retained as an integration failure, not a successful consumer acceptance. It exposed the following generic boundaries that source-emission checks had not exercised:
+
+- The standalone compiler style bundle omitted the canonical native host's existing `user-select: none` and prefixed equivalent. The candidate copies only that bounded mapping. Plain GPUI Text has no selection controller; `text`, `all` and `auto` remain rejected. The emitted Rust regression exercises both properties and all four values; the producer-parity fixture links the copied arm to the canonical native implementation.
+- Existing Button, Switch and Checkbox prototypes declare the portable accessibility action `activate`. The native SDK now maps it to AccessKit Click alongside the retained `press`/`click` spellings. This does not introduce a component-specific activation policy.
+- Expose events with no accompanying State change were queued without waking native consumers. `emit` now marks native notification dirty while leaving `update_requested` and the authored projection revision untouched. The SDK regression proves that event-only publication does not reexecute the authored renderer; downstream history, dialog and precise-value tests are the actual retained-observer acceptance routes.
+- An authored hook's scalar/null renderer was captured as an ordinary function, then lost its checked scalar-to-snapshot conversion when returned through the handle record. GPUI lowering now adapts renderers at the hook setup boundary just as at root setup. Independent follow-up review caught that an adaptation containing only a native renderer lost ordinary callable identity. The adapter now retains the original callable alongside its checked conversion. Equality, direct scalar invocation, same-receiver public aliases and callable admission preserve that original function; public invocation and rendering retain owner-lifetime guards. Re-exposing the same public renderer does not accumulate guard closures. Three emitted SDK tests exercise scalar and typed-native identities, invocation, projection, public aliases and disposal. The five source cases include unrelated null/string/number renderers, accepted identity/public aliases and the existing explicit rejection of a capture renderer with no statically typed call signature. This does not admit arbitrary `capture.render(...)` calls or runtime template interpretation.
+- The native `Value` equality implementation omitted owner capabilities, so the same RunHandle compared unequal across callbacks. That broke authored guards such as `currentView === run` in the real Input editor. Stable `Run`, definition and renderer facets now compare by their exact owner within the same facet; the three facets remain distinct from one another. Root and hook setup receive the definition facet, projection receives the renderer facet, and callbacks receive Run. Independent review checked this against the Runtime kernel's separately constructed, retained handles. One emitted SDK test covers same-owner identity, distinct owners and all cross-facet negative cases.
+- The native framework suppresses observer Notify effects during drawing, including physical focus/blur delivery. Source state could retire synchronously while retained application observers missed the event. A weak-entity deferred notification now follows physical focus, blur and actual window deactivation callbacks. Ordinary `drive` notifications remain immediate, avoiding a render/prop-update notification loop. No authored state transition or platform focus effect is deferred. Two real GPUI SDK tests cover physical blur delivery to a retained observer after synchronous retirement and the absence of entity retention or resurrection by a queued notification.
+
+The emitted native SDK command `cargo test -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1` subsequently passed **10/10** tests on the modern workspace GPUI identity: 3 text/IME/UTF-16, 2 conditional-state projections, 2 exact scroll-engine leases, 1 portable activation mapping, 1 event-only notification and 1 bounded selection-style mapping. This used compiler-generated files without Rust output edits. A first added activation-test build missed its module import; it failed compilation and was repaired in the authoring source before regeneration. The successful SDK run does not by itself close the failed application suite or certify physical OS accessibility.
+
+The final regenerated SDK command passed **17/17** tests: 3 text/IME/UTF-16, 2 conditional-state projections, 3 exact scroll-engine/notification cases, 1 portable activation mapping, 1 event-only notification, 1 bounded selection-style mapping, 3 renderer identity/public-projection cases, 1 owner-facet identity case and 2 native focus-notification cases. An intermediate **14/15** SDK run failed because the new scroll event-loop fixture marked its owner mounted without supplying the bounds required by native readiness. The source fixture now explicitly supplies committed bounds and asserts readiness; it does not claim to prove mounting. All fixes were made in authored compiler/test sources before fresh generation, without patching generated Rust.
+
+The narrow source checks passed **1/1** style producer-parity and **5/5** hook-renderer cases, including the added identity regression and retained negative admission case. The existing template-lowering/render-provenance checks previously passed **77/77**; the renderer repair separately reran the complete template-lowering file together with the five hook cases, passing **71/71**. Initial added-fixture runs had incorrect file-URL or output-section access, retained as fixture failures; the corrected checks preserve the intended assertions.
+
+A later full application run reached **217 passes and 13 failures out of 230**. Those failures remain retained integration evidence. The newest full application run is still pending at this record update; neither the 17 passing SDK tests nor the 123 passing focused source tests close that gate. Final application and strict producer results belong to their separate candidate-bound report.
+
+## Reproduction
+
+From the repository root with the declared Node/pnpm baseline:
+
+```sh
+corepack pnpm@10.32.1 exec vitest run packages/compiler/test/terminating-flow-branch.test.ts packages/compiler/test/reviewer-flow-recheck.test.ts packages/compiler/test/ordinary-flow-soundness.test.ts packages/compiler/test/nominal-flow-normalization.test.ts packages/compiler/test/exception-flow.test.ts packages/compiler/test/string-coercion.test.ts
+corepack pnpm@10.32.1 exec vitest run packages/compiler/test/scalar-conversions.test.ts packages/compiler/test/scalar-round.test.ts
+corepack pnpm@10.32.1 exec vitest run packages/compiler/test/conditional-accessible-state.test.ts packages/compiler/test/readonly-text-boundary.test.ts packages/compiler/test/text-reset-native.test.ts
+corepack pnpm@10.32.1 exec vitest run packages/prototypes/base/test/input-editor.test.ts packages/prototypes/base/test/input.test.ts packages/prototypes/base/test/input-reset.test.ts packages/prototypes/base/test/text-control-composition-lifecycle.test.ts packages/prototypes/base/test/control-label.projections.test.ts
+```
+
+The scalar suites use `PROTO_UI_RUST_DATA_CARGO` or `CARGO` when supplied and otherwise use `cargo`. `PROTO_UI_REQUIRE_RUST_DATA_TESTS=1` makes a missing toolchain fail instead of producing a skipped native case. A skip is never native evidence.
+
+After a fresh compiler producer writes an unchanged SDK consumer, the native text lease tests are selected by:
+
+```sh
+cargo test -p proto-ui-gpui-native --features test-support,gpui/test-support --lib text_owner_tests -- --test-threads=1
+```
+
+All three `text_owner_tests` passed as part of the final 17-test emitted SDK run. Platform IME, focus navigation and assistive-technology acceptance require their own real native journeys after the generated consumer succeeds.
+
+## Catalog and documentation validation
+
+The authored catalog and documentation slice was checked with the repository's actual checkers:
+
+| Check | Observed result |
+| --- | --- |
+| `node --import tsx scripts/spec/check-lifecycle-authoring.mjs --base 52101cba4ed4cd2a6966823dc51655e58b7c63ab` | Passed all four changed catalog inputs, with draft status and classified blockers retained. |
+| `node scripts/spec/check-prototype-catalog.mjs` and `node --test scripts/spec/bounded-map.test.mjs` | Catalog passed; all seven bounded-map tests passed. |
+| `workspace-relations.test.ts` and `lifecycle-readiness.test.ts` | Passed 4 and 91 cases respectively. |
+| `catalog-evidence-integrity.test.ts` | Initial candidate run failed because the new cited record had not yet been added to Git's index. After the intended file was added, all 13 cases passed. No path or assertion was exempted. |
+| `node scripts/docs/check-public-docs.mjs` | Passed the public and repository documentation checks. |
+| Focused TypeScript program rooted at `packages/prototypes/base/test/input-editor.test.ts`, using `tsconfig.workspace.json` options | Its 693-file imported closure checked with zero diagnostics; this is distinct from a whole-workspace typecheck. |
+| Final focused TypeScript program `/tmp/proto-ui-controls-check.json`, including compiler sources, Input sources and the changed compiler/Input tests | `tsc --noEmit --pretty false` exited zero with zero diagnostics. A concurrent attempt was terminated by the OS with exit 137; the complete program was rerun alone after the test workers exited. This is not a whole-workspace typecheck. |
+| `node --import tsx scripts/spec/generate-agent-project-understanding.mjs` and the same command with `--check` | Generated and verified the disposable Agent projection from 1,293 entities. |
+| `node --import tsx apps/workspace/scripts/generate-spec-dataset.ts` | Generated the disposable workspace dataset from the same 1,293 entities without catalog issues. |
+
+The requested `corepack pnpm@10.32.1 spec:docs:agent` wrapper first failed because the `tsx` CLI could not open its local IPC socket (`EPERM`). Executing the identical repository generator through Node's `--import tsx` completed without that CLI socket. The failed wrapper remains an environment result, not a generator pass; no permission or catalog validation was bypassed. Both generated projections remain Git-ignored and are not hand-edited or committed.
+
+The final 12-file run used `PROTO_UI_REQUIRE_RUST_DATA_TESTS=1`, the matching cached Rust toolchain on `PATH`, and `CARGO_NET_OFFLINE=true`. Both emitted-Rust test cases executed and passed. The retained results are `/tmp/proto-controls-final-candidate-tests2.log` and its JSON sibling, with the zero-diagnostic TypeScript log at `/tmp/proto-controls-final-candidate-types3.log`. An earlier attempted combined run occurred while the newly imported native notification source file had not yet been written: 22 tests executed successfully and seven suites could not load. That attempt remains a failed intermediate run, followed by the successful complete rerun.
+
+## Remaining ownership
+
+The coordinated compiler owner is responsible for the final generated/native build, the current-tree regression result, SDK export compatibility, final source pin and publication. The standalone hook and scalar contracts remain draft. A dedicated mounted GPUI scalar-boundary test and actual platform input acceptance remain separate. The emitted SDK text/conditional-state/scroll tests have their actual native result recorded above. No local passing count closes those broader criteria.
