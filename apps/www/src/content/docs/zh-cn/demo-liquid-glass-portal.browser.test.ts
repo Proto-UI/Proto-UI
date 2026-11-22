@@ -573,6 +573,9 @@ describe.sequential(
                     boxSizing: css.boxSizing,
                     rootZoom: getComputedStyle(html).zoom,
                     columnsDirection: getComputedStyle(columns).flexDirection,
+                    columnsDisplay: getComputedStyle(columns).display,
+                    columnsGrid: getComputedStyle(columns).gridTemplateColumns,
+                    tocDisplay: getComputedStyle(toc).display,
                     tocPosition: getComputedStyle(toc).position,
                   },
                 };
@@ -681,9 +684,16 @@ describe.sequential(
           expect(result.baselineStability.stable, result.control.name).toBe(true);
           const baseline = result.baseline.at(-1);
           expect(baseline.css.containerType).toBe('inline-size');
-          // Outside the nested query, retain the original upstream layout as
-          // observed; do not invent a negative-query column direction.
-          if (baseline.predicate) expect(baseline.css.columnsDirection).toBe('column');
+          // The admitted 0.3 layout keeps the TOC beside prose or hidden; the
+          // container budget collapses the two-column grid to one track and
+          // hides the TOC rather than reflowing it above the article. Retain
+          // the actual product branch (single-column grid + hidden TOC) when
+          // the canvas budget applies; do not assert a rejected flex column.
+          if (baseline.predicate) {
+            expect(baseline.css.columnsDisplay).toBe('grid');
+            expect(baseline.css.columnsGrid.trim().split(/\s+/).length).toBe(1);
+            expect(baseline.css.tocDisplay).toBe('none');
+          }
           if (result.control.name.startsWith('media-'))
             expect(baseline.mediaMatches).toBe(result.control.name !== 'media-below');
           for (const entry of result.handover.slice(-3)) {
