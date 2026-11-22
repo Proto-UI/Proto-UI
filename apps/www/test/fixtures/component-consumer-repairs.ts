@@ -71,12 +71,14 @@ async function settle() {
 
 /** Real source prototypes and real React/WC adapters; no simulated focus or geometry. */
 export async function mount(
-  scenario: 'labels' | 'tooltip' | 'drawer',
+  scenario: 'labels' | 'tooltip' | 'drawer' | 'tooltip-lifecycle',
   familyName: keyof typeof families,
   runtime: 'react' | 'wc'
 ) {
   const family = families[familyName];
   const counts = { click: 0, active: [] as unknown[], value: [] as unknown[] };
+  let buttonPresent = true;
+  let buttonMount = 0;
   let nodes: Node[];
   if (scenario === 'labels') {
     const pairs = Array.from({ length: 3 }, () => ({ controlLabel: createControlLabelRef() }));
@@ -159,6 +161,44 @@ export async function mount(
       },
       { key: 'after', tag: 'button', children: ['After'] },
     ];
+  } else if (scenario === 'tooltip-lifecycle') {
+    // Same same-subject recipe as the 'tooltip' scenario, but the mounted host
+    // stays detached until lifecycle.attach() so the no-DOM mount phase is
+    // observable, and the wrapped button can be removed, re-inserted, disabled,
+    // hidden, given a negative tabindex or remounted while the wiring lives.
+    const command: Prototype<any, any> = family.button;
+    const tooltipButton = definePrototype({
+      ...command,
+      name: `consumer-${familyName}-tooltip-lifecycle-button`,
+      setup(def) {
+        const render = command.setup(def);
+        baseTooltip.useTooltipTrigger();
+        return render;
+      },
+    });
+    nodes = [
+      { key: 'before', tag: 'button', children: ['Before'] },
+      {
+        key: 'root',
+        proto: family.tooltipRoot,
+        props: { openDelay: 0, closeDelay: 0 },
+        children: [
+          {
+            key: 'button',
+            proto: tooltipButton,
+            events: { click: () => counts.click++ },
+            children: ['Save'],
+          },
+          {
+            key: 'content',
+            proto: family.tooltipContent,
+            props: { enterDuration: 0, leaveDuration: 0 },
+            children: ['Save this document'],
+          },
+        ],
+      },
+      { key: 'after', tag: 'button', children: ['After'] },
+    ];
   } else {
     nodes = [
       {
@@ -208,15 +248,26 @@ export async function mount(
   const adapt = createReactAdapter({ ...React, createPortal });
   const components = new Map<Prototype<any, any>, any>();
   const host = document.createElement('div');
-  document.body.append(host);
+  if (scenario !== 'tooltip-lifecycle') document.body.append(host);
   const root = runtime === 'react' ? createRoot(host) : null;
+  const wireWcEvents = (element: HTMLElement, node: Node) => {
+    for (const [event, listener] of Object.entries(node.events ?? {}))
+      element.addEventListener(event, (e) => {
+        if (e instanceof CustomEvent) listener(e.detail);
+      });
+  };
   const renderNode = (node: Node | string): any => {
     if (typeof node === 'string') return node;
     definitions.set(node.key, node);
     if (runtime === 'react') {
+      if (scenario === 'tooltip-lifecycle' && node.key === 'button' && !buttonPresent)
+        return null;
       const props: Record<string, any> = {
         ...node.props,
-        key: node.key,
+        key:
+          scenario === 'tooltip-lifecycle' && node.key === 'button'
+            ? `button-${buttonMount}`
+            : node.key,
         'data-demo-ref': node.key,
       };
       if (node.associations) props.instanceAssociations = node.associations;
@@ -240,10 +291,7 @@ export async function mount(
       setElementProps(element, props);
       if (hostStyle) Object.assign(element.style, hostStyle);
       if (node.associations) setElementAssociations(element, node.associations);
-      for (const [event, listener] of Object.entries(node.events ?? {}))
-        element.addEventListener(event, (e) => {
-          if (e instanceof CustomEvent) listener(e.detail);
-        });
+      wireWcEvents(element, node);
     } else if (node.props?.style) Object.assign(element.style, node.props.style);
     element.append(...(node.children ?? []).map(renderNode));
     return element;
@@ -264,6 +312,85 @@ export async function mount(
         ? refs.get(key)!.current.getExposes()
         : (hosts.get(key) as any).getExposes();
     },
+    // #1455 lifecycle acceptance: the mounted host stays detached until attach(),
+    // and the wrapped control can be removed, re-inserted, remounted (element
+    // replacement), given a negative tabindex or hidden while the wiring lives.
+    lifecycle:
+      scenario === 'tooltip-lifecycle'
+        ? {
+            async attach() {
+              document.body.append(host);
+              // The React adapter re-advertises its focus target only on a
+              // committed render, so inserting the detached host needs one
+              // re-render for the focusable projection (tabindex) to land.
+              if (root) flushSync(() => root.render(nodes.map(renderNode)));
+              await settle();
+            },
+            async remove() {
+              if (root) {
+                buttonPresent = false;
+                flushSync(() => root.render(nodes.map(renderNode)));
+              } else {
+                hosts.get('button')?.remove();
+              }
+              await settle();
+            },
+            async insert() {
+              if (root) {
+                buttonPresent = true;
+                flushSync(() => root.render(nodes.map(renderNode)));
+              } else {
+                const button = hosts.get('button');
+                const rootElement = hosts.get('root');
+                if (button && rootElement)
+                  rootElement.insertBefore(button, hosts.get('content') ?? null);
+              }
+              await settle();
+            },
+            async remount() {
+              buttonMount += 1;
+              if (root) {
+                flushSync(() => root.render(nodes.map(renderNode)));
+              } else {
+                const buttonNode = definitions.get('button');
+                const previous = hosts.get('button');
+                if (buttonNode?.proto && previous) {
+                  const replacement = document.createElement(buttonNode.proto.name);
+                  replacement.setAttribute('data-demo-ref', 'button');
+                  const { hostStyle, ...props } = buttonNode.props ?? {};
+                  setElementProps(replacement, props);
+                  if (hostStyle) Object.assign(replacement.style, hostStyle);
+                  wireWcEvents(replacement, buttonNode);
+                  previous.replaceWith(replacement);
+                  hosts.set('button', replacement);
+                }
+              }
+              await settle();
+            },
+            async setTabindex(value: number) {
+              host.querySelector<HTMLElement>('[data-demo-ref="button"]')?.setAttribute(
+                'tabindex',
+                String(value)
+              );
+              await settle();
+            },
+            async setHidden(hidden: boolean) {
+              const button = host.querySelector<HTMLElement>('[data-demo-ref="button"]');
+              if (!button) return;
+              // Author display rules outrank the UA [hidden] rule, so pair the
+              // semantic hidden attribute with an inline display to actually
+              // remove the control from layout and the tab order.
+              if (hidden) {
+                button.setAttribute('hidden', '');
+                button.style.display = 'none';
+              } else {
+                button.removeAttribute('hidden');
+                button.style.display = '';
+              }
+              await settle();
+            },
+          }
+        : null,
     async dispose() {
       if (root) flushSync(() => root.unmount());
       host.remove();

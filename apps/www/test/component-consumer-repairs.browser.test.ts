@@ -201,6 +201,141 @@ it.each(cases)(
   }
 );
 
+// #1455 lifecycle acceptance, bound to the same same-subject recipe the tooltip
+// suite above exercises. #1471's DOM-wrapper candidate (a mount-only descendant
+// scan gated on an `el instanceof HTMLElement` check) is dispositioned here as
+// neither a mainline defect nor an accepted implementation: it was closed
+// without merge, and the base tooltip source carries no wrapper heuristic, so the
+// wrapped control below is the single focus owner in every phase.
+//
+// Out-of-band (left unchecked, not claimed by this suite): a fully no-DOM host
+// with no browser globals (e.g. the GPUI/native path) and OS assistive-technology
+// certification. This harness observes detached-then-attached mounting and real
+// Chromium Tab/Shift+Tab, pointer/focus opening, Escape and activation only.
+it.each(cases)(
+  '$family $runtime Tooltip lifecycle keeps one Tab stop across mounting, removal, eligibility and remount',
+  async ({ family, runtime }) => {
+    const { page, errors } = await fixture('tooltip-lifecycle', family, runtime);
+    const life = (name: 'attach' | 'remove' | 'insert' | 'remount') =>
+      page.evaluate((n) => window.repairFixture.lifecycle![n](), name);
+    const setTabindex = (value: number) =>
+      page.evaluate((v) => window.repairFixture.lifecycle!.setTabindex(v), value);
+    const setHidden = (hidden: boolean) =>
+      page.evaluate((h) => window.repairFixture.lifecycle!.setHidden(h), hidden);
+    const tabIndexFromBefore = async () => {
+      await node(page, 'before').focus();
+      await page.keyboard.press('Tab');
+      return active(page);
+    };
+    try {
+      // no-DOM mounting: the control is created and wired while its host is
+      // detached, then mounted; after mounting it is exactly one Tab stop.
+      expect(
+        await page.evaluate(() => document.querySelector('[data-demo-ref="button"]'))
+      ).toBeNull();
+      await life('attach');
+      expect(await active(page)).not.toBe('button');
+      expect(await tabIndexFromBefore()).toBe('button');
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('button');
+      await page.keyboard.press('Shift+Tab');
+      expect(await active(page)).toBe('before');
+
+      // The wiring survived detached mounting: focus opens the tooltip and the
+      // focused subject owns the description relation.
+      await node(page, 'button').focus();
+      await page.waitForFunction(() => window.repairFixture.exposes('root').open.get());
+      // The content view reveals a frame or two after the root open state, so
+      // wait for the described-by target to carry its id before asserting.
+      await page.waitForFunction(
+        () => Boolean(document.querySelector('[data-demo-ref="content"]')?.getAttribute('id')),
+        { timeout: 5000 }
+      );
+      const contentId = await node(page, 'content').getAttribute('id');
+      expect(contentId).toBeTruthy();
+      expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);
+      await page.keyboard.press('Enter');
+      expect(await page.evaluate(() => window.repairFixture.counts.click)).toBe(1);
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !window.repairFixture.exposes('root').open.get());
+      expect(await active(page)).toBe('button');
+
+      // Dynamic removal: the wrapped control leaves the tab order entirely and
+      // focus moves across the gap; re-insertion restores exactly one stop.
+      await life('remove');
+      expect(
+        await page.evaluate(() => document.querySelector('[data-demo-ref="button"]'))
+      ).toBeNull();
+      expect(await tabIndexFromBefore()).toBe('after');
+      await life('insert');
+      expect(await tabIndexFromBefore()).toBe('button');
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+
+      // Command-disabled versus tooltip-disabled ownership: a disabled command is
+      // not a Tab stop while the tooltip root stays enabled, and re-enabling it
+      // restores the single stop. (Tooltip-disabled ownership is the sibling test
+      // above, which disables the root rather than the command.)
+      await page.evaluate(() => window.repairFixture.set('button', { disabled: true }));
+      expect(await tabIndexFromBefore()).toBe('after');
+      await page.evaluate(() => window.repairFixture.set('button', { disabled: false }));
+      expect(await tabIndexFromBefore()).toBe('button');
+
+      // Hidden control: removed from the tab order, then restored.
+      await setHidden(true);
+      expect(await tabIndexFromBefore()).toBe('after');
+      await setHidden(false);
+      expect(await tabIndexFromBefore()).toBe('button');
+
+      // Negative tabindex: programmatic focus only, so not a Tab stop; restoring a
+      // non-negative tabindex restores the single stop.
+      // Focus 'before' first: a focus change makes the adapter re-project the
+      // button's tabindex, so the negative value must be applied after the last
+      // such change and before the Tab, with no intervening focus move.
+      await node(page, 'before').focus();
+      await setTabindex(-1);
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      await setTabindex(0);
+      expect(await tabIndexFromBefore()).toBe('button');
+
+      // Remount / shadow-host boundary: the underlying element is replaced and the
+      // wiring re-binds; the replacement is exactly one Tab stop and still opens,
+      // activates and owns the description.
+      await page.evaluate(() =>
+        document.querySelector('[data-demo-ref="button"]')?.setAttribute('data-pre-remount', '')
+      );
+      await life('remount');
+      const remounted = await page.evaluate(() => {
+        const el = document.querySelector('[data-demo-ref="button"]');
+        return { exists: Boolean(el), isReplacement: el ? !el.hasAttribute('data-pre-remount') : false };
+      });
+      expect(remounted.exists).toBe(true);
+      expect(remounted.isReplacement).toBe(true);
+      expect(await tabIndexFromBefore()).toBe('button');
+      await page.keyboard.press('Tab');
+      expect(await active(page)).toBe('after');
+      await node(page, 'button').focus();
+      await page.waitForFunction(() => window.repairFixture.exposes('root').open.get());
+      await page.waitForFunction(
+        () => Boolean(document.querySelector('[data-demo-ref="content"]')?.getAttribute('id')),
+        { timeout: 5000 }
+      );
+      const remountedContentId = await node(page, 'content').getAttribute('id');
+      expect(remountedContentId).toBe(contentId);
+      expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);
+      await page.keyboard.press('Enter');
+      expect(await page.evaluate(() => window.repairFixture.counts.click)).toBe(2);
+      await page.screenshot({ path: path.join(output, `${family}-${runtime}-tooltip-lifecycle.png`) });
+      expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  }
+);
+
 it.each(cases)(
   '$family $runtime horizontal Drawer keeps actual width and attachment coherent',
   async ({ family, runtime }) => {
