@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import Mock, patch
 
 spec = importlib.util.spec_from_file_location('consumer_broker', Path(__file__).with_name('consumer-broker.py'))
 module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
@@ -62,6 +63,51 @@ class Capabilities(unittest.TestCase):
     def test_no_observer_before_current_build(self):
         self.broker.built_revision = 0; self.broker.revision = 1
         with self.assertRaises(ValueError): self.broker.dispatch({'action': 'observe'}, self.call)
+
+    def test_failed_rebuild_revokes_observation_until_full_success(self):
+        self.broker.installed = True
+
+        def build(label, outcomes):
+            call = self.output / label; call.mkdir()
+            self.broker.command = Mock(side_effect=[
+                outcome if isinstance(outcome, Exception) else {'exitCode': outcome}
+                for outcome in outcomes
+            ])
+            return self.broker.dispatch({'action': 'build'}, call)
+
+        for label, outcomes in [
+            ('typecheck-failure', [1]),
+            ('typecheck-timeout', [None]),
+            ('bundler-failure', [0, 1]),
+            ('bundler-timeout', [0, None]),
+            ('deadline-exception', [TimeoutError('Consumer time window ended')]),
+        ]:
+            with self.subTest(failure=label):
+                self.assertEqual(build(label + '-initial', [0, 0])['exitCode'], 0)
+                revision = self.broker.revision
+                if isinstance(outcomes[-1], Exception):
+                    with self.assertRaises(TimeoutError):
+                        build(label + '-failed', outcomes)
+                else:
+                    self.assertNotEqual(build(label + '-failed', outcomes)['exitCode'], 0)
+                self.assertEqual(self.broker.revision, revision)
+
+                with patch.object(module.socketserver, 'TCPServer', side_effect=AssertionError('Stale observer started')) as server:
+                    with self.assertRaisesRegex(ValueError, 'Build the current revision'):
+                        self.broker.dispatch({'action': 'observe'}, self.call)
+                    server.assert_not_called()
+
+                self.assertEqual(build(label + '-recovered', [0, 0])['exitCode'], 0)
+                self.broker.command = Mock(return_value={'exitCode': 0})
+                server = Mock(server_address=('127.0.0.1', 12345))
+                with patch.object(module.socketserver, 'TCPServer', return_value=server) as create_server, patch.object(module.threading, 'Thread') as create_thread:
+                    self.assertEqual(self.broker.dispatch({'action': 'observe'}, self.call)['exitCode'], 0)
+                    create_server.assert_called_once()
+                    create_thread.return_value.start.assert_called_once()
+                    create_thread.return_value.join.assert_called_once_with(timeout=5)
+                self.broker.command.assert_called_once()
+                server.shutdown.assert_called_once()
+                server.server_close.assert_called_once()
 
 
 if __name__ == '__main__': unittest.main()

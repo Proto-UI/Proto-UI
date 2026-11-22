@@ -139,6 +139,8 @@ class Broker:
         if name == 'build':
             if not self.installed:
                 raise ValueError('Install the declared dependencies first')
+            # Rebuilding can replace dist; only a new complete success authorizes observation.
+            self.built_revision = None
             typecheck_directory = call_dir / 'typecheck'; typecheck_directory.mkdir()
             typecheck = self.command([self.node, str(self.workspace / 'node_modules/typescript/bin/tsc'), '--noEmit', '--project', 'tsconfig.json'], typecheck_directory, 90)
             if typecheck['exitCode'] != 0:
