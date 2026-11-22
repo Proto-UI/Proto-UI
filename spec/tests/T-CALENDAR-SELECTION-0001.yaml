@@ -6,6 +6,14 @@ since: 0.3.0-alpha.2
 lifecycleRationale: The selection suite was defined before implementation and now has focused runtime and four-Adapter journey evidence. Native browser and assistive-technology acceptance remain separate.
 summary: Covers canonical mode ownership, invalid requests, range day states, family paint and Date Picker completion.
 cases:
+  - id: T-CALENDAR-SELECTION-0001-CASE-CAPTURE
+    title: Valid request capture precedes observable effects and follows setup lifetime
+    covers: [C-CALENDAR-SELECTION-0001-CAPTURE]
+    expectation: request-bound-read-only-capture-without-invalid-or-no-op-notifications
+  - id: T-CALENDAR-SELECTION-0001-CASE-SESSIONS
+    title: Reentrant request completion matches actual controlled and uncontrolled opening sessions
+    covers: [C-CALENDAR-SELECTION-0001-PICKER, P-BASE-POPOVER-OPEN-SESSION]
+    expectation: newer-accepted-requests-survive-older-notifications-without-closing-reopened-sessions
   - id: T-CALENDAR-SELECTION-0001-CASE-MULTIPLE
     title: Multiple toggle, normalized immutable values and count constraints
     covers:
@@ -34,6 +42,14 @@ cases:
     covers: [C-CALENDAR-SELECTION-0001-PICKER]
     expectation: close-on-accepted-complete-selection-only
 implementations:
+  - id: calendar-selection-causal-lifecycle
+    kind: runtime-test
+    status: pending
+    path: packages/prototypes/base/test/selection-reset-lifecycle.test.ts
+    required: true
+    consumesCases:
+      - T-CALENDAR-SELECTION-0001-CASE-CAPTURE
+      - T-CALENDAR-SELECTION-0001-CASE-SESSIONS
   - id: calendar-selection-runtime
     kind: runtime-test
     status: passing
@@ -55,7 +71,7 @@ implementations:
       - T-CALENDAR-SELECTION-0001-CASE-PICKER
 verifies:
   contracts: [C-CALENDAR-SELECTION-0001]
-  prototypes: [P-BASE-CALENDAR, P-BASE-DATE-PICKER]
+  prototypes: [P-BASE-CALENDAR, P-BASE-DATE-PICKER, P-BASE-POPOVER]
 revisions:
   - version: 0.3.0-alpha.2
     change: introduced

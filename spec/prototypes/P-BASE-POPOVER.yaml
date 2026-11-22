@@ -11,6 +11,10 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-BASE-POPOVER-OPEN-SESSION
+    text:
+      zh-CN: Root 的 Context 公开只读 openSessionId；它在该 Root 的每次 canonical false→true 提交时递增，并与 open 原子提交，先于相应通知。初始化为 open 也创建首个会话。受控 props 接受与非受控请求遵守同一规则；被拒绝的受控请求、重复 open、无新 opening 的 remount 均不创建会话。close 使原会话不再 open，之后的 reopen 创建不同编号。编号只在 rootId 内有意义；消费者不能通过旧通知重写或推断当前会话。
+      en: Root Context exposes a read-only openSessionId, incremented for each canonical false-to-true transition of that Root and committed atomically with open before its notifications. Initially accepted open creates the first session. Controlled prop acceptance and uncontrolled requests follow the same rule; refused controlled requests, repeated open and remount without a new opening do not create sessions. Close makes the previous session no longer open and subsequent reopen creates a different id. An id is scoped to rootId; consumers must not overwrite or infer the current session from old notifications.
   - id: P-BASE-POPOVER-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -70,7 +74,7 @@ dependsOn:
     - C-AS-FOCUS-SCOPE-0002
     - C-AS-FOCUS-ENTRY-0001
 verifies:
-  tests: [T-POPOVER-OPENING-ENTRY-0001]
+  tests: [T-POPOVER-OPENING-ENTRY-0001, T-CALENDAR-SELECTION-0001]
 sources:
   - path: packages/prototypes/base/src/popover/
   - path: packages/prototypes/base/test/navigation-overlays/popover-entry-focus-scroll.test.ts
@@ -83,6 +87,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-POPOVER
 revisions:
+  - version: 0.3.0-alpha.2
+    change: refined
+    summary: Define an owner-local accepted-opening session fact for causal composition without relying on cross-channel notification order.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Define logical-first opening-owned region fallback, scroll-preserving options and close/outside cancellation independently of boundary activity; retain draft lifecycle and native admission requirements.
