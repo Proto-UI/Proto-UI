@@ -97,6 +97,7 @@ implementations:
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL]
     notes:
       - The ordinary tab-focus and tab-scope authored fixtures are compiled afresh. Native test execution and its exact source receipt are required separately; fixture authorship alone is not passing evidence or operating-system keyboard acceptance.
+      - The separate-App regression retains live owners with colliding App-local window identifiers and dispatches real keys. Current-App event fan-out and host driving must not invoke or update the other App's Entity; no fixture exception or weaker identity assertion is used.
 verifies:
   contracts:
     - id: C-AS-FOCUSABLE-0001
