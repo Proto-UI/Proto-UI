@@ -409,7 +409,7 @@ for (const runtime of RUNTIMES)
           const ownsHover = async () => {
             const box = await enabled.boundingBox();
             if (!box) return false;
-            return page.evaluate(
+            return page!.evaluate(
               ({ x, y }) => {
                 const hit = document.elementFromPoint(x, y);
                 return !!hit && hit.closest('[role="button"]')?.textContent?.trim() === 'Ghost';
