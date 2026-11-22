@@ -2,6 +2,7 @@ import { callableEffectIssue } from './callable-effects';
 import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
 import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
+import { declaredSetValueEvent } from './a11y-event-types';
 import { createHash } from 'node:crypto';
 import { CompilerRejection, reject } from './diagnostics';
 import {
@@ -88,6 +89,7 @@ const CAPABILITIES = new Set([
   'event-control',
   'event-or-control',
   'host-event',
+  'a11y-value-event',
   'props',
   'focus',
   'accessible',
@@ -803,6 +805,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       keys.set(id, type);
     }
     const exposures = new Map<string, Record<string, unknown>>();
+    const numericActionEvents = new Set<string>();
     for (const value of array(root.exposes)) {
       const exposure = object(value, [
         'name',
@@ -1784,7 +1787,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (operation === 'event.on' || operation === 'event.onGlobal') {
               if (first?.kind !== 'literal' || typeof first.value !== 'string')
                 bad('Input registrations require static types.', location);
-              bindings.inputPayloadType = first.value.startsWith('host:') ? 'host-event' : 'event';
+              bindings.inputPayloadType =
+                operation === 'event.on' && numericActionEvents.has(first.value)
+                  ? 'a11y-value-event'
+                  : first.value.startsWith('host:')
+                    ? 'host-event'
+                    : 'event';
             }
             if (operation === 'expose.emit' || operation === 'expose.method') {
               if (operation === 'expose.emit') {
@@ -1852,6 +1860,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               bindings
             );
             if (argumentIssues.length) bad(argumentIssues[0].message, location);
+            if (operation === 'accessible.action') {
+              const event = declaredSetValueEvent(args as ExpressionIR[]);
+              if (event) numericActionEvents.add(event);
+            }
             if (operation === 'expose.state') {
               const exposure =
                 first?.kind === 'literal' ? exposures.get(String(first.value)) : undefined;

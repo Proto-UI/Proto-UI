@@ -146,6 +146,7 @@ export function emitGpuiSource(
     'event.on',
     'event.onGlobal',
     'event.requestDefaultActionPrevention',
+    'eventControl.requestDefaultActionPrevention',
     'focus.configure',
     'focus.setDisabled',
     'focus.focusSelf',
@@ -2035,9 +2036,26 @@ impl __PuiNativeRecordValue {
           case 'positioning.getSnapshot':
             return `positioning_snapshot(${receiverOwner()})`;
           case 'event.on':
-          case 'event.onGlobal':
-            return `listen(&${ownerReference()}, ${argument(0)}, ${node.operation === 'event.onGlobal'}, ${argument(1)}, ${argument(2)})`;
+          case 'event.onGlobal': {
+            const callback = node.arguments[1];
+            const parameters =
+              callback.kind === 'function'
+                ? callback.function.parameters
+                : typeof callback.type !== 'string' && callback.type.kind === 'callable'
+                  ? callback.type.parameters
+                  : [];
+            const listener =
+              parameters[1]?.type === 'a11y-value-event' ||
+              (node.operation === 'event.on' &&
+                node.arguments[0].kind === 'literal' &&
+                typeof node.arguments[0].value === 'string' &&
+                admittedAnalysis.numericAccessibilityEvents.includes(node.arguments[0].value))
+                ? 'listen_numeric_value'
+                : 'listen';
+            return `${listener}(&${ownerReference()}, ${argument(0)}, ${node.operation === 'event.onGlobal'}, ${argument(1)}, ${argument(2)})`;
+          }
           case 'event.requestDefaultActionPrevention':
+          case 'eventControl.requestDefaultActionPrevention':
             return `prevent(${receiver()})`;
           default:
             throw new Error(`Checked GPUI operation has no direct lowering: ${node.operation}`);

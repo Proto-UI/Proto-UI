@@ -136,6 +136,7 @@ impl Value {
         Self::Json(Json::Object(value)) => value.get(key).cloned().map(Self::json).unwrap_or(Self::Undefined),
         Self::Record(value) => value.fields.borrow().get(key).cloned().unwrap_or(Self::Undefined),
         Self::Array(value) => if key=="length"{Self::number(value.len()as f64)}else{key.parse::<usize>().ok().and_then(|index|value.get(index).cloned()).unwrap_or(Self::Undefined)},
+        Self::Input(_) if key=="control" => self.clone(),
         Self::Input(value) => value.fields.get(key).cloned().map(Self::Json).unwrap_or(Self::Undefined),
         Self::ContextKey(_) if key=="__brand" => Self::string("ContextKey"),
         Self::Handle(owner, kind) => capability_member(owner, kind, key),
@@ -263,7 +264,7 @@ pub struct State { pub value:RefCell<Value>, pub kind:&'static str, pub spec:Val
 #[derive(Clone)]
 struct Watcher { active:Rc<Cell<bool>>, keys:Option<Vec<String>>, raw:bool, callback:Value }
 #[derive(Clone)]
-struct Listener { active:Rc<Cell<bool>>, kind:String, global:bool, capture:bool, once:bool, consumed_epoch:Rc<Cell<Option<u64>>>,  passive:bool, callback:Value }
+struct Listener { active:Rc<Cell<bool>>, kind:String, global:bool, capture:bool, once:bool, consumed_epoch:Rc<Cell<Option<u64>>>, passive:bool, numeric_value:bool, callback:Value }
 #[derive(Clone)]
 struct Contribution {active:Rc<Cell<bool>>, predicate:Option<Value>, styles:Vec<(String,String)>}
 #[derive(Clone)]
@@ -632,7 +633,9 @@ pub fn accessible_role(owner:&OwnerWeak,role:Value)->Value{setup(owner).borrow_m
 pub fn accessible_state(owner:&OwnerWeak,key:Value,state:Value)->Value{setup(owner).borrow_mut().accessible_states.insert(key.text(),state);Value::Undefined}
 pub fn accessible_action(owner:&OwnerWeak,key:Value)->Value{setup(owner).borrow_mut().accessible_actions.insert(key.text());Value::Undefined}
 pub fn name_content(owner:&OwnerWeak)->Value{let owner=setup(owner);let mut o=owner.borrow_mut();o.name_content=true;o.modules.accessible_text.remove("name");Value::Undefined}
-pub fn listen(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let kind=key.text();if global&&kind.starts_with("press."){owner.borrow_mut().press_global=true;}let capture=options.member("capture",true);let once=options.member("once",true);let passive=options.member("passive",true);owner.borrow_mut().listeners.push(Listener{active:active.clone(),kind,global,capture:!capture.nullish()&&capture.bool(),once:!once.nullish()&&once.bool(),consumed_epoch:Rc::new(Cell::new(None)),passive:!passive.nullish()&&passive.bool(),callback});disposer(owner,active,false)}
+pub fn listen(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{listen_with_schema(owner,key,global,callback,options,false)}
+pub fn listen_numeric_value(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{assert!(!global,"numeric accessibility actions are owner-local");listen_with_schema(owner,key,global,callback,options,true)}
+fn listen_with_schema(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value,numeric_value:bool)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let kind=key.text();if global&&kind.starts_with("press."){owner.borrow_mut().press_global=true;}let capture=options.member("capture",true);let once=options.member("once",true);let passive=options.member("passive",true);owner.borrow_mut().listeners.push(Listener{active:active.clone(),kind,global,capture:!capture.nullish()&&capture.bool(),once:!once.nullish()&&once.bool(),consumed_epoch:Rc::new(Cell::new(None)),passive:!passive.nullish()&&passive.bool(),numeric_value,callback});disposer(owner,active,false)}
 pub fn prevent(input:Value)->Value{match input{Value::Input(input)=>{if !input.live.get(){throw_error("INPUT_CONTROL_EXPIRED","input control expired")}if !input.passive{input.prevented.set(true)}},_=>panic!("input capability required")};Value::Undefined}
 struct InputLifetime<'a>(&'a Input);
 impl Drop for InputLifetime<'_>{fn drop(&mut self){self.0.live.set(false);}}
@@ -645,6 +648,7 @@ fn dispatch_phase(owner:&OwnerRef,kind:&str,global:bool,capture:bool,fields:Map<
     for listener in listeners{
         if owner.borrow().disposed||!owner.borrow().mounted{break}
         if !listener.active.get()||listener.global!=global||listener.capture!=capture||listener.kind!=kind{continue}
+        if listener.numeric_value&&!fields.get("value").and_then(Json::as_f64).is_some_and(f64::is_finite){continue}
         if listener.once{let epoch=owner.borrow().epoch;if listener.consumed_epoch.get()==Some(epoch){continue}listener.consumed_epoch.set(Some(epoch));}
         let input=Rc::new(Input{fields:fields.clone(),prevented:Cell::new(false),passive:listener.passive,live:Cell::new(true)});
         let delivered=native_host_callback(owner,kind,||invoke_scoped(owner,"event",||{
@@ -656,6 +660,19 @@ fn dispatch_phase(owner:&OwnerRef,kind:&str,global:bool,capture:bool,fields:Map<
     prevented
 }
 pub fn event_fields(kind:&str)->Map<String,Json>{let mut fields=Map::new();fields.insert("type".into(),Json::String(kind.into()));fields}
+pub fn default_accessibility_event(action:&str)->String{if action=="setValue"{"host:a11y-set-value".into()}else{format!("a11y:{action}")}}
+/// One bridge shared by the actual GPUI callback and native consumer tests.
+/// A SetValue request carries finite numeric input; policy and State stay authored.
+pub fn dispatch_accessibility_action(owner:&OwnerRef,action:&str,data:Option<&gpui::accesskit::ActionData>)->bool{
+    let kind={let o=owner.borrow();if o.disposed||!o.present||!o.mounted||!o.accessible||!o.accessible_actions.contains(action){return false}o.modules.action_events.get(action).cloned().unwrap_or_else(||default_accessibility_event(action))};
+    let mut fields=event_fields(&kind);
+    if action=="setValue"{
+        let Some(gpui::accesskit::ActionData::NumericValue(value))=data else{return false};
+        if !value.is_finite(){return false}
+        fields.insert("value".into(),Json::from(*value));
+    }
+    dispatch(owner,&kind,false,fields)
+}
 pub fn text_content(value:&Option<NativeSnapshot>,slot:&[NativeSnapshot])->String{value.as_ref().map(|snapshot|(snapshot.text)(slot)).unwrap_or_default()}
 pub type Drive=Rc<dyn Fn(&mut Window,&mut App)>;
 #[derive(Clone,Copy)]
@@ -700,7 +717,7 @@ pub fn paint_native_root(value:&NativeSnapshot,owner:&OwnerRef,focus:&FocusHandl
 let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(style,fixed,translation)=native_presentation(owner,&tokens);*element.style()=style;
 if image_supported(owner){element=element.role(gpui::Role::Image);}
 if owner.borrow().modules.hooks.contains("scroll"){let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
-let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let owner=owner.clone();let drive=drive.clone();let kind=action.clone();element=element.on_a11y_action(action_from_name(&action),move |_,window,cx|{let kind=owner.borrow().modules.action_events.get(&kind).cloned().unwrap_or_else(||format!("a11y:{kind}"));if dispatch(&owner,&kind,false,event_fields(&kind)){window.prevent_default()}drive(window,cx)});}}
+let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let owner=owner.clone();let drive=drive.clone();let kind=action.clone();element=element.on_a11y_action(action_from_name(&action),move |data,window,cx|{if dispatch_accessibility_action(&owner,&kind,data){window.prevent_default()}drive(window,cx)});}}
 if native_pointer_input_needed(owner){
 let capture_down=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_down(move|event,window,cx|{let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_down,"host:mousedown",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_down=owner.clone();let down_drive=drive.clone();element.interactivity().on_any_mouse_down(move|event,window,cx|{if claim_pointer(&on_down){let mut fields=event_fields("pointer.down");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_down,"pointer.down",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_down,"press.start",press_fields("press.start",&fields));}if prevented{window.prevent_default()}else if !window.default_prevented(){text_pointer_down(&on_down,event,window,cx);}if event.button==gpui::MouseButton::Right&&dispatch_root_route(&on_down,"context.menu",event_fields("context.menu")){window.prevent_default()}}let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch(&on_down,"host:mousedown",false,fields){window.prevent_default()}down_drive(window,cx)});
@@ -878,7 +895,7 @@ pub fn role_from_name(name:&str)->Option<gpui::Role>{
         };return Some(role)
     }None
 }
-pub fn action_from_name(name:&str)->gpui::AccessibleAction{match name{"click"|"press"=>gpui::AccessibleAction::Click,"focus"=>gpui::AccessibleAction::Focus,"increment"=>gpui::AccessibleAction::Increment,"decrement"=>gpui::AccessibleAction::Decrement,_=>panic!("unsupported native accessibility action: {name}")}}
+pub fn action_from_name(name:&str)->gpui::AccessibleAction{match name{"click"|"press"=>gpui::AccessibleAction::Click,"focus"=>gpui::AccessibleAction::Focus,"increment"=>gpui::AccessibleAction::Increment,"decrement"=>gpui::AccessibleAction::Decrement,"setValue"=>gpui::AccessibleAction::SetValue,_=>panic!("unsupported native accessibility action: {name}")}}
 thread_local!{static KEY_TARGET:RefCell<Option<OwnerWeak>>=RefCell::new(None);static KEY_DISPATCHED:Cell<bool>=Cell::new(false);static CLICK_TARGET:RefCell<Option<OwnerWeak>>=RefCell::new(None);static POINTER_TARGET:RefCell<Option<OwnerWeak>>=RefCell::new(None);static POINTER_DISPATCHED:Cell<bool>=Cell::new(false);static GLOBAL_CLICK_DISPATCHED:Cell<bool>=Cell::new(false);}
 thread_local!{static KEY_SCOPES:RefCell<Vec<(gpui::WindowId,gpui::WeakFocusHandle)>>=RefCell::new(Vec::new());}
 pub fn register_key_scope(focus:&FocusHandle,window:&Window){let id=window.window_handle().window_id();KEY_SCOPES.with(|scopes|{let mut scopes=scopes.borrow_mut();if scopes.iter().any(|(window,scope)|*window==id&&scope==focus){return}scopes.retain(|(_,scope)|scope.upgrade().is_some());scopes.push((id,focus.downgrade()));});}

@@ -142,6 +142,7 @@ export type ValueType =
   | 'event-control'
   | 'event-or-control'
   | 'host-event'
+  | 'a11y-value-event'
   | 'props'
   | 'focus'
   | 'accessible'

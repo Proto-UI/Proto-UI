@@ -2,6 +2,7 @@ import { pruneDeadValues } from './demand-pruning';
 import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
+import { declaredSetValueEvent } from './a11y-event-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
 import {
@@ -468,7 +469,10 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
     mode: 'source',
     implemented: true,
-    operations: nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
+    operations: [
+      ...nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
+      'eventControl.requestDefaultActionPrevention',
+    ],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
       { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
@@ -659,6 +663,7 @@ export interface TargetOperationAnalysis {
   readonly sites: readonly { operation: Operation; span: SourceSpan }[];
   readonly authoredHooks: readonly string[];
   readonly functions: readonly FunctionIR[];
+  readonly numericAccessibilityEvents: readonly string[];
 }
 /** Calls, host callbacks and outward callables are invocation roots. Creation alone is inert. */
 export function checkTargetOperations(
@@ -680,6 +685,7 @@ export function checkTargetOperations(
   const allowed = new Set(selected.operations);
   const capabilities = new Set(selected.hostCapabilities);
   const operations = new Set<Operation>();
+  const numericAccessibilityEvents = new Set<string>();
   const sites: { operation: Operation; span: SourceSpan }[] = [];
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   const reachedHooks = new Set<string>(),
@@ -718,6 +724,22 @@ export function checkTargetOperations(
     switch (value.kind) {
       case 'operation':
         operation(value.operation, value.span);
+        if (value.operation === 'accessible.action') {
+          const event = declaredSetValueEvent(value.arguments);
+          if (event) numericAccessibilityEvents.add(event);
+        }
+        if (
+          selected.id === 'gpui-source-v1' &&
+          value.operation === 'accessible.action' &&
+          value.arguments[0]?.kind === 'literal' &&
+          value.arguments[0].value === 'setValue' &&
+          declaredSetValueEvent(value.arguments) === undefined
+        )
+          diagnostic(
+            'PUI_GPUI_A11Y_VALUE',
+            'SetValue requires a literal nonempty host:* event route or its default route.',
+            value.span
+          );
         break;
       case 'style-handle':
         operation('style.tw', value.span);
@@ -750,6 +772,12 @@ export function checkTargetOperations(
           );
         break;
       case 'member':
+        if (value.object.type === 'a11y-value-event' && selected.id !== 'gpui-source-v1')
+          diagnostic(
+            'PUI4003',
+            `Numeric accessibility action payloads are not implemented by ${selected.id}.`,
+            value.span
+          );
         if (
           value.object.type === 'event' &&
           ['pointerType', 'pointerButtons'].includes(value.property) &&
@@ -839,6 +867,7 @@ export function checkTargetOperations(
           sites,
           authoredHooks: [...reachedHooks],
           functions: [...reachedFunctions],
+          numericAccessibilityEvents: [...numericAccessibilityEvents],
         },
       };
 }

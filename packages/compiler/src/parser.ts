@@ -1,4 +1,5 @@
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
+import { declaredSetValueEvent } from './a11y-event-types';
 import ts from 'typescript';
 import { createHash } from 'node:crypto';
 import { CompilerRejection } from './diagnostics';
@@ -142,6 +143,7 @@ const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
   run: 'RunHandle',
   render: 'RendererHandle',
   event: 'ProtoEventPayload',
+  'a11y-value-event': 'A11ySetValueEventPayload',
   'control-label-request': 'ControlLabelRequest',
 };
 
@@ -187,6 +189,7 @@ class Frontend {
   readonly activeHelpers = new Set<string>();
   readonly eventKinds = new Map<string, 'void' | 'json' | 'any'>();
   readonly eventPayloads = new Map<string, DataType[]>();
+  readonly numericActionEvents = new Set<string>();
   private context: FunctionContext = 'setup';
   private ruleSequence = 0;
   private moduleSequence = 0;
@@ -3077,7 +3080,12 @@ class Frontend {
         bindings.contextValueType = this.contextType(args[0]);
         if (operation === 'event.on' || operation === 'event.onGlobal') {
           const type = this.literalString(args[0], argument);
-          bindings.inputPayloadType = type.startsWith('host:') ? 'host-event' : 'event';
+          bindings.inputPayloadType =
+            operation === 'event.on' && this.numericActionEvents.has(type)
+              ? 'a11y-value-event'
+              : type.startsWith('host:')
+                ? 'host-event'
+                : 'event';
         }
         if (operation === 'expose.emit') {
           const names = finiteStringKeys(args[0]);
@@ -3147,6 +3155,10 @@ class Frontend {
     receiver?: ExpressionIR
   ): void {
     const span = sourceSpan(node);
+    if (operation === 'accessible.action') {
+      const event = declaredSetValueEvent(args);
+      if (event) this.numericActionEvents.add(event);
+    }
     if (operation === 'hook.asTableStructure') {
       const family = tableStructureFamily(span);
       if (!this.staticDeclarations.has(family.id)) this.staticDeclarations.set(family.id, family);
