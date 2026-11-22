@@ -22,6 +22,16 @@ it('selects native Rhea Button and Select recipes without redefining a library d
     minHeight: 'var(--site-control-height, 2.75rem)',
   });
   expect(headerButtonProps('brutalist')).toEqual({ variant: 'surface', size: 'icon' });
+  expect(headerButtonProps('bootstrap-2-3-2')).toEqual({
+    variant: 'default',
+    size: 'default',
+    colorContext: 'navbar',
+  });
+  expect(headerButtonProps('bootstrap-2-3-2', 'default')).toEqual({
+    variant: 'default',
+    size: 'default',
+    colorContext: 'default',
+  });
 });
 it('uses public ghost feedback for navigation, not text-link underline', () => {
   for (const facts of [

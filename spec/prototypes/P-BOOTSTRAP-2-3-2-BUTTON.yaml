@@ -13,7 +13,10 @@ criteria:
       en: The Prototype invokes asButton() once, preserves inherited interaction, focus, disabled and click ownership, and consumes only its exposed state handles for visual Rules.
   - id: P-BOOTSTRAP-2-3-2-BUTTON-API
     text:
-      en: variant is default | primary | warning | danger | success | info | inverse, default default; size is default | large | small | mini, default default; disabled is inherited and defaults false. wrap defaults false; false retains the upstream single-line nowrap recipe and true uses whitespace-normal with h-auto/min-h-8 so long labels grow instead of clipping. Removing a prop restores its default. Size Rules are mutually exclusive and retain the same Base interaction owner.
+      en: variant is default | primary | warning | danger | success | info | inverse, default default; size is default | large | small | mini, default default; disabled is inherited and defaults false. wrap defaults false; false retains the upstream single-line nowrap recipe and true uses whitespace-normal with h-auto/min-h-8 so long labels grow instead of clipping. The optional colorContext default | navbar defaults to default. Navbar substitutes the bounded blue-navigation palette described below without changing any Base semantic owner. Removing a prop restores its default. Size Rules are mutually exclusive and retain the same Base interaction owner.
+  - id: P-BOOTSTRAP-2-3-2-BUTTON-NAVBAR
+    text:
+      en: The opt-in navbar colorContext is a Proto UI adaptation for a blue navigation surface, not an original Bootstrap 2.3.2 color variant. It uses transparent border and resting fill, white ink with the existing dark text shadow, black at 10 percent hover or focus fill and black at 20 percent pressed fill with the inherited inset depth. Disabled clears transient feedback, restores transparent fill and preserves Base suppression. Focus-visible has a white 2px ring with zero offset and forced-colors outline. The chosen size and wrap remain intact; the consumer supplies outer target geometry. Removing navbar restores the requested ordinary variant, including its existing state and size. This context introduces no navigation, search, disclosure, selected state or extra event owner.
   - id: P-BOOTSTRAP-2-3-2-BUTTON-VISUAL
     text:
       en: Seven color variants use fixed v2.3.2 resting and state-endpoint paint, including text shadows and final modern-browser border colors. Hover/focus retain the gradient at 0px -15px with its endpoint background color; pressed/disabled flatten it. Four sizes retain upstream pixel units. A stronger focus-visible ring is preserved. The 100ms background-position motion, color-contrast acceptance, link/block recipes and complete target evidence remain open; static endpoint coverage is not full upstream parity. The legacy palette is retained in both host color schemes.
@@ -41,6 +44,7 @@ sources:
   - path: packages/prototypes/bootstrap-2-3-2/README.md
   - path: https://github.com/Proto-UI/Proto-UI/issues/792
   - path: https://github.com/twbs/bootstrap/blob/v2.3.2/docs/assets/css/bootstrap.css#L3198-L3559
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/navbar.less
 dependsOn:
   contracts:
     - C-CORE-SYNTAX-0003
@@ -69,6 +73,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added an explicit wrap prop for the real homepage consumer, preserving upstream nowrap by default and allowing bounded vertical growth on request.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added an opt-in blue-navbar presentation context for actual header commands, preserving ordinary variants, Base ownership and draft target boundaries.
 tags:
   - prototype
   - bootstrap-2-3-2

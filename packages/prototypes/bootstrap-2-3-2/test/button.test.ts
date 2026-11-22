@@ -184,4 +184,58 @@ describe('bootstrap-2-3-2 Button draft projection', () => {
     expect(tokens).toContain('text-[14px]');
     await invokeUnmounted();
   });
+  it.each(['default', 'primary', 'inverse'] as const)(
+    'restores %s paint after opting the same Base owner into the navbar',
+    async (variant) => {
+      const { controller, root, global, invokeUnmounted } = mount({ variant, size: 'small' });
+      try {
+        const ordinary = [...controller.getRuleStyleTokens()].sort();
+        const assertNavbarFill = (fill: string) => {
+          const tokens = controller.getRuleStyleTokens();
+          expect(tokens.filter((token) => token.startsWith('bg-'))).toEqual([fill]);
+          expect(tokens).toContain('border-transparent');
+          expect(tokens).toContain('text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)]');
+          expect(tokens).not.toContain('ring-ring');
+          expect(tokens).toContain('text-[11.9px]');
+        };
+        controller.applyRawProps({ variant, size: 'small', colorContext: 'navbar' });
+        assertNavbarFill('bg-transparent');
+        expect(controller.getRuleStyleTokens()).toContain('shadow-none');
+        root.dispatchEvent(new CustomEvent('pointer.enter'));
+        assertNavbarFill('bg-black/10');
+        root.dispatchEvent(new CustomEvent('pointer.down'));
+        assertNavbarFill('bg-black/20');
+        expect(controller.getRuleStyleTokens()).toContain(
+          'shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]'
+        );
+        controller.applyRawProps({
+          variant,
+          size: 'small',
+          colorContext: 'navbar',
+          disabled: true,
+        });
+        assertNavbarFill('bg-transparent');
+        expect(controller.getRuleStyleTokens()).toContain('shadow-none');
+        expect(controller.getRuleStyleTokens()).toContain('pointer-events-none');
+        controller.applyRawProps({ variant, size: 'small', colorContext: 'navbar' });
+        root.dispatchEvent(new CustomEvent('pointer.up'));
+        root.dispatchEvent(new CustomEvent('pointer.leave'));
+        global.dispatchEvent(new CustomEvent('key.down'));
+        root.dispatchEvent(new CustomEvent('host:focus'));
+        assertNavbarFill('bg-black/10');
+        expect(controller.getRuleStyleTokens()).toContain('ring-primary-foreground');
+        expect(controller.getRuleStyleTokens()).toContain('ring-offset-0');
+        expect(controller.getRuleStyleTokens()).toContain('forced-colors-focus-outline');
+        root.dispatchEvent(new CustomEvent('host:blur'));
+        assertNavbarFill('bg-transparent');
+        expect(controller.getRuleStyleTokens()).not.toContain('ring-primary-foreground');
+        // Actual raw-prop removal, not an explicit default patch, restores the
+        // entire ordinary variant/size output without retaining navbar paint.
+        controller.applyRawProps({ variant, size: 'small' });
+        expect([...controller.getRuleStyleTokens()].sort()).toEqual(ordinary);
+      } finally {
+        await invokeUnmounted();
+      }
+    }
+  );
 });

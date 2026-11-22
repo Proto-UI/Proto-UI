@@ -9,6 +9,8 @@ const fixturePath = 'apps/www/src/pages/en/test/bootstrap-state-controls.astro';
 const browserPath = 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts';
 const fixture = readFileSync(fixturePath, 'utf8');
 const browser = readFileSync(browserPath, 'utf8');
+const navbarPath = 'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts';
+const navbar = readFileSync(navbarPath, 'utf8');
 const workflow = parse(
   readFileSync('.github/workflows/bootstrap-state-controls-evidence.yml', 'utf8')
 );
@@ -78,6 +80,7 @@ test('browser suite is Actions-only and exact-head guarded before starting any s
 test('browser test and fixture script have no TypeScript syntax diagnostics', () => {
   for (const [fileName, source] of [
     [browserPath, browser],
+    [navbarPath, navbar],
     [fixturePath + '.ts', fixture.match(/<script>([\s\S]*?)<\/script>/)?.[1]],
   ]) {
     const result = ts.transpileModule(source, {
@@ -92,6 +95,58 @@ test('browser test and fixture script have no TypeScript syntax diagnostics', ()
       []
     );
   }
+});
+
+test('navbar evidence is independently guarded, scheduled and terminal after another suite fails', () => {
+  const beforeStart = navbar.slice(0, navbar.indexOf("baseUrl = await startServer('/en/')"));
+  assert.match(beforeStart, /GITHUB_ACTIONS !== 'true'/);
+  assert.match(beforeStart, /sourceSha !== expectedSha/);
+  assert.match(beforeStart, /PROTO_UI_BROWSER_BASE_URL/);
+  assert.match(navbar, /describe\.skipIf\(!enabled\)/);
+  assert.match(navbar, /expectedCases\.every/);
+  assert.match(navbar, /\? 'pending' : 'blocked'/);
+  assert.match(navbar, /expect\(complete,/);
+  assert.equal(BROWSER_SUITES.filter((suite) => suite === navbarPath).length, 1);
+  const phase = createRuntimeTestPlan([])[0];
+  assert.equal(phase.args[phase.args.indexOf(navbarPath) - 1], '--exclude');
+  const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === 'navbar');
+  assert.equal(step.if, '${{ !cancelled() }}');
+  assert.equal(step.env.PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE, '1');
+  assert.ok(step.run.includes(navbarPath));
+  assert.ok(
+    workflow.jobs['browser-evidence'].steps.some(
+      (step) =>
+        step.if === 'always()' && step.with?.path === '${{ runner.temp }}/bootstrap-navbar-evidence'
+    )
+  );
+});
+
+test('historical navbar capture keeps candidate instrumentation outside the pinned measured tree', () => {
+  const script = readFileSync('scripts/analysis/bootstrap-navbar-baseline.mjs', 'utf8');
+  const beforeImports = script
+    .slice(0, script.indexOf('harness = await import('))
+    .replace(/\s+/g, ' ');
+  assert.match(beforeImports, /GITHUB_ACTIONS, 'true'/);
+  assert.match(beforeImports, /measuredSha, BASELINE_SHA/);
+  assert.match(beforeImports, /scriptSourceSha, process\.env\.PROTO_UI_EXPECTED_HEAD_SHA/);
+  assert.match(beforeImports, /measuredRoot, scriptRoot/);
+  assert.match(beforeImports, /status', '--porcelain'/);
+  assert.match(
+    script,
+    /path\.join\(measuredRoot, 'apps\/www\/src\/content\/docs\/zh-cn\/browser-harness\.ts'\)/
+  );
+  assert.match(script, /scriptSha256/);
+  assert.match(script, /status: 'captured'/);
+  assert.doesNotMatch(script, /toBeLessThanOrEqual\(42\)|height.*=== 40|height.*== 40/);
+  const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === 'baseline');
+  assert.equal(step.env.PROTO_UI_BASELINE_SHA, 'dc3b184ba10b0de53e40359c52d012b204b2cd01');
+  assert.match(step.run, /git worktree add --detach/);
+  assert.match(step.run, /cd "\$PROTO_UI_BASELINE_WORKTREE"/);
+  assert.match(
+    step.run,
+    /node --import tsx "\$GITHUB_WORKSPACE\/scripts\/analysis\/bootstrap-navbar-baseline\.mjs"/
+  );
+  assert.doesNotMatch(step.run, /\bcp\b|\bcopy\b|git (?:cherry-pick|apply)/);
 });
 
 test('registered browser suite stays out of the no-server phase', () => {
