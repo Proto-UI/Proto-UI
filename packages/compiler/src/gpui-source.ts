@@ -1245,8 +1245,7 @@ impl __PuiNativeRecordValue {
     // repaint never re-runs a factory or reconstructs a lexical environment.
     return `{ let callable=${value}; match callable {
       Value::NativeFunction{render,..} => Value::Renderer(render),
-      Value::Renderer(render) => Value::Renderer(render),
-      ${valueAlternatives(node.type).includes('void') ? 'Value::Undefined => Value::Undefined,' : ''}
+      Value::Renderer(render) => Value::Renderer(render),${valueAlternatives(node.type).includes('void') ? '\n      Value::Undefined => Value::Undefined,' : ''}
       Value::Function(callback) => Value::Renderer(Rc::new(move |arguments:Vec<Value>| { ${result} })),
       _ => panic!("checked setup result must be a callable")
     } }`;
@@ -2605,10 +2604,10 @@ impl __PuiNativeRecordValue {
       pub fn new_with_associations(raw_props: Json, parent: Option<OwnerWeak>, associations: NativeInstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> {
           catch_authored(|| {
           let owner_ref = Owner::new(raw_props, parent.unwrap_or_default(), accepts_context, accepts_props, prop_valid, style_vocabulary());
-          let owner = Rc::downgrade(&owner_ref);
-          ${
+          let owner = Rc::downgrade(&owner_ref);${
             admittedAnalysis.operations.includes('hook.asControlLabel')
-              ? `let notify_view=cx.entity().downgrade();let notify_cx=cx.to_async();
+              ? `
+          let notify_view=cx.entity().downgrade();let notify_cx=cx.to_async();
           configure_control_label_host(&owner_ref,Rc::new(move||{let view=notify_view.clone();notify_cx.spawn(async move|cx|{let _=view.update(cx,|_,cx|cx.notify());}).detach();}));`
               : ''
           }
