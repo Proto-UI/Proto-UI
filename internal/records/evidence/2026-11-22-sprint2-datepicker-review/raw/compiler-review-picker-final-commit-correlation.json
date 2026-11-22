@@ -1,0 +1,86 @@
+{
+  "schema": "proto-ui.review.datepicker-commit-correlation.v1",
+  "productSourceCommit": "322a87132c88bf7784765d2e2f597ee1d50072ee",
+  "reviewedIntegrationHead": "dbcdecb077283d4e3fe11fe1077b74708f24fa4b",
+  "productSourceFiles": 5,
+  "allProductSourcesExactMatch": true,
+  "executionSnapshotPreserved": true,
+  "nonProductDifferences": "Owner test now retains the stale request method before dispose; Popover test relation has since metadata; causal test implementation moves pending to passing after owner-run 144/144. Independent probes do not import the owner test file. No behavioral criteria changed after the eight probe runs.",
+  "files": [
+    {
+      "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "executedSha256": "777790fcbe6c154c45154127a99f9f7c92720586777c68229e8f6a59e0dc1573",
+      "reviewedCommitSha256": "777790fcbe6c154c45154127a99f9f7c92720586777c68229e8f6a59e0dc1573",
+      "sameBytes": true,
+      "isProductSource": true
+    },
+    {
+      "source": "packages/prototypes/base/src/calendar/types.ts",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/calendar/types.ts",
+      "executedSha256": "76c7ff83b149d9ea39d2afd9efb9bc57e36db4b06506d1ad97c2c168f27f966e",
+      "reviewedCommitSha256": "76c7ff83b149d9ea39d2afd9efb9bc57e36db4b06506d1ad97c2c168f27f966e",
+      "sameBytes": true,
+      "isProductSource": true
+    },
+    {
+      "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "executedSha256": "c5def0af61fa5a26835ca7f05017cff4786f95bbbecaa03c795b79c3ad677643",
+      "reviewedCommitSha256": "c5def0af61fa5a26835ca7f05017cff4786f95bbbecaa03c795b79c3ad677643",
+      "sameBytes": true,
+      "isProductSource": true
+    },
+    {
+      "source": "packages/prototypes/base/src/popover/root.proto.ts",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/popover/root.proto.ts",
+      "executedSha256": "fd0b6720ad60d6f37380049fda70822234e857e6386a2b9e9028a9113a8d02ce",
+      "reviewedCommitSha256": "fd0b6720ad60d6f37380049fda70822234e857e6386a2b9e9028a9113a8d02ce",
+      "sameBytes": true,
+      "isProductSource": true
+    },
+    {
+      "source": "packages/prototypes/base/src/popover/shared.ts",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/popover/shared.ts",
+      "executedSha256": "63b947ed937524a489737def841dfa6d5a5d923e72cd9a540963318235eec73e",
+      "reviewedCommitSha256": "63b947ed937524a489737def841dfa6d5a5d923e72cd9a540963318235eec73e",
+      "sameBytes": true,
+      "isProductSource": true
+    },
+    {
+      "source": "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "executedSha256": "7c4126828be33202a38678e987488e09684dc12e5e4d8c8f5a91d68569c93827",
+      "reviewedCommitSha256": "4230e4eb21e52bf57208080bf41068b8fbe37c7f248510147d00f71d805ba8bc",
+      "sameBytes": false,
+      "isProductSource": false,
+      "reviewedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-commit/packages/prototypes/base/test/selection-reset-lifecycle.test.ts"
+    },
+    {
+      "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+      "executedSha256": "03b35ed6ab64c647be73d9fd58ac0a9179d7a2714d4c3afad2be51c48b675d02",
+      "reviewedCommitSha256": "03b35ed6ab64c647be73d9fd58ac0a9179d7a2714d4c3afad2be51c48b675d02",
+      "sameBytes": true,
+      "isProductSource": false
+    },
+    {
+      "source": "spec/prototypes/P-BASE-POPOVER.yaml",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/spec/prototypes/P-BASE-POPOVER.yaml",
+      "executedSha256": "e6b403f9b74875a29a3a76cd15a98d7609d26eda3f4d0949e286a1e60efe7bae",
+      "reviewedCommitSha256": "d683b693ca095fd786df33cf5575f4cd6eb112a816b4d52ccdaf97486313f36a",
+      "sameBytes": false,
+      "isProductSource": false,
+      "reviewedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-commit/spec/prototypes/P-BASE-POPOVER.yaml"
+    },
+    {
+      "source": "spec/tests/T-CALENDAR-SELECTION-0001.yaml",
+      "executedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/spec/tests/T-CALENDAR-SELECTION-0001.yaml",
+      "executedSha256": "a93ffb371a05a5ae4c2a4afaff67a227c3daecac2a5551168869b5c553fd8265",
+      "reviewedCommitSha256": "3c1bd5b022b0e33c2037da4031202252e403dfb383839e14fa59e0c3ffca1dbd",
+      "sameBytes": false,
+      "isProductSource": false,
+      "reviewedSnapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-commit/spec/tests/T-CALENDAR-SELECTION-0001.yaml"
+    }
+  ]
+}
