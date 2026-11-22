@@ -520,20 +520,47 @@ describe('Website projection composition', () => {
           return entry;
         });
 
-        composition.setThemeSurfaceStyle({
-          '--pui-background': '#090909',
-          '--pui-foreground': '#eeeeee',
-        });
+        // Exercise the mounted renderer channel as well as the definition.
+        // A frozen author entry can stay unchanged while setSurfaceStyle still
+        // overwrites its real surface during a theme refresh.
+        const { host, refs } = mountDemoTree(composition.demo);
+        const setSurfaceStyle = vi.fn();
+        const cleanup = composition.demo.setup!({
+          host,
+          refs,
+          api: {
+            call: () => undefined,
+            getExposes: () => undefined,
+            setProps: () => undefined,
+            setSurfaceStyle,
+          },
+        }) as () => void;
 
-        expect(inner.surfaceStyle).toEqual(authored);
-        expect(JSON.stringify(inner.surfaceStyle)).not.toContain('--pui-background');
-        for (const entry of owned) {
-          expect(entry['--pui-background']).toBe('#090909');
-          expect(entry['--pui-foreground']).toBe('#eeeeee');
+        try {
+          composition.setThemeSurfaceStyle({
+            '--pui-background': '#090909',
+            '--pui-foreground': '#eeeeee',
+          });
+
+          expect(setSurfaceStyle.mock.calls.some(([ref]) => ref === 'inner')).toBe(false);
+          expect(setSurfaceStyle).toHaveBeenCalledWith(
+            'outer',
+            shape === 'object'
+              ? expect.objectContaining({ '--pui-foreground': '#eeeeee' })
+              : expect.arrayContaining([expect.objectContaining({ '--pui-foreground': '#eeeeee' })])
+          );
+          expect(inner.surfaceStyle).toEqual(authored);
+          expect(JSON.stringify(inner.surfaceStyle)).not.toContain('--pui-background');
+          for (const entry of owned) {
+            expect(entry['--pui-background']).toBe('#090909');
+            expect(entry['--pui-foreground']).toBe('#eeeeee');
+          }
+          if (Array.isArray(outer.surfaceStyle)) expect(outer.surfaceStyle[0]).toBe('color: navy;');
+          else expect(outer.surfaceStyle).toMatchObject({ color: 'navy' });
+          expect(childDemo.root).toEqual(original);
+        } finally {
+          cleanup();
         }
-        if (Array.isArray(outer.surfaceStyle)) expect(outer.surfaceStyle[0]).toBe('color: navy;');
-        else expect(outer.surfaceStyle).toMatchObject({ color: 'navy' });
-        expect(childDemo.root).toEqual(original);
       }
     );
 

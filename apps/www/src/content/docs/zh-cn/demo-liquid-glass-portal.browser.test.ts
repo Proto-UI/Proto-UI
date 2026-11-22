@@ -589,6 +589,7 @@ describe.sequential(
                 mediaEdgeAssumption:
                   '1279/1280/1281px probes Chromium default initial font 16px; actual matchMedia is retained independently of root font',
                 baseline: [],
+                settling: [],
                 handover: [],
               };
               try {
@@ -605,6 +606,30 @@ describe.sequential(
                   throw new Error('Actual docs-canvas CSS rule missing');
                 html.style.setProperty('font-size', `${control.font}px`, 'important');
                 html.style.setProperty('zoom', String(control.zoom), 'important');
+                // Root font/viewport changes publish measured sticky-header
+                // geometry asynchronously. Retain that settling history before
+                // taking the unchanged three-frame baseline; do not mistake an
+                // in-flight header publication for containment oscillation.
+                let stableFrames = 0;
+                let previous: ReturnType<typeof sample> | undefined;
+                for (let index = 0; index < 12 && stableFrames < 3; index++) {
+                  await frame();
+                  const current = sample();
+                  result.settling.push(current);
+                  const stable =
+                    previous &&
+                    current.predicate === previous.predicate &&
+                    Math.abs(current.contentWidth - previous.contentWidth) <= 1 &&
+                    (['shell', 'columns', 'toc', 'main'] as const).every((box) =>
+                      ['left', 'top', 'width', 'height'].every(
+                        (key) => Math.abs(current[box][key] - previous![box][key]) <= 1
+                      )
+                    );
+                  stableFrames = stable ? stableFrames + 1 : 0;
+                  previous = current;
+                }
+                if (stableFrames < 3)
+                  throw new Error('Documentation layout did not settle within 12 frames');
                 for (let index = 0; index < 3; index++) {
                   await frame();
                   result.baseline.push(sample());

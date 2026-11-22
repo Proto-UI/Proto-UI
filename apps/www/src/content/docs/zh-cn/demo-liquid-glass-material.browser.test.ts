@@ -6,6 +6,7 @@ import path from 'node:path';
 import type { Browser, BrowserContext, CDPSession, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { observeOwnedMaterialPaint } from './material-paint-observation';
+import { decodeTrackEventCategories, missingTraceCategories } from './trace-category-admission';
 import {
   launchBrowser,
   startServer,
@@ -92,6 +93,8 @@ async function quality(value: string) {
         return {
           observedAtMs: performance.now(),
           theme: document.documentElement.dataset.theme,
+          devicePixelRatio: window.devicePixelRatio,
+          resolutionMatches: window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).matches,
           ready: document.documentElement.dataset.materialReady,
           fixtureError: document.documentElement.dataset.materialError,
           totalRegularNodes: document.querySelectorAll('[data-demo-ref="regular"]').length,
@@ -1906,6 +1909,43 @@ if (includeLiquidWip) describe.sequential('bounded release lifecycle', () => {
       await runCase('full-footprint-negative-guards', async (entry) => {
         const { target } = await prepare('wc');
         entry.before = await checkpoint('expanded-idle');
+        // The negative must be the only overlapping paint. A neighbour that
+        // acquires an expanded carrier after revocation must not make recovery
+        // impossible. Measure both possible envelopes before inserting it.
+        entry.neighbourFootprints = await target.evaluate((host) => {
+          const rect = (element: Element) => {
+            const bounds = element.getBoundingClientRect();
+            const outset = Math.ceil(Math.max(bounds.width, bounds.height) * 0.08 + 1);
+            return {
+              left: bounds.left - outset,
+              right: bounds.right + outset,
+              top: bounds.top - outset,
+              bottom: bounds.bottom + outset,
+              width: bounds.width,
+              height: bounds.height,
+              outset,
+            };
+          };
+          const own = rect(host);
+          return Array.from(
+            host.closest('.material-controls')!.querySelectorAll('[data-material-quality]')
+          )
+            .filter((node) => node !== host)
+            .map((node) => {
+              const neighbour = rect(node);
+              return {
+                own,
+                neighbour,
+                overlaps:
+                  own.left < neighbour.right &&
+                  own.right > neighbour.left &&
+                  own.top < neighbour.bottom &&
+                  own.bottom > neighbour.top,
+              };
+            });
+        });
+        expect(entry.neighbourFootprints.length).toBeGreaterThan(0);
+        expect(entry.neighbourFootprints.every((item: any) => !item.overlaps)).toBe(true);
         await target.evaluate((host) => {
           const root = host.closest('[data-material-scene]')!;
           const r = host.getBoundingClientRect(),
@@ -2241,17 +2281,40 @@ async function sampleWindow(
       traceSession.on('Tracing.tracingComplete', onComplete);
       const categories = ['devtools.timeline', 'blink.user_timing', 'v8', 'cc', 'gpu'];
       const available = await traceSession.send('Tracing.getCategories');
+      let advertised = available.categories;
+      let descriptor: unknown = null,
+        descriptorError: string | undefined;
+      if (missingTraceCategories(categories, advertised).length) {
+        // Chromium exposes the Perfetto descriptor separately from the legacy
+        // category enumeration. Ask the browser for actual supported names;
+        // empty discovery must never be replaced with the requested names.
+        try {
+          const sendDescriptor = traceSession.send.bind(traceSession) as (
+            method: 'Tracing.getTrackEventDescriptor'
+          ) => Promise<{ descriptor: string }>;
+          const response = await sendDescriptor('Tracing.getTrackEventDescriptor');
+          descriptor = response;
+          advertised = [
+            ...new Set([...advertised, ...decodeTrackEventCategories(response.descriptor)]),
+          ];
+        } catch (error) {
+          descriptorError = String(error);
+        }
+      }
       result.traceAdmission = {
         browser: browser.version(),
         requested: categories,
         response: available,
+        descriptor,
+        descriptorError,
+        advertised,
       };
       await mkdir(evidence, { recursive: true });
       await writeFile(
         path.join(evidence, `performance-${name}-trace-admission.json`),
         JSON.stringify(result.traceAdmission, null, 2)
       );
-      const missing = categories.filter((category) => !available.categories.includes(category));
+      const missing = missingTraceCategories(categories, advertised);
       if (missing.length)
         throw new Error(`Requested trace categories unavailable: ${missing.join(',')}`);
       await traceSession.send('Tracing.start', {

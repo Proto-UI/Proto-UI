@@ -229,6 +229,47 @@ describe('bounded visible Previewer source layout', () => {
     s.redraw();
     expect(s.lease.current()).toBeNull();
   });
+  it('refreshes a paused source from physical-pixel resize without a CSS resize or media callback', () => {
+    const registrations: Array<{
+      callback: ResizeObserverCallback;
+      target: Element;
+      options?: ResizeObserverOptions;
+    }> = [];
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(private callback: ResizeObserverCallback) {}
+        observe(target: Element, options?: ResizeObserverOptions) {
+          registrations.push({ callback: this.callback, target, options });
+        }
+        unobserve() {}
+        disconnect = disconnect;
+      }
+    );
+    const s = scene();
+    const canvas = s.scope.querySelector('canvas')!;
+    const original = s.lease.current()!;
+    expect(original.width).toBe(420);
+    const pixelObserver = registrations.find(
+      (entry) => entry.target === canvas && entry.options?.box === 'device-pixel-content-box'
+    );
+    expect(pixelObserver).toBeDefined();
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+    // Only the physical pixel box changes; CSS geometry stays 420 x 104.
+    pixelObserver!.callback([], {} as ResizeObserver);
+    for (const [id, callback] of [...frames]) {
+      frames.delete(id);
+      callback(0);
+    }
+    expect(s.lease.current()).toMatchObject({ width: 840, height: 208 });
+    expect(s.lease.current()!.revision).toBeGreaterThan(original.revision);
+    s.dispose();
+    pixelObserver!.callback([], {} as ResizeObserver);
+    expect(frames.size).toBe(0);
+    expect(disconnect).toHaveBeenCalledOnce();
+    expect(s.lease.current()).toBeNull();
+  });
   it('rejects fractional edge overflow and non-finite DPR without fabricating a smaller source', () => {
     const s = scene();
     width = 2048;

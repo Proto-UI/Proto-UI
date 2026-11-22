@@ -378,6 +378,17 @@ function createScene(
     releases.push(() => resize?.disconnect());
     resize?.observe(scope);
     resize?.observe(mount);
+    // A DPR change can preserve both CSS boxes. Observe the visible source's
+    // physical pixels too, so a quiet/paused scene can replace its stale lease
+    // even when the resolution media event is delayed. Keep the existing media
+    // subscription for engines without this ResizeObserver box option.
+    if (resize) {
+      try {
+        resize.observe(canvas, { box: 'device-pixel-content-box' });
+      } catch {
+        resize.observe(canvas);
+      }
+    }
     // Subscribe to newly projected sizes and retire removed targets. Attribute
     // changes also cover placement updates, including an unchanged popup size.
     const overlayChanges = new win.MutationObserver(() => {

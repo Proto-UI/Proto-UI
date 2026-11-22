@@ -367,16 +367,14 @@ function pushNestedOwnedThemeSurfaces(
   if (typeof node === 'string' || node.kind === 'text') return;
   if (node.kind === 'proto' && inheritTheme && node.ref && api.setSurfaceStyle) {
     const style = node.surfaceStyle;
-    const themeEntry = Array.isArray(style) ? style.at(-1) : style;
+    const themeEntry = rendererThemeEntries.get(node);
     if (
       themeEntry &&
-      typeof themeEntry === 'object' &&
-      Object.keys(theme).some((property) =>
-        Object.prototype.hasOwnProperty.call(themeEntry, property)
-      )
+      (style === themeEntry || (Array.isArray(style) && style.includes(themeEntry)))
     ) {
-      // Committed snapshots freeze author styles: rebuild the trailing theme
-      // block with the new values instead of mutating the stored entry.
+      // Only construction grants this lease. An authored --pui-* value is not
+      // an owned theme block, including inside frozen dynamic child snapshots.
+      // Rebuild the owned trailing block for the normalized renderer channel.
       const pushed = Array.isArray(style)
         ? [...style.slice(0, -1), { ...themeEntry, ...theme }]
         : { ...themeEntry, ...theme };
