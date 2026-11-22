@@ -7,6 +7,7 @@ import type { Browser, CDPSession, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser } from './browser-harness';
 import { collectMatrixInteractiveFacts } from './demo-matrix-observation';
+import { collectMatrixAccessibilityFacts } from './demo-matrix-accessibility';
 
 // Bounded HTML-AAM controls, not an audit of all Demo Matrix content or ATs.
 // https://www.w3.org/TR/html-aam-1.0/#el-select
@@ -49,7 +50,7 @@ async function record(page: Page, id: string, samples: unknown[], error?: unknow
   if (!evidence) return;
   const directory = path.join(evidence, 'demo-matrix-accessibility');
   await mkdir(directory, { recursive: true });
-  const sourcePath = 'apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts';
+  const sourcePath = 'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.ts';
   await writeFile(
     path.join(directory, `${id}.json`),
     JSON.stringify(
@@ -75,55 +76,100 @@ async function record(page: Page, id: string, samples: unknown[], error?: unknow
 
 describe('Demo Matrix observer against native Chromium accessibility facts', () => {
   it.each([
-    { id: 'size-1', attributes: 'size="1"', role: 'combobox' },
-    { id: 'size-4', attributes: 'size="4"', role: 'listbox' },
-    { id: 'multiple-size-1', attributes: 'multiple size="1"', role: 'listbox' },
-    { id: 'multiple-size-4', attributes: 'multiple size="4"', role: 'listbox' },
-  ])('observes native and explicit $id as $role', async ({ id, attributes, role }) => {
-    const page = await browser.newPage();
-    const cdp = await page.context().newCDPSession(page);
-    const samples: unknown[] = [];
-    let failure: unknown;
-    try {
-      await page.setContent(
-        matrix(
-          `<label for="native">Destination</label><select id="native" ${attributes}><option>First</option><option>Second</option></select>`,
-          `<div id="explicit" role="${role}" aria-label="Destination" tabindex="0">First</div>`
-        )
-      );
-      const observer = (await page.evaluate(collectMatrixInteractiveFacts, ['combobox', 'listbox']))
-        .control;
-      const native = await axFact(cdp, '#native');
-      const explicit = await axFact(cdp, '#explicit');
-      samples.push({ step: 'positive', observer, native, explicit });
-      expect(observer).toEqual([[{ role, name: 'Destination' }], [{ role, name: 'Destination' }]]);
-      for (const actual of [native, explicit])
-        expect({ role: actual.role, name: actual.name }).toEqual(observer[0]![0]);
-      // A wrong explicit role must remain a parity failure in both observations.
-      await page
-        .locator('#explicit')
-        .evaluate(
-          (element, wrongRole) => element.setAttribute('role', wrongRole),
-          role === 'combobox' ? 'listbox' : 'combobox'
-        );
-      const negative = (await page.evaluate(collectMatrixInteractiveFacts, ['combobox', 'listbox']))
-        .control;
-      const changed = await axFact(cdp, '#explicit');
-      samples.push({ step: 'wrong-role-negative', observer: negative, explicit: changed });
-      expect(negative[1]![0]!.role).toBe(changed.role);
-      expect(() => expect(negative[0]).toEqual(negative[1])).toThrow();
-    } catch (error) {
-      failure = error;
-      throw error;
-    } finally {
+    { id: 'size-1', attributes: 'size="1"', domRole: 'combobox', nativeRole: 'combobox' },
+    { id: 'size-4', attributes: 'size="4"', domRole: 'listbox', nativeRole: 'listbox' },
+    {
+      id: 'multiple-size-1',
+      attributes: 'multiple size="1"',
+      domRole: 'listbox',
+      nativeRole: 'combobox',
+    },
+    {
+      id: 'multiple-size-4',
+      attributes: 'multiple size="4"',
+      domRole: 'listbox',
+      nativeRole: 'listbox',
+    },
+  ])(
+    'observes $id using Chromium facts and retains HTML-AAM comparison',
+    async ({ id, attributes, domRole, nativeRole }) => {
+      const page = await browser.newPage();
+      const cdp = await page.context().newCDPSession(page);
+      const samples: unknown[] = [];
+      let failure: unknown;
+      const roles = ['combobox', 'listbox'];
       try {
-        await record(page, id, samples, failure);
+        await page.setContent(
+          matrix(
+            `<label for="native">Destination</label><select id="native" ${attributes}><option>First</option><option>Second</option></select>`,
+            `<div id="explicit" role="${domRole}" aria-label="Destination" tabindex="0">First</div>`
+          )
+        );
+        const approximation = (await page.evaluate(collectMatrixInteractiveFacts, roles)).control;
+        const observer = await collectMatrixAccessibilityFacts(page, roles);
+        const native = await axFact(cdp, '#native');
+        const explicit = await axFact(cdp, '#explicit');
+        samples.push({ step: 'native-and-html-aam', approximation, observer, native, explicit });
+        expect(approximation).toEqual([
+          [{ role: domRole, name: 'Destination' }],
+          [{ role: domRole, name: 'Destination' }],
+        ]);
+        // Chromium's own select-listbox-modes fixture maps multiple size=1 to
+        // comboBoxSelect. Keep that platform fact separate from HTML-AAM's
+        // multiple=>listbox expectation, without a UA sniff in the collector.
+        // https://chromium.googlesource.com/chromium/src/+/1397c45b3e2ebf77a4f6480da0fae2c88349c28b/content/test/data/accessibility/html/select-listbox-modes-expected-blink.txt
+        expect(native.role).toBe(nativeRole);
+        for (const [index, actual] of [native, explicit].entries())
+          expect(observer.facts.control![index]![0]).toEqual({
+            role: actual.role,
+            name: actual.name,
+          });
+        if (id === 'multiple-size-1') {
+          // This is the original false green: DOM inference calls both listbox,
+          // while real native and explicit roles differ. The AX observer rejects it.
+          expect(approximation[0]).toEqual(approximation[1]);
+          expect(() =>
+            expect(observer.facts.control![0]).toEqual(observer.facts.control![1])
+          ).toThrow();
+          expect(() =>
+            expect({ role: native.role, name: native.name }).toEqual(approximation[0]![0])
+          ).toThrow();
+          await page
+            .locator('#explicit')
+            .evaluate((element, role) => element.setAttribute('role', role), nativeRole);
+        }
+        const equivalent = await collectMatrixAccessibilityFacts(page, roles);
+        samples.push({ step: 'actual-role-equivalence', observer: equivalent });
+        expect(equivalent.facts.control).toEqual([
+          [{ role: nativeRole, name: 'Destination' }],
+          [{ role: nativeRole, name: 'Destination' }],
+        ]);
+        await page
+          .locator('#explicit')
+          .evaluate(
+            (element, wrongRole) => element.setAttribute('role', wrongRole),
+            nativeRole === 'combobox' ? 'listbox' : 'combobox'
+          );
+        const negative = await collectMatrixAccessibilityFacts(page, roles);
+        const changed = await axFact(cdp, '#explicit');
+        samples.push({ step: 'wrong-role-negative', observer: negative, explicit: changed });
+        expect(negative.facts.control![1]![0]!.role).toBe(changed.role);
+        expect(() =>
+          expect(negative.facts.control![0]).toEqual(negative.facts.control![1])
+        ).toThrow();
+      } catch (error) {
+        failure = error;
+        throw error;
       } finally {
-        await cdp.detach();
-        await page.close();
+        try {
+          await record(page, id, samples, failure);
+        } finally {
+          await cdp.detach();
+          await page.close();
+        }
       }
     }
-  });
+  );
 
   it('preserves ordered explicit and wrapping labels and catches the lost-second-label negative', async () => {
     const page = await browser.newPage();
@@ -138,16 +184,18 @@ describe('Demo Matrix observer against native Chromium accessibility facts', () 
         )
       );
       const read = async () => ({
-        observer: (await page.evaluate(collectMatrixInteractiveFacts, ['textbox'])).control,
+        approximation: (await page.evaluate(collectMatrixInteractiveFacts, ['textbox'])).control,
+        observer: await collectMatrixAccessibilityFacts(page, ['textbox']),
         native: await axFact(cdp, '#native'),
         explicit: await axFact(cdp, '#explicit'),
       });
       const before = await read();
       samples.push({ step: 'three-ordered-labels', ...before });
-      expect(before.observer).toEqual([
+      expect(before.observer.facts.control).toEqual([
         [{ role: 'textbox', name: 'First Second Third' }],
         [{ role: 'textbox', name: 'First Second Third' }],
       ]);
+      expect(before.approximation).toEqual(before.observer.facts.control);
       expect(before.native.name).toBe('First Second Third');
       expect(before.explicit.name).toBe(before.native.name);
       await page
@@ -157,9 +205,11 @@ describe('Demo Matrix observer against native Chromium accessibility facts', () 
       samples.push({ step: 'second-label-removed', ...after });
       expect(after.native.name).toBe('First Third');
       expect(after.explicit.name).toBe('First Second Third');
-      expect(after.observer[0]![0]!.name).toBe(after.native.name);
-      expect(after.observer[1]![0]!.name).toBe(after.explicit.name);
-      expect(() => expect(after.observer[0]).toEqual(after.observer[1])).toThrow();
+      expect(after.observer.facts.control![0]![0]!.name).toBe(after.native.name);
+      expect(after.observer.facts.control![1]![0]!.name).toBe(after.explicit.name);
+      expect(() =>
+        expect(after.observer.facts.control![0]).toEqual(after.observer.facts.control![1])
+      ).toThrow();
     } catch (error) {
       failure = error;
       throw error;

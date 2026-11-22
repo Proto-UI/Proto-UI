@@ -9,11 +9,11 @@ import { RUNTIMES, launchBrowser, startServer, stopServer } from './browser-harn
 import {
   matrixHostsReady,
   collectMatrixReadinessDiagnostics,
-  collectMatrixInteractiveFacts,
   type InteractiveFact,
 } from './demo-matrix-observation';
 
 import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
+import { collectMatrixAccessibilityFacts } from './demo-matrix-accessibility';
 
 const MATRIX_ROUTE = '/zh-cn/internal/demo-matrix/';
 
@@ -346,7 +346,18 @@ async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
  * matrix surface until the corresponding trigger opens them.
  */
 async function readInteractiveFacts(page: Page): Promise<Record<string, InteractiveFact[][]>> {
-  return page.evaluate(collectMatrixInteractiveFacts, INTERACTIVE_ROLES);
+  const observed = await collectMatrixAccessibilityFacts(page, INTERACTIVE_ROLES);
+  const evidenceRoot =
+    process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
+  if (evidenceRoot) {
+    const directory = join(evidenceRoot, 'demo-matrix');
+    await mkdir(directory, { recursive: true });
+    await writeFile(
+      join(directory, 'interactive-accessibility.json'),
+      JSON.stringify({ sourceSha: diagnosticSourceSha, ...observed }, null, 2)
+    );
+  }
+  return observed.facts;
 }
 
 async function chooseGlobalAdapter(page: Page, runtime: string): Promise<void> {

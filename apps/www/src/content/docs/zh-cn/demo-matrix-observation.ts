@@ -1,6 +1,6 @@
 // Browser-evaluated observations: keep these functions self-contained so
 // Playwright can serialize them without importing page-side dependencies.
-export type InteractiveFact = { role: string; name: string };
+export type InteractiveFact = { role: string; name: string; selector?: string };
 
 export function matrixHostsReady(): boolean {
   const hosts = [...document.querySelectorAll<HTMLElement>('[data-previewer-id] .host')];
@@ -24,13 +24,18 @@ export function matrixHostsReady(): boolean {
   );
 }
 
+/** DOM-only HTML-AAM/name approximation. Browser parity must use the AX
+ * collector, because browser-native mappings can differ (for example Chromium
+ * renders multiple size=1 as a popup combobox). Selectors retain the exact same
+ * candidate membership and order for that independent browser observation. */
 export function collectMatrixInteractiveFacts(
-  interactiveRoles: readonly string[]
+  input: readonly string[] | { roles: readonly string[]; selectors: true }
 ): Record<string, InteractiveFact[][]> {
-  const roles = new Set<string>(interactiveRoles);
-  // Map native elements to their implicit ARIA roles so that cross-adapter
-  // comparisons use the same role vocabulary. An <input type="text"> has the
-  // implicit role "textbox", not "input".
+  const options = Array.isArray(input)
+    ? { roles: input, selectors: false }
+    : (input as { roles: readonly string[]; selectors: true });
+  const roles = new Set<string>(options.roles);
+  // The normative DOM vocabulary is useful for diagnosis, but is not an AX fact.
   const implicitRole = (element: HTMLElement): string => {
     const tag = element.tagName.toLowerCase();
     if (tag === 'input') {
@@ -88,6 +93,14 @@ export function collectMatrixInteractiveFacts(
     );
   };
 
+  const selector = (element: Element): string => {
+    const parts: string[] = [];
+    for (let node = element; node.parentElement; node = node.parentElement) {
+      parts.unshift(`:nth-child(${Array.from(node.parentElement.children).indexOf(node) + 1})`);
+    }
+    return `:root${parts.length ? ' > ' + parts.join(' > ') : ''}`;
+  };
+
   const result: Record<string, InteractiveFact[][]> = {};
   document.querySelectorAll<HTMLElement>('.demo-matrix__item').forEach((item) => {
     const grids = Array.from(item.children).filter((child) =>
@@ -109,6 +122,7 @@ export function collectMatrixInteractiveFacts(
           .map((element) => ({
             role: element.getAttribute('role') || implicitRole(element),
             name: accessibleName(element),
+            ...(options.selectors ? { selector: selector(element) } : {}),
           }))
       );
   });
