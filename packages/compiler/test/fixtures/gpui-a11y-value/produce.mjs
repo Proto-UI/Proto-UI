@@ -47,7 +47,7 @@ const provenance = JSON.parse(await readFile(path.join(component, 'provenance.js
 const name = /^\s*name\s*=\s*"([^"]+)"/m.exec(manifest)?.[1];
 if (!name) throw new Error('Missing emitted package name.');
 const controls = [];
-for (const stem of ['activation', 'host-activation', 'text', 'press-modifiers']) {
+for (const stem of ['activation', 'host-activation', 'text', 'press-modifiers', 'tab-focus', 'tab-scope']) {
   const result = await compileFile(path.join(fixture, stem + '.proto.ts'), {
     root: fixture,
     profile: 'gpui-source-v1',
@@ -88,6 +88,7 @@ serde_json = "1.0"
 );
 await mkdir(path.join(output, 'tests'));
 await copyFile(path.join(fixture, 'consumer.rs'), path.join(output, 'tests', 'a11y_value.rs'));
+await copyFile(path.join(fixture, 'sequential_focus.rs'), path.join(output, 'tests', 'sequential_focus.rs'));
 const lockfile = values.lockfile ?? path.resolve(fixture, '../gpui-ordinary-values/Cargo.lock');
 await copyFile(lockfile, path.join(output, 'Cargo.lock'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -105,6 +106,7 @@ const receipt = {
     }))
   ),
   consumerSha256: sha256(await readFile(path.join(fixture, 'consumer.rs'))),
+  sequentialFocusConsumerSha256: sha256(await readFile(path.join(fixture, 'sequential_focus.rs'))),
   generatedPackageName: name,
   nativeSdk: provenance.nativeSdk,
   seedLockSha256: sha256(await readFile(lockfile)),
