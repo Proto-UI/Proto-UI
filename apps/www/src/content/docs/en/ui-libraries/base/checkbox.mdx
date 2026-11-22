@@ -8,7 +8,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-The Checkbox base prototype provides checked, unchecked, disabled, and indeterminate interactions on top of Toggle semantics.
+The Checkbox base prototype owns checked, unchecked, disabled, read-only and indeterminate interactions through one canonical choice owner.
 
 <div>
   <PrototypePreviewer
@@ -23,7 +23,7 @@ The Checkbox base prototype provides checked, unchecked, disabled, and indetermi
 
 Checkbox is split into root and indicator parts connected through the anatomy system.
 
-- **Root** (`base-checkbox-root`) manages Toggle state (`checked`, `checkedChange`), disabled behavior, and the additional `indeterminate` state.
+- **Root** (`base-checkbox-root`) owns canonical `checked`, emits `checkedChange`, and manages disabled/read-only policy and the independent `indeterminate` state.
 - **Indicator** (`base-checkbox-indicator`) reads the root `checked` and `indeterminate` states through anatomy runtime access and reflects them for rendering. It does not own checkbox state.
 
 The `base-checkbox` anatomy family uses a `contains` relation from root to indicator. A checkbox is expected to have at least one indicator, and may have more than one indicator when multiple visual surfaces need the same indicator semantics.
@@ -34,14 +34,15 @@ In the Web Components preview runtime, prototype IDs are registered with a `wc-`
 
 `indeterminate` may be uncontrolled via `defaultIndeterminate` or controlled via `indeterminate`.
 
-When an enabled indeterminate checkbox is pressed:
+When an editable indeterminate checkbox activates, Root first clears or requests clearing `indeterminate` and emits `indeterminateChange`. Uncontrolled mixed state clears directly; a controlled owner accepts by passing `indeterminate={false}` back.
 
-1. `checked` toggles on `press.commit` when uncontrolled, or is updated by the owner when controlled via `checkedChange` (`{ checked, indeterminate }`).
-2. The root requests `indeterminate: false` by emitting `indeterminateChange`.
-3. If `indeterminate` is uncontrolled, the root also clears its internal indeterminate state.
-4. If `indeterminate` is controlled, the external owner must handle `indeterminateChange` and pass `indeterminate={false}` back in.
+Root then requests the opposite of the canonical `checked` value at activation start and emits `checkedChange`. If the mixed-clear callback already commits a newer checked value, the older checked stage retires instead of reversing that new owner decision. Confirming only mixed=false while checked stays unchanged retains the original checked request. Disabled or readOnly blocks both value proposals.
 
-Disabled checkboxes do not change checked or indeterminate state on press.
+## Read-only and explicit Form composition
+
+Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. Ordinary Root does not automatically register with Field or Form.
+
+Use `fieldCheckbox` from `@proto.ui/prototypes-base/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
 
 ## API
 
@@ -52,6 +53,7 @@ Checkbox is workspace source. There is no public `proto-ui add` target. Passing 
   rows={[
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />

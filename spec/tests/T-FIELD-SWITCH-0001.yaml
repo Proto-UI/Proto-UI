@@ -31,6 +31,14 @@ implementations:
     path: packages/prototypes/base/test/notification-retirement-lifecycle.test.ts
     required: true
     consumesCases: [T-FIELD-SWITCH-0001-CASE-RESET]
+  - id: field-switch-reset-native-recipes
+    kind: adapter-test
+    status: planned
+    path: scripts/analysis/form-select-recipes-browser.mjs
+    required: true
+    consumesCases: [T-FIELD-SWITCH-0001-CASE-RESET]
+    notes:
+      - Native choices recipe checks the real uncontrolled FieldSwitch reset in each release family and Web Adapter; physical hardware and assistive technology remain separate.
   - id: field-switch-wc
     kind: module-test
     status: passing

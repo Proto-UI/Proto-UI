@@ -58,7 +58,7 @@ Root 投影 `role="radiogroup"`、动态 disabled 状态，并把 `a11yLabel` �
 
 首个切片明确**不包含**：
 
-- `name`、form owner、提交、重置、校验、`required` 或 hidden/native input
+- `name`、form owner、提交、校验、`required` 或 hidden/native input
 - 原生 `<input type="radio">` 的事件与分组等价行为
 - 公开的 `orientation` 或 `loop` 配置
 - Toolbar 专用方向键行为
@@ -73,6 +73,12 @@ Root 投影 `role="radiogroup"`、动态 disabled 状态，并把 `a11yLabel` �
 - 源码：[packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
 - 测试：[radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)
 
+## 只读与显式 Form 组合
+
+Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。只读 Radio Group 仍可使用已有导航键漫游焦点。普通 Root 不会自动注册到 Field 或 Form。
+
+在显式 `FormField` 中使用 `@proto.ui/prototypes-base/field` 的 `fieldRadioGroup`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+
 ## API
 
 Radio Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
@@ -82,6 +88,7 @@ Radio Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入 
   rows={[
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />

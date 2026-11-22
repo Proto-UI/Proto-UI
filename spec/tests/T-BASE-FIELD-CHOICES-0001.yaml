@@ -58,6 +58,20 @@ implementations:
     path: packages/prototypes/base/test/notification-retirement-lifecycle.test.ts
     required: true
     consumesCases: [T-BASE-FIELD-CHOICES-0001-CASE-RESET]
+  - id: choice-public-framework-recipes
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/field-choices-recipes.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-FIELD-CHOICES-0001-CASE-VALUES,
+        T-BASE-FIELD-CHOICES-0001-CASE-POLICY,
+        T-BASE-FIELD-CHOICES-0001-CASE-RESET,
+        T-BASE-FIELD-CHOICES-0001-CASE-PROJECTIONS,
+      ]
+    notes:
+      - Actual public DemoSpecs and four framework Adapters in a source DOM environment. Only CDN acquisition is replaced. Generated relative/inline-flex CSS supplies the existing Rhea Switch host prerequisite; no native geometry or input acceptance is inferred.
   - id: choice-native-public-recipes
     kind: adapter-test
     status: planned
@@ -71,7 +85,7 @@ implementations:
         T-BASE-FIELD-CHOICES-0001-CASE-PROJECTIONS,
       ]
     notes:
-      - Planned choices kind uses actual public DemoSpecs and four Adapters; source tests do not establish native input or AT acceptance.
+      - The choices kind executes 12 independently recorded Base/Shadcn/Brutalist × WC/React/Vue/Vue2 public consumers. Its current native run remains pending; source tests do not establish native input or AT acceptance.
 revisions:
   - version: 0.3.0-alpha.2
     change: introduced

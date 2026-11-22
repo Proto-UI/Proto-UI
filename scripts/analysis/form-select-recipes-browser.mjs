@@ -1,5 +1,5 @@
 /**
- * Native browser acceptance of the actual Sprint 2 public Form and Select recipes.
+ * Native browser acceptance of the actual Sprint 2 public Form, Field choices and Select recipes.
  * Prerequisite: corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
  * Run: node --import tsx scripts/analysis/form-select-recipes-browser.mjs
  * CHROME_PATH / PUI_CHROME_EXECUTABLE selects Chrome; PUI_EVIDENCE_DIR selects output.
@@ -14,11 +14,12 @@ import path from 'node:path';
 import { build } from 'esbuild';
 import { renderBrutalistThemeCss } from '../../packages/prototypes/brutalist/src/theme.ts';
 import { readCollectionsSourceInventory } from './collections-source-inventory.mjs';
+import { readFormSelectRecipeCss } from './form-select-recipe-css.mjs';
 
 const select = (key, defaults) => process.env[key]?.split(',').filter(Boolean) ?? defaults;
 const families = select('PUI_BROWSER_FAMILIES', ['base', 'shadcn', 'brutalist']);
 const runtimes = select('PUI_BROWSER_RUNTIMES', ['wc', 'react', 'vue', 'vue2']);
-const kinds = select('PUI_BROWSER_KINDS', ['form', 'select']);
+const kinds = select('PUI_BROWSER_KINDS', ['form', 'select', 'choices']);
 const output = path.resolve(process.env.PUI_EVIDENCE_DIR ?? '.tmp/form-select-recipes-browser');
 await mkdir(output, { recursive: true });
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
@@ -41,7 +42,7 @@ const report = {
     viewport: { width: 1100, height: 850 },
   },
   boundary:
-    'Actual public DemoSpecs, real Web Adapters/frameworks and generated CSS. Native Chromium keyboard/mouse and CDP-emulated trusted touch/pen. Touch cancellation and implicit capture are observed separately; this is not physical hardware acceptance. Runtime assets are bundled locally; import retry, physical hardware, screen readers, non-Web and compiler parity are separate acceptance.',
+    'Actual public DemoSpecs, real Web Adapters/frameworks, generated prototype CSS and the ordinary Tailwind consumer stylesheet/fonts. Native Chromium keyboard/mouse and CDP-emulated trusted touch/pen. Touch cancellation and implicit capture are observed separately; this is not physical hardware acceptance. Runtime assets are bundled locally; import retry, physical hardware, screen readers, non-Web and compiler parity are separate acceptance.',
   cases: [],
 };
 const bundle = await build({
@@ -83,6 +84,8 @@ const [theme, tokens] = await Promise.all([
   readFile('apps/www/src/styles/shadcn-theme.css', 'utf8'),
   readFile('apps/www/src/styles/proto-ui-tokens.generated.css', 'utf8'),
 ]);
+const consumerStyles = await readFormSelectRecipeCss();
+report.source.consumerStyles = consumerStyles.receipt;
 const familyTheme = renderBrutalistThemeCss({
   variablePrefix: 'pui-',
   lightSelector: ':root[data-family="brutalist"]',
@@ -132,12 +135,13 @@ page.setDefaultTimeout(6000);
 const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
 await page.setContent(
-  '<!doctype html><html data-theme="light"><head><meta charset="utf-8"></head><body><main><h1>Proto UI · Form and Select recipes</h1><p id="scope"></p><div id="fixture"></div></main></body></html>'
+  '<!doctype html><html data-theme="light"><head><meta charset="utf-8"></head><body><main><h1>Proto UI · Form, choices and Select recipes</h1><p id="scope"></p><div id="fixture"></div></main></body></html>'
 );
 await page.addStyleTag({
-  content: `@layer reset, theme, proto-ui, consumer;
+  content: `@layer reset, theme, base, proto-ui, components, utilities, consumer;
   @layer reset { *,::before,::after { box-sizing:border-box; } body { margin:0; font:16px/1.5 system-ui,sans-serif; color:#172033; background:#f5f7fb; } }
   @layer theme { ${theme}\n${familyTheme} }
+  ${consumerStyles.css}
   ${tokens}
   ${fixtureStyles}
   @layer consumer { main { padding:40px; } #fixture { width:760px; max-width:100%; min-height:360px; padding:20px; background:white; border:1px solid #dce2eb; } h1 { font-size:24px; } }
@@ -288,6 +292,165 @@ async function form(prefix) {
       'CheckboxGroup aggregate, reset and multiline restoration',
     ],
     pictures: [invalid, await capture(`${prefix}-reset`)],
+  };
+}
+
+async function choices(prefix) {
+  const initial = { agreement: false, plan: '', alerts: false };
+  const chosen = { agreement: true, plan: 'pro', alerts: true };
+  const values = () => read('choiceForm', 'getValues');
+  const focused = (name) =>
+    ref(name).evaluate(
+      (node) => (node.getRootNode().activeElement ?? document.activeElement) === node
+    );
+  const proposals = async () =>
+    Number(/proposals=(\d+)/.exec(await ref('choiceStatus').textContent())[1]);
+  const retain = (key) => page.evaluate((key) => PuiFormSelect.retain('agreement', key), key);
+  const retired = async (key) => {
+    const result = await page.evaluate((key) => PuiFormSelect.retired(key), key);
+    assert.equal(result.connected, false, 'old public control is actually removed');
+    assert.match(result.readError, /terminal disposal/, 'old owner exposes are terminal');
+    return result;
+  };
+  await until('choiceForm', 'getValues', initial);
+  assert.equal(await ref('agreement').getAttribute('aria-checked'), 'mixed');
+  assert.equal(
+    await ref('agreement').getAttribute('aria-labelledby'),
+    await ref('agreeLabel').getAttribute('id')
+  );
+  assert.equal(
+    await ref('plan').getAttribute('aria-labelledby'),
+    await ref('planLabel').getAttribute('id')
+  );
+  assert.equal(
+    await ref('choiceGroup').getAttribute('aria-labelledby'),
+    await ref('choiceLegend').getAttribute('id')
+  );
+  await click('choiceSubmit');
+  assert.equal(await ref('choiceSubmission').textContent(), 'required values missing');
+  assert.equal((await read('agreeField', 'getValidity')).invalid, true);
+  assert.equal((await read('planField', 'getValidity')).invalid, true);
+  assert.equal(
+    await ref('agreement').getAttribute('aria-errormessage'),
+    await ref('agreeError').getAttribute('id')
+  );
+  assert.equal(
+    await ref('plan').getAttribute('aria-errormessage'),
+    await ref('planError').getAttribute('id')
+  );
+  const invalid = await capture(`${prefix}-required`);
+  await click('choiceToggleOwner');
+  const beforeRefusal = await proposals();
+  await click('agreement');
+  await click('plan-basic');
+  assert.deepEqual(await values(), initial);
+  assert.equal(await proposals(), beforeRefusal + 2);
+  assert.equal(await read('agreeField', 'dirty.get'), false);
+  assert.equal(await read('planField', 'dirty.get'), false);
+  await click('choiceToggleOwner');
+  await click('agreement');
+  await click('plan-pro');
+  await click('alerts');
+  await until('choiceForm', 'getValues', chosen);
+  assert.equal(await ref('agreement').getAttribute('aria-checked'), 'true');
+  assert.equal((await read('agreeField', 'getValidity')).invalid, false);
+  assert.equal((await read('planField', 'getValidity')).invalid, false);
+  await click('choiceReadOnly');
+  const beforeReadonly = await proposals();
+  await click('agreeLabel');
+  assert.equal(await focused('agreement'), true);
+  await page.keyboard.press('Space');
+  await settle();
+  await click('planLabel');
+  assert.equal(await focused('plan-pro'), true);
+  const touched = await read('planField', 'touched.get');
+  await page.keyboard.press('ArrowLeft');
+  await settle();
+  assert.equal(await focused('plan-basic'), true);
+  assert.equal(
+    await read('planField', 'touched.get'),
+    touched,
+    'internal group focus migration is not blur'
+  );
+  await click('alertsLabel');
+  assert.equal(await focused('alerts'), true);
+  await page.keyboard.press('Space');
+  await settle();
+  assert.equal(
+    await proposals(),
+    beforeReadonly,
+    'readonly retains focus without any value proposal'
+  );
+  assert.deepEqual(await values(), chosen);
+  const readonly = await capture(`${prefix}-readonly`);
+  await click('choiceDisabled');
+  assert.deepEqual(await values(), {});
+  assert.equal(await ref('agreement').getAttribute('aria-disabled'), 'true');
+  assert.equal(await ref('plan-basic').getAttribute('aria-disabled'), 'true');
+  await click('choiceDisabled');
+  assert.deepEqual(await values(), chosen);
+  await click('choiceToggleOwner');
+  await click('choiceReset');
+  assert.deepEqual(await values(), { agreement: true, plan: 'pro', alerts: false });
+  assert.equal(await read('agreeField', 'dirty.get'), true);
+  assert.equal(await read('planField', 'dirty.get'), true);
+  await click('choiceToggleOwner');
+  await click('choiceReset');
+  await until('choiceForm', 'getValues', initial);
+  assert.equal(await read('agreeField', 'dirty.get'), false);
+  assert.equal(await read('planField', 'dirty.get'), false);
+  assert.equal(await read('agreement', 'readOnly.get'), true);
+  await click('choiceReadOnly');
+  await click('choiceHold');
+  await click('agreement');
+  assert.equal((await values()).agreement, false);
+  assert.equal(await ref('choiceHeld').textContent(), 'held revision=1');
+  await retain('held-response');
+  await click('choiceReplace');
+  await page.waitForFunction(() =>
+    document.querySelector('[data-demo-ref="choiceStatus"]').textContent.includes('revision=2')
+  );
+  await click('choiceDeliver');
+  assert.equal(await ref('choiceHeld').textContent(), 'stale revision=1 current=2');
+  assert.deepEqual(await values(), initial);
+  const heldOwner = await retired('held-response');
+  await retain('callback-replacement');
+  await click('choiceReplaceOnRequest');
+  const beforeReplacement = await proposals();
+  await click('agreement');
+  await page.waitForFunction(() =>
+    document.querySelector('[data-demo-ref="choiceStatus"]').textContent.includes('revision=3')
+  );
+  await settle();
+  assert.deepEqual(await values(), initial);
+  assert.equal(
+    await proposals(),
+    beforeReplacement + 1,
+    'retired owner emits no trailing proposal'
+  );
+  const callbackOwner = await retired('callback-replacement');
+  await click('agreement');
+  await click('plan-basic');
+  await click('choiceSubmit');
+  assert.match(
+    await ref('choiceSubmission').textContent(),
+    /submitted=1.*"agreement":true.*"plan":"basic"/
+  );
+  return {
+    checks: [
+      'explicit checkbox/radio/switch Field compositions and exact IDREFs',
+      'false/mixed and empty string retain required oracle',
+      'controlled refusal and ordinary queued acceptance',
+      'readonly Label/Space focus and radio roving without proposals',
+      'same-group focus migration is not blur',
+      'nested Fieldset disabled omits canonical values without rewriting owners',
+      'controlled reset refusal preserves value and dirty; accepted reset restores creation baseline',
+      'held owner response cannot update replacement controls',
+      'replacement during outward value request retires old owner and trailing proposal',
+      'new owner remains usable and Form submits actual named canonical values',
+    ],
+    retiredOwners: { heldOwner, callbackOwner },
+    pictures: [invalid, readonly, await capture(`${prefix}-new-owner-submit`)],
   };
 }
 
@@ -479,7 +642,7 @@ try {
             },
             [runtime, family, kind]
           );
-          Object.assign(result, await { form, select: selectInput }[kind](prefix));
+          Object.assign(result, await { form, select: selectInput, choices }[kind](prefix));
           result.inputs = await page.evaluate(() => PuiFormSelect.receipts());
           assert.ok(
             result.inputs.some((event) => event.trusted),

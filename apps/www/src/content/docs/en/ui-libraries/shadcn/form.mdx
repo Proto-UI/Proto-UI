@@ -26,9 +26,31 @@ Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI,
 
 ## Versioned validation and nested controls
 
-<PrototypePreviewer demoId="demo-shadcn-form-validation" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+<PrototypePreviewer
+  demoId="demo-shadcn-form-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
 
 This public recipe holds actual external validation requests in its consumer. Submit starts validation; Return success or Return error delivers the current `requestId` through `resolveValidation`. Edit, reset or change readOnly before returning an older result to see its rejection. Cancel submit retires the Form attempt; an independent Field may still accept its current validation result without completing that canceled submission. A new submit supersedes the previous attempt. Controlled editor notifications read the canonical value after the framework commits the owner response; rejected text never becomes a Field value. The account value stays controlled by the application, and nested Fieldsets govern the Checkbox Group and multiline notes. Disabling the parent group omits its fields from submitted values without rewriting their owners. Form reset restores uncontrolled baselines and asks the controlled owner to restore its initial value. The demo owns no network request.
+
+## Explicit choice fields
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-choices"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The `shadcn-field` source entry exports `fieldCheckbox`, `fieldRadioGroup` and `fieldSwitch`. Place each inside an explicit `FormField` and use the same-family Checkbox Indicator, Radio Items/Indicators or Switch Thumb. Ordinary Checkbox and Radio Group remain usable without registering a form field.
+
+The recipe keeps Checkbox and Radio values controlled by its consumer, while Switch is uncontrolled. Refuse requests to observe unchanged canonical values and dirty state; accept them to update the values used by required validation and submission. Checkbox submits its boolean `checked`; mixed display does not satisfy required when checked is false. Radio submits its canonical string, with empty meaning missing for required.
+
+Read-only is an explicit Field policy. Labels still focus the corresponding control, and Radio arrows still move roving focus without proposing another value. Fieldset separately inherits disabled policy and omits its participating fields from Form values. Reset requests the creation value from controlled owners and restores uncontrolled values; refusing that request retains canonical value and dirty. A reset does not generate change validation.
+
+Hold a consumer reply, replace the controls, then deliver it to see the stale reply rejected by its consumer revision. “Replace on next request” replaces real control instances from their outward callback. The current owner can then submit again. These examples are draft semantics shared by the four Web Adapters; native input and assistive technology acceptance is recorded separately.
 
 ## API
 
@@ -46,7 +68,4 @@ These props belong to Root. Field defaults `name` to `''`. Submit and Reset defa
 
 ## References
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-FORM.yaml', 'P-BASE-FORM.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-FORM.yaml', 'P-BASE-FORM.yaml']} />

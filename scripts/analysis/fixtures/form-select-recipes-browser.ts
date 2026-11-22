@@ -1,3 +1,18 @@
+import * as baseCheckbox from '@proto.ui/prototypes-base/checkbox';
+import * as baseRadio from '@proto.ui/prototypes-base/radio-group';
+import * as baseSwitch from '@proto.ui/prototypes-base/switch';
+import * as baseLabel from '@proto.ui/prototypes-base/label';
+import baseChoicesDemo from '../../../apps/www/src/content/docs/demo-base-field-choices.demo';
+import * as shadcnCheckbox from '@proto.ui/prototypes-shadcn/checkbox';
+import * as shadcnRadio from '@proto.ui/prototypes-shadcn/radio-group';
+import * as shadcnSwitch from '@proto.ui/prototypes-shadcn/switch';
+import * as shadcnLabel from '@proto.ui/prototypes-shadcn/label';
+import shadcnChoicesDemo from '../../../apps/www/src/content/docs/demo-shadcn-field-choices.demo';
+import * as brutalistCheckbox from '@proto.ui/prototypes-brutalist/checkbox';
+import * as brutalistRadio from '@proto.ui/prototypes-brutalist/radio-group';
+import * as brutalistSwitch from '@proto.ui/prototypes-brutalist/switch';
+import * as brutalistLabel from '@proto.ui/prototypes-brutalist/label';
+import brutalistChoicesDemo from '../../../apps/www/src/content/docs/demo-brutalist-field-choices.demo';
 /** Actual public DemoSpecs and four framework Adapters; observations never inject component values or geometry. */
 import * as baseForm from '@proto.ui/prototypes-base/form';
 import * as shadcnForm from '@proto.ui/prototypes-shadcn/form';
@@ -53,6 +68,18 @@ for (const library of [
   baseButton,
   shadcnButton,
   brutalistButton,
+  baseCheckbox,
+  baseRadio,
+  baseSwitch,
+  baseLabel,
+  shadcnCheckbox,
+  shadcnRadio,
+  shadcnSwitch,
+  shadcnLabel,
+  brutalistCheckbox,
+  brutalistRadio,
+  brutalistSwitch,
+  brutalistLabel,
   { styleScope },
 ])
   for (const value of Object.values(library))
@@ -62,15 +89,36 @@ for (const library of [
     }
 
 const demos: Record<string, Record<string, DemoSpec>> = {
-  base: { form: baseFormDemo, select: baseSelectDemo },
-  shadcn: { form: shadcnFormDemo, select: shadcnSelectDemo },
-  brutalist: { form: brutalistFormDemo, select: brutalistSelectDemo },
+  base: { form: baseFormDemo, select: baseSelectDemo, choices: baseChoicesDemo },
+  shadcn: { form: shadcnFormDemo, select: shadcnSelectDemo, choices: shadcnChoicesDemo },
+  brutalist: {
+    form: brutalistFormDemo,
+    select: brutalistSelectDemo,
+    choices: brutalistChoicesDemo,
+  },
 };
 let view: DemoRenderResult | undefined;
 let api: DemoRuntimeApi | undefined;
 let refs: Record<string, HTMLElement> = {};
 let host: HTMLElement | undefined;
 const inputs: Array<Record<string, unknown>> = [];
+const retained = new Map<string, { node: HTMLElement; exposes: any }>();
+/** Read-only retention observes actual old owner retirement after a public recipe replacement. */
+export function retain(ref: string, key: string) {
+  retained.set(key, { node: refs[ref], exposes: api?.getExposes(ref) });
+}
+export function retired(key: string) {
+  const owner = retained.get(key);
+  if (!owner) throw new Error(`Unknown retained owner ${key}`);
+  let readValue: unknown;
+  let readError: string | undefined;
+  try {
+    readValue = owner.exposes.checked.get();
+  } catch (error) {
+    readError = String(error);
+  }
+  return { connected: owner.node.isConnected, readValue, readError };
+}
 for (const type of [
   'keydown',
   'click',
@@ -151,6 +199,7 @@ export async function dispose() {
   view = undefined;
   api = undefined;
   refs = {};
+  retained.clear();
   await settle();
   return {
     hostChildren: host?.childElementCount ?? 0,
