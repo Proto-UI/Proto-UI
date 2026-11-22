@@ -428,7 +428,7 @@ function roundedFrameFixture() {
   const state = JSON.stringify({
     owner: 'owner', generation: '1', viewport: [128, 128, 1, 0, 0],
     scope: { attributes: [
-      ['data-projection-owner', 'owner'], ['data-projection-generation', '1'],
+      ['data-projection-scope', 'owner'], ['data-projection-generation', '1'],
       ['data-projection-family', 'brutalist'], ['data-projection-runtime', item.runtime],
     ] },
     theme: { attributes: [['data-theme', item.theme]] },
@@ -1181,6 +1181,70 @@ async function auditFunction(name, next, dependencies) {
   return new Function(...Object.keys(dependencies), code + `;return ${name};`)(
     ...Object.values(dependencies)
   );
+}
+
+for (const fault of ['none', 'unsettled', 'identity', 'ax', 'retired']) {
+  test(`actual Dropdown caller establishes stable paint before identity/AX (${fault})`, async () => {
+    // Injected ordering controls execute the real caller. They stop at native
+    // entry and do not certify a browser, an AX tree, or a completed gesture.
+    const calls = [];
+    let settled = false;
+    let identityReads = 0;
+    const entryBoundary = new Error('controlled native-entry boundary');
+    const rows = [{ name: 'Profile', identity: 'default' }, { name: 'Delete', identity: 'destructive' }];
+    const physical = { dispose: async () => { calls.push('dispose'); } };
+    const target = { elementHandle: async () => { calls.push('physical'); return physical; } };
+    const popup = {
+      and() { return this; },
+      waitFor: async () => {},
+      locator: () => ({ waitFor: async () => { calls.push('entry'); throw entryBoundary; } }),
+    };
+    const page = {
+      locator: () => ({}),
+      keyboard: { press: async (key) => { calls.push(key); } },
+      mouse: { move: async () => {} },
+    };
+    const trigger = { getAttribute: async () => 'owned-popup', click: async () => {} };
+    const item = { family: 'dropdown-menu' };
+    const journey = await auditFunction('popupItemPointerJourneys', 'dialogOpenObservation', {
+      phase: '',
+      dropdownPointerRows: () => rows,
+      dropdownPointerTarget: async () => target,
+      owned: async () => popup,
+      establishNativeItemPointerBaseline,
+      stableFingerprint: async () => {
+        calls.push('paint');
+        if (fault === 'unsettled') throw new Error('controlled unsettled paint');
+        settled = true;
+        return 'stable-authored-paint';
+      },
+      dropdownPointerIdentity: async (_page, _popup, actual, row) => {
+        assert.equal(actual, physical);
+        assert.equal(row, rows[0]);
+        calls.push('identity');
+        identityReads++;
+        return { achieved: settled && fault !== 'identity' && !(fault === 'retired' && identityReads === 2) };
+      },
+      dropdownPointerAX: async () => { calls.push('ax'); return { achieved: fault !== 'ax' }; },
+      targetObservation: async () => { calls.push('target'); assert.equal(settled, true); return { achieved: true }; },
+    });
+    const expected = fault === 'none' ? entryBoundary :
+      fault === 'unsettled' ? /controlled unsettled paint/ :
+      fault === 'identity' ? /Invalid current Dropdown pointer row/ :
+      fault === 'ax' ? /Invalid native Dropdown item name/ :
+      /Dropdown Item retired during AX observation/;
+    await assert.rejects(() => journey(page, item, trigger), expected);
+    const stages = calls.filter((call) => call !== 'Escape');
+    assert.deepEqual(stages, fault === 'none'
+      ? ['paint', 'physical', 'identity', 'ax', 'identity', 'dispose', 'target', 'entry']
+      : fault === 'unsettled' ? ['paint']
+      : fault === 'identity' ? ['paint', 'physical', 'identity', 'dispose']
+      : fault === 'ax' ? ['paint', 'physical', 'identity', 'ax', 'dispose']
+      : ['paint', 'physical', 'identity', 'ax', 'identity', 'dispose']);
+    assert.equal(item.pointerItemBaselines[0].achieved, false);
+    assert.equal(item.pointerItemBaselines[0].dropdownAX?.achieved, fault === 'unsettled' || fault === 'identity' ? undefined : fault !== 'ax');
+    assert.equal(calls.includes('End') || calls.includes('Home'), false);
+  });
 }
 
 for (const family of ['label', 'collapsible', 'accordion']) {

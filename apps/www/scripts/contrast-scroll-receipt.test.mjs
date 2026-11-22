@@ -130,7 +130,7 @@ async function collectedReceipt() {
   const document = window.document;
   document.documentElement.dataset.theme = 'light';
   document.body.innerHTML =
-    '<section data-projection-scope="fixture" data-projection-owner="fixture" data-projection-generation="1" data-projection-family="brutalist" data-projection-runtime="react">' +
+    '<section data-projection-scope="fixture" data-projection-generation="1" data-projection-family="brutalist" data-projection-runtime="react">' +
     '<div data-pui-root data-projection-owner="fixture" data-projection-generation="1" data-projection-prototype="brutalist-scroll-area-root">' +
     '<div data-pui-root data-projection-owner="fixture" data-projection-generation="1" data-projection-prototype="brutalist-scroll-area-viewport"></div></div></section>';
   const root = document.querySelector('[data-projection-prototype="brutalist-scroll-area-root"]');
@@ -274,6 +274,26 @@ test('actual collector and PNG seal supply the existing rounded ScrollArea evide
   assert.equal(result.physicalNodeId, viewport.physicalNodeId);
   assert.notEqual(viewport.physicalNodeId, fixture.frame.facts.surfaces[0].physicalNodeId);
 });
+
+for (const fault of ['missing-scope', 'foreign-scope', 'owner-alias-only', 'stale-scope']) {
+  test(`actual rounded receipt rejects ${fault} after raw fingerprint resealing`, async () => {
+    const fixture = await collectedReceipt();
+    const snapshot = JSON.parse(fixture.fingerprints.before);
+    const attributes = new Map(snapshot.scope.attributes);
+    if (fault === 'foreign-scope') attributes.set('data-projection-scope', 'another-preview');
+    else if (fault === 'stale-scope') attributes.set('data-projection-generation', '2');
+    else attributes.delete('data-projection-scope');
+    if (fault === 'owner-alias-only') attributes.set('data-projection-owner', 'fixture');
+    snapshot.scope.attributes = [...attributes];
+    fixture.fingerprints.before = fixture.fingerprints.facts = fixture.fingerprints.after =
+      JSON.stringify(snapshot);
+    reseal(fixture);
+    assert.equal(
+      classifyKnownUnsupportedContrastFrame(fixture.item, fixture.frame, fixture.raw),
+      null
+    );
+  });
+}
 
 for (const [name, damage] of [
   [

@@ -194,7 +194,7 @@ export function classifyKnownUnsupportedContrastFrame(item, frame, raw) {
   const scopeAttributes = Object.fromEntries(snapshot.scope.attributes);
   const themeAttributes = Object.fromEntries(snapshot.theme.attributes);
   if (
-    scopeAttributes['data-projection-owner'] !== owner ||
+    scopeAttributes['data-projection-scope'] !== owner ||
     scopeAttributes['data-projection-generation'] !== generation ||
     scopeAttributes['data-projection-family'] !== 'brutalist' ||
     scopeAttributes['data-projection-runtime'] !== item.runtime ||

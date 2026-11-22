@@ -867,10 +867,27 @@ const paintWitnessBoxes = (element: Element, boxes: readonly DOMRect[]): readonl
 
 // This is a bounded source witness, not pixel segmentation or an occlusion
 // renderer. Never borrow ancestor fill to claim an otherwise invisible target.
-const hasSupportedPaint = (element: Element): boolean => {
+const readSupportedPaintWitness = (element: Element) => {
+  type Witness = {
+    kind: string;
+    physicalNodeId: number;
+    boxes: { x: number; y: number; width: number; height: number }[];
+    visibility: ReturnType<typeof paintedBoxVisibility>;
+  };
+  const witness = (
+    node: Node,
+    kind: string,
+    boxes: readonly DOMRect[],
+    visibility: ReturnType<typeof paintedBoxVisibility>
+  ): Witness => ({
+    kind,
+    physicalNodeId: stateNodeIdentity(node),
+    boxes: boxes.map(({ x, y, width, height }) => ({ x, y, width, height })),
+    visibility,
+  });
   const visited = new Set<Node>();
-  const inspect = (node: Node): boolean => {
-    if (visited.has(node)) return false;
+  const inspect = (node: Node): Witness | null => {
+    if (visited.has(node)) return null;
     visited.add(node);
     if (node.nodeType === Node.TEXT_NODE) {
       const parent = (node as Text).assignedSlot ?? node.parentElement;
@@ -879,24 +896,25 @@ const hasSupportedPaint = (element: Element): boolean => {
         parent.namespaceURI === 'http://www.w3.org/2000/svg' ||
         !node.textContent?.trim()
       )
-        return false;
+        return null;
       const style = getComputedStyle(parent);
       if (
         !(parseFloat(style.fontSize) > 0) ||
         !nontransparentSourcePaint(style.webkitTextFillColor || style.color)
       )
-        return false;
+        return null;
       const range = document.createRange();
       range.selectNodeContents(node);
-      const visibility = paintedBoxVisibility(parent, [...range.getClientRects()], true);
-      return visibility.visible && visibility.classification === 'source-model-visible';
+      const boxes = [...range.getClientRects()];
+      const visibility = paintedBoxVisibility(parent, boxes, true);
+      return visibility.visible && visibility.classification === 'source-model-visible'
+        ? witness(node, 'text', boxes, visibility)
+        : null;
     }
-    if (!(node instanceof Element)) return false;
+    if (!(node instanceof Element)) return null;
     const style = getComputedStyle(node);
-    const visibility = paintedBoxVisibility(
-      node,
-      paintWitnessBoxes(node, [...node.getClientRects()])
-    );
+    const boxes = paintWitnessBoxes(node, [...node.getClientRects()]);
+    const visibility = paintedBoxVisibility(node, boxes);
     if (visibility.visible && visibility.classification === 'source-model-visible') {
       if (node.namespaceURI === 'http://www.w3.org/2000/svg') {
         if (!node.closest('defs,clipPath,mask,marker,pattern')) {
@@ -905,7 +923,7 @@ const hasSupportedPaint = (element: Element): boolean => {
             nontransparentSourcePaint(style.fill) &&
             supportedSvgFillArea(node, style)
           )
-            return true;
+            return witness(node, 'svg-fill', boxes, visibility);
           if (
             style.strokeOpacity === '1' &&
             nontransparentSourcePaint(style.stroke) &&
@@ -914,7 +932,8 @@ const hasSupportedPaint = (element: Element): boolean => {
           ) {
             try {
               const length = (node as SVGGeometryElement).getTotalLength();
-              if (Number.isFinite(length) && length > 0) return true;
+              if (Number.isFinite(length) && length > 0)
+                return witness(node, 'svg-stroke', boxes, visibility);
             } catch {
               /* Unknown geometry is not paint proof. */
             }
@@ -929,7 +948,7 @@ const hasSupportedPaint = (element: Element): boolean => {
           style.backgroundImage === 'none' &&
           nontransparentSourcePaint(style.backgroundColor)
         )
-          return true;
+          return witness(node, 'background', boxes, visibility);
         if (
           style.borderImageSource === 'none' &&
           ['top', 'right', 'bottom', 'left'].some(
@@ -939,14 +958,18 @@ const hasSupportedPaint = (element: Element): boolean => {
               nontransparentSourcePaint(style.getPropertyValue(`border-${side}-color`))
           )
         )
-          return true;
+          return witness(node, 'border', boxes, visibility);
       }
     }
     // Native/replaced content cannot be witnessed by stale defaultValue or DOM
     // fallback text. Their supported box paint still qualifies above.
     if (node.matches('textarea,input,select,canvas,img,video,audio,object,iframe,embed'))
-      return false;
-    return composedChildren(node).some(inspect);
+      return null;
+    for (const child of composedChildren(node)) {
+      const painted = inspect(child);
+      if (painted) return painted;
+    }
+    return null;
   };
   return inspect(element);
 };
@@ -955,7 +978,7 @@ const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf
   const visibility = paintedBoxVisibility(element, boxes, clipSelf);
   // Preserve already-unsupported reasons (including the declared rounded-clip
   // domain) exactly. This adds no known-unsupported terminal exception.
-  if (visibility.classification !== 'source-model-visible' || hasSupportedPaint(element))
+  if (visibility.classification !== 'source-model-visible' || readSupportedPaintWitness(element))
     return visibility;
   return {
     ...visibility,
@@ -967,8 +990,32 @@ const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf
 // Shared with every runner target: Playwright visibility alone admits
 // opacity-zero and fully clipped boxes. This observes the same paint limits as
 // the captured frame and never mutates the subject.
-export const readContrastPaintedVisibility = (element: Element) =>
-  paintedVisibility(element, paintWitnessBoxes(element, [...element.getClientRects()]));
+export const readContrastPaintedVisibility = (element: Element) => {
+  const visibility = paintedVisibility(
+    element,
+    paintWitnessBoxes(element, [...element.getClientRects()])
+  );
+  if (
+    visibility.visible &&
+    visibility.classification === 'unsupported' &&
+    visibility.limits.length > 0 &&
+    visibility.limits.every((limit) => limit === 'unsupported-rounded-overflow-clip')
+  ) {
+    const paintWitness = readSupportedPaintWitness(element);
+    if (paintWitness)
+      return {
+        ...visibility,
+        classification: 'source-model-visible',
+        limits: [],
+        // Presence may be established by a real descendant's entire painted
+        // box inside every supported clip. The original target perimeter and
+        // its numeric measurements retain their whole-box limitations.
+        boxVisibility: visibility,
+        paintWitness,
+      };
+  }
+  return visibility;
+};
 
 // The runner and instrument calibration consume this exact browser function.
 // Supported bounds/opacity/clipping are required in addition to native state;

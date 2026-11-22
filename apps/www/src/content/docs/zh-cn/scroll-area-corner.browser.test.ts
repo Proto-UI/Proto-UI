@@ -309,7 +309,28 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             expect(paint.borderStyle).toBe('solid');
             expect(paint.borderLeft).toBe('2px');
             expect(paint.borderTop).toBe('2px');
-            return { vertical: v, horizontal: h, viewport: surface, hit, passive: paint };
+            const thumbPaint = await Promise.all(
+              [vThumb, hThumb].map((thumb) =>
+                thumb.evaluate((element) => {
+                  const box = element.getBoundingClientRect();
+                  return {
+                    width: box.width,
+                    height: box.height,
+                    background: getComputedStyle(element).backgroundColor,
+                  };
+                })
+              )
+            );
+            // A painted corner and viewport cannot substitute for either live
+            // Thumb. Retain this independent check across every corner state.
+            for (const [index, thumb] of thumbPaint.entries()) {
+              const label = `${runtime}/${index === 0 ? 'vertical' : 'horizontal'} Thumb`;
+              expect(thumb.width, label).toBeGreaterThan(0);
+              expect(thumb.height, label).toBeGreaterThan(0);
+              expect(computedThumbFillAlpha(thumb.background), `${label}: ${thumb.background}`)
+                .toBeGreaterThan(0);
+            }
+            return { vertical: v, horizontal: h, viewport: surface, hit, passive: paint, thumbPaint };
           };
           const initial = await checkCorner();
           await capture('initial', initial);

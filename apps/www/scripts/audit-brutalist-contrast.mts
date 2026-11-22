@@ -2079,37 +2079,38 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
       achieved: false,
     };
     (item.pointerItemBaselines ??= []).push(baselineRecord);
-    if (!isSelect) {
-      baselineRecord.stage = 'checking-current-dropdown-item';
-      const dropdownRow = row as ReturnType<typeof dropdownPointerRows>[number];
-      const physical = await target.elementHandle();
-      if (!physical) throw new Error('Dropdown pointer row has no current physical target.');
-      try {
-        const before = await dropdownPointerIdentity(page, popup, physical, dropdownRow);
-        baselineRecord.dropdownIdentityBefore = before;
-        if (!before.achieved)
-          throw new Error(`Invalid current Dropdown pointer row: ${row.identity}.`);
-        baselineRecord.stage = 'reading-current-dropdown-ax';
-        phase = `item-pointer-native-name:${row.identity}`;
-        const ax = await dropdownPointerAX(page, before, dropdownRow);
-        baselineRecord.dropdownAX = ax;
-        if (!ax.achieved) throw new Error(`Invalid native Dropdown item name: ${row.identity}.`);
-        const after = await dropdownPointerIdentity(page, popup, physical, dropdownRow);
-        baselineRecord.dropdownIdentityAfter = after;
-        if (!after.achieved)
-          throw new Error(`Dropdown Item retired during AX observation: ${row.identity}.`);
-      } finally {
-        await physical.dispose();
-      }
-    }
     phase = `item-pointer-baseline:${row.identity}`;
-    baselineRecord.beforeEntryWait = await targetObservation(target);
     const before = await establishNativeItemPointerBaseline({
       waitForPaint: async () => {
         baselineRecord.stage = 'waiting-authored-entry-paint';
         baselineRecord.settledFingerprint = await stableFingerprint(page);
+        if (!isSelect) {
+          baselineRecord.stage = 'checking-current-dropdown-item';
+          const dropdownRow = row as ReturnType<typeof dropdownPointerRows>[number];
+          const physical = await target.elementHandle();
+          if (!physical) throw new Error('Dropdown pointer row has no current physical target.');
+          try {
+            const before = await dropdownPointerIdentity(page, popup, physical, dropdownRow);
+            baselineRecord.dropdownIdentityBefore = before;
+            if (!before.achieved)
+              throw new Error(`Invalid current Dropdown pointer row: ${row.identity}.`);
+            baselineRecord.stage = 'reading-current-dropdown-ax';
+            phase = `item-pointer-native-name:${row.identity}`;
+            const ax = await dropdownPointerAX(page, before, dropdownRow);
+            baselineRecord.dropdownAX = ax;
+            if (!ax.achieved) throw new Error(`Invalid native Dropdown item name: ${row.identity}.`);
+            const after = await dropdownPointerIdentity(page, popup, physical, dropdownRow);
+            baselineRecord.dropdownIdentityAfter = after;
+            if (!after.achieved)
+              throw new Error(`Dropdown Item retired during AX observation: ${row.identity}.`);
+          } finally {
+            await physical.dispose();
+          }
+        }
       },
       waitForEntry: async () => {
+        phase = `item-pointer-baseline:${row.identity}`;
+        baselineRecord.beforeEntryWait = await targetObservation(target);
         baselineRecord.stage = 'waiting-native-entry';
         const entry = popup.locator(
           `[role="${role}"]:focus:not([aria-disabled="true"]):not([disabled])`

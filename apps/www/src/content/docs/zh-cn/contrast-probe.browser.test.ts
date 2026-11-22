@@ -446,6 +446,55 @@ describe('contrast probe / real Chromium instrument calibration', () => {
     }
   });
 
+  it('uses real safe descendant ink for rounded-container presence while retaining raw edge limits', async () => {
+    const context = await browser.newContext({ viewport: { width: 800, height: 600 } });
+    try {
+      const page = await context.newPage();
+      await page.setContent(fixture(`
+        <style>
+          .witness-clip { width:220px;height:72px;overflow:hidden;border-radius:5px;margin:8px; }
+          .witness-clip > [data-pui-root] { width:220px;height:72px;margin:0;background:transparent; }
+          .witness-clip span { display:inline-block;margin:16px; }
+        </style>
+        <div class="witness-clip"><div data-pui-root id="painted" data-demo-ref="painted"><span>Current owned ink</span></div></div>
+        <div class="witness-clip"><div data-pui-root id="empty" data-demo-ref="empty"></div></div>
+        <div class="witness-clip"><div data-pui-root id="transparent" data-demo-ref="transparent"><span style="color:transparent;-webkit-text-fill-color:transparent">Transparent ink</span></div></div>
+        <div class="witness-clip" style="filter:opacity(0)"><div data-pui-root id="filtered" data-demo-ref="filtered"><span>Filtered ink</span></div></div>
+      `));
+      await page.locator('[data-pui-root]').evaluateAll((elements) => {
+        for (const element of elements) {
+          element.setAttribute('data-projection-owner', 'calibration');
+          element.setAttribute('data-projection-generation', '1');
+        }
+      });
+      await page.addScriptTag({ content: bundle });
+      await page.evaluate(() => document.fonts.ready);
+      const observed = await page.evaluate(() => Object.fromEntries(
+        ['painted', 'empty', 'transparent', 'filtered'].map((id) => [id,
+          window.puiContrastProbe.readContrastTargetObservation(document.getElementById(id)!)])
+      ));
+      const png = await page.screenshot();
+      const frame = await page.evaluate((image) => window.puiContrastProbe.collectContrastFrame({
+        image, family: 'rounded-presence-calibration',
+      }), png.toString('base64'));
+      await recordCalibrationFile('rounded-presence-witness.png', png);
+      await recordCalibrationFile('rounded-presence-witness.json', JSON.stringify({ observed, frame }, null, 2));
+      expect(observed.painted.achieved).toBe(true);
+      expect(observed.painted.visibility).toMatchObject({
+        classification: 'source-model-visible',
+        paintWitness: { kind: 'text' },
+        boxVisibility: { classification: 'unsupported', limits: ['unsupported-rounded-overflow-clip'] },
+      });
+      for (const id of ['empty', 'transparent', 'filtered']) expect(observed[id].achieved).toBe(false);
+      const wholeBox = surface(frame, 'painted');
+      expect(wholeBox.visibility.classification).toBe('unsupported');
+      expect(wholeBox.visibility.limits).toContain('unsupported-rounded-overflow-clip');
+      expect(wholeBox.exterior).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  });
+
   for (const placement of ['target', 'ancestor'] as const) {
     for (const [property, value] of [
       ['filter', 'opacity(0)'],

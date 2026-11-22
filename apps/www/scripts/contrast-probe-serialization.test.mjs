@@ -242,7 +242,7 @@ test('browser-side Focus diagnostics run without Node transpiler helpers', async
 // function. They do not establish native CSS rendering or hit testing.
 const targetObservationFixture = async () => {
   const source = await readFile(new URL('./contrast-probe.browser.ts', import.meta.url), 'utf8');
-  const compiled = await transform(source, {
+  const compiled = await transform(source + '\nexport const readWholeBoxCalibration = (element) => paintedVisibility(element, [...element.getClientRects()]);', {
     loader: 'ts',
     format: 'iife',
     globalName: 'puiContrastProbe',
@@ -359,8 +359,46 @@ const targetObservationFixture = async () => {
     textNode,
     styleByElement,
     bounds,
+    observeWholeBox: () => sandbox.puiContrastProbe.readWholeBoxCalibration(element),
   };
 };
+
+for (const fault of ['none', 'empty', 'transparent', 'outside-safe-rect', 'mixed-boxes', 'unknown-radius', 'filter', 'zoom', 'mask', 'hidden-ancestor']) {
+  test(`rounded target presence requires an actual safe paint witness (${fault})`, async () => {
+    // CSSOM and text-range rectangles are injected calibration facts. The
+    // production reader must retain unsupported whole-box/perimeter evidence.
+    const fixture = await targetObservationFixture();
+    const { ancestorStyle, style, element, textNode, sandbox, bounds } = fixture;
+    ancestorStyle.overflowX = ancestorStyle.overflowY = 'hidden';
+    ancestorStyle.borderTopLeftRadius = '5px';
+    style.backgroundColor = 'transparent';
+    const center = { x: 20, y: 20, left: 20, top: 20, right: 30, bottom: 30, width: 10, height: 10 };
+    let boxes = [center];
+    sandbox.document.createRange = () => ({ selectNodeContents: () => {}, getClientRects: () => boxes });
+    if (fault === 'empty') element.childNodes = [];
+    if (fault === 'transparent') style.webkitTextFillColor = 'transparent';
+    if (fault === 'outside-safe-rect') boxes = [bounds];
+    if (fault === 'mixed-boxes') boxes = [center, bounds];
+    if (fault === 'unknown-radius') ancestorStyle.borderTopLeftRadius = '50%';
+    if (fault === 'filter') ancestorStyle.filter = 'opacity(0)';
+    if (fault === 'zoom') ancestorStyle.zoom = '2';
+    if (fault === 'mask') ancestorStyle.maskImage = 'linear-gradient(transparent,transparent)';
+    if (fault === 'hidden-ancestor') ancestorStyle.opacity = '0';
+    const observed = fixture.observe();
+    assert.equal(observed.achieved, fault === 'none');
+    assert.equal(observed.focused, true);
+    if (fault === 'none') {
+      assert.equal(observed.visibility.paintWitness.kind, 'text');
+      assert.ok(Number.isSafeInteger(observed.visibility.paintWitness.physicalNodeId));
+      assert.deepEqual(JSON.parse(JSON.stringify(observed.visibility.paintWitness.boxes)), [{ x: 20, y: 20, width: 10, height: 10 }]);
+      assert.equal(observed.visibility.boxVisibility.classification, 'unsupported');
+      assert.deepEqual([...observed.visibility.boxVisibility.limits], ['unsupported-rounded-overflow-clip']);
+      assert.equal(fixture.observeWholeBox().classification, 'unsupported');
+      assert.deepEqual([...fixture.observeWholeBox().limits], ['unsupported-rounded-overflow-clip']);
+    } else assert.equal(observed.visibility.paintWitness, undefined);
+    assert.equal(textNode.textContent, 'Native-state fixture');
+  });
+}
 
 for (const overflow of ['hidden', 'clip', 'auto', 'scroll']) {
   test(`shared target acceptance withholds rounded ${overflow} clipping without inventing hidden bounds`, async () => {
