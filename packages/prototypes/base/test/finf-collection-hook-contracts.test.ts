@@ -201,6 +201,7 @@ it('inspects real authored hook frames and nested child handles', async () => {
       following: true,
       requestStatus: true,
       jumpToEnd: true,
+      pauseFollowing: true,
     } satisfies Record<keyof ProtoAdapterExposes<typeof message.messageScrollerViewport>, true>,
     mj: {
       disabled: true,
