@@ -26,7 +26,7 @@ afterAll(async () => {
 // transformed Node-side import could create a different module/participant.
 // Only the first materialization rejection and optional delivery gate are
 // injected. Real participants, controllers, public composition and DOM run.
-const installFault = `async () => {
+const installFault = `(async () => {
   const { searchCommandParticipant } = await import('/src/components/site-search-commands.ts');
   const root = document.querySelector('site-search');
   const owner = searchCommandParticipant(root);
@@ -50,7 +50,12 @@ const installFault = `async () => {
       dispose() { trace.disposed.push(call); return candidate.dispose(); },
     };
   };
-}`;
+  return {
+    sameRoot: trace.root === document.querySelector('site-search'),
+    attempts: trace.attempts.length,
+    openerConnected: trace.sourceOwner?.isConnected === true,
+  };
+})()`;
 
 async function prepare(page: Page, family: string) {
   // Dev has no generated Pagefind index. This data boundary is independent
@@ -74,7 +79,12 @@ async function prepare(page: Page, family: string) {
   expect(
     await page.locator('[data-search-dialog-mount] [data-projection-generation-host]').count()
   ).toBe(0);
-  await page.evaluate(installFault);
+  const installed = await page.evaluate(installFault);
+  expect(installed, 'The browser module fault must be installed before the open intent').toEqual({
+    sameRoot: true,
+    attempts: 0,
+    openerConnected: true,
+  });
   await page
     .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
     .click();
