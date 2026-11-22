@@ -46,25 +46,109 @@ async function capture(name: string) {
   }
 }
 let qualityWaitSequence = 0;
-async function quality(value: string) {
+type RasterExpectation = {
+  dpr: 1 | 2;
+  phase: string;
+  previousRevisions?: Record<string, number>;
+};
+async function quality(value: string): Promise<void>;
+async function quality(value: string, raster: RasterExpectation): Promise<Record<string, number>>;
+async function quality(value: string, raster?: RasterExpectation) {
   const sequence = ++qualityWaitSequence;
   try {
-    await page.waitForFunction(
-      (expected) =>
-        Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).length ===
-          4 &&
-        Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).every(
-          (el) => el.dataset.materialQuality === expected
-        ),
-      value,
+    const ready = await page.waitForFunction(
+      ({ expected, raster }) => {
+        const regulars = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')
+        );
+        if (regulars.length !== 4 || !regulars.every((el) => el.dataset.materialQuality === expected))
+          return false;
+        if (!raster) return true;
+        // Observe the current physical source and the consumer's committed
+        // revision in the SAME original wait. An old self-optical dataset alone
+        // cannot accept a DPR transition before the producer/consumer refresh.
+        const snapshot = {
+          observedAtMs: performance.now(),
+          devicePixelRatio: window.devicePixelRatio,
+          runtimes: ['wc', 'react', 'vue', 'vue2'].map((runtime) => {
+            const roots = document.querySelectorAll(`[data-material-host="${runtime}"]`),
+              hosts = roots[0]?.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]'),
+              canvases = roots[0]?.querySelectorAll<HTMLCanvasElement>('[data-material-backdrop]'),
+              host = hosts?.[0],
+              canvas = canvases?.[0],
+              bounds = canvas?.getBoundingClientRect(),
+              revision = host?.dataset.materialSourceRevision;
+            return {
+              runtime,
+              rootCount: roots.length,
+              regularCount: hosts?.length ?? 0,
+              canvasCount: canvases?.length ?? 0,
+              connected: host?.isConnected === true && canvas?.isConnected === true,
+              quality: host?.dataset.materialQuality ?? null,
+              source: host?.dataset.materialSource ?? null,
+              sourceRevision: revision && /^\d+$/.test(revision) ? Number(revision) : null,
+              width: canvas?.width ?? null,
+              height: canvas?.height ?? null,
+              geometry: bounds
+                ? { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }
+                : null,
+            };
+          }),
+        };
+        const current = snapshot.runtimes.every(
+          (entry) =>
+            entry.rootCount === 1 &&
+            entry.regularCount === 1 &&
+            entry.canvasCount === 1 &&
+            entry.connected &&
+            entry.quality === expected &&
+            entry.source === 'visible-app-canvas' &&
+            entry.sourceRevision !== null &&
+            Number.isSafeInteger(entry.sourceRevision) &&
+            entry.sourceRevision > 0 &&
+            (!raster.previousRevisions ||
+              (Number.isSafeInteger(raster.previousRevisions[entry.runtime]) &&
+                entry.sourceRevision > raster.previousRevisions[entry.runtime])) &&
+            entry.geometry !== null &&
+            Number.isFinite(entry.geometry.width) &&
+            Number.isFinite(entry.geometry.height) &&
+            entry.geometry.width > 0 &&
+            entry.geometry.height > 0 &&
+            entry.width === Math.ceil(entry.geometry.width * snapshot.devicePixelRatio) &&
+            entry.height === Math.ceil(entry.geometry.height * snapshot.devicePixelRatio)
+        );
+        return snapshot.devicePixelRatio === raster.dpr && current ? snapshot : false;
+      },
+      { expected: value, raster },
       { timeout: 20000 }
     );
+    try {
+      if (raster) {
+        const snapshot = await ready.jsonValue();
+        if (!snapshot || typeof snapshot !== 'object')
+          throw new Error('Missing DPR source snapshot');
+        observations.push({
+          kind: 'dpr-source-raster',
+          sequence,
+          phase: raster.phase,
+          expectedDpr: raster.dpr,
+          previousRevisions: raster.previousRevisions ?? null,
+          snapshot,
+        });
+        return Object.fromEntries(
+          snapshot.runtimes.map((entry) => [entry.runtime, entry.sourceRevision!])
+        );
+      }
+    } finally {
+      await ready.dispose();
+    }
   } catch (error) {
     // Failure-only observation: never pause/redraw/rebind or change the original wait.
     const name = `quality-timeout-${sequence}-${value}`;
     const diagnostic: Record<string, unknown> = {
       name,
       expected: value,
+      rasterExpectation: raster ?? null,
       timeoutMs: 20000,
       originalError:
         error instanceof Error
@@ -415,17 +499,28 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
         )
         .toBe(true);
       await page.setViewportSize({ width: 1100, height: 1000 });
-      await quality('self-optical');
+      const beforeDpr = await quality('self-optical', {
+        dpr: 1,
+        phase: `${theme}-before-dpr-two`,
+      });
       await cdp.send('Emulation.setDeviceMetricsOverride', {
         width: 1100,
         height: 1000,
         deviceScaleFactor: 2,
         mobile: false,
       });
-      await quality('self-optical');
+      const dprTwo = await quality('self-optical', {
+        dpr: 2,
+        phase: `${theme}-dpr-two`,
+        previousRevisions: beforeDpr,
+      });
       await capture(`${theme}-dpr-two`);
       await cdp.send('Emulation.clearDeviceMetricsOverride');
-      await quality('self-optical');
+      await quality('self-optical', {
+        dpr: 1,
+        phase: `${theme}-dpr-restored`,
+        previousRevisions: dprTwo,
+      });
       await page.setViewportSize({ width: 1440, height: 1050 });
       await quality('self-optical');
       // Same-generation inputs are shared, and >16 surfaces keep one live rendering context.

@@ -185,6 +185,8 @@ function createScene(
       intersecting = true,
       renderable = true;
     let layoutRaf: number | null = null;
+    let resolution: MediaQueryList | undefined;
+    let resolutionRatio: number | undefined;
     let lastSourceSignature = '';
     const originalMinHeight = scope.style.getPropertyValue('min-height');
     const originalMinPriority = scope.style.getPropertyPriority('min-height');
@@ -256,6 +258,10 @@ function createScene(
       layoutRaf = win.requestAnimationFrame(() => {
         layoutRaf = null;
         if (retired) return;
+        // A resize/resolution notification can precede the new readable DPR.
+        // Refresh its exact query with the geometry at this frame, rather than
+        // permanently rebinding the old ratio in the notification callback.
+        bindResolution();
         layout();
         refresh();
       });
@@ -432,16 +438,19 @@ function createScene(
         attributes: true,
         attributeFilter: ['class', 'data-theme', 'hidden', 'style'],
       });
-    let resolution: MediaQueryList | undefined;
-    const resolutionChanged = () => {
-      resolution?.removeEventListener('change', resolutionChanged);
-      resolution = win.matchMedia?.(`(resolution: ${win.devicePixelRatio}dppx)`);
-      resolution?.addEventListener('change', resolutionChanged);
-      layout();
-      refresh();
-    };
-    releases.push(() => resolution?.removeEventListener('change', resolutionChanged));
-    resolutionChanged();
+    function bindResolution() {
+      const ratio = win.devicePixelRatio;
+      if (resolution && Object.is(resolutionRatio, ratio)) return;
+      resolution?.removeEventListener('change', scheduleLayout);
+      resolution = win.matchMedia?.(`(resolution: ${ratio}dppx)`);
+      resolutionRatio = ratio;
+      resolution?.addEventListener('change', scheduleLayout);
+    }
+    releases.push(() => resolution?.removeEventListener('change', scheduleLayout));
+    // First paint remains synchronous. Subsequent media, viewport and observer
+    // notifications share one bounded layout frame, with no idle polling.
+    bindResolution();
+    layout();
     const scheme = win.matchMedia?.('(prefers-color-scheme: dark)');
     scheme?.addEventListener('change', refresh);
     releases.push(() => scheme?.removeEventListener('change', refresh));
@@ -449,8 +458,8 @@ function createScene(
     releases.push(offPreferences);
     doc.addEventListener('visibilitychange', refresh);
     releases.push(() => doc.removeEventListener('visibilitychange', refresh));
-    win.addEventListener('resize', refresh);
-    releases.push(() => win.removeEventListener('resize', refresh));
+    win.addEventListener('resize', scheduleLayout);
+    releases.push(() => win.removeEventListener('resize', scheduleLayout));
     refresh();
     return {
       mount,
