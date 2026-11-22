@@ -860,7 +860,7 @@ async function sample(browser, server, source, variant, mode, iteration, out, re
           localStorage.setItem('starlight-theme', 'light');
           localStorage.setItem('preferred-prototypes-adapter', 'wc');
         });
-        await page.addInitScript(observeSearch.bind(null, variant));
+        await page.addInitScript(observeSearch, variant);
         stage = 'navigate';
         const response = await page.goto(server.origin + PLAN.route, {
           waitUntil: 'domcontentloaded',
