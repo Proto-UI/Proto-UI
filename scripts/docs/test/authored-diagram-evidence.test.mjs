@@ -12,6 +12,7 @@ import {
 } from '../../../apps/www/scripts/whitepaper-diagram-evidence-receipts.mjs';
 import {
   authoredDiagramCapturePlan,
+  authoredImageContentBox,
   authoredSvgDimensions,
   verifyAuthoredDiagramReport,
 } from '../../../apps/www/scripts/capture-authored-diagram-evidence.mjs';
@@ -75,7 +76,10 @@ function png(width, height) {
 }
 
 // Synthetic in-memory checker fixtures, never browser evidence or product PNGs.
-function fixture() {
+function fixture({
+  border = { top: 0, right: 0, bottom: 0, left: 0 },
+  padding = { top: 0, right: 0, bottom: 0, left: 0 },
+} = {}) {
   const provenance = { head: revision },
     build = { sha256: 'a'.repeat(64) };
   const sources = new Map(),
@@ -120,18 +124,34 @@ function fixture() {
       complete: true,
       naturalWidth: dimensions.width,
       naturalHeight: dimensions.height,
-      width: 100,
-      height: (100 * dimensions.height) / dimensions.width,
+      width: 100 + border.left + border.right + padding.left + padding.right,
+      height:
+        (100 * dimensions.height) / dimensions.width +
+        border.top +
+        border.bottom +
+        padding.top +
+        padding.bottom,
       alt: 'Fixture description',
       document: { horizontalOverflow: false },
-      style: { display: 'block', visibility: 'visible', opacity: '1', colorScheme: entry.theme },
+      style: {
+        display: 'block',
+        visibility: 'visible',
+        opacity: '1',
+        colorScheme: entry.theme,
+        border: { ...border },
+        padding: { ...padding },
+      },
       inViewportHorizontally: true,
       visibleViewportArea: 100,
       viewport: entry.viewport,
       headerOverlap: [],
     };
+    image.contentBox = {
+      width: image.width - border.left - border.right - padding.left - padding.right,
+      height: image.height - border.top - border.bottom - padding.top - padding.bottom,
+    };
     image.documentImage = { x: 0, y: 200, width: image.width, height: image.height };
-    const clip = { x: 0, y: 200, width: 100, height: Math.ceil(image.height) };
+    const clip = { x: 0, y: 200, width: Math.ceil(image.width), height: Math.ceil(image.height) };
     const articleFile = `${entry.id}-article.png`,
       figureFile = `${entry.id}-figure.png`;
     screenshots.set(articleFile, png(entry.viewport.width, entry.viewport.height));
@@ -175,6 +195,74 @@ test('complete byte-bound capture receipts stay pending visual review', async ()
     screenshots: 64,
     visualReview: 'pending',
   });
+});
+
+test('authored SVG aspect ratios use actual image content inside borders and padding', async () => {
+  for (const spacing of [
+    { border: { top: 1, right: 1, bottom: 1, left: 1 } },
+    {
+      border: { top: 1, right: 2, bottom: 3, left: 4 },
+      padding: { top: 5, right: 6, bottom: 7, left: 8 },
+    },
+  ]) {
+    const f = fixture(spacing);
+    assert.deepEqual(await verifyAuthoredDiagramReport(f.report, f.options), {
+      cases: 32,
+      screenshots: 64,
+      visualReview: 'pending',
+    });
+  }
+});
+
+test('the observed narrow lifecycle border box preserves SVG content proportions', () => {
+  const image = {
+    width: 358,
+    height: 182.859375,
+    style: {
+      border: { top: 1, right: 1, bottom: 1, left: 1 },
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+    },
+  };
+  const ratio = 982.4986302983941 / 499.1608633439397;
+  assert.ok(Math.abs(image.width / image.height - ratio) > 0.01);
+  const content = authoredImageContentBox(image);
+  assert.deepEqual(content, { width: 356, height: 180.859375 });
+  assert.ok(Math.abs(content.width / content.height - ratio) < 0.01);
+  const distorted = authoredImageContentBox({ ...image, height: image.height + 4 });
+  assert.ok(Math.abs(distorted.width / distorted.height - ratio) > 0.01);
+});
+
+test('content geometry is recomputed and rejects distortion, invalid edges and invented content boxes', async () => {
+  for (const mutate of [
+    (image) => {
+      image.height += 4;
+    },
+    (image) => {
+      image.style.border.left = -1;
+    },
+    (image) => {
+      image.style.padding.top = NaN;
+    },
+    (image) => {
+      image.style.padding.right = Infinity;
+    },
+    (image) => {
+      delete image.style.border;
+    },
+    (image) => {
+      image.style.padding.left = image.width;
+    },
+    (image) => {
+      image.contentBox.height += 4;
+    },
+    (image) => {
+      delete image.contentBox;
+    },
+  ]) {
+    const f = fixture();
+    mutate(f.report.cases[0].image);
+    await assert.rejects(verifyAuthoredDiagramReport(f.report, f.options));
+  }
 });
 
 test('missing, failed, hidden, cropped, stale or changed-byte evidence cannot pass the checker', async () => {

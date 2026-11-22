@@ -9,6 +9,7 @@ import {
   diagramPagePaths,
   diagramPngReceipt,
   diagramSha256,
+  verifyDiagramFonts,
   verifyDiagramReport,
 } from './whitepaper-diagram-evidence-receipts.mjs';
 import {
@@ -162,6 +163,11 @@ try {
               families: [...document.querySelectorAll('text')].map(
                 (node) => getComputedStyle(node).fontFamily
               ),
+              fontElements: [...document.querySelectorAll('text')].map((node) => ({
+                text: node.textContent,
+                classes: [...node.classList],
+                family: getComputedStyle(node).fontFamily,
+              })),
               faces: [...document.fonts].map((face) => ({
                 family: face.family,
                 status: face.status,
@@ -172,42 +178,24 @@ try {
                   ...bounds(node.querySelector(':scope > rect')),
                 })
               ),
-              text: [...document.querySelectorAll('text')].flatMap((node) => {
-                const spans = [...node.querySelectorAll('tspan')];
-                return spans.length ? spans : [node];
-              }).map((node) => {
-                const group = node.closest('[data-node], [data-diagnosis]');
-                return {
-                  text: node.textContent,
-                  fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
-                  ...bounds(node),
-                  ...(group ? { card: bounds(group.querySelector(':scope > rect')) } : {}),
-                };
-              }),
+              text: [...document.querySelectorAll('text')]
+                .flatMap((node) => {
+                  const spans = [...node.querySelectorAll('tspan')];
+                  return spans.length ? spans : [node];
+                })
+                .map((node) => {
+                  const group = node.closest('[data-node], [data-diagnosis]');
+                  return {
+                    text: node.textContent,
+                    fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+                    ...bounds(node),
+                    ...(group ? { card: bounds(group.querySelector(':scope > rect')) } : {}),
+                  };
+                }),
             };
           });
           Object.assign(fontEntry, fontEvidence);
-          if (profile.fonts === 'embedded-handwritten') {
-            assert.ok(
-              fontEvidence.faces.some(
-                (face) => face.family.includes('Hand Latin') && face.status === 'loaded'
-              )
-            );
-            if (locale === 'zh-cn')
-              assert.ok(
-                fontEvidence.faces.some(
-                  (face) => face.family.includes('Hand CJK') && face.status === 'loaded'
-                )
-              );
-          } else {
-            assert.equal(
-              fontEvidence.faces.length,
-              0,
-              'System-font diagram must not load embedded faces'
-            );
-            assert.ok(fontEvidence.families.length > 0, 'Inspect actual system-font text');
-            assert.ok(fontEvidence.families.every((family) => family.includes('sans-serif')));
-          }
+          verifyDiagramFonts(profile, fontEvidence, locale);
           for (const box of fontEvidence.text) {
             assert.ok(
               box.x >= -1 &&
@@ -313,10 +301,17 @@ try {
               naturalWidth: node.naturalWidth,
               naturalHeight: node.naturalHeight,
               alt: node.alt,
-              describedBy: (node.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean).map((id) => {
-                const description = node.ownerDocument.getElementById(id);
-                return { id, present: Boolean(description), text: description?.textContent?.trim() || '' };
-              }),
+              describedBy: (node.getAttribute('aria-describedby') || '')
+                .split(/\s+/)
+                .filter(Boolean)
+                .map((id) => {
+                  const description = node.ownerDocument.getElementById(id);
+                  return {
+                    id,
+                    present: Boolean(description),
+                    text: description?.textContent?.trim() || '',
+                  };
+                }),
               complete: node.complete,
               x: rect.x,
               y: rect.y,
@@ -399,7 +394,10 @@ try {
             if (profile.intrinsic === 'viewBox') {
               assert.ok(measurement.naturalWidth > 0 && measurement.naturalHeight > 0);
               assert.ok(
-                Math.abs(measurement.naturalWidth / measurement.naturalHeight - expected.width / expected.height) < 0.01,
+                Math.abs(
+                  measurement.naturalWidth / measurement.naturalHeight -
+                    expected.width / expected.height
+                ) < 0.01,
                 'A viewBox-only asset retains its aspect ratio without inventing intrinsic pixels'
               );
             } else {
@@ -408,7 +406,10 @@ try {
             }
             assert.ok(measurement.complete && measurement.alt.length > 0);
             for (const description of measurement.describedBy) {
-              assert.ok(description.present && description.text, 'Authored descriptions must resolve');
+              assert.ok(
+                description.present && description.text,
+                'Authored descriptions must resolve'
+              );
             }
             assert.equal(measurement.scheme, theme);
             assert.ok(measurement.width > 0 && measurement.height > 0);
@@ -443,7 +444,9 @@ try {
                   node?.complete &&
                   node.currentSrc === source &&
                   (viewBox
-                    ? node.naturalWidth > 0 && node.naturalHeight > 0 && Math.abs(node.naturalWidth / node.naturalHeight - width / height) < 0.01
+                    ? node.naturalWidth > 0 &&
+                      node.naturalHeight > 0 &&
+                      Math.abs(node.naturalWidth / node.naturalHeight - width / height) < 0.01
                     : node.naturalWidth === width && node.naturalHeight === height)
                 );
               },
@@ -465,7 +468,8 @@ try {
             );
             assert.ok(
               await page.evaluate(
-                () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
+                () =>
+                  document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
               ),
               'The article must not introduce horizontal overflow'
             );
@@ -510,9 +514,10 @@ try {
             assert.deepEqual(configuredViewport, viewport);
             const fullPage = !originalRegion.fitsUnobstructedViewport;
             const kind = fullPage ? 'document-region' : 'viewport-region';
-            const figureFile = profile.figure === 'evolution-feedback'
-              ? `${id}-figure-${fullPage ? 'document' : 'viewport'}.png`
-              : `${id}-figure.png`;
+            const figureFile =
+              profile.figure === 'evolution-feedback'
+                ? `${id}-figure-${fullPage ? 'document' : 'viewport'}.png`
+                : `${id}-figure.png`;
             entry.figureCapture = { kind, file: figureFile, originalRegion, outcome: 'running' };
             try {
               // Only genuine scrolling changes the view. Tall figures need a
@@ -664,13 +669,18 @@ try {
             triggerLabel: await trigger.locator('.docs-image-trigger-label').textContent(),
             triggerSnapshot: await trigger.ariaSnapshot(),
             imageDescriptions: entry.image.describedBy,
-            caption: await image.evaluate((node) =>
-              node.closest('figure')?.querySelector('figcaption')?.textContent?.trim() || ''
+            caption: await image.evaluate(
+              (node) =>
+                node.closest('figure')?.querySelector('figcaption')?.textContent?.trim() || ''
             ),
           };
           entry.preview = await openPreview();
-          entry.accessibility.previewDescription = await page.locator('.docs-image-accessible-description').textContent();
-          entry.accessibility.previewSnapshot = await page.locator('[data-docs-image-content]').ariaSnapshot();
+          entry.accessibility.previewDescription = await page
+            .locator('.docs-image-accessible-description')
+            .textContent();
+          entry.accessibility.previewSnapshot = await page
+            .locator('[data-docs-image-content]')
+            .ariaSnapshot();
           if (entry.accessibility.caption) {
             assert.ok(
               entry.accessibility.previewDescription.includes(entry.accessibility.caption),

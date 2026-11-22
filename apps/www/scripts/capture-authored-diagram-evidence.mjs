@@ -75,6 +75,45 @@ export function authoredSvgDimensions(source) {
   return { viewBox, width: viewBox[2], height: viewBox[3] };
 }
 
+// getBoundingClientRect measures the border box. SVG intrinsic proportions
+// belong to the image content; retain the outer box for visibility and PNG clips.
+export function authoredImageContentBox(image) {
+  assert.ok(Number.isFinite(image.width) && image.width > 0);
+  assert.ok(Number.isFinite(image.height) && image.height > 0);
+  for (const kind of ['border', 'padding']) {
+    const edges = image.style[kind];
+    assert.ok(
+      edges &&
+        ['top', 'right', 'bottom', 'left'].every(
+          (edge) => Number.isFinite(edges[edge]) && edges[edge] >= 0
+        ),
+      `Measured nonnegative ${kind} edges are required`
+    );
+  }
+  const { border, padding } = image.style;
+  const width = image.width - border.left - border.right - padding.left - padding.right;
+  const height = image.height - border.top - border.bottom - padding.top - padding.bottom;
+  assert.ok(width > 0 && height > 0, 'Image content box must be positive');
+  return { width, height };
+}
+
+function verifyAuthoredImageGeometry(image, dimensions) {
+  assert.deepEqual(
+    image.contentBox,
+    authoredImageContentBox(image),
+    'Recompute content geometry from measured border and padding edges'
+  );
+  assert.ok(
+    Math.abs(image.naturalWidth / image.naturalHeight - dimensions.width / dimensions.height) < 0.01
+  );
+  assert.ok(
+    Math.abs(
+      image.contentBox.width / image.contentBox.height - dimensions.width / dimensions.height
+    ) < 0.01,
+    'Image content aspect ratio differs from its SVG'
+  );
+}
+
 export async function verifyAuthoredDiagramReport(
   report,
   { inventory, provenance, build, readSource, readScreenshot }
@@ -141,14 +180,7 @@ export async function verifyAuthoredDiagramReport(
     assert.equal(entry.image.document.horizontalOverflow, false);
     assert.equal(entry.image.inViewportHorizontally, true);
     const dimensions = report.assets[expected.asset];
-    assert.ok(
-      Math.abs(
-        entry.image.naturalWidth / entry.image.naturalHeight - dimensions.width / dimensions.height
-      ) < 0.01
-    );
-    assert.ok(
-      Math.abs(entry.image.width / entry.image.height - dimensions.width / dimensions.height) < 0.01
-    );
+    verifyAuthoredImageGeometry(entry.image, dimensions);
     for (const kind of ['article', 'figure']) {
       const capture = entry[kind + 'Capture'];
       assert.equal(capture.file, `${expected.id}-${kind}.png`);
@@ -160,6 +192,10 @@ export async function verifyAuthoredDiagramReport(
     assert.deepEqual(entry.articleCapture.dimensions, expected.viewport);
     assert.deepEqual(entry.articleCapture.source, entry.image);
     const positioned = entry.figureCapture.source;
+    for (const measured of [positioned, entry.figureCapture.after]) {
+      verifyAuthoredImageGeometry(measured, dimensions);
+      assert.deepEqual(measured.contentBox, entry.image.contentBox);
+    }
     assert.deepEqual(positioned.viewport, expected.viewport);
     assert.deepEqual(positioned.documentImage, entry.image.documentImage);
     assert.deepEqual(entry.figureCapture.after.documentImage, positioned.documentImage);
@@ -185,7 +221,7 @@ export async function verifyAuthoredDiagramReport(
 }
 
 // Executed only within the actual article. No cloned DOM or SVG-document probe.
-function measureImage(node) {
+export function measureImage(node) {
   const box = (element) => {
     const { x, y, width, height } = element.getBoundingClientRect();
     return { x, y, width, height };
@@ -235,6 +271,19 @@ function measureImage(node) {
       opacity: style.opacity,
       colorScheme: style.colorScheme,
       filter: style.filter,
+      boxSizing: style.boxSizing,
+      border: Object.fromEntries(
+        ['Top', 'Right', 'Bottom', 'Left'].map((side) => [
+          side.toLowerCase(),
+          Number.parseFloat(style[`border${side}Width`]),
+        ])
+      ),
+      padding: Object.fromEntries(
+        ['Top', 'Right', 'Bottom', 'Left'].map((side) => [
+          side.toLowerCase(),
+          Number.parseFloat(style[`padding${side}`]),
+        ])
+      ),
     },
     viewport: { width: innerWidth, height: innerHeight },
     scroll: { x: scrollX, y: scrollY },
@@ -380,20 +429,12 @@ export async function captureAuthoredDiagrams({ root, directory, revision, execu
         await image.evaluate((node) => node.decode());
         await page.evaluate(() => document.fonts.ready);
         entry.image = await image.evaluate(measureImage);
+        entry.image.contentBox = authoredImageContentBox(entry.image);
         assert.equal(entry.image.src, origin + entry.asset);
         assert.ok(
           entry.image.complete && entry.image.naturalWidth > 0 && entry.image.naturalHeight > 0
         );
-        assert.ok(
-          Math.abs(
-            entry.image.naturalWidth / entry.image.naturalHeight -
-              dimensions.width / dimensions.height
-          ) < 0.01
-        );
-        assert.ok(
-          Math.abs(entry.image.width / entry.image.height - dimensions.width / dimensions.height) <
-            0.01
-        );
+        verifyAuthoredImageGeometry(entry.image, dimensions);
         const articleFile = `${entry.id}-article.png`;
         await page.screenshot({ path: path.join(out, articleFile), scale: 'css' });
         entry.articleCapture = {
@@ -410,6 +451,7 @@ export async function captureAuthoredDiagrams({ root, directory, revision, execu
             new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
         );
         const positioned = await image.evaluate(measureImage);
+        positioned.contentBox = authoredImageContentBox(positioned);
         const bounds = positioned.documentImage;
         const clip = {
           x: Math.floor(bounds.x),
@@ -433,6 +475,7 @@ export async function captureAuthoredDiagrams({ root, directory, revision, execu
           animations: 'allow',
         });
         const after = await image.evaluate(measureImage);
+        after.contentBox = authoredImageContentBox(after);
         assert.deepEqual(after.viewport, entry.viewport);
         assert.deepEqual(
           after.documentImage,

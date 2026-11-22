@@ -95,7 +95,9 @@ test('the four generated profiles bind their ten explicit locale assets', async 
     },
   };
   assert.deepEqual(
-    diagramProfiles().filter((profile) => profile.figure !== 'information-flow-model').map((profile) => profile.figure),
+    diagramProfiles()
+      .filter((profile) => profile.figure !== 'information-flow-model')
+      .map((profile) => profile.figure),
     Object.keys(expected)
   );
   assert.ok(Object.isFrozen(diagramProfiles()));
@@ -155,8 +157,24 @@ test('the retained legacy profile uses canonical chapters and viewBox geometry i
     height: 760,
     intrinsic: 'viewBox',
     fonts: 'system',
+    systemFontRoles: [
+      {
+        classes: ['channel-label'],
+        genericFamily: 'monospace',
+        labels: ['event', 'feedback', 'props', 'expose', 'context'],
+      },
+      {
+        classes: ['actor-label', 'component-label', 'dimension-label', 'dimension-heading'],
+        genericFamily: 'sans-serif',
+      },
+    ],
     revealDetailsId: 'legacy-information-flow-comparison',
   });
+  assert.ok(Object.isFrozen(profile.systemFontRoles));
+  for (const role of profile.systemFontRoles) {
+    assert.ok(Object.isFrozen(role) && Object.isFrozen(role.classes));
+    if (role.labels) assert.ok(Object.isFrozen(role.labels));
+  }
   for (const locale of ['en', 'zh-cn']) {
     assert.deepEqual(diagramLocale(profile, locale), {
       asset: '/diagrams/information-flow-model.svg',
@@ -164,7 +182,10 @@ test('the retained legacy profile uses canonical chapters and viewBox geometry i
     });
     for (const width of [390, 639, 640, 1440]) {
       assert.deepEqual(selectDiagramVariant(profile, locale, width), {
-        name: 'desktop', asset: '/diagrams/information-flow-model.svg', width: 600, height: 760,
+        name: 'desktop',
+        asset: '/diagrams/information-flow-model.svg',
+        width: 600,
+        height: 760,
       });
     }
   }
