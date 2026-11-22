@@ -6,7 +6,8 @@ permissions:
   contents: read
 concurrency:
   group: bootstrap-state-controls-evidence-${{ github.ref }}
-  cancel-in-progress: true
+  # Manual evidence must not cancel an active shared regression cycle.
+  cancel-in-progress: false
 jobs:
   browser-evidence:
     runs-on: ubuntu-24.04
