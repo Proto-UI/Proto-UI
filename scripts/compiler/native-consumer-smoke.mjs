@@ -532,15 +532,16 @@ try{
     const element=document.createElement('native-consumer-counter');
     element.addEventListener('phase',event=>recordPhase(event.detail));
     const transact=async callback=>{callback();await microtasks();};
-    driver={query:()=>element.shadowRoot?.querySelector('section')??null,handle:()=>element,
+    driver={query:()=>element.querySelector('section'),handle:()=>element,
       transact,
       change:props=>transact(()=>element.setProps(props)),
       destroy:()=>{element.dispose();element.remove();},
       move:()=>transact(()=>{const other=document.createElement('div');document.body.append(other);other.append(element);})};
     element.setProps(initial);outer.append(element);await microtasks();
+    assert.equal(element.shadowRoot,null,'Ordinary WC profile uses the native light-DOM surface');
   }else throw new Error('Unsupported runtime profile '+profile);
   trace.measurements.initializationMs=performance.now()-initializationStart;
-  driver.query=()=>profile==='web-component-source-v1'?driver.handle().shadowRoot?.querySelector(templateTag)??null:outer.querySelector(templateTag);
+  driver.query=()=>profile==='web-component-source-v1'?driver.handle().querySelector(templateTag):outer.querySelector(templateTag);
   driver.host=()=>profile==='web-component-source-v1'?driver.handle():outer.querySelector('[data-pui-root]');
   const transact=driver.transact;
   driver.transact=async callback=>{const start=performance.now();await transact(callback);trace.measurements.updates.push({operation:'owner transaction (including framework flush)',ms:performance.now()-start});};
@@ -566,7 +567,7 @@ try{
   const visible=(text)=>assert.equal(driver.query()?.textContent,text);
   observe('mount');visible('2');assert.equal(state.get(),2);
   styled(['bg-white','opacity-100']);assert.equal(driver.query().getAttribute('data-pui-style'),'text-white');
-  assert.equal(driver.query().parentElement,profile==='web-component-source-v1'?null:driver.host(),'Template must be inside the single Root');
+  assert.equal(driver.query().parentElement,driver.host(),'Template must be inside the single native Root');
   assert.deepEqual(trace.phases.map(item=>item.kind),['created','mounted']);
   const off=state.subscribe(event=>{trace.transitions.push({prev:event.prev,next:event.next,reason:event.reason??null});save();});
   const stableRoot=driver.host();
@@ -574,7 +575,7 @@ try{
   assert.equal(driver.host(),stableRoot);assert.deepEqual(trace.phases.map(item=>item.kind),['created','mounted']);
   assert.deepEqual(trace.transitions.map(item=>[item.prev,item.next]),[[2,7]]);
   const styleUpdates=trace.phases.filter(item=>item.kind==='updated').length;
-  const hostPropsUpdate=profile==='vue2-source-v1'||profile==='web-component-source-v1';
+  const hostPropsUpdate=profile==='vue2-source-v1';
   trace.hostPropsPolicy=hostPropsUpdate?'Host props replacement explicitly requests semantic update':'Only authored run.update requests semantic update';
   const propsText=hostPropsUpdate?'7':'2';
   await driver.change({seed:2,visible:true,active:true});observe('later-rule-wins');styled(['bg-black','opacity-40']);visible(propsText);
@@ -646,7 +647,8 @@ try{
     providerModule.register('native-consumer-provider');consumerModule.register('native-consumer-context');
     const parent=document.createElement('native-consumer-provider');const child=document.createElement('native-consumer-context');
     parent.setProps({seed:31});parent.append(child);contextHost.append(parent);await microtasks();
-    contextDriver={change:async next=>{parent.setProps({seed:next});await microtasks();},handle:()=>child,query:()=>child.shadowRoot?.querySelector('output'),destroy:async()=>{child.dispose();parent.dispose();parent.remove();await microtasks();}};
+    assert.equal(parent.shadowRoot,null);assert.equal(child.shadowRoot,null);
+    contextDriver={change:async next=>{parent.setProps({seed:next});await microtasks();},handle:()=>child,query:()=>child.querySelector('output'),destroy:async()=>{child.dispose();parent.dispose();parent.remove();await microtasks();}};
   }
   trace.context={initializationMs:performance.now()-contextStart,steps:[]};
   memorySnapshot('context-mount');
