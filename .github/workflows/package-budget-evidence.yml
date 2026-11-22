@@ -1,0 +1,49 @@
+name: Package budget evidence
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-budget-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  whole-entry-budgets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the frozen public package graph
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.32.1 --activate
+          corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Build the complete publish graph
+        run: corepack pnpm@10.32.1 build:packages
+      - name: Check public manifests and measurement controls
+        run: |
+          corepack pnpm@10.32.1 check:package-manifests
+          corepack pnpm@10.32.1 test:package-budget-policy
+      - name: Enforce the unchanged strict whole-entry gate
+        run: |
+          mkdir -p "$RUNNER_TEMP/package-budgets"
+          node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA" > "$RUNNER_TEMP/package-budgets/report.json"
+      - name: Preserve actual comparisons and the measured source closure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-budgets-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/package-budgets/report.json
+          if-no-files-found: error
+          retention-days: 30

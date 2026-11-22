@@ -789,7 +789,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           if (!this.canProject()) return;
           if (
             this.dirty &&
-            (this.caps.has(SHADER_PRESENTATION_SINK_CAP) ||
+            ((this.shaderDeclaration !== null && this.caps.has(SHADER_PRESENTATION_SINK_CAP)) ||
               this.caps.has(VISUAL_FEEDBACK_SINK_CAP) ||
               this.caps.has(FINAL_STYLE_SINK_CAP))
           ) {

@@ -71,6 +71,34 @@ function fixture() {
 }
 
 describe('portable shader owner without Web globals', () => {
+  it.each([false, true])(
+    'keeps a failed ordinary Effects publication deferred with an unused shader capability (%s)',
+    (shaderAvailable) => {
+      const f = fixture();
+      if (shaderAvailable) f.caps.attach([[SHADER_PRESENTATION_SINK_CAP, f.sink]]);
+      f.facade.style.use(tw('bg-black'));
+      f.mount();
+      f.effects.queueStyle.mockImplementationOnce(() => {
+        throw new Error('ordinary host publication failed');
+      });
+      expect(() => f.facade.style.patch(tw('bg-white'))).toThrow(
+        'ordinary host publication failed'
+      );
+      f.effects.queueStyle.mockClear();
+      f.effects.requestFlush.mockClear();
+      f.hooks.onEffectsFlushed?.();
+      expect(f.effects.queueStyle).not.toHaveBeenCalled();
+      expect(f.effects.requestFlush).toHaveBeenCalledTimes(1);
+      expect(f.sink.commit).not.toHaveBeenCalled();
+      f.hooks.afterRenderCommit();
+      expect(f.effects.queueStyle).toHaveBeenCalledWith(
+        expect.objectContaining({ tokens: ['bg-white'] })
+      );
+      expect(f.sink.commit).not.toHaveBeenCalled();
+      f.hooks.dispose?.();
+    }
+  );
+
   it('snapshots authored data once and preserves final patched style in the complete frame', () => {
     expect(typeof window).toBe('undefined');
     expect(typeof document).toBe('undefined');
