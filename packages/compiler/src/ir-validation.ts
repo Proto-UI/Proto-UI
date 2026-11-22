@@ -2030,8 +2030,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               };
               const thenScope = branch(true),
                 elseScope = branch(false);
-              const a = statements(node.then, thenScope, phase, context, reachableReturns),
-                b = statements(node.otherwise, elseScope, phase, context, reachableReturns);
+              const beforeBranch = flow.checkpoint();
+              const a = statements(node.then, thenScope, phase, context, reachableReturns);
+              const thenFlow = flow.checkpoint();
+              flow.restore(beforeBranch);
+              const b = statements(node.otherwise, elseScope, phase, context, reachableReturns);
+              const elseFlow = flow.checkpoint();
+              if (a) flow.restore(elseFlow);
+              else if (b) flow.restore(thenFlow);
+              else flow.merge(thenFlow, elseFlow);
               const continuing = a ? elseScope : b ? thenScope : undefined;
               if (continuing)
                 for (const name of scope.keys()) scope.set(name, continuing.get(name)!);

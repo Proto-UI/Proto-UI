@@ -8,7 +8,7 @@ use proto_ui_gpui_native::gpui_native_owner::{
     catch_authored, detach_native_view, dispatch, event_fields, expose_event, expose_method,
     expose_value, focus_setup, focus_setup_config, invoke, native_owner_allocation_count,
     native_resource_counts, record, scroll_frame, scroll_request, strict_equal, NativeSnapshot, Owner, OwnerRef, Value,
-    TABLE_STRUCTURE_FAMILY,
+    TABLE_STRUCTURE_FAMILY, attach_scroll_surface, NativeScrollTarget, scroll_snapshot,
 };
 use serde_json::{json, Value as Json};
 use std::{
@@ -554,6 +554,85 @@ fn event_names(owner: &OwnerRef) -> Vec<String> {
         .iter()
         .map(|(name, _)| name.clone())
         .collect()
+}
+
+struct PhysicalScroll {
+    handle: gpui::ScrollHandle,
+    rows: usize,
+}
+impl Render for PhysicalScroll {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        gpui::div().id("physical-scroll").w(px(160.)).h(px(80.))
+            .overflow_y_scroll().track_scroll(&self.handle).flex().flex_col()
+            .children((0..self.rows).map(|index| gpui::div().flex_none().h(px(20.)).child(format!("Row {index}"))))
+    }
+}
+
+#[gpui::test]
+fn native_scroll_target_shares_real_geometry_and_retires_only_its_lease(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    let (component, first_handle, first_target, first_lease) = window.update(cx, |host, window, cx| {
+        let component = external_scroll::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let owner = component.read(cx).owner.clone();
+        let handle = gpui::ScrollHandle::default();
+        let target = NativeScrollTarget::new(handle.clone());
+        let lease = attach_scroll_surface(&Rc::downgrade(&owner), target.clone(), window).unwrap();
+        let content = cx.new(|_| PhysicalScroll { handle: handle.clone(), rows: 30 });
+        component.update(cx, |view, cx| view.set_slot(vec![NativeSnapshot::native_view(content.into())], cx).unwrap());
+        host.scope.update(cx, |view, cx| view.set_slot(vec![NativeSnapshot::native_view(component.clone().into())], cx).unwrap());
+        (component, handle, target, lease)
+    }).unwrap();
+    frames(window, cx);
+    let (second_handle, second_lease) = window.update(cx, |_, window, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(first_lease.is_current());
+        assert!(first_handle.max_offset().y > px(100.), "real child layout establishes overflow");
+        assert_eq!(owner.borrow().modules.scroll.handle.as_ref().unwrap().max_offset().y, px(0.), "compiler root did not create a second scroll box");
+        assert_eq!(exposed(&owner, "middle").call(vec![]).unwrap().member("kind", false).text(), "dispatched");
+        assert!((first_handle.offset().y + first_handle.max_offset().y / 2.).abs() < px(0.01));
+        let snapshot = exposed(&owner, "snapshot").call(vec![]).unwrap();
+        assert_eq!(snapshot.member("projection", false).text(), "system");
+        assert!((snapshot.member("vertical", false).member("position", false).num() - 0.5).abs() < 0.001);
+        // A rival acquisition has no authority over the existing physical box.
+        let rival = external_scroll::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        assert!(attach_scroll_surface(&Rc::downgrade(&rival.read(cx).owner), first_target.clone(), window).is_err());
+        assert!(first_lease.is_current());
+        exposed(&owner, "end").call(vec![]).unwrap();
+        exposed(&owner, "sameAxis").call(vec![]).unwrap();
+        assert!(owner.borrow().modules.scroll.pending_end.is_some());
+        exposed(&owner, "extraFields").call(vec![]).unwrap();
+        assert!(owner.borrow().modules.scroll.pending_end.is_none());
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected");
+        assert_eq!(owner.borrow().modules.scroll.config["projection"].text(), "system");
+        assert_eq!(exposed(&owner, "middle").call(vec![]).unwrap().member("reason", false).text(), "unavailable");
+        exposed(&owner, "vertical").call(vec![]).unwrap();
+        exposed(&owner, "end").call(vec![]).unwrap();
+        let offset = first_handle.offset();
+        let handle = gpui::ScrollHandle::default();
+        let lease = attach_scroll_surface(&Rc::downgrade(&owner), NativeScrollTarget::new(handle.clone()), window).unwrap();
+        assert!(!first_lease.is_current());
+        assert!(owner.borrow().modules.scroll.pending_end.is_none());
+        assert_eq!(first_handle.offset(), offset, "release never moves the old physical target");
+        let content = cx.new(|_| PhysicalScroll { handle: handle.clone(), rows: 45 });
+        component.update(cx, |view, cx| view.set_slot(vec![NativeSnapshot::native_view(content.into())], cx).unwrap());
+        (handle, lease)
+    }).unwrap();
+    drop(first_lease);
+    frames(window, cx);
+    window.update(cx, |_, window, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(second_lease.is_current(), "late old lease cleanup preserves replacement");
+        assert!(second_handle.max_offset().y > px(100.));
+        assert_eq!(second_handle.offset().y, px(0.), "old pending end was not replayed into the replacement");
+        exposed(&owner, "middle").call(vec![]).unwrap();
+        let offset = second_handle.offset();
+        detach_native_view(&owner);
+        assert!(!second_lease.is_current());
+        assert!(!second_lease.note_input(window));
+        assert_eq!(second_handle.offset(), offset);
+        assert_eq!(scroll_snapshot(&Rc::downgrade(&owner)).member("projection", false).text(), "unresolved");
+        assert_eq!(exposed(&owner, "middle").call(vec![]).unwrap().member("reason", false).text(), "not-mounted");
+    }).unwrap();
 }
 
 #[gpui::test]

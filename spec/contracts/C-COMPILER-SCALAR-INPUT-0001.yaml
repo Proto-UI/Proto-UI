@@ -1,0 +1,42 @@
+id: C-COMPILER-SCALAR-INPUT-0001
+type: contract
+title: Bounded scalar conversion and readonly JSON output in Compiler source
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  Human-directed consumer work exposes these ordinary source operations. The slice has checked source and IR admission plus executable generated-native regressions, but independent review and source-bound native execution are required before activation.
+
+summary: Preserve checked scalar conversion, UTF-16 length, numeric rounding and finite readonly data snapshots without admitting arbitrary JavaScript coercion.
+statement:
+  en: >-
+    A compiler may admit the bounded source operations defined here independently of any component identity. They preserve the existing primitive language semantics and JSON ownership boundary; they neither grant general object coercion nor remove readonly permissions from an authored lexical value.
+
+criteria:
+  - id: C-COMPILER-SCALAR-INPUT-0001-LENGTH
+    text: >-
+      Reading length on a checked string counts UTF-16 code units. Optional access preserves undefined only for a nullish receiver. This does not admit arbitrary string properties or extend a target's string transport domain.
+
+  - id: C-COMPILER-SCALAR-INPUT-0001-CONVERSION
+    text: >-
+      Number accepts zero or one checked scalar primitive operand and follows the existing ECMAScript binary64 scalar conversion. No argument yields positive zero; undefined yields NaN. GPUI String accepts zero or one checked scalar primitive operand; no argument yields the empty string. Structured objects, callbacks, capabilities and opaque unknown do not acquire native conversion. Calls evaluate their argument once. Source bindings shadowing Number, String or Math retain their authored meaning.
+
+  - id: C-COMPILER-SCALAR-INPUT-0001-ROUNDING
+    text: >-
+      Math.floor and Math.round each require one checked number operand. Floor rounds toward negative infinity. Round chooses the nearest integer with ties toward positive infinity, preserving negative zero for values from negative one half through negative zero. Both preserve NaN, infinities and signed zero as intermediate numeric values. This does not admit nonfinite outward JSON numbers. Evaluation occurs once, including failures.
+
+  - id: C-COMPILER-SCALAR-INPUT-0001-READONLY
+    text: >-
+      An outward Expose event may snapshot a finite readonly record whose entire value type recursively proves JSON data. Readonly remains a lexical mutation restriction. The event schema removes only readonly metadata, retaining field types and optionality. Capabilities, callable values, open dictionaries, unknown and nested undefined cannot cross this boundary, including hidden fields in a structurally narrowed source view. Independently supplied IR must satisfy the same proof as source admission.
+
+sources:
+  - path: packages/compiler/src/value-types.ts
+  - path: packages/compiler/src/expression-types.ts
+  - path: packages/compiler/src/gpui-native-values.ts
+  - path: packages/compiler/test/gpui-authored-inputs.test.ts
+verifies:
+  tests: [T-COMPILER-GPUI-AUTHORED-INPUT-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define scalar and readonly data operations reached by native authored text and continuous controls.
+tags: [compiler, scalar, data, native]

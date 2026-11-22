@@ -251,6 +251,39 @@ export function objectValueType(fields: ObjectValueType['fields']): ValueType {
     : { kind: 'object', fields };
 }
 
+/** Prove an outward JSON snapshot without erasing the expression's readonly view.
+ * Capabilities, callbacks, open dictionaries and nested undefined are never data. */
+export function dataBoundaryType(type: ValueType, top = true): DataType | undefined {
+  if (typeof type === 'string')
+    return ['boolean', 'number', 'string', 'null'].includes(type) || (top && type === 'void')
+      ? (type as DataType)
+      : undefined;
+  if (type.kind === 'literal') return type;
+  if (type.kind === 'array') {
+    const element = dataBoundaryType(type.element, false);
+    return element ? { kind: 'array', element } : undefined;
+  }
+  if (type.kind === 'union' || type.kind === 'value-union') {
+    const members = type.members.map((member) => dataBoundaryType(member, false));
+    return members.every((member): member is DataType => member !== undefined)
+      ? { kind: 'union', members }
+      : undefined;
+  }
+  if (
+    (type.kind === 'record' || type.kind === 'object') &&
+    !('index' in type && type.index !== undefined)
+  ) {
+    const fields: { name: string; type: DataType; optional?: boolean }[] = [];
+    for (const field of type.fields) {
+      const value = dataBoundaryType(field.type, false);
+      if (!value) return undefined;
+      fields.push({ name: field.name, type: value, ...(field.optional ? { optional: true } : {}) });
+    }
+    return { kind: 'record', fields };
+  }
+  return undefined;
+}
+
 export function memberValueType(owner: ValueType, key: string, optional = false): ValueType {
   const types = valueAlternatives(owner).map((type) => {
     if (type === 'null' || type === 'void') {
@@ -369,6 +402,18 @@ export function intrinsicResult(
   )
     return 'boolean';
   if (name === 'typeof' && args.length === 1) return 'string';
+  if (
+    name === 'number' &&
+    args.length <= 1 &&
+    args.every((type) =>
+      valueAlternatives(type).every((member) =>
+        typeof member === 'string'
+          ? ['string', 'number', 'boolean', 'null', 'void'].includes(member)
+          : member.kind === 'literal'
+      )
+    )
+  )
+    return 'number';
   if (name === 'string') {
     if (
       args.length <= 1 &&
@@ -382,6 +427,12 @@ export function intrinsicResult(
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
     return 'exception';
   if (name === 'number.isFinite' && args.length === 1 && isDataValueType(args[0])) return 'boolean';
+  if (
+    (name === 'math.floor' || name === 'math.round') &&
+    args.length === 1 &&
+    valueAssignable(args[0], 'number')
+  )
+    return 'number';
   if (name === 'string' && args.length === 1 && (isDataValueType(args[0]) || args[0] === 'unknown'))
     return 'string';
   if (name === 'object.freeze' && args.length === 1 && objectFields(args[0])) return args[0];

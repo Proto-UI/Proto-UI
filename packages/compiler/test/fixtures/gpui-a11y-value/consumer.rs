@@ -234,3 +234,127 @@ fn numeric_projection_rejects_invalid_native_facts_instead_of_coercing_to_zero(c
         }
     }).unwrap();
 }
+
+macro_rules! native_control {
+    ($harness:ident, $component:path, $open:ident) => {
+        struct $harness { component: Entity<$component> }
+        impl Render for $harness {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                gpui::div().size_full().child(self.component.clone())
+            }
+        }
+        fn $open(cx: &mut TestAppContext, props: serde_json::Value) -> WindowHandle<$harness> {
+            cx.open_window(size(px(240.), px(80.)), |window, cx| $harness {
+                component: cx.new(|cx| <$component>::new(props, None, window, cx)
+                    .unwrap_or_else(|_| panic!("authored control construction failed"))),
+            })
+        }
+    };
+}
+native_control!(ActivationHarness, activation::CompiledComponent, open_activation);
+native_control!(HostActivationHarness, host_activation::CompiledComponent, open_host_activation);
+native_control!(TextHarness, text::CompiledComponent, open_text);
+
+#[gpui::test]
+fn assistive_activation_enters_authored_press_before_expose_and_disabled_policy(cx: &mut TestAppContext) {
+    let window = open_activation(cx, json!({}));
+    let mut visual = VisualTestContext::from_window(AnyWindowHandle::from(window), cx);
+    frames(&mut visual);
+    window.update(&mut visual, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        assert_eq!(action_from_name("activate"), gpui::AccessibleAction::Click);
+        assert!(dispatch_accessibility_action(&handle.owner, "activate", None));
+        assert_eq!(handle.take_events(), vec![("invoked".into(), json!({"count":2,"selected":true}))]);
+        assert_eq!(handle.state("count").unwrap_or_else(|_| panic!("count state")).as_f64(), Some(2.));
+        assert!(dispatch(&handle.owner, "press.commit", false, event_fields("press.commit")));
+        assert_eq!(handle.take_events(), vec![("invoked".into(), json!({"count":4,"selected":false}))]);
+        handle.call("setDisabled", vec![json!(true)], window, cx).unwrap_or_else(|_| panic!("disable"));
+        assert!(!dispatch_accessibility_action(&handle.owner, "activate", None));
+        assert!(handle.take_events().is_empty());
+        assert_eq!(handle.state("count").unwrap_or_else(|_| panic!("count state")).as_f64(), Some(4.));
+        detach_native_view(&handle.owner);
+        assert!(!dispatch_accessibility_action(&handle.owner, "activate", None));
+        Owner::dispose(&handle.owner);
+        assert!(!dispatch_accessibility_action(&handle.owner, "activate", None));
+        assert!(handle.take_failures().is_empty());
+    }).unwrap();
+}
+
+#[gpui::test]
+fn explicit_host_activation_keeps_its_authored_route_without_trigger(cx: &mut TestAppContext) {
+    let window = open_host_activation(cx, json!({}));
+    let mut visual = VisualTestContext::from_window(AnyWindowHandle::from(window), cx);
+    frames(&mut visual);
+    window.update(&mut visual, |host, _, cx| {
+        let handle = host.component.read(cx).handle();
+        // No portable default prevention was requested by this host extension.
+        assert!(!dispatch_accessibility_action(&handle.owner, "activate", None));
+        assert_eq!(handle.state("count").unwrap_or_else(|_| panic!("count state")).as_f64(), Some(7.));
+        assert_eq!(handle.take_events(), vec![("changed".into(), json!({"count":7}))]);
+        assert!(handle.take_failures().is_empty());
+    }).unwrap();
+}
+
+#[gpui::test]
+fn conditional_accessibility_projects_only_applicable_current_facts(cx: &mut TestAppContext) {
+    let window = open_activation(cx, json!({}));
+    let mut visual = VisualTestContext::from_window(AnyWindowHandle::from(window), cx);
+    frames(&mut visual);
+    window.update(&mut visual, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        let hidden = projected_node(&handle.owner);
+        assert_eq!(hidden.toggled(), None);
+        assert_eq!(hidden.is_selected(), None);
+        assert_eq!(hidden.is_expanded(), None);
+        handle.call("setSelected", vec![json!(true)], window, cx).unwrap_or_else(|_| panic!("select"));
+        handle.call("setObsolete", vec![json!(false)], window, cx).unwrap_or_else(|_| panic!("obsolete"));
+        assert_eq!(projected_node(&handle.owner).toggled(), None);
+        handle.call("setApplicable", vec![json!(true)], window, cx).unwrap_or_else(|_| panic!("enable"));
+        let active = projected_node(&handle.owner);
+        assert_eq!(active.toggled(), Some(gui_toggled(true)));
+        assert_eq!(active.is_selected(), Some(true));
+        assert_eq!(active.is_expanded(), Some(true));
+        handle.call("setApplicable", vec![json!(false)], window, cx).unwrap_or_else(|_| panic!("disable"));
+        handle.call("setSelected", vec![json!(false)], window, cx).unwrap_or_else(|_| panic!("select"));
+        handle.call("setApplicable", vec![json!(true)], window, cx).unwrap_or_else(|_| panic!("enable"));
+        assert_eq!(projected_node(&handle.owner).toggled(), Some(gui_toggled(false)));
+        // Probe corrupt runtime facts below State's normalizer. The projector
+        // must omit, never coerce, veto or replace that source value.
+        let condition = handle.owner.borrow().accessible_state_conditions.get("pressed").cloned().unwrap();
+        let Value::State(condition) = condition else { panic!("real condition State") };
+        *condition.value.borrow_mut() = Value::Undefined;
+        assert_eq!(projected_node(&handle.owner).toggled(), None);
+        assert!(matches!(*condition.value.borrow(), Value::Undefined));
+        *condition.value.borrow_mut() = Value::boolean(true);
+        assert_eq!(projected_node(&handle.owner).toggled(), Some(gui_toggled(false)));
+        assert!(handle.take_failures().is_empty());
+    }).unwrap();
+}
+fn gui_toggled(value: bool) -> gpui::Toggled { if value { gpui::Toggled::True } else { gpui::Toggled::False } }
+
+#[gpui::test]
+fn generated_text_reset_retains_controlled_truth_and_utf16_scalar_semantics(cx: &mut TestAppContext) {
+    for controlled in [false, true] {
+        let window = open_text(cx, json!({"controlled":controlled}));
+        let mut visual = VisualTestContext::from_window(AnyWindowHandle::from(window), cx);
+        frames(&mut visual);
+        window.update(&mut visual, |host, window, cx| {
+            let handle = host.component.read(cx).handle();
+            assert_eq!(handle.call("reset", vec![json!("a\r\n😀候b")], window, cx).unwrap_or_else(|_| panic!("reset")), json!(!controlled));
+            assert_eq!(handle.call("value", vec![], window, cx).unwrap_or_else(|_| panic!("value")), json!(if controlled {"truth"} else {"a😀候b"}));
+            assert_eq!(handle.call("length", vec![], window, cx).unwrap_or_else(|_| panic!("length")), json!(5));
+            assert_eq!(handle.call("composing", vec![], window, cx).unwrap_or_else(|_| panic!("composing")), json!(false));
+            for (value, floor, round, negative) in [(1.5,1.,2.,false),(-1.5,-2.,-1.,true),(-0.5,-1.,0.,true),(0.49999999999999994,0.,0.,false)] {
+                assert_eq!(handle.call("math", vec![json!(value)], window, cx).unwrap_or_else(|_| panic!("math")), json!({"floor":floor,"round":round,"negative":negative}));
+            }
+            for (input, expected) in [(" 0x10 ","16"),(" 0b11 ","3"),("", "0"),("-0", "0"),("Infinity", "invalid"),("no", "invalid")] {
+                assert_eq!(handle.call("parse", vec![json!(input)], window, cx).unwrap_or_else(|_| panic!("parse")), json!(expected));
+            }
+            assert_eq!(handle.call("reset", vec![], window, cx).unwrap_or_else(|_| panic!("reset default")), json!(!controlled));
+            assert_eq!(handle.call("value", vec![], window, cx).unwrap_or_else(|_| panic!("value")), json!(if controlled {"truth"} else {"seed"}));
+            detach_native_view(&handle.owner);
+            assert_eq!(handle.call("reset", vec![json!("detached")], window, cx).unwrap_or_else(|_| panic!("reset detached")), json!(false));
+            assert!(handle.take_failures().is_empty());
+        }).unwrap();
+    }
+}
