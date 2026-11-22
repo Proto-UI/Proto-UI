@@ -1,0 +1,410 @@
+{
+  "schema_version": 1,
+  "base_revision": "795b1b4958333cf904547e484acb4de9d4b3ee80",
+  "final_test_sha256": "bc44131a01668c3a75675d91891d032f4e66f4ff87a5bc218f6fd99bdd484b88",
+  "upstream_production_or_contract_change": false,
+  "candidate_head_at_execution": "Runs used the exact base commit plus each retained dirty patch. The final committed test is bound by its SHA256, not by mislabelling base HEAD as a tested clean candidate.",
+  "original_ci": {
+    "shenko_source": "c931526c8ae8cd16f3e0cf56d733f1e4275d5bb0",
+    "run_id": 44968307539,
+    "job_id": 137042231258,
+    "url": "https://github.com/cyjin-yl/shenko/actions/runs/44968307539/job/137042231258",
+    "upstream_pin": "795b1b4958333cf904547e484acb4de9d4b3ee80",
+    "suites": {
+      "passed": 182,
+      "failed": 1,
+      "skipped": 2
+    },
+    "tests": {
+      "passed": 2912,
+      "failed": 1,
+      "skipped": 9
+    },
+    "artifact_id": 14732462738,
+    "artifact_bytes": 1151499,
+    "artifact_sha256": "0ab487b6747204ce4626836f216a5d527b7cc4cdfb710dc93c8f441d9cb6bdbd",
+    "source_receipt": "original-ci/compiler-summary.json.gz",
+    "whole_zip_retained_here": false
+  },
+  "runs": [
+    {
+      "label": "controlled-late-mutation-baseline",
+      "role": "ineffective-instrumentation-probe",
+      "receipt": "controlled-late-mutation-baseline.receipt.json.gz",
+      "artifacts": {
+        "log": "controlled-late-mutation-baseline.log.gz",
+        "patch": "controlled-late-mutation-baseline.patch.gz",
+        "vitest.json": "controlled-late-mutation-baseline.vitest.json.gz",
+        "trace.jsonl": "controlled-late-mutation-baseline.trace.jsonl.gz"
+      },
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "exit_code": 0,
+      "duration_seconds": 13.658,
+      "inputs_unchanged_during_run": true,
+      "limitation": "The timer spy targeted a Vitest global alias, not the actual Happy DOM owner timer; no mutation timers were intercepted. Its passing outcome does not establish the ordering hypothesis."
+    },
+    {
+      "label": "controlled-document-mutation-baseline",
+      "role": "ineffective-instrumentation-probe",
+      "receipt": "controlled-document-mutation-baseline.receipt.json.gz",
+      "artifacts": {
+        "log": "controlled-document-mutation-baseline.log.gz",
+        "patch": "controlled-document-mutation-baseline.patch.gz",
+        "vitest.json": "controlled-document-mutation-baseline.vitest.json.gz",
+        "trace.jsonl": "controlled-document-mutation-baseline.trace.jsonl.gz"
+      },
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "exit_code": 0,
+      "duration_seconds": 13.268,
+      "inputs_unchanged_during_run": true,
+      "limitation": "The timer spy targeted a Vitest global alias, not the actual Happy DOM owner timer; no mutation timers were intercepted. Its passing outcome does not establish the ordering hypothesis."
+    },
+    {
+      "label": "controlled-owner-mutation-baseline",
+      "role": "controlled-negative",
+      "receipt": "controlled-owner-mutation-baseline.receipt.json.gz",
+      "artifacts": {
+        "log": "controlled-owner-mutation-baseline.log.gz",
+        "patch": "controlled-owner-mutation-baseline.patch.gz",
+        "vitest.json": "controlled-owner-mutation-baseline.vitest.json.gz",
+        "trace.jsonl": "controlled-owner-mutation-baseline.trace.jsonl.gz"
+      },
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 27,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "exit_code": 1,
+      "duration_seconds": 13.722,
+      "inputs_unchanged_during_run": true,
+      "trace_summary": {
+        "helper_return": [
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 32,
+            "time": 6285.885518,
+            "phase": "mount",
+            "kind": "helper-return",
+            "offset": 0,
+            "pendingMutationTimers": [10, 11, 14, 15, 16, 17, 18],
+            "round": 0,
+            "pendingFrames": 0
+          }
+        ],
+        "writes": [
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 34,
+            "time": 6286.537329,
+            "phase": "geometry",
+            "kind": "scrollTop-write",
+            "offset": 50,
+            "pendingMutationTimers": [10, 11, 14, 15, 16, 17, 18],
+            "before": 0,
+            "requested": 50,
+            "after": 50
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 64,
+            "time": 6386.812188,
+            "phase": "complete-delayed-mount-work-before-original-oracle",
+            "kind": "scrollTop-write",
+            "offset": 300,
+            "pendingMutationTimers": [],
+            "before": 50,
+            "requested": 300,
+            "after": 300
+          }
+        ],
+        "request_returns": [
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 36,
+            "time": 6288.542859,
+            "phase": "foreign-surface:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [10, 11, 14, 15, 16, 17, 18],
+            "name": "foreign-surface",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 38,
+            "time": 6289.214269,
+            "phase": "sibling:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [10, 11, 14, 15, 16, 17, 18],
+            "name": "sibling",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 40,
+            "time": 6289.646643,
+            "phase": "self:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [10, 11, 14, 15, 16, 17, 18],
+            "name": "self",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 42,
+            "time": 6290.236401,
+            "phase": "other-family:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [10, 11, 14, 15, 16, 17, 18],
+            "name": "other-family",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          }
+        ],
+        "mutation_delivery_count": 7,
+        "fixture_frame_count": 0
+      }
+    },
+    {
+      "label": "controlled-owner-mutation-settled",
+      "role": "controlled-positive",
+      "receipt": "controlled-owner-mutation-settled.receipt.json.gz",
+      "artifacts": {
+        "log": "controlled-owner-mutation-settled.log.gz",
+        "patch": "controlled-owner-mutation-settled.patch.gz",
+        "vitest.json": "controlled-owner-mutation-settled.vitest.json.gz",
+        "trace.jsonl": "controlled-owner-mutation-settled.trace.jsonl.gz"
+      },
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "exit_code": 0,
+      "duration_seconds": 13.683,
+      "inputs_unchanged_during_run": true,
+      "trace_summary": {
+        "helper_return": [
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 56,
+            "time": 6572.154473,
+            "phase": "mount",
+            "kind": "helper-return",
+            "offset": 0,
+            "pendingMutationTimers": [],
+            "round": 1,
+            "pendingFrames": 0
+          }
+        ],
+        "writes": [
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 52,
+            "time": 6570.784738,
+            "phase": "mount",
+            "kind": "scrollTop-write",
+            "offset": 0,
+            "pendingMutationTimers": [],
+            "before": 0,
+            "requested": 0,
+            "after": 0
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 58,
+            "time": 6572.806182,
+            "phase": "geometry",
+            "kind": "scrollTop-write",
+            "offset": 50,
+            "pendingMutationTimers": [],
+            "before": 0,
+            "requested": 50,
+            "after": 50
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 70,
+            "time": 6577.676277,
+            "phase": "valid:synchronous",
+            "kind": "scrollTop-write",
+            "offset": 70,
+            "pendingMutationTimers": [19],
+            "before": 50,
+            "requested": 70,
+            "after": 70
+          }
+        ],
+        "request_returns": [
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 60,
+            "time": 6573.778656,
+            "phase": "foreign-surface:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [],
+            "name": "foreign-surface",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 62,
+            "time": 6574.238139,
+            "phase": "sibling:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [],
+            "name": "sibling",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 64,
+            "time": 6574.609471,
+            "phase": "self:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [],
+            "name": "self",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 66,
+            "time": 6574.950818,
+            "phase": "other-family:synchronous",
+            "kind": "request-return",
+            "offset": 50,
+            "pendingMutationTimers": [],
+            "name": "other-family",
+            "result": {
+              "kind": "rejected",
+              "reason": "unavailable"
+            }
+          },
+          {
+            "profile": "react-dom-source-v1",
+            "mode": "delay-mount-mutations",
+            "sequence": 73,
+            "time": 6578.125905,
+            "phase": "valid:synchronous",
+            "kind": "request-return",
+            "offset": 70,
+            "pendingMutationTimers": [20],
+            "name": "valid",
+            "result": {
+              "kind": "dispatched"
+            }
+          }
+        ],
+        "mutation_delivery_count": 7,
+        "fixture_frame_count": 3
+      }
+    },
+    {
+      "label": "final-native-mutation-settled",
+      "role": "final-uninstrumented-source",
+      "receipt": "final-native-mutation-settled.receipt.json.gz",
+      "artifacts": {
+        "log": "final-native-mutation-settled.log.gz",
+        "patch": "final-native-mutation-settled.patch.gz",
+        "vitest.json": "final-native-mutation-settled.vitest.json.gz"
+      },
+      "results": {
+        "numTotalTests": 28,
+        "numPassedTests": 28,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "exit_code": 0,
+      "duration_seconds": 13.115,
+      "inputs_unchanged_during_run": true
+    }
+  ],
+  "assertion_conservation": {
+    "baseExpectCalls": 29,
+    "candidateExpectCalls": 29,
+    "expectExpressionsUnchanged": true,
+    "baseMatcherCalls": 29,
+    "candidateMatcherCalls": 29,
+    "matcherCallsAndExpectedValuesUnchanged": true,
+    "baseTestDefinitions": 7,
+    "candidateTestDefinitions": 7,
+    "testTitlesUnchanged": true,
+    "baseSelectiveOrSkippedCalls": [],
+    "candidateSelectiveOrSkippedCalls": []
+  },
+  "controls": {
+    "injected": "Only real Happy DOM MutationObserver delivery scheduled during the React mounting phase was delayed to100ms in temporary diagnostics; both controlled runs also wait for delayed work immediately before the original50 oracle.",
+    "observed": "Actual emitted scrollTop setter, actual mutation delivery and RAF scheduling/execution, and each synchronous invalid request boundary.",
+    "only_controlled_before_after_difference": "Public Happy DOM type import + waitUntilComplete before original pending-frame empty test, with two explanatory comment lines.",
+    "not_in_final_test": "Private owner-window symbol, timer delay, setter/RAF tracing, extra pre-oracle await and trace wrappers.",
+    "original_ci_trace_limit": "No setter/MO/RAF trace was captured by the failing Nightly. This demonstrates a reachable legal ordering producing the same assertion failure, not a replay or exclusive attribution of the CI event.",
+    "bounds": "Existing eight frame-drain rounds, per-test deadline and outer runner deadline are unchanged; no time delay is added to the final fixture. A recurring Happy DOM task remains subject to the existing test deadline."
+  },
+  "validation_boundary": {
+    "focused_natural_full_file": "28 passed /0 failed /0 skipped",
+    "full_compiler_new_revision": "not run locally",
+    "actual_browser_layout": "not claimed",
+    "upstream_native_ci_and_dco": "pending actual publication",
+    "failure_rate": "not estimated",
+    "shared_shenko_environment": "not used for these local fixture diagnostics"
+  },
+  "raw_artifact_manifest": "file-manifest.json"
+}

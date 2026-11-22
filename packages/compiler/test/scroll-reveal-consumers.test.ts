@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import type { Window as HappyDOMWindow } from 'happy-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { nativeOwnerProfiles } from './native-owner-consumer';
 import { cleanupScrollConsumers, mountScrollFamily } from './scroll-reveal-consumer';
@@ -69,6 +70,9 @@ async function mountSettledScrollFamily(profile: (typeof nativeOwnerProfiles)[nu
           callback(performance.now());
         }
       });
+      // Mutation delivery can enqueue end-follow frames after act has returned.
+      // Drain the actual Happy DOM tasks before deciding the frame queue is empty.
+      await (window as unknown as HappyDOMWindow).happyDOM.waitUntilComplete();
       if (!pending.size) return owner;
     }
     throw new Error('scroll-family mounting did not finish its animation-frame work');
