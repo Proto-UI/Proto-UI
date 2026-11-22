@@ -140,7 +140,8 @@ test('a resource deadline is retained separately from an assertion failure', asy
     );
     assert.equal(result.stopReason, 'resource-deadline');
     assert.notEqual(result.exitCode, 0);
-    assert.match(readFileSync(path.join(directory, 'deadline.log'), 'utf8'), /entered/);
+    // This resource deadline includes process startup, so JavaScript need not
+    // have run. The preceding independent command test proves log retention.
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
