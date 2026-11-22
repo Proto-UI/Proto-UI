@@ -283,8 +283,11 @@ describe('module-scroll: anchor host contract', () => {
     expect(f.target.scrollTop).toBe(350);
     expect(f.snapshots.at(-1)?.endFollow.state).toBe('following');
 
-    // Reader departs; the observation syncs while the reader is away.
+    // A real departure: reader intent via wheel input, then the scroll that
+    // takes the reader away from the end and pauses follow ownership.
+    f.target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: -40 }));
     f.scrollTo(200);
+    expect(f.snapshots.at(-1)?.endFollow.state).toBe('paused');
 
     // Later non-head growth with an unchanged offset must not compensate —
     // the consumed head-growth evidence was already spent while following.
@@ -320,16 +323,33 @@ describe('module-scroll: anchor host contract', () => {
 
   it('does not treat the first append to an empty target as head growth', () => {
     const f = installAnchorFixture({ endFollow: { mode: 'off' }, anchor: anchorVertical });
+    // Remove all children through the mutation path so headNode is cleared.
+    const removed = [...f.target.children];
     f.target.replaceChildren();
-    f.updateMetrics({ clientHeight: 100, scrollHeight: 400 });
+    f.mutations.deliver([
+      {
+        type: 'childList',
+        target: f.target,
+        addedNodes: [],
+        removedNodes: removed,
+        previousSibling: null,
+        nextSibling: null,
+        attributeName: null,
+        attributeNamespace: null,
+        oldValue: null,
+      } as unknown as MutationRecord,
+    ]);
+    f.updateMetrics({ clientHeight: 100, scrollHeight: 0 });
     f.scrollTo(0);
 
     const first = document.createElement('div');
     const second = document.createElement('div');
     f.target.append(first, second);
+    f.updateMetrics({ scrollHeight: 400 });
     f.mutations.deliver([childListRecord(f.target, [first, second])]);
 
-    // Nothing moved above existing content; the offset stays at the top.
+    // Nothing moved above existing content; the offset stays at the top even
+    // though the extent grew past the viewport.
     expect(f.target.scrollTop).toBe(0);
     f.lease.dispose();
   });
