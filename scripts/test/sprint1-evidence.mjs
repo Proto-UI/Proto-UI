@@ -59,6 +59,18 @@ export const SPRINT1_TOTAL_MS = 80 * 60_000;
 export const SPRINT1_CLEANUP_MS = 5_000;
 export const SPRINT1_MATRIX_CASE =
   'Website Demo Matrix browser smoke mounts every demo in every official Web adapter';
+// Written by the existing four production cases on their successful paths.
+// The poll records carry original 1000ms publication verdicts; destination
+// captures cover both family journeys and their native IME/keyboard journeys.
+export const SPRINT1_PRODUCTION_CAPTURES = Object.freeze([
+  'native-ime-plain-input-control.json',
+  'pagefind-empty-query-control.json',
+  ...['shadcn', 'brutalist'].flatMap((family) => [
+    `${family}-destination.json`,
+    `${family}-ime-keyboard-destination.json`,
+    ...['react', 'vue2', 'wc'].map((runtime) => `${family}-runtime-${runtime}-poll.json`),
+  ]),
+]);
 
 export function sprint1Plan(directory, sourceSha, repo = root) {
   assert.match(sourceSha ?? '', /^[a-f0-9]{40}$/, 'Exact Sprint 1 source SHA is required');
@@ -137,7 +149,7 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
       ['apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts'],
       // The complete serial Search producer exhausted its previous 900s window
       // before writing terminal Vitest JSON. Preserve that failed attempt and
-      // allow the unchanged 83-case suite enough acquisition/reporting time;
+      // allow the unchanged 84-case suite enough acquisition/reporting time;
       // every case, assertion and original 1000ms readiness limit remains owned
       // by that suite. This outer resource allowance proves no product speedup.
       1200
@@ -155,10 +167,23 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
     node('search-production', ['apps/www/scripts/run-search-production-evidence.mjs'], 570, {
       suites: ['apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts'],
       env: {
+        // The unchanged production suite owns captures under
+        // RUNNER_TEMP/homepage-evidence/search-production. Scope this one
+        // subprocess to the uploaded subtree without changing other steps.
+        RUNNER_TEMP: path.join(output, 'search-production'),
         PROTO_UI_RUNTIME_EVIDENCE_DIR: path.join(output, 'search-production'),
         PROTO_UI_SEARCH_PRODUCTION_REPORT: productionReport,
       },
-      report: { kind: 'vitest', path: productionReport },
+      report: {
+        kind: 'vitest',
+        path: productionReport,
+        captureDirectory: path.join(
+          output,
+          'search-production',
+          'homepage-evidence',
+          'search-production'
+        ),
+      },
     }),
   ];
 }
@@ -212,7 +237,18 @@ export function assertSprint1StepEvidence(step, sourceSha, repo = root) {
   }
   if (step.report.kind === 'vitest') {
     assertVitestReport(report, { phase: 'browser', suites: step.suites }, repo);
-    return { suites: report.testResults.length, tests: report.numPassedTests };
+    const evidence = { suites: report.testResults.length, tests: report.numPassedTests };
+    if (step.report.captureDirectory) {
+      for (const name of SPRINT1_PRODUCTION_CAPTURES) {
+        const capture = JSON.parse(
+          readFileSync(path.join(step.report.captureDirectory, name), 'utf8')
+        );
+        assert.equal(capture.source?.sha, sourceSha, `Capture source mismatch: ${name}`);
+        assert.equal(capture.source?.dirty, false, `Capture must bind a clean source: ${name}`);
+      }
+      evidence.sourceBoundCaptures = SPRINT1_PRODUCTION_CAPTURES.length;
+    }
+    return evidence;
   }
   if (step.report.kind === 'number-field') {
     assert.equal(report.source.head, sourceSha);

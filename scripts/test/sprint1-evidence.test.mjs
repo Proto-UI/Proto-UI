@@ -16,6 +16,7 @@ import {
   SPRINT1_CLEANUP_MS,
   SPRINT1_MATRIX_CASE,
   SPRINT1_NODE_SUITES,
+  SPRINT1_PRODUCTION_CAPTURES,
   SPRINT1_TOTAL_MS,
   SPRINT1_UNIT_SUITES,
 } from './sprint1-evidence.mjs';
@@ -118,6 +119,14 @@ function writeSimulated(step, sha, repo) {
   mkdirSync(path.dirname(step.report.path), { recursive: true });
   const report = simulatedReport(step, sha, repo);
   writeFileSync(step.report.path, typeof report === 'string' ? report : JSON.stringify(report));
+  if (step.report.captureDirectory) {
+    mkdirSync(step.report.captureDirectory, { recursive: true });
+    for (const name of SPRINT1_PRODUCTION_CAPTURES)
+      writeFileSync(
+        path.join(step.report.captureDirectory, name),
+        JSON.stringify({ simulated: true, source: { sha, dirty: false } })
+      );
+  }
 }
 
 test('the fixed serial selection preserves the full original criteria and bounded resource budget', () => {
@@ -180,6 +189,68 @@ test('new native suites remain in the complete scheduled inventory and fit the e
     assert.equal(general.args[general.args.indexOf(suite) - 1], '--exclude');
     assert.ok(browser.args.includes(suite));
   }
+});
+
+test('the production subprocess keeps its real capture path inside the uploaded subtree', async (t) => {
+  const directory = temporary(t);
+  const steps = sprint1Plan(directory, 'a'.repeat(40));
+  const production = steps.find((step) => step.id === 'search-production');
+  assert.equal(production.env.RUNNER_TEMP, path.join(directory, 'search-production'));
+  assert.equal(
+    production.report.captureDirectory,
+    path.join(production.env.RUNNER_TEMP, 'homepage-evidence', 'search-production')
+  );
+  for (const step of steps.filter((step) => step !== production))
+    assert.equal(step.env?.RUNNER_TEMP, undefined, 'Other steps keep their original environment');
+  const env = { ...process.env, RUNNER_TEMP: path.join(directory, 'outside-upload-control') };
+  const result = await runSprint1Command(
+    {
+      ...production,
+      args: [
+        '-e',
+        `const fs=require('node:fs'); const path=require('node:path');
+const target=path.join(process.env.RUNNER_TEMP,'homepage-evidence','search-production');
+fs.mkdirSync(target,{recursive:true});
+fs.writeFileSync(path.join(target,'ownership-control.json'),JSON.stringify({simulated:true}));`,
+      ],
+      timeoutMs: 2000,
+    },
+    directory,
+    { env }
+  );
+  assert.equal(result.exitCode, 0);
+  assert.deepEqual(result.cleanupErrors, []);
+  assert.deepEqual(
+    JSON.parse(
+      readFileSync(path.join(production.report.captureDirectory, 'ownership-control.json'))
+    ),
+    { simulated: true }
+  );
+  assert.equal(env.RUNNER_TEMP, path.join(directory, 'outside-upload-control'));
+});
+
+test('a green production report cannot conceal missing or stale source-bound captures', (t) => {
+  const f = sourceFixture(t);
+  const production = sprint1Plan(f.output, f.sha, f.repo).find(
+    (step) => step.id === 'search-production'
+  );
+  writeSimulated(production, f.sha, f.repo);
+  const file = path.join(production.report.captureDirectory, 'shadcn-runtime-react-poll.json');
+  rmSync(file);
+  assert.throws(() => assertSprint1StepEvidence(production, f.sha, f.repo), /ENOENT/);
+  writeSimulated(production, f.sha, f.repo);
+  writeFileSync(
+    file,
+    JSON.stringify({ simulated: true, source: { sha: 'b'.repeat(40), dirty: false } })
+  );
+  assert.throws(
+    () => assertSprint1StepEvidence(production, f.sha, f.repo),
+    /Capture source mismatch/
+  );
+  writeFileSync(file, JSON.stringify({ simulated: true, source: { sha: f.sha, dirty: true } }));
+  assert.throws(() => assertSprint1StepEvidence(production, f.sha, f.repo), /clean source/);
+  writeSimulated(production, f.sha, f.repo);
+  assert.equal(assertSprint1StepEvidence(production, f.sha, f.repo).sourceBoundCaptures, 12);
 });
 
 test('the existing repair scope and manual serial Sprint 1 owner retain actual workflow wiring', () => {
