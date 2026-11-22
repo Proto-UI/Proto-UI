@@ -44,7 +44,7 @@ async function compilerInputs() {
 }
 
 /** Produce actual native modules from the shared authored Transition source. */
-export async function buildTransitionNativeFixture() {
+export async function buildTransitionNativeFixture(target: keyof typeof profiles) {
   const parent = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? tmpdir();
   await mkdir(parent, { recursive: true });
   const evidenceDir = await mkdtemp(path.join(parent, 'transition-native-'));
@@ -64,7 +64,8 @@ export async function buildTransitionNativeFixture() {
   const artifacts: Record<string, string> = {};
   const sources: Record<string, string> = {};
   for (const [name, contents] of Object.entries(files)) sources[name] = digest(contents);
-  for (const [target, profile] of Object.entries(profiles)) {
+  const selectedProfiles = { [target]: profiles[target] };
+  for (const [target, profile] of Object.entries(selectedProfiles)) {
     table[target] = {};
     for (const variant of ['ordinary', 'prepared']) {
       const source = `import {definePrototype} from '@proto.ui/core';
@@ -171,14 +172,13 @@ export const fixture = createTransitionBrowserFixture(${entries});`;
         status,
         node: process.version,
         esbuild: esbuildVersion,
-        profiles,
+        profiles: selectedProfiles,
         compilerSource,
         sources,
         artifacts,
         inputs,
         bundleSha256: digest(bundle),
-        scope:
-          'Actual authored Runtime and generated four-Web-target lifecycle consumers; ordinary imports, native DOM and real timers. No GPUI, OS assistive technology or performance certification.',
+        scope: `Actual authored Runtime and generated ${target} lifecycle consumers; ordinary imports, native DOM and real timers. No GPUI, OS assistive technology or performance certification.`,
       },
       null,
       2

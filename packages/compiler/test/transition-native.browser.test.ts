@@ -18,22 +18,54 @@ declare global {
 }
 
 let browser: Browser;
-let built: Awaited<ReturnType<typeof buildTransitionNativeFixture>>;
+const targets = ['react', 'vue', 'vue2', 'wc'] as const;
+const fixtures = new Map<
+  TransitionTarget,
+  Awaited<ReturnType<typeof buildTransitionNativeFixture>>
+>();
+// Each target has its own canonical compiler prerequisite. Serializing all
+// eight compilations inside one browser-launch hook hid which input exceeded
+// that preparation budget and left every lifecycle case unexecuted.
+for (const target of targets) {
+  beforeAll(async () => {
+    const start = performance.now();
+    console.log(`Preparing Transition native ${target}: ordinary + prepared`);
+    const built = await buildTransitionNativeFixture(target);
+    fixtures.set(target, built);
+    const elapsedMs = performance.now() - start;
+    await writeFile(
+      path.join(built.evidenceDir, 'preparation.json'),
+      JSON.stringify(
+        {
+          target,
+          head: built.head,
+          elapsedMs,
+          outcome: 'PASS',
+          scope: 'Canonical compile and bundle prerequisite, not a lifecycle latency measurement.',
+        },
+        null,
+        2
+      ) + '\n'
+    );
+    console.log(
+      `Prepared Transition native ${target} in ${Math.round(elapsedMs)}ms: ${built.evidenceDir}`
+    );
+  }, 60_000);
+}
 beforeAll(async () => {
-  built = await buildTransitionNativeFixture();
   browser = await chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
     chromiumSandbox: true,
   });
-  await writeFile(path.join(built.evidenceDir, 'browser-version.txt'), browser.version());
-  console.log(`Transition native evidence: ${built.evidenceDir}`);
+  for (const built of fixtures.values())
+    await writeFile(path.join(built.evidenceDir, 'browser-version.txt'), browser.version());
 }, 60_000);
 afterAll(async () => {
   await browser?.close();
 });
 
-const cases = (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
+const cases = targets.flatMap((target) =>
   (['runtime', 'compiled'] as const).map((execution) => ({ target, execution }))
 );
 type Scenario = { target: TransitionTarget; execution: TransitionExecution };
@@ -55,6 +87,8 @@ async function run(
   }) => Promise<void>,
   reducedMotion: 'reduce' | 'no-preference' = 'no-preference'
 ) {
+  const built = fixtures.get(scenario.target);
+  if (!built) throw new Error(`Missing prepared native target ${scenario.target}`);
   const page = await browser.newPage({ viewport: { width: 800, height: 500 }, reducedMotion });
   page.setDefaultTimeout(5_000);
   const errors: string[] = [];
