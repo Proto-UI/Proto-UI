@@ -1332,6 +1332,9 @@ export function createWebScrollSurfaceHost(
           const axis = configuredFollowAxis();
           if (!axis) return false;
           cancelScheduledEnd(true);
+          readerIntentUntil = 0;
+          readerArrivalUntil = 0;
+          readerContacts.clearMovement();
           endFollowState = 'paused';
           // Input intent alone cannot resume: a reader must actually arrive at
           // the end. Keep an observation through stationary contact, editing,

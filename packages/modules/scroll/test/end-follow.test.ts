@@ -194,7 +194,12 @@ describe('module-scroll: end-follow host contract', () => {
     target.scrollTop = 400;
     target.dispatchEvent(new Event('scroll'));
     expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    target.scrollTop = 300;
+    target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 100 }));
     expect(lease.pauseFollowing!()).toBe(true);
+    target.scrollTop = 400;
+    target.dispatchEvent(new Event('scroll'));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
     lease.request({ kind: 'to-end', axis: 'vertical' });
     frames.runAll();
     expect(snapshots.at(-1)?.endFollow.state).toBe('following');
