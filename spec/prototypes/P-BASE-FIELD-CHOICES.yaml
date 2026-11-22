@@ -14,7 +14,7 @@ criteria:
       en: Checkbox reports canonical boolean checked; indeterminate is presentation only. Radio Group reports its canonical string. Existing Field required treats false and empty string as missing. Controlled refusal cannot change the submitted value, dirty, mixed ownership or onChange acceptance.
   - id: P-BASE-FIELD-CHOICES-POLICY
     text:
-      en: Local readOnly and effective Field/Fieldset readOnly block pointer, keyboard and Label value proposals while retaining focus. ReadOnly Radio Group arrows can move current roving focus without requesting a value. Disabled additionally removes focus participation and Form values. Ordinary roots admit local readOnly without adding a Field owner.
+      en: Local readOnly and effective Field readOnly block pointer, keyboard and Label value proposals while retaining focus. ReadOnly Radio Group arrows can move current roving focus without requesting a value. Local, Field and inherited Fieldset disabled additionally remove focus participation and Form values; C-FIELDSET-0001 remains a disabled-only grouping policy. Ordinary roots admit local readOnly without adding a Field owner.
   - id: P-BASE-FIELD-CHOICES-RESET
     text:
       en: Reset targets the instance creation canonical value and Checkbox mixed state. Controlled values are only proposed; refused reset keeps canonical value and dirty relative to the initial baseline. Reset may run while readonly/disabled, retires queued reports and never forces a controlled owner.

@@ -39,6 +39,9 @@ declare const radio: ExposesOf<typeof fieldRadioGroup>;
 const checked: boolean = checkbox.checked.get();
 const value: string = radio.value.get();
 const reset: boolean = checkbox.resetValue();
+declare const switchControl: ExposesOf<typeof fieldSwitch>;
+const switchReset: boolean = switchControl.resetValue();
+void switchReset;
 void [checked, value, reset];
 definePrototype({
   name: 'field-choice-authored-consumer',

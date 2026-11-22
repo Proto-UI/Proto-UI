@@ -250,6 +250,51 @@ for (const family of Object.keys(libraries) as Array<keyof typeof libraries>)
         expect(f.values()).toEqual({ choice: true });
       }
     );
+    it.each([false, true])(
+      'Switch controlled=%s reset preserves initial canonical ownership while readonly',
+      async (controlled) => {
+        const f = mount(
+          family,
+          'switch',
+          controlled ? { checked: false } : { defaultChecked: false },
+          { validationMode: 'onChange', externalValidation: true }
+        );
+        await flush();
+        let accepts = true;
+        const changes: boolean[] = [],
+          requests: unknown[] = [];
+        f.control.addEventListener('checkedChange', (event: CustomEvent<{ checked: boolean }>) => {
+          changes.push(event.detail.checked);
+          if (controlled && accepts)
+            queueMicrotask(() => patch(f.control, { checked: event.detail.checked }));
+        });
+        f.field.addEventListener('validationRequest', (event: CustomEvent) =>
+          requests.push(event.detail)
+        );
+        f.control.click();
+        await flush();
+        expect(f.values()).toEqual({ choice: true });
+        patch(f.control, { defaultChecked: true });
+        patch(f.field, { readOnly: true });
+        await flush();
+        requests.length = 0;
+        changes.length = 0;
+        accepts = false;
+        f.form.getExposes().requestReset();
+        await flush();
+        expect(f.values()).toEqual({ choice: controlled });
+        expect(f.field.getExposes().dirty.get()).toBe(controlled);
+        expect(changes).toEqual(controlled ? [false] : []);
+        expect(requests).toEqual([]);
+        accepts = true;
+        f.form.getExposes().requestReset();
+        await flush();
+        expect(f.values()).toEqual({ choice: false });
+        expect(f.field.getExposes().dirty.get()).toBe(false);
+        expect(f.x().percentage.get()).toBe(0);
+        expect(requests).toEqual([]);
+      }
+    );
     it('keeps radio roving under readonly and only treats departure from the group as blur', async () => {
       const f = mount(
         family,
@@ -289,6 +334,41 @@ for (const family of Object.keys(libraries) as Array<keyof typeof libraries>)
       expect(requests).toHaveLength(1);
       expect(requests[0].value).toBe('a');
     });
+    it.each(['reset', 'readOnly', 'disabled'] as const)(
+      'Radio retires a pending blur on %s and can observe a later departure',
+      async (boundary) => {
+        const f = mount(
+          family,
+          'radio',
+          { defaultValue: 'a' },
+          { validationMode: 'onBlur', externalValidation: true }
+        );
+        await flush();
+        const requests: unknown[] = [];
+        f.field.addEventListener('validationRequest', (event: CustomEvent) =>
+          requests.push(event.detail)
+        );
+        f.items[0].focus();
+        await flush();
+        expect(f.x().focused.get()).toBe(true);
+        f.outside.focus();
+        if (boundary === 'reset') f.form.getExposes().requestReset();
+        else patch(f.field, { [boundary]: true });
+        expect(f.field.getExposes().touched.get()).toBe(false);
+        await flush();
+        expect(f.field.getExposes().touched.get()).toBe(false);
+        expect(f.x().focused.get()).toBe(false);
+        expect(requests).toEqual([]);
+        if (boundary !== 'reset') patch(f.field, { [boundary]: false });
+        await flush();
+        f.items[0].focus();
+        await flush();
+        f.outside.focus();
+        await flush();
+        expect(f.field.getExposes().touched.get()).toBe(true);
+        expect(requests).toHaveLength(1);
+      }
+    );
     it('does not make ordinary Checkbox or Radio Group a Form field', async () => {
       const lib = libraries[family];
       const form = document.createElement(lib.form.formRoot.name) as any;

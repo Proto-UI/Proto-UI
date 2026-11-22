@@ -14,7 +14,23 @@ cases:
     covers:
       [C-FIELD-SWITCH-0001-COMPOSITION, C-FIELD-SWITCH-0001-FACTS, C-FIELD-SWITCH-0001-LIFECYCLE]
     expectation: opt-in-relationships-and-canonical-boolean-with-retirement-safe-notifications
+  - id: T-FIELD-SWITCH-0001-CASE-RESET
+    title: Explicit reset remains canonical and lifecycle-safe
+    covers: [C-FIELD-SWITCH-0001-RESET]
+    expectation: Initial checked is restored for uncontrolled owners and proposed for controlled owners; refusal preserves value/dirty and no reset produces change validation or old-owner continuation.
 implementations:
+  - id: field-switch-reset-families
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/field-choices.test.ts
+    required: true
+    consumesCases: [T-FIELD-SWITCH-0001-CASE-RESET]
+  - id: field-switch-reset-reentry
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/notification-retirement-lifecycle.test.ts
+    required: true
+    consumesCases: [T-FIELD-SWITCH-0001-CASE-RESET]
   - id: field-switch-wc
     kind: module-test
     status: passing

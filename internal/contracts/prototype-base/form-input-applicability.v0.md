@@ -14,7 +14,7 @@ This independently reviewable definition bounds #1160 and #1094 for the 0.3 Base
 
 ## Explicit choice entries
 
-FieldCheckbox and FieldRadioGroup call the existing semantic root setup with a definition-time `fieldBinding` option and asOptionalFieldControl. Ordinary Checkbox/Radio Group remain unregistered inside Form or Field and never become form fields through ancestor discovery. The ordinary roots also admit local readOnly as a focus-preserving edit policy; the explicit entries OR it with Field/Fieldset policy. There is one semantic owner per control.
+FieldCheckbox and FieldRadioGroup call the existing semantic root setup with a definition-time `fieldBinding` option and asOptionalFieldControl. Ordinary Checkbox/Radio Group remain unregistered inside Form or Field and never become form fields through ancestor discovery. The ordinary roots also admit local readOnly as a focus-preserving edit policy; the explicit entries OR it with Field readOnly and disabled policy; inherited Fieldset disabled remains governed by C-FIELDSET-0001 (Fieldset does not admit readOnly). There is one semantic owner per control.
 
 Checkbox reports the canonical boolean, including false. Indeterminate never changes the submitted boolean or the required oracle. Existing C-FIELD-0001 defines false as empty; no other boolean Field is reinterpreted. Radio Group reports the canonical string; empty is missing when required. Item names are not serialized values; duplicate/disabled/nonmember requests remain rejected by the Root.
 

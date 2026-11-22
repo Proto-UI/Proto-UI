@@ -112,6 +112,12 @@ export function setupRadioGroupRoot(
     operationEpoch = 0;
   let unregisterCoordinator: (() => void) | null = null;
   let focusTask: DelayTask | null = null;
+  let focusEpoch = 0;
+  const retireFocus = () => {
+    focusEpoch++;
+    focusTask?.cancel();
+    focusTask = null;
+  };
   const live = (run: RunHandle<RadioGroupRootProps>, view: number, operation: number) =>
     currentRun === run && viewEpoch === view && operationEpoch === operation;
   const reportField = (reason: 'sync' | 'change' | 'blur' = 'sync') => {
@@ -146,7 +152,7 @@ export function setupRadioGroupRoot(
     }
     return live(run, view, operation);
   };
-  const sampleFocus = () => {
+  const sampleFocus = (forcedReason?: 'sync') => {
     if (!mounted || !currentRun) return;
     if (!binding) {
       const current = currentRun;
@@ -158,18 +164,19 @@ export function setupRadioGroupRoot(
       if (currentRun === current) focused.set(next, 'reason: radio current owned focus');
       return;
     }
-    focusTask?.cancel();
+    retireFocus();
     const run = currentRun,
-      view = viewEpoch;
+      view = viewEpoch,
+      focus = focusEpoch;
     focusTask = delay(0, () => {
+      if (currentRun !== run || viewEpoch !== view || focusEpoch !== focus) return;
       focusTask = null;
-      if (currentRun !== run || viewEpoch !== view) return;
       const next = run.anatomy
         .partsOf(RADIO_GROUP_FAMILY, 'item')
         .some(
           (part) => (part.getExpose('focused') as { get?(): boolean } | null)?.get?.() === true
         );
-      const reason = focused.get() && !next ? 'blur' : 'sync';
+      const reason = forcedReason ?? (focused.get() && !next ? 'blur' : 'sync');
       const operation = operationEpoch;
       focused.set(next, 'reason: radio group current owned focus');
       if (live(run, view, operation)) reportField(reason);
@@ -225,9 +232,11 @@ export function setupRadioGroupRoot(
     const p = run.props.get();
     const nextDisabled = binding ? binding.state.fieldDisabled.get() : !!p.disabled;
     const nextReadOnly = binding ? binding.state.fieldReadOnly.get() : !!p.readOnly;
-    if (nextDisabled !== disabled.get() || nextReadOnly !== readOnly.get()) {
+    const policyChanged = nextDisabled !== disabled.get() || nextReadOnly !== readOnly.get();
+    if (policyChanged) {
       operationEpoch++;
       reports.cancel();
+      retireFocus();
     }
     const view = viewEpoch,
       operation = operationEpoch;
@@ -236,6 +245,17 @@ export function setupRadioGroupRoot(
     readOnly.set(nextReadOnly, 'reason: radio effective readonly');
     if (!live(run, view, operation)) return;
     a11yLabel.set(p.a11yLabel ?? '', 'reason: radio group accessible label');
+    if (live(run, view, operation) && publish(run)) {
+      reportField();
+      if (policyChanged && live(run, view, operation)) sampleFocus('sync');
+    }
+  };
+  const syncOwner = (run: RunHandle<RadioGroupRootProps>) => {
+    if (currentRun !== run) return;
+    const view = viewEpoch,
+      operation = operationEpoch;
+    if (run.props.isProvided('value'))
+      value.set(run.props.get().value ?? '', 'reason: radio controlled canonical value');
     if (live(run, view, operation) && publish(run)) reportField();
   };
   def.lifecycle.onCreated((run) => {
@@ -250,6 +270,8 @@ export function setupRadioGroupRoot(
   def.lifecycle.onMounted((run) => {
     currentRun = run;
     mounted = true;
+    syncOwner(run);
+    if (currentRun !== run || !mounted) return;
     registerCoordinator();
     syncPolicy(run);
     sampleFocus();
@@ -259,8 +281,7 @@ export function setupRadioGroupRoot(
   });
   const retire = () => {
     reports.cancel();
-    focusTask?.cancel();
-    focusTask = null;
+    retireFocus();
     operationEpoch++;
     viewEpoch++;
     mounted = false;
@@ -280,14 +301,7 @@ export function setupRadioGroupRoot(
       sampleFocus();
     }
   });
-  def.props.watch(['value'], (run, next) => {
-    if (currentRun !== run) return;
-    const view = viewEpoch,
-      operation = operationEpoch;
-    if (run.props.isProvided('value'))
-      value.set(next.value ?? '', 'reason: radio controlled canonical value');
-    if (live(run, view, operation) && publish(run)) reportField();
-  });
+  def.props.watch(['value'], syncOwner);
   def.props.watch(['disabled', 'readOnly', 'a11yLabel'], syncPolicy);
   if (binding)
     for (const state of [binding.state.fieldDisabled, binding.state.fieldReadOnly])
@@ -300,12 +314,14 @@ export function setupRadioGroupRoot(
     const view = viewEpoch,
       operation = ++operationEpoch;
     reports.cancel();
+    retireFocus();
     const controlled = run.props.isProvided('value');
     if (!controlled) value.set(initialValue, 'reason: radio reset canonical value');
     if (!live(run, view, operation) || !publish(run)) return true;
     reportField();
     if (live(run, view, operation) && controlled)
       run.expose.emit('valueChange', { value: initialValue });
+    if (live(run, view, operation)) sampleFocus('sync');
     return true;
   });
 }

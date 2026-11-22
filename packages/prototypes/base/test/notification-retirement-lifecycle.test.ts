@@ -21,10 +21,12 @@ import {
   fieldControl,
   fieldTextarea,
   fieldCheckbox,
+  fieldSwitch,
   fieldRadioGroup,
   FIELD_CONTEXT,
 } from '../src/field';
-import { radioGroupItem } from '../src/radio-group';
+import { radioGroupRoot, radioGroupItem } from '../src/radio-group';
+import { checkboxRoot } from '../src/checkbox';
 import { formRoot, formField } from '../src/form';
 import { toggleGroupRoot, toggleGroupItem } from '../src/toggle-group';
 import { TOGGLE_GROUP_CONTEXT } from '../src/toggle-group/shared';
@@ -182,6 +184,117 @@ function runtimeHarness() {
     },
   };
 }
+
+for (const proto of [checkboxRoot, fieldCheckbox])
+  it.each(['confirm-mixed', 'new-checked', 'owner-round-trip'] as const)(
+    `${proto.name} mixed callback respects newer checked ownership: %s`,
+    async (mode) => {
+      const h = runtimeHarness();
+      const control = h.make(proto, null, { checked: false, indeterminate: true });
+      const proposals: boolean[] = [];
+      try {
+        await control.session.mount();
+        h.setActionCallback((name, detail) => {
+          if (name === 'indeterminateChange') {
+            control.session.controller.applyRawProps({
+              checked: mode !== 'confirm-mixed',
+              indeterminate: false,
+            });
+            if (mode === 'owner-round-trip')
+              control.session.controller.applyRawProps({ checked: false, indeterminate: false });
+          }
+          if (name === 'checkedChange') {
+            proposals.push(detail.checked);
+            control.session.controller.applyRawProps({
+              checked: detail.checked,
+              indeterminate: false,
+            });
+          }
+        });
+        control.session.invokeInCallbackScope(() =>
+          control.target.dispatchEvent(new Event('press.commit'))
+        );
+        expect(control.exposes.checked.get()).toBe(mode !== 'owner-round-trip');
+        expect(control.exposes.indeterminate.get()).toBe(false);
+        expect(proposals).toEqual(mode === 'confirm-mixed' ? [true] : []);
+      } finally {
+        await control.session.dispose();
+      }
+    }
+  );
+
+it.each(['reset', 'unmount', 'dispose', 'remount'] as const)(
+  'FieldSwitch reset retires continuation after controlled callback %s',
+  async (boundary) => {
+    const h = runtimeHarness();
+    const field = h.make(fieldRoot, null, { validationMode: 'onChange', externalValidation: true });
+    const control = h.make(fieldSwitch, field.target, { checked: false });
+    const pending: Promise<void>[] = [];
+    let retired = false;
+    try {
+      await field.session.mount();
+      await control.session.mount();
+      control.session.controller.applyRawProps({ checked: true });
+      h.setActionCallback((name) => {
+        if (name !== 'checkedChange' || retired) return;
+        retired = true;
+        if (boundary === 'reset') control.exposes.resetValue();
+        else {
+          pending.push(control.session[boundary === 'dispose' ? 'dispose' : 'unmount']());
+          if (boundary === 'remount') pending.push(control.session.mount());
+        }
+      });
+      expect(() =>
+        control.session.invokeInCallbackScope(() => control.exposes.resetValue())
+      ).not.toThrow();
+      expect(retired).toBe(true);
+      await Promise.all(pending);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(h.actions.filter((name) => name === 'checkedChange')).toHaveLength(
+        boundary === 'reset' ? 2 : 1
+      );
+      expect(h.actions).not.toContain('validationRequest');
+      if (boundary === 'remount' || boundary === 'reset') {
+        expect(control.exposes.checked.get()).toBe(true);
+        expect(control.exposes.__fieldSnapshot()).toMatchObject({ active: true, value: true });
+      }
+    } finally {
+      h.setActionCallback(() => {});
+      await control.session.dispose();
+      await field.session.dispose();
+    }
+  }
+);
+
+it.each([radioGroupRoot, fieldRadioGroup])(
+  '$name reconciles current controlled props on reconnect without replacing its reset baseline',
+  async (proto) => {
+    const h = runtimeHarness();
+    const control = h.make(proto, null, { value: 'a' });
+    const proposals: unknown[] = [];
+    try {
+      await control.session.mount();
+      await control.session.unmount();
+      control.session.controller.applyRawProps({ value: 'b' });
+      await control.session.mount();
+      expect(control.exposes.value.get()).toBe('b');
+      h.setActionCallback((name, payload) => {
+        if (name === 'valueChange') proposals.push(payload.value);
+      });
+      control.session.invokeInCallbackScope(() => control.exposes.resetValue());
+      expect(proposals).toEqual(['a']);
+      expect(control.exposes.value.get()).toBe('b');
+      await control.session.unmount();
+      control.session.controller.applyRawProps({ defaultValue: 'c' });
+      await control.session.mount();
+      expect(control.exposes.value.get()).toBe('b');
+      control.session.invokeInCallbackScope(() => control.exposes.resetValue());
+      expect(control.exposes.value.get()).toBe('a');
+    } finally {
+      await control.session.dispose();
+    }
+  }
+);
 
 for (const kind of ['checkbox', 'radio'] as const)
   it.each(['reset', 'unmount', 'dispose', 'remount'] as const)(

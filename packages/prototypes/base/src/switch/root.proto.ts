@@ -11,7 +11,11 @@ import { asOptionalFieldControl } from '../field/control-binding.proto';
 import { FIELD_LABEL_PAIR } from '../field/shared';
 import type { SwitchRootAsHookContract, SwitchRootExposes, SwitchRootProps } from './types';
 
-export type SwitchRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
+export type SwitchRootSetupOptions = Readonly<{
+  fieldBinding?: boolean;
+  /** Explicit Field composition installs its reset entry; the ordinary Root API stays independent. */
+  registerResetValue?: (resetValue: () => boolean) => void;
+}>;
 /** Definition-time semantic composition; ordinary Switch remains independent of Field. */
 export function setupSwitchRoot(
   def: DefHandle<SwitchRootProps, SwitchRootExposes>,
@@ -104,6 +108,7 @@ export function setupSwitchRoot(
   });
 
   let controlled = false;
+  let initialChecked = false;
   let accepted = false;
   let startProgress = 0;
   let live = true;
@@ -211,10 +216,8 @@ export function setupSwitchRoot(
   def.lifecycle.onCreated((run) => {
     currentRun = run;
     controlled = run.props.isProvided('checked');
-    checked.set(
-      controlled ? !!run.props.get().checked : !!run.props.get().defaultChecked,
-      'reason: switch root initialize checked'
-    );
+    initialChecked = controlled ? !!run.props.get().checked : !!run.props.get().defaultChecked;
+    checked.set(initialChecked, 'reason: switch root initialize checked');
     syncDisabled(run, binding ? binding.state.fieldDisabled.get() : !!run.props.get().disabled);
     publishContext(run);
     reportField();
@@ -385,6 +388,32 @@ export function setupSwitchRoot(
     },
     options.fieldBinding ? FIELD_LABEL_PAIR : undefined
   );
+  options.registerResetValue?.(() => {
+    const run = currentRun,
+      view = viewEpoch;
+    if (!run || !live) return false;
+    // Reset is an explicit owner operation, including while readonly/disabled.
+    // It retires old preview and reports; it is not an edit notification.
+    for (const task of reportTasks) task.cancel();
+    reportTasks.clear();
+    invalidatePreview(run, false);
+    if (!live || currentRun !== run || viewEpoch !== view) return true;
+    const operation = interactionEpoch;
+    const current = () =>
+      live && currentRun === run && viewEpoch === view && interactionEpoch === operation;
+    try {
+      if (!controlled) checked.set(initialChecked, 'reason: FieldSwitch reset canonical checked');
+      if (!current() || !publishContext(run)) return true;
+      reportField();
+      if (!current()) return true;
+      if (controlled) run.expose.emit('checkedChange', { checked: initialChecked });
+      if (!current() || !publishContext(run)) return true;
+      reportField();
+      return true;
+    } finally {
+      if (current()) syncAxis(run);
+    }
+  });
 }
 
 /*

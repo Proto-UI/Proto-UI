@@ -68,6 +68,7 @@ export function setupCheckboxRoot(
   let mounted = false,
     viewEpoch = 0,
     operationEpoch = 0;
+  let checkedOwnerEpoch = 0;
   let controlledChecked = false,
     controlledIndeterminate = false;
   let initialChecked = false,
@@ -130,7 +131,10 @@ export function setupCheckboxRoot(
       p = run.props.get();
     controlledChecked = run.props.isProvided('checked');
     controlledIndeterminate = run.props.isProvided('indeterminate');
-    if (controlledChecked) checked.set(!!p.checked, 'reason: checkbox controlled checked');
+    if (controlledChecked) {
+      if (!!p.checked !== checked.get()) checkedOwnerEpoch++;
+      checked.set(!!p.checked, 'reason: checkbox controlled checked');
+    }
     if (!isCurrent(run, view, operation)) return;
     if (controlledIndeterminate)
       indeterminate.set(!!p.indeterminate, 'reason: checkbox controlled mixed');
@@ -189,6 +193,7 @@ export function setupCheckboxRoot(
     pressed.set(false, 'reason: checkbox press complete');
     if (!live() || disabled.get() || readOnly.get() || key === 'Enter') return;
     const before = checked.get(),
+      owner = checkedOwnerEpoch,
       mixed = indeterminate.get();
     if (mixed) {
       if (!controlledIndeterminate)
@@ -196,8 +201,16 @@ export function setupCheckboxRoot(
       if (!live()) return;
       run.expose.emit('indeterminateChange', { indeterminate: false });
       if (!live() || disabled.get() || readOnly.get()) return;
+      // A newer checked owner decision retires the old activation's checked stage.
+      // Confirming only mixed=false still allows the original boolean request.
+      if (checkedOwnerEpoch !== owner) {
+        if (!publish(run)) return;
+        reportField();
+        if (live()) reports.schedule(before);
+        return;
+      }
     }
-    const next = !checked.get();
+    const next = !before;
     if (!controlledChecked) checked.set(next, 'reason: checkbox accepted checked');
     if (!live()) return;
     run.expose.emit('checkedChange', {
