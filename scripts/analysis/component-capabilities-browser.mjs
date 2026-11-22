@@ -138,7 +138,8 @@ const { chromium } = createRequire(new URL('../../apps/www/package.json', import
 const browser = await chromium.launch({
   headless: true,
   executablePath: process.env.PUI_CHROME_EXECUTABLE ?? '/usr/bin/chromium',
-  args: ['--no-sandbox'],
+  chromiumSandbox: true,
+  args: ['--disable-dev-shm-usage'],
 });
 report.environment.browser = browser.version();
 const page = await browser.newPage({
