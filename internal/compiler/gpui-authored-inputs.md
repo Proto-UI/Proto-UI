@@ -36,6 +36,14 @@ WindowId in another App cannot authorize an event or Entity update there. The
 separate-App native regression exercises this through real physical key dispatch;
 it does not claim a broader rewrite of every portable logical registry.
 
+Registering an unchanged physical binding is idempotent. Ordinary Props updates
+and queued host driving reuse the owner's epoch, window and weak native handle
+receipt, without scanning or notifying the App registry again. A replaced or
+reattached binding registers its new receipt; current disabled, navigation and
+composition eligibility still comes from the live owner at dispatch. The native
+regression observes actual registry notifications across repeated component
+updates and detach/reattach, rather than imposing an elapsed-time threshold.
+
 An active trapped FocusScope retains its in-scope navigation policy. Otherwise
 the host uses GPUI's current native tab map, including ordinary native siblings,
 disabled targets and authored `navParticipation`. This does not make a

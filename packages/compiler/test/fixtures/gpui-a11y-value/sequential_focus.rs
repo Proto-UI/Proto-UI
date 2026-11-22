@@ -232,3 +232,36 @@ fn native_tab_registry_is_app_scoped(cx: &mut TestAppContext) {
     key(window, &mut second, "tab", At::Second);
     key(window, &mut second, "shift-tab", At::First);
 }
+
+#[gpui::test]
+fn native_focus_registry_changes_only_for_a_new_physical_binding(cx: &mut TestAppContext) {
+    use proto_ui_gpui_native::gpui_native_owner::{detach_native_view, observe_native_focus_registry_for_test};
+    let window = open(cx, false); let mut visual = VisualTestContext::from_window(window.into(), cx); frames(&mut visual);
+    let changes = Rc::new(std::cell::Cell::new(0)); let observed = changes.clone();
+    let _observation = visual.update(|_, cx| observe_native_focus_registry_for_test(cx, move |_| observed.set(observed.get() + 1)));
+    visual.run_until_parked();
+    // Exercise the real generated Props/drive/render path repeatedly. The
+    // stable native target must not publish registry changes as side effects.
+    for block in [true, false, true, false] {
+        window.update(&mut visual, |host, window, cx| host.first.update(cx, |target, cx|
+            target.set_props(json!({"blockTab":block}), window, cx).unwrap_or_else(|_| panic!("real source update")))).unwrap();
+        frames(&mut visual);
+    }
+    assert_eq!(changes.get(), 0, "stable drives must not mutate or notify the App focus registry");
+    let epoch = window.update(&mut visual, |host, window, cx| {
+        let owner = host.first.read(cx).owner.clone();
+        let epoch = owner.borrow().epoch;
+        // Withdraw the physical view through the production SDK lifecycle,
+        // then let the retained generated component bind its next real frame.
+        detach_native_view(&owner); window.refresh(); epoch
+    }).unwrap();
+    frames(&mut visual);
+    window.update(&mut visual, |host, _, cx| {
+        let owner = host.first.read(cx).owner.borrow();
+        assert!(owner.mounted && owner.bounds.is_some() && owner.epoch != epoch);
+    }).unwrap();
+    assert!(changes.get() > 0, "a genuinely new view binding must refresh its receipt");
+    changes.set(0);
+    frames(&mut visual);
+    assert_eq!(changes.get(), 0, "the replacement also settles after its binding is registered");
+}

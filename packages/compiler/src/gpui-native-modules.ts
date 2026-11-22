@@ -22,6 +22,7 @@ pub struct FocusModule {
     pub roving_declared:bool,
     pub reason:&'static str,pub prevent_scroll:bool,pub blur_requested:bool,pub previous:OwnerWeak,pub remembered:OwnerWeak,
     pub pending:Option<(&'static str,Value)>,pub native:Option<FocusHandle>,
+    sequential_native:Option<(u64,gpui::WindowId,gpui::WeakFocusHandle)>,
     pub intent:u64,pub scope_activation:u64,pub scope_intent:u64,pub scope_recipient:Option<(OwnerWeak,u64)>,
     pub entry_intent:Option<FocusEntryIntent>,pub request_source:Option<(OwnerWeak,u64)>,
     entry_projection:Option<FocusEntryProjection>,entry_self_focused:bool,
@@ -309,6 +310,10 @@ struct SequentialFocusInput {
     _capture:gpui::Subscription,_settled:gpui::Subscription,
 }
 impl gpui::Global for SequentialFocusInput{}
+#[cfg(feature="test-support")]
+pub fn observe_native_focus_registry_for_test(cx:&mut App,callback:impl FnMut(&mut App)+'static)->gpui::Subscription{
+    cx.observe_global::<SequentialFocusInput>(callback)
+}
 // Keep weak physical identities while the committed GPUI map still holds them.
 // A detached/disposed Proto target must not be mistaken for a native sibling.
 struct SequentialFocusTarget{owner:OwnerWeak,focus:gpui::WeakFocusHandle,window:gpui::WindowId,epoch:u64}
@@ -435,6 +440,13 @@ fn sequential_focus_settled(event:&gpui::KeystrokeEvent,window:&mut Window,cx:&m
     }
 }
 pub fn register_sequential_focus_owner(owner:&OwnerRef,cx:&mut App){
+    let binding={let o=owner.borrow();o.modules.focus.native.as_ref().zip(o.window_id)
+        .map(|(focus,window)|(o.epoch,window,focus.downgrade()))};
+    // drive_queued_focus visits the window's owners on ordinary input/Props
+    // updates. A stable physical binding is already registered: do not turn
+    // each visit into a whole-registry scan or a GPUI global-notify effect.
+    if binding.is_some()&&cx.has_global::<SequentialFocusInput>()
+        &&owner.borrow().modules.focus.sequential_native==binding{return}
     if !cx.has_global::<SequentialFocusInput>(){
         let capture=cx.intercept_keystrokes(sequential_focus_capture);
         let settled=cx.observe_keystrokes(sequential_focus_settled);
@@ -444,10 +456,10 @@ pub fn register_sequential_focus_owner(owner:&OwnerRef,cx:&mut App){
     input.owners.retain(|owner|owner.strong_count()>0);
     if !input.owners.iter().any(|owner|Weak::ptr_eq(owner,&weak)){input.owners.push(weak.clone());}
     input.targets.retain(|target|target.focus.upgrade().is_some());
-    let owner=owner.borrow();
-    if let (Some(focus),Some(window))=(&owner.modules.focus.native,owner.window_id){
-        input.targets.retain(|target|target.window!=window||target.focus.upgrade().as_ref()!=Some(focus));
-        input.targets.push(SequentialFocusTarget{owner:weak,focus:focus.downgrade(),window,epoch:owner.epoch});
+    if let Some((epoch,window,focus))=&binding{
+        input.targets.retain(|target|target.window!=*window||target.focus!=*focus);
+        input.targets.push(SequentialFocusTarget{owner:weak,focus:focus.clone(),window:*window,epoch:*epoch});
+        owner.borrow_mut().modules.focus.sequential_native=binding;
     }
 }
 pub fn focus_key_navigation(event:&gpui::KeyDownEvent,window:&mut Window,cx:&App)->bool{
