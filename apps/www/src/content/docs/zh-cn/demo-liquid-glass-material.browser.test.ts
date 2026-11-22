@@ -17,6 +17,7 @@ const ROUTE = '/en/test/liquid-glass-material/';
 const evidence = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
 // Liquid Glass is 0.4/WIP, same opt-in shape as PUI_ASYNC_REGION_INCLUDE_WIP.
 // These cases stay authored; they are not a 0.3 gate unless explicitly included.
+// Unset does not register them: browser CI rejects status 'skipped'.
 const includeLiquidWip = process.env.PUI_LIQUID_GLASS_INCLUDE_WIP === '1';
 let browser: Browser,
   context: BrowserContext,
@@ -223,7 +224,7 @@ afterAll(async () => {
 }, 60000);
 describe.sequential('V2 optical paint through four real Web Adapter runtimes', () => {
   for (const theme of ['light', 'dark'] as const)
-    it.skipIf(!includeLiquidWip)(
+    if (includeLiquidWip) it(
       `${theme}: visible dynamic source, optical pixels, motion, input and revocation`,
       async () => {
       await preference(theme);
@@ -515,7 +516,7 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
     }
   }, 150000);
 
-  it.skipIf(!includeLiquidWip)(
+  if (includeLiquidWip) it(
     'preserves authored theme tokens through a real WC portal and native observer cleanup',
     async () => {
     if (!evidence)
@@ -1326,8 +1327,8 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
   );
 });
 
-describe.sequential('bounded release lifecycle', () => {
-  it.skipIf(!includeLiquidWip)(
+if (includeLiquidWip) describe.sequential('bounded release lifecycle', () => {
+  it(
     'retains complete paint geometry, finishes real release tails and rejects late completions',
     async () => {
     if (!evidence)
@@ -2474,8 +2475,8 @@ function requireEmptyDocumentCounters(value: Record<string, unknown>) {
     if (Object.hasOwn(value, name)) throw new Error(`Empty-document control has program ${name}`);
 }
 
-describe('bounded public Liquid live-canvas diagnostics', () => {
-  it.skipIf(!includeLiquidWip)(
+if (includeLiquidWip) describe('bounded public Liquid live-canvas diagnostics', () => {
+  it(
     'records actual four-runtime idle/hover work without accepting an optimization',
     async () => {
     if (!evidence) throw new Error('Diagnostic artifacts require PROTO_UI_MATERIAL_EVIDENCE_DIR');

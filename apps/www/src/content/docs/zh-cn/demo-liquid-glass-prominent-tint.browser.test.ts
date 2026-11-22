@@ -39,6 +39,7 @@ import type { captureProminentTintFrame } from './liquid-prominent-tint-capture'
 // runtime; all semantic cases remain present. No local browser fallback.
 const route = '/en/test/liquid-glass-prominent-tint/';
 // Whole file is Liquid Glass 0.4/WIP. The four runtime jobs stay opt-in, not a 0.3 gate.
+// Unset does not register them: browser CI rejects status 'skipped'.
 const includeLiquidWip = process.env.PUI_LIQUID_GLASS_INCLUDE_WIP === '1';
 const evidenceRoot = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
 const output = evidenceRoot ? path.join(evidenceRoot, 'prominent-tint') : null;
@@ -139,6 +140,7 @@ async function preferences(cdp: CDPSession, theme: string, extra: Record<string,
   });
 }
 beforeAll(async () => {
+  if (!includeLiquidWip) return;
   if (process.env.GITHUB_ACTIONS !== 'true' || !process.env.CANDIDATE_SHA || !output)
     throw new Error('Prominent tint native evidence requires official exact-head GitHub Actions');
   expect(revision.sha).toBe(process.env.CANDIDATE_SHA);
@@ -165,6 +167,7 @@ beforeAll(async () => {
   });
 }, 150_000);
 afterAll(async () => {
+  if (!includeLiquidWip) return;
   try {
     // Use one terminal reconciliation for both checkpoint and final results.
     // A timeout has executed; only untouched entries may become blocked.
@@ -484,7 +487,7 @@ async function runCase(name: string, run: () => Promise<void>) {
     },
   });
 }
-for (const runtime of runtimes)
+if (includeLiquidWip) for (const runtime of runtimes)
   for (const theme of ['light', 'dark'] as const)
     for (const part of ['button', 'submit'] as const) {
       for (const content of ['text', 'icon-only'] as const) {
@@ -501,7 +504,7 @@ for (const runtime of runtimes)
               captureCoverage.set(`${name}-${source}-${phase}-${control}`, { status: 'not-run' });
         }
         describe(`${name} source-bound prominent tint`, () => {
-          it.skipIf(!includeLiquidWip)(
+          it(
             'retains the real five-state journey and paired source evidence',
             () =>
               runCase(name, async () => {
@@ -671,7 +674,7 @@ for (const runtime of runtimes)
       coverage.set(name, { status: 'not-run' });
       behaviorCoverage.set(name, 'not-run');
       describe(name, () => {
-        it.skipIf(!includeLiquidWip)(
+        it(
           'separates focus, preferences, unsafe source, cancellation and recovery',
           () =>
             runCase(name, async () => {
