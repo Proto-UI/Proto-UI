@@ -1,0 +1,1311 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-22T00:27:31.154089+00:00",
+  "sourceCheckpoint": {
+    "revision": "56a28db5004e10039c63007c580fb2086663a3aa",
+    "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+    "baseline": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+    "integratedMain": "2d21cb4d6c3f726c5d6756d03739d466faa7ff10"
+  },
+  "purpose": "Bind the reviewed Select overlay margin and read-only native diagnostics to the actual regenerated candidate and current full local gates.",
+  "actualLocalExecution": {
+    "generator": {
+      "phase": "generator",
+      "command": [
+        "node",
+        "scripts/coverage-matrices/prototype-coverage.mjs",
+        "--refresh-candidate",
+        "56a28db5004e10039c63007c580fb2086663a3aa",
+        "--write"
+      ],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-select-mount-closeout",
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-22T00:18:32.363271+00:00",
+      "finishedAt": "2026-11-22T00:18:55.692964+00:00",
+      "seconds": 23.33,
+      "exitCode": 0,
+      "before": {
+        "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+        "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+        "statusPorcelain": "",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "05a3bef4e7b6e007e2a42f7f8409ffc857de995fa5df041a5c64b6d737370d44"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "e99ad3f482f862ae967ddee2c6cea6b437207d4a3b11f39c335668e56c57f5e9"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+            "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+            "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+            "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "after": {
+        "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+        "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "331302723bd5e1fa98d530af9ee57de19aef44553af3e0e6168d5e1b0559523a",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "9083b25a82da331d4b1e210c533af33f8dcaf49b1ed43a49cecbad2343a03289"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+            "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+            "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+            "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": null,
+      "logBytes": 113,
+      "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+    },
+    "coverage": {
+      "phase": "coverage",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:coverage-matrices"],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-select-mount-closeout",
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-22T00:19:16.000440+00:00",
+      "finishedAt": "2026-11-22T00:27:08.618207+00:00",
+      "seconds": 472.618,
+      "exitCode": 0,
+      "before": {
+        "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+        "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "e27fb9fe1e01aabc4226073b01338cb744684ed9623d326efb7013078a1d5729",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "d4f00d9d05538d87c297c989e80477472ecd4b531123020fe6732544e93e30de"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+            "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+            "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+            "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "after": {
+        "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+        "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "e27fb9fe1e01aabc4226073b01338cb744684ed9623d326efb7013078a1d5729",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "d4f00d9d05538d87c297c989e80477472ecd4b531123020fe6732544e93e30de"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+            "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+            "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+            "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": true,
+      "logBytes": 484561,
+      "logSha256": "2c26c2b1f9d479971e0626ec0635866db0cd8d51ef755123c1f624b91be5838b",
+      "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+    },
+    "types": {
+      "phase": "types",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-select-mount-closeout",
+      "nodeOptions": "--max-old-space-size=4096",
+      "startedAt": "2026-11-22T00:19:15.980451+00:00",
+      "finishedAt": "2026-11-22T00:23:27.569252+00:00",
+      "seconds": 251.589,
+      "exitCode": 0,
+      "before": {
+        "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+        "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "e27fb9fe1e01aabc4226073b01338cb744684ed9623d326efb7013078a1d5729",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "d4f00d9d05538d87c297c989e80477472ecd4b531123020fe6732544e93e30de"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+            "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+            "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+            "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "after": {
+        "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+        "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+        "statusPorcelain": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+        "trackedPatchSha256": "e27fb9fe1e01aabc4226073b01338cb744684ed9623d326efb7013078a1d5729",
+        "outputs": [
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+            "sha256": "d4f00d9d05538d87c297c989e80477472ecd4b531123020fe6732544e93e30de"
+          },
+          {
+            "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+            "sha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16"
+          },
+          {
+            "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+            "sha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0"
+          }
+        ],
+        "reviewedSource": [
+          {
+            "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+            "sha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+            "sha256": "bc3821236d4c5146e6976400dc2d6d0ee5d6a37deac254be1f4aa2266b820c9a",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+            "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+            "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20",
+            "matchesCheckpoint": true
+          },
+          {
+            "path": "internal/website/self-hosting-coverage-matrix.md",
+            "sha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+            "matchesCheckpoint": true
+          }
+        ]
+      },
+      "sourceAndGeneratedStable": true,
+      "logBytes": 10819,
+      "logSha256": "89d83e110763a240161bb7e0f7d450bf6b75cf9a4bed76fb89cb29c97de1fc16",
+      "boundary": "Actual local execution at the named source, with the two generated outputs explicitly tracked. No native result or later-head rerun is implied."
+    }
+  },
+  "coverageSummary": {
+    "matrices": 2,
+    "counts": {
+      "tests": 4491,
+      "pass": 4490,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 1,
+      "todo": 0
+    },
+    "portableSkip": "﹣ portable suite does not run Linux media integration (0.125226ms) # NOT RUN here: node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs; required separately in Linux CI"
+  },
+  "typeSummary": {
+    "files": 1259,
+    "errors": 0,
+    "warnings": 0,
+    "hints": 33
+  },
+  "bindingAudit": {
+    "observedAt": "2026-11-22T00:20:55.604626+00:00",
+    "sourceRevision": "56a28db5004e10039c63007c580fb2086663a3aa",
+    "sourceTree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+    "comparisonCommit": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+    "previousProjectionSourceRevision": "26d359cd2642fce9aa350ceb88644cae26763282",
+    "sourceBindingCount": 5956,
+    "previousSourceBindingCount": 5956,
+    "allPreviousBindingPathsRetainedInOrder": true,
+    "addedSourceBindings": [],
+    "independentlyReconstructedInventoryMatches": true,
+    "allCurrentHashesAndGitObjectsMatch": true,
+    "sourceBindingDetails": {
+      "path": "source-bindings-detail.json",
+      "bytes": 1493014,
+      "sha256": "6a35768de29eee1ee1e2156e1c35c94c985992edfc60633983e4d12f98f9006a"
+    },
+    "hashRenewals": [
+      {
+        "path": "internal/website/self-hosting-coverage-matrix.md",
+        "beforeSha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+        "afterSha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0"
+      }
+    ],
+    "websiteSourceFingerprintRenewal": {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "owner": "www.demo.authored-controllers",
+      "beforeSha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+      "afterSha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+      "ledgerPath": "internal/website/self-hosting-coverage-matrix.md",
+      "beforeLedgerSha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+      "afterLedgerSha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+      "singleExistingFingerprintOnly": true,
+      "allOtherLedgerBytesIdentical": true,
+      "historicalParagraphRetained": true,
+      "admissionBoundary": "The two new hashes were explicitly supplied after parent source review; measuring a body does not grant admission or external approval."
+    },
+    "proof": {
+      "verifiedCommit": "56a28db5004e10039c63007c580fb2086663a3aa",
+      "verifiedTreeCount": 322,
+      "verifiedUniqueBlobCount": 5892,
+      "verifiedUniqueBlobBytes": 16307656,
+      "missingOrUnusedProofTrees": [],
+      "boundary": "Git object integrity only, no signature or approval assertion."
+    },
+    "finitePolicies": {
+      "details": {
+        "path": "finite-policy-audit.json",
+        "bytes": 110523,
+        "sha256": "ad13ab273b5176099bb682e3a1f68417f0bbef1504fd5294c7264d0685502270"
+      },
+      "counts": {
+        "importer": 122,
+        "companion": 1
+      },
+      "allDefiningPolicyBytesUnchanged": true,
+      "allCurrentBodiesMatch": true,
+      "websiteBindings": 211,
+      "websitePathOrderAndOwnersUnchanged": true
+    },
+    "generatedOutputs": [
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.json",
+        "rawGeneratedSha256": "9083b25a82da331d4b1e210c533af33f8dcaf49b1ed43a49cecbad2343a03289",
+        "formattedSha256": "d4f00d9d05538d87c297c989e80477472ecd4b531123020fe6732544e93e30de",
+        "bytes": 3614615
+      },
+      {
+        "path": "internal/coverage-matrices/prototype-coverage-matrix.md",
+        "rawGeneratedSha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16",
+        "formattedSha256": "20e54eb7f0410fc318b78c07a59ad5bb60f73fccf64b18c21f506d26f8bfbd16",
+        "bytes": 159357
+      },
+      {
+        "path": "internal/coverage-matrices/finf-delivery-checklist.md",
+        "rawGeneratedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "formattedSha256": "a7802eb14efc7fafa033109408b77a603a94289fa4655ae23d3e09c73f7953f0",
+        "bytes": 50877
+      }
+    ],
+    "formattedJsonEqualsActualGenerator": true,
+    "markdownOnlyCandidateRevisionChanged": true,
+    "checklistByteIdentical": true,
+    "acceptance": {
+      "allOtherProjectionFieldsUnchanged": true,
+      "allConsumerRowsByteIdenticalTo817": true,
+      "rowCounts": {
+        "comparisonRows": 71,
+        "projectionRows": 22,
+        "consumerRows": 141,
+        "migrationLedger": 101
+      },
+      "catalogStates": {
+        "draft": 585
+      },
+      "gpuiStates": {
+        "required-unassessed": 456
+      },
+      "noOwnerCriteriaOrLifecyclePromotion": true
+    },
+    "generatorReceiptSha256": "cfacff950f599a3560a8a94fbaf9df9816163ae224c32b2dd4f9f6c2f380bdac",
+    "generatorRunnerSha256": "73a7dbb40b1eeabb65062cd7caa50e41b1275874a4a42188847648fe1a69f281",
+    "generatorCommandCwdInputsAndThreeOutputsVerified": true,
+    "baselineToSourceChangedPaths": [
+      "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+      "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+      "internal/records/2026-11-22-select-overlay-mount-clearance.md",
+      "internal/website/self-hosting-coverage-matrix.md"
+    ],
+    "start": {
+      "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+      "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "patchSha256": "e27fb9fe1e01aabc4226073b01338cb744684ed9623d326efb7013078a1d5729"
+    },
+    "end": {
+      "head": "56a28db5004e10039c63007c580fb2086663a3aa",
+      "tree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+      "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+      "patchSha256": "e27fb9fe1e01aabc4226073b01338cb744684ed9623d326efb7013078a1d5729"
+    },
+    "outcome": "PASS",
+    "boundary": "Independent finite source-proof and policy integrity audit. Full gates, native executions, final derived-head readback and remaining product acceptance are separate."
+  },
+  "bindingAuditIdentity": {
+    "path": "regression-select-mount-publication/binding-audit.json",
+    "bytes": 5661,
+    "sha256": "3d65242c2f98a3e465f672cc0c62b43e1582246af3f1a8ccee38d27406a90837"
+  },
+  "consumerCriteriaCounts": {
+    "allPrograms": 141,
+    "website": 78,
+    "source": "Top-level consumerRows grouped by program and source, not candidateSource or duplicate ledger prose."
+  },
+  "boundedSourceReview": {
+    "reviewReceipt": {
+      "sourceCommit": "56a28db5004e10039c63007c580fb2086663a3aa",
+      "sourceTree": "c61e5a3bf77c6bf563c83f25121c009ab6340dc4",
+      "parentSource": "711254b57ec0b8c93df4c4b7038c90e3a2102e94",
+      "ledgerPath": "internal/website/self-hosting-coverage-matrix.md",
+      "ledgerBeforeSha256": "5af63b75be88e406e4470f41a62a7b0b85310fe465765c28584034d7730b8ae5",
+      "ledgerAfterSha256": "35fc10bf4da9e9ba806655cd4ed5d45e4c7df2ed9b791c69cf7b3f31763a9be0",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "oldDemoSha256": "b5544279036af34b358978c7353c3673dba8de7eb8ed750fba075ad501874d09",
+      "reviewedDemoSha256": "0d0d101722c5d0197ff839b068e01534d43fdb464cf3d6f0f5cfda788c6ef564",
+      "onlyExactRowHashChanged": true,
+      "otherLedgerBytesUnchanged": true,
+      "ownerAndDispositionUnchanged": true,
+      "reviewRecord": "internal/records/2026-11-22-select-overlay-mount-clearance.json",
+      "status": ""
+    },
+    "receiptIdentity": {
+      "path": "regression-select-mount-integration/website-review-receipt.json",
+      "bytes": 906,
+      "sha256": "8cb77785268304f1dfc31ec404433502fd21ed8e8c2b3b2abbd94f475d88e794"
+    },
+    "offlineInstall": {
+      "command": ["corepack", "pnpm@10.32.1", "install", "--offline", "--frozen-lockfile"],
+      "cwd": "/workspace/scratch/fbd6f62bb640/regression-select-mount-closeout",
+      "source": "711254b57ec0b8c93df4c4b7038c90e3a2102e94",
+      "startedAt": "2026-11-22T00:17:37.476104+00:00",
+      "finishedAt": "2026-11-22T00:17:40.587348+00:00",
+      "durationSeconds": 3.111,
+      "exitCode": 0,
+      "logBytes": 1062,
+      "logSha256": "f2615032908a4357463ca90652d03e5a56f0343ea814afd7076c157765e14566",
+      "statusAfter": ""
+    },
+    "installReceiptIdentity": {
+      "path": "regression-select-mount-integration/offline-install-receipt.json",
+      "bytes": 520,
+      "sha256": "de4fff82d529caeb59d2949e318a04dc73f7af7b10a9e21fde029ae1c7ad28cf"
+    },
+    "scope": "One existing Website fingerprint renewed after source review; all other ledger bytes, owners, criteria, dispositions and historical prose remain unchanged. The existing conservative Material source guard and paint thresholds are retained."
+  },
+  "correctionRecords": [
+    {
+      "path": "regression-select-mount-closeout/internal/records/2026-11-22-select-overlay-mount-clearance.json",
+      "bytes": 16659,
+      "sha256": "faed90cfd1653a15151e8e6273d6f89a46c715e9def81d78b1110e01d4edffe9"
+    },
+    {
+      "path": "regression-select-mount-closeout/internal/records/2026-11-22-select-overlay-mount-clearance.md",
+      "bytes": 7463,
+      "sha256": "19bf28877dbf7e806314193a54218c6ee711d40e069e4aca059af38a56dafc20"
+    }
+  ],
+  "historicalLocalControls": {
+    "actualSourceRevision": "26d359cd2642fce9aa350ceb88644cae26763282",
+    "axis": {
+      "actualReceipt": {
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "--pool=forks",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/fbd6f62bb640/regression-main2d-publication/integrated-axis-vitest.json",
+          "packages/adapters/base/test/web-axis-input-host.test.ts",
+          "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+          "packages/adapters/react/test/axis-input.integration.test.ts",
+          "packages/adapters/vue/test/axis-input.integration.test.ts",
+          "packages/adapters/vue2/test/axis-input.integration.test.ts",
+          "packages/adapters/web-component/test/axis-input.integration.test.ts",
+          "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "packages/prototypes/base/test/resizable-group.test.ts",
+          "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+        ],
+        "cwd": "/workspace/scratch/fbd6f62bb640/regression-final-closeout",
+        "startedAt": "2026-11-21T23:27:35.489918+00:00",
+        "finishedAt": "2026-11-21T23:27:48.055220+00:00",
+        "seconds": 12.565,
+        "exitCode": 0,
+        "before": {
+          "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+          "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+          "status": "",
+          "sourceFiles": [
+            {
+              "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+              "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+              "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+              "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+              "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+              "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+              "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+              "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+              "matchesCommit": true
+            },
+            {
+              "path": "vitest.config.ts",
+              "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+              "matchesCommit": true
+            }
+          ]
+        },
+        "after": {
+          "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+          "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+          "status": "",
+          "sourceFiles": [
+            {
+              "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+              "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+              "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+              "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+              "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+              "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+              "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+              "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/prototypes/base/test/resizable-group.test.ts",
+              "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+              "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+              "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+              "matchesCommit": true
+            },
+            {
+              "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+              "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+              "matchesCommit": true
+            },
+            {
+              "path": "vitest.config.ts",
+              "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+              "matchesCommit": true
+            }
+          ]
+        },
+        "selectedFiles": [
+          "packages/adapters/base/test/web-axis-input-host.test.ts",
+          "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+          "packages/adapters/react/test/axis-input.integration.test.ts",
+          "packages/adapters/vue/test/axis-input.integration.test.ts",
+          "packages/adapters/vue2/test/axis-input.integration.test.ts",
+          "packages/adapters/web-component/test/axis-input.integration.test.ts",
+          "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "packages/prototypes/base/test/resizable-group.test.ts",
+          "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+        ],
+        "reportedFiles": [
+          "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+          "packages/adapters/base/test/web-axis-input-host.test.ts",
+          "packages/adapters/react/test/axis-input.integration.test.ts",
+          "packages/adapters/vue/test/axis-input.integration.test.ts",
+          "packages/adapters/vue2/test/axis-input.integration.test.ts",
+          "packages/adapters/web-component/test/axis-input.integration.test.ts",
+          "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "packages/prototypes/base/test/resizable-group.test.ts",
+          "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts"
+        ],
+        "counts": {
+          "numTotalTests": 122,
+          "numPassedTests": 122,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0
+        },
+        "checks": {
+          "cleanSourceStable": true,
+          "exactNineFilesCollectedOnce": true,
+          "actual122PassNoOmission": true,
+          "commandExitZero": true
+        },
+        "logBytes": 206950,
+        "logSha256": "56fdaae4bfc24ec5664edd661fd40068c7b127ef3bd802e014b1996e472cc8a3",
+        "reportBytes": 46966,
+        "reportSha256": "650685b6a38133bb18e1bee39da60e8dd38030c16437dc3700f828ae31adea28",
+        "dependencyBoundary": "This integrated worktree uses its own real frozen offline pnpm installation. Earlier author-worktree symlink-based red/failed-attempt/green receipts remain historical and are not relabeled clean.",
+        "acceptanceBoundary": "Actual local nine-file regression evidence, not native layout or a final complete cycle."
+      },
+      "artifacts": [
+        {
+          "path": "regression-main2d-publication/integrated-axis-receipt.json",
+          "bytes": 8638,
+          "sha256": "e465c6d54773e49db496b31ec8549120520ac4308baa6188949eec877cff28df"
+        },
+        {
+          "path": "regression-main2d-publication/integrated-axis.log",
+          "bytes": 206950,
+          "sha256": "56fdaae4bfc24ec5664edd661fd40068c7b127ef3bd802e014b1996e472cc8a3"
+        },
+        {
+          "path": "regression-main2d-publication/integrated-axis-vitest.json",
+          "bytes": 46966,
+          "sha256": "650685b6a38133bb18e1bee39da60e8dd38030c16437dc3700f828ae31adea28"
+        }
+      ],
+      "currentFileEquivalence": [
+        {
+          "path": "packages/adapters/base/test/web-axis-input-host.test.ts",
+          "sha256": "9305ba28f35c7418d7a55f685b992100dfc5df228b52d224fcecdc80dcbb8322",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/base/test/web-axis-delta-basis.test.ts",
+          "sha256": "de81039df26f2e0abfc472d95caff7a20390aaa6aec279397c9b8112961d4d41",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/react/test/axis-input.integration.test.ts",
+          "sha256": "d9d9a34918d49d93aaf50d8f37aa244c557b13e76262d6aabf818081d4af4a6b",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/vue/test/axis-input.integration.test.ts",
+          "sha256": "081570f9ec428f552db1d08f758bce004e48f7e6a5324fcb24f8320aff87318f",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/vue2/test/axis-input.integration.test.ts",
+          "sha256": "d04dbdc6e1bff0affb3b732a208c5c27d1d14bc0a234391feb487d97b21cbcf5",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/web-component/test/axis-input.integration.test.ts",
+          "sha256": "480cb2e86acbcf7349105187d76c293d249d20bfe44bf10caefc8ee1ccdb16e4",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/prototypes/base/test/carousel-continuous.test.ts",
+          "sha256": "fc1635c879d8a7729cc6b1338ba98f8826414132806f5db7e2ff2d027e7f8b4b",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/prototypes/base/test/resizable-group.test.ts",
+          "sha256": "2a00b1328c7836bdde74ecd0e42ac5baa41b8dbae4cf5bd26d248479a712cd15",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts",
+          "sha256": "1a100591d09e0844d9923d0e5fdfc0ac2478d7f0a8c15a05ac82b9a101bd63f0",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+          "sha256": "5be7032d50a3e9565ed434707907dc64b0ae7bdd7a98a93e6808d222cdf33377",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "sha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "vitest.config.ts",
+          "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+          "matchesHistoricalBody": true
+        }
+      ]
+    },
+    "timing": {
+      "actualReceipt": {
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "--pool=forks",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/fbd6f62bb640/regression-main2d-integration/timing-tests.vitest.json",
+          "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+          "packages/compiler/test/transition-timing-matrix.test.ts"
+        ],
+        "cwd": "/workspace/scratch/fbd6f62bb640/regression-main2d-closeout",
+        "startedAt": "2026-11-21T23:24:28.654076+00:00",
+        "endedAt": "2026-11-21T23:27:19.208221+00:00",
+        "durationSeconds": 170.554,
+        "exitCode": 0,
+        "toolchain": {
+          "node": "v24.22.3",
+          "pnpm": "10.32.1"
+        },
+        "before": {
+          "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+          "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+          "statusPorcelain": "",
+          "fileSha256": {
+            "packages/compiler/src/compile.ts": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "packages/compiler/test/source-graph.test.ts": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "packages/compiler/test/transition-timing-matrix.test.ts": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "packages/prototypes/base/test/transition-timing-matrix.test.ts": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8"
+          }
+        },
+        "after": {
+          "head": "26d359cd2642fce9aa350ceb88644cae26763282",
+          "tree": "e52a07f7f4e9f9b8d2d279e3622135e9d251f811",
+          "statusPorcelain": "",
+          "fileSha256": {
+            "packages/compiler/src/compile.ts": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+            "packages/compiler/test/source-graph.test.ts": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+            "packages/compiler/test/transition-timing-matrix.test.ts": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+            "packages/prototypes/base/test/transition-timing-matrix.test.ts": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8"
+          }
+        },
+        "sourceStable": true,
+        "beforeClean": true,
+        "afterClean": true,
+        "logPath": "/workspace/scratch/fbd6f62bb640/regression-main2d-integration/timing-tests.log",
+        "logBytes": 321977,
+        "logSha256": "04bbc3f33618dde58eeba366735733d94ba8d4b4c180415bc85e591a4d963323",
+        "reportPath": "/workspace/scratch/fbd6f62bb640/regression-main2d-integration/timing-tests.vitest.json",
+        "reportBytes": 7998,
+        "reportSha256": "45d0982189cde50e5532c865d5f1a6e282179fc95adc8ad51052bf5a0c3edebd",
+        "counts": {
+          "numTotalTestSuites": 10,
+          "numPassedTestSuites": 10,
+          "numFailedTestSuites": 0,
+          "numPendingTestSuites": 0,
+          "numTotalTests": 26,
+          "numPassedTests": 26,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": true
+        },
+        "files": [
+          {
+            "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+            "status": "passed",
+            "caseCount": 19,
+            "caseStatusCounts": {
+              "passed": 19
+            }
+          },
+          {
+            "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+            "status": "passed",
+            "caseCount": 7,
+            "caseStatusCounts": {
+              "passed": 7
+            }
+          }
+        ],
+        "unhandledErrors": [],
+        "exactSelectedFilesOnce": true
+      },
+      "artifacts": [
+        {
+          "path": "regression-main2d-integration/timing-tests-receipt.json",
+          "bytes": 3382,
+          "sha256": "6070e8c2deb9c9c8acb10f44ffa1eb916d3d5a9a053be792c16e7cd1562f1190"
+        },
+        {
+          "path": "regression-main2d-integration/timing-tests.log",
+          "bytes": 321977,
+          "sha256": "04bbc3f33618dde58eeba366735733d94ba8d4b4c180415bc85e591a4d963323"
+        },
+        {
+          "path": "regression-main2d-integration/timing-tests.vitest.json",
+          "bytes": 7998,
+          "sha256": "45d0982189cde50e5532c865d5f1a6e282179fc95adc8ad51052bf5a0c3edebd"
+        }
+      ],
+      "currentFileEquivalence": [
+        {
+          "path": "packages/compiler/src/compile.ts",
+          "sha256": "42dc9a2b111bc114cb2ae211eab1299c8867150ffd3320103eb17b0a8fe9e407",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/compiler/test/source-graph.test.ts",
+          "sha256": "936e9581594e49d27327e2ee9609e1b2f3a2cfc596b3a837d8ebccd69d6ea53e",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/compiler/test/transition-timing-matrix.test.ts",
+          "sha256": "69e3e27bf40772d40a1c65a01dda4932df4e4e80f71b55336932e936ced82600",
+          "matchesHistoricalBody": true
+        },
+        {
+          "path": "packages/prototypes/base/test/transition-timing-matrix.test.ts",
+          "sha256": "85c8eacb8270ebf2d613fbf1d9a0113637bf0e31f43d44fd03d0690f4ea003d8",
+          "matchesHistoricalBody": true
+        }
+      ]
+    },
+    "boundary": "Actual clean 26d executions in distinct worktrees with their own frozen installs. The listed tested bodies equal this checkpoint. This is not a rerun at this checkpoint or a claim about an unenumerated transitive execution closure."
+  },
+  "historicalNativeEvidence": {
+    "select": {
+      "receiptIdentity": {
+        "path": "native-final-44963404765-select/select-terminal-closeout.json",
+        "bytes": 89823,
+        "sha256": "6d315d913a805fa0c65359e7a8c1b09b524b1d726a752244871eaa3fc6f86ad4"
+      },
+      "runId": 44963404765,
+      "attempt": 1,
+      "head": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+      "tree": "25916f297a3ea49b501dec569527cdf69cf04fc2",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44963404765",
+      "nativeWorkflow": {
+        "status": "completed",
+        "conclusion": "failure",
+        "jobId": 137026967353,
+        "jobName": "browser-evidence",
+        "jobConclusion": "failure",
+        "jobStartedAt": "2026-11-21T23:46:23Z",
+        "jobCompletedAt": "2026-11-21T23:52:01Z",
+        "failedSteps": [
+          {
+            "name": "Capture actual two-family four-runtime selections",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 6,
+            "started_at": "2026-11-21T23:46:45Z",
+            "completed_at": "2026-11-21T23:51:58Z"
+          }
+        ]
+      },
+      "inventory": {
+        "expectedFiles": 1,
+        "observedFiles": 1,
+        "expectedCases": 24,
+        "observedTerminalCases": 24,
+        "passed": 16,
+        "failed": 8,
+        "skipped": 0,
+        "todo": 0,
+        "missingIdentities": [],
+        "duplicates": [],
+        "identityInventoryComplete": true,
+        "nativeDuration": [
+          "312.90s (transform 88ms, setup 0ms, collect 317ms, tests 312.35s, environment 0ms, prepare 40ms)"
+        ],
+        "resourceTerminationLines": [],
+        "noOuterResourceTruncationObserved": true
+      },
+      "caseGroups": {
+        "bootstrapSelectionFlows": {
+          "passed": 8,
+          "failed": 0
+        },
+        "liquidSelectionFlows": {
+          "passed": 0,
+          "failed": 8
+        },
+        "nativeTextSelection": {
+          "passed": 8,
+          "failed": 0
+        }
+      },
+      "scopeInterpretation": {
+        "beforeOpen": {
+          "oldF0OpaqueFallback": 8,
+          "candidateSelfOpticalRendered": 8
+        },
+        "afterOpen": {
+          "candidateTriggerOpaqueFallbackSourceOverlappingContent": 8,
+          "candidateSurfaceSelfOpticalRendered": 8,
+          "firstFailedAssertion": "test:328:18, original Trigger self-optical poll, 20000ms"
+        },
+        "nativeClaimsReached": [
+          "initial own-scene/runtime mounting",
+          "popup visibility",
+          "Surface self-optical assertion"
+        ],
+        "nativeClaimsUnreachedInLiquidFlows": [
+          "successful owned-stage optical capture",
+          "keyboard selection and commit",
+          "controlled selection path",
+          "RTL 320px and 200% font flow"
+        ],
+        "rtlOpticalClaim": "Bootstrap completed records retain opticalPaintClaim:false and gpuiClaim:false. Liquid RTL flow is unreached in this run; no earlier cycle result substitutes for it.",
+        "zeroAreaOverlayInference": "All eight open snapshots have a visible opacity=1, width=432, height=0 uncontrolledStageOverlay at Trigger bottom. Current four-edge overlaps predicate evaluates true against its zero-area rect after 9px expansion; before open opacity=0 skips it. Surface borderbox is 7px clear of expanded Trigger. Public facts plus inspected source support a zero-area overlap defect hypothesis; native records do not name the internal first candidate, and no fix has run here."
+      },
+      "boundary": "This is the failed 817 targeted receipt only. Historical f0/e775 archives remain unchanged; it is not a full-cycle receipt or proof of a later repair."
+    },
+    "material": {
+      "receiptIdentity": {
+        "path": "native-final-targeted-44963377079-material/native-targeted-material-closeout.json",
+        "bytes": 55623,
+        "sha256": "28bd38a27b25321eb9515704b0eecc3775f8b4f7116159d031f0836b32ee6343"
+      },
+      "runId": 44963377079,
+      "attempt": 1,
+      "head": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+      "tree": "25916f297a3ea49b501dec569527cdf69cf04fc2",
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/44963377079",
+      "scope": "Exactly the actual targeted liquid-material-evidence.yml eleven-job dispatch. It excludes strict package budgets and material source-specializer, and is not a complete repository regression cycle.",
+      "jobConclusions": {
+        "success": 6,
+        "failure": 5
+      },
+      "actualVitestExecutions": {
+        "passed": 1583,
+        "total": 1604,
+        "failed": 21
+      },
+      "hover": {
+        "actualCasesPassed": 16,
+        "plannedCaptures": 2904,
+        "completedCaptures": 2904,
+        "verifiedNativePngDigests": 8080,
+        "contactBoundaryStages": 120,
+        "unchangedCaptureReadinessSeconds": 8,
+        "unchangedCaseSeconds": 240,
+        "unchangedJobMinutes": 20,
+        "boundarySemantics": "Full authored pointer footprint at all valid positive contact phases. Exact source-edge reason=source-bounds-unavailable; neighbor/accordion-tight reason=source-overlapping-content; all five boundary stages retain fallback and pressed state only at actual negative-press. The f0 failed artifacts remain unchanged."
+      },
+      "tint": {
+        "runId": 44963377079,
+        "runAttempt": 1,
+        "source": {
+          "sha": "81722b5fd969e9a86e5b07d35f21486df1ab220a",
+          "tree": "25916f297a3ea49b501dec569527cdf69cf04fc2",
+          "patchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "allPreflightsPassed": true,
+        "allTerminal": true,
+        "captures": {
+          "passed-observation-checks": 1416,
+          "blocked-at-normal-finalization": 192
+        },
+        "behavior": {
+          "passed": 48
+        },
+        "opticalResults": {
+          "failed": 16,
+          "passed": 24,
+          "diagnostic-only": 16,
+          "inconclusive": 8
+        },
+        "verifiedPngs": 8512,
+        "integrityViolations": 0,
+        "allCapturesCompleted": false,
+        "productAccepted": false,
+        "attributionLimit": "Classify this run only from its actual binding records, terminal checkpoint and optical metrics. Compare new optical results with retained e775 and f0 evidence by values and identities. Prior blocked optics supply no matching optical baseline; matching failed case names alone does not establish causality.",
+        "reports": [
+          "prominent-tint-wc-artifact-audit.json",
+          "prominent-tint-react-artifact-audit.json",
+          "prominent-tint-vue-artifact-audit.json",
+          "prominent-tint-vue2-artifact-audit.json"
+        ]
+      },
+      "main": {
+        "actualTests": {
+          "failed": 5,
+          "passed": 967,
+          "total": 972
+        },
+        "all28FilesTerminal": true,
+        "allStylesPreflightsBeforeBody": true,
+        "controlSuiteTerminalLines": [
+          "2026-11-21T23:57:14.7040591Z  ✓ packages/adapters/base/test/web-material-sink.test.ts (164 tests) 810ms",
+          "2026-11-21T23:57:26.6701197Z  ✓ apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts (45 tests) 345ms",
+          "2026-11-21T23:57:33.1411406Z  ✓ apps/www/src/components/PrototypePreviewer/demo-renderer.hover-reenable.test.ts (29 tests) 5479ms",
+          "2026-11-21T23:57:36.6904127Z  ✓ apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts (39 tests) 7ms"
+        ],
+        "toggle": {
+          "nativeSuite": "13/13 passed",
+          "runtimeThemeJourneys": 8,
+          "journeyFailureCount": 0,
+          "capturedRecords": 204,
+          "verifiedNativePngDigests": 316,
+          "releasedSamples": [
+            {
+              "name": "react-dark-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "react-light-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "vue-dark-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "vue-light-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "vue2-dark-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "vue2-light-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "wc-dark-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            },
+            {
+              "name": "wc-light-released",
+              "phase": "rest",
+              "contact": "release",
+              "quality": "self-optical",
+              "committed": true,
+              "paintOutset": 9
+            }
+          ]
+        },
+        "failures": [
+          {
+            "owner": "dark material",
+            "stage": "After resizing viewport to 1100x1000, original 20-second self-optical wait at material.browser.test.ts:439",
+            "actual": "All four regular hosts are opaque-fallback/source-overlapping-content; no current carrier. Earlier observer failure has been passed, but this later stage is not accepted.",
+            "record": {
+              "path": "/workspace/scratch/fbd6f62bb640/native-final-targeted-44963377079-material/artifact-14731075566/quality-timeout-15-self-optical.json",
+              "bytes": 6226,
+              "sha256": "4c4d29455f046a0f335cd01b2258ad85294302787612e02453f94d5b17f045f9"
+            },
+            "png": {
+              "path": "/workspace/scratch/fbd6f62bb640/native-final-targeted-44963377079-material/artifact-14731075566/quality-timeout-15-self-optical.png",
+              "bytes": 99438,
+              "sha256": "c0c32c3cdb70abbf6b91e610e92fa81135ad2ee98439125ff525cf0bfb5134c8"
+            },
+            "attribution": "Overlap subject is not identified by this existing public snapshot; no claim that the helper fix or empty overlay causes it."
+          },
+          {
+            "owner": "WC theme and native observer cleanup",
+            "actual": [
+              {
+                "stage": "mounted-light",
+                "name": "AssertionError",
+                "message": "expected { value: '#1d1d1f', priority: '' } to deeply equal { value: '#aabbcc', priority: '' }",
+                "stack": "AssertionError: expected { value: '#1d1d1f', priority: '' } to deeply equal { value: '#aabbcc', priority: '' }\n    at authored (/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts:658:56)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts:1132:7\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+              },
+              {
+                "stage": "archive-native-observation",
+                "name": "AssertionError",
+                "message": "expected [] to have a length of 2 but got +0",
+                "stack": "AssertionError: expected [] to have a length of 2 but got +0\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1339:22)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts:1273:87\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+              }
+            ],
+            "attribution": "Retain both actual author #aabbcc versus #1d1d1f and expected two observer events versus zero assertions."
+          },
+          {
+            "owner": "bounded release",
+            "childCases": 11,
+            "childrenWithoutRecordedFailure": 10,
+            "failedChild": "full-footprint-negative-guards",
+            "actual": "Original visible 2px obstruction in the full footprint correctly yields source-overlapping-content and clears the carrier. After removing it, ownedRest fails its original 2-second bound; overflow:hidden clipping stage is not reached.",
+            "obstruction": {
+              "hostRight": 227.25,
+              "obstructionLeft": 229.25,
+              "obstructionRight": 231.25
+            },
+            "traceSnapshots": 135,
+            "traceTruncated": false,
+            "record": {
+              "path": "/workspace/scratch/fbd6f62bb640/native-final-targeted-44963377079-material/artifact-14731075566/release-lifecycle/report.json",
+              "bytes": 1770651,
+              "sha256": "11181b98504385f75810a9289a1f82f0f2471dec4fc5e9599946d597a1629671"
+            },
+            "attribution": "The retained trace remains rest/frame8/sourceRevision11/fallback until cleanup. No new complete geometry was rejected by the helper. Specific stale-source or overlap owner causality remains unresolved."
+          },
+          {
+            "owner": "public live-canvas trace diagnostic",
+            "actual": "Error: Requested trace categories unavailable: devtools.timeline,blink.user_timing,v8,cc,gpu",
+            "captureComplete": false,
+            "productOptimizationAccepted": false,
+            "attribution": "Requested trace categories unavailable; actual capability failure retained, not a product acceptance."
+          },
+          {
+            "owner": "Portal containment diagnostic",
+            "actual": "Actual CSS columns direction row versus expected column under the declared positive container predicate.",
+            "record": {
+              "path": "/workspace/scratch/fbd6f62bb640/native-final-targeted-44963377079-material/artifact-14731075566/portal/docs-shell-containment-handover.json",
+              "bytes": 311727,
+              "sha256": "51052603e8d5fb1a489df42c3b25690ce225097a4ac5ea0c19c87375252c40b7"
+            },
+            "attribution": "Native guard failure retained; does not establish a successful containment handover."
+          }
+        ]
+      },
+      "attributionBoundaries": [
+        "This run proves the helper correction on four real Hover runtimes and eight real Toggle journeys, without erasing any prior red cycle.",
+        "Tint comparison preserves all64 actual measurements, original gates and still-failed/diagnostic/inconclusive statuses. Pre-existence relative to e775 is supported; original introduction before e775 and small numeric difference causality are not proved.",
+        "There are no exit124 resource truncations here; individual 20s/2s waits are failed assertions, not a reason to widen timeouts.",
+        "Native package budgets and source-specializer are absent from this targeted workflow. The local clean817 strict9+2 receipt is only a later-native comparison baseline."
+      ],
+      "boundary": "Historical targeted eleven-owner execution only. It excludes strict budgets/source-specializer and cannot be relabeled as this source or a whole-cycle result."
+    }
+  },
+  "derivedCommitPlan": {
+    "expectedPaths": [
+      "internal/coverage-matrices/prototype-coverage-matrix.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.md",
+      "internal/records/2026-11-22-select-mount-candidate-binding.json",
+      "internal/records/2026-11-22-select-mount-candidate-binding.md"
+    ],
+    "sourceEquivalence": "Only the two actual generated outputs and these two records may differ from the checkpoint; read back every bound body and all validated output bytes after committing.",
+    "strictBudgetRequirement": "Measure the clean containing head with the unchanged strict nine-probe policy and retain both diagnostics.",
+    "nativeRequirement": "First obtain the actual 24-case Select native result for the containing head, then run the complete CI at that exact head. Complete CI includes the eleven Material owners plus strict budgets and source-specializer. Do not repeat the standalone Material workflow solely to duplicate historical execution when its actual runtime inputs are unchanged; the full cycle still executes those owners.",
+    "statusAtCreation": "The containing commit and its subsequent native executions are not asserted by this source record."
+  },
+  "acceptanceBoundary": "Source integrity and actual local gates only. Historical failures retain their original revisions. No product, draft/GPUI lifecycle, native whole-cycle, GitHub approval, merge or release acceptance is implied."
+}
