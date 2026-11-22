@@ -184,6 +184,27 @@
       "tree": "219b4f23367f836a4028a785184f1818fee4e259",
       "commitObjectSha256": "65fe9578e6a8f13bb7c0edbeebcddabca661ea572daeae7b2886a16ebf7d82fd",
       "boundary": "Ten suites304 cases:292browser12ordinary; independent source/dry-plan check"
+    },
+    {
+      "key": "datepicker-causal-definition",
+      "commit": "2419927b6218b75d8e0782285d2748c123411bbe",
+      "tree": "c83ea232e740684d2d6d23215d0340c8de043231",
+      "commitObjectSha256": "9ecad79860f2286593ed1954b468dc071c4f4ae31e81cb71fa0dd2fd1c3e5eea",
+      "boundary": "Definition-first request capture and accepted opening session; draft retained"
+    },
+    {
+      "key": "datepicker-causal-source",
+      "commit": "322a87132c88bf7784765d2e2f597ee1d50072ee",
+      "tree": "6903e879690ecd527cf5a17f62e5e585704fce88",
+      "commitObjectSha256": "f1abb09c3a4d4eac21f9a1f062819a339852ac5efbe385e2909886ffd45ce068",
+      "boundary": "Five product sources match independent eight-probe execution; nonproduct differences retained separately"
+    },
+    {
+      "key": "queue-types-terminal",
+      "commit": "dbcdecb077283d4e3fe11fe1077b74708f24fa4b",
+      "tree": "3b50d1a14b0e7f3c7fd70d90847bbbb7422a73e2",
+      "commitObjectSha256": "4e20840b53b0288b67e04a1c4153ec32b41b0d06bb7765d9a7110ad038a7dc00",
+      "boundary": "Required workspace-types stage independent of ten native/ordinary suites;225-minute job; no execution claim"
     }
   ],
   "verifiedIntegrationMappings": [
@@ -407,5 +428,6 @@
       ],
       "kind": "ordinary site stylesheet generation only"
     }
-  ]
+  ],
+  "finalKnownSourceFindings": "resolved by bounded source reviews; native/type/whole-PR acceptance pending"
 }

@@ -3,7 +3,7 @@
   "recordDate": "2026-11-22",
   "owner": "/root/collections",
   "scope": "Original retained local collection execution logs plus independent bounded cross-workstream reviews; not a final-head native acceptance packet. Compression is byte-preserving; no historical log or JSON header is rewritten.",
-  "fileCount": 218,
+  "fileCount": 255,
   "files": [
     {
       "path": "ci/reviewed-original-projection-family-evidence.yml",
@@ -31,6 +31,24 @@
       "sha256": "0f37a611cd9c362cbd092dae8e85a6116286683578ad5a0c5166ac584d934bf5",
       "storedBytes": 2607,
       "storedSha256": "0f37a611cd9c362cbd092dae8e85a6116286683578ad5a0c5166ac584d934bf5"
+    },
+    {
+      "path": "ci/reviewed-types-projection-family-evidence.yml",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/reviewed-types-projection-family-evidence.yml",
+      "encoding": "identity",
+      "bytes": 4178,
+      "sha256": "a0cf38cf8a30259a32a2a49ef3bc481eae889a537e1e809c3dd51bef47a6bbb4",
+      "storedBytes": 4178,
+      "storedSha256": "a0cf38cf8a30259a32a2a49ef3bc481eae889a537e1e809c3dd51bef47a6bbb4"
+    },
+    {
+      "path": "ci/reviewed-types-run-sprint2-consumers.mjs",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/reviewed-types-run-sprint2-consumers.mjs",
+      "encoding": "identity",
+      "bytes": 15700,
+      "sha256": "347583fd9f8df858599e190968cf384e53bebaabc2c46303a86cbe4c87a3bb47",
+      "storedBytes": 15700,
+      "storedSha256": "347583fd9f8df858599e190968cf384e53bebaabc2c46303a86cbe4c87a3bb47"
     },
     {
       "path": "ci/sprint2-compiled-inventory-review-green.json",
@@ -71,6 +89,15 @@
       "sha256": "312f88d6da1c268f43db49e7702e1c48da27f3ea80d7cfae403d6fc0d157ca02",
       "storedBytes": 2388,
       "storedSha256": "312f88d6da1c268f43db49e7702e1c48da27f3ea80d7cfae403d6fc0d157ca02"
+    },
+    {
+      "path": "ci/sprint2-queue-final-controls.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/sprint2-queue-final-controls.log",
+      "encoding": "gzip",
+      "bytes": 609,
+      "sha256": "6a5c0c650ca410e0abb6cb3cc159d290d6a07d67274fb87216bcf35f2dc61ca7",
+      "storedBytes": 392,
+      "storedSha256": "d9994ccbcb42d26baf347d7dd548ae9350208fdd0185f780f1541ae4a04a58c0"
     },
     {
       "path": "ci/sprint2-queue-inventory-review-green.json",
@@ -616,13 +643,22 @@
       ]
     },
     {
+      "path": "compiler/compiler-agent-datepicker-review-status.txt",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-agent-datepicker-review-status.txt",
+      "encoding": "identity",
+      "bytes": 34,
+      "sha256": "f0068da53222acc5173049e57c0e19b6639f961674694a32fbfc692e62fd6e69",
+      "storedBytes": 34,
+      "storedSha256": "f0068da53222acc5173049e57c0e19b6639f961674694a32fbfc692e62fd6e69"
+    },
+    {
       "path": "compiler/compiler-agent-datepicker-review.md",
       "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-agent-datepicker-review.md",
       "encoding": "identity",
-      "bytes": 4639,
-      "sha256": "e46571e3890019a3c3d173f834cb0b4b80f4ca560620c16ede514874c5265cb9",
-      "storedBytes": 4639,
-      "storedSha256": "e46571e3890019a3c3d173f834cb0b4b80f4ca560620c16ede514874c5265cb9"
+      "bytes": 8673,
+      "sha256": "499b12424576e0cae451a15354fefe08437341939c4c0a16280415adb33534cc",
+      "storedBytes": 8673,
+      "storedSha256": "499b12424576e0cae451a15354fefe08437341939c4c0a16280415adb33534cc"
     },
     {
       "path": "compiler/compiler-native-browser-static-review.json",
@@ -715,6 +751,51 @@
       "storedSha256": "3f5b82fddb924e2b63ad9c90f0ee2c191d096a6c080ff5f2c9416ec9e8186503"
     },
     {
+      "path": "compiler/compiler-review-picker-capture-replay-summary.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-capture-replay-summary.json",
+      "encoding": "identity",
+      "bytes": 5433,
+      "sha256": "807167d92b3449a1a53e10437782ab521577533dd2f2e7e67fa11d18fd71f393",
+      "storedBytes": 5433,
+      "storedSha256": "807167d92b3449a1a53e10437782ab521577533dd2f2e7e67fa11d18fd71f393"
+    },
+    {
+      "path": "compiler/compiler-review-picker-capture-replay.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-capture-replay.log",
+      "encoding": "gzip",
+      "bytes": 5433,
+      "sha256": "807167d92b3449a1a53e10437782ab521577533dd2f2e7e67fa11d18fd71f393",
+      "storedBytes": 923,
+      "storedSha256": "802e4b523caed08a41daece0d18ae2bb9255d7c96c7e33b00212f722f283f753"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-nested-capture-green.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested-capture-green.json",
+      "encoding": "identity",
+      "bytes": 1110,
+      "sha256": "7883c992104a203984b7f564fdfbd39c551e4d0b11561e4f311373e6dca29d53",
+      "storedBytes": 1110,
+      "storedSha256": "7883c992104a203984b7f564fdfbd39c551e4d0b11561e4f311373e6dca29d53"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-nested-capture-green.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested-capture-green.log",
+      "encoding": "gzip",
+      "bytes": 1110,
+      "sha256": "7883c992104a203984b7f564fdfbd39c551e4d0b11561e4f311373e6dca29d53",
+      "storedBytes": 375,
+      "storedSha256": "8e7c0b5dbc4391bb95084fad92a6dade52551dfc04dc8e41c580edf90e116d05"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-nested-capture-green.mts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested-capture-green.mts",
+      "encoding": "identity",
+      "bytes": 6526,
+      "sha256": "0f229e0afa222f95a97d86d7ef959485cd457acfe510e5146f1e965847556156",
+      "storedBytes": 6526,
+      "storedSha256": "0f229e0afa222f95a97d86d7ef959485cd457acfe510e5146f1e965847556156"
+    },
+    {
       "path": "compiler/compiler-review-picker-context-nested.json",
       "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested.json",
       "encoding": "identity",
@@ -740,6 +821,33 @@
       "sha256": "4a1cd60efcab41f155c4e26eb97d3b8f6b872acf673439c83c30905a3210ea44",
       "storedBytes": 6512,
       "storedSha256": "4a1cd60efcab41f155c4e26eb97d3b8f6b872acf673439c83c30905a3210ea44"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-oldclose-capture-green.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-oldclose-capture-green.json",
+      "encoding": "identity",
+      "bytes": 1245,
+      "sha256": "cb7da953c95f2a086dca5e0dcb3e925674d40432135e8aa72d6e5866b003b8cb",
+      "storedBytes": 1245,
+      "storedSha256": "cb7da953c95f2a086dca5e0dcb3e925674d40432135e8aa72d6e5866b003b8cb"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-oldclose-capture-green.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-oldclose-capture-green.log",
+      "encoding": "gzip",
+      "bytes": 1245,
+      "sha256": "cb7da953c95f2a086dca5e0dcb3e925674d40432135e8aa72d6e5866b003b8cb",
+      "storedBytes": 404,
+      "storedSha256": "1e5932b41979bb38b65ce35025e78bb99af4003b5800539a7a4d002cb08fefdd"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-oldclose-capture-green.mts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-oldclose-capture-green.mts",
+      "encoding": "identity",
+      "bytes": 6792,
+      "sha256": "a3b4fc3ef81395c3f2dfec8d76bd05f132797c3a83a6cf2202d15566996b1091",
+      "storedBytes": 6792,
+      "storedSha256": "a3b4fc3ef81395c3f2dfec8d76bd05f132797c3a83a6cf2202d15566996b1091"
     },
     {
       "path": "compiler/compiler-review-picker-context-oldclose-source-before.json",
@@ -776,6 +884,33 @@
       "sha256": "3c77a1cac6a35d9fd6531d4ff3e28c5d90e06fe8c172ee0e74df5fb740604565",
       "storedBytes": 6778,
       "storedSha256": "3c77a1cac6a35d9fd6531d4ff3e28c5d90e06fe8c172ee0e74df5fb740604565"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-start-capture-green.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-capture-green.json",
+      "encoding": "identity",
+      "bytes": 749,
+      "sha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b",
+      "storedBytes": 749,
+      "storedSha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-start-capture-green.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-capture-green.log",
+      "encoding": "gzip",
+      "bytes": 749,
+      "sha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b",
+      "storedBytes": 303,
+      "storedSha256": "e9aeba7db3d304875903b293a1ba6013dd2b80633b5bbf6281cf3dca51f63328"
+    },
+    {
+      "path": "compiler/compiler-review-picker-context-start-capture-green.mts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-capture-green.mts",
+      "encoding": "identity",
+      "bytes": 5693,
+      "sha256": "1f288463538f9efe6844db1f1f37722ec33036902375f0e1b493244eb285e9e5",
+      "storedBytes": 5693,
+      "storedSha256": "1f288463538f9efe6844db1f1f37722ec33036902375f0e1b493244eb285e9e5"
     },
     {
       "path": "compiler/compiler-review-picker-context-start-green.json",
@@ -830,6 +965,51 @@
       "sha256": "91f52ca2ef198db301efc90b2aeef8146ceebc1e1248db65809281deaead27cb",
       "storedBytes": 5679,
       "storedSha256": "91f52ca2ef198db301efc90b2aeef8146ceebc1e1248db65809281deaead27cb"
+    },
+    {
+      "path": "compiler/compiler-review-picker-final-commit-correlation.diff.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-final-commit-correlation.diff",
+      "encoding": "gzip",
+      "bytes": 1615,
+      "sha256": "f0ca3c398623394066a96372f97242f3044700438687ea4083bb1c7186b147d3",
+      "storedBytes": 717,
+      "storedSha256": "5ccc14387c47818496bc18819c2aa07119e6cb218067aab3c6806387cf184f4f"
+    },
+    {
+      "path": "compiler/compiler-review-picker-final-commit-correlation.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-final-commit-correlation.json",
+      "encoding": "identity",
+      "bytes": 5589,
+      "sha256": "cfe23437a2e52702fc8be1000fc6e91bc8a0e79002195d595573d14ab355ba92",
+      "storedBytes": 5589,
+      "storedSha256": "cfe23437a2e52702fc8be1000fc6e91bc8a0e79002195d595573d14ab355ba92"
+    },
+    {
+      "path": "compiler/compiler-review-picker-request-start-capture-green.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-capture-green.json",
+      "encoding": "identity",
+      "bytes": 824,
+      "sha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b",
+      "storedBytes": 824,
+      "storedSha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b"
+    },
+    {
+      "path": "compiler/compiler-review-picker-request-start-capture-green.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-capture-green.log",
+      "encoding": "gzip",
+      "bytes": 824,
+      "sha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b",
+      "storedBytes": 361,
+      "storedSha256": "e568c6914359ab262d8c08152a2cb9691283dd47fa856c7e6c20604d3dbf314d"
+    },
+    {
+      "path": "compiler/compiler-review-picker-request-start-capture-green.mts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-capture-green.mts",
+      "encoding": "identity",
+      "bytes": 5441,
+      "sha256": "31335a5989d8bd377e643651f8f3272cbbfe86af4083a9100dfa5253dd5f9df6",
+      "storedBytes": 5441,
+      "storedSha256": "31335a5989d8bd377e643651f8f3272cbbfe86af4083a9100dfa5253dd5f9df6"
     },
     {
       "path": "compiler/compiler-review-picker-request-start-green.json",
@@ -889,10 +1069,10 @@
       "path": "compiler/compiler-review-picker-source-bindings.json",
       "originalPath": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-source-bindings.json",
       "encoding": "identity",
-      "bytes": 12568,
-      "sha256": "023adc9afb2778707b06fdcfb78b8870b3b8a15e1055d093de65ce5ffa13fd95",
-      "storedBytes": 12568,
-      "storedSha256": "023adc9afb2778707b06fdcfb78b8870b3b8a15e1055d093de65ce5ffa13fd95"
+      "bytes": 33254,
+      "sha256": "f162b1844fcc5cf4bdaab87f15c640686896c63d402a0e06896eaf8cd8ba002f",
+      "storedBytes": 33254,
+      "storedSha256": "f162b1844fcc5cf4bdaab87f15c640686896c63d402a0e06896eaf8cd8ba002f"
     },
     {
       "path": "compiler/compiler-review-scope-and-props-green.log.gz",
@@ -929,6 +1109,45 @@
       "sha256": "7b4f90b48079cb255d7f9014e59b56a4d1b5096d09d77d1ead47f431124bcf40",
       "storedBytes": 2697,
       "storedSha256": "7b4f90b48079cb255d7f9014e59b56a4d1b5096d09d77d1ead47f431124bcf40"
+    },
+    {
+      "path": "datepicker/datepicker-causal-capture-first.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-causal-capture-first.log",
+      "encoding": "gzip",
+      "bytes": 177179,
+      "sha256": "1cf48708937d5a4c91862953929213981b1bd2cc6d422aafb9419deb70676947",
+      "storedBytes": 19777,
+      "storedSha256": "e154263f473e93a038bedc9ed62d72e2f175ba8e10af37b70c690c3c5c819c2d",
+      "printedTestSummary": [
+        "Test Files  2 passed (2)",
+        "Tests  114 passed (114)"
+      ]
+    },
+    {
+      "path": "datepicker/datepicker-causal-capture-green.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-causal-capture-green.log",
+      "encoding": "gzip",
+      "bytes": 193136,
+      "sha256": "cd6f17089f1fc6425bc82597df36c45e3f8290ae9fe5eb25293c066fa2aab8ed",
+      "storedBytes": 21279,
+      "storedSha256": "f583d625f9891c5f9bf83bf6d209d86621003fdc4769df663ba5439cff0ce908",
+      "printedTestSummary": [
+        "Test Files  1 failed | 2 passed (3)",
+        "Tests  1 failed | 143 passed (144)"
+      ]
+    },
+    {
+      "path": "datepicker/datepicker-causal-capture-r2.log.gz",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-causal-capture-r2.log",
+      "encoding": "gzip",
+      "bytes": 192169,
+      "sha256": "642acbca606f741a181ebf5931efb4a4fe8f9838785bb5422e90fa5c95acc7f0",
+      "storedBytes": 20909,
+      "storedSha256": "dd4c27a010859044eeaf193932a7c1b9fd16beb6b8c9c652845def3561253974",
+      "printedTestSummary": [
+        "Test Files  3 passed (3)",
+        "Tests  144 passed (144)"
+      ]
     },
     {
       "path": "datepicker/datepicker-completion-independent-probe.json",
@@ -1127,6 +1346,114 @@
       "sha256": "8c2b5bcf5e93ef2f40315091a82983ac11dc78f72e78215df3e5fcd3742d7ef6",
       "storedBytes": 14645,
       "storedSha256": "daac1e33342d13dff4f933cceb101641f1a7bb5103cac9c299fc345f7bfaa08c"
+    },
+    {
+      "path": "datepicker-sources/final-commit/packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-commit/packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "encoding": "identity",
+      "bytes": 36922,
+      "sha256": "4230e4eb21e52bf57208080bf41068b8fbe37c7f248510147d00f71d805ba8bc",
+      "storedBytes": 36922,
+      "storedSha256": "4230e4eb21e52bf57208080bf41068b8fbe37c7f248510147d00f71d805ba8bc"
+    },
+    {
+      "path": "datepicker-sources/final-commit/spec/prototypes/P-BASE-POPOVER.yaml",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-commit/spec/prototypes/P-BASE-POPOVER.yaml",
+      "encoding": "identity",
+      "bytes": 8036,
+      "sha256": "d683b693ca095fd786df33cf5575f4cd6eb112a816b4d52ccdaf97486313f36a",
+      "storedBytes": 8036,
+      "storedSha256": "d683b693ca095fd786df33cf5575f4cd6eb112a816b4d52ccdaf97486313f36a"
+    },
+    {
+      "path": "datepicker-sources/final-commit/spec/tests/T-CALENDAR-SELECTION-0001.yaml",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-commit/spec/tests/T-CALENDAR-SELECTION-0001.yaml",
+      "encoding": "identity",
+      "bytes": 3639,
+      "sha256": "3c1bd5b022b0e33c2037da4031202252e403dfb383839e14fa59e0c3ffca1dbd",
+      "storedBytes": 3639,
+      "storedSha256": "3c1bd5b022b0e33c2037da4031202252e403dfb383839e14fa59e0c3ffca1dbd"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "encoding": "identity",
+      "bytes": 37057,
+      "sha256": "777790fcbe6c154c45154127a99f9f7c92720586777c68229e8f6a59e0dc1573",
+      "storedBytes": 37057,
+      "storedSha256": "777790fcbe6c154c45154127a99f9f7c92720586777c68229e8f6a59e0dc1573"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/packages/prototypes/base/src/calendar/types.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/calendar/types.ts",
+      "encoding": "identity",
+      "bytes": 6127,
+      "sha256": "76c7ff83b149d9ea39d2afd9efb9bc57e36db4b06506d1ad97c2c168f27f966e",
+      "storedBytes": 6127,
+      "storedSha256": "76c7ff83b149d9ea39d2afd9efb9bc57e36db4b06506d1ad97c2c168f27f966e"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "encoding": "identity",
+      "bytes": 5361,
+      "sha256": "c5def0af61fa5a26835ca7f05017cff4786f95bbbecaa03c795b79c3ad677643",
+      "storedBytes": 5361,
+      "storedSha256": "c5def0af61fa5a26835ca7f05017cff4786f95bbbecaa03c795b79c3ad677643"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/packages/prototypes/base/src/popover/root.proto.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/popover/root.proto.ts",
+      "encoding": "identity",
+      "bytes": 4135,
+      "sha256": "fd0b6720ad60d6f37380049fda70822234e857e6386a2b9e9028a9113a8d02ce",
+      "storedBytes": 4135,
+      "storedSha256": "fd0b6720ad60d6f37380049fda70822234e857e6386a2b9e9028a9113a8d02ce"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/packages/prototypes/base/src/popover/shared.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/src/popover/shared.ts",
+      "encoding": "identity",
+      "bytes": 2777,
+      "sha256": "63b947ed937524a489737def841dfa6d5a5d923e72cd9a540963318235eec73e",
+      "storedBytes": 2777,
+      "storedSha256": "63b947ed937524a489737def841dfa6d5a5d923e72cd9a540963318235eec73e"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "encoding": "identity",
+      "bytes": 36881,
+      "sha256": "7c4126828be33202a38678e987488e09684dc12e5e4d8c8f5a91d68569c93827",
+      "storedBytes": 36881,
+      "storedSha256": "7c4126828be33202a38678e987488e09684dc12e5e4d8c8f5a91d68569c93827"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+      "encoding": "identity",
+      "bytes": 7762,
+      "sha256": "03b35ed6ab64c647be73d9fd58ac0a9179d7a2714d4c3afad2be51c48b675d02",
+      "storedBytes": 7762,
+      "storedSha256": "03b35ed6ab64c647be73d9fd58ac0a9179d7a2714d4c3afad2be51c48b675d02"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/spec/prototypes/P-BASE-POPOVER.yaml",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/spec/prototypes/P-BASE-POPOVER.yaml",
+      "encoding": "identity",
+      "bytes": 7997,
+      "sha256": "e6b403f9b74875a29a3a76cd15a98d7609d26eda3f4d0949e286a1e60efe7bae",
+      "storedBytes": 7997,
+      "storedSha256": "e6b403f9b74875a29a3a76cd15a98d7609d26eda3f4d0949e286a1e60efe7bae"
+    },
+    {
+      "path": "datepicker-sources/final-request-capture/spec/tests/T-CALENDAR-SELECTION-0001.yaml",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/final-request-capture/spec/tests/T-CALENDAR-SELECTION-0001.yaml",
+      "encoding": "identity",
+      "bytes": 3639,
+      "sha256": "a93ffb371a05a5ae4c2a4afaff67a227c3daecac2a5551168869b5c553fd8265",
+      "storedBytes": 3639,
+      "storedSha256": "a93ffb371a05a5ae4c2a4afaff67a227c3daecac2a5551168869b5c553fd8265"
     },
     {
       "path": "datepicker-sources/first-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts",
@@ -1752,6 +2079,15 @@
       "storedSha256": "24f37a30c19ec37a0bbb720913ddf66461d5d126d3c484256b86eeeccefb080b"
     },
     {
+      "path": "reviews/collections-agent-datepicker-capture-correlation.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/collections-agent-datepicker-capture-correlation.json",
+      "encoding": "identity",
+      "bytes": 4592,
+      "sha256": "3b8034300717bae2cb6d23acd8131be65347c8e49c8a39667ac760083e819dcb",
+      "storedBytes": 4592,
+      "storedSha256": "3b8034300717bae2cb6d23acd8131be65347c8e49c8a39667ac760083e819dcb"
+    },
+    {
       "path": "reviews/collections-agent-datepicker-review-source.json",
       "originalPath": "/workspace/scratch/44c416809288/evidence/collections-agent-datepicker-review-source.json",
       "encoding": "identity",
@@ -1764,10 +2100,10 @@
       "path": "reviews/collections-agent-datepicker-review.md",
       "originalPath": "/workspace/scratch/44c416809288/evidence/collections-agent-datepicker-review.md",
       "encoding": "identity",
-      "bytes": 9128,
-      "sha256": "b5ead208a9fe90e68aeda89e1a09bb385fbc572d6dde03931525bcb3355b7b7c",
-      "storedBytes": 9128,
-      "storedSha256": "b5ead208a9fe90e68aeda89e1a09bb385fbc572d6dde03931525bcb3355b7b7c"
+      "bytes": 11811,
+      "sha256": "bfb830ea567eea093a856ec6ae81fa095983414a37d09f0a40dba9d8e81dba80",
+      "storedBytes": 11811,
+      "storedSha256": "bfb830ea567eea093a856ec6ae81fa095983414a37d09f0a40dba9d8e81dba80"
     },
     {
       "path": "reviews/collections-agent-field-choices-review-source.json",
@@ -1877,6 +2213,15 @@
       "storedSha256": "758ad2815f1dfb706ce81c864ea71b195f939e58c3cfbd6886fc3b63c5eea77a"
     },
     {
+      "path": "reviews/collections-agent-sprint2-ci-review-source-r6.json",
+      "originalPath": "/workspace/scratch/44c416809288/evidence/collections-agent-sprint2-ci-review-source-r6.json",
+      "encoding": "identity",
+      "bytes": 1325,
+      "sha256": "7cabfa803abfdd1fe513ba21772956eabcb9eb0a0ca3b2eb7ecc58389fdac889",
+      "storedBytes": 1325,
+      "storedSha256": "7cabfa803abfdd1fe513ba21772956eabcb9eb0a0ca3b2eb7ecc58389fdac889"
+    },
+    {
       "path": "reviews/collections-agent-sprint2-ci-review-source.json",
       "originalPath": "/workspace/scratch/44c416809288/evidence/collections-agent-sprint2-ci-review-source.json",
       "encoding": "identity",
@@ -1889,10 +2234,10 @@
       "path": "reviews/collections-agent-sprint2-ci-review.md",
       "originalPath": "/workspace/scratch/44c416809288/evidence/collections-agent-sprint2-ci-review.md",
       "encoding": "identity",
-      "bytes": 16504,
-      "sha256": "cda3ab7c8ea68b723d47b3ed0950dfdc5be32ab42c49f9cec21bc4031207b3d6",
-      "storedBytes": 16504,
-      "storedSha256": "cda3ab7c8ea68b723d47b3ed0950dfdc5be32ab42c49f9cec21bc4031207b3d6"
+      "bytes": 17761,
+      "sha256": "661b98e0b6faf7ea2bcd8f392fccb68868be245448760b3be939995aa176f2ac",
+      "storedBytes": 17761,
+      "storedSha256": "661b98e0b6faf7ea2bcd8f392fccb68868be245448760b3be939995aa176f2ac"
     },
     {
       "path": "reviews/collections-agent-text-control-review-source.json",
@@ -2171,10 +2516,10 @@
       "originalPath": null,
       "kind": "derived-source-bindings",
       "encoding": "identity",
-      "bytes": 18082,
-      "sha256": "08475b10cdc7384eed44b72d86d238a47084eeea65fc3ecbe059d07a58ff8c9b",
-      "storedBytes": 18082,
-      "storedSha256": "08475b10cdc7384eed44b72d86d238a47084eeea65fc3ecbe059d07a58ff8c9b"
+      "bytes": 19346,
+      "sha256": "1dbb8d9b8b63419f5662a26a3ba5d50f2fa3c16c148a0067be4b817b59768a49",
+      "storedBytes": 19346,
+      "storedSha256": "1dbb8d9b8b63419f5662a26a3ba5d50f2fa3c16c148a0067be4b817b59768a49"
     }
   ]
 }

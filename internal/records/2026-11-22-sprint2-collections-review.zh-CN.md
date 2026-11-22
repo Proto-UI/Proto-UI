@@ -92,13 +92,17 @@ Shenko 最后回执使用 `a165c40` 上游产物、固定真实 consumer head，
 
 [Date Picker 评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-datepicker-review.md)保留原 dc3 基线四红和 `3bd5bcf` 对 outward callback/accepted completion 顺序的修复。作者完整 106/106 与我的四个 Runtime 独立 probe 属于该边界，不是以后新增 State/Context 重入的证明。
 
-后续另一独立 reviewer 发现更早的 public State subscriber、合法更早 Calendar Context subscriber，以及嵌套 Popover Context subscriber 创建新 request 的路径。原红、中间修复的有限绿和精确三源快照分别保留；`reviewedCommit` 表示被审基线的旧 JSON header 没有被篡改成执行候选，新的 source binding 明确执行的工作树字节。**最新嵌套 Context finding 在本记录准备阶段仍待实现/独立复验，Date Picker 不在这里被提前宣布完全接受。**
+后续另一独立 reviewer 发现更早的 public State subscriber、合法更早 Calendar Context subscriber，以及嵌套 Popover Context subscriber 创建新 request 的路径。原红、中间修复的有限绿和精确三源快照分别保留；`reviewedCommit` 表示被审基线的旧 JSON header 没有被篡改成执行候选，新的 source binding 明确执行的工作树字节。初版 `8251f7f` 准确保留这些 OPEN_FINDING。随后定义 `2419927` 与实现 `322a871` 改为真正的请求开始 capture + canonical opening session：capture 先于所有可观察副作用，Picker 只匹配实际 request/root/session，当前 Popover 事实不再受旧通知回写。编译器 reviewer 原八个反例复验 8/8，我只读核对全 delta 并逐字节确认五个产品源与执行快照相同，已知源码 finding 现已解决；这仍不代替 native/整合验收。
+
+来源对账保留两个非产品差异：新测试在 dispose 前保存旧方法引用、测试记录从 pending 标 passing；`dbcdecb` 再补测试 relation since。原八 probe 不导入这两测试/登记文件。作者日志的 `green.log` 实际为 143/144（新 probe 错读已清空 exposes），`r2.log` 才是最终 144/144；原字节与解释均保留，不按文件名判断结果。
 
 队列详见 [串行验收评审](evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-sprint2-ci-review.md)。两个实际反例已修复：timeout 不能在 leader 退出后取消 descendant 的最终 group kill；相同数量的假 case 不能替代精确 family/host/scenario 集合。新增 compiler20 的相同 count-only 弱点也用原伪造 receipt 复验拒绝，真实 ID 集合接受、selected skipped 仍 incomplete。
 
 `2430aeaf1c74dc1f4563a543e0021574e7d5c441` 的最终已审计划是 **10 suites / 304 cases：292 browser + 12 Node/HappyDOM**。choices 与 Date Picker 只增加原套内 case；12 阶段最大 180 分钟，加 process-group grace、安装 10 分钟、上传 3 分钟和 setup 余量，由 210 分钟 job 覆盖。整合者日志 `sprint2-integration-controls-r2.log` 实际打印 Node 合并 **26/26**（含 queue 五条）、Rhea **103/103**、catalog helper **7/7** 和 305 双语 primary routes 检查通过；不把 26 再与其子集重复相加。
 
 这些是队列控制流和 inventory 的证据。原 ordinary-linked 两次 unexpected worker exit 的原因仍 unknown；带观察器的 12/12 和计划里的正常托管重跑不能删掉原失败。托管 304 case 仍需完整终态与最终候选 source 回读。
+
+追加队列 `dbcdecb077283d4e3fe11fe1077b74708f24fa4b` 单独运行既有 workspace 类型检查。它与后续十套一样只依赖 public-packages/styles，类型失败使总结果失败但不会跳过独立套件。现在 13 阶段最大 195 分钟 +65 秒 grace +10 分钟安装 +3 分钟上传，job 调为225分钟。此 delta 已只读核对并绑定原文件 hash，没有在本机重跑广测或提前记录类型通过。
 
 ## 6. 发布传输的边界
 
@@ -110,7 +114,7 @@ Shenko 最后回执使用 `a165c40` 上游产物、固定真实 consumer head，
 
 ## 7. 本记录出口
 
-本路可交付的集合实现、公开 recipe、来源修复和已解决独立 finding 都有可读源码与原失败/正控。新定义保持 draft，各 Issue 的原完整条件由各自追踪继续承接。当前仍需最终候选完整 native/CI artifact、最新 Date Picker 嵌套 Context 修复的独立接受，以及 PR 层实际审核/检查/Ready 回读；此记录不代替这些步骤。
+本路可交付的集合实现、公开 recipe、来源修复和已解决独立 finding 都有可读源码与原失败/正控。新定义保持 draft，各 Issue 的原完整条件由各自追踪继续承接。当前仍需最终候选完整 native/类型/CI artifact，以及 PR 层实际审核/检查/Ready 回读；此记录不代替这些步骤。
 
 
 ## 8. 本报告文件的检查
