@@ -1,0 +1,158 @@
+{
+  "schema": "proto-ui.review.datepicker-source-bindings.v1",
+  "clarification": "The original reviewedCommit field in the unchanged State-green receipt identifies the reviewed baseline, not its executed candidate. The green run used the first-request-publication snapshots (Calendar e24adfcf..., +11 lines), while the original red used 3bd5bcf. This additive binding preserves both original raw receipts. The Context probe then exposes the same request-start gap on that first fix.",
+  "runs": [
+    {
+      "id": "compiler-review-picker-request-start",
+      "script": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start.mts",
+      "scriptSha256": "6fa3887345be8cdebe7eaad731027dd8920a28bc7cb923aff0e8cf130c8bf7ab",
+      "receipt": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start.json",
+      "receiptSha256": "84a0b8f4c259d47e78e5b5c8e8bbdbb7770eb8671ac5dc662976a5831a2bb53b",
+      "log": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start.log",
+      "files": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/red/packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "bytes": 35380,
+          "sha256": "37abb98add0b3cb861e246200ac2d8511e30b1d201b3f5ddd6c86f1cb74fa852"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/red/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "bytes": 5108,
+          "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/red/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "bytes": 6240,
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ],
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": false
+    },
+    {
+      "id": "compiler-review-picker-request-start-green",
+      "script": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-green.mts",
+      "scriptSha256": "3c0f01735841fe760807aebd64537b22567089b14d0c529d7d3c206a3b24b34e",
+      "receipt": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-green.json",
+      "receiptSha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b",
+      "log": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-green.log",
+      "files": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/first-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "bytes": 35842,
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/first-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "bytes": 5108,
+          "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/first-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "bytes": 6240,
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ],
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": true
+    },
+    {
+      "id": "compiler-review-picker-context-start",
+      "script": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start.mts",
+      "scriptSha256": "91f52ca2ef198db301efc90b2aeef8146ceebc1e1248db65809281deaead27cb",
+      "receipt": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start.json",
+      "receiptSha256": "9e5587207427d6c91fc7420828541336c991b5fca55f5682595e56004db90e12",
+      "log": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start.log",
+      "files": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/first-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "bytes": 35842,
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/first-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "bytes": 5108,
+          "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/first-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "bytes": 6240,
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ],
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": true
+    },
+    {
+      "id": "compiler-review-picker-context-start-green",
+      "script": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-green.mts",
+      "scriptSha256": "f53f3164feac4b7143308b43c7fb5185cf50cdc22837c74e29b53a4cb8575e38",
+      "receipt": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-green.json",
+      "receiptSha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b",
+      "log": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-green.log",
+      "files": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/second-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "bytes": 35842,
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/second-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "bytes": 5774,
+          "sha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/second-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "bytes": 6240,
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ],
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": true,
+      "subsequentExactSourceCommit": "593682a8758a777306f3889b98fef475d4263c44"
+    },
+    {
+      "id": "compiler-review-picker-context-nested",
+      "script": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested.mts",
+      "scriptSha256": "4a1cd60efcab41f155c4e26eb97d3b8f6b872acf673439c83c30905a3210ea44",
+      "receipt": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested.json",
+      "receiptSha256": "e89e0742d536b3bfb7d836be514941137f30f61c3e674e58d26c2810141cc03b",
+      "log": "/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-nested.log",
+      "files": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/second-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "bytes": 35842,
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/second-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "bytes": 5774,
+          "sha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/second-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "bytes": 6240,
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ],
+      "executedHead": "2430aeaf1c74dc1f4563a543e0021574e7d5c441",
+      "sourceCommit": "593682a8758a777306f3889b98fef475d4263c44",
+      "uncommittedSourceDeltaAtExecution": false
+    }
+  ]
+}

@@ -1,0 +1,330 @@
+{
+  "schema": "proto-ui.review.datepicker-evidence.v1",
+  "scope": "Independent runtime probes plus static native consumer review. Product implementations not edited by this reviewer. Raw scripts and receipts preserved byte-for-byte; scripts contain original execution paths.",
+  "status": "OPEN_FINDING_DATEPICKER_REVIEW_002",
+  "runs": [
+    {
+      "id": "compiler-review-picker-request-start",
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": false,
+      "script": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start.mts.gz",
+      "receipt": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start.json",
+      "log": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start.log.gz",
+      "sources": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/red/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+          "sha256": "37abb98add0b3cb861e246200ac2d8511e30b1d201b3f5ddd6c86f1cb74fa852"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/red/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+          "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/red/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ]
+    },
+    {
+      "id": "compiler-review-picker-request-start-green",
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": true,
+      "script": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start-green.mts.gz",
+      "receipt": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start-green.json",
+      "log": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start-green.log.gz",
+      "sources": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+          "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ]
+    },
+    {
+      "id": "compiler-review-picker-context-start",
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": true,
+      "script": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start.mts.gz",
+      "receipt": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start.json",
+      "log": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start.log.gz",
+      "sources": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+          "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ]
+    },
+    {
+      "id": "compiler-review-picker-context-start-green",
+      "baseCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "uncommittedSourceDeltaAtExecution": true,
+      "subsequentExactSourceCommit": "593682a8758a777306f3889b98fef475d4263c44",
+      "script": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start-green.mts.gz",
+      "receipt": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start-green.json",
+      "log": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start-green.log.gz",
+      "sources": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+          "sha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ]
+    },
+    {
+      "id": "compiler-review-picker-context-nested",
+      "executedHead": "2430aeaf1c74dc1f4563a543e0021574e7d5c441",
+      "sourceCommit": "593682a8758a777306f3889b98fef475d4263c44",
+      "uncommittedSourceDeltaAtExecution": false,
+      "script": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-nested.mts.gz",
+      "receipt": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-nested.json",
+      "log": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-nested.log.gz",
+      "sources": [
+        {
+          "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+          "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790"
+        },
+        {
+          "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+          "sha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840"
+        },
+        {
+          "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+          "snapshot": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+          "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start.mts.gz",
+      "sha256": "f77bd25eea7b575df294e9ee8dc006bab4f9c0e1cb9a6268019c13e07f2ae30f",
+      "bytes": 1934,
+      "originalSha256": "6fa3887345be8cdebe7eaad731027dd8920a28bc7cb923aff0e8cf130c8bf7ab",
+      "originalBytes": 5427,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start.json",
+      "sha256": "84a0b8f4c259d47e78e5b5c8e8bbdbb7770eb8671ac5dc662976a5831a2bb53b",
+      "bytes": 873,
+      "originalSha256": "84a0b8f4c259d47e78e5b5c8e8bbdbb7770eb8671ac5dc662976a5831a2bb53b",
+      "originalBytes": 873
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start.log.gz",
+      "sha256": "6640ed409611286878f7386ffdf8e1c7ba18a4364c463ea1c3bdf048f5197d07",
+      "bytes": 367,
+      "originalSha256": "84a0b8f4c259d47e78e5b5c8e8bbdbb7770eb8671ac5dc662976a5831a2bb53b",
+      "originalBytes": 873,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/red/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+      "sha256": "fd5b4156dff9a74fdedd1b2d42caf1c141a3f79336a2edd82e2d60bc88db7228",
+      "bytes": 7541,
+      "originalSha256": "37abb98add0b3cb861e246200ac2d8511e30b1d201b3f5ddd6c86f1cb74fa852",
+      "originalBytes": 35380,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/red/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+      "sha256": "ef787cf9e047275b5a8798580f735c92f523e0d3a5ce0d1b934d9a1b139cae40",
+      "bytes": 1284,
+      "originalSha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9",
+      "originalBytes": 5108,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/red/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+      "sha256": "71e9aed50808e76d23284ad3a4c0e14ce1c62213952e3bef57280104ec742c80",
+      "bytes": 2600,
+      "originalSha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09",
+      "originalBytes": 6240,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start-green.mts.gz",
+      "sha256": "03a113f211b548cec9f7e7cf7d20d0d1ff827d8ba75a2d85fe4474dee2f57528",
+      "bytes": 1938,
+      "originalSha256": "3c0f01735841fe760807aebd64537b22567089b14d0c529d7d3c206a3b24b34e",
+      "originalBytes": 5433,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start-green.json",
+      "sha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b",
+      "bytes": 824,
+      "originalSha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b",
+      "originalBytes": 824
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-request-start-green.log.gz",
+      "sha256": "e568c6914359ab262d8c08152a2cb9691283dd47fa856c7e6c20604d3dbf314d",
+      "bytes": 361,
+      "originalSha256": "5342315f1b4ebfc3458c07652631e05105d2cc323ee62c261b458f8e1769487b",
+      "originalBytes": 824,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+      "sha256": "8a0980cb176d83390ca2c79cb769b758cc5fb5d806b75e6cfd2849c1952f7247",
+      "bytes": 7700,
+      "originalSha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790",
+      "originalBytes": 35842,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+      "sha256": "ef787cf9e047275b5a8798580f735c92f523e0d3a5ce0d1b934d9a1b139cae40",
+      "bytes": 1284,
+      "originalSha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9",
+      "originalBytes": 5108,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/first-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+      "sha256": "71e9aed50808e76d23284ad3a4c0e14ce1c62213952e3bef57280104ec742c80",
+      "bytes": 2600,
+      "originalSha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09",
+      "originalBytes": 6240,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start.mts.gz",
+      "sha256": "08779de4da782e8e414f5f37ce5f7e72e665d3c9aa909302bea0f1c099029ca4",
+      "bytes": 1953,
+      "originalSha256": "91f52ca2ef198db301efc90b2aeef8146ceebc1e1248db65809281deaead27cb",
+      "originalBytes": 5679,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start.json",
+      "sha256": "9e5587207427d6c91fc7420828541336c991b5fca55f5682595e56004db90e12",
+      "bytes": 798,
+      "originalSha256": "9e5587207427d6c91fc7420828541336c991b5fca55f5682595e56004db90e12",
+      "originalBytes": 798
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start.log.gz",
+      "sha256": "ca1ba2fe012cdc72afc8c6ee42864fde98a0a2a71aa75101e191c1a601effe93",
+      "bytes": 308,
+      "originalSha256": "9e5587207427d6c91fc7420828541336c991b5fca55f5682595e56004db90e12",
+      "originalBytes": 798,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start-green.mts.gz",
+      "sha256": "fd607c2639ddcad2647fd4723e086046b73b7cb6d77ee784524ae5db1e20e9b8",
+      "bytes": 1957,
+      "originalSha256": "f53f3164feac4b7143308b43c7fb5185cf50cdc22837c74e29b53a4cb8575e38",
+      "originalBytes": 5685,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start-green.json",
+      "sha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b",
+      "bytes": 749,
+      "originalSha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b",
+      "originalBytes": 749
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-start-green.log.gz",
+      "sha256": "e9aeba7db3d304875903b293a1ba6013dd2b80633b5bbf6281cf3dca51f63328",
+      "bytes": 303,
+      "originalSha256": "fa6fdc065c9ba043cad71f1177809d1493365aaa0ea8fe3b2ffa12bf8f18650b",
+      "originalBytes": 749,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/packages/prototypes/base/src/calendar/calendar.proto.ts.gz",
+      "sha256": "8a0980cb176d83390ca2c79cb769b758cc5fb5d806b75e6cfd2849c1952f7247",
+      "bytes": 7700,
+      "originalSha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790",
+      "originalBytes": 35842,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/packages/prototypes/base/src/date-picker/date-picker.proto.ts.gz",
+      "sha256": "2f4e41f46232ca945f4946d44a7fe3604bf1324f5cd21856fce92b4bb60a08fd",
+      "bytes": 1543,
+      "originalSha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840",
+      "originalBytes": 5774,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/sources/second-request-publication/spec/contracts/C-CALENDAR-SELECTION-0001.yaml.gz",
+      "sha256": "71e9aed50808e76d23284ad3a4c0e14ce1c62213952e3bef57280104ec742c80",
+      "bytes": 2600,
+      "originalSha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09",
+      "originalBytes": 6240,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-nested.mts.gz",
+      "sha256": "1cf947a88fb55a0b332d6a52aa34078c1e47c37e7e05447365b41116cd27e025",
+      "bytes": 2128,
+      "originalSha256": "4a1cd60efcab41f155c4e26eb97d3b8f6b872acf673439c83c30905a3210ea44",
+      "originalBytes": 6512,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-nested.json",
+      "sha256": "e89e0742d536b3bfb7d836be514941137f30f61c3e674e58d26c2810141cc03b",
+      "bytes": 1067,
+      "originalSha256": "e89e0742d536b3bfb7d836be514941137f30f61c3e674e58d26c2810141cc03b",
+      "originalBytes": 1067
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/compiler-review-picker-context-nested.log.gz",
+      "sha256": "e261701c860688dc10ca7a1965eab806b1496dde6dc2305c41b0814bc83e2094",
+      "bytes": 375,
+      "originalSha256": "e89e0742d536b3bfb7d836be514941137f30f61c3e674e58d26c2810141cc03b",
+      "originalBytes": 1067,
+      "compression": "gzip"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint2-datepicker-review/raw/original-source-bindings.json",
+      "sha256": "014e0eb452e4fbf5fae04cc0699eb9935bb7db5b68bc4c8285ee80f7259c3f01",
+      "bytes": 9826,
+      "originalSha256": "014e0eb452e4fbf5fae04cc0699eb9935bb7db5b68bc4c8285ee80f7259c3f01",
+      "originalBytes": 9826
+    }
+  ]
+}
