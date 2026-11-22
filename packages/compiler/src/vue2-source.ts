@@ -1713,8 +1713,8 @@ ${
       } catch (error) {
         ${
           ssr
-            ? `try { owner.dispose(); }
-        catch (cleanupError) { throw new AggregateError([error, cleanupError], '[Vue2 SSR] initialization and cleanup failed.'); }
+            ? `if (session) session.failure ??= { value: error };
+        try { owner.dispose(true); } catch { /* Preserve the first setup/created error. */ }
         throw error;`
             : `
         terminal = true;
@@ -1786,14 +1786,21 @@ ${
       hostActive = true; ++epoch; pending = null; renderedCommit = null;
       vm.$forceUpdate();
     },
-    dispose() {
+    dispose(${ssr ? 'exhaustive = false' : ''}) {
       if (terminal) return;
       terminal = true; ++epoch; renderedCommit = null; pending = null; queued = false;
       ${hasAuthoredHooks ? 'for (const off of PUIAuthoredWatchCleanups.splice(0)) off();' : ''}
       unwatch?.(); unwatch = undefined;
       /** @type {{ error: unknown } | undefined} */ let failure;
       try { detach(); } catch (error) { failure = { error }; }
-      ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= { error }; }
+      ${ssr ? 'if (initialized)' : ''} try {
+${
+  ssr
+    ? `        if (exhaustive) { for (const callback of lifecycle.beforeDispose) { try { invoke(() => callback(run), false); } catch (error) { failure ??= { error }; } } }
+        else `
+    : ''
+}        fire('beforeDispose');
+      } catch (error) { failure ??= { error }; }
 ${
   stateful
     ? String.raw`      for (const state of states) {

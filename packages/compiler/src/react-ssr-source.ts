@@ -1,7 +1,9 @@
+import { ownerInitialDataGuard, ownerInitialPropsGuard } from './owner-initial-data';
 import type { PrototypeIR } from './ir';
 
 export const reactSSRTransportArtifact = {
-  path: '.proto-ui/context/react-ssr-v1.ts', kind: 'source' as const,
+  path: '.proto-ui/context/react-ssr-v1.ts',
+  kind: 'source' as const,
   contents: `import { createContext } from 'react';
 // Framework transport only. Request ownership and projections remain in editable target source.
 export const ServerTransport = createContext<unknown>(null);
@@ -45,7 +47,14 @@ interface ${p}HydrationSession {
 const ${p}ServerTransport = ${p}SharedServerTransport as ${p}React.Context<${p}ServerRequest | null>;
 const ${p}HydrationTransport = ${p}SharedHydrationTransport as ${p}React.Context<${p}HydrationSession | null>;
 const ${p}OwnerReady = ${p}SharedOwnerReady;
+${ownerInitialDataGuard(`${p}InitialData`)}
+${ownerInitialPropsGuard(
+  `${p}InitialProps`,
+  `${p}InitialData`,
+  ir.props.map((prop) => prop.name)
+)}
 function ${p}EncodeData(value: unknown, ancestors = new Set<object>()): GeneratedInitialData {
+  if (!ancestors.size) value = ${p}InitialData(value);
   if (value === undefined) return { kind: 'undefined' };
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return { kind: 'value', value };
   if (typeof value === 'number' && Number.isFinite(value)) return { kind: 'number', value, negativeZero: Object.is(value, -0) };
@@ -69,19 +78,29 @@ function ${p}EncodeData(value: unknown, ancestors = new Set<object>()): Generate
     return { kind: 'object', entries };
   } finally { ancestors.delete(value); }
 }
-function ${p}DecodeData(data: GeneratedInitialData): unknown {
-  switch (data.kind) {
-    case 'undefined': return undefined;
-    case 'value': return data.value;
-    case 'number': return data.negativeZero ? -0 : data.value;
-    case 'array': return data.entries.map(${p}DecodeData);
-    case 'object': {
-      const record: Record<string, unknown> = Object.create(null);
-      for (const [key, value] of data.entries) record[key] = ${p}DecodeData(value);
-      return record;
+function ${p}DecodeData(input: GeneratedInitialData): unknown {
+  function invalid(): never { throw new TypeError('[Hydration] malformed initial-data carrier.'); }
+  function decode(data: GeneratedInitialData): unknown {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return invalid();
+    const keys = Object.keys(data);
+    switch (data.kind) {
+      case 'undefined': if (keys.length !== 1) return invalid(); return undefined;
+      case 'value': if (keys.length !== 2 || data.value !== null && typeof data.value !== 'string' && typeof data.value !== 'boolean') return invalid(); return data.value;
+      case 'number': if (keys.length !== 3 || !Number.isFinite(data.value) || typeof data.value !== 'number' || typeof data.negativeZero !== 'boolean' || data.negativeZero && data.value !== 0) return invalid(); return data.negativeZero ? -0 : data.value;
+      case 'array': if (keys.length !== 2 || !Array.isArray(data.entries)) return invalid(); return Object.freeze(data.entries.map(decode));
+      case 'object': {
+        if (keys.length !== 2 || !Array.isArray(data.entries)) return invalid();
+        const record: Record<string, unknown> = Object.create(null);
+        for (const entry of data.entries) {
+          if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== 'string' || Object.hasOwn(record, entry[0])) return invalid();
+          record[entry[0]] = decode(entry[1]);
+        }
+        return Object.freeze(record);
+      }
+      default: return invalid();
     }
-    default: throw new TypeError('[Hydration] malformed initial-data carrier.');
   }
+  return decode(${p}InitialData(input));
 }
 function ${p}EncodeTemplate(node: unknown): GeneratedTemplateProjection {
   if (node === null || node === undefined) return null;
@@ -118,8 +137,9 @@ function ${p}RootAttributes(projection: GeneratedRenderProjection): Record<strin
 function ${p}CheckCarrier(carrier: GeneratedHydrationCarrier): void {
   if (carrier.version !== 1 || carrier.profile !== 'react-dom-ssr-v1' || carrier.source !== ${JSON.stringify(ir.source.sha256)})
     throw new Error('[Hydration] carrier version/source/profile mismatch; adoption was not attempted.');
-  if (!Object.keys(carrier.projections).length)
+  if (!carrier.projections || typeof carrier.projections !== 'object' || Array.isArray(carrier.projections) || !Object.keys(carrier.projections).length)
     throw new Error('[Hydration] missing initial component projections; adoption was not attempted.');
+  for (const projection of Object.values(carrier.projections)) ${p}DecodeData(projection.raw);
 }
 class ${p}ServerRequest {
   readonly projections: Record<string, GeneratedRenderProjection> = Object.create(null);
@@ -129,7 +149,7 @@ class ${p}ServerRequest {
   constructor(readonly signal?: AbortSignal) {}
   get ownerCount() { return this.instances.size; }
   prepare(id: string, create: () => { owner: ${p}Owner; projection: GeneratedRenderProjection }) {
-    if (this.disposed || this.signal?.aborted) throw this.signal?.reason ?? new Error('[SSR] request aborted.');
+    if (this.disposed || this.signal?.aborted) { this.signal?.throwIfAborted(); throw new Error('[SSR] request disposed.'); }
     const existing = this.instances.get(id);
     if (existing) {
       try { existing.projection = existing.owner.prepareServer(); this.projections[id] = existing.projection; return existing; }
@@ -138,8 +158,8 @@ class ${p}ServerRequest {
     let entry: { owner: ${p}Owner; projection: GeneratedRenderProjection };
     try { entry = create(); } catch (error) { this.failures.push(error); throw error; }
     if (this.disposed || this.signal?.aborted) {
-      const error = this.signal?.reason ?? new Error('[SSR] request aborted during owner preparation.');
-      try { entry.owner.disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[SSR] abort cleanup failed.'); }
+      const error = this.signal?.aborted ? this.signal.reason : new Error('[SSR] request disposed during owner preparation.');
+      try { entry.owner.disposeNow(); } catch { /* Abort remains the initiating reason. */ }
       throw error;
     }
     this.instances.set(id, entry); this.projections[id] = entry.projection;
@@ -153,17 +173,19 @@ class ${p}ServerRequest {
       try { entry.owner.disposeNow(); } catch (error) { failures.push(error); }
     }
     this.instances.clear();
+    if (failures.length === 1) throw failures[0];
     if (failures.length) throw new AggregateError(failures, '[SSR] request cleanup failed.');
   }
 }
 /** An explicit request owns all nested server instances, including failure/abort rollback. */
 export function renderGeneratedToString(props: GeneratedComponentProps = {}, options: { signal?: AbortSignal; identifierPrefix?: string } = {}): GeneratedServerResult {
   const request = new ${p}ServerRequest(options.signal);
-  const abort = () => request.dispose();
+  const abort = () => { failure ??= { value: options.signal!.reason }; try { request.dispose(); } catch { /* Abort keeps its initiating reason. */ } };
   options.signal?.addEventListener('abort', abort, { once: true });
-  let failure: unknown;
+  let failure: { value: unknown } | undefined;
   try {
-    if (options.signal?.aborted) throw options.signal.reason ?? new Error('[SSR] request aborted.');
+    options.signal?.throwIfAborted();
+    props = ${p}InitialProps(props) as GeneratedComponentProps;
     const identifierPrefix = options.identifierPrefix ?? '';
     const element = ${p}React.createElement(${p}ServerTransport.Provider, { value: request }, ${p}React.createElement(${component}, props));
     // Discover nested logical owners before serialization. The serialization pass
@@ -175,12 +197,13 @@ export function renderGeneratedToString(props: GeneratedComponentProps = {}, opt
     const html = request.ownerCount > 1 ? ${p}RenderToString(element, { identifierPrefix }) : discovered;
     if (request.failures.length) throw request.failures.length === 1 ? request.failures[0]
       : new AggregateError(request.failures, '[SSR] source failures cannot be accepted as Suspense fallback serialization.');
-    if (options.signal?.aborted) throw options.signal.reason ?? new Error('[SSR] request aborted.');
+    options.signal?.throwIfAborted();
     return { html, carrier: { version: 1, profile: 'react-dom-ssr-v1', source: ${JSON.stringify(ir.source.sha256)}, identifierPrefix, html, projections: request.projections } };
-  } catch (error) { failure = error; throw error; }
+  } catch (error) { failure ??= { value: error }; throw failure.value; }
   finally {
     options.signal?.removeEventListener('abort', abort);
-    try { request.dispose(); } catch (cleanup) { if (failure !== undefined) throw new AggregateError([failure, cleanup], '[SSR] render and cleanup failed.'); throw cleanup; }
+    try { request.dispose(); } catch (cleanup) { if (!failure) { options.signal?.throwIfAborted(); throw cleanup; } }
+    if (!failure) options.signal?.throwIfAborted();
   }
 }
 export interface GeneratedHydratedRoot {
@@ -193,6 +216,7 @@ export interface GeneratedHydratedRoot {
 /** React adoption is real; recoverable regeneration is diagnosed and never counted as successful adoption. */
 export function hydrateGeneratedRoot(container: Element | Document, props: GeneratedComponentProps, carrier: GeneratedHydrationCarrier,
   options: ${p}HydrationOptions = {}): GeneratedHydratedRoot {
+  carrier = ${p}InitialData(carrier);
   ${p}CheckCarrier(carrier);
   if (options.identifierPrefix !== undefined && options.identifierPrefix !== carrier.identifierPrefix)
     throw new Error('[Hydration] identifierPrefix differs from the server request.');

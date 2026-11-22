@@ -1,3 +1,4 @@
+import { ownerInitialDataGuard, ownerInitialDataDecoder } from './owner-initial-data';
 import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import { mapSupportImports } from './native-support/template-ast';
 import type { NativeSupportPlan } from './native-support/plan';
@@ -268,7 +269,10 @@ export function presentationElement(tag: string, style: string | undefined, chil
   if (!/^[A-Za-z][A-Za-z0-9:_-]*$/.test(tag)) throw new TypeError('Invalid template tag');
   return {kind: 'element', tag: tag.toLowerCase(), ...(style === undefined ? {} : {style}), children: presentationChildren(children)};
 }
+${ownerInitialDataGuard('cloneInitialData')}
+${ownerInitialDataDecoder('decodeInitialData', 'cloneInitialData')}
 function checkData(value: unknown, seen = new Set<object>()): void {
+  if (!seen.size) value = cloneInitialData(value);
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return;
   if (typeof value === 'number' && Number.isFinite(value)) return;
   if (typeof value !== 'object' || seen.has(value)) throw new TypeError('SSR transport requires finite acyclic JSON data');
@@ -286,6 +290,7 @@ function checkData(value: unknown, seen = new Set<object>()): void {
   } finally { seen.delete(value); }
 }
 function encodeRaw(raw: Record<string, unknown>): RawData {
+  raw = cloneInitialData(raw);
   function encode(value: unknown, seen = new Set<object>()): unknown {
     if (value === undefined) return ['undefined'];
     if (Object.is(value, -0)) return ['negative-zero'];
@@ -304,19 +309,13 @@ function encodeRaw(raw: Record<string, unknown>): RawData {
       return array ? ['array', value.map(item => encode(item, seen))] : ['record', Object.entries(value).map(([key,item]) => [key,encode(item, seen)])];
     } finally { seen.delete(value); }
   }
-  // Validate before any getter can run, including top-level props.
+  // Own data descriptors are validated without reading accessor values.
   encode(raw);
   return Object.keys(raw).map(key => [key, {kind:'value',value:encode(raw[key])}]);
 }
 export function decodeRaw(data: RawData): Record<string, unknown> {
-  function decode(value: unknown): unknown {
-    if (!Array.isArray(value)) return value;
-    if (value[0] === 'undefined') return undefined;
-    if (value[0] === 'negative-zero') return -0;
-    if (value[0] === 'array') return value[1].map(decode);
-    if (value[0] === 'record') return Object.fromEntries(value[1].map(([key,item]: [string,unknown]) => [key,decode(item)]));
-    throw new HydrationMismatch('invalid initial data tag');
-  }
+  data = cloneInitialData(data);
+  const decode = decodeInitialData;
   const raw = Object.create(null) as Record<string, unknown>;
   for (const [key, value] of data) {
     if (['instanceAssociations', 'instance-associations', 'instanceassociations'].includes(key))
@@ -448,11 +447,12 @@ type ServerOwner = {serialize(): void; dispose(): void};
 export function withServerOwner<O extends ServerOwner, T>(factory: (port: HostPort, raw: Record<string, unknown>) => O, props: Record<string, unknown>, options: ServerOptions, binding: string, tag: string, consume: (result: {html: string; carrier: Carrier}, parent: ServerParent) => T, artifacts: ArtifactVersions): T {
   checkServerAssociationInputs(props, options);
   options.signal?.throwIfAborted();
-  encodeRaw(props); // No non-data inputs or accessor side effects enter generated setup.
+  props = cloneInitialData(props); // Trusted caller/decoded data only; Proxy traps are not sandboxed.
+  encodeRaw(props);
   const port = createServerPort(options);
   let owner: O | undefined, failure: unknown, result: T, failed = false;
   let abortFailure: unknown, abortFailed = false;
-  const abort = () => { try { owner?.dispose(); } catch (error) { abortFailure = error; abortFailed = true; } finally { port.close(); } };
+  const abort = () => { if (!failed) { failure = options.signal!.reason; failed = true; } try { owner?.dispose(); } catch (error) { abortFailure = error; abortFailed = true; } finally { port.close(); } };
   options.signal?.addEventListener('abort', abort, {once: true});
   try {
     owner = factory(port, props);
@@ -467,12 +467,13 @@ export function withServerOwner<O extends ServerOwner, T>(factory: (port: HostPo
     result = consume(finishServer(port, props, {...options, slotHtml}, binding, tag, artifacts), port.parent);
     if (result && typeof (result as {then?: unknown}).then === 'function') throw new TypeError('Server logical scope callback must be synchronous');
     options.signal?.throwIfAborted();
-  } catch (error) { failure = error; failed = true; }
+  } catch (error) { if (!failed) { failure = error; failed = true; } }
   finally {
     options.signal?.removeEventListener('abort', abort);
-    try { owner?.dispose(); } catch (error) { failure = failed ? new AggregateError([failure, error], 'Server execution and cleanup failed') : error; failed = true; }
+    try { owner?.dispose(); } catch (error) { if (!failed) { failure = options.signal?.aborted ? options.signal.reason : error; failed = true; } }
     port.close();
-    if (abortFailed) { failure = failed ? new AggregateError([failure, abortFailure], 'Server abort cleanup failed') : abortFailure; failed = true; }
+    if (!failed && options.signal?.aborted) { failure = options.signal.reason; failed = true; }
+    if (abortFailed && !failed) { failure = abortFailure; failed = true; }
   }
   if (failed) throw failure;
   return result!;

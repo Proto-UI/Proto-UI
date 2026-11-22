@@ -1,6 +1,9 @@
+import { ownerInitialDataGuard, ownerInitialDataDecoder } from './owner-initial-data';
 // Vue2-specific server/hydration host entrypoints. The framework owns VNodes and slots.
 export function vue2SsrEntrypoints(prefix: string, component: string, source: string): string {
   return String.raw`
+${ownerInitialDataGuard(`${prefix}InitialData`, false)}
+${ownerInitialDataDecoder(`${prefix}DecodeInitialData`, `${prefix}InitialData`, false)}
 const ${prefix}SessionKey = '__proto_ui_vue2_ssr_v1_session';
 function ${prefix}FindSession(vm) {
   for (let current = vm; current; current = current.$parent) {
@@ -9,6 +12,7 @@ function ${prefix}FindSession(vm) {
   return null;
 }
 function ${prefix}EncodeRaw(raw) {
+  raw = ${prefix}InitialData(raw);
   const seen = new Set();
   function encode(value) {
     if (value === undefined) return ['undefined'];
@@ -23,36 +27,27 @@ function ${prefix}EncodeRaw(raw) {
   }
   return encode(raw);
 }
-function ${prefix}DecodeRaw(raw) {
-  function decode(value) {
-    if (!Array.isArray(value)) return value;
-    if (value[0] === 'undefined') return undefined;
-    if (value[0] === 'negative-zero') return -0;
-    if (value[0] === 'array') return value[1].map(decode);
-    if (value[0] === 'record') return Object.fromEntries(value[1].map(([key, item]) => [key, decode(item)]));
-    throw new TypeError('[Vue2 SSR] invalid initial data tag');
-  }
-  return Object.freeze(decode(raw));
-}
+function ${prefix}DecodeRaw(raw) { return ${prefix}DecodeInitialData(raw); }
 function ${prefix}CheckVue(Vue) {
   if (!Vue || Vue.version !== '2.6.14') throw new Error('[Vue2 SSR] requires Vue 2.6.14.');
 }
 function ${prefix}CloseSession(session) {
   if (session.closed) return;
   session.closed = true;
-  let failure;
+  const failures = [];
   // Descendant subscriptions retire before their providers.
   for (const owner of session.owners.slice().reverse()) {
-    try { owner.dispose(); } catch (error) { failure ??= error; }
+    try { owner.dispose(); } catch (error) { failures.push(error); }
   }
   session.owners.length = 0;
-  if (failure) throw failure;
+  if (failures.length === 1) throw failures[0];
+  if (failures.length) throw new AggregateError(failures, '[Vue2 SSR] request cleanup failed.');
 }
 function ${prefix}Root(Vue, session, options) {
   const root = new Vue({
     [${prefix}SessionKey]: session,
     data() { return { input: options.props || {}, attrs: options.attrs || {} }; },
-    errorCaptured(error) { session.failure ??= error; return false; },
+    errorCaptured(error) { session.failure ??= { value: error }; return false; },
     render(h) {
       const data = { props: this.input, attrs: this.attrs, on: options.on || {} };
       if (options.scopedSlots) data.scopedSlots = options.scopedSlots;
@@ -66,50 +61,53 @@ function ${prefix}Root(Vue, session, options) {
  */
 export async function renderToString(options) {
   const { Vue, renderer, signal } = options;
+  signal?.throwIfAborted();
   ${prefix}CheckVue(Vue);
   if (!renderer || typeof renderer.renderToString !== 'function') throw new TypeError('[Vue2 SSR] requires vue-server-renderer 2.6.14 createRenderer().');
-  const session = { mode: 'server', owners: [], projections: [], closed: false, failure: null };
+  options = { ...options, props: ${prefix}InitialData(options.props ?? {}), attrs: ${prefix}InitialData(options.attrs ?? {}) };
+  const session = { mode: 'server', owners: [], projections: [], closed: false, failure: undefined };
   const context = options.context || {};
-  let root, aborted, rejectAbort, renderFailure;
+  let root, failure;
+  const cancellation = Promise.withResolvers();
+  void cancellation.promise.catch(() => {});
   const abort = () => {
-    aborted = signal.reason || new Error('[Vue2 SSR] request aborted.');
-    try { ${prefix}CloseSession(session); } catch (error) { aborted = new AggregateError([aborted, error], '[Vue2 SSR] abort cleanup failed.'); }
-    rejectAbort?.(aborted);
+    failure ??= { value: signal.reason }; session.failure ??= failure;
+    try { ${prefix}CloseSession(session); } catch { /* Abort keeps its initiating reason. */ }
+    cancellation.reject(failure.value);
   };
+  signal?.addEventListener('abort', abort, { once: true });
   try {
-    if (signal?.aborted) throw signal.reason || new Error('[Vue2 SSR] request aborted.');
+    signal?.throwIfAborted();
     root = ${prefix}Root(Vue, session, options);
     const render = Promise.resolve(renderer.renderToString(root, context));
-    let result = render;
-    if (signal) {
-      const cancellation = Promise.withResolvers();
-      rejectAbort = cancellation.reject;
-      signal.addEventListener('abort', abort, { once: true });
-      if (signal.aborted) abort();
-      result = Promise.race([render, cancellation.promise]);
-    }
-    const html = await result;
-    if (aborted) throw aborted;
-    if (session.failure) throw session.failure;
+    void render.catch(() => {});
+    const html = await Promise.race([render, cancellation.promise]);
+    if (failure) throw failure.value;
+    if (session.failure) throw session.failure.value;
+    signal?.throwIfAborted();
     const carrier = JSON.parse(JSON.stringify({
       version: 1, profile: 'vue2-ssr-v1', source: '${source}',
-      initialProps: ${prefix}EncodeRaw(options.props || {}),
-      initialAttrs: ${prefix}EncodeRaw(options.attrs || {}),
+      initialProps: ${prefix}EncodeRaw(options.props),
+      initialAttrs: ${prefix}EncodeRaw(options.attrs),
       projections: session.projections,
     }));
     if (!${prefix}Json(carrier) || carrier.projections.length !== session.owners.length) throw new Error('[Vue2 SSR] incomplete request projection.');
     return { html, carrier };
   } catch (error) {
-    renderFailure = error;
-    throw error;
+    failure ??= { value: error };
+    throw failure.value;
   } finally {
     signal?.removeEventListener('abort', abort);
-    // Vue's server renderer does not call beforeDestroy. Explicitly retire the request.
-    try { ${prefix}CloseSession(session); }
-    catch (error) {
-      if (renderFailure) throw new AggregateError([renderFailure, error], '[Vue2 SSR] rendering and cleanup failed.');
-      throw error;
-    } finally { root?.$destroy(); }
+    // Vue's server renderer does not own Proto cleanup; retire the request even
+    // when a lifecycle callback or the framework's destruction path fails.
+    const cleanup = [];
+    try { ${prefix}CloseSession(session); } catch (error) { cleanup.push(error); }
+    try { root?.$destroy(); } catch (error) { cleanup.push(error); }
+    if (!failure) {
+      signal?.throwIfAborted();
+      if (cleanup.length === 1) throw cleanup[0];
+      if (cleanup.length) throw new AggregateError(cleanup, '[Vue2 SSR] request cleanup failed.');
+    }
   }
 }
 function ${prefix}Nodes(root) {
@@ -122,9 +120,12 @@ function ${prefix}Nodes(root) {
  * options.props/attrs may differ from the carrier; the normal Props update policy is retained.
  */
 export async function hydrate(options) {
-  const { Vue, target, carrier } = options;
+  const { Vue, target } = options;
+  const carrier = ${prefix}InitialData(options.carrier);
   ${prefix}CheckVue(Vue);
   if (!carrier || carrier.version !== 1 || carrier.profile !== 'vue2-ssr-v1' || carrier.source !== '${source}' || !${prefix}Json(carrier) || !Array.isArray(carrier.projections)) throw new Error('[Vue2 SSR] invalid source/profile carrier.');
+  ${prefix}DecodeRaw(carrier.initialProps); ${prefix}DecodeRaw(carrier.initialAttrs);
+  for (const projection of carrier.projections) ${prefix}DecodeRaw(projection.raw);
   if (!target || ![1, 8].includes(target.nodeType)) throw new TypeError('[Vue2 SSR] hydration requires the serialized Root or absence comment.');
   const session = { mode: 'hydrate', carrier, owners: [], closed: false, failure: null };
   const before = ${prefix}Nodes(target);
@@ -137,7 +138,7 @@ export async function hydrate(options) {
   });
   try {
     root.$mount(target, true);
-    if (session.failure) throw session.failure;
+    if (session.failure) throw session.failure.value;
     const after = ${prefix}Nodes(root.$el);
     const projection = carrier.projections[0];
     if (projection?.present && typeof projection.rootTag === 'string' && root.$el
@@ -156,7 +157,7 @@ export async function hydrate(options) {
     await Vue.nextTick();
     await Vue.nextTick();
     await Vue.nextTick();
-    if (session.failure) throw session.failure;
+    if (session.failure) throw session.failure.value;
     return {
       root,
       get instance() { return root.$children[0]; },
@@ -165,8 +166,8 @@ export async function hydrate(options) {
     };
   } catch (error) {
     try { ${prefix}CloseSession(session); }
-    catch (cleanupError) { throw new AggregateError([error, cleanupError], '[Vue2 SSR] hydration and cleanup failed.'); }
-    finally { root.$destroy(); }
+    catch { /* Keep the initiating hydration failure. */ }
+    try { root.$destroy(); } catch { /* Keep the initiating hydration failure. */ }
     throw error;
   }
 }
