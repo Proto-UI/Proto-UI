@@ -21,6 +21,13 @@ Select 在 Neo-Brutalist 表面语言下保留 Base 的 value-class presentation
 
 此 prop 设置在 `brutalist-select-trigger`，不设在 Root 或 Content。`appearance="flat"`、缺省或移除 prop 都恢复扁平默认值。`size="sm" | "default"`、配对 fill/ink、焦点 ring、键盘选择及 disabled 行为不变；两种外观的 Content 都保持扁平。页面 CSS 不应另外补影。
 
+
+## 鼠标、键盘与触摸所有权
+
+<PrototypePreviewer demoId="demo-brutalist-select-input" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+这个可滚动的公开配方区分焦点与已提交选择。已知、无按住按钮的鼠标移动可导航；触摸、笔与拖动不借用该 hover 路径。受控拒绝开关显示提案，同时由 owner 保留当前值。弹层采用公开 popper 定位，触摸滚动与捕获由浏览器负责。
+
 ## API
 
 Select 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 或 `value` 会使对应事实进入受控模式。

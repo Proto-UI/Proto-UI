@@ -21,6 +21,13 @@ The default Trigger follows the upstream Select: a flat 5px-rounded, 2px black f
 
 Set the prop on `brutalist-select-trigger`, not Root or Content. `appearance="flat"`, omission, or removing the prop restores the flat default. `size="sm" | "default"`, the paired fill/ink, focus ring, keyboard selection and disabled behavior are unchanged. Content stays flat in either appearance. Page CSS must not add a replacement shadow.
 
+
+## Pointer, keyboard and touch ownership
+
+<PrototypePreviewer demoId="demo-brutalist-select-input" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+This scrollable public recipe separates focus from the committed selection. Known mouse movement without held buttons may navigate; touch, pen and dragging do not borrow that hover path. The controlled-refusal switch leaves proposals visible while the owner keeps the current value. The popup uses the public popper placement; the browser owns touch scrolling and capture.
+
 ## API
 
 Select is workspace source. There is no public `proto-ui add` target. Passing `open` or `value` selects controlled mode for that fact.

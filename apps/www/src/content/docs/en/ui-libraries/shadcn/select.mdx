@@ -37,6 +37,13 @@ This page uses `appearance="default"` with `styleProfile="rhea"`. The optional `
 
 Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
 
+
+## Pointer, keyboard and touch ownership
+
+<PrototypePreviewer demoId="demo-shadcn-select-input" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+This scrollable public recipe separates focus from the committed selection. Known mouse movement without held buttons may navigate; touch, pen and dragging do not borrow that hover path. The controlled-refusal switch leaves proposals visible while the owner keeps the current value. The popup uses the public popper placement; the browser owns touch scrolling and capture.
+
 ## API
 
 Passing `open` or `value` selects controlled mode for that fact.
