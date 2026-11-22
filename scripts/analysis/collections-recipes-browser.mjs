@@ -13,6 +13,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { build } from 'esbuild';
 import { renderBrutalistThemeCss } from '../../packages/prototypes/brutalist/src/theme.ts';
+import { readCollectionsSourceInventory } from './collections-source-inventory.mjs';
 
 const select = (key, defaults) => process.env[key]?.split(',').filter(Boolean) ?? defaults;
 const families = select('PUI_BROWSER_FAMILIES', ['base', 'shadcn', 'brutalist']);
@@ -21,33 +22,14 @@ const kinds = select('PUI_BROWSER_KINDS', ['tree', 'data-table', 'virtual-list']
 const output = path.resolve(process.env.PUI_EVIDENCE_DIR ?? '.tmp/collections-recipes-browser');
 await mkdir(output, { recursive: true });
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
-const paths = [
-  ...new Set([
-    ...git('ls-files', 'packages', 'apps/www/src', 'scripts/analysis', 'spec').split('\n'),
-    ...git(
-      'ls-files',
-      '--others',
-      '--exclude-standard',
-      'packages',
-      'apps/www/src',
-      'scripts/analysis',
-      'spec'
-    ).split('\n'),
-  ]),
-]
-  .filter(Boolean)
-  .sort();
-const digest = createHash('sha256');
-for (const file of paths) {
-  digest.update(file + '\0');
-  digest.update(await readFile(file));
-}
+const inventory = await readCollectionsSourceInventory();
 const report = {
   kind: 'collections-public-recipes-native-chromium',
   capturedAt: new Date().toISOString(),
   source: {
     head: git('rev-parse', 'HEAD'),
-    treeFilesSha256: digest.digest('hex'),
+    treeFilesSha256: inventory.sha256,
+    treeFilesCount: inventory.paths.length,
     dirty: Boolean(git('status', '--porcelain')),
   },
   environment: {

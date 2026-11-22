@@ -81,6 +81,8 @@ Other development failures were classified and corrected without weakening old a
 
 `scripts/analysis/collections-recipes-browser.mjs` is a new standalone runner for **36 independently terminalized cases**: three public collection recipes × three release families × four Web Adapters. It records source head/tree digest, dirty state, bundle/style hashes, browser/environment, native trusted inputs, screenshots, per-case failure and cleanup. Local bundle preparation succeeded. Native execution is queued by the integration owner on the authorized browser machine; **this record does not claim a native pass**.
 
+The first remote launch stopped before any browser case: line-delimited `git ls-files` quoted the existing Chinese source path `apps/www/src/styles/__行文脉络.md`, which was then incorrectly opened as a literal escaped filename. The source inventory now uses `git ls-files -z` for tracked and untracked paths, without changing Git configuration. Its Node test preserves the old ENOENT negative control against that actual file and successfully hashes the complete new inventory. Run `node --test scripts/analysis/test/collections-source-inventory.test.mjs` independently of browser acquisition; this startup correction does not claim that the browser cases passed.
+
 Prerequisites are an installed workspace, built package exports and current generated website styles:
 
 ```sh
@@ -90,7 +92,7 @@ PUI_EVIDENCE_DIR=/path/to/evidence/collections \
   node --import tsx scripts/analysis/collections-recipes-browser.mjs
 ```
 
-The original Resizable/Carousel native runner remains unchanged. Run its **24 lanes** under the same serialized heavy-validation queue:
+The original Resizable/Carousel native matrix and assertions remain unchanged; the integration owner aligns browser launch with the shared sandboxed harness. Run its **24 lanes** under the same serialized heavy-validation queue:
 
 ```sh
 PUI_BROWSER_KINDS=resizable,carousel \
