@@ -12,7 +12,7 @@ import type { AnatomyPort } from '@proto.ui/module-anatomy';
 import { createAxisInputModule } from '../src/create';
 import { AXIS_INPUT_HOST_CAP, AXIS_INPUT_RUN_IN_CALLBACK_CAP } from '../src/caps';
 
-function harness(withHost = true, travelRole = false) {
+function harness(withHost = true, travelRole = false, originRole = false) {
   let phase: 'setup' | 'callback' = 'setup';
   const run = { update() {} } as RunHandle<Record<string, unknown>>;
   const sys = {
@@ -123,6 +123,7 @@ function harness(withHost = true, travelRole = false) {
     inputRole: 'handle',
     geometryRole: 'root',
     ...(travelRole ? { travelRole: 'indicator' } : {}),
+    ...(originRole ? { originRole: 'indicator' } : {}),
   });
   const samples: AxisInputSample[] = [];
   input.on((_run, sample) => {
@@ -176,6 +177,44 @@ const sample = (phase: 'start' | 'move' | 'end'): AxisInputSample => ({
 });
 
 describe('axis-input module ownership', () => {
+  it('binds public origin order to one logical owner and rejects stale reassociated callbacks', () => {
+    const h = harness(true, false, true);
+    h.mount();
+    const old = h.records[0];
+    expect(old.binding.originTargets).toEqual([h.travelTarget]);
+    old.binding.onSample({ ...sample('start'), originIndex: 0 });
+    h.reassociate();
+    old.binding.onSample({ ...sample('move'), originIndex: 0 });
+    old.binding.onSample({ ...sample('end'), originIndex: 0 });
+    expect(old.disposed).toBe(true);
+    expect(h.samples.map((s) => s.phase)).toEqual(['start', 'cancel']);
+    h.records[1].binding.onSample({ ...sample('start'), originIndex: null });
+    h.setTravelCount(0);
+    h.notify();
+    expect(h.samples.map((s) => s.phase)).toEqual(['start', 'cancel', 'start', 'cancel']);
+    expect(h.records.at(-1)?.binding.originTargets).toEqual([]);
+    h.module.hooks.dispose?.();
+  });
+  it.each([undefined, -1, 0.5, 1])(
+    'fails closed for missing or invalid opt-in origin %s',
+    (originIndex) => {
+      const h = harness(true, false, true);
+      h.mount();
+      h.records[0].binding.onSample({ ...sample('start'), originIndex });
+      expect(h.samples).toEqual([]);
+      expect(h.records[0].disposed).toBe(true);
+      h.module.hooks.dispose?.();
+    }
+  );
+  it('rejects a host that changes origin while one contact is active', () => {
+    const h = harness(true, false, true);
+    h.mount();
+    h.records[0].binding.onSample({ ...sample('start'), originIndex: 0 });
+    h.records[0].binding.onSample({ ...sample('move'), originIndex: null });
+    expect(h.samples.map((s) => s.phase)).toEqual(['start', 'cancel']);
+    expect(h.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'host-cancel' });
+    h.module.hooks.dispose?.();
+  });
   it('resolves only its own input and nearest geometry; dispatches in callback scope', () => {
     const h = harness();
     h.mount();

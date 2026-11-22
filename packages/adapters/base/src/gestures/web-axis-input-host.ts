@@ -199,6 +199,7 @@ function normalized(
     position: Math.min(1, Math.max(0, geometry.sign === 1 ? rawPosition : 1 - rawPosition)),
     delta,
     totalDelta,
+    ...(sample.originIndex !== undefined ? { originIndex: sample.originIndex } : {}),
   });
 }
 function sameConfig(a: AxisInputConfig, b: AxisInputConfig): boolean {
@@ -242,6 +243,7 @@ export function createWebAxisInputHost(
       let travelTarget =
         binding.travelTarget === undefined ? undefined : webTarget(binding.travelTarget);
       let deltaBasis = binding.deltaBasisTargets?.map(webTarget);
+      let originTargets = binding.originTargets?.map(webTarget);
       let moveLease: MoveGestureHostLease | null = null;
       let session: Session | null = null;
       let pending: Geometry | null = null;
@@ -269,8 +271,15 @@ export function createWebAxisInputHost(
           target: input,
           axis: binding.config.axis,
           activation: binding.config.activation ?? 'immediate',
+          ...(originTargets ? { originTargets } : {}),
           shouldStart(sample) {
-            if (disposed || currentEpoch !== epoch || !input.isConnected) return false;
+            if (
+              disposed ||
+              currentEpoch !== epoch ||
+              !input.isConnected ||
+              originTargets?.some((part) => !part.isConnected)
+            )
+              return false;
             if (binding.config.contactBasis === 'cancel-on-extent-change') {
               const win = geometryTarget.ownerDocument.defaultView;
               if (
@@ -302,7 +311,8 @@ export function createWebAxisInputHost(
                   (!input.isConnected ||
                     !geometryTarget.isConnected ||
                     (travelTarget && !travelTarget.isConnected) ||
-                    deltaBasis?.some((part) => !part.isConnected))
+                    deltaBasis?.some((part) => !part.isConnected) ||
+                    originTargets?.some((part) => !part.isConnected))
                 )
                   restart('target-detached');
               });
@@ -342,7 +352,8 @@ export function createWebAxisInputHost(
           !input.isConnected ||
           !geometryTarget.isConnected ||
           (travelTarget && !travelTarget.isConnected) ||
-          deltaBasis?.some((part) => !part.isConnected)
+          deltaBasis?.some((part) => !part.isConnected) ||
+          originTargets?.some((part) => !part.isConnected)
         ) {
           restart('target-detached');
           return false;
@@ -399,18 +410,22 @@ export function createWebAxisInputHost(
           const nextTravel =
             next.travelTarget === undefined ? undefined : webTarget(next.travelTarget);
           const nextBasis = next.deltaBasisTargets?.map(webTarget);
+          const nextOrigins = next.originTargets?.map(webTarget);
           const replaced =
             input !== nextInput ||
             geometryTarget !== nextGeometry ||
             travelTarget !== nextTravel ||
             (nextBasis?.length ?? 0) !== (deltaBasis?.length ?? 0) ||
-            (nextBasis?.some((part, i) => part !== deltaBasis?.[i]) ?? false);
+            (nextBasis?.some((part, i) => part !== deltaBasis?.[i]) ?? false) ||
+            (nextOrigins?.length ?? 0) !== (originTargets?.length ?? 0) ||
+            (nextOrigins?.some((part, i) => part !== originTargets?.[i]) ?? false);
           const changed = !sameConfig(binding.config, next.config);
           binding = next;
           input = nextInput;
           geometryTarget = nextGeometry;
           travelTarget = nextTravel;
           deltaBasis = nextBasis;
+          originTargets = nextOrigins;
           if (replaced || changed)
             restart(
               replaced
