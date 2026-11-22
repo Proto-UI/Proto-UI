@@ -189,13 +189,16 @@ export async function buildBoundary(root) {
     body.includes('pagefind-ui__form') &&
     body.includes('pagefind-ui__drawer') &&
     body.includes('pagefind-ui__search-input');
-  // The Pagefind build emits its own UI bundle at pagefind/ui/ independent of
-  // which search implementation consumes it. Bind that canonical asset first so
-  // a same-tree A/B compares the same logical bytes on both sides; trees that
-  // inline the Pagefind UI package into an Astro chunk keep the fallback scan.
+  // The Pagefind CLI emits its own default UI bundle as a flat pagefind/*.js
+  // asset independent of which search implementation consumes it
+  // (pagefind-ui.js carries the UI markers; pagefind.js and
+  // pagefind-modular-ui.js do not). Scan the whole emitted tree so both flat
+  // and ui/-prefixed layouts bind the same logical asset on both sides; trees
+  // that inline the Pagefind UI package into an Astro chunk keep the fallback
+  // scan.
   const uiAssets = [];
   for (const file of await walk(path.join(dist, 'pagefind'))) {
-    if (!file.startsWith('ui/') || !file.endsWith('.js')) continue;
+    if (!file.endsWith('.js')) continue;
     const body = await readFile(path.join(dist, 'pagefind', file), 'utf8');
     if (hasUiMarkers(body))
       uiAssets.push({
@@ -206,14 +209,14 @@ export async function buildBoundary(root) {
   }
   if (uiAssets.length === 0)
     for (const file of await walk(path.join(dist, '_astro'))) {
-    if (!file.endsWith('.js')) continue;
-    const body = await readFile(path.join(dist, '_astro', file), 'utf8');
-    if (hasUiMarkers(body))
-      uiAssets.push({
-        path: '/_astro/' + file,
-        sha256: sha256(body),
-        bytes: Buffer.byteLength(body),
-      });
+      if (!file.endsWith('.js')) continue;
+      const body = await readFile(path.join(dist, '_astro', file), 'utf8');
+      if (hasUiMarkers(body))
+        uiAssets.push({
+          path: '/_astro/' + file,
+          sha256: sha256(body),
+          bytes: Buffer.byteLength(body),
+        });
     }
   assert.equal(
     uiAssets.length,
