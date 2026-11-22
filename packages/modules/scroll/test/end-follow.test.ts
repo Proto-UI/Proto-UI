@@ -200,6 +200,23 @@ describe('module-scroll: end-follow host contract', () => {
     target.scrollTop = 400;
     target.dispatchEvent(new Event('scroll'));
     expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    // Programmatic position commands do not become reader arrivals merely
+    // because their physical destination happens to be the logical end.
+    for (const request of [
+      { kind: 'by', axis: 'vertical', delta: 100 },
+      { kind: 'to', axis: 'vertical', position: 1 },
+      { kind: 'page', axis: 'vertical', direction: 'after' },
+      { kind: 'control-drag', axis: 'vertical', position: 1 },
+    ] as const) {
+      lease.request({ kind: 'to', axis: 'vertical', position: 0.75 });
+      expect(target.scrollTop).toBe(300);
+      lease.request(request);
+      expect(target.scrollTop).toBe(400);
+      expect(snapshots.at(-1)?.endFollow.state, request.kind).toBe('paused');
+      target.dispatchEvent(new Event('scroll'));
+      window.dispatchEvent(new Event('resize'));
+      expect(snapshots.at(-1)?.endFollow.state, request.kind).toBe('paused');
+    }
     lease.request({ kind: 'to-end', axis: 'vertical' });
     frames.runAll();
     expect(snapshots.at(-1)?.endFollow.state).toBe('following');

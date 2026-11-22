@@ -660,7 +660,7 @@ export function createWebScrollSurfaceHost(
         options.onPolicyLost?.();
         return false;
       };
-      const executeRequest = (request: ScrollSurfacePositionRequest) => {
+      const executeRequest = (request: ScrollSurfacePositionRequest, readerRequest = false) => {
         if (!policyCurrent()) return;
         const followAxis = configuredFollowAxis();
         if (request.kind === 'to-end') {
@@ -679,13 +679,40 @@ export function createWebScrollSurfaceHost(
         // A boundary-clamped departure emits no scroll event, so the pending
         // automatic end frame must be canceled from the classified input path.
         if (scheduledEnd?.axis === request.axis) cancelScheduledEnd(true);
-        if (followAxis === request.axis) explicitPauseObservation = null;
+        if (followAxis === request.axis && explicitPauseObservation) {
+          // Only host-owned control input may attribute this movement to the
+          // reader. Public position commands preserve the pause and retire
+          // old movement evidence without losing ownership of live contacts.
+          explicitPauseObservation = readAnchorObservation(request.axis);
+          if (readerRequest) {
+            readerArrivalUntil =
+              (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
+          } else {
+            readerIntentUntil = 0;
+            readerArrivalUntil = 0;
+            readerContacts.clearMovement();
+          }
+        }
         applyRequest(target, request);
         if (configuredAnchorAxis() === request.axis) syncAnchorObservation();
         if (followAxis === request.axis) {
           const atEndAfterRequest = isAxisAtEnd(request.axis);
+          if (explicitPauseObservation) {
+            const previous = explicitPauseObservation;
+            const next = readAnchorObservation(request.axis);
+            const readerArrived =
+              readerRequest &&
+              atEndAfterRequest &&
+              next.offset !== previous.offset &&
+              next.viewport === previous.viewport &&
+              next.extent === previous.extent;
+            explicitPauseObservation = readerArrived ? null : next;
+          }
           const smoothMovement = ownerWindow?.getComputedStyle(target).scrollBehavior === 'smooth';
-          const shouldPause = !atEndAfterRequest || (requestedAtEnd === false && smoothMovement);
+          const shouldPause =
+            explicitPauseObservation !== null ||
+            !atEndAfterRequest ||
+            (requestedAtEnd === false && smoothMovement);
           requestedDepartureAxis = shouldPause ? request.axis : null;
           endFollowState = shouldPause ? 'paused' : 'following';
         }
@@ -702,7 +729,7 @@ export function createWebScrollSurfaceHost(
           let position =
             (coordinate(sample, axis) - geometry.trackStart - grabOffset) / geometry.travel;
           if (axis === 'horizontal' && horizontalSign(target) < 0) position = 1 - position;
-          executeRequest({ kind: 'control-drag', axis, position: clampRatio(position) });
+          executeRequest({ kind: 'control-drag', axis, position: clampRatio(position) }, true);
         };
         return Object.freeze({
           target: thumb,
@@ -1353,10 +1380,16 @@ export function createWebScrollSurfaceHost(
           });
           if (!accepted || !current()) return false;
           if (configuredFollowAxis() === axis) {
-            explicitPauseObservation = null;
+            if (explicitPauseObservation) {
+              readerIntentUntil = 0;
+              readerArrivalUntil = 0;
+              readerContacts.clearMovement();
+              explicitPauseObservation = readAnchorObservation(axis);
+            }
             const atEnd = isAxisAtEnd(axis);
-            requestedDepartureAxis = atEnd ? null : axis;
-            endFollowState = atEnd ? 'following' : 'paused';
+            const shouldPause = explicitPauseObservation !== null || !atEnd;
+            requestedDepartureAxis = shouldPause ? axis : null;
+            endFollowState = shouldPause ? 'paused' : 'following';
           }
           publish();
           return current();

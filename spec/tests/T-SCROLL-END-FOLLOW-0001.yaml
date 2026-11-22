@@ -44,7 +44,7 @@ cases:
     title: semantic pause preserves reader position and retires with its owner
     covers:
       - C-SCROLL-END-FOLLOW-0001-PAUSE
-    expectation: pending-cancelled-without-position-or-focus-write-and-no-layout-only-resume
+    expectation: pending-cancelled-without-position-or-focus-write-and-resume-only-by-reader-arrival-or-to-end
   - id: T-SCROLL-END-FOLLOW-0001-CASE-LIFETIME
     title: replacement disposal and late callbacks cannot update a later epoch
     covers:
