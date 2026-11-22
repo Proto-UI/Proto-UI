@@ -25,7 +25,8 @@ implementations:
     status: passing
     path: packages/modules/text-control/test/selection.test.ts
     required: true
-    consumesCases: [T-TEXT-CONTROL-SELECTION-0001-CASE-FACTS, T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP]
+    consumesCases:
+      [T-TEXT-CONTROL-SELECTION-0001-CASE-FACTS, T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP]
   - id: adapter-selection
     kind: adapter-test
     status: passing
@@ -40,6 +41,15 @@ implementations:
     path: packages/prototypes/base/test/input-otp-selection.test.ts
     required: true
     consumesCases: [T-TEXT-CONTROL-SELECTION-0001-CASE-OTP]
+  - id: otp-native-selection
+    kind: browser-test
+    status: planned
+    path: scripts/analysis/sprint2-input-browser.mjs
+    required: true
+    consumesCases:
+      [T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP, T-TEXT-CONTROL-SELECTION-0001-CASE-OTP]
+    notes:
+      - Independently terminal controlled and uncontrolled cases run real browser mouse and keyboard input through the four public Adapters; physical OS IME, assistive technology and Compiler evidence remain separate.
 verifies:
   contracts:
     - id: C-TEXT-CONTROL-SELECTION-0001
