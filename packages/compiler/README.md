@@ -73,6 +73,12 @@ if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
 
 The synthesized authored-hook result exposes `render` as the checked setup render callable or `undefined`. Reading or forwarding this field does not execute the fragment. Callable analysis retains its declaration environment, and serialized IR independently checks the projected type. A void hook setup contributes no render field; returning that missing field from the caller preserves the caller's existing default-render behavior. This compiler slice follows the draft asHook result contracts and does not promote their lifecycle.
 
+## Diagnostic origins
+
+Checked source rejections retain their actual available source spans and categories. A failure before a source position is known uses a diagnostic-only sentinel: the known relative source identity where available, otherwise `<unknown>`; `start`/`end` are `-1` and line/column coordinates are `0`. Human-readable diagnostics say `source location unknown`, and supplying source text does not turn that sentinel into a first-line excerpt. JSON preserves the sentinel. Valid IR and generated source maps continue to require real, nonnegative offsets and one-based line/column positions.
+
+Expected file/root/loader rejections and closed snapshots without their entry remain `PUI1003` / `invalid-input`. Unexpected implementation exceptions remain `PUI1999` / `compiler-defect` with the original stack. A checked `CompilerRejection` retains its existing diagnostic. Frontend exceptions use unknown coordinates rather than an invented source location. Source-map attachment failures retain `PUI3005`, their original stack and the available setup span explicitly labeled as context. Public diagnostic presentation keeps its existing absolute-path redaction. `test/diagnostic-origin.test.ts` exercises these public boundaries with deliberate fault injection; it does not admit any additional Hook or source-language feature.
+
 ## Host support follows invocation
 
 Creating a closure does not execute its body. The compiler first removes unused values only when their evaluation is proved inert. It then follows known ordinary calls, returned callables, registrations and outward callable values to choose host support. An effectful helper that ignores a callback still executes; transporting that callback does not acquire its host capability.

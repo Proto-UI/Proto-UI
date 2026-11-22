@@ -1,8 +1,7 @@
 import { realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
-import { reject } from './diagnostics';
-import type { SourceSpan } from './ir';
+import { reject, unknownDiagnosticSpan } from './diagnostics';
 
 export interface SourceEdge {
   specifier: string;
@@ -12,15 +11,7 @@ export interface SourceEdge {
 
 /** A source identity, never an absolute host path or a path outside the source root. */
 export function sourceName(file: string): string {
-  const span: SourceSpan = {
-    file: '<input>',
-    start: 0,
-    end: 0,
-    line: 1,
-    column: 1,
-    endLine: 1,
-    endColumn: 1,
-  };
+  const span = unknownDiagnosticSpan();
   if (
     typeof file !== 'string' ||
     !file ||
