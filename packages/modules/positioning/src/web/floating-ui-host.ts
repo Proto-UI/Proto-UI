@@ -462,6 +462,16 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
           void position();
         });
+        // autoUpdate records overflow ancestors only once. A scroller that
+        // becomes overflow:auto after the popup opens (nested demo panes)
+        // never notifies that list, so the fixed popper keeps its pre-scroll
+        // coordinates. Element scroll does not bubble, but it is observable
+        // in the capture phase on the document.
+        const ownerDocument = reference.element.ownerDocument;
+        const onCapturedScroll = () => {
+          void position();
+        };
+        ownerDocument.addEventListener('scroll', onCapturedScroll, true);
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
@@ -472,6 +482,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           stopAuto();
           stopRoot();
           stopInvalidation?.();
+          ownerDocument.removeEventListener('scroll', onCapturedScroll, true);
         };
       };
 
