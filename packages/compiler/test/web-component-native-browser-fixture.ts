@@ -205,7 +205,21 @@ export async function startNativeWcFixture() {
     if (!address || typeof address === 'string') throw new Error('Missing loopback address');
     browser = await launchBrowser();
     await writeFile(path.join(evidenceDir, 'browser-version.txt'), browser.version());
-    return { browser, baseUrl: 'http://127.0.0.1:' + address.port, evidenceDir, head, close };
+    const baseUrl = 'http://127.0.0.1:' + address.port;
+    // The first Chromium contexts pay a multi-second newPage/navigation cost.
+    // Light journeys run before shadow and otherwise exhaust the 5000ms test budget
+    // after their assertions have already passed.
+    for (let i = 0; i < 3; i++) {
+      const warm = await browser.newContext();
+      try {
+        const page = await warm.newPage();
+        await page.goto(baseUrl, { waitUntil: 'load' });
+        await page.waitForFunction('window.nativeWcReady === true');
+      } finally {
+        await warm.close();
+      }
+    }
+    return { browser, baseUrl, evidenceDir, head, close };
   } catch (error) {
     await writeFile(path.join(evidenceDir, 'startup-error.txt'), String(error));
     await close();
