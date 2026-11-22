@@ -97,7 +97,10 @@ export function matrixAccessibilityFromSnapshots(
 /** Chromium CDP facts, scoped to the existing matrix's visible DOM candidates.
  * This does not claim physical assistive-technology or other-engine acceptance. */
 export async function collectMatrixAccessibilityFacts(page: Page, roles: readonly string[]) {
-  const targets = await page.evaluate(collectMatrixInteractiveFacts, { roles, selectors: true });
+  const targets = await page.evaluate(collectMatrixInteractiveFacts, {
+    roles,
+    selectors: true as const,
+  });
   const session = await page.context().newCDPSession(page);
   try {
     // Do not pierce shadow roots or frames: the previous matrix candidate query
