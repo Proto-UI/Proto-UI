@@ -117,13 +117,16 @@ pub fn text_is_composing(owner:&OwnerRef)->bool{
 /// range, a disabled owner, another window, or a detached editing lease.
 pub fn text_select_utf16(owner:&OwnerRef,start:usize,end:usize,window:&mut Window,cx:&mut App)->bool{
     if !ready(owner)||!text_supported(owner)||text_disabled(owner){return false}
-    let focus={let mut o=owner.borrow_mut();
+    let _focus={let mut o=owner.borrow_mut();
         if o.window_id!=Some(window.window_handle().window_id()){return false}
         let text=&mut o.modules.text;if text.composing{return false}
         text.selection=utf16_range(&text.editor,start..end.max(start));text.reversed=false;
         text.drag_anchor=None;text.reveal_caret=true;o.dirty=true;o.modules.focus.native.clone()
     };
-    if let Some(focus)=focus{window.notify_text_selection_changed(&focus);}
+    // The pinned GPUI profile has no explicit platform selection-notification
+    // API. Its input handler still reports this selection and the driver redraws.
+    #[cfg(feature = "gpui-text-selection-notification")]
+    if let Some(focus)=_focus{window.notify_text_selection_changed(&focus);}
     text_drive(owner,window,cx);true
 }
 pub fn text_accessible(owner:&OwnerRef,node:&mut gpui::accesskit::Node){

@@ -14,6 +14,8 @@ The existing public `textControl.resetValue(value?)` is lowered to a bounded edi
 
 Native `text_select_utf16(owner, start, end, window, app)` is a host API, not a new portable author hook. A prototype can publish its selected range policy and the host applies it to the exact current editor. It clamps and snaps codepoint boundaries without splitting surrogate pairs, reveals the caret, permits readonly selection, and rejects disabled, composing, detached or foreign-window targets. Consumers must also retain their authored request/view epoch for asynchronous requests; this synchronous host API does not authenticate a stale app task.
 
+The pinned GPUI `62e5991` profile exposes the current selection through its native input handler and redraws the editor, but has no `Window::notify_text_selection_changed` API. The SDK's optional `gpui-text-selection-notification` Cargo feature calls that extension for a separately verified host that provides it. It is disabled by default in both dependency modes: choosing a workspace dependency or the modern Element ABI does not prove that independent platform-notification capability. Consumers using the extension must enable the feature on their production SDK dependency. This does not claim OS text-service notification support for the pinned profile.
+
 While composition is active, ordinary native editing commands cannot navigate, delete, paste, undo or confirm provisional text. The native IME replacement path continues to own that session. Focus traversal also avoids moving away through an unhandled Tab during composition. These tests use GPUI's input handler and are not a claim that a particular OS input method has been exercised.
 
 ## Source prerequisites

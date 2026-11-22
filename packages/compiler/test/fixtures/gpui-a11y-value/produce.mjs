@@ -12,6 +12,7 @@ const { values, positionals } = parseArgs({
   options: {
     'gpui-git': { type: 'string' },
     'gpui-rev': { type: 'string' },
+    'gpui-text-selection-notification': { type: 'boolean', default: false },
     'lockfile': { type: 'string' },
   },
 });
@@ -21,6 +22,10 @@ if (positionals.length !== 1 || !path.isAbsolute(output ?? '') || existsSync(out
 const workspace = values['gpui-git'] !== undefined || values['gpui-rev'] !== undefined;
 const git = values['gpui-git'] ?? 'https://github.com/zed-industries/zed';
 const rev = values['gpui-rev'] ?? '62e5991dd0f0c8a3af8d5e7e9c4652490d468db8';
+const sdkFeatures = [
+  'test-support',
+  ...(values['gpui-text-selection-notification'] ? ['gpui-text-selection-notification'] : []),
+];
 if (
   !/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(git) ||
   !/^[a-f0-9]{40}$/.test(rev)
@@ -75,7 +80,7 @@ gpui = { git = ${JSON.stringify(git)}, rev = ${JSON.stringify(rev)} }
 [dependencies]
 component = { package = ${JSON.stringify(name)}, path = "component" }
 ${controls.map((control) => `${control.stem.replaceAll('-', '_')} = { package = ${JSON.stringify(control.name)}, path = ${JSON.stringify(control.stem)} }`).join('\n')}
-proto-ui-gpui-native = { path = "component/.proto-ui/gpui-native", features = ["test-support"] }
+proto-ui-gpui-native = { path = "component/.proto-ui/gpui-native", features = ${JSON.stringify(sdkFeatures)} }
 gpui = { workspace = true, features = ["test-support"] }
 serde_json = "1.0"
 `,
@@ -91,6 +96,7 @@ const receipt = {
   kind: 'generated-gpui-numeric-accessibility-bridge',
   compilerProfile: 'gpui-source-v1',
   gpui: { git, rev, workspace },
+  nativeSdkFeatures: sdkFeatures,
   sourceSha256: sha256(await readFile(path.join(fixture, 'value.proto.ts'))),
   controls: await Promise.all(
     controls.map(async (control) => ({
