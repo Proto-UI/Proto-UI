@@ -166,13 +166,11 @@ export async function compileFile(
   let snapshot = options.sourceSnapshot;
   try {
     if (!snapshot) {
-      if (!path.isAbsolute(entry)) origin = unknownDiagnosticSpan(sourceName(entry));
+      if (!path.isAbsolute(entry)) origin = diagnosticInputOrigin(entry);
       const root = await realpath(options.root ?? process.cwd());
       const graph = new FileSourceGraph(root);
       const requested = path.isAbsolute(entry) ? entry : path.resolve(root, entry);
-      origin = unknownDiagnosticSpan(
-        sourceName(path.relative(root, requested).split(path.sep).join('/'))
-      );
+      origin = diagnosticInputOrigin(path.relative(root, requested).split(path.sep).join('/'));
       const loaded = await graph.load(await graph.entry(requested));
       if (loaded.failures.length) throw loaded.failures[0];
       snapshot = loaded;
@@ -217,6 +215,16 @@ export async function compileFile(
   } catch (error) {
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
     return { ok: false, diagnostics: [defectDiagnostic(error, origin)] };
+  }
+}
+
+/** Origin tracing must not decide whether a requested filesystem path is admitted. */
+function diagnosticInputOrigin(file: string): SourceSpan {
+  try {
+    return unknownDiagnosticSpan(sourceName(file));
+  } catch (error) {
+    if (error instanceof CompilerRejection) return unknownDiagnosticSpan();
+    throw error;
   }
 }
 

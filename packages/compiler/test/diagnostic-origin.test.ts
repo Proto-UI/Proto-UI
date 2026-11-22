@@ -54,6 +54,12 @@ function unknownOrigin(value: CompilerDiagnostic, file: string) {
 }
 
 describe('#1457 truthful diagnostic origin at public boundaries', () => {
+  it('preserves a legal normalized relative entry that resolves back inside the root', async () => {
+    const result = await compileFile(`../${path.basename(root)}/entry.proto.ts`, { root });
+    expect(result.ok, JSON.stringify(result)).toBe(true);
+    if (result.ok) expect(result.value.ir.source.file).toBe('entry.proto.ts');
+  });
+
   it('keeps the diagnostic sentinel out of valid IR and source maps', () => {
     const compiled = compilePrototype(source, { fileName: 'entry.proto.ts' });
     expect(compiled.ok).toBe(true);
