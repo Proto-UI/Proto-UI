@@ -225,7 +225,33 @@
       "Initial optional upstream receipt path was incorrectly supplied as an output; first invocation ENOENT retained, corrected invocation omitted this optional input.",
       "Tracked generated build-manifest.json changes as a producer output; authored app source was not edited.",
       "No new live backend/Harness task, native scrolling-follow-tail, physical IME or OS AT acceptance."
-    ]
+    ],
+    "typecheckObservation": {
+      "schemaVersion": 1,
+      "kind": "actual-application-consumer-command",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "cwd": "/workspace/scratch/828b7e591003/shenko-consumer/crates/shenko-ui/web",
+      "sourceBefore": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "sourceAfter": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "startedAtUTC": "2026-11-22T11:13:17.834513+00:00",
+      "finishedAtUTC": "2026-11-22T11:13:22.556950+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/828b7e591003/shenko-types-receipt.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "originalCombinedInvocation": {
+      "cwd": "/workspace/scratch/828b7e591003/shenko-consumer/crates/shenko-ui/web",
+      "command": "env PROTO_UI_SOURCE=/workspace/scratch/828b7e591003/Proto-UI-shenko-pin bash -c 'node build.mjs && corepack pnpm@10.32.1 exec tsc --noEmit && node --test tests/*.test.mjs'",
+      "exitCode": 0,
+      "terminalObservation": "Exec session 16356 completed with exit_code 0. The test phase was reached through the unchanged && chain.",
+      "separateOriginalTypecheckLog": false
+    }
   },
   "verdant": {
     "repository": "https://github.com/OpenGreendam/verdant",
@@ -265,6 +291,23 @@
     "limitations": [
       "Fresh compilation byte comparison and admission fixtures do not establish native GPUI runtime, keyboard, accessibility or resource cleanup.",
       "Main and PR 5 are separate consumer source lines; no PR 5 receipt was assigned to main."
-    ]
+    ],
+    "admissionRuleObservation": {
+      "schemaVersion": 1,
+      "kind": "actual-application-consumer-command",
+      "command": [
+        "node",
+        "frontend/proto-ui/tools/check-proto-ui-rules.mjs"
+      ],
+      "cwd": "/workspace/scratch/828b7e591003/verdant-consumer",
+      "sourceBefore": "91a775546ebd21a87d76d76568195a6513437719",
+      "sourceAfter": "91a775546ebd21a87d76d76568195a6513437719",
+      "startedAtUTC": "2026-11-22T11:13:22.560907+00:00",
+      "finishedAtUTC": "2026-11-22T11:13:22.680962+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/828b7e591003/verdant-admission-rules-receipt.log",
+      "logSha256": "46f2925f6c07037a3e73f1c1cc9dffa014ffc42cb4b6d7515c5a3c01432bb21d",
+      "stdout": "ok the workspace-shaped artifact set is admitted\nok a generated crate that pins gpui is rejected\nok a generated crate that declares gpui twice is rejected\nok a bundled native SDK that pins gpui is rejected\nok provenance that reports a pinned gpui is rejected\nall workspace GPUI rule cases passed.\n"
+    }
   }
 }
