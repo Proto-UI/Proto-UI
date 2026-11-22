@@ -45,6 +45,11 @@ remain available. Passive text and compiler-emitted passive content preserve
 eligibility metadata through ordinary native factories. This is a conservative
 host boundary, not a guess that an unknown native widget is passive.
 
+GPUI ordinary text supports the native `none`/`auto` selection defaults. An
+explicit `selection: text` still reports the missing selectable-content host;
+it is not silently treated as `none`. Editable TextControl selection is a
+separate owner and is unchanged.
+
 The anatomy-descriptor branch and native touch gesture qualification are not
 admitted by this lowering. A supplied anatomy descriptor is a compiler error,
 not a silently ignored argument. These limits must not be reported as complete
