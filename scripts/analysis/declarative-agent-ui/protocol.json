@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "issue": 757,
+  "kind": "bounded-catalog-realization-experiment",
+  "external": {
+    "repository": "a2ui-project/a2ui",
+    "revision": "5ff1b05f02d39f969b52a942e78e864ef3ac01fa",
+    "version": "1.0",
+    "catalog": "catalogs/basic/v1/catalog.json",
+    "license": "Apache-2.0"
+  },
+  "paths": {
+    "ordinary": "A2UI literal Tabs/Text -> common catalog mapping -> Radix React Tabs 1.1.13",
+    "proto": "the same A2UI literal Tabs/Text -> common catalog mapping -> actual Base Tabs + React Adapter"
+  },
+  "host": { "react": "18.3.1", "reactDom": "18.3.1", "input": "native Chromium keyboard/pointer via Playwright" },
+  "repetitions": 3,
+  "catalogPolicies": { "activationModes": ["manual", "automatic"], "loop": true, "selectedOwner": "component-uncontrolled", "initialSelection": "first tab", "homeEnd": true, "updateIdentity": "preserve trigger DOM identity", "authority": "shared task/catalog policy; not universal APG or external-protocol requirements" },
+  "commonScope": ["one surface", "literal Text children", "Tabs with unique child IDs", "literal accessibility label", "createSurface", "updateComponents", "deleteSurface"],
+  "oracleSources": [
+    "https://www.w3.org/WAI/ARIA/apg/patterns/tabs/",
+    "https://github.com/a2ui-project/a2ui/blob/5ff1b05f02d39f969b52a942e78e864ef3ac01fa/specification/v1_0/docs/a2ui_protocol.md",
+    "spec/prototypes/P-BASE-TABS.yaml",
+    "spec/prototypes/P-BASE-TABS-LIST.yaml",
+    "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+    "spec/prototypes/P-BASE-TABS-CONTENT.yaml"
+  ],
+  "cases": [
+    { "id": "initial", "expected": "exactly one selected General tab and one visible matching panel" },
+    { "id": "tab-entry", "expected": "native Tab enters the selected tab" },
+    { "id": "right", "expected": "Right focuses Privacy; manual keeps General selected, automatic selects Privacy" },
+    { "id": "activate", "expected": "native Enter selects Privacy and shows its content" },
+    { "id": "wrap", "expected": "Left from General focuses Notifications and Right returns to General; selection follows only in automatic mode; exactly one roving tab stop" },
+    { "id": "end-home", "expected": "End focuses Notifications and Home focuses General; manual selection changes only on activation" },
+    { "id": "space", "expected": "native Space selects focused General; the page does not scroll" },
+    { "id": "pointer", "expected": "native pointer selects Privacy" },
+    { "id": "relations", "expected": "the visible panel is labelled by the selected tab and that tab controls the panel; the tablist has the supplied name" },
+    { "id": "panel-exit", "expected": "native Tab enters the active plain-text panel and the following Tab reaches the ordinary host action" },
+    { "id": "update", "expected": "updating the Privacy title/text preserves selection and trigger DOM identity" },
+    { "id": "delete", "expected": "deleteSurface removes all tab parts; retained detached element activation creates no live parts; the ordinary host action continues to work" },
+    { "id": "recreate", "expected": "a new unique surface ID creates one fresh Tabs owner with General selected" }
+  ],
+  "negativeControls": [
+    { "id": "missing-label", "expected": "official schema accepts; both implementations render an unnamed tablist; behavioral oracle reports missing-name" },
+    { "id": "swallowed-arrow", "expected": "a catalog-wrapper capture handler swallowing ArrowRight causes the independent keyboard journey to report focus-stuck for either path" },
+    { "id": "dynamic-title", "expected": "the official schema accepts a data-bound title; this literal-only subset rejects it equally for both paths because its common catalog glue has no data-model resolver, not because Proto cannot render changing text" },
+    { "id": "function-rpc", "expected": "the official schema accepts callRendererFunction; this component catalog rejects it explicitly because function evaluation/RPC has no direct Tabs primitive mapping and needs a separate application capability" },
+    { "id": "redundant-keyboard-guarantee", "expected": "a mature ordinary catalog may already supply the same focus/activation guarantee; a tie is no unique Proto advantage" }
+  ],
+  "exclusions": ["full A2UI renderer", "function RPC", "data binding", "additional component catalogs", "native mixing", "OS assistive technology", "cross-host advantage", "model generation costs", "business usability", "stable conformance claim"],
+  "interpretation": "Preserve all failures and first divergence. Report schema validity, subset support and behavioral correctness separately. Missing catalog glue is not a missing Proto guarantee. Three repetitions measure deterministic replay, not independent AI implementations. Do not infer semantic or economic advantage from composability or line counts. Independent review must precede the first recorded final run."
+}
