@@ -1,0 +1,1824 @@
+{
+  "schema": "proto-ui.sprint2-input-receipts.v1",
+  "readFirst": "Historical receipts are not all runs of the archived final source. Related commit IDs name the implemented correction, not an unrecorded clean test source. Empty stdout never proves success; explicit tool observations are labeled separately. PASS_REPORTED is bounded to the cases named in that output.",
+  "receipts": [
+    {
+      "path": "receipts/axis-values-final.log.gz",
+      "originalFile": "axis-values-final.log",
+      "observedFileMtime": "2026-11-22T10:53:10.023322+00:00",
+      "rawBytesSha256": "6327b66de14169c32338fc21f0ce06ec05674a746798cf676486d688e9f63db8",
+      "summaryLines": [
+        "Test Files  2 failed | 10 passed (12)",
+        "Tests  29 failed | 186 passed (215)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "fixture-and-product-iteration",
+      "interpretation": "29 failed / 186 passed. Some old fixtures lacked the owned Delay scheduler required by the new reports; retain this run, do not interpret its filename as final success."
+    },
+    {
+      "path": "receipts/checkbox-mixed-owner-review-red.log.gz",
+      "originalFile": "checkbox-mixed-owner-review-red.log",
+      "observedFileMtime": "2026-11-22T12:40:39.399092+00:00",
+      "rawBytesSha256": "6f19b67c14864a51ac88426c54ff28b6d518445fef66e74059d683cf08729f45",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  4 failed | 2 passed | 130 skipped (136)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "independent-review-002",
+      "interpretation": "Four failing new-owner/ABA controls and two positives. Mixed-clear callback must not let old activation invert the new checked owner."
+    },
+    {
+      "path": "receipts/datepicker-baseline-install.log.gz",
+      "originalFile": "datepicker-baseline-install.log",
+      "observedFileMtime": "2026-11-22T12:11:55.491105+00:00",
+      "rawBytesSha256": "a9c8c9d81c4cc59ccde372c0a6246e8042a53c999a2c0b11f865510f44324131",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/datepicker-dc3b184-baseline-red.log.gz",
+      "originalFile": "datepicker-dc3b184-baseline-red.log",
+      "observedFileMtime": "2026-11-22T12:12:51.740317+00:00",
+      "rawBytesSha256": "5635c49ad9423d045229f5b814e5cddc39f62d1abb8cd3bc0137212c5bd4fa92",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  4 failed | 65 skipped (69)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "original-baseline-product-failure",
+      "interpretation": "Untouched dc3b184 original DatePicker retirement tests: four failures. Calendar publication closed Popover before valueChange; original assertion retained. Root later owns the bounded fix 3bd5bcf.",
+      "sourceCommit": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "originalAffectedSourceAndTestAtBase": true,
+      "sourceBindingNote": "Executed against the original source/test in the detached baseline worktree. The original affected files and base identity were checked; a complete run-time dirty-file digest manifest was not captured. Later fixes are separate."
+    },
+    {
+      "path": "receipts/field-async-report-fixed.log.gz",
+      "originalFile": "field-async-report-fixed.log",
+      "observedFileMtime": "2026-11-22T11:07:42.157581+00:00",
+      "rawBytesSha256": "f17965e36a3df0ce86b2fec1b424d07f11ed6b880a01baa6f66f2a5f1892a9d1",
+      "summaryLines": [
+        "Test Files  3 passed (3)",
+        "Tests  49 passed (49)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choice-base-inherited.log.gz",
+      "originalFile": "field-choice-base-inherited.log",
+      "observedFileMtime": "2026-11-22T12:08:42.146946+00:00",
+      "rawBytesSha256": "fcf91224bb11e2d839dbe7f53047ccaf2ef09ee61ffbdfafcdca2af3b8dac959",
+      "summaryLines": [
+        "Test Files  2 failed | 2 passed (4)",
+        "Tests  5 failed | 120 passed (125)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "baseline-and-public-api-expectation",
+      "interpretation": "Five failures: four untouched DatePicker baseline failures plus Radio exact public expose-key expectation after legitimate readOnly/focus API expansion."
+    },
+    {
+      "path": "receipts/field-choice-final-public-review.log.gz",
+      "originalFile": "field-choice-final-public-review.log",
+      "observedFileMtime": "2026-11-22T12:45:45.837589+00:00",
+      "rawBytesSha256": "79dc3147cc739a1ef600ee43a088c74f3d4b6dbf66b1a39678b0715604f245af",
+      "summaryLines": [
+        "Test Files  4 passed (4)",
+        "Tests  212 passed (212)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choice-first-types.log.gz",
+      "originalFile": "field-choice-first-types.log",
+      "observedFileMtime": "2026-11-22T12:08:38.454868+00:00",
+      "rawBytesSha256": "18e73fc2b126bb597e2fb3ed8463c312d371d9d94ddcbaa31856efcd6c7c1106",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choice-independent-review-fixed.log.gz",
+      "originalFile": "field-choice-independent-review-fixed.log",
+      "observedFileMtime": "2026-11-22T12:42:11.085034+00:00",
+      "rawBytesSha256": "85f1d08a82b10af4a9c7d413892c87b76bbc6a3e2597880d7141a66a67a2f5a9",
+      "summaryLines": [
+        "Test Files  8 passed (8)",
+        "Tests  265 passed (265)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choice-retirement-first.log.gz",
+      "originalFile": "field-choice-retirement-first.log",
+      "observedFileMtime": "2026-11-22T12:16:10.988578+00:00",
+      "rawBytesSha256": "3ee3db66689b4b47e4b28d7999488fed12d9705a2005a788dd236efd403bddc6",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  9 passed | 115 skipped (124)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choice-second-types.log.gz",
+      "originalFile": "field-choice-second-types.log",
+      "observedFileMtime": "2026-11-22T12:11:54.683088+00:00",
+      "rawBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summaryLines": [],
+      "status": "EMPTY_STDOUT_ONLY",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choice-switch-reset-reconnect-first.log.gz",
+      "originalFile": "field-choice-switch-reset-reconnect-first.log",
+      "observedFileMtime": "2026-11-22T12:36:53.358297+00:00",
+      "rawBytesSha256": "d29542dc1a2bf767f8a624e3b0c1b8589dc4527c32752fcbc144881619dadfc0",
+      "summaryLines": [
+        "Test Files  6 passed (6)",
+        "Tests  217 passed (217)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-authoring-final.log.gz",
+      "originalFile": "field-choices-authoring-final.log",
+      "observedFileMtime": "2026-11-22T12:39:13.533277+00:00",
+      "rawBytesSha256": "04946bd896263d7b3d88344cac009b54a645d6430e0d5f75bfbd4b92c40a1466",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-catalog-final.log.gz",
+      "originalFile": "field-choices-catalog-final.log",
+      "observedFileMtime": "2026-11-22T12:30:00.449648+00:00",
+      "rawBytesSha256": "394c01a86ac26631cc228d9fbaac5dbc28b7b834e8a14976656ac35916bd1056",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-catalog-first.log.gz",
+      "originalFile": "field-choices-catalog-first.log",
+      "observedFileMtime": "2026-11-22T12:20:32.776809+00:00",
+      "rawBytesSha256": "5f6315379e156ea959cfcfea75e1af351838861d933ac620d6fc6f318a53f0fc",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "environment-failure",
+      "interpretation": "tsx CLI attempted a local IPC socket and failed EPERM. Later node --import tsx entry avoids its unnecessary CLI listener without changing browser sandbox requirements."
+    },
+    {
+      "path": "receipts/field-choices-catalog-second.log.gz",
+      "originalFile": "field-choices-catalog-second.log",
+      "observedFileMtime": "2026-11-22T12:20:48.378255+00:00",
+      "rawBytesSha256": "ab9051c8d45b6ac81ebfe0e910457ce22db670d1d9f76985fbf77bae1a7c7ab3",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "catalog-iteration",
+      "interpretation": "Six missing new Field choice catalog entries reported. They were cataloged; no new legacy debt exception was added."
+    },
+    {
+      "path": "receipts/field-choices-catalog-third.log.gz",
+      "originalFile": "field-choices-catalog-third.log",
+      "observedFileMtime": "2026-11-22T12:21:54.847614+00:00",
+      "rawBytesSha256": "7eb4b50f1f04eedb3b88e74510286325aa4350bcb97b54861763af24d037a39e",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "catalog-iteration",
+      "interpretation": "Five family projection catalog gaps remained. The later final catalog check has zero new issues."
+    },
+    {
+      "path": "receipts/field-choices-first.log.gz",
+      "originalFile": "field-choices-first.log",
+      "observedFileMtime": "2026-11-22T12:15:11.311305+00:00",
+      "rawBytesSha256": "5047bfffc5cc78ccd7578b2110a756faefac8dde1dd5979773aa00d5d09ae4a7",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  15 failed | 6 passed (21)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-inherited-final.log.gz",
+      "originalFile": "field-choices-inherited-final.log",
+      "observedFileMtime": "2026-11-22T12:20:45.046188+00:00",
+      "rawBytesSha256": "f5c09b5d8df0ef9f62dacb6973759eec9a1f513017454bb6d458d4492267a062",
+      "summaryLines": [
+        "Test Files  2 failed | 5 passed (7)",
+        "Tests  8 failed | 204 passed (212)",
+        "Errors  3 errors"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-callback-ownership",
+      "interpretation": "204 passed / eight failed with three unhandled errors: attempted cross-owner focus callback use. Repaired by existing public Root methods entering the correct author callback scope."
+    },
+    {
+      "path": "receipts/field-choices-native-fixture-build.log.gz",
+      "originalFile": "field-choices-native-fixture-build.log",
+      "observedFileMtime": "2026-11-22T12:38:59.568983+00:00",
+      "rawBytesSha256": "c3508af98c8469ff9a8f6dd029703b31a05646b18a4d034432a94889ae9fac53",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "static-bundle-only",
+      "interpretation": "Actual fixture build emitted JS 3510503 bytes and CSS 130 bytes at that intermediate candidate. This is not browser execution and precedes complete consumer Tailwind stylesheet materialization."
+    },
+    {
+      "path": "receipts/field-choices-public-docs-final.log.gz",
+      "originalFile": "field-choices-public-docs-final.log",
+      "observedFileMtime": "2026-11-22T12:47:02.503214+00:00",
+      "rawBytesSha256": "cd4ac25707571c52ce464ee207dd68ab8731da8410bb4dafdce37a62c063ef90",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-public-recipes-first.log.gz",
+      "originalFile": "field-choices-public-recipes-first.log",
+      "observedFileMtime": "2026-11-22T12:31:55.576034+00:00",
+      "rawBytesSha256": "495f01cb9c1fcd5ebb7c927f03100fa22ecd2a1357abcd4a2f5e9e599bcdb3db",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  12 failed (12)",
+        "Errors  4 errors"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "consumer-fixture-errors",
+      "interpretation": "12 failures and four unhandled errors. Recipe sent unsupported Fieldset.readOnly and the source test lacked actual relative/inline-flex CSS required by Shadcn hit geometry. Fix the consumer to set the three Field readOnly props and use generated consumer utilities; no Fieldset API invented."
+    },
+    {
+      "path": "receipts/field-choices-public-recipes-second.log.gz",
+      "originalFile": "field-choices-public-recipes-second.log",
+      "observedFileMtime": "2026-11-22T12:33:04.629492+00:00",
+      "rawBytesSha256": "23ddda51dffffe0d4e93fc334391a630d2a8bf3c8cac981c6c1ebd301f14e280",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  12 failed (12)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-reset-gap",
+      "interpretation": "12 failures after consumer preconditions were corrected: FieldSwitch had no explicit resetValue, leaving uncontrolled alerts true after reset. Distinct from the first recipe failure."
+    },
+    {
+      "path": "receipts/field-choices-public-recipes-third.log.gz",
+      "originalFile": "field-choices-public-recipes-third.log",
+      "observedFileMtime": "2026-11-22T12:37:18.346843+00:00",
+      "rawBytesSha256": "d19fb82257487f4d1b9b55cdd118477d13d59d471a051de4328e67a7e22d54d1",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  12 passed (12)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-public-types-final.log.gz",
+      "originalFile": "field-choices-public-types-final.log",
+      "observedFileMtime": "2026-11-22T12:30:04.065722+00:00",
+      "rawBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summaryLines": [],
+      "status": "EMPTY_STDOUT_ONLY",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "tool-observed-exit-not-in-stdout",
+      "interpretation": "Empty stdout. Original exec session 73105 was explicitly polled and returned exit 0 on the e16e820 candidate. Exact dirty whole-run snapshot was not captured."
+    },
+    {
+      "path": "receipts/field-choices-public-types.log.gz",
+      "originalFile": "field-choices-public-types.log",
+      "observedFileMtime": "2026-11-22T12:20:32.985166+00:00",
+      "rawBytesSha256": "f599f860879c40305a6a633f16a1d48579941f67302f32f3cf1f7da0f0836467",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-reset-types-final.log.gz",
+      "originalFile": "field-choices-reset-types-final.log",
+      "observedFileMtime": "2026-11-22T12:38:32.428407+00:00",
+      "rawBytesSha256": "e925c3d2718c3242884b38281ee6ff0c400e5178fd8c0df345443553dd38193b",
+      "summaryLines": [],
+      "status": "INTERRUPTED_NO_COMPLETE_RESULT",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "interrupted-unknown-cause",
+      "interpretation": "tsc was killed with SIGKILL. No compiler diagnostic or complete type-check terminal result. Cause unknown; do not assert OOM or treat as success."
+    },
+    {
+      "path": "receipts/field-choices-reset-types-queued-final.log.gz",
+      "originalFile": "field-choices-reset-types-queued-final.log",
+      "observedFileMtime": "2026-11-22T12:42:20.765239+00:00",
+      "rawBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summaryLines": [],
+      "status": "EMPTY_STDOUT_ONLY",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "tool-observed-exit-not-in-stdout",
+      "interpretation": "Empty stdout. The original exec session 15989 was explicitly polled and returned exit 0 after serialized execution, on the ebbfc57 candidate before later 004/005 changes. This metadata preserves that session observation; empty stdout alone proves no result."
+    },
+    {
+      "path": "receipts/field-choices-reviewed-final.log.gz",
+      "originalFile": "field-choices-reviewed-final.log",
+      "observedFileMtime": "2026-11-22T12:22:04.887820+00:00",
+      "rawBytesSha256": "357039c51cc4d6a5f9039cf8ca699d10df84551b886a25c7d5daf08e00cdb8d5",
+      "summaryLines": [
+        "Test Files  7 passed (7)",
+        "Tests  212 passed (212)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-second.log.gz",
+      "originalFile": "field-choices-second.log",
+      "observedFileMtime": "2026-11-22T12:16:59.857610+00:00",
+      "rawBytesSha256": "36c6398dd0c7210361e26e2896062a11db4237bfd00bd4c935389998fd0c17f5",
+      "summaryLines": [
+        "Test Files  1 failed | 3 passed (4)",
+        "Tests  9 failed | 68 passed (77)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-spec-delivery-final.log.gz",
+      "originalFile": "field-choices-spec-delivery-final.log",
+      "observedFileMtime": "2026-11-22T12:55:14.005910+00:00",
+      "rawBytesSha256": "b07cfdbd3e8918f110baef114c21f39011d83e923072dedf683dbeb2fed2e4b1",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-spec-final.log.gz",
+      "originalFile": "field-choices-spec-final.log",
+      "observedFileMtime": "2026-11-22T12:30:47.482613+00:00",
+      "rawBytesSha256": "b07cfdbd3e8918f110baef114c21f39011d83e923072dedf683dbeb2fed2e4b1",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "validation-receipt",
+      "interpretation": "Current retained bytes show 1299 entities / zero issues. An earlier invocation reused this filename; its original failed bytes are not recoverable from this archive and are not falsely claimed retained."
+    },
+    {
+      "path": "receipts/field-choices-spec-reset-final.log.gz",
+      "originalFile": "field-choices-spec-reset-final.log",
+      "observedFileMtime": "2026-11-22T12:38:50.932800+00:00",
+      "rawBytesSha256": "b07cfdbd3e8918f110baef114c21f39011d83e923072dedf683dbeb2fed2e4b1",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-spec-review-final.log.gz",
+      "originalFile": "field-choices-spec-review-final.log",
+      "observedFileMtime": "2026-11-22T12:42:43.145714+00:00",
+      "rawBytesSha256": "b07cfdbd3e8918f110baef114c21f39011d83e923072dedf683dbeb2fed2e4b1",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-choices-third.log.gz",
+      "originalFile": "field-choices-third.log",
+      "observedFileMtime": "2026-11-22T12:17:56.082796+00:00",
+      "rawBytesSha256": "63e2f4178168a7c05e822ed96ebcc34dfe9763f590cfe060d28b24c670ff8f04",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  21 passed (21)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e16e820",
+        "ebbfc57",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-controlled-report-regression.log.gz",
+      "originalFile": "field-controlled-report-regression.log",
+      "observedFileMtime": "2026-11-22T11:28:39.200116+00:00",
+      "rawBytesSha256": "5ff57401d146b8cc0aecd7baa5fccab33b28df974b1e12be04ab29d68ea6b819",
+      "summaryLines": [
+        "Test Files  1 failed | 5 passed (6)",
+        "Tests  1 failed | 107 passed (108)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-callback-scheduling",
+      "interpretation": "One regression remains with 107 passes; canonical candidate reporting was corrected without replacing generic TextControl candidate semantics with OTP semantics."
+    },
+    {
+      "path": "receipts/field-form-public-final.log.gz",
+      "originalFile": "field-form-public-final.log",
+      "observedFileMtime": "2026-11-22T11:29:43.889440+00:00",
+      "rawBytesSha256": "085d0c65c1aa1e3b39db52149a24037bef23a9534a9af38c9875a517fbadb5b3",
+      "summaryLines": [
+        "Test Files  1 failed | 6 passed (7)",
+        "Tests  1 failed | 125 passed (126)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-callback-scheduling",
+      "interpretation": "Despite final in its name, 125 passed / 1 failed; reported change count was two instead of one."
+    },
+    {
+      "path": "receipts/field-paint-drift-fixed.log.gz",
+      "originalFile": "field-paint-drift-fixed.log",
+      "observedFileMtime": "2026-11-22T11:03:34.624439+00:00",
+      "rawBytesSha256": "b6a6237478c846b8557d2bb180fcc2b45a0e98bd609f63d9b3be893deea0fc57",
+      "summaryLines": [
+        "Test Files  2 passed (2)",
+        "Tests  11 passed (11)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-reset-reentry-final.log.gz",
+      "originalFile": "field-reset-reentry-final.log",
+      "observedFileMtime": "2026-11-22T11:58:34.158047+00:00",
+      "rawBytesSha256": "5d535edc85a845ed66195234b8df987a8faebced1afe5c2abff4f2f1da1b66f8",
+      "summaryLines": [
+        "Test Files  5 passed (5)",
+        "Tests  202 passed (202)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-reset-reentry-fixed.log.gz",
+      "originalFile": "field-reset-reentry-fixed.log",
+      "observedFileMtime": "2026-11-22T11:56:08.462984+00:00",
+      "rawBytesSha256": "dfafb6ab7b7afca7f4503190b2e860715369249580a16f5aaf255c1321dfca63",
+      "summaryLines": [
+        "Test Files  1 failed | 4 passed (5)",
+        "Tests  4 failed | 198 passed (202)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "remaining-baseline-fixture-failures",
+      "interpretation": "198 passed / four NumberField fixture failures remained. Original baseline was checked separately before correcting only the fixture precondition."
+    },
+    {
+      "path": "receipts/field-reset-reentry-real-red.log.gz",
+      "originalFile": "field-reset-reentry-real-red.log",
+      "observedFileMtime": "2026-11-22T11:55:42.674443+00:00",
+      "rawBytesSha256": "e1ed1686d482c3d50b42329b200940b365842cbc57142155061e67943dc2e9cb",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  4 failed | 2 passed | 109 skipped (115)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-negative-control",
+      "interpretation": "Valid actual Runtime callback scopes: four failures / two positive cases. FieldControl terminal reset continuation and Textarea new-composition overwrite."
+    },
+    {
+      "path": "receipts/field-reset-reentry-red.log.gz",
+      "originalFile": "field-reset-reentry-red.log",
+      "observedFileMtime": "2026-11-22T11:55:21.233995+00:00",
+      "rawBytesSha256": "6db3fc083c73ebc2e54cd4946b95de8a7ebc0d3fb08b9aa7907282bff9ae19d4",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  6 failed | 109 skipped (115)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "fixture-error",
+      "interpretation": "First six failures came from exposed calls outside the required author callback scope. This is not the product negative control; use field-reset-reentry-real-red.log."
+    },
+    {
+      "path": "receipts/field-reset-reentry-types-final.log.gz",
+      "originalFile": "field-reset-reentry-types-final.log",
+      "observedFileMtime": "2026-11-22T11:59:06.383929+00:00",
+      "rawBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summaryLines": [],
+      "status": "EMPTY_STDOUT_ONLY",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "tool-observed-exit-not-in-stdout",
+      "interpretation": "Empty stdout; original tool returned exit 0 for the 3d5e556 candidate. This note records the session observation, not a new execution."
+    },
+    {
+      "path": "receipts/field-reset-reentry-types.log.gz",
+      "originalFile": "field-reset-reentry-types.log",
+      "observedFileMtime": "2026-11-22T11:58:57.694556+00:00",
+      "rawBytesSha256": "8a70546d1b0b13fdeaef293df4698f1c8f6201cb607d4cc577325f4f0083a540",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-source-types.log.gz",
+      "originalFile": "field-source-types.log",
+      "observedFileMtime": "2026-11-22T11:33:04.957652+00:00",
+      "rawBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summaryLines": [],
+      "status": "EMPTY_STDOUT_ONLY",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/field-switch-entry-lease-review-fixed.log.gz",
+      "originalFile": "field-switch-entry-lease-review-fixed.log",
+      "observedFileMtime": "2026-11-22T12:53:32.335480+00:00",
+      "rawBytesSha256": "105ee147574791baa5ddeea579b80ee6eb8b5431b60747aa4bca5197b4cac89a",
+      "summaryLines": [
+        "Test Files  6 passed (6)",
+        "Tests  232 passed (232)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "42ee3b9",
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "source-pass-with-limited-run-identity",
+      "interpretation": "Six files / 232 passed. Executed on the dirty candidate whose implementation was committed as 42ee3b9 with then-uncommitted public recipes later in 095ecbd. Exact whole-run worktree digest was not captured; this does not assert a clean 095ecbd or integrated-head execution."
+    },
+    {
+      "path": "receipts/field-switch-reset-lease-review-red.log.gz",
+      "originalFile": "field-switch-reset-lease-review-red.log",
+      "observedFileMtime": "2026-11-22T12:51:24.224760+00:00",
+      "rawBytesSha256": "dbe5e7849a500a98cfc5fe1ed4bd35e2356cfb9da24c808979f046bb16e178e6",
+      "summaryLines": [
+        "Test Files  1 failed | 1 passed (2)",
+        "Tests  3 failed | 3 passed | 151 skipped (157)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "42ee3b9"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "independent-review-005",
+      "interpretation": "Three failures / three positives. Reset must own its lease at entry before preview teardown not after a synchronous pressed callback; own Axis cancellation remains a valid positive control."
+    },
+    {
+      "path": "receipts/field-switch-reset-missing-red.log.gz",
+      "originalFile": "field-switch-reset-missing-red.log",
+      "observedFileMtime": "2026-11-22T12:36:09.997383+00:00",
+      "rawBytesSha256": "c98f6874b0bf7215b07597cf88b00d37dd76b78b268190a794c37e65b5fc80ba",
+      "summaryLines": [
+        "Test Files  2 failed (2)",
+        "Tests  10 failed | 147 skipped (157)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-negative-control",
+      "interpretation": "Ten focused failures preserve the missing explicit FieldSwitch reset before the correction."
+    },
+    {
+      "path": "receipts/field-textarea-report-final.log.gz",
+      "originalFile": "field-textarea-report-final.log",
+      "observedFileMtime": "2026-11-22T11:30:16.050111+00:00",
+      "rawBytesSha256": "f33f2306d2c809e06ee97666e63b69adf1df05b641d4051a3a7faf38dea3f798",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  17 passed (17)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/form-controlled-consumers-final.log.gz",
+      "originalFile": "form-controlled-consumers-final.log",
+      "observedFileMtime": "2026-11-22T11:34:11.347054+00:00",
+      "rawBytesSha256": "e7f8494a8ca8f30acc18516d4882f99a2d3431f0f54c6ff2d98cc001e23128cf",
+      "summaryLines": [
+        "Test Files  3 passed (3)",
+        "Tests  54 passed (54)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/form-field-catalog.log.gz",
+      "originalFile": "form-field-catalog.log",
+      "observedFileMtime": "2026-11-22T11:29:41.861397+00:00",
+      "rawBytesSha256": "45d9bf13dfeabdc7971b582c451a11bd420549a48b092f31f748b2c3b29a9c6f",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/form-recipe-base-wc-2.log.gz",
+      "originalFile": "form-recipe-base-wc-2.log",
+      "observedFileMtime": "2026-11-22T11:21:54.627553+00:00",
+      "rawBytesSha256": "982a2d3e822a2b2864be207679f313d9258e68dfb952fb03080a7eed4fef85c5",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 11 skipped (12)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "consumer-fixture-error",
+      "interpretation": "Initial fixture attempted a terminal old-owner call; corrected observation keeps terminal ownership semantics."
+    },
+    {
+      "path": "receipts/form-recipe-base-wc.log.gz",
+      "originalFile": "form-recipe-base-wc.log",
+      "observedFileMtime": "2026-11-22T11:20:58.158355+00:00",
+      "rawBytesSha256": "30b2d82ea503a5bd60a8a4ad7581087a7ee38755bfa8729f263a21a1f27a9813",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 11 skipped (12)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "consumer-fixture-error",
+      "interpretation": "Initial public recipe requestSubmit oracle was incorrect. The original failed receipt is retained separately from later framework commit failures."
+    },
+    {
+      "path": "receipts/form-recipes-four-hosts-2.log.gz",
+      "originalFile": "form-recipes-four-hosts-2.log",
+      "observedFileMtime": "2026-11-22T11:27:43.978955+00:00",
+      "rawBytesSha256": "295f80213724c086d28310d473807a46932541c35a730b7b73b628131da0c8ec",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  12 passed (12)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/form-recipes-four-hosts.log.gz",
+      "originalFile": "form-recipes-four-hosts.log",
+      "observedFileMtime": "2026-11-22T11:22:18.504059+00:00",
+      "rawBytesSha256": "eed757b984d286e605d86c6523f86f93bb4d4b800d3c9c7f370a0a44cb042c9d",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  8 failed | 4 passed (12)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3bf60f1"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-and-public-entry-gaps",
+      "interpretation": "Eight failed / four passed: ordinary Vue/Vue2 commit scheduling and missing public Brutalist FieldTextarea. Four-host public recipes later passed independently."
+    },
+    {
+      "path": "receipts/form-select-public-css-final.log.gz",
+      "originalFile": "form-select-public-css-final.log",
+      "observedFileMtime": "2026-11-22T12:51:56.165437+00:00",
+      "rawBytesSha256": "d9bb898be4a1e3d9d24ec6b1ed3d2ca2aab9a21d8c4be1da243067f30cbd443c",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "095ecbd"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "actual-stylesheet-only",
+      "interpretation": "Actual Tailwind 4.2.2 compilation: 365 candidates and 555880 CSS bytes including local font bytes; exact inputs/output hashes in the receipt. Confirms stylesheet generation, not native focus/input/paint acceptance."
+    },
+    {
+      "path": "receipts/input-catalog-fixed.log.gz",
+      "originalFile": "input-catalog-fixed.log",
+      "observedFileMtime": "2026-11-22T10:57:10.160406+00:00",
+      "rawBytesSha256": "60a2a949fcdcca06e2d9b28991803d8331fb1d41ebbe7d1155165297dfb4a45d",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/input-catalog.log.gz",
+      "originalFile": "input-catalog.log",
+      "observedFileMtime": "2026-11-22T10:52:52.798958+00:00",
+      "rawBytesSha256": "4c902d888b9334c4c291a9ac679834548ab155da2abf37c06db9816ca41249cf",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/input-native-bundle.log.gz",
+      "originalFile": "input-native-bundle.log",
+      "observedFileMtime": "2026-11-22T10:57:06.596330+00:00",
+      "rawBytesSha256": "741ef9db57aaca75636bc3b0e5bf25d69af3a807e862f3638f0a3813fecb98fb",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/numberfield-retirement-baseline-red.log.gz",
+      "originalFile": "numberfield-retirement-baseline-red.log",
+      "observedFileMtime": "2026-11-22T11:57:50.045118+00:00",
+      "rawBytesSha256": "1112eb20ecdac6562f9e28f7044bb548ee987635126a2e7c0d2d92fbb92e65d8",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  4 failed | 105 skipped (109)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3d5e556"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "original-baseline-fixture-failures",
+      "interpretation": "Untouched dc3b184 original tests: four failures. Fixture marked composition active and then expected a commit that the existing contract forbids. Later fixture uses a controlled non-composing unaccepted draft; NumberField product is unchanged.",
+      "sourceCommit": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "originalAffectedSourceAndTestAtBase": true,
+      "sourceBindingNote": "Executed against the original source/test in the detached baseline worktree. The original affected files and base identity were checked; a complete run-time dirty-file digest manifest was not captured. Later fixes are separate."
+    },
+    {
+      "path": "receipts/otp-blur-diagnosis.log.gz",
+      "originalFile": "otp-blur-diagnosis.log",
+      "observedFileMtime": "2026-11-22T11:18:25.631114+00:00",
+      "rawBytesSha256": "1139ec59e6d7178f2a41106efca29ce9fa54384b6f97ce159cf7fae6dc390a58",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  1 failed | 17 skipped (18)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/otp-controlled-caret-final.log.gz",
+      "originalFile": "otp-controlled-caret-final.log",
+      "observedFileMtime": "2026-11-22T11:53:52.208161+00:00",
+      "rawBytesSha256": "b55c38b9a35f90c17b33a0d7f0b95764d12421bc4e1fb16c6a97bf389a78625b",
+      "summaryLines": [
+        "Test Files  4 passed (4)",
+        "Tests  138 passed (138)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "b1033a4"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/otp-controlled-caret-fixed.log.gz",
+      "originalFile": "otp-controlled-caret-fixed.log",
+      "observedFileMtime": "2026-11-22T11:49:06.234142+00:00",
+      "rawBytesSha256": "30e4de0edb8cd6f9c407f8e677ad63950e78b52e985b7ce1d832d8eef716756b",
+      "summaryLines": [
+        "Test Files  3 passed (3)",
+        "Tests  51 passed (51)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "b1033a4"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/otp-controlled-caret-red.log.gz",
+      "originalFile": "otp-controlled-caret-red.log",
+      "observedFileMtime": "2026-11-22T11:48:18.341147+00:00",
+      "rawBytesSha256": "0025c286e99f25464f0e718e48d0a523fce75d8fe3faca6bd204c5caebd31f68",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  6 failed | 18 skipped (24)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "b1033a4"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-negative-control",
+      "interpretation": "Six failures reproduce physical candidate/caret rollback during old-canonical controlled refresh. Motivated by parent-observed native OTP 5678 -> 5786 failure; this log is source execution, not native replay."
+    },
+    {
+      "path": "receipts/otp-field-refusal-fixed.log.gz",
+      "originalFile": "otp-field-refusal-fixed.log",
+      "observedFileMtime": "2026-11-22T11:04:53.142052+00:00",
+      "rawBytesSha256": "9fa4774c48d32ecbefd6faa74239e3f53a95060a8ab1c0aa47d348c4481c3621",
+      "summaryLines": [
+        "Test Files  2 passed (2)",
+        "Tests  21 passed (21)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/otp-field-refusal-red.log.gz",
+      "originalFile": "otp-field-refusal-red.log",
+      "observedFileMtime": "2026-11-22T11:03:24.944239+00:00",
+      "rawBytesSha256": "b17de6040f7b8a77ccb07afb8f923b74b80d368e56a4ce377dfc92933eca163c",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  3 failed | 9 passed (12)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "bounded-canonical-notification-gap",
+      "interpretation": "Three OTP Field refusal/no-op cases failed before the explicit OTP canonical-change rule. This is not evidence that every generic Field candidate edit must use that rule."
+    },
+    {
+      "path": "receipts/radio-focused-owner-review-red.log.gz",
+      "originalFile": "radio-focused-owner-review-red.log",
+      "observedFileMtime": "2026-11-22T12:44:49.864403+00:00",
+      "rawBytesSha256": "c6c3c1627e5e140c52e9afa6057c68051b3c3d667a1913bdad0c35ab1a211eb0",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  2 failed | 3 passed | 136 skipped (141)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "3693622"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "independent-review-004",
+      "interpretation": "Two failures / three positives. A focused subscriber retires or changes the owner before no-op requestValue continuation. View/operation/value revision guard retains original intent."
+    },
+    {
+      "path": "receipts/radio-reconnect-review-red.log.gz",
+      "originalFile": "radio-reconnect-review-red.log",
+      "observedFileMtime": "2026-11-22T12:35:43.260814+00:00",
+      "rawBytesSha256": "3a43e2b8a69f724250002b547261483abe73d0c7b010c6b25bf6766d45e32a42",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  2 failed | 124 skipped (126)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "independent-review-001",
+      "interpretation": "Controlled Radio and FieldRadio remount retained a stale a after disconnected owner props became b. Latest provided value must reconcile while the original reset baseline is retained."
+    },
+    {
+      "path": "receipts/radio-reset-blur-review-red.log.gz",
+      "originalFile": "radio-reset-blur-review-red.log",
+      "observedFileMtime": "2026-11-22T12:41:24.380044+00:00",
+      "rawBytesSha256": "2825b742b700650a2632dda220d2c4c6beaa170c294ab2e2b178cc256231c5f4",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  6 failed | 3 passed | 27 skipped (36)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "ebbfc57"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "independent-review-003",
+      "interpretation": "Six reset/readOnly failures and three positives. Old queued blur restored touched after reset; independent focus generation now retires it, preserving later fresh departure."
+    },
+    {
+      "path": "receipts/select-public-recipes-source-final.log.gz",
+      "originalFile": "select-public-recipes-source-final.log",
+      "observedFileMtime": "2026-11-22T12:01:28.285746+00:00",
+      "rawBytesSha256": "3e9e0a577f9da3734e451954ef0e27cda19f32bc4e5d60086f8f809ffa371485",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  12 passed (12)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "abbc6a8"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/select-public-recipes-source.log.gz",
+      "originalFile": "select-public-recipes-source.log",
+      "observedFileMtime": "2026-11-22T12:00:28.344477+00:00",
+      "rawBytesSha256": "be393f8e2e8df7dbc28d5c8bc36f59be2a0db18c569f054de4ca34f333068c70",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  3 failed | 9 passed (12)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "abbc6a8"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "consumer-readiness-fixture",
+      "interpretation": "Three React cases addressed before a framework commit exposed current refs. Public readiness now waits for the actual open commit; no value/selection assertion removed."
+    },
+    {
+      "path": "receipts/selection-first.json.gz",
+      "originalFile": "selection-first.json",
+      "observedFileMtime": "2026-11-22T10:29:32.889318+00:00",
+      "rawBytesSha256": "3d336a323d7439736539e6dde22e6c8d4a27cc1baac1c8cc8fb6460de5874480",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 19,
+        "numPassedTests": 14,
+        "numFailedTests": 5,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 6,
+        "success": false
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/selection-first.log.gz",
+      "originalFile": "selection-first.log",
+      "observedFileMtime": "2026-11-22T10:29:32.889318+00:00",
+      "rawBytesSha256": "1a9eb887e00be97cf81aeca7e70deb01d26264192b2069d17b00eed1ea723cee",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/selection-first.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/selection-second.json.gz",
+      "originalFile": "selection-second.json",
+      "observedFileMtime": "2026-11-22T10:30:11.582163+00:00",
+      "rawBytesSha256": "bad95c152de21a05d685d0a7427a4453b2ae432856852450634b26a75ffa36f8",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 135,
+        "numPassedTests": 135,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 0,
+        "success": true
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/selection-second.log.gz",
+      "originalFile": "selection-second.log",
+      "observedFileMtime": "2026-11-22T10:30:11.586163+00:00",
+      "rawBytesSha256": "42804a66a89aaaac2265cda45f1e15cc7cae0ffdec05acead453691a3e843b25",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/selection-second.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/selection-spec.json.gz",
+      "originalFile": "selection-spec.json",
+      "observedFileMtime": "2026-11-22T10:32:12.568784+00:00",
+      "rawBytesSha256": "ab3caa04a146b459bc86d1fb845cc91194d9b6fc89e4f0961b34c23f50924403",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 95,
+        "numPassedTests": 94,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 2,
+        "success": false
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/selection-spec.log.gz",
+      "originalFile": "selection-spec.log",
+      "observedFileMtime": "2026-11-22T10:32:12.568784+00:00",
+      "rawBytesSha256": "12d87321fa54ebd9590d05e39161569f54ff21f0c1626c2787131e1f31085b32",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/selection-spec.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/shared-input-review-fixed.log.gz",
+      "originalFile": "shared-input-review-fixed.log",
+      "observedFileMtime": "2026-11-22T11:10:36.221250+00:00",
+      "rawBytesSha256": "90ff3d123236fe85e272ee7a305ea010e194c34782cbb6f3879c533348e1bdfd",
+      "summaryLines": [
+        "Test Files  3 passed (3)",
+        "Tests  55 passed (55)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/shared-input-reviewed-catalog.log.gz",
+      "originalFile": "shared-input-reviewed-catalog.log",
+      "observedFileMtime": "2026-11-22T11:19:19.064247+00:00",
+      "rawBytesSha256": "f1681d1dc19f5341c311b8094fea87d86c662cffe96b9c105df652b35598136c",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/shared-input-reviewed-final-2.log.gz",
+      "originalFile": "shared-input-reviewed-final-2.log",
+      "observedFileMtime": "2026-11-22T11:19:00.975862+00:00",
+      "rawBytesSha256": "e9e94f4aa9b1780c71533b74850c572acc542bfee674b1ef10ebd9fdfe378c62",
+      "summaryLines": [
+        "Test Files  5 passed (5)",
+        "Tests  121 passed (121)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/shared-input-reviewed-final.log.gz",
+      "originalFile": "shared-input-reviewed-final.log",
+      "observedFileMtime": "2026-11-22T11:13:25.648781+00:00",
+      "rawBytesSha256": "00f9f7a6bcfa44b31c83b660f2f31516b147fcfc4b10752c92af8645e2a323c4",
+      "summaryLines": [
+        "Test Files  1 failed | 4 passed (5)",
+        "Tests  3 failed | 118 passed (121)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/shared-s2-scope.log.gz",
+      "originalFile": "shared-s2-scope.log",
+      "observedFileMtime": "2026-11-22T10:57:41.433069+00:00",
+      "rawBytesSha256": "c7f076f0a10a62710618447b79356f146a99e4bcacd8c15112cdede9a2f2177a",
+      "summaryLines": [
+        "Test Files  2 failed | 17 passed (19)",
+        "Tests  2 failed | 312 passed (314)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "92dbc8a",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "two-oracle-mismatches",
+      "interpretation": "312 passed / 2 failed: old Bootstrap invalid-ink expectation and old Field number[] negative input. Keep governed family ink and the independently defined finite homogeneous vector rule."
+    },
+    {
+      "path": "receipts/slider-existing.json.gz",
+      "originalFile": "slider-existing.json",
+      "observedFileMtime": "2026-11-22T10:39:21.733921+00:00",
+      "rawBytesSha256": "6ba81e03670331f1698dc8c0fa65fe8efbc3baa30c21dce3b0e8f58998161b8f",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 118,
+        "numPassedTests": 118,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 0,
+        "success": true
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-existing.log.gz",
+      "originalFile": "slider-existing.log",
+      "observedFileMtime": "2026-11-22T10:39:21.733921+00:00",
+      "rawBytesSha256": "df1263f464253761d5d2f7513763367b815befee336e75a617f4345777c30f5b",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/slider-existing.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-input-default.log.gz",
+      "originalFile": "slider-input-default.log",
+      "observedFileMtime": "2026-11-22T10:47:20.667974+00:00",
+      "rawBytesSha256": "5bea7395c5654b965bad73e31db18e53f900ab14d1eaa1e8de945baf52d85295",
+      "summaryLines": [
+        "Test Files  2 passed (2)",
+        "Tests  49 passed (49)",
+        "Errors  3 errors"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "unhandled-errors",
+      "interpretation": "49 tests passed but three unhandled ANATOMY_CLAIM_INVALID errors remained. This is not a clean pass; slider-input-fixed.log is a separate clean result."
+    },
+    {
+      "path": "receipts/slider-input-dispose-red.log.gz",
+      "originalFile": "slider-input-dispose-red.log",
+      "observedFileMtime": "2026-11-22T11:09:20.503636+00:00",
+      "rawBytesSha256": "815a3648cd512e553d7ac8a0ffe03c52788fce02829727d629cccf4e03f773ad",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  2 failed | 7 passed (9)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "dcf20f5"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-negative-control",
+      "interpretation": "Synchronous Track focus callback disposed its owner; old continuation still called axisInput.sync. Two failures remain in the original receipt."
+    },
+    {
+      "path": "receipts/slider-input-fixed.log.gz",
+      "originalFile": "slider-input-fixed.log",
+      "observedFileMtime": "2026-11-22T10:52:08.842031+00:00",
+      "rawBytesSha256": "c792a2c588e04c0c1a2860a086f6de3c96d6353637ec28e3633fc44af7611a0b",
+      "summaryLines": [
+        "Test Files  2 passed (2)",
+        "Tests  49 passed (49)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-input-third.json.gz",
+      "originalFile": "slider-input-third.json",
+      "observedFileMtime": "2026-11-22T10:44:56.489000+00:00",
+      "rawBytesSha256": "50f1bf9411679b2c702b056acfec06f4da940ab1ce3b0c13036ccfc40ae83522",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "bb1bb30",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 49,
+        "numPassedTests": 49,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 0,
+        "success": true
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-input-third.log.gz",
+      "originalFile": "slider-input-third.log",
+      "observedFileMtime": "2026-11-22T10:44:56.489000+00:00",
+      "rawBytesSha256": "ebbdb01127c305d40dbb61874b55f8118e5f1367fa6cb4ed97709d5ea42aa93c",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "bb1bb30",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/slider-input-third.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-selection-new.json.gz",
+      "originalFile": "slider-selection-new.json",
+      "observedFileMtime": "2026-11-22T10:41:41.572878+00:00",
+      "rawBytesSha256": "c222423e59b025e754b5ad1020c2f077f730bf3dca436d58f5a6b346104dd321",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "bb1bb30",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 54,
+        "numPassedTests": 34,
+        "numFailedTests": 20,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 16,
+        "success": false
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-selection-new.log.gz",
+      "originalFile": "slider-selection-new.log",
+      "observedFileMtime": "2026-11-22T10:41:41.572878+00:00",
+      "rawBytesSha256": "e6776c12bd8230fbe9d4be6f8acbed7f054e7f8223396647860e4dc8c323f16a",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "bb1bb30",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/slider-selection-new.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-selection-second.json.gz",
+      "originalFile": "slider-selection-second.json",
+      "observedFileMtime": "2026-11-22T10:43:18.068908+00:00",
+      "rawBytesSha256": "7fb6aac3837770e983bf6c59e562fba843453a45a3d0a442386819ba04087805",
+      "summaryLines": [],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "bb1bb30",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 168,
+        "numPassedTests": 165,
+        "numFailedTests": 3,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 4,
+        "success": false
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/slider-selection-second.log.gz",
+      "originalFile": "slider-selection-second.log",
+      "observedFileMtime": "2026-11-22T10:43:18.068908+00:00",
+      "rawBytesSha256": "1d35d2eb894d729c9c553cb739d57d7ee1b9758dcd0419d76e15b8fbca22a5ba",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "bb1bb30",
+        "91ec753"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/slider-selection-second.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/text-control-pass2.json.gz",
+      "originalFile": "text-control-pass2.json",
+      "observedFileMtime": "2026-11-22T10:24:33.498891+00:00",
+      "rawBytesSha256": "4bc2cf13d9b465d8d709a05b0964bfa9f66d8c35aa52e1675ea187e7689dd106",
+      "summaryLines": [],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "testSummary": {
+        "numTotalTests": 116,
+        "numPassedTests": 116,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numFailedTestSuites": 0,
+        "success": true
+      },
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/text-control-pass2.log.gz",
+      "originalFile": "text-control-pass2.log",
+      "observedFileMtime": "2026-11-22T10:24:33.498891+00:00",
+      "rawBytesSha256": "d39eeb0b2cd27b182e5d893f3896f48b3e8c21625bc2445978b1e2bb4af26bdb",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "e2ef558"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "summaryReport": "receipts/text-control-pass2.json.gz",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/textcontrol-host-typefix.log.gz",
+      "originalFile": "textcontrol-host-typefix.log",
+      "observedFileMtime": "2026-11-22T11:32:05.680403+00:00",
+      "rawBytesSha256": "d2447062601a62c422dd14375be73742e7db5a5b839e67fccaf2323290ff8408",
+      "summaryLines": [
+        "Test Files  1 passed (1)",
+        "Tests  5 passed (5)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "6efeb9d"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/textcontrol-owner-revert-fixed.log.gz",
+      "originalFile": "textcontrol-owner-revert-fixed.log",
+      "observedFileMtime": "2026-11-22T11:56:52.915917+00:00",
+      "rawBytesSha256": "d56d660d9333733a426eb93cff0c8564a9de2fefbbaf7e1547e8b75e5d50abbc",
+      "summaryLines": [
+        "Test Files  2 passed (2)",
+        "Tests  117 passed (117)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "14c47f2"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/textcontrol-owner-revert-red.log.gz",
+      "originalFile": "textcontrol-owner-revert-red.log",
+      "observedFileMtime": "2026-11-22T11:56:35.007542+00:00",
+      "rawBytesSha256": "a8320a442b27a3fd90a0277e0d9a9f95cddcc805ffbc64a1caf386bfb45c5645",
+      "summaryLines": [
+        "Test Files  1 failed (1)",
+        "Tests  6 failed | 87 skipped (93)"
+      ],
+      "status": "FAIL_REPORTED",
+      "relatedImplementationCommits": [
+        "14c47f2"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "product-negative-control",
+      "interpretation": "Six failures: owner A -> B -> A must retire the earlier candidate guard permanently; returning to an old string is still a new canonical decision."
+    },
+    {
+      "path": "receipts/textcontrol-public-package-typefix.log.gz",
+      "originalFile": "textcontrol-public-package-typefix.log",
+      "observedFileMtime": "2026-11-22T11:32:34.229004+00:00",
+      "rawBytesSha256": "f21b90543e1c566158cd6a450aea0de96a92898e9c8f9e5e8a2075c45a024ed6",
+      "summaryLines": [],
+      "status": "RETAINED_WITHOUT_INFERRED_EXIT",
+      "relatedImplementationCommits": [
+        "6efeb9d"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "classification": "public-build-subset",
+      "interpretation": "Four of 47 public packages built: types/core/module-base/module-text-control. Do not claim a complete 47-package build from this receipt."
+    },
+    {
+      "path": "receipts/values-field-final.log.gz",
+      "originalFile": "values-field-final.log",
+      "observedFileMtime": "2026-11-22T10:58:56.126655+00:00",
+      "rawBytesSha256": "a2103702beb2bc0162090fc66a715f6700380db06db2245790437699041874d2",
+      "summaryLines": [
+        "Test Files  2 passed (2)",
+        "Tests  53 passed (53)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    },
+    {
+      "path": "receipts/values-optional-field-fixed.log.gz",
+      "originalFile": "values-optional-field-fixed.log",
+      "observedFileMtime": "2026-11-22T10:53:45.512073+00:00",
+      "rawBytesSha256": "7d933e913e62e41e460256357685fddd3ab8be15759b3e145ff11a90a842bdf5",
+      "summaryLines": [
+        "Test Files  3 passed (3)",
+        "Tests  103 passed (103)"
+      ],
+      "status": "PASS_REPORTED",
+      "relatedImplementationCommits": [
+        "91ec753",
+        "e63d469"
+      ],
+      "exactWholeWorktreeAtRunCaptured": false,
+      "filterNote": "Counts marked skipped in focused -t runs are excluded cases, not executed passes; no acceptance is inferred for them.",
+      "classification": "retained-historical-execution",
+      "interpretation": "Retained raw execution output. Read its test cases and diagnostics; related commits are correction references, not a retroactive exact-run source identity."
+    }
+  ],
+  "excluded": [
+    {
+      "original": "/workspace/scratch/44c416809288/intake/field-choices-delivery-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/field-choices-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/field-choices-public-final-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/field-choices-reset-public-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/field-choices-source-review-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/field-switch-entry-lease-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/form-final-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/form-reviewed-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/radio-focus-review-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/selection-fix-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    },
+    {
+      "original": "/workspace/scratch/44c416809288/intake/selection-format.log",
+      "reason": "Formatting-only output; source patches retain the formatted implementation."
+    }
+  ]
+}
