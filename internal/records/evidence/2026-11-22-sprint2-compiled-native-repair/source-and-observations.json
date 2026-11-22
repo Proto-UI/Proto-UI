@@ -1,0 +1,1931 @@
+{
+  "head": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+  "run": 45029016292,
+  "job": 137228248258,
+  "originalArtifactZipSha256": "acd5bebb98575a3fb417f6b4897138f4861fee81b6f65b211a8eb91f0dad72ac",
+  "buildSha256": "a428a90c5407557097bc5e8cca37db67539701d244e38356a175ba888c0ecfff",
+  "originalFiles": [
+    {
+      "path": "react-base.json",
+      "sha256": "852846f0d038e568dad555bca1161a2716805fba1d551a02e9fc1bcca61396a9",
+      "bytes": 3312
+    },
+    {
+      "path": "react-brutalist.json",
+      "sha256": "b791aab91367cbcb14076ece4f35e975e1bf655b04ba8551b440749e563b8fcb",
+      "bytes": 3805
+    },
+    {
+      "path": "react-shadcn.json",
+      "sha256": "cdd18f1e44c87c6b41d0807d3c7437a45b29030175f05682291fc1e1748604ea",
+      "bytes": 3848
+    },
+    {
+      "path": "react-text-queued.json",
+      "sha256": "e3e34469b05c7342dbbeb4784a5666dace415f7e2d87145e878358045d059a80",
+      "bytes": 2799
+    },
+    {
+      "path": "react-text-sync.json",
+      "sha256": "e3e34469b05c7342dbbeb4784a5666dace415f7e2d87145e878358045d059a80",
+      "bytes": 2799
+    },
+    {
+      "path": "vue-base.json",
+      "sha256": "86cb3ecaadac0c41f47bb19ba3fde6f06c60ae6e0c632b5ce7f995bc48569769",
+      "bytes": 1961
+    },
+    {
+      "path": "vue-brutalist.json",
+      "sha256": "c2cf36008da342954102dce12e4976a0781d8486211714f7d28395f0b97f59e2",
+      "bytes": 3005
+    },
+    {
+      "path": "vue-shadcn.json",
+      "sha256": "fa403ff1aa04c3d1b69af504a8c8f392bdf0d79d00da80e1aed309b693019e2d",
+      "bytes": 3360
+    },
+    {
+      "path": "vue-text-queued.json",
+      "sha256": "8e02687f24cd2969f7d1ae541374fc6ac23963792ecff193b9c642e15f07ee79",
+      "bytes": 3475
+    },
+    {
+      "path": "vue-text-sync.json",
+      "sha256": "8e02687f24cd2969f7d1ae541374fc6ac23963792ecff193b9c642e15f07ee79",
+      "bytes": 3475
+    },
+    {
+      "path": "vue2-base.json",
+      "sha256": "86cb3ecaadac0c41f47bb19ba3fde6f06c60ae6e0c632b5ce7f995bc48569769",
+      "bytes": 1961
+    },
+    {
+      "path": "vue2-brutalist.json",
+      "sha256": "c2cf36008da342954102dce12e4976a0781d8486211714f7d28395f0b97f59e2",
+      "bytes": 3005
+    },
+    {
+      "path": "vue2-shadcn.json",
+      "sha256": "fa403ff1aa04c3d1b69af504a8c8f392bdf0d79d00da80e1aed309b693019e2d",
+      "bytes": 3360
+    },
+    {
+      "path": "vue2-text-queued.json",
+      "sha256": "8e02687f24cd2969f7d1ae541374fc6ac23963792ecff193b9c642e15f07ee79",
+      "bytes": 3475
+    },
+    {
+      "path": "vue2-text-sync.json",
+      "sha256": "8e02687f24cd2969f7d1ae541374fc6ac23963792ecff193b9c642e15f07ee79",
+      "bytes": 3475
+    },
+    {
+      "path": "wc-base.json",
+      "sha256": "c39f512783db63caca7736c3e8436be30629d70ad430045093b95eba5aebdba3",
+      "bytes": 2171
+    },
+    {
+      "path": "wc-brutalist.json",
+      "sha256": "d5f0dc0ba34bdfa8e20abccc6e671913c409ed44f86b6fae7af6ae0c821c44a6",
+      "bytes": 3215
+    },
+    {
+      "path": "wc-shadcn.json",
+      "sha256": "1e77c09ba286c99197e8716c2180853fd073668647f213a9d62c9770e12b6a69",
+      "bytes": 3570
+    },
+    {
+      "path": "wc-text-queued.json",
+      "sha256": "7a82f12409f59ab719b458a6f41dc88cb540cba05f6dd2c3d815ec15c2fee7cf",
+      "bytes": 3474
+    },
+    {
+      "path": "wc-text-sync.json",
+      "sha256": "7a82f12409f59ab719b458a6f41dc88cb540cba05f6dd2c3d815ec15c2fee7cf",
+      "bytes": 3474
+    }
+  ],
+  "cases": [
+    {
+      "name": "react-base",
+      "status": "FAIL",
+      "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[data-sprint2-target]')\n",
+      "steps": [
+        "mounted"
+      ]
+    },
+    {
+      "name": "react-brutalist",
+      "status": "FAIL",
+      "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[data-sprint2-target]')\n",
+      "steps": [
+        "mounted"
+      ]
+    },
+    {
+      "name": "react-shadcn",
+      "status": "FAIL",
+      "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[data-sprint2-target]')\n",
+      "steps": [
+        "mounted"
+      ]
+    },
+    {
+      "name": "react-text-queued",
+      "status": "FAIL",
+      "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('input[data-sprint2-target]')\n",
+      "steps": []
+    },
+    {
+      "name": "react-text-sync",
+      "status": "FAIL",
+      "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('input[data-sprint2-target]')\n",
+      "steps": []
+    },
+    {
+      "name": "vue-base",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue-brutalist",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue-shadcn",
+      "status": "FAIL",
+      "firstFailure": "Matcher did not succeed in 1000ms",
+      "steps": [
+        "mounted"
+      ]
+    },
+    {
+      "name": "vue-text-queued",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "trusted-accepted-5678",
+        "rejected-native-candidate",
+        "reconnected-owner",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue-text-sync",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "trusted-accepted-5678",
+        "rejected-native-candidate",
+        "reconnected-owner",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue2-base",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue2-brutalist",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue2-shadcn",
+      "status": "FAIL",
+      "firstFailure": "Matcher did not succeed in 1000ms",
+      "steps": [
+        "mounted"
+      ]
+    },
+    {
+      "name": "vue2-text-queued",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "trusted-accepted-5678",
+        "rejected-native-candidate",
+        "reconnected-owner",
+        "disposed"
+      ]
+    },
+    {
+      "name": "vue2-text-sync",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "trusted-accepted-5678",
+        "rejected-native-candidate",
+        "reconnected-owner",
+        "disposed"
+      ]
+    },
+    {
+      "name": "wc-base",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
+    },
+    {
+      "name": "wc-brutalist",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
+    },
+    {
+      "name": "wc-shadcn",
+      "status": "FAIL",
+      "firstFailure": "Matcher did not succeed in 1000ms",
+      "steps": [
+        "mounted"
+      ]
+    },
+    {
+      "name": "wc-text-queued",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "trusted-accepted-5678",
+        "rejected-native-candidate",
+        "reconnected-owner",
+        "disposed"
+      ]
+    },
+    {
+      "name": "wc-text-sync",
+      "status": "PASS",
+      "firstFailure": null,
+      "steps": [
+        "trusted-accepted-5678",
+        "rejected-native-candidate",
+        "reconnected-owner",
+        "disposed"
+      ]
+    }
+  ],
+  "traceObservations": [
+    {
+      "case": "react-base",
+      "traceSha256": "cf91de66ac051099eb36e6bded6875406307d2d06ae455e7da81d915c39d645d",
+      "traceBytes": 966807,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@18",
+            "startTime": 5761.305,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, args.family)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "react"
+                      }
+                    },
+                    {
+                      "k": "family",
+                      "v": {
+                        "s": "base"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@d07341a7b1292a5ef0701c3c8362b0d1",
+            "beforeSnapshot": "before@call@18"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@18",
+            "endTime": 5773.874,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "base"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@18"
+          }
+        }
+      ]
+    },
+    {
+      "case": "react-shadcn",
+      "traceSha256": "6b905f4c7b57c3d01cf70761e1a5720cb53c1c467899f9169ca47968662aac27",
+      "traceBytes": 967042,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@54",
+            "startTime": 11408.468,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, args.family)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "react"
+                      }
+                    },
+                    {
+                      "k": "family",
+                      "v": {
+                        "s": "shadcn"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@dae2a5c7eaeacc3e3664d0b50c9b593b",
+            "beforeSnapshot": "before@call@54"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@54",
+            "endTime": 11421.941,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "shadcn"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@54"
+          }
+        }
+      ]
+    },
+    {
+      "case": "react-brutalist",
+      "traceSha256": "746741a6c89d4ab0b7991cefa4f41cb812bb34bd890593983515876941636450",
+      "traceBytes": 967043,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@90",
+            "startTime": 17063.531,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, args.family)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "react"
+                      }
+                    },
+                    {
+                      "k": "family",
+                      "v": {
+                        "s": "brutalist"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@76b0800c24a7164a6b99f0cbe084bc13",
+            "beforeSnapshot": "before@call@90"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@90",
+            "endTime": 17076.269,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "brutalist"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@90"
+          }
+        }
+      ]
+    },
+    {
+      "case": "react-text-sync",
+      "traceSha256": "5cdd5026534fbe71b5ae744e0faf0fa738330b89770065e27789a769a183dd97",
+      "traceBytes": 956380,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@126",
+            "startTime": 22710.622,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, \"text\", args.mode)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "react"
+                      }
+                    },
+                    {
+                      "k": "mode",
+                      "v": {
+                        "s": "sync"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@4649913c0a7d974d6fbc9bab8bb2307f",
+            "beforeSnapshot": "before@call@126"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@126",
+            "endTime": 22721.581,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "text"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "o": [
+                        {
+                          "k": "value",
+                          "v": {
+                            "s": "5"
+                          }
+                        },
+                        {
+                          "k": "composing",
+                          "v": {
+                            "b": false
+                          }
+                        },
+                        {
+                          "k": "selection",
+                          "v": {
+                            "v": "null"
+                          }
+                        }
+                      ],
+                      "id": 3
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@126"
+          }
+        }
+      ]
+    },
+    {
+      "case": "react-text-queued",
+      "traceSha256": "bbbb5a62719da3921ba1ee1a83c6240cd5d440c86e04237a5ff66649f651cddd",
+      "traceBytes": 956323,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@154",
+            "startTime": 28393.249,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, \"text\", args.mode)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "react"
+                      }
+                    },
+                    {
+                      "k": "mode",
+                      "v": {
+                        "s": "queued"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@228e0e0453c6805408226b76de248664",
+            "beforeSnapshot": "before@call@154"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@154",
+            "endTime": 28404.598,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "text"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "o": [
+                        {
+                          "k": "value",
+                          "v": {
+                            "s": "5"
+                          }
+                        },
+                        {
+                          "k": "composing",
+                          "v": {
+                            "b": false
+                          }
+                        },
+                        {
+                          "k": "selection",
+                          "v": {
+                            "v": "null"
+                          }
+                        }
+                      ],
+                      "id": 3
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@154"
+          }
+        }
+      ]
+    },
+    {
+      "case": "vue-shadcn",
+      "traceSha256": "2bbac2ff62ffc1697ca0763c2fbd319e5ad97d6929f822155571bae35ccfebe4",
+      "traceBytes": 986788,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@250",
+            "startTime": 34820.359,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, args.family)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "vue"
+                      }
+                    },
+                    {
+                      "k": "family",
+                      "v": {
+                        "s": "shadcn"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@5becf7a08a9c1a6d0656b3f364dde029",
+            "beforeSnapshot": "before@call@250"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@250",
+            "endTime": 34834.96,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "shadcn"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "s": "Ordinary child"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "s": "button"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "s": "false"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [
+                        {
+                          "s": "select-none"
+                        },
+                        {
+                          "s": "inline-flex"
+                        },
+                        {
+                          "s": "box-border"
+                        },
+                        {
+                          "s": "shrink-0"
+                        },
+                        {
+                          "s": "items-center"
+                        },
+                        {
+                          "s": "justify-center"
+                        },
+                        {
+                          "s": "border"
+                        },
+                        {
+                          "s": "border-border"
+                        },
+                        {
+                          "s": "bg-clip-padding"
+                        },
+                        {
+                          "s": "py-0"
+                        },
+                        {
+                          "s": "transition-all"
+                        },
+                        {
+                          "s": "outline-none"
+                        },
+                        {
+                          "s": "text-sm"
+                        },
+                        {
+                          "s": "leading-5"
+                        },
+                        {
+                          "s": "font-medium"
+                        },
+                        {
+                          "s": "rounded-md"
+                        },
+                        {
+                          "s": "bg-background"
+                        },
+                        {
+                          "s": "text-foreground"
+                        },
+                        {
+                          "s": "shadow-xs"
+                        },
+                        {
+                          "s": "h-9"
+                        },
+                        {
+                          "s": "gap-1.5"
+                        },
+                        {
+                          "s": "px-2.5"
+                        },
+                        {
+                          "s": "whitespace-nowrap"
+                        }
+                      ],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@250"
+          }
+        },
+        {
+          "frame": {
+            "type": "frame-snapshot",
+            "snapshot": {
+              "callId": "call@276",
+              "snapshotName": "before@call@276",
+              "pageId": "page@5becf7a08a9c1a6d0656b3f364dde029",
+              "frameId": "frame@90174adb9da01f76bd9d54692cb4b884",
+              "frameUrl": "about:blank",
+              "doctype": "html",
+              "html": [
+                "HTML",
+                {
+                  "lang": "en"
+                },
+                [
+                  [
+                    33,
+                    2
+                  ]
+                ],
+                [
+                  "BODY",
+                  {},
+                  [
+                    [
+                      35,
+                      5
+                    ]
+                  ],
+                  [
+                    "MAIN",
+                    {
+                      "id": "mount"
+                    },
+                    [
+                      "DIV",
+                      {
+                        "data-v-app": ""
+                      },
+                      [
+                        "DIV",
+                        {
+                          "__playwright_target__": "call@266",
+                          "data-pui-root": "",
+                          "data-pui-style": "select-none inline-flex box-border shrink-0 items-center justify-center border border-input bg-clip-padding py-0 transition-all outline-none text-sm leading-5 font-medium rounded-md bg-input/50 text-foreground shadow-xs h-9 gap-1.5 px-2.5 whitespace-nowrap",
+                          "tabindex": "0",
+                          "role": "button",
+                          "aria-disabled": "false",
+                          "data-pui-a11y-actions": "activate",
+                          "data-sprint2-target": ""
+                        },
+                        [
+                          [
+                            27,
+                            0
+                          ]
+                        ],
+                        [
+                          [
+                            27,
+                            2
+                          ]
+                        ],
+                        [
+                          [
+                            27,
+                            3
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              "viewport": {
+                "width": 960,
+                "height": 640
+              },
+              "timestamp": 34952.729,
+              "wallTime": 1795355542806,
+              "collectionTime": 0.19999999995343387,
+              "resourceOverrides": [],
+              "isMainFrame": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": "vue2-shadcn",
+      "traceSha256": "8ea220a8fda1144abba5e37ce1097f96453c009b1e626246770d9ecb9fbe8eed",
+      "traceBytes": 979391,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@644",
+            "startTime": 39753.123,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, args.family)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "vue2"
+                      }
+                    },
+                    {
+                      "k": "family",
+                      "v": {
+                        "s": "shadcn"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@79692fd89f171afd9579254d7ad3081e",
+            "beforeSnapshot": "before@call@644"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@644",
+            "endTime": 39765.223,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "shadcn"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "s": "Ordinary child"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "s": "button"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "s": "false"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [
+                        {
+                          "s": "select-none"
+                        },
+                        {
+                          "s": "inline-flex"
+                        },
+                        {
+                          "s": "box-border"
+                        },
+                        {
+                          "s": "shrink-0"
+                        },
+                        {
+                          "s": "items-center"
+                        },
+                        {
+                          "s": "justify-center"
+                        },
+                        {
+                          "s": "border"
+                        },
+                        {
+                          "s": "border-border"
+                        },
+                        {
+                          "s": "bg-clip-padding"
+                        },
+                        {
+                          "s": "py-0"
+                        },
+                        {
+                          "s": "transition-all"
+                        },
+                        {
+                          "s": "outline-none"
+                        },
+                        {
+                          "s": "text-sm"
+                        },
+                        {
+                          "s": "leading-5"
+                        },
+                        {
+                          "s": "font-medium"
+                        },
+                        {
+                          "s": "rounded-md"
+                        },
+                        {
+                          "s": "bg-background"
+                        },
+                        {
+                          "s": "text-foreground"
+                        },
+                        {
+                          "s": "shadow-xs"
+                        },
+                        {
+                          "s": "h-9"
+                        },
+                        {
+                          "s": "gap-1.5"
+                        },
+                        {
+                          "s": "px-2.5"
+                        },
+                        {
+                          "s": "whitespace-nowrap"
+                        }
+                      ],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@644"
+          }
+        },
+        {
+          "frame": {
+            "type": "frame-snapshot",
+            "snapshot": {
+              "callId": "call@670",
+              "snapshotName": "before@call@670",
+              "pageId": "page@79692fd89f171afd9579254d7ad3081e",
+              "frameId": "frame@cc0e239f9fc45677c221111492bec7d8",
+              "frameUrl": "about:blank",
+              "doctype": "html",
+              "html": [
+                "HTML",
+                {
+                  "lang": "en"
+                },
+                [
+                  [
+                    33,
+                    2
+                  ]
+                ],
+                [
+                  "BODY",
+                  {},
+                  [
+                    [
+                      35,
+                      5
+                    ]
+                  ],
+                  [
+                    "MAIN",
+                    {
+                      "id": "mount"
+                    },
+                    [
+                      "DIV",
+                      {},
+                      [
+                        "DIV",
+                        {
+                          "__playwright_target__": "call@660",
+                          "data-pui-root": "",
+                          "tabindex": "0",
+                          "role": "button",
+                          "aria-disabled": "false",
+                          "data-pui-a11y-actions": "activate",
+                          "data-pui-style": "select-none inline-flex box-border shrink-0 items-center justify-center border border-input bg-clip-padding py-0 transition-all outline-none text-sm leading-5 font-medium rounded-md bg-input/50 text-foreground shadow-xs h-9 gap-1.5 px-2.5 whitespace-nowrap",
+                          "data-sprint2-target": ""
+                        },
+                        [
+                          [
+                            27,
+                            1
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              "viewport": {
+                "width": 960,
+                "height": 640
+              },
+              "timestamp": 39898.332,
+              "wallTime": 1795355547752,
+              "collectionTime": 0.09999999997671694,
+              "resourceOverrides": [],
+              "isMainFrame": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case": "wc-shadcn",
+      "traceSha256": "22867ae022424606c2f69e9a0a2c8990d1c4cb4ae660e2661dff56017a94767b",
+      "traceBytes": 986074,
+      "selectedEvents": [
+        {
+          "before": {
+            "type": "before",
+            "callId": "call@1038",
+            "startTime": 44560.602,
+            "class": "Frame",
+            "method": "evaluateExpression",
+            "params": {
+              "expression": "(args) => window.sprint2Native.fixture.mount(args.target, args.family)",
+              "isFunction": true,
+              "arg": {
+                "value": {
+                  "o": [
+                    {
+                      "k": "target",
+                      "v": {
+                        "s": "wc"
+                      }
+                    },
+                    {
+                      "k": "family",
+                      "v": {
+                        "s": "shadcn"
+                      }
+                    }
+                  ],
+                  "id": 1
+                },
+                "handles": []
+              }
+            },
+            "pageId": "page@525386dc30195bca6cbda99b6953ff47",
+            "beforeSnapshot": "before@call@1038"
+          },
+          "after": {
+            "type": "after",
+            "callId": "call@1038",
+            "endTime": 44569.409,
+            "result": {
+              "value": {
+                "o": [
+                  {
+                    "k": "kind",
+                    "v": {
+                      "s": "shadcn"
+                    }
+                  },
+                  {
+                    "k": "clicks",
+                    "v": {
+                      "n": 0
+                    }
+                  },
+                  {
+                    "k": "rootIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "ownerIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childIdentity",
+                    "v": {
+                      "b": true
+                    }
+                  },
+                  {
+                    "k": "childText",
+                    "v": {
+                      "s": "Ordinary child"
+                    }
+                  },
+                  {
+                    "k": "role",
+                    "v": {
+                      "s": "button"
+                    }
+                  },
+                  {
+                    "k": "disabled",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "ariaDisabled",
+                    "v": {
+                      "s": "false"
+                    }
+                  },
+                  {
+                    "k": "style",
+                    "v": {
+                      "a": [
+                        {
+                          "s": "select-none"
+                        },
+                        {
+                          "s": "inline-flex"
+                        },
+                        {
+                          "s": "box-border"
+                        },
+                        {
+                          "s": "shrink-0"
+                        },
+                        {
+                          "s": "items-center"
+                        },
+                        {
+                          "s": "justify-center"
+                        },
+                        {
+                          "s": "border"
+                        },
+                        {
+                          "s": "border-border"
+                        },
+                        {
+                          "s": "bg-clip-padding"
+                        },
+                        {
+                          "s": "py-0"
+                        },
+                        {
+                          "s": "transition-all"
+                        },
+                        {
+                          "s": "outline-none"
+                        },
+                        {
+                          "s": "text-sm"
+                        },
+                        {
+                          "s": "leading-5"
+                        },
+                        {
+                          "s": "font-medium"
+                        },
+                        {
+                          "s": "rounded-md"
+                        },
+                        {
+                          "s": "bg-background"
+                        },
+                        {
+                          "s": "text-foreground"
+                        },
+                        {
+                          "s": "shadow-xs"
+                        },
+                        {
+                          "s": "h-9"
+                        },
+                        {
+                          "s": "gap-1.5"
+                        },
+                        {
+                          "s": "px-2.5"
+                        },
+                        {
+                          "s": "whitespace-nowrap"
+                        }
+                      ],
+                      "id": 2
+                    }
+                  },
+                  {
+                    "k": "focused",
+                    "v": {
+                      "b": false
+                    }
+                  },
+                  {
+                    "k": "text",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalValue",
+                    "v": {
+                      "v": "null"
+                    }
+                  },
+                  {
+                    "k": "physicalSelection",
+                    "v": {
+                      "v": "null"
+                    }
+                  }
+                ],
+                "id": 1
+              }
+            },
+            "afterSnapshot": "after@call@1038"
+          }
+        },
+        {
+          "frame": {
+            "type": "frame-snapshot",
+            "snapshot": {
+              "callId": "call@1064",
+              "snapshotName": "before@call@1064",
+              "pageId": "page@525386dc30195bca6cbda99b6953ff47",
+              "frameId": "frame@aa9686e0dc21557d15c00a2aef679f46",
+              "frameUrl": "about:blank",
+              "doctype": "html",
+              "html": [
+                "HTML",
+                {
+                  "lang": "en"
+                },
+                [
+                  [
+                    33,
+                    2
+                  ]
+                ],
+                [
+                  "BODY",
+                  {
+                    "__playwright_custom_elements__": "sprint2-generated-shadcn-1"
+                  },
+                  [
+                    [
+                      35,
+                      5
+                    ]
+                  ],
+                  [
+                    "MAIN",
+                    {
+                      "id": "mount"
+                    },
+                    [
+                      "DIV",
+                      {},
+                      [
+                        "SPRINT2-GENERATED-SHADCN-1",
+                        {
+                          "__playwright_target__": "call@1054",
+                          "data-pui-style": "select-none inline-flex box-border shrink-0 items-center justify-center border border-input bg-clip-padding py-0 transition-all outline-none text-sm leading-5 font-medium rounded-md bg-input/50 text-foreground shadow-xs h-9 gap-1.5 px-2.5 whitespace-nowrap",
+                          "tabindex": "0",
+                          "role": "button",
+                          "aria-disabled": "false",
+                          "data-pui-a11y-actions": "activate",
+                          "data-sprint2-target": ""
+                        },
+                        [
+                          [
+                            27,
+                            1
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              "viewport": {
+                "width": 960,
+                "height": 640
+              },
+              "timestamp": 44677.504,
+              "wallTime": 1795355552531,
+              "collectionTime": 0.2000000000698492,
+              "resourceOverrides": [],
+              "isMainFrame": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "candidateSources": [
+    {
+      "path": "packages/compiler/test/sprint2-browser-consumer.ts",
+      "sha256": "4ab9e91973c25e51385cdcd6aae9b8037bb43614024b54631e852ce0a72f45e7",
+      "bytes": 10655
+    },
+    {
+      "path": "packages/compiler/test/sprint2-browser-consumer.test.ts",
+      "sha256": "fb61e9b1732954a563cec834c571b2a1bcfb8e108581b3b62ed4fd1d698d175c",
+      "bytes": 3865
+    },
+    {
+      "path": "packages/compiler/test/sprint2-native.browser.test.ts",
+      "sha256": "647cb878ff5d4e6c17d275255d6280e25c5d1e3b2c23ff643248359c0d642c9c",
+      "bytes": 14839
+    },
+    {
+      "path": "packages/compiler/test/release-family-consumer.test.ts",
+      "sha256": "cebffcc44ff12a222d362f0bd7dd944780992c56f9654530d8d24aa3111cbdb6",
+      "bytes": 6231
+    },
+    {
+      "path": "packages/compiler/test/rule-meta-consumer.test.ts",
+      "sha256": "9020fed3f0c9e7f7a400c730f0601955d9642d17c3467684a9826e20cec62b24",
+      "bytes": 13744
+    }
+  ],
+  "scope": "Socket-free fixture diagnosis and regression evidence; revised native20 remains pending hosted replay."
+}

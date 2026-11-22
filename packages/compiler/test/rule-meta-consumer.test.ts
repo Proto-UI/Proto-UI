@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import type { Window as HappyDOMWindow } from 'happy-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ts from 'typescript';
 import { compilePrototype } from '../src/compile';
@@ -89,14 +90,14 @@ for (const profile of nativeOwnerProfiles)
         api = owner.handle.getExposes();
       const counters = [api.updates.get(), api.watches.get()];
       document.documentElement.dataset.theme = 'dark';
-      await window.happyDOM.whenAsyncComplete();
+      await (window as unknown as HappyDOMWindow).happyDOM.waitUntilComplete();
       await owner.flush();
       expect(tokens()).toEqual(new Set(['bg-black', 'transition-all']));
       expect(root()).toBe(element);
       expect([api.updates.get(), api.watches.get()]).toEqual(counters);
       await owner.setProps({ active: true });
       document.documentElement.dataset.theme = 'light';
-      await window.happyDOM.whenAsyncComplete();
+      await (window as unknown as HappyDOMWindow).happyDOM.waitUntilComplete();
       await owner.flush();
       expect(tokens().has('bg-red')).toBe(true);
       host.change({

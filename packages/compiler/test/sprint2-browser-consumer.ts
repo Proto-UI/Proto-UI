@@ -14,6 +14,53 @@ type Driver = {
   close(): Promise<void>;
 };
 type Modules = Record<Target, Record<Kind, Record<string, any>>>;
+
+function physicalRoot(host: HTMLElement, target: Target, kind: Kind): HTMLElement | null {
+  return kind === 'text'
+    ? host.querySelector<HTMLInputElement>('input')
+    : target === 'wc'
+      ? (host.firstElementChild as HTMLElement | null)
+      : host.querySelector<HTMLElement>('[data-pui-root]');
+}
+
+/** A framework flush or animation frame does not acknowledge a deferred DOM commit. */
+async function physicalPresence(host: HTMLElement, target: Target, kind: Kind, present: boolean) {
+  const matches = () => {
+    const root = physicalRoot(host, target, kind);
+    return present ? root?.isConnected === true : root === null;
+  };
+  if (matches()) return;
+  await new Promise<void>((resolve, reject) => {
+    let finished = false;
+    const observer = new MutationObserver(() => {
+      if (matches()) finish();
+    });
+    const timeout = setTimeout(
+      () =>
+        finish(
+          new Error(
+            `${target}/${kind}: physical Root did not become ${present ? 'present' : 'absent'}`
+          )
+        ),
+      5000
+    );
+    function finish(error?: Error) {
+      if (finished) return;
+      finished = true;
+      observer.disconnect();
+      clearTimeout(timeout);
+      if (error) reject(error);
+      else resolve();
+    }
+    try {
+      observer.observe(host, { childList: true, subtree: true });
+      if (matches()) finish();
+    } catch (error) {
+      finish(error instanceof Error ? error : new Error(String(error)));
+    }
+  });
+}
+
 async function settled(target: Target) {
   await Promise.resolve();
   if (target === 'vue') await Vue.nextTick();
@@ -41,11 +88,7 @@ export function createSprint2BrowserConsumer(modules: Modules) {
       }
     | undefined;
   const physical = () =>
-    current?.kind === 'text'
-      ? (current.driver.host.querySelector<HTMLInputElement>('input') ?? null)
-      : current?.target === 'wc'
-        ? (current.driver.host.firstElementChild as HTMLElement | null)
-        : (current?.driver.host.querySelector<HTMLElement>('[data-pui-root]') ?? null);
+    current ? physicalRoot(current.driver.host, current.target, current.kind) : null;
   async function mount(target: Target, kind: Kind, mode: 'sync' | 'queued' = 'sync') {
     if (current) await dispose();
     const module = modules[target][kind],
@@ -174,6 +217,19 @@ export function createSprint2BrowserConsumer(modules: Modules) {
         },
       };
     }
+    try {
+      await physicalPresence(host, target, kind, true);
+    } catch (error) {
+      try {
+        await driver.close();
+      } catch (cleanupError) {
+        throw new AggregateError(
+          [error, cleanupError],
+          'Physical Root readiness and cleanup failed'
+        );
+      }
+      throw error;
+    }
     const owner = driver.handle(),
       api = owner.getExposes();
     current = {
@@ -236,6 +292,7 @@ export function createSprint2BrowserConsumer(modules: Modules) {
     if (!current || current.kind !== 'text') throw new Error('Text owner missing');
     if (!present) current.retired = physical() as HTMLInputElement;
     await current.driver.setProps({ present });
+    await physicalPresence(current.driver.host, current.target, current.kind, present);
     physical()?.setAttribute('data-sprint2-target', '');
     return read();
   }

@@ -173,10 +173,16 @@ for (const target of ['react', 'vue', 'vue2', 'wc'] as const) {
       `${target}/${family}: native Button activation, preferences and terminal cleanup`,
       async () =>
         withPage(target + '-' + family, async (page, record) => {
-          await page.evaluate(
+          const mounted = await page.evaluate(
             (args) => window.sprint2Native.fixture.mount(args.target, args.family),
             { target, family }
           );
+          expect(mounted).toMatchObject({
+            rootIdentity: true,
+            ownerIdentity: true,
+            childIdentity: true,
+            role: 'button',
+          });
           const button = page.locator('[data-sprint2-target]');
           await expect
             .poll(() => page.evaluate(() => window.sprint2Native.fixture.read()?.role))
@@ -197,6 +203,8 @@ for (const target of ['react', 'vue', 'vue2', 'wc'] as const) {
             .poll(() => page.evaluate(() => window.sprint2Native.fixture.read()?.clicks))
             .toBe(2);
           if (family === 'shadcn') {
+            // The trusted click leaves the pointer hovering the button. Its authored
+            // dark hover rule overrides the ordinary dark background contribution.
             await expect
               .poll(() =>
                 page.evaluate(() =>
@@ -208,10 +216,30 @@ for (const target of ['react', 'vue', 'vue2', 'wc'] as const) {
             await expect
               .poll(() =>
                 page.evaluate(() =>
+                  window.sprint2Native.fixture.read()?.style.includes('bg-input/50')
+                )
+              )
+              .toBe(true);
+            expect(
+              await page.evaluate(() =>
+                window.sprint2Native.fixture.read()?.style.includes('bg-input/30')
+              )
+            ).toBe(false);
+            await record('dark-hover');
+            await page.mouse.move(0, 0);
+            await expect
+              .poll(() =>
+                page.evaluate(() =>
                   window.sprint2Native.fixture.read()?.style.includes('bg-input/30')
                 )
               )
               .toBe(true);
+            expect(
+              await page.evaluate(() =>
+                window.sprint2Native.fixture.read()?.style.includes('bg-input/50')
+              )
+            ).toBe(false);
+            await record('dark-unhovered');
             await page.evaluate(() => {
               document.documentElement.dataset.theme = 'light';
             });
@@ -222,6 +250,7 @@ for (const target of ['react', 'vue', 'vue2', 'wc'] as const) {
                 )
               )
               .toBe(false);
+            await record('explicit-light');
           }
           if (family === 'brutalist') {
             await expect
@@ -276,10 +305,12 @@ for (const target of ['react', 'vue', 'vue2', 'wc'] as const) {
       `${target}/${mode}: trusted controlled typing preserves caret through candidate refresh`,
       async () =>
         withPage(target + '-text-' + mode, async (page, record) => {
-          await page.evaluate(
+          const mounted = await page.evaluate(
             (args) => window.sprint2Native.fixture.mount(args.target, 'text', args.mode),
             { target, mode }
           );
+          expect(mounted).toMatchObject({ ownerIdentity: true, physicalValue: '5' });
+          await record('mounted');
           const input = page.locator('input[data-sprint2-target]');
           await input.click();
           await input.press('End');

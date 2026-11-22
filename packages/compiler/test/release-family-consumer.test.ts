@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import path from 'node:path';
+import type { Window as HappyDOMWindow } from 'happy-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import { compileFile, compilePrototype } from '../src/compile';
 import { mountNativeOwner, nativeOwnerProfiles } from './native-owner-consumer';
@@ -59,11 +60,11 @@ for (const family of ['base', 'shadcn', 'brutalist'])
       if (family === 'shadcn') {
         expect(tokens().has('bg-input/30')).toBe(false);
         document.documentElement.dataset.theme = 'dark';
-        await window.happyDOM.whenAsyncComplete();
+        await (window as unknown as HappyDOMWindow).happyDOM.waitUntilComplete();
         await owner.flush();
         expect(tokens().has('bg-input/30')).toBe(true);
         document.documentElement.dataset.theme = 'light';
-        await window.happyDOM.whenAsyncComplete();
+        await (window as unknown as HappyDOMWindow).happyDOM.waitUntilComplete();
         await owner.flush();
         expect(tokens().has('bg-input/30')).toBe(false);
       }
