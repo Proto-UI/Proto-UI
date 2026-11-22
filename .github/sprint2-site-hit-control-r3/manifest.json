@@ -1,0 +1,9 @@
+{
+  "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "fixtureSha256": "e711131db264547dd7193f3ff8d6fa3fab82f6ca153b33a7d82fbe7d81250780",
+  "kind": "same-product-source-pre-input-scroll-baseline-control",
+  "expectedCases": 61,
+  "originalCases": 42,
+  "targetCases": 20,
+  "extraTargetRepetitions": 19
+}
