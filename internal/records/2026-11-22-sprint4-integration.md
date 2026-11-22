@@ -40,6 +40,7 @@ An implementation-independent reviewer retained the original reproductions befor
 | S4-R6: different reached shader kernels conflicted in a multi-entry project | Verify every entry's host, ownership and kernel manifest against its canonical emitted bytes before taking the project-wide reached-kernel union. Four target profiles exercise mixed copy/tint entries; altered or missing support remains an error. |
 | S4-R7: restoring a previous shader capability reused its retired view identity | Each actual Feedback-to-sink binding gets a monotonic generation. Restoring A after A-to-B replacement can paint again without admitting old frames or old releases; remount preserves monotonicity. |
 | S4-R8: installing an unused shader capability changed ordinary Effects retry timing | The synchronous shader publication path now requires an actual shader declaration. A failed ordinary host publication retains its existing deferred retry, with or without the unused capability. An independent disposer-based control also distinguishes the original failure from the repaired path; genuinely declared shader publication remains immediate. |
+| S4-R9: the published Verdant migration evidence lacked its upstream license boundary | The evidence directory now retains the pinned upstream LICENSE, NOTICE and unchanged authored source, with explicit AGPL-3.0-or-later attribution for Verdant-derived material. The existing data producer's hardcoded MIT metadata remains identified as a publication defect; the original patch and receipts are not rewritten. Proto-UI SDK/support attribution stays separate. |
 
 The R3/R5 integration lane passed **161/161 tests in seven files**, including the pre-existing source-graph, module data/storage, callable-selection and dormant tests. Its initial 123/124 result exposed a mapped default-factory-export regression in the first repair; that case was repaired without weakening the existing assertion. The reviewer independently replayed the two original TDZ and four signature inputs and observed their intended diagnostics. Final review remains bound to the frozen published source and validation packet.
 
@@ -71,6 +72,15 @@ The evidence index is [Sprint 4 observations](./evidence/2026-11-22-sprint4/obse
 
 Verdant's initial unchanged-consumer upgrade failed first on its old generated crate package name and then on its obsolete static `call_data_method` API. The instance-owned API change already existed in base history at `2403772bea490de3cc9e79f009ab25e2fe7d6962`. The reviewed migration retains the generated GPUI view, and routes the three headless decisions through the existing `C-COMPILER-RUST-DATA-0001` / `rust-data-v1` contract: `planNoteGesture`, `planControlGesture` and `dragNormalized`. The canonical producer writes the dependency-free Rust data artifact; no fake mounted owner or handwritten generated reducer is used. The [complete temporary consumer patch](./evidence/2026-11-22-sprint4/verdant-consumer-migration.patch) applies cleanly to the original application revision. It has not been published to the application repository.
 
+**Verdant-derived source and translated business logic retain AGPL-3.0-or-later.**
+The [evidence attribution and original notices](./evidence/2026-11-22-sprint4/README.md)
+bind the exact upstream revision and source hashes. Proto-UI's MIT license does
+not replace Verdant's license. The generated data crate's existing hardcoded MIT
+metadata is retained as an identified defect, not a relicensing or publication
+permission. Source-license selection/inheritance and regenerated distribution
+metadata remain work for the Compiler/consumer owner before a downstream crate
+release. The temporary compile/test result does not certify distribution readiness.
+
 The retained source-bound visuals were inspected directly:
 
 ![Real compiled shader surface with ordinary and slot children](./evidence/2026-11-22-sprint4/shader-react-compiled.png)
@@ -89,4 +99,4 @@ The full cycle also observed the original Scroll Area WC drag result `scrollTop 
 
 `.github/workflows/package-budget-evidence.yml` provides a manual/callable complete-package build and strict measurement using the same Node 24, pnpm 10.32.1, manifest checks and measurement controls as `ci.yml`. It adds no automatic trigger, changes no existing regression lane or measurement policy, and always preserves the actual source-bound report. Final exact-head PR readiness and independent review are recorded on the PR after validation and readback; this record alone does not declare a green full cycle or a GitHub approval.
 
-Agent provenance: ChatGPT coding agents authored the new public implementation, tests and records under the current user's instruction. A separate fresh context reviewed the implementation and supplied the seven falsifying probes. No GitHub self-approval, original-author certification, merge, release or application deployment is claimed.
+Agent provenance: ChatGPT coding agents authored the new public implementation, tests and records under the current user's instruction. A separate fresh context reviewed the implementation, supplied independent falsifying probes and checked source attribution. No GitHub self-approval, original-author certification, merge, release or application deployment is claimed.
