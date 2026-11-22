@@ -65,9 +65,11 @@ describe('Menubar bounded New York / Rhea projection', () => {
       expect(document.activeElement).toBe(f.item);
       expect(f.item.getExposes().focused.get()).toBe(true);
       expect(f.item.hasAttribute('data-focused')).toBe(true);
-      // Compound variant/focus paint is an accepted contribution, not a selector substring.
-      expect(acceptedStyleTokens(f.item).has('bg-accent')).toBe(true);
-      expect(acceptedStyleTokens(f.item).has('text-accent-foreground')).toBe(true);
+      // Focused paint stays a literal exposed-state variant. Resolving it to
+      // bg-accent drops the data-[focused] selector the public recipe checks.
+      expect(acceptedStyleTokens(f.item).has('data-[focused]:bg-accent')).toBe(true);
+      expect(acceptedStyleTokens(f.item).has('data-[focused]:text-accent-foreground')).toBe(true);
+      expect(acceptedStyleTokens(f.item).has('bg-accent')).toBe(false);
       expect(styleContains(f.item, 'bg-primary')).toBe(false);
       expect(styleContains(f.item, 'data-[focused]:bg-primary')).toBe(false);
       // Shared menu paint owns the equivalent left/right contributions separately.
