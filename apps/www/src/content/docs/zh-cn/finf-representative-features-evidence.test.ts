@@ -159,7 +159,7 @@ function mockedCase(
       if (options.navigationFailure) throw options.navigationFailure;
       return { status: () => 200 };
     }),
-    locator: vi.fn(() => ({ first: () => previewer })),
+    locator: vi.fn((_selector: string) => ({ first: () => previewer })),
     evaluate: vi.fn(async () => ({ locale: 'zh-CN', today: '2026-10-10T12:00:00.000Z' })),
     viewportSize: () => ({ width: 1365, height: 1000 }),
     screenshot: vi.fn(async (shot: HarnessScreenshot) => {
@@ -266,6 +266,39 @@ describe('Finf representative evidence harness, no native browser', () => {
       );
       expect(existsSync(`apps/www/src/content/docs${route.slice(0, -1)}.mdx`), route).toBe(true);
     }
+  });
+
+  it('keeps Calendar journeys and failure diagnostics on the caption demo when selection demos precede it', async () => {
+    const window = new Window();
+    window.document.body.innerHTML = `
+      <section data-previewer-id="selection" data-demo-id="demo-shadcn-calendar-selection">Range and multiple dates</section>
+      <section data-previewer-id="caption" data-demo-id="demo-shadcn-calendar">Single date with month and year controls</section>
+    `;
+    const caption = window.document.querySelector('[data-demo-id="demo-shadcn-calendar"]')!;
+    const selection = window.document.querySelector(
+      '[data-demo-id="demo-shadcn-calendar-selection"]'
+    )!;
+    const failure = new Error('Keep the actual caption assertion failure');
+    const fixture = mockedCase({ component: 'calendar', failure });
+    fixture.previewer.evaluate.mockImplementation(async () => caption.outerHTML);
+    const otherPreviewer = {
+      ...fixture.previewer,
+      waitFor: vi.fn(),
+      evaluate: vi.fn(async () => selection.outerHTML),
+    };
+    fixture.page.locator.mockImplementation((selector: string) => ({
+      first: () =>
+        window.document.querySelector(selector) === caption ? fixture.previewer : otherPreviewer,
+    }));
+
+    await expect(fixture.run()).rejects.toBe(failure);
+    expect(fixture.previewer.waitFor).toHaveBeenCalledOnce();
+    expect(otherPreviewer.waitFor).not.toHaveBeenCalled();
+    expect(fixture.diagnosticFiles.get('/test-only/shadcn-calendar-failed-dom.txt')).toBe(
+      caption.outerHTML
+    );
+    expect(fixture.receipts.get('shadcn-calendar.json').error.message).toBe(failure.message);
+    window.happyDOM.abort();
   });
 
   it('records previous screenshots, a new failure capture and original assertion error, then closes the context', async () => {

@@ -10,7 +10,10 @@ const flush = async () => {
   for (let i = 0; i < 32; i++) await Promise.resolve();
 };
 const roots: HTMLElement[] = [];
+const layoutSubscriptions = new Map<HTMLElement, () => void>();
 afterEach(async () => {
+  layoutSubscriptions.forEach((unsubscribe) => unsubscribe());
+  layoutSubscriptions.clear();
   roots.splice(0).forEach((el) => el.remove());
   await flush();
 });
@@ -59,16 +62,32 @@ function geometry(
   vertical = false
 ) {
   const available = (vertical ? height : width) - 16 * g.handles.length;
+  layoutSubscriptions.get(g.root)?.();
+  g.root.style.boxSizing = 'border-box';
+  g.root.style.width = `${width}px`;
+  g.root.style.height = `${height}px`;
   g.root.getBoundingClientRect = () => ({ left: 0, top: 0, width, height }) as DOMRect;
-  g.panels.forEach((panel, index) => {
-    panel.getBoundingClientRect = () =>
-      ({
-        left: 0,
-        top: 0,
-        width: vertical ? width : (available * g.api().sizes.get()[index]) / 100,
-        height: vertical ? (available * g.api().sizes.get()[index]) / 100 : height,
-      }) as DOMRect;
+  const panelBox = (index: number) => ({
+    left: 0,
+    top: 0,
+    width: vertical ? width : (available * g.api().sizes.get()[index]) / 100,
+    height: vertical ? (available * g.api().sizes.get()[index]) / 100 : height,
   });
+  g.panels.forEach((panel, index) => {
+    panel.style.boxSizing = 'border-box';
+    panel.getBoundingClientRect = () => panelBox(index) as DOMRect;
+  });
+  // Model the layout that happy-dom cannot perform. Both computed dimensions
+  // and rects follow accepted public sizes, never pending controlled proposals.
+  const syncPanelLayout = () => {
+    g.panels.forEach((panel, index) => {
+      const box = panelBox(index);
+      panel.style.width = `${box.width}px`;
+      panel.style.height = `${box.height}px`;
+    });
+  };
+  syncPanelLayout();
+  layoutSubscriptions.set(g.root, g.api().sizes.subscribe(syncPanelLayout));
   return available;
 }
 function pointer(el: HTMLElement, type: string, x: number, y = 20) {
@@ -256,6 +275,26 @@ it('cancellation clears controlled proposal history and a later gesture can retr
   }
   expect(g.changes).toHaveLength(2);
   expect(g.commits).toEqual([]);
+  expect(g.api().sizes.get()).toEqual([25, 35, 40]);
+});
+it('cancels a resized container before commit and accepts a later controlled retry', async () => {
+  const g = await group(base, { sizes: [25, 35, 40] });
+  const initialExtent = geometry(g);
+  pointer(g.handles[1], 'pointerdown', 100);
+  pointer(g.handles[1], 'pointermove', 100 + initialExtent * 0.1);
+  expect(g.changes).toEqual([[25, 45, 30]]);
+  const resizedExtent = geometry(g, 660);
+  pointer(g.handles[1], 'pointerup', 100 + initialExtent * 0.1);
+  expect(g.commits).toEqual([]);
+  expect(g.api().sizes.get()).toEqual([25, 35, 40]);
+  pointer(g.handles[1], 'pointerdown', 100);
+  pointer(g.handles[1], 'pointermove', 100 + resizedExtent * 0.1);
+  pointer(g.handles[1], 'pointerup', 100 + resizedExtent * 0.1);
+  expect(g.changes).toEqual([
+    [25, 45, 30],
+    [25, 45, 30],
+  ]);
+  expect(g.commits).toEqual([[25, 45, 30]]);
   expect(g.api().sizes.get()).toEqual([25, 35, 40]);
 });
 it('keyboard and accessible separator values use the indexed adjacent constraints', async () => {

@@ -62,6 +62,14 @@ async function fixture(props: Record<string, unknown> = {}, family = 'base', cou
     scrollTop: { configurable: true, value: 0, writable: true },
   });
   viewport.getBoundingClientRect = () => new DOMRect(0, 0, width, height);
+  // happy-dom has no layout engine: expose the same fixture dimensions to
+  // computed-style contact-basis checks and to rect/client measurements.
+  const syncLayoutSize = () => {
+    viewport.style.boxSizing = 'border-box';
+    viewport.style.width = `${width}px`;
+    viewport.style.height = `${height}px`;
+  };
+  syncLayoutSize();
   if (props.direction === 'rtl') viewport.style.direction = 'rtl';
   viewport.append(...slides);
   root.append(viewport, previous, next);
@@ -81,6 +89,7 @@ async function fixture(props: Record<string, unknown> = {}, family = 'base', cou
     resize: async (newWidth: number, newExtent: number) => {
       width = newWidth;
       extent = newExtent;
+      syncLayoutSize();
       window.dispatchEvent(new Event('resize'));
       await flush();
     },
