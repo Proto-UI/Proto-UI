@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-22",
+  "kind": "separately reviewable numeric package-budget transaction",
+  "state": "applied numeric-only candidate; final clean and native checks pending",
+  "sourceBase": "94b0687ea51c6cecde6ca9fbdc95d5a791562d76",
+  "authority": "Current user request covering 0.3 blocker triage and CI repair; pui-dev grants bounded numeric choices for already integrated accepted capabilities, preserving independent review and exact-candidate CI.",
+  "costEvidence": "internal/records/2026-11-22-package-budget-restoration.json plus BudgetAttribution closure diff at /tmp/budget-rerun/{gzip-current,canonical,meta}.json",
+  "canonicalRun": 44980617729,
+  "canonicalJob": 137080150566,
+  "canonicalSource": "94b0687ea51c6cecde6ca9fbdc95d5a791562d76",
+  "priorTransaction": "internal/records/2026-11-22-package-budget-numeric-transaction.json",
+  "comparison": "The prior transaction's small bounded reserves (432–947 gzip) were consumed by accepted merges landing after its sourceBase d095fa0a8: PR #1666 selection/numeric/scroll/resize (+592..651 gzip per adapter, +310 runtime), PR #1680 message-scroller-anchor (+745..853 gzip via create-web-scroll-host), axis-input contact-basis fixes (+746 via web-axis-input-host), PR #1672 drawer-mask-layer-offset (+90). Closure inputs unchanged (0 added, 0 removed) and no new external dependencies; this is measured capability growth, not a bundle blowup.",
+  "capabilityScope": "Accepted post-d095fa0a8 merges: #1666 030 capabilities, #1680 scroller anchor, axis-input contact-basis fixes, #1672 drawer mask. Numeric accounting only; does not promote spec entities or certify product acceptance.",
+  "headroomRationale": "Same 0.35–0.59% bounded reserves convention as the prior transaction. New ceilings place the failing three adapters inside their measured values with comparable small margins; runtime is left at the prior ceiling since it still passes (68-byte headroom).",
+  "changes": [
+    {
+      "entry": "packages/adapters/react/src/index.ts",
+      "name": "adapter-react root",
+      "oldCeiling": 164500,
+      "newCeiling": 165500,
+      "canonicalGzipBytes": 164916,
+      "headroomBytes": 584,
+      "headroomPercentOfMeasurement": 0.354
+    },
+    {
+      "entry": "packages/adapters/vue/src/index.ts",
+      "name": "adapter-vue root",
+      "oldCeiling": 163500,
+      "newCeiling": 164300,
+      "canonicalGzipBytes": 163708,
+      "headroomBytes": 592,
+      "headroomPercentOfMeasurement": 0.362
+    },
+    {
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "name": "adapter-web-component root",
+      "oldCeiling": 197500,
+      "newCeiling": 199000,
+      "canonicalGzipBytes": 198101,
+      "headroomBytes": 899,
+      "headroomPercentOfMeasurement": 0.454
+    }
+  ]
+}
