@@ -176,6 +176,21 @@ async function runCell(
     page = await context.newPage();
     page.setDefaultTimeout(10_000);
     page.on('pageerror', (error) => receipt.pageErrors!.push(error.message));
+    const navigations: Array<{ at: string; url: string }> = [];
+    const devServerMessages: string[] = [];
+    receipt.facts.mainFrameNavigations = navigations;
+    receipt.facts.devServerMessages = devServerMessages;
+    page.on('framenavigated', (frame) => {
+      if (frame === page!.mainFrame())
+        navigations.push({ at: new Date().toISOString(), url: frame.url() });
+    });
+    page.on('websocket', (socket) => {
+      socket.on('framereceived', (frame) => {
+        if (typeof frame.payload !== 'string') return;
+        devServerMessages.push(frame.payload.slice(0, 2_000));
+        if (devServerMessages.length > 20) devServerMessages.shift();
+      });
+    });
     await action(page, receipt.facts);
     expect(receipt.pageErrors).toEqual([]);
   } catch (error) {
@@ -184,6 +199,7 @@ async function runCell(
     if (page && !page.isClosed()) {
       try {
         receipt.facts.finalUrl = page.url();
+        receipt.facts.finalDocumentTimeOrigin = await page.evaluate(() => performance.timeOrigin);
         const filename = `${id}.png`;
         await page.screenshot({ path: path.join(output, filename), timeout: 10_000 });
         receipt.screenshots = [filename];
@@ -209,6 +225,7 @@ async function goto(page: Page, route: string) {
     timeout: 45_000,
   });
   expect(response?.status()).toBe(200);
+  return response!;
 }
 
 async function manager(page: Page, name: 'npm' | 'pnpm') {
@@ -383,7 +400,19 @@ describe.sequential('current-source release documentation reading', () => {
                 };
               }
               const example = page.locator('[data-code-example]');
-              await example.getByRole('tab', { name: hostNames[runtime], exact: true }).click();
+              // The idle enhancement retires the SSR anchor strip. Exercise the
+              // actual family Tabs, without holding a fallback through that swap.
+              const hostTab = example
+                .locator('[data-code-example-tablist="host"]')
+                .getByRole('tab', { name: hostNames[runtime], exact: true });
+              await hostTab.waitFor({ state: 'visible' });
+              await hostTab.click();
+              expect(await hostTab.getAttribute('aria-selected')).toBe('true');
+              facts.hostControl = await hostTab.evaluate((element) => ({
+                tag: element.tagName,
+                projected: element.hasAttribute('data-code-example-projected-tab'),
+                width: element.getBoundingClientRect().width,
+              }));
               const panel = example.locator(`[data-code-host-panel][data-code-host="${runtime}"]`);
               await panel.waitFor({ state: 'visible' });
               const samples = [];
@@ -480,26 +509,35 @@ describe.sequential('current-source release documentation reading', () => {
             colorScheme: 'light',
           },
           async (page, facts) => {
-            await goto(page, routeFor(locale, 'button'));
+            const response = await goto(page, routeFor(locale, 'button'));
+            // Keep the bytes of this exact navigation. A second document fetch
+            // is not needed to create a fresh node from the real authored SSR.
+            const sourceHtml = await response.text();
             await manager(page, 'npm');
+            facts.documentTimeOrigin = await page.evaluate(() => performance.timeOrigin);
+            // Retain the live owner's actual node before teardown, independently
+            // of the replacement evaluation's return value or any later lookup.
+            const oldCard = await page
+              .locator('[data-install-command-card]')
+              .first()
+              .elementHandle();
+            if (!oldCard) throw new Error('Owner probe requires the live original card.');
+            facts.ownerStage = 'captured-live-card';
             // The SSR bytes supply a new real card, without copying hydrated private
             // children. This is an explicit lifecycle probe, not an Astro navigation.
-            const oldCard = await page.evaluateHandle(async () => {
-              const response = await fetch(location.href);
-              if (!response.ok)
-                throw new Error(`Owner probe source fetch failed: ${response.status}`);
-              const parsed = new DOMParser().parseFromString(await response.text(), 'text/html');
-              const replacement = parsed.querySelector('[data-install-command-card]');
-              const previous = document.querySelector<HTMLElement>('[data-install-command-card]');
-              if (!previous || !replacement)
-                throw new Error('Owner probe requires both real cards.');
-              document.dispatchEvent(new Event('astro:before-swap'));
-              previous.replaceWith(document.importNode(replacement, true));
-              document.dispatchEvent(new Event('astro:page-load'));
-              document.dispatchEvent(new Event('astro:page-load'));
-              return previous;
-            });
             try {
+              await page.evaluate((html) => {
+                const parsed = new DOMParser().parseFromString(html, 'text/html');
+                const replacement = parsed.querySelector('[data-install-command-card]');
+                const previous = document.querySelector<HTMLElement>('[data-install-command-card]');
+                if (!previous || !replacement)
+                  throw new Error('Owner probe requires both real cards.');
+                document.dispatchEvent(new Event('astro:before-swap'));
+                previous.replaceWith(document.importNode(replacement, true));
+                document.dispatchEvent(new Event('astro:page-load'));
+                document.dispatchEvent(new Event('astro:page-load'));
+              }, sourceHtml);
+              facts.ownerStage = 'replacement-published';
               facts.newCommand = await manager(page, 'pnpm');
               facts.retiredOwner = await oldCard.evaluate((old) => {
                 old
@@ -516,6 +554,10 @@ describe.sequential('current-source release documentation reading', () => {
                 initialized: null,
                 manager: 'npm',
               });
+              expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+                facts.documentTimeOrigin
+              );
+              facts.ownerStage = 'retired-reference-verified';
               facts.probe =
                 'Synthetic Astro before-swap/page-load lifecycle; new controls activated with native keyboard.';
               await page.locator('[data-install-command-card]').first().scrollIntoViewIfNeeded();
