@@ -43,6 +43,14 @@ function emitted(text = source, methods = ['decide', 'scale', 'defaults']): Rust
 
 const cargo = process.env.PROTO_UI_RUST_DATA_CARGO ?? process.env.CARGO ?? 'cargo';
 const cargoAvailable = spawnSync(cargo, ['--version'], { encoding: 'utf8' }).status === 0;
+// Cold native linking on macOS can exceed Vitest's 5s JavaScript-test default.
+// Keep Cargo consumers mandatory in CI and bound each test explicitly.
+const nativeTest = (name: string, run: () => Promise<void>) =>
+  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+    name,
+    run,
+    60_000
+  );
 async function native(output: RustDataModule, tests: string): Promise<void> {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'proto-rust-data-'));
   try {
@@ -186,7 +194,7 @@ describe('checked Rust data artifacts', () => {
     expect(output.code).not.toContain('DataArray');
   });
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+  nativeTest(
     'executes typed decisions/defaults/failures and proves the full offline Cargo graph has no GPUI',
     async () => {
       await native(
@@ -210,17 +218,14 @@ describe('checked Rust data artifacts', () => {
     }
   );
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
-    'recompiling a source mutation changes actual Rust behavior',
-    async () => {
-      await native(
-        emitted(source.replace('delta * 2', 'delta * 7'), ['scale']),
-        `#[cfg(test)] mod consumer {use super::*; #[test] fn mutation() { assert_eq!(scale(0.25, 0.125).unwrap(), 1.125); }}`
-      );
-    }
-  );
+  nativeTest('recompiling a source mutation changes actual Rust behavior', async () => {
+    await native(
+      emitted(source.replace('delta * 2', 'delta * 7'), ['scale']),
+      `#[cfg(test)] mod consumer {use super::*; #[test] fn mutation() { assert_eq!(scale(0.25, 0.125).unwrap(), 1.125); }}`
+    );
+  });
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+  nativeTest(
     'preserves binary64, UTF-16 order and reference identity through typed helpers',
     async () => {
       const text = `${core}
@@ -250,7 +255,7 @@ describe('checked Rust data artifacts', () => {
     }
   );
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+  nativeTest(
     'preserves computed undefined defaults and validates optional/literal nested data',
     async () => {
       const text = `${core}
@@ -279,7 +284,7 @@ describe('checked Rust data artifacts', () => {
     }
   );
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+  nativeTest(
     'applies public defaults to explicit undefined while preserving null and supplied values',
     async () => {
       const text = `${core}
@@ -299,7 +304,7 @@ describe('checked Rust data artifacts', () => {
     }
   );
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+  nativeTest(
     'compares both union operands without shadowing scalar values or record identities',
     async () => {
       const text = `${core}
@@ -334,7 +339,7 @@ describe('checked Rust data artifacts', () => {
     }
   );
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
+  nativeTest(
     'allocates disjoint public, private, support, record and normalized field names',
     async () => {
       const text = `${core}
@@ -363,20 +368,17 @@ describe('checked Rust data artifacts', () => {
     }
   );
 
-  it.skipIf(!cargoAvailable && process.env.PROTO_UI_REQUIRE_RUST_DATA_TESTS !== '1')(
-    'normalizes colliding field names independently of record field order',
-    async () => {
-      const text = `${core}
+  nativeTest('normalizes colliding field names independently of record field order', async () => {
+    const text = `${core}
       type Input = {'foo-bar':number;foo_bar:number;identity:number};
       function reorder(input:Input):{identity:number;foo_bar:number;'foo-bar':number}{return input;}
       function select(input:Input):number{return reorder(input).foo_bar;}
       export default definePrototype({name:'fields',setup(def){def.expose.method('select',select)}});`;
-      await native(
-        emitted(text, ['select']),
-        `#[cfg(test)] mod consumer {use super::*;
+    await native(
+      emitted(text, ['select']),
+      `#[cfg(test)] mod consumer {use super::*;
       #[test] fn fields(){assert_eq!(select(SelectInput::new(3.,7.,11.)).unwrap(),7.);}
     }`
-      );
-    }
-  );
+    );
+  });
 });
