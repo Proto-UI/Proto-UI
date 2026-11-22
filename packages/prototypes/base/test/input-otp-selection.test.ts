@@ -104,6 +104,41 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s OTP selection consumer', (fam
     expect(m.active()).toEqual([false, true, false, false]);
   });
 
+  it.each(['synchronous', 'queued'] as const)(
+    'keeps each accepted native caret when its %s controlled owner commits',
+    async (mode) => {
+      const m = await mount({ value: '1234' }, true);
+      m.root.addEventListener('valueChange', (event: CustomEvent) => {
+        const accept = () => patchProps(m.root, { value: event.detail.value });
+        if (mode === 'queued') queueMicrotask(accept);
+        else accept();
+      });
+      await m.select(0, 4);
+      let accepted = '';
+      for (const digit of '5678') {
+        const start = m.editor.selectionStart!,
+          end = m.editor.selectionEnd!;
+        const candidate = m.editor.value.slice(0, start) + digit + m.editor.value.slice(end);
+        m.editor.value = candidate;
+        m.editor.setSelectionRange(start + 1, start + 1);
+        m.editor.dispatchEvent(
+          new InputEvent('input', {
+            bubbles: true,
+            composed: true,
+            data: digit,
+            inputType: 'insertText',
+          })
+        );
+        await flush();
+        accepted += digit;
+        expect(m.root.getExposes().value.get()).toBe(accepted);
+        expect(m.editor.value).toBe(accepted);
+        expect(m.editor.selectionStart).toBe(accepted.length);
+        expect(m.editor.selectionEnd).toBe(accepted.length);
+      }
+    }
+  );
+
   it('validates only canonical accepted edits after owner callbacks and cancels a detached report', async () => {
     const m = await mount({ value: '12' }, true);
     const requests: any[] = [];
