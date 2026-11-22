@@ -146,14 +146,17 @@ pub fn scroll_frame(owner:&OwnerRef,window:&mut Window){
     let follow=field(&s.config,"endFollow");
     let configured=!follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end";
     let axis=if configured{text_or(follow.member("axis",false),"vertical")}else{"vertical".into()};
+    let axes=text_or(field(&s.config,"axes"),"both");
     let mut end=None;
     let mut retired_end=false;
     if let Some((horizontal,requested_epoch))=s.pending_end.take(){
-        if requested_epoch==epoch{end=Some(horizontal)}else{s.request_status="rejected".into();retired_end=true;}
+        if requested_epoch==epoch&&(axes=="both"||horizontal==(axes=="horizontal")){end=Some(horizontal)}else{s.request_status="rejected".into();retired_end=true;}
     }
     // Retirement discards this frame's growth observation; updating previous_max
     // below consumes it rather than deferring old-view movement to a later frame.
-    if !retired_end&&end.is_none()&&configured&&s.following&&max!=s.previous_max{end=Some(axis=="horizontal");}
+    // Axis sync suspends this projection without rewriting authored follow
+    // policy. Consume unavailable-axis growth so re-enabling cannot replay it.
+    if !retired_end&&end.is_none()&&configured&&(axes=="both"||axes==axis)&&s.following&&max!=s.previous_max{end=Some(axis=="horizontal");}
     if let Some(horizontal)=end{
         let mut offset=s.handle().offset();
         if horizontal{offset.x=-max.x}else{offset.y=-max.y}

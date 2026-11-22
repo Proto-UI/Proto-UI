@@ -36,6 +36,11 @@ physical occurrences, as well as at the initial logical mount. Cached authored
 projections can change native parents or occur twice without a new authored
 projection commit; that cache reuse cannot preserve an earlier request turn.
 
+An actionable Label also observes native window activation independently of
+focus observation. Deactivation retires its pending pointer turn; returning to
+the window cannot complete the old click. This subscription does not add a
+focus listener, focusability or a Tab stop to the Label.
+
 ## Naming and input
 
 Naming projects AccessKit `labelled_by` to the actual label node from the same

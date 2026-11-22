@@ -534,7 +534,7 @@ fn open(cx: &mut TestAppContext, props: Json) -> WindowHandle<Harness> {
     frames(handle, cx);
     handle
 }
-fn frames(window: WindowHandle<Harness>, cx: &mut TestAppContext) {
+fn frames<T: Render + 'static>(window: WindowHandle<T>, cx: &mut TestAppContext) {
     for _ in 0..3 {
         cx.update_window(window.into(), |_, window, cx| {
             window.refresh();
@@ -632,6 +632,60 @@ fn native_scroll_target_shares_real_geometry_and_retires_only_its_lease(cx: &mut
         assert_eq!(second_handle.offset(), offset);
         assert_eq!(scroll_snapshot(&Rc::downgrade(&owner)).member("projection", false).text(), "unresolved");
         assert_eq!(exposed(&owner, "middle").call(vec![]).unwrap().member("reason", false).text(), "not-mounted");
+    }).unwrap();
+}
+
+#[gpui::test]
+fn native_scroll_axis_sync_suspends_following_without_replaying_disabled_growth(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    let (component, content, handle, lease) = window.update(cx, |host, window, cx| {
+        let component = validation::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let owner = component.read(cx).owner.clone();
+        let handle = gpui::ScrollHandle::default();
+        let lease = attach_scroll_surface(&Rc::downgrade(&owner), NativeScrollTarget::new(handle.clone()), window).unwrap();
+        let content = cx.new(|_| PhysicalScroll { handle: handle.clone(), rows: 30 });
+        host.scope.update(cx, |view, cx| view.set_slot(vec![
+            NativeSnapshot::native_view(component.clone().into()),
+            NativeSnapshot::native_view(content.clone().into()),
+        ], cx).unwrap());
+        (component, content, handle, lease)
+    }).unwrap();
+    frames(window, cx);
+    let (before, extent) = window.update(cx, |_, _, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(lease.is_current());
+        assert!(handle.max_offset().y > px(100.), "physical content has genuine overflow");
+        assert_eq!(handle.offset().y, -handle.max_offset().y, "the configured policy follows the initial end");
+        exposed(&owner, "scrollEnd").call(vec![]).unwrap();
+        exposed(&owner, "scrollAxesHorizontal").call(vec![]).unwrap();
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected", "switching axes retires a pending unavailable-axis request");
+        let before = handle.offset();
+        let extent = handle.max_offset();
+        content.update(cx, |content, cx| { content.rows = 45; cx.notify(); });
+        (before, extent)
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, _, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(handle.max_offset().y > extent.y);
+        assert_eq!(handle.offset(), before, "automatic end following cannot write an axis disabled by sync");
+        let follow = owner.borrow().modules.scroll.config["endFollow"].clone();
+        assert_eq!(follow.member("mode", false).text(), "while-at-end");
+        assert_eq!(follow.member("axis", false).text(), "vertical", "sync preserves the authored follow policy");
+        assert!(owner.borrow().modules.scroll.following, "the policy remains eligible when its axis returns");
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected", "ineligible growth cannot report an applied request");
+        exposed(&owner, "scrollAxesVertical").call(vec![]).unwrap();
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, _, cx| {
+        assert_eq!(handle.offset(), before, "returning the axis does not replay growth observed while it was disabled");
+        content.update(cx, |content, cx| { content.rows = 60; cx.notify(); });
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, _, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert_eq!(handle.offset().y, -handle.max_offset().y, "new eligible growth follows normally");
+        assert_eq!(owner.borrow().modules.scroll.request_status, "applied");
     }).unwrap();
 }
 
@@ -1293,6 +1347,71 @@ fn default_native_focus_scope_and_roving_use_real_handles(cx: &mut TestAppContex
             assert!(host.first.focus_handle(cx).is_focused(window));
         })
         .unwrap();
+}
+
+#[gpui::test]
+fn native_focus_draw_notifications_reach_entity_observers(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    let noticed = Rc::new(RefCell::new(Vec::<Json>::new()));
+    let observation = window.update(cx, |host, window, cx| {
+        let noticed = noticed.clone();
+        window.observe(&host.first, cx, move |target, _, cx| {
+            noticed.borrow_mut().push(target.read(cx).handle().state("focused").unwrap());
+        })
+    }).unwrap();
+    window.update(cx, |host, window, cx| window.focus(&host.first.focus_handle(cx), cx)).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, window, cx| {
+        assert_eq!(host.first.read(cx).handle().state("focused").unwrap(), json!(true));
+        assert_eq!(noticed.borrow().last(), Some(&json!(true)), "native focus is authored state and an observable generated entity change");
+        noticed.borrow_mut().clear();
+        window.focus(&host.second.focus_handle(cx), cx);
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, _, cx| {
+        assert_eq!(host.first.read(cx).handle().state("focused").unwrap(), json!(false));
+        assert_eq!(noticed.borrow().last(), Some(&json!(false)), "a blur in DrawPhase::Focus must wake native output consumers after drawing");
+    }).unwrap();
+    drop(observation);
+}
+
+struct RenderOutputHarness {
+    component: Entity<validation::CompiledComponent>,
+    pending: Option<u32>,
+    observed: Rc<RefCell<Vec<(String, Json)>>>,
+    _observation: gpui::Subscription,
+}
+impl Render for RenderOutputHarness {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if let Some(value) = self.pending.take() {
+            self.component.read(cx).handle().call("emitOnly", vec![json!(value)], window, cx).unwrap();
+        }
+        gpui::div().size_full().child(self.component.clone())
+    }
+}
+#[gpui::test]
+fn native_rendering_cannot_consume_pending_authored_output_notifications(cx: &mut TestAppContext) {
+    let window = cx.open_window(size(px(240.), px(80.)), |window, cx| {
+        let component = validation::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let observed = Rc::new(RefCell::new(Vec::new()));
+        let received = observed.clone();
+        let observation = cx.observe(&component, move |_: &mut RenderOutputHarness, component, cx| {
+            received.borrow_mut().extend(component.read(cx).handle().take_events());
+        });
+        RenderOutputHarness { component, pending: None, observed, _observation: observation }
+    });
+    frames(window, cx);
+    for next in [1, 2] {
+        window.update(cx, |host, _, cx| { host.pending = Some(next); cx.notify(); }).unwrap();
+        frames(window, cx);
+        window.update(cx, |host, _, cx| {
+            let expected: Vec<_> = (1..=next).map(|value| ("renderRequest".into(), json!({"value": f64::from(value)}))).collect();
+            assert_eq!(*host.observed.borrow(), expected, "drawing the generated child cannot swallow a pending event-only change from its native parent");
+            assert!(host.component.read(cx).handle().take_events().is_empty(), "the observer drains each output once");
+        }).unwrap();
+    }
+    frames(window, cx);
+    window.update(cx, |host, _, _| assert_eq!(host.observed.borrow().len(), 2, "later renders cannot replay delivered output")).unwrap();
 }
 
 #[gpui::test]

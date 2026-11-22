@@ -18,13 +18,28 @@ While composition is active, ordinary native editing commands cannot navigate, d
 
 ## Source prerequisites
 
-The shared source and independent IR checks admit UTF-16 string length, checked scalar Number/String conversion, and numeric Math.floor/Math.round. GPUI's rounding preserves ties toward positive infinity and negative zero rather than using Rust's different round behavior. A readonly finite record can form an outward JSON snapshot without gaining lexical write authority or hiding a capability. Terminal cancellation branches cannot invalidate the distinct continuing branch's lexical refinement; reachable branch effects remain joined.
+The shared source and independent IR checks admit UTF-16 string length, checked scalar Number/String conversion, and numeric Math.floor/Math.round. GPUI's rounding preserves ties toward positive infinity and negative zero rather than using Rust's different round behavior. A readonly finite record can form an outward JSON snapshot without gaining lexical write authority or hiding a capability. The shared closed-call provenance analysis retains actual ordinary fields through structural views, aliases, helper arguments/results, arrays and later writes. At an outward event it rejects hidden non-JSON fields, including enumerable undefined, and unresolved structured provenance. A local readonly view remains legal, and an explicitly fresh record can select proven data fields. Absent optional fields remain distinct from present fields containing undefined. Terminal cancellation branches cannot invalidate the distinct continuing branch's lexical refinement; reachable branch effects remain joined.
 
 An authored capture's `render` member retains the callable returned by that exact hook setup. The native lowering follows that nominal provenance to admit scalar or empty render callbacks as well as native renderer callbacks. An absent optional captured renderer keeps the normal default-slot behavior. This does not make arbitrary record members into renderers or add a template interpreter.
 
 ## Callback delivery and terminal cleanup
 
 A valid Expose emission wakes the native component's observers even when the callback does not modify State or call `run.update()`. The event remains queued until its consumer takes it; observing it does not manufacture a new authored input or duplicate the payload. Invalid emissions cannot schedule a wakeup.
+
+Native focus and blur callbacks run in GPUI's drawing turn, where immediate
+`Context::notify` does not dispatch entity-observer effects. Generated component
+drivers keep their authored state changes synchronous and defer the entity
+notification through a weak view until the current host turn ends. Consumers
+therefore receive focus-triggered cancellations and exposed output without
+polling or implementing a second blur policy. The real generated focus fixture
+checks both the source fact and the external entity observer after focus gain
+and loss; the weak notification cannot retain a removed component.
+Rendering the generated view does not consume that pending observer signal.
+The native parent may call an exposed method while constructing its layout;
+the child's subsequent render must preserve event-only output until the queued
+driver notifies its consumer. A separate native fixture verifies exactly-once
+delivery over repeated native-parent renders without adding authored State or
+calling `run.update()`.
 
 Retained callback handles preserve reference identity within their instance, including when a callback compares a saved handle with its own local copy. Handles from different instances remain distinct; the same instance's definition, callback and renderer handles also have separate identities. Equality only observes the reference; it neither grants callback scope nor revives a disposed owner.
 

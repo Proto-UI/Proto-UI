@@ -36,8 +36,14 @@ cases:
         C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
         C-COMPILER-SCALAR-INPUT-0001-READONLY,
       ]
-    expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries.
+    expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries. Structural readonly views, aliases, helper calls and mutable stores cannot hide enumerable undefined or another non-JSON nested value. Local-only narrowed views and explicit fresh data snapshots remain admitted.
 implementations:
+  - id: checked-json-source-provenance
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/json-boundary-provenance.test.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
   - id: checked-authored-inputs
     kind: module-test
     status: needs-review

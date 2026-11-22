@@ -46,6 +46,10 @@ enum, preserves an omitted axis and is a no-op for the same value. It changes
 neither projection nor end-follow policy. A queued movement on an axis that
 becomes unavailable is rejected. The GPUI backend lowers this existing atom;
 other compiler backends keep an explicit unsupported result until implemented.
+Automatic end-follow also requires that its configured axis is currently
+allowed. Growth observed while that axis is unavailable is consumed without a
+movement; restoring the axis permits later growth to follow, without replaying
+the disabled interval or changing the authored follow policy.
 
 ## Acceptance evidence
 
