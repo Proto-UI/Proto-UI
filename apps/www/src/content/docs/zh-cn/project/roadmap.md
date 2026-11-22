@@ -5,7 +5,9 @@ description: 'Proto UI 当前所处阶段，以及 v0 到 v1 的主要演进方�
 
 # 路线图
 
-Proto UI 当前处于 v0 阶段，**0.2** release line 已于 2026 年 8 月 13 日随 [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 完成稳定发布。当前工作因此进入 0.2 发布后的稳定化阶段：根据仓库外真实项目试用补齐文档与架构断口、加强证据，并为 v0.3 方向做准备，但不会把任何尚未发布的 alpha train 表述为当前可用版本。后续 v0 与 v1 milestone 不预先承诺固定日历日期。
+Proto UI 当前处于 v0 阶段，**0.2** release line 已于 2026 年 8 月 13 日随 [Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 完成稳定发布。当前开发遵循 [0.3 交付计划](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/release-0.3-plan.md)，其中记录承诺范围、目标日期、功能冻结与验收阶段。目标日期不豁免未完成的验收条件，也不代表已经发布。
+
+工作区版本以 [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) 和对应[版本实体](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions)为准；未发布开发进展需要与稳定版安装路径分别说明。[私有 Compiler](https://github.com/Proto-UI/Proto-UI/blob/main/packages/compiler/README.md) 已有具体范围的实现，各 profile 的证据不等于已发布 Compiler 版本或完整原生宿主一致性验收。
 
 这一阶段的重点不是尽快扩张功能表面，而是先完成协议层的基础闭环：让核心信息通路、执行语义与跨宿主翻译关系具备稳定、可验证的基础。
 
