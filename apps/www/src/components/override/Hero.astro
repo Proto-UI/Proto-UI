@@ -90,6 +90,11 @@ const whitepaperLabel =
     outline: 2px solid var(--color-ring);
     outline-offset: 3px;
   }
+  @media (forced-colors: active) {
+    .homepage-hero :global(.homepage-hero__eyebrow a:focus-visible) {
+      outline-color: Highlight;
+    }
+  }
   .homepage-hero h1 {
     max-width: 100%;
     margin: 0;

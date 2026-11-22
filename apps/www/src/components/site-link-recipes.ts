@@ -147,7 +147,9 @@ export function linkSurfaceProps(
           ? 'bottom'
           : 'none',
     elevation: framed && family === 'brutalist' ? 'raised' : 'none',
-    focusVisible: facts.focusVisible,
+    // The Hero's native anchor owns its outer pill ring, including the
+    // fallback. Its inner passive Surface must not paint a second rectangle.
+    focusVisible: appearance === 'pill' ? false : facts.focusVisible,
     hovered: framed || row || group ? facts.hovered : false,
     pressed: facts.pressed,
     current: row && facts.current,

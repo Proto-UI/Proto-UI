@@ -8,6 +8,16 @@ import {
 } from './site-link-recipes';
 const idle = { hovered: false, pressed: false, focusVisible: false, current: false, inView: false };
 
+it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
+  '%s leaves the Hero pill focus ring on its native outer anchor',
+  (family) => {
+    const focused = { ...idle, focusVisible: true };
+    expect(linkSurfaceProps(family, 'pill', 'minimal', focused).focusVisible).toBe(false);
+    expect(linkSurfaceProps(family, 'text', 'minimal', focused).focusVisible).toBe(true);
+    expect(linkTextProps('pill', focused, family).decoration).toBe('none');
+  }
+);
+
 // P-SHADCN-SURFACE-ACTION-APPEARANCE: explicit passive Rhea paint.
 // Literal expectations are independent of shadcnActionAppearance's output.
 for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {

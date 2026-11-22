@@ -383,7 +383,33 @@ for (const locale of locales)
           }));
           expect(focus.outline).toBe('solid');
           expect(parseFloat(focus.width)).toBeGreaterThanOrEqual(2);
+          const innerFocusPaint = () =>
+            pill.evaluate((node) =>
+              [...node.querySelectorAll('*')].flatMap((part) => {
+                const style = getComputedStyle(part);
+                return (style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0) ||
+                  style.boxShadow !== 'none'
+                  ? [{ tag: part.tagName, outline: style.outline, shadow: style.boxShadow }]
+                  : [];
+              })
+            );
+          await expect.poll(innerFocusPaint).toEqual([]);
           await capture(page, `hero-${locale}-${theme}-${mode}-focus`, focus);
+          if (locale === 'en' && theme === 'light') {
+            await page.emulateMedia({ forcedColors: 'active' });
+            expect(await pill.evaluate((node) => node.matches(':focus-visible'))).toBe(true);
+            const forcedFocus = await pill.evaluate((node) => ({
+              outline: getComputedStyle(node).outlineStyle,
+              width: getComputedStyle(node).outlineWidth,
+              color: getComputedStyle(node).outlineColor,
+              background: getComputedStyle(document.body).backgroundColor,
+            }));
+            expect(forcedFocus.outline).toBe('solid');
+            expect(parseFloat(forcedFocus.width)).toBeGreaterThanOrEqual(2);
+            expect(forcedFocus.color).not.toBe(forcedFocus.background);
+            await expect.poll(innerFocusPaint).toEqual([]);
+            await capture(page, `hero-${locale}-${theme}-${mode}-forced-colors`, forcedFocus);
+          }
           await Promise.all([
             page.waitForURL(`**/${locale}/whitepaper/0-preface/`),
             page.keyboard.press('Enter'),
