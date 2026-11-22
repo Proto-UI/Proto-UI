@@ -16,6 +16,7 @@ import {
   createJavaScriptValueReader,
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
+  emitJavaScriptRecord,
   emitJavaScriptValue,
   emitJavaScriptParameters,
   emitUninvokedJavaScriptFunction,
@@ -308,7 +309,9 @@ export function emitWebComponentSource(
     if (
       node.kind === 'style-handle' ||
       node.kind === 'rule' ||
-      (node.kind === 'operation' && String(node.operation).startsWith('feedback.style.'))
+      (node.kind === 'operation' &&
+        (String(node.operation).startsWith('feedback.style.') ||
+          node.operation === 'feedback.material.shader'))
     )
       styled = true;
     if (node.kind === 'operation' && node.operation === 'render.el') {
@@ -386,7 +389,7 @@ export function emitWebComponentSource(
   const contextValidation = context
     ? emitNativeContextValidation(ir, keyNames, `${prefix}Accepts`)
     : '';
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix, admitted.value.shaderKernels);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -560,9 +563,21 @@ export function emitWebComponentSource(
         span: node.span,
       });
     try {
+      // Omitting an unused renderer parameter does not change TemplateChildren
+      // semantics. A native render still constructs its result in the current
+      // Document, including null, text and arrays with no authored r.el call.
+      const implicitRenderer =
+        !options.ssr && node.context === 'render' && node.parameters.length === 0
+          ? `${prefix}RendererArgument${nativeSequence++}`
+          : undefined;
       const renderer =
-        !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      const callable = `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+        !options.ssr && node.parameters[0]?.type === 'render'
+          ? node.parameters[0].name
+          : implicitRenderer;
+      const nativeParameters = implicitRenderer
+        ? `${implicitRenderer}: ${prefix}Renderer`
+        : emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName);
+      const callable = `(${nativeParameters})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${renderer ? `${'  '.repeat(depth + 1)}return ${renderer}.nativeFrame.document.createDocumentFragment();\n` : ''}${'  '.repeat(depth)}}`;
       return callBoundaries.authored.has(node)
         ? `${prefix}MarkAuthoredCallable(${callable})`
         : callable;
@@ -623,7 +638,7 @@ export function emitWebComponentSource(
       case 'array':
         return `[${node.elements.map((value) => expr(value, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${node.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expr(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(node, (item) => expr(item, depth), typeName);
       case 'function':
         return fn(node.function, depth);
       case 'helper-call':
@@ -715,7 +730,7 @@ export function emitWebComponentSource(
               const output = `${prefix}Output${nativeSequence++}`,
                 fragment = `${prefix}Fragment${nativeSequence++}`;
               const frame = `${nativeRenderer}.nativeFrame`;
-              return `${origin}${indent}const ${output}=${statement.value ? expr(statement.value, depth) : 'undefined'};\n${indent}const ${fragment}=${frame}.document.createDocumentFragment();\n${nativeAppend(statement.value, output, fragment, frame)}\n${indent}return ${fragment};\n`;
+              return `${origin}${indent}const ${output}=${statement.value ? expr(statement.value, depth) : 'undefined'};\n${indent}const ${fragment}=${frame}.document.createDocumentFragment();\nif(${output}!==undefined){${nativeAppend(statement.value, output, fragment, frame)}}\n${indent}return ${fragment};\n`;
             }
             return `${origin}${indent}return${statement.value ? ` ${expr(statement.value, depth)}` : ''};\n`;
           case 'throw':
@@ -895,7 +910,7 @@ ${controlLabel ? "  if (port.server && getAssociations !== undefined) throw new 
   const ${prefix}Def = owner.def;
 ${publicCalls ? `    const ${prefix}WrapPublic = owner.wrapPublic;` : ''}
 ${hasAuthoredHooks ? `    const ${prefix}Authored = owner.authored;` : ''}
-${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
+${atoms.shader ? `    const ${prefix}Shader = owner.shader;` : ''}${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
 ${styled ? `  const ${prefix}Style = owner.style;\n  const ${prefix}OwnerProps = owner.props;\n` : ''}${interacting ? `  const ${prefix}Interaction = owner.interaction;\n` : ''}${hookCode}
   try {
     owner.render = (${fn(ir.setup, 2)})(${ir.setup.parameters.length === 0 ? '' : `${prefix}Def`});
@@ -1043,7 +1058,7 @@ ${controlLabel ? `    this.${prefix}Owner?.interaction.refresh();` : ''}
     const ${prefix}Def = owner.def;
 ${publicCalls ? `    const ${prefix}WrapPublic = owner.wrapPublic;` : ''}
 ${hasAuthoredHooks ? `    const ${prefix}Authored = owner.authored;` : ''}
-${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
+${atoms.shader ? `    const ${prefix}Shader = owner.shader;` : ''}${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
 ${styled ? `    const ${prefix}Style = owner.style;\n    const ${prefix}OwnerProps = owner.props;\n` : ''}
 ${interacting ? `    const ${prefix}Interaction = owner.interaction;\n` : ''}
 ${hookCode}    try {
@@ -1194,7 +1209,7 @@ ${context ? `  context: ${p}ContextDef;\n` : ''}  props: {define(input: Record<s
   expose: {value(key: string, value: unknown): void; state(key: string, handle: ${p}State${interacting ? ` | ${p}NativeObservedState<boolean | string | number>` : ''}): void; method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R): void; event(key: string, spec?: object): void};
   lifecycle: {onCreated(fn: Function): void; onMounted(fn: Function): void; onUpdated(fn: Function): void; onUnmounted(fn: Function): void; onBeforeDispose(fn: Function): void};
 };
-type ${p}Owner = {${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
+type ${p}Owner = {${atoms.shader ? `shader: ReturnType<typeof ${p}CreateShader>; ` : ''}${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
 function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}${controlLabel ? ', getAssociations: () => unknown' : ''}): ${p}Owner {
   let alive = true, disposing = false, setup = true, callbackDepth = 0;
 ${
@@ -1218,13 +1233,15 @@ ${ssr ? '' : '  let detachedDisplay: {value: string; priority: string} | undefin
   const ensureExternal = () => { ensure(); if (disposing) throw new Error('Logical owner is disposing'); };
   const ensureSetup = () => { ensure(); if (!setup) throw new Error('Setup capability is closed'); };
   const runtime = () => { ensure(); if (setup || !callbackDepth) throw new Error('State writes require a live callback scope'); };
-  ${atoms.owner({ setup: 'ensureSetup()', runtime: 'runtime()', alive: 'alive', invoke: 'invoke(callback, [], false)', invokeRun: 'invoke(callback)', document: ssr ? "host.root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)" : 'host.ownerDocument', run: `${p}Run` })}
+  ${atoms.owner({ setup: 'ensureSetup()', runtime: 'runtime()', alive: 'alive', invoke: 'invoke(callback, [], false)', invokeRun: 'invoke(callback)', document: ssr ? "host.root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)" : 'host.ownerDocument', run: `${p}Run`, root: ssr ? 'host.root' : 'host', prepare: styled ? `${p}Style.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `  const ${p}AuthoredWatchCleanups: (() => void)[] = [];
   const ${p}Authored = ${p}CreateAuthored({setup: ensureSetup, borrow(value) {
     const state = value as ${p}State<${p}Scalar>;
-    return Object.freeze({get: () => state.get(), setDefault: (value: ${p}Scalar) => state.setDefault(value), set: (value: ${p}Scalar, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: unknown) => void) { ensureSetup(); const off = state.external.subscribe(event => { invoke(callback, [event]); }); ${p}AuthoredWatchCleanups.push(off); return off; }});
+    const borrowed = Object.freeze({get: () => state.get(), setDefault: (value: ${p}Scalar) => state.setDefault(value), set: (value: ${p}Scalar, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: unknown) => void) { ensureSetup(); const off = state.external.subscribe(event => { invoke(callback, [event]); }); ${p}AuthoredWatchCleanups.push(off); return off; }});
+    ${atoms.registerSource('borrowed')}
+    return borrowed;
   }});`
     : ''
 }
@@ -1287,8 +1304,10 @@ ${controlLabel ? '    getAssociations,\n' : ''}
         unsubscribe(off: () => void) { ensureExternal(); off(); },
       });
       observedProjections.set(handle, {external, subscribers});
+      ${atoms.registerSource('handle')}
       observedSubscriptions.push(handle.subscribe((event) => {
-${styled ? `        ${p}Style.refresh();\n` : ''}        ${p}Interaction.refresh();
+${styled ? `        ${p}Style.refresh();\n` : ''}${atoms.refresh}
+        ${p}Interaction.refresh();
         ${emitRecordedNotification({ queue: 'emissions', draining: 'emitting', subscribers: 'subscribers', deliver: 'invoke(subscriber, [event], false)', alive: 'alive && !disposing', drain: false })}
         drainEmissions();
       }));
@@ -1421,13 +1440,14 @@ ${hasAuthoredHooks ? `    ${p}Authored.claimState(semantic);` : ''}
       set(next: T, reason?: unknown) {
         runtime(); validate(next); if (Object.is(value, next)) return;
         const prev = value; value = next;
-${styled ? `        ${p}Style.refresh();\n` : ''}
+${styled ? `        ${p}Style.refresh();\n` : ''}${atoms.refresh}
+
 ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
         ${emitRecordedNotification({ queue: 'emissions', draining: 'emitting', subscribers: 'subscribers', deliver: "invoke(subscriber, [{type: 'next', prev, next, reason}], false)", alive: 'alive && !disposing', drain: false })}
         drainEmissions();
       },
     };
-    states.push(handle); ${hasAuthoredHooks ? `${p}Authored.state(semantic, handle);` : ''} return handle;
+    states.push(handle); ${hasAuthoredHooks ? `${p}Authored.state(semantic, handle);` : ''} ${atoms.registerSource('handle')} return handle;
   }
 ${
   ssr
@@ -1479,15 +1499,16 @@ ${interacting ? `    try { ${p}Interaction.unmount(); } catch (caught) { error =
     host.visible(true);
     if (!view) {
       ++epoch; render(); view = true; dirty = false;
-${styled ? `      ${p}Style.mount();\n` : ''}${
-        interacting
-          ? `      if (!interactionAdopted && host.hydrationAttributes) {
+${styled ? `      ${p}Style.mount();\n` : ''}      ${atoms.mount}
+${
+  interacting
+    ? `      if (!interactionAdopted && host.hydrationAttributes) {
         ${p}Interaction.adoptAttributes(host.hydrationAttributes, host.hydrationBaselines);
         interactionAdopted = true;
       }
       ${p}Interaction.mount();\n`
-          : ''
-      }      fire('mounted');
+    : ''
+}      fire('mounted');
     } else if (dirty) { dirty = false; render(); fire('updated'); }
   }
   function schedule(update: boolean): void {
@@ -1550,7 +1571,7 @@ ${styled ? `    try { ${p}Style.unmount(); host.removeAttribute('data-pui-style'
       }
       detachedDisplay = undefined;
     }
-    if (!view) { ++epoch; render(); view = true; ${styled ? `${p}Style.mount(); ` : ''}${interacting ? `${p}Interaction.mount(); ` : ''}fire('mounted'); }
+    if (!view) { ++epoch; render(); view = true; ${styled ? `${p}Style.mount(); ` : ''}${atoms.mount}${interacting ? `${p}Interaction.mount(); ` : ''}fire('mounted'); }
     else if (dirty) { render(); fire('updated'); }
   }
   function schedule(update: boolean): void {
@@ -1613,7 +1634,7 @@ ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
   const owner: ${p}Owner = {
     ${publicCalls ? `wrapPublic: ${p}WrapPublic,` : ''}
     ${hasAuthoredHooks ? `authored: ${p}Authored,` : ''}
-    ${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
+    ${atoms.shader ? `shader: ${p}Shader,` : ''}${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
     identity: Symbol('compiled-logical-owner'), def, exposes, render: undefined,
 ${interacting ? `    interaction: ${p}Interaction,\n` : ''}
 ${styled ? `    style: ${p}Style, props: () => resolved as ${p}PropsSnapshot,\n` : ''}

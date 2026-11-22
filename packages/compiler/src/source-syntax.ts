@@ -9,14 +9,16 @@ export type FunctionNode =
   | ts.FunctionDeclaration
   | ts.FunctionExpression
   | ts.ArrowFunction
-  | ts.MethodDeclaration;
+  | ts.MethodDeclaration
+  | ts.GetAccessorDeclaration;
 
 export function isSourceFunction(node: ts.Node): node is FunctionNode {
   return (
     ts.isFunctionDeclaration(node) ||
     ts.isFunctionExpression(node) ||
     ts.isArrowFunction(node) ||
-    ts.isMethodDeclaration(node)
+    ts.isMethodDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node)
   );
 }
 
@@ -43,6 +45,84 @@ export function scalarInitializer(node: ts.Expression): boolean {
     (ts.isPrefixUnaryExpression(node) &&
       (node.operator === ts.SyntaxKind.MinusToken || node.operator === ts.SyntaxKind.PlusToken) &&
       ts.isNumericLiteral(node.operand))
+  );
+}
+
+/** A literal-only membership expression has no source calls, getters or coercion. */
+export function staticScalarMembership(node: ts.Expression): boolean | undefined {
+  node = unwrapSourceExpression(node);
+  if (
+    !ts.isCallExpression(node) ||
+    node.questionDotToken ||
+    node.typeArguments?.length ||
+    !ts.isPropertyAccessExpression(node.expression) ||
+    node.expression.questionDotToken ||
+    node.expression.name.text !== 'includes' ||
+    node.arguments.length !== 1
+  )
+    return undefined;
+  const receiver = unwrapSourceExpression(node.expression.expression);
+  if (!ts.isArrayLiteralExpression(receiver)) return undefined;
+  const scalar = (value: ts.Expression): string | number | boolean | null | undefined => {
+    value = unwrapSourceExpression(value);
+    if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) return value.text;
+    if (ts.isNumericLiteral(value)) {
+      const number = Number(value.text);
+      return Number.isFinite(number) ? number : undefined;
+    }
+    if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
+    if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
+    if (value.kind === ts.SyntaxKind.NullKeyword) return null;
+    if (
+      ts.isPrefixUnaryExpression(value) &&
+      (value.operator === ts.SyntaxKind.PlusToken || value.operator === ts.SyntaxKind.MinusToken) &&
+      ts.isNumericLiteral(value.operand)
+    ) {
+      const number =
+        Number(value.operand.text) * (value.operator === ts.SyntaxKind.MinusToken ? -1 : 1);
+      return Number.isFinite(number) ? number : undefined;
+    }
+    return undefined;
+  };
+  const search = scalar(node.arguments[0]);
+  const elements = receiver.elements.map(scalar);
+  if (search === undefined || elements.some((value) => value === undefined)) return undefined;
+  // Every admitted number is finite. Equality therefore implements SameValueZero,
+  // including +0/-0, without evaluating any input code or coercing an operand.
+  return elements.some((value) => value === search);
+}
+
+/** A checked immutable module selection, not an arbitrary top-level expression. */
+export function staticCallableSelection(node: ts.Node): node is ts.ConditionalExpression {
+  if (!ts.isConditionalExpression(node)) return false;
+  const leaf = (value: ts.Expression): boolean => ts.isIdentifier(unwrapSourceExpression(value));
+  const condition = unwrapSourceExpression(node.condition);
+  return (
+    (ts.isIdentifier(condition) ||
+      condition.kind === ts.SyntaxKind.TrueKeyword ||
+      condition.kind === ts.SyntaxKind.FalseKeyword ||
+      staticScalarMembership(condition) !== undefined) &&
+    leaf(node.whenTrue) &&
+    leaf(node.whenFalse)
+  );
+}
+
+/** Creating a literal getter object is inert; reads later execute its real body. */
+export function staticGetterRecordInitializer(node: ts.Expression): boolean {
+  node = unwrapSourceExpression(node);
+  return (
+    ts.isObjectLiteralExpression(node) &&
+    node.properties.some(ts.isGetAccessorDeclaration) &&
+    node.properties.every(
+      (property) =>
+        (ts.isGetAccessorDeclaration(property) &&
+          property.parameters.length === 0 &&
+          !!property.body &&
+          (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name))) ||
+        (ts.isPropertyAssignment(property) &&
+          (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
+          staticDataInitializer(property.initializer))
+    )
   );
 }
 
@@ -74,7 +154,7 @@ export function staticDataInitializer(node: ts.Expression): boolean {
           staticDataInitializer(property.initializer)) ||
         (ts.isSpreadAssignment(property) && ts.isIdentifier(property.expression))
     );
-  return staticJoin(node) !== undefined;
+  return staticJoin(node) !== undefined || staticScalarMembership(node) !== undefined;
 }
 
 /** `<static array>.join(<string literal>)`: the receiver and separator nodes. */

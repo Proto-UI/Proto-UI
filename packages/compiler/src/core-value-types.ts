@@ -68,6 +68,60 @@ export const PRESENTATION_RECEIPT_TYPE = readonlyRecord({
 });
 export const COMPLETION_REQUEST_TYPE = readonlyRecord({ receipt: PRESENTATION_RECEIPT_TYPE });
 
+/** Presentation keeps State identity in IR; a user-supplied getter is not a readable State. */
+export const AFFINE_LENGTH_TYPE: ValueType = record({
+  px: 'number',
+  rootText: 'number',
+  ownBox: 'number',
+});
+export const TRANSLATION_TYPE: ValueType = {
+  kind: 'array',
+  element: AFFINE_LENGTH_TYPE as import('./data-types').DataType,
+};
+export const PRESENCE_ENDPOINT_TYPE: ValueType = objectValueType([
+  {
+    name: 'translate',
+    optional: true,
+    readonly: true,
+    type: joinValueTypes([
+      TRANSLATION_TYPE,
+      readonlyRecord({
+        source: joinValueTypes(['state:string', 'observed:string', 'borrowed:string']),
+        cases: { kind: 'object', fields: [], index: TRANSLATION_TYPE },
+      }),
+    ]),
+  },
+  { name: 'opacity', optional: true, readonly: true, type: 'number' },
+]);
+export const PRESENTATION_DECLARATION_TYPE: ValueType = readonlyRecord({
+  owner: 'presentation-owner-ref',
+  closed: PRESENCE_ENDPOINT_TYPE,
+  entered: PRESENCE_ENDPOINT_TYPE,
+  easing: { kind: 'array', element: 'number' },
+});
+
+export const SHADER_PASS_TYPE: ValueType = objectValueType([
+  { name: 'id', type: 'string' },
+  { name: 'kernel', type: literals('copy-rgba8-v1', 'tint-rgba8-v1') },
+  { name: 'input', type: 'string' },
+  { name: 'tint', type: { kind: 'array', element: 'number' }, optional: true },
+]);
+export const SHADER_PRESENTATION_TYPE: ValueType = readonlyRecord({
+  version: { kind: 'literal', value: 1 },
+  source: readonlyRecord({
+    kind: { kind: 'literal', value: 'owned-pixels' },
+    width: 'number',
+    height: 'number',
+    pixels: { kind: 'array', element: 'number' },
+    colorSpace: { kind: 'literal', value: 'linear-srgb' },
+    alpha: { kind: 'literal', value: 'premultiplied' },
+    origin: { kind: 'literal', value: 'top-left' },
+  }),
+  passes: { kind: 'array', element: SHADER_PASS_TYPE as import('./data-types').DataType },
+  output: 'string',
+  fallback: { kind: 'array', element: 'number' },
+});
+
 /** Core Scroll requests retain their discriminants and Anatomy authority in portable IR. */
 export const SCROLL_AXIS_TYPE = literals('horizontal', 'vertical');
 export const SCROLL_POSITION_REQUEST_TYPE = joinValueTypes([
@@ -133,6 +187,12 @@ export const CORE_VALUE_TYPES: Readonly<Record<string, ValueType>> = {
   PresentationOwnerWriter: 'presentation-owner-writer',
   PresentationViewBinding: 'presentation-view-binding',
   PresenceOwnerDeclaration: 'presence-owner',
+  ShaderPresentationDeclaration: SHADER_PRESENTATION_TYPE,
+  ShaderPass: SHADER_PASS_TYPE,
+  AffineLength: AFFINE_LENGTH_TYPE,
+  Translation: TRANSLATION_TYPE,
+  PresenceEndpoint: PRESENCE_ENDPOINT_TYPE,
+  PresencePresentationDeclaration: PRESENTATION_DECLARATION_TYPE,
   AttemptToken: ATTEMPT_TOKEN_TYPE,
   PresencePhase: PRESENCE_PHASE_TYPE,
   PresentationCompletionConfig: PRESENTATION_COMPLETION_TYPE,

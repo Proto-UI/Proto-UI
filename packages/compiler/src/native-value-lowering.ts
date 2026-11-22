@@ -285,6 +285,31 @@ export function emitUninvokedJavaScriptFunction(value: FunctionIR, typed = true)
   return `${annotations}(${parameters}) => { throw new Error('[Compiler] unreachable authored callable invoked'); }`;
 }
 
+/** Native accessors retain deferred execution; constructing the record never reads it. */
+export function emitJavaScriptRecordEntry(
+  entry: { key: string; value: ExpressionIR; accessor?: 'get' },
+  emit: (value: ExpressionIR) => string,
+  typeName?: (type: ValueType) => string,
+  typed = true
+): string {
+  const key = `[${JSON.stringify(entry.key)}]`;
+  if (entry.accessor === 'get') {
+    if (entry.value.kind !== 'function') throw new Error('Invalid getter callable.');
+    const result = typed && typeName ? `: ${typeName(entry.value.function.returnType)}` : '';
+    return `get ${key}()${result} { return (${emit(entry.value)})(); }`;
+  }
+  return `${key}: ${emit(entry.value)}`;
+}
+
+export function emitJavaScriptRecord(
+  value: Extract<ExpressionIR, { kind: 'record' }>,
+  emit: (value: ExpressionIR) => string,
+  typeName?: (type: ValueType) => string,
+  typed = true
+): string {
+  return `{ ${value.entries.map((entry) => emitJavaScriptRecordEntry(entry, emit, typeName, typed)).join(', ')} }`;
+}
+
 export function emitJavaScriptValue(
   value: ExpressionIR,
   emit: (value: ExpressionIR) => string,
@@ -310,7 +335,7 @@ export function emitJavaScriptValue(
         return emitJavaScriptExternalCall(value, emit, typeName, typed, callBoundary);
       return `(${emit(value.callee)})${value.optional ? '?.' : ''}(${value.arguments.map(emit).join(', ')})`;
     case 'object-spread':
-      return `({ ${value.parts.map((part) => (part.kind === 'spread' ? `...(${emit(part.value)})` : `[${JSON.stringify(part.key)}]: ${emit(part.value)}`)).join(', ')} })`;
+      return `({ ${value.parts.map((part) => (part.kind === 'spread' ? `...(${emit(part.value)})` : emitJavaScriptRecordEntry(part, emit, typeName, typed))).join(', ')} })`;
     case 'intrinsic': {
       const args = value.arguments.map(emit);
       switch (value.name) {

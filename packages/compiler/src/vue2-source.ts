@@ -20,6 +20,7 @@ import {
   createJavaScriptValueReader,
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
+  emitJavaScriptRecord,
   emitJavaScriptValue,
   emitJavaScriptParameters,
   emitUninvokedJavaScriptFunction,
@@ -318,7 +319,7 @@ export function emitVue2Source(
   const contextNames = new Map(
     ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`])
   );
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix, admitted.value.shaderKernels);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -489,7 +490,7 @@ export function emitVue2Source(
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${value.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expression(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(value, (item) => expression(item, depth), typeName, false);
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
@@ -767,7 +768,7 @@ ${helpers}
 function ${prefix}Setup(${prefix}Owner) {
 ${publicCalls ? `  const ${prefix}WrapPublic = ${prefix}Owner.wrapPublic;` : ''}
 ${hasAuthoredHooks ? `  const ${prefix}Authored = ${prefix}Owner.authored;` : ''}
-${atoms.delay ? `  const ${prefix}Delay = ${prefix}Owner.delay;` : ''}${atoms.presence ? `  const ${prefix}Presence = ${prefix}Owner.presence;` : ''}${atoms.meta ? `  const ${prefix}Meta = ${prefix}Owner.meta;` : ''}
+${atoms.shader ? `  const ${prefix}Shader = ${prefix}Owner.shader;` : ''}${atoms.delay ? `  const ${prefix}Delay = ${prefix}Owner.delay;` : ''}${atoms.presence ? `  const ${prefix}Presence = ${prefix}Owner.presence;` : ''}${atoms.meta ? `  const ${prefix}Meta = ${prefix}Owner.meta;` : ''}
 ${hooks}
   ${
     ir.setup.returnType === 'void'
@@ -907,7 +908,7 @@ function nativeHelpers(
   publicCalls: boolean,
   controlLabel: boolean
 ): string {
-  const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
+  const refresh = `${styled ? 'style.refresh();' : ''}${atoms.refresh}${interactive ? ' interaction.refresh();' : ''}`;
   // Derive the generated finite registry and its key enumeration from the same
   // canonical operation metadata; no independent callback-shape analysis.
   const lifecycleKeys = Object.values(OPERATION_RULES)
@@ -1312,7 +1313,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
       : new AggregateError(failures, '[Vue2 native] presence withdrawal failed.');
   };
 ${context.owner}
-  ${atoms.owner({ setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', typed: false })}
+  ${atoms.owner({ setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', root: 'activeRoot && activeRoot.ownerDocument.defaultView && activeRoot instanceof activeRoot.ownerDocument.defaultView.HTMLElement ? activeRoot : null', prepare: styled ? 'style.refresh();' : '', typed: false })}
 ${
   hasAuthoredHooks
     ? `  /** @type {(() => void)[]} */ const PUIAuthoredWatchCleanups = [];
@@ -1321,7 +1322,9 @@ ${
       stateful
         ? `
     const state = /** @type {PUIOwnedState<unknown>} */ (value);
-    return Object.freeze({get: () => state.get(), setDefault: (/** @type {unknown} */ value) => state.setDefault(value), set: (/** @param {unknown} value @param {unknown} [reason] */ (value, reason) => state.set(value, reason)), watch: (/** @type {(run: PUIRun, event: PUIStateEvent<unknown>) => void} */ fn) => { setupOnly(); const off = state.external.subscribe(event => invoke(() => fn(run, event), false)); PUIAuthoredWatchCleanups.push(off); return off; }});
+    const borrowed = Object.freeze({get: () => state.get(), setDefault: (/** @type {unknown} */ value) => state.setDefault(value), set: (/** @param {unknown} value @param {unknown} [reason] */ (value, reason) => state.set(value, reason)), watch: (/** @type {(run: PUIRun, event: PUIStateEvent<unknown>) => void} */ fn) => { setupOnly(); const off = state.external.subscribe(event => invoke(() => fn(run, event), false)); PUIAuthoredWatchCleanups.push(off); return off; }});
+    ${atoms.registerSource('borrowed')}
+    return borrowed;
     `
         : 'return value;'
     }
@@ -1405,6 +1408,7 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
         spec: Object.freeze({ kind: typeof handle.get() === 'boolean' ? 'bool' : typeof handle.get() === 'number' ? 'number.discrete' : 'string', observed: true }),
       });
       observedExternals.set(handle, external);
+      ${atoms.registerSource('handle')}
       states.push({ dispose: () => {
         off();
         try { for (const fn of Array.from(subscribers)) fn({ type: 'disconnect', reason: 'unmount' }); }
@@ -1467,6 +1471,7 @@ ${
     };
     ${interactive ? 'observedExternals.set(handle, handle.external);' : ''}
     states.push(handle);
+    ${atoms.registerSource('handle')}
     return handle;
   };
   /** @template {boolean | string | number} T @param {PUIStateKind} kind @param {string} key @param {T} initial @param {PUIStateConfiguration} [configuration] @returns {PUIOwnedState<T>} */
@@ -1627,9 +1632,11 @@ ${
         }
         ${interactive ? 'if (terminal || commit.epoch !== epoch || !present || !hostActive) return;' : ''}
         ${styled ? 'style.mount();' : ''}
+        ${atoms.mount}
         fire('mounted');
         ${ssr ? `if (firstContinuation) { firstContinuation = false; syncHost(true); }` : ''}
       } else if (viewActive) {
+        ${atoms.physicalPresentation ? `if (activeRoot !== target) { ${atoms.detach} activeRoot = target; ${atoms.mount} }` : ''}
         ${
           interactive
             ? `if (activeRoot !== target || activeEpoch !== epoch) {
@@ -1650,7 +1657,7 @@ ${
   const owner = {
     ${publicCalls ? 'wrapPublic: PUIWrapPublic,' : ''}
     ${hasAuthoredHooks ? 'authored: PUIAuthored,' : ''}
-    ${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
+    ${atoms.shader ? 'shader: PUIShader,' : ''}${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
     ${context.handle}
     host() { return viewActive && present && hostActive && !terminal ? vm.$el : null; },
     ${interactive ? 'interaction,' : ''}

@@ -1,6 +1,7 @@
 import { pruneDeadValues } from './demand-pruning';
 import {
   emitJavaScriptValue,
+  emitJavaScriptRecord,
   emitJavaScriptParameters,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -269,7 +270,7 @@ export function emitReact(
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${value.entries.map((entry) => `${entry.key === '__proto__' ? `[${JSON.stringify(entry.key)}]` : JSON.stringify(entry.key)}: ${expression(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(value, (item) => expression(item, depth), typeName);
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
