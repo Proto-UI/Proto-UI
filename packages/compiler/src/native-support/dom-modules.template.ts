@@ -928,7 +928,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
         ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
         ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
       if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
-      applyText(!(textObservation?.epoch === generation && textObservation.ownerValue === textValue && previousValue === textValue)); requestPresentation();
+      // A real canonical transition retires the prior candidate window, even if
+      // a later explicit transition returns to its original string value.
+      if (textValue !== previousValue) textObservation = null;
+      applyText(!(textObservation?.epoch === generation && textObservation.ownerValue === textValue)); requestPresentation();
     },
     snapshot() { alive(); const target = ready() ? root as HTMLInputElement | HTMLTextAreaElement : null; return textDeclared ? Object.freeze({ value: textValue, composing: textComposing, selection: target && canonicalText(target.value) === textValue ? readTextSelection(target, target.value) : null }) : null; },
   };
