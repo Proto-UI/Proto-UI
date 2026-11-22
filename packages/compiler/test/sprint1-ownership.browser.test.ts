@@ -73,7 +73,7 @@ async function runBrowserCase(
       .catch(() => undefined);
     const repository = fileURLToPath(new URL('../../../', import.meta.url));
     const inputs = [
-      'packages/compiler/test/browser-sprint1-ownership.test.ts',
+      'packages/compiler/test/sprint1-ownership.browser.test.ts',
       'packages/compiler/test/ownership-fixture-plugin.ts',
       'packages/compiler/test/props-policy-source.ts',
       'packages/compiler/test/fixtures/differential-browser/props-policy.proto.ts',
