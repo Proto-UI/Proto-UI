@@ -27,13 +27,13 @@ The same composition contains “Run action” and “Disabled” in each host. 
 
 First [initialize an existing application](/en/start-here/quick-start/). For the published 0.2.0 Web Component baseline:
 
-<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc base-button" manager="npm" />
-
-With pnpm:
-
-```sh
-pnpm dlx @proto.ui/cli@0.2.0 add wc base-button
-```
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@0.2.0 add wc base-button',
+    pnpm: 'pnpm dlx @proto.ui/cli@0.2.0 add wc base-button',
+  }}
+  manager="npm"
+/>
 
 Replace `wc` with `react` or `vue` for the stable React or Vue 3 facade. The CLI installs `@proto.ui/prototypes-base` and the corresponding `@proto.ui/adapter-web-component`, `@proto.ui/adapter-react` or `@proto.ui/adapter-vue` at its own exact version. It generates the local `BaseButton` export or `proto-ui-base-button` custom element.
 

@@ -79,6 +79,7 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/test/release-docs-reading.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
   'packages/compiler/test/control-label-native.browser.test.ts',
   'packages/compiler/test/transition-native.browser.test.ts',

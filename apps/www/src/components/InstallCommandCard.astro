@@ -3,6 +3,7 @@ import SiteCopyBootstrap from './SiteCopyBootstrap.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from './site-library-family';
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(siteFamily);
+const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
 // <InstallCommandCard
 //   manager="npm"
 //   commands={{
@@ -62,7 +63,7 @@ const activeManager =
   id={shellId}
 >
   <div class="install-command-card__toolbar" data-code-toolbar data-site-code-surface="toolbar">
-    <div class="install-command-card__managers" aria-label="Package manager">
+    <div class="install-command-card__managers" aria-label={isChinese ? '包管理器' : 'Package manager'}>
       {
         normalizedEntries.map((entry) => (
           <Button
@@ -96,7 +97,7 @@ const activeManager =
       class="install-command-card__copy"
       data-copy-button
       data-site-copy
-      data-copy-label="Copy command"
+      data-copy-label={isChinese ? '复制命令' : 'Copy command'}
     >
     </div>
   </div>
@@ -109,7 +110,7 @@ const activeManager =
           entry.manager === activeManager || 'install-command-card__body--hidden',
         ]}
         tabindex="0"
-        aria-label="Install command"
+        aria-label={`${entry.manager} · ${isChinese ? '安装命令' : 'Install command'}`}
         data-command-panel={entry.manager}
         hidden={entry.manager !== activeManager}
       >
@@ -119,57 +120,13 @@ const activeManager =
   }
 </figure>
 
+<noscript set:html={'<style>@layer base { [data-install-command-card] [data-command-panel][hidden] { display:block!important; } } [data-install-command-card] [data-command-panel] { margin-block:0.5rem; }</style>'} />
+
 <script>
-  import { setElementProps } from '@proto.ui/adapter-web-component';
+  import { initInstallCommandCards } from './install-command-card-client';
 
-  (() => {
-    document.querySelectorAll<HTMLElement>('[data-install-command-card]').forEach((card) => {
-      if (card.dataset.installCommandInit === '1') return;
-      card.dataset.installCommandInit = '1';
-
-      const tabs = Array.from(card.querySelectorAll<HTMLElement>('[data-manager-tab]'));
-      const panels = Array.from(card.querySelectorAll<HTMLElement>('[data-command-panel]'));
-      if (tabs.length === 0 || panels.length === 0) return;
-
-      function setActiveManager(nextManager: string) {
-        card.dataset.activeManager = nextManager;
-        tabs.forEach((tab) => {
-          const active = tab.dataset.managerTab === nextManager;
-          tab.classList.toggle('install-command-card__manager--active', active);
-          tab.setAttribute('aria-pressed', active ? 'true' : 'false');
-          setElementProps(tab, {
-            variant:
-              tab.dataset.siteControlFamily === 'brutalist'
-                ? active
-                  ? 'solid'
-                  : 'surface'
-                : active
-                  ? 'secondary'
-                  : 'ghost',
-            size: 'sm',
-          });
-        });
-        panels.forEach((panel) => {
-          const active = panel.dataset.commandPanel === nextManager;
-          panel.hidden = !active;
-          panel.classList.toggle('install-command-card__body--hidden', !active);
-        });
-      }
-
-      tabs.forEach((tab) => {
-        tab.addEventListener('click', (event) => {
-          if (
-            tab.matches('wc-shadcn-button, wc-brutalist-button') &&
-            !(event instanceof CustomEvent)
-          )
-            return;
-          const nextManager = tab.dataset.managerTab;
-          if (!nextManager) return;
-          setActiveManager(nextManager);
-        });
-      });
-    });
-  })();
+  initInstallCommandCards(document);
+  document.addEventListener('astro:page-load', () => initInstallCommandCards(document));
 </script>
 
 <script>

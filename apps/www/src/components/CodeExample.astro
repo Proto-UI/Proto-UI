@@ -9,7 +9,11 @@ export type { CodeExampleFile, CodeExampleProps, CodeExamplesByHost } from './co
 
 interface Props extends CodeExampleProps {}
 
-const { files, commands = {}, pendingHosts = [], guidance = {}, labels = { install: 'Install', usage: 'Usage', copy: 'Copy', pending: 'WIP', overflow: 'Scroll to see all hosts →' }, initialHost, label = 'Code example', class: className = '' } = Astro.props;
+const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
+const defaultLabels = isChinese
+  ? { install: '安装', usage: '用法', copy: '复制', pending: 'WIP', overflow: '横向滚动查看所有宿主 →', files: '文件' }
+  : { install: 'Install', usage: 'Usage', copy: 'Copy', pending: 'WIP', overflow: 'Scroll to see all hosts →', files: 'Files' };
+const { files, commands = {}, pendingHosts = [], guidance = {}, labels = defaultLabels, initialHost, label = isChinese ? '代码示例' : 'Code example', class: className = '' } = Astro.props;
 
 for (const host of Object.keys(files)) {
   if (!isRuntimeId(host)) throw new Error(`[CodeExample] Unsupported host "${host}".`);
@@ -59,7 +63,7 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
   aria-label={label}
 >
   <div class="code-example__strip" data-code-toolbar>
-    <nav class="code-example__tabs" aria-label="Host" data-code-host-tabs>
+    <nav class="code-example__tabs" aria-label={isChinese ? '宿主' : 'Host'} data-code-host-tabs>
       {
         hosts.map((host, hostIndex) => {
           const selected = host === activeHost;
@@ -115,7 +119,7 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
               <p><strong>WIP · {pendingHost.label}</strong></p>
               <p>{pendingHost.message}</p>
             </div>
-          ) : <CodeFileBrowser id={`${instanceId}-${hostIndex}`} files={hostFiles} label={labels.usage} filesLabel={labels.files ?? 'Files'} copyLabel={labels.copy} />}
+          ) : <CodeFileBrowser id={`${instanceId}-${hostIndex}`} files={hostFiles} label={labels.usage} filesLabel={labels.files ?? defaultLabels.files} copyLabel={labels.copy} />}
 
         </section>
       );
