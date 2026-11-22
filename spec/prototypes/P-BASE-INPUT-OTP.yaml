@@ -15,10 +15,14 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BASE-INPUT-OTP-FIELD
+    text:
+      en: The optional Field Control reports only the Root's canonical accepted value. Input and composition completion finish their outward owner callbacks before requesting automatic change validation; a refused controlled candidate or unchanged normalized uncontrolled value cannot validate the old value as a change. An accepted canonical change requests automatic onChange validation; explicit manual validation and configured blur validation remain available even without a change. Same-turn edits coalesce to one report for the latest accepted snapshot. Root reset first retires its editor lease. Reset, policy changes, composition restart and editor retirement revoke queued reports. Composition end still retires the composing fact when no value was accepted.
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-FIELD-0001
     - id: C-TEXT-CONTROL-SELECTION-0001
       since: 0.3.0-alpha.2
 verifies:
@@ -35,6 +39,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-INPUT-OTP
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Required canonical-only Field change reports after owner callbacks with reset, policy and editor lease cancellation.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base inputOtp family as draft.

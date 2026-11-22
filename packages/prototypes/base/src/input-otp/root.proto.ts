@@ -161,6 +161,11 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
   let initialValue: string = '';
   def.expose.method('resetValue', () => {
     if (!run) return false;
+    const current = run,
+      epoch = viewEpoch;
+    const reset = run.anatomy.partsOf(INPUT_OTP_FAMILY, 'input')[0]?.getExpose('__resetEditor');
+    if (typeof reset === 'function') reset();
+    if (run !== current || viewEpoch !== epoch) return false;
     selection = null;
     const next = normalize(initialValue);
     if (!run.props.isProvided('value')) value.set(next, 'reason: input-otp value reset');

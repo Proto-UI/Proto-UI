@@ -1,13 +1,20 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  AdaptToWebComponent,
+  getElementProps,
+  setElementProps,
+} from '@proto.ui/adapter-web-component';
 import * as base from '../src/input-otp';
 import * as shadcn from '../../shadcn/src/input-otp';
 import * as brutalist from '../../brutalist/src/input-otp';
+import { fieldRoot, fieldLabel } from '../src/field';
 
 const flush = async () => {
   for (let i = 0; i < 30; i++) await Promise.resolve();
 };
-for (const group of [base, shadcn, brutalist])
+const patchProps = (element: HTMLElement, props: Record<string, unknown>) =>
+  setElementProps(element, { ...getElementProps(element), ...props });
+for (const group of [base, shadcn, brutalist, { fieldRoot, fieldLabel }])
   for (const prototype of Object.values(group))
     if (prototype && typeof prototype === 'object' && 'setup' in prototype)
       AdaptToWebComponent(prototype as any);
@@ -22,12 +29,17 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s OTP selection consumer', (fam
     setElementProps(element, props);
     return element;
   };
-  const mount = async (props = {}) => {
+  const mount = async (props = {}, withField = false) => {
     const root = part('root', { length: 4, defaultValue: '1234', ...props });
-    const input = part('input');
+    const input = part(withField ? 'control' : 'input');
     const slots = [0, 1, 2, 3].map((index) => part('slot', { index }));
     root.append(input, ...slots);
-    document.body.append(root);
+    const field = document.createElement(fieldRoot.name) as any;
+    if (withField) {
+      setElementProps(field, { externalValidation: true, validationMode: 'onChange' });
+      field.append(document.createElement(fieldLabel.name), root);
+      document.body.append(field);
+    } else document.body.append(root);
     await flush();
     const editor = (input.shadowRoot?.querySelector('input') ??
       input.querySelector('input')) as HTMLInputElement;
@@ -38,7 +50,7 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s OTP selection consumer', (fam
       editor.dispatchEvent(new Event('select', { bubbles: true }));
       await flush();
     };
-    return { root, input, slots, editor, active, select };
+    return { root, input, slots, editor, active, select, field };
   };
 
   it('uses the real middle caret and selected range without value or completion proposals', async () => {
@@ -59,7 +71,7 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s OTP selection consumer', (fam
     await flush();
     expect(m.active()).toEqual([false, false, false, false]);
     await m.select(0);
-    setElementProps(m.root, { readOnly: true });
+    patchProps(m.root, { readOnly: true });
     await flush();
     expect(m.active()).toEqual([false, false, false, false]);
     expect(m.editor.readOnly).toBe(true);
@@ -90,6 +102,96 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s OTP selection consumer', (fam
     replacement.dispatchEvent(new Event('select'));
     await flush();
     expect(m.active()).toEqual([false, true, false, false]);
+  });
+
+  it('validates only canonical accepted edits after owner callbacks and cancels a detached report', async () => {
+    const m = await mount({ value: '12' }, true);
+    const requests: any[] = [];
+    m.field.addEventListener('validationRequest', (event: CustomEvent) =>
+      requests.push(event.detail)
+    );
+    const edit = async (text: string) => {
+      m.editor.value = text;
+      m.editor.dispatchEvent(
+        new InputEvent('input', { bubbles: true, composed: true, data: text })
+      );
+      await new Promise((resolve) => setTimeout(resolve, 4));
+      await flush();
+    };
+    await edit('123');
+    expect(m.editor.value).toBe('12');
+    expect(requests).toEqual([]);
+    expect(m.field.getExposes().getValidity().dirty).toBe(false);
+    const accept = (event: CustomEvent) => patchProps(m.root, { value: event.detail.value });
+    m.root.addEventListener('valueChange', accept);
+    await edit('1234');
+    expect(m.editor.value).toBe('1234');
+    expect(requests).toHaveLength(1);
+    expect(requests[0].value).toBe('1234');
+    m.root.addEventListener('valueChange', () => m.root.remove());
+    await edit('5678');
+    expect(requests).toHaveLength(1);
+  });
+
+  it('keeps normalized no-op edits quiet while retaining manual and blur validation', async () => {
+    const m = await mount({ defaultValue: '12' }, true);
+    const requests: any[] = [];
+    m.field.addEventListener('validationRequest', (event: CustomEvent) =>
+      requests.push(event.detail)
+    );
+    m.editor.value = '12x';
+    m.editor.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, data: 'x' }));
+    await new Promise((resolve) => setTimeout(resolve, 4));
+    await flush();
+    expect(m.editor.value).toBe('12');
+    expect(requests).toEqual([]);
+    m.field.getExposes().validate();
+    await flush();
+    expect(requests.at(-1)).toMatchObject({ value: '12', reason: 'manual' });
+    patchProps(m.field, { validationMode: 'onBlur' });
+    await flush();
+    m.editor.focus();
+    await flush();
+    expect(m.editor.isConnected).toBe(true);
+    expect(m.root.getExposes().focused.get()).toBe(true);
+    m.editor.blur();
+    await flush();
+    expect(m.root.getExposes().focused.get()).toBe(false);
+    expect(requests.at(-1)).toMatchObject({ value: '12', reason: 'blur' });
+    expect(requests).toHaveLength(2);
+  });
+
+  it('coalesces current Field values and retires reports on Root reset or policy interruption', async () => {
+    const m = await mount({ defaultValue: '12' }, true);
+    const requests: any[] = [];
+    m.field.addEventListener('validationRequest', (event: CustomEvent) =>
+      requests.push(event.detail)
+    );
+    const edit = (text: string) => {
+      m.editor.value = text;
+      m.editor.dispatchEvent(
+        new InputEvent('input', { bubbles: true, composed: true, data: text })
+      );
+    };
+    edit('123');
+    edit('1234');
+    await new Promise((resolve) => setTimeout(resolve, 4));
+    await flush();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].value).toBe('1234');
+    edit('9876');
+    m.root.getExposes().resetValue();
+    await new Promise((resolve) => setTimeout(resolve, 4));
+    await flush();
+    expect(m.editor.value).toBe('12');
+    expect(requests).toHaveLength(1);
+    edit('5678');
+    patchProps(m.root, { readOnly: true });
+    patchProps(m.root, { readOnly: false });
+    await new Promise((resolve) => setTimeout(resolve, 4));
+    await flush();
+    expect(m.editor.value).toBe('5678');
+    expect(requests).toHaveLength(1);
   });
 
   it('preserves a candidate when selection arrives before input and Context refreshes', async () => {

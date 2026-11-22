@@ -146,7 +146,13 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     groupFocused = false,
     resetting = false;
   let focusTask: DelayTask | null = null;
-  const fieldTasks = new Set<DelayTask>();
+  let fieldTask: DelayTask | null = null;
+  let fieldReportEpoch = 0;
+  const cancelFieldReport = () => {
+    fieldReportEpoch++;
+    fieldTask?.cancel();
+    fieldTask = null;
+  };
   const bump = () => revision.set((revision.get() + 1) % Number.MAX_SAFE_INTEGER);
   // Exposed State notifications are synchronous external callback boundaries.
   // Once onUnmounted retires the receiver, stop the old frame before any next
@@ -187,6 +193,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       before = revision.get();
     if (!current.context.tryRead(FIELD_CONTEXT)) {
       fieldFingerprint = null;
+      cancelFieldReport();
       return;
     }
     field.setPolicy({ disabled: !ready.get(), readOnly: false });
@@ -203,13 +210,17 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       reason: 'sync',
     });
     if (!changed || resetting || !live() || current !== run || before !== revision.get()) return;
-    // Outward owner callbacks finish before validation; every accepted canonical
-    // change owns its task, while reset/retirement cancels unfinished reports.
-    const task = delay(0, () => {
-      fieldTasks.delete(task);
-      if (live()) field.report({ value: fieldValue(), focused: groupFocused, reason: 'change' });
+    // Owner callbacks finish before validation. A newer canonical publication
+    // supersedes a queued report, so old work never validates a different value
+    // and a same-turn sequence validates the latest snapshot only once.
+    cancelFieldReport();
+    const epoch = fieldReportEpoch;
+    fieldTask = delay(0, () => {
+      if (!live() || current !== run || fieldReportEpoch !== epoch) return;
+      fieldTask = null;
+      if (JSON.stringify(fieldValue()) !== fingerprint) return;
+      field.report({ value, focused: groupFocused, reason: 'change' });
     });
-    fieldTasks.add(task);
   };
   const mapping = (wanted = -1) => {
     if (!run) return false;
@@ -241,6 +252,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     const nextDisabled = !!p.disabled || !!field?.disabled,
       nextReadOnly = !!p.readOnly || !!field?.readOnly;
     const changedFlags = disabled.get() !== nextDisabled || readOnly.get() !== nextReadOnly;
+    if (changedFlags) cancelFieldReport();
     // These effective policy facts do not depend on numerical validity.
     disabled.set(nextDisabled);
     if (!live()) return;
@@ -647,8 +659,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
   });
   def.expose.method('resetValue', () => {
     if (!live() || working.get()) return false;
-    for (const task of fieldTasks) task.cancel();
-    fieldTasks.clear();
+    cancelFieldReport();
     resetting = true;
     try {
       invalidate();
@@ -733,8 +744,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
   def.lifecycle.onUnmounted(() => {
     focusTask?.cancel();
     focusTask = null;
-    for (const task of fieldTasks) task.cancel();
-    fieldTasks.clear();
+    cancelFieldReport();
     groupFocused = false;
     fieldFingerprint = null;
     retired.set(true);
@@ -749,8 +759,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     // Terminal disposal can also happen without any mounted epoch.
     run = null;
     focusTask?.cancel();
-    for (const task of fieldTasks) task.cancel();
-    fieldTasks.clear();
+    cancelFieldReport();
     retired.set(true);
   });
   return (r: RendererHandle<any>) => r.slot();

@@ -17,6 +17,7 @@ import type {
 function setup(def: DefHandle<SliderValuesPartProps>) {
   const render = setupSliderValuesPart(def, 'track');
   const axis = asAxisInput<SliderValuesPartProps>();
+  let mounted = false;
   let rootAvailable = false,
     accepted = false,
     fromThumb = false;
@@ -24,9 +25,10 @@ function setup(def: DefHandle<SliderValuesPartProps>) {
     focusedIndex = -1;
   const revoke = () => {
     accepted = false;
-    axis.sync({ disabled: true });
+    if (mounted) axis.sync({ disabled: true });
   };
   const sync = (run: RunHandle<SliderValuesPartProps>) => {
+    if (!mounted) return;
     if (!rootAvailable) {
       revoke();
       return;
@@ -55,13 +57,17 @@ function setup(def: DefHandle<SliderValuesPartProps>) {
   def.context.subscribe(SLIDER_VALUES_CONTEXT, sync);
   def.props.watchAll(sync);
   def.lifecycle.onMounted((run) => {
+    mounted = true;
     rootAvailable = run.anatomy.partsOf(SLIDER_VALUES_FAMILY, 'root').length === 1;
     sync(run);
   });
-  def.lifecycle.onUnmounted(() => {
+  const retire = () => {
+    mounted = false;
     rootAvailable = false;
     accepted = false;
-  });
+  };
+  def.lifecycle.onUnmounted(retire);
+  def.lifecycle.onBeforeDispose(retire);
   const valueAt = (fraction: number, c: SliderValuesContext) => {
     const f = Math.min(1, Math.max(0, fraction)),
       span = c.max - c.min;
@@ -81,6 +87,7 @@ function setup(def: DefHandle<SliderValuesPartProps>) {
     }
   };
   axis.on((run, sample) => {
+    if (!mounted) return;
     if (sample.phase === 'cancel') {
       const wasAccepted = accepted;
       accepted = false;
@@ -133,7 +140,7 @@ function setup(def: DefHandle<SliderValuesPartProps>) {
         return;
       }
       focusSlot(run, index);
-      if (!accepted || !rootAvailable) return;
+      if (!mounted || !accepted || !rootAvailable) return;
       c = run.context.read(SLIDER_VALUES_CONTEXT);
       if (fromThumb) return;
     }
@@ -154,10 +161,10 @@ function setup(def: DefHandle<SliderValuesPartProps>) {
       return;
     }
     sliderValuesMethod(run, 'requestInteractionValue', next);
-    if (!rootAvailable) return;
+    if (!mounted || !rootAvailable) return;
     c = run.context.read(SLIDER_VALUES_CONTEXT);
     if (c.interacting) focusSlot(run, c.activeIndex);
-    if (sample.phase === 'end') sliderValuesMethod(run, 'commitValue');
+    if (mounted && rootAvailable && sample.phase === 'end') sliderValuesMethod(run, 'commitValue');
   });
   return render;
 }

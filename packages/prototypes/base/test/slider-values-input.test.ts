@@ -199,6 +199,29 @@ describe.each(['base', 'shadcn', 'brutalist'])('%s Slider Values public input', 
     expect(f.changes).toEqual([]);
   });
 
+  it('coalesces same-turn Field reports to one current snapshot and cancels reset work', async () => {
+    const f = await fixture({}, { validationMode: 'onChange', externalValidation: true });
+    const requests: any[] = [];
+    f.field.addEventListener('validationRequest', (event: CustomEvent) =>
+      requests.push(event.detail)
+    );
+    f.x.requestThumbValue(0, 30);
+    f.x.requestThumbValue(0, 40);
+    await validation();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].value).toEqual([40, 80]);
+    const first = requests[0].requestId;
+    f.x.requestThumbValue(0, 50);
+    f.x.resetValue();
+    await validation();
+    expect(requests).toHaveLength(1);
+    expect(
+      f.field.getExposes().resolveValidation(first, { invalid: true, errors: ['stale'] })
+    ).toBe(false);
+    expect(f.x.getValue()).toEqual([20, 80]);
+    expect(f.field.getExposes().getValidity().pending).toBe(false);
+  });
+
   it('controlled refusal keeps canonical Field value and skips onChange validation', async () => {
     const f = await fixture(
       { value: [20, 80] },

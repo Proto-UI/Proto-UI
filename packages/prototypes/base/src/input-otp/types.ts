@@ -52,6 +52,7 @@ export type InputOtpInputExposes = {
   focusSelf: ExposeMethod<() => void>;
   resetValue: ExposeMethod<() => boolean>;
   __implicitSubmitEligible: ExposeMethod<() => boolean>;
+  __resetEditor: ExposeMethod<() => boolean>;
 };
 export type InputOtpControlExposes = InputOtpInputExposes & {
   [K in keyof import('../field').FieldControlBindingStates]: ExposeState<boolean>;
