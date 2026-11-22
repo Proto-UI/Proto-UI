@@ -333,6 +333,12 @@ export async function main(args = process.argv.slice(2)) {
       args: ['pnpm@10.32.1', '--filter', 'apps-www', 'generate:proto-ui-style'],
       requires: ['public-packages'],
     },
+    {
+      id: 'workspace-types',
+      command: 'corepack',
+      args: ['pnpm@10.32.1', 'check:types:workspace'],
+      requires: ['public-packages', 'styles'],
+    },
     ...SPRINT2_SUITES.map((suite) => ({ ...suite, requires: ['public-packages', 'styles'] })),
   ];
   await runQueue(

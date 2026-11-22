@@ -80,7 +80,9 @@ dependsOn:
     - C-AS-FOCUS-SCOPE-0002
     - C-AS-FOCUS-ENTRY-0001
 verifies:
-  tests: [T-POPOVER-OPENING-ENTRY-0001, T-CALENDAR-SELECTION-0001]
+  tests:
+    - T-POPOVER-OPENING-ENTRY-0001
+    - { id: T-CALENDAR-SELECTION-0001, since: 0.3.0-alpha.2 }
 sources:
   - path: packages/prototypes/base/src/popover/
   - path: packages/prototypes/base/test/navigation-overlays/popover-entry-focus-scroll.test.ts
