@@ -88,6 +88,8 @@ import calendarSelectionDemo from '../src/content/docs/zh-cn/demo-shadcn-calenda
 import datePickerSelectionDemo from '../src/content/docs/zh-cn/demo-shadcn-date-picker-selection.demo';
 import sliderValuesDemo from '../src/content/docs/demo-shadcn-slider-values.demo';
 import dataTableRecipesDemo from '../src/content/docs/zh-cn/demo-shadcn-data-table-recipes.demo';
+import formValidationDemo from '../src/content/docs/demo-shadcn-form-validation.demo';
+import selectInputDemo from '../src/content/docs/demo-shadcn-select-input.demo';
 import { codeMap as codeMap0 } from '../src/content/docs/demo_components/button/buttonCode';
 import { getButtonExampleFiles } from '../src/content/docs/demo_components/button/button-usage';
 import inputShellDemo from '../src/content/docs/demo-shadcn-input-shell.demo';
@@ -173,6 +175,8 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-date-picker-selection', datePickerSelectionDemo],
   ['demo-shadcn-slider-values', sliderValuesDemo],
   ['demo-shadcn-data-table-recipes', dataTableRecipesDemo],
+  ['demo-shadcn-form-validation', formValidationDemo],
+  ['demo-shadcn-select-input', selectInputDemo],
 ];
 
 const profileExamples = [
@@ -299,7 +303,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(78);
+    expect(expected).toHaveLength(80);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(
