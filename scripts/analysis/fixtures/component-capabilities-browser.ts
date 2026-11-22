@@ -192,6 +192,15 @@ let frameworkHandle: ((id: string) => Handle | undefined) | undefined;
 let activeRuntime: Runtime | undefined;
 let fixture: HTMLElement | undefined;
 let acceptValue = false;
+let acceptRange = false;
+let observeSelection = false;
+let reopenOnSelection = false;
+let selectionRecords: Array<{
+  type: string;
+  beforeOpen: boolean;
+  afterOwnerOpen: boolean;
+  afterReopenOpen: boolean;
+}> = [];
 
 const node = (
   id: string,
@@ -203,13 +212,38 @@ const node = (
 const copy = <T>(value: T): T => structuredClone(value);
 const record = (id: string, type: string, detail: unknown) => {
   records.push({ id, type, detail: copy(detail) });
-  if (acceptValue && id === 'root' && type === 'valueChange') {
+  const selection = id === 'root' && ['valueChange', 'rangeChange'].includes(type);
+  const exposed =
+    selection && observeSelection
+      ? (frameworkHandle ? frameworkHandle(id) : handles.get(id))?.getExposes()
+      : undefined;
+  const beforeOpen = exposed?.open?.get();
+  const property =
+    acceptValue && type === 'valueChange'
+      ? 'value'
+      : acceptRange && type === 'rangeChange'
+        ? 'range'
+        : undefined;
+  if (selection && property) {
     const current = nodes.get(id);
-    if (current && detail && typeof detail === 'object' && 'value' in detail) {
-      current.props = { ...current.props, value: copy(detail.value) };
+    if (current && detail && typeof detail === 'object' && property in detail) {
+      current.props = { ...current.props, [property]: copy((detail as Props)[property]) };
       if (activeRuntime === 'wc') setElementProps(handles.get(id) as any, current.props);
       else redraw?.();
     }
+  }
+  if (exposed) {
+    const afterOwnerOpen = exposed.open.get();
+    if (reopenOnSelection) {
+      exposed.close('consumer-selection-reopen');
+      exposed.openPopover('consumer-selection-reopen');
+    }
+    selectionRecords.push({
+      type,
+      beforeOpen,
+      afterOwnerOpen,
+      afterReopenOpen: exposed.open.get(),
+    });
   }
 };
 const callbacks = (id: string) =>
@@ -224,7 +258,14 @@ const callbacks = (id: string) =>
 
 function tree(family: Family, kind: Kind, options: Props): Node {
   const p = families[family];
-  const { withField, acceptValue: _acceptValue, ...rootProps } = options;
+  const {
+    withField,
+    acceptValue: _acceptValue,
+    acceptRange: _acceptRange,
+    observeSelection: _observeSelection,
+    reopenOnSelection: _reopenOnSelection,
+    ...rootProps
+  } = options;
   const fieldWrap = (root: Node) =>
     withField
       ? node('form', p.formRoot, {}, [
@@ -501,7 +542,7 @@ function tree(family: Family, kind: Kind, options: Props): Node {
     maxNights: 14,
     a11yLabel: 'Choose dates',
     ...(picker ? { defaultOpen: false } : {}),
-    ...options,
+    ...rootProps,
   };
   const first = new Date(`${props.month ?? props.defaultMonth}-01T00:00:00Z`);
   const weekStartsOn = Number(props.weekStartsOn ?? 0);
@@ -614,6 +655,10 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
     throw new Error(`Unknown fixture kind: ${kind}`);
   activeRuntime = runtime;
   acceptValue = options.acceptValue === true;
+  acceptRange = options.acceptRange === true;
+  observeSelection = options.observeSelection === true;
+  reopenOnSelection = options.reopenOnSelection === true;
+  selectionRecords = [];
   records = [];
   fixture = document.getElementById('fixture') ?? document.createElement('div');
   if (!fixture.isConnected) {
@@ -802,6 +847,11 @@ export async function call(id: string, key: string, ...args: unknown[]) {
 
 export function events(): EventRecord[] {
   return copy(records);
+}
+
+/** Callback observations from this ordinary consumer, never component overrides. */
+export function selectionObservations() {
+  return copy(selectionRecords);
 }
 
 /** Ordinary controlled consumer policy, independent of prototype state. */
