@@ -188,6 +188,7 @@ describe('module-scroll: fake host contract', () => {
       projection: 'system',
       requireProjection: undefined,
       endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      anchor: { mode: 'off' },
     });
     expect(h.surface.axes.get()).toBe('vertical');
     h.connections[1].onFacts({ ...snapshot('off', 'idle'), axes: 'horizontal' });

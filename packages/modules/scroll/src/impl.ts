@@ -43,11 +43,13 @@ const EMPTY_AXIS: ScrollAxisSnapshot = Object.freeze({
 });
 
 const END_FOLLOW_OFF = Object.freeze({ mode: 'off' as const });
+const ANCHOR_OFF = Object.freeze({ mode: 'off' as const });
 
 const DEFAULT_CONFIG: ScrollSurfaceConfig = Object.freeze({
   axes: 'both',
   projection: 'auto',
   endFollow: END_FOLLOW_OFF,
+  anchor: ANCHOR_OFF,
 });
 
 const clampRatio = (value: number) =>
@@ -195,6 +197,12 @@ export class ScrollModuleImpl extends ModuleBase {
           : patch.endFollow.mode === 'while-at-end'
             ? Object.freeze({ mode: 'while-at-end', axis: patch.endFollow.axis })
             : END_FOLLOW_OFF,
+      anchor:
+        typeof patch.anchor === 'undefined'
+          ? this.config.anchor
+          : patch.anchor.mode === 'preserve-visible'
+            ? Object.freeze({ mode: 'preserve-visible', axis: patch.anchor.axis })
+            : ANCHOR_OFF,
     });
     this.set(this.axesOwned, this.config.axes);
   }

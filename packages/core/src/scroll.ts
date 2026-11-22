@@ -11,6 +11,9 @@ export type ScrollEndFollowPolicy =
   | Readonly<{ mode: 'while-at-end'; axis: ScrollAxis }>;
 export type ScrollEndFollowState = 'off' | 'pending' | 'following' | 'paused';
 export type ScrollEndFollowRequestStatus = 'idle' | 'pending' | 'applied' | 'rejected';
+export type ScrollAnchorPolicy =
+  | Readonly<{ mode: 'off' }>
+  | Readonly<{ mode: 'preserve-visible'; axis: ScrollAxis }>;
 
 export type ScrollEndFollowSnapshot = Readonly<{
   state: ScrollEndFollowState;
@@ -22,6 +25,7 @@ export type ScrollSurfaceConfigPatch = Readonly<{
   projection?: ScrollProjectionPreference;
   requireProjection?: Exclude<ScrollProjectionPreference, 'auto'>;
   endFollow?: ScrollEndFollowPolicy;
+  anchor?: ScrollAnchorPolicy;
 }>;
 
 export type ScrollSurfaceConfig = Readonly<{
@@ -29,6 +33,7 @@ export type ScrollSurfaceConfig = Readonly<{
   projection: ScrollProjectionPreference;
   requireProjection?: Exclude<ScrollProjectionPreference, 'auto'>;
   endFollow: ScrollEndFollowPolicy;
+  anchor?: ScrollAnchorPolicy;
 }>;
 
 /**
