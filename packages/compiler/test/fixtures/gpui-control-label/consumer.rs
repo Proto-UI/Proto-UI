@@ -138,7 +138,9 @@ fn a_shared_reference_does_not_authorize_different_native_windows(cx:&mut TestAp
     let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(first),cx);frames(&mut visual);
     second.update(&mut visual,|host,_,cx|{set_instance_associations(&host.label.read(cx).owner,NativeInstanceAssociations::default());}).unwrap();
     first.update(&mut visual,|host,_,cx|{set_instance_associations(&host.button.read(cx).owner,NativeInstanceAssociations::default());}).unwrap();
-    second.update(&mut visual,|_,window,cx|{window.refresh();window.draw(cx).clear(cx);}).unwrap();visual.run_until_parked();
+    // Draw through the window context, without leasing its root Harness while
+    // GPUI itself needs that same entity to render the new frame.
+    let mut second_visual=VisualTestContext::from_window(AnyWindowHandle::from(second),cx);frames(&mut second_visual);
     first.update(&mut visual,|host,window,cx|{
         let label=host.label.read(cx).owner.clone();assert_eq!(control_label_diagnostic(&label),Some("foreign-tree-scope"));
         assert!(!control_label_accessibility_action(&label,window,cx));assert!(events(host,cx).is_empty());
@@ -155,4 +157,20 @@ fn official_button_space_default_prevention_keeps_one_press_intent(cx:&mut TestA
         visual.simulate_keystrokes(key);
         window.update(&mut visual,|host,_,cx|{assert_eq!(events(host,cx),click_signal(),"{key} must activate once after default prevention and native click de-duplication");assert!(host.button.read(cx).handle().take_failures().is_empty());}).unwrap();
     }
+}
+
+
+struct DelegatedInput {input:Entity<input_delegate::CompiledComponent>}
+impl Render for DelegatedInput {fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement{gpui::div().size_full().child(self.input.clone())}}
+#[gpui::test]
+fn an_authored_input_capture_keeps_its_scalar_empty_renderer_and_native_editor(cx:&mut TestAppContext){
+    let window=cx.open_window(size(px(240.),px(60.)),|window,cx|DelegatedInput{input:cx.new(|cx|input_delegate::CompiledComponent::new(json!({"defaultValue":"initial"}),None,window,cx).unwrap_or_else(|_|panic!("delegated Input construction")))});
+    let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);frames(&mut visual);
+    window.update(&mut visual,|host,window,cx|{
+        let handle=host.input.read(cx).handle();assert!(ready(&handle.owner));
+        assert_eq!(handle.state("value").unwrap_or_else(|_|panic!("value")),json!("initial"));
+        assert_eq!(handle.call("resetValue",vec![json!("new 😀")],window,cx).unwrap_or_else(|_|panic!("reset")),json!(true));
+        assert_eq!(handle.state("value").unwrap_or_else(|_|panic!("reset value")),json!("new 😀"));
+        assert!(handle.take_failures().is_empty());
+    }).unwrap();frames(&mut visual);
 }

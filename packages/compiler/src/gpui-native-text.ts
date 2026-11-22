@@ -360,12 +360,17 @@ pub fn text_scroll(owner:&OwnerRef,event:&gpui::ScrollWheelEvent,window:&mut Win
     };if changed{text_drive(owner,window,cx);}changed
 }
 pub fn text_key_down(owner:&OwnerRef,event:&gpui::KeyDownEvent,window:&mut Window,cx:&mut App)->bool{
+    text_key_stroke(owner,&event.keystroke,window,cx)
+}
+// The editing owner consumes only the stable keystroke fields. Platform-added
+// KeyDownEvent transport fields do not alter editing policy or test fixtures.
+fn text_key_stroke(owner:&OwnerRef,keystroke:&gpui::Keystroke,window:&mut Window,cx:&mut App)->bool{
     if !text_supported(owner)||text_disabled(owner){return false}
     // The platform IME owns candidate navigation, deletion and confirmation.
     // App-level editing must not rewrite the active provisional text.
     if text_is_composing(owner){return true}
-    let named=crate::gpui_native_key::named_key(&event.keystroke.key);let key=named.as_deref().unwrap_or(event.keystroke.key.as_str());
-    let command=event.keystroke.modifiers.platform||event.keystroke.modifiers.control;
+    let named=crate::gpui_native_key::named_key(&keystroke.key);let key=named.as_deref().unwrap_or(keystroke.key.as_str());
+    let command=keystroke.modifiers.platform||keystroke.modifiers.control;
     if command&&matches!(key,"c"|"C"|"x"|"X"){
         let selection={let o=owner.borrow();let text=&o.modules.text;text.editor[text.selection.clone()].to_owned()};
         if !selection.is_empty(){cx.write_to_clipboard(gpui::ClipboardItem::new_string(selection));if matches!(key,"x"|"X")&&text_editable(owner){let epoch=owner.borrow().modules.text.lease_epoch;NativeTextInput{owner:Rc::downgrade(owner),epoch}.replace(None,"",Some("deleteByCut"),window,cx);}}return true
@@ -374,7 +379,7 @@ pub fn text_key_down(owner:&OwnerRef,event:&gpui::KeyDownEvent,window:&mut Windo
         if let Some(item)=cx.read_from_clipboard(){if let Some(input)=item.text(){let epoch=owner.borrow().modules.text.lease_epoch;NativeTextInput{owner:Rc::downgrade(owner),epoch}.replace(None,&input,Some("insertFromPaste"),window,cx);}}return true
     }
     if command&&matches!(key,"z"|"Z"|"y"|"Y")&&text_editable(owner){
-        let redo=event.keystroke.modifiers.shift||matches!(key,"y"|"Y");let next={let mut o=owner.borrow_mut();let text=&mut o.modules.text;
+        let redo=keystroke.modifiers.shift||matches!(key,"y"|"Y");let next={let mut o=owner.borrow_mut();let text=&mut o.modules.text;
             let next=if redo{text.redo.pop()}else{text.undo.pop()};if let Some(next)=next{let current=TextEdit{value:text.editor.clone(),selection:text.selection.clone(),reversed:text.reversed};if redo{text.undo.push(current)}else{text.redo.push(current)}text.editor=next.value;text.selection=next.selection;text.reversed=next.reversed;text.marked=None;text.composing=false;text.geometry=None;text.changed=true;text.reveal_caret=true;Some(text.editor.clone())}else{None}};
         if let Some(value)=next{text_event(owner,"input",&value,false,None,Some(if redo{"historyRedo"}else{"historyUndo"}),window,cx);text_drive(owner,window,cx);}return true
     }
@@ -393,8 +398,8 @@ pub fn text_key_down(owner:&OwnerRef,event:&gpui::KeyDownEvent,window:&mut Windo
             "Home"=>if command{0}else{text.editor[..caret].rfind('\n').map(|i|i+1).unwrap_or(0)},"End"=>if command{text.editor.len()}else{text.editor[caret..].find('\n').map(|i|caret+i).unwrap_or(text.editor.len())},
             "ArrowUp"|"ArrowDown"=>text.geometry.as_ref().map(|geometry|{let position=geometry.position(caret);geometry.index(position+gpui::point(gpui::px(0.),if key=="ArrowUp"{-geometry.line_height}else{geometry.line_height}))}).unwrap_or(caret),_=>caret};
         if deleting{if text.selection.is_empty(){Some(caret.min(target)..caret.max(target))}else{Some(text.selection.clone())}}
-        else{let target=if !event.keystroke.modifiers.shift&&!text.selection.is_empty()&&matches!(key,"ArrowLeft"|"ArrowRight"){if key=="ArrowLeft"{text.selection.start}else{text.selection.end}}else{target};
-            let anchor=if event.keystroke.modifiers.shift{if text.reversed{text.selection.end}else{text.selection.start}}else{target};text.selection=anchor.min(target)..anchor.max(target);text.reversed=target<anchor;text.reveal_caret=true;o.dirty=true;None}
+        else{let target=if !keystroke.modifiers.shift&&!text.selection.is_empty()&&matches!(key,"ArrowLeft"|"ArrowRight"){if key=="ArrowLeft"{text.selection.start}else{text.selection.end}}else{target};
+            let anchor=if keystroke.modifiers.shift{if text.reversed{text.selection.end}else{text.selection.start}}else{target};text.selection=anchor.min(target)..anchor.max(target);text.reversed=target<anchor;text.reveal_caret=true;o.dirty=true;None}
     };
     if let Some(range)=range{let epoch=owner.borrow().modules.text.lease_epoch;let range={let o=owner.borrow();let text=&o.modules.text;byte_utf16(&text.editor,range.start)..byte_utf16(&text.editor,range.end)};NativeTextInput{owner:Rc::downgrade(owner),epoch}.replace(Some(range),"",Some(if key=="Delete"{"deleteContentForward"}else{"deleteContentBackward"}),window,cx);return true}
     text_drive(owner,window,cx);true
@@ -477,7 +482,7 @@ mod text_owner_tests {
             assert!(!text_select_utf16(&owner,0,0,window,cx));
             for key in ["enter","escape","left","right","home","end","backspace","delete","ctrl-z","ctrl-v"]{
                 let key=gpui::Keystroke::parse(key).unwrap();
-                assert!(text_key_down(&owner,&gpui::KeyDownEvent{keystroke:key,is_held:false},window,cx));
+                assert!(text_key_stroke(&owner,&key,window,cx));
                 assert_eq!(owner.borrow().modules.text.editor,before);
                 assert_eq!(editor.selected_text_range(false,window,cx).unwrap().range,selection);
                 assert!(text_is_composing(&owner));
@@ -506,8 +511,8 @@ mod text_owner_tests {
             assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"fresh😀");
             old.replace_text_in_range(None,"stale",window,cx);
             assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"fresh😀");
-            let undo=gpui::KeyDownEvent{keystroke:gpui::Keystroke::parse("ctrl-z").unwrap(),is_held:false};
-            text_key_down(&owner,&undo,window,cx);
+            let undo=gpui::Keystroke::parse("ctrl-z").unwrap();
+            text_key_stroke(&owner,&undo,window,cx);
             assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"fresh😀","reset cannot undo into the retired draft");
             assert!(text_reset_value(&Rc::downgrade(&owner),Value::Undefined).bool());
             assert_eq!(text_snapshot(&Rc::downgrade(&owner)).member("value",false).text(),"seed");

@@ -258,7 +258,10 @@ pub fn focus_activate(owner:&OwnerWeak,options:Value)->Value{
 }
 pub fn focus_restore(owner:&OwnerWeak)->Value{focus_request(owner,Value::Undefined,false)}
 pub fn focus_deactivate(owner:&OwnerWeak,options:Value)->Value{
-    let owner=runtime(owner);{let mut o=owner.borrow_mut();o.modules.focus.scope_activation=o.modules.focus.scope_activation.wrapping_add(1);}retire_scope_entry(&owner);clear_scope_recipient(&owner);
+    // Terminal callbacks retain their cleanup scope (C-LIFECYCLE-0005-E).
+    // Only this release operation bypasses the before-dispose acquisition guard.
+    let owner_ref=ensure(owner);let terminal=owner_ref.borrow().phase=="before-dispose";
+    let owner=if terminal{owner_ref}else{runtime(owner)};{let mut o=owner.borrow_mut();o.modules.focus.scope_activation=o.modules.focus.scope_activation.wrapping_add(1);}retire_scope_entry(&owner);clear_scope_recipient(&owner);
     let request_epoch=focus_intent_epoch(&owner);let activation=owner.borrow().modules.focus.scope_activation;let scope_intent=owner.borrow().modules.focus.scope_intent;let superseded=request_epoch>scope_intent&&pending_focus_since(&owner,scope_intent);
     let was_active={let mut o=owner.borrow_mut();o.modules.focus.module_active=false;o.dirty=true;std::mem::take(&mut o.modules.focus.scope_active)};
     if !was_active{return Value::Undefined}
@@ -393,4 +396,23 @@ pub fn poll_state_watchers(){
     drain_state_notices();
 }
 pub fn host_target(owner:&OwnerWeak)->Value{let owner_ref=ensure(owner);if ready(&owner_ref){Value::HostTarget(owner.clone())}else{Value::Json(Json::Null)}}
+
+#[cfg(all(test,feature="test-support"))]
+mod focus_terminal_cleanup_tests {
+    use super::*;
+    #[test]
+    fn terminal_scope_release_runs_during_real_disposal_and_keeps_phase_guards(){
+        let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());let weak=Rc::downgrade(&owner);
+        assert!(catch_authored(||focus_deactivate(&weak,Value::Undefined)).is_err(),"setup is not a release callback");
+        focus_setup(&weak,"focus-scope");let released=Rc::new(Cell::new(false));let observed=released.clone();let cleanup=weak.clone();
+        register_life(&weak,"before-dispose",Value::Function(Rc::new(move|_|{
+            assert_eq!(cleanup.upgrade().unwrap().borrow().phase,"before-dispose");
+            focus_deactivate(&cleanup,Value::Undefined);observed.set(true);Value::Undefined
+        })));
+        Owner::finish(&owner,Value::Undefined);owner.borrow_mut().phase="render";
+        assert!(catch_authored(||focus_deactivate(&weak,Value::Undefined)).is_err());owner.borrow_mut().phase="idle";
+        owner.borrow_mut().modules.focus.scope_active=true;Owner::dispose(&owner);assert!(released.get());assert!(owner.borrow().disposed);
+        assert!(catch_authored(||focus_deactivate(&weak,Value::Undefined)).is_err(),"a disposed release cannot revive its owner");
+    }
+}
 `;
