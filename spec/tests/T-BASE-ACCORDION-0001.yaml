@@ -242,7 +242,7 @@ implementations:
     exercises: *a1
     notes:
       - 'Implemented and registered: twenty native family/runtime journeys plus five narrow Chinese 320px / 200% text journeys. Not executed on this source. CI must bind actual screenshot manifests to this head; no proxy screenshots or old results satisfy this mapping.'
-      - Liquid Glass family journeys are 0.4/WIP and are skipped unless PUI_LIQUID_GLASS_INCLUDE_WIP=1. Base, Shadcn and Brutalist journeys stay in the default gate. Passing accordion-material unit tests are unchanged.
+      - Liquid Glass family journeys are 0.4/WIP and are not registered unless PUI_LIQUID_GLASS_INCLUDE_WIP=1. Base, Shadcn and Brutalist journeys stay in the default gate. Passing accordion-material unit tests are unchanged.
   - id: liquid-accordion-shared-material
     kind: runtime-test
     status: passing
