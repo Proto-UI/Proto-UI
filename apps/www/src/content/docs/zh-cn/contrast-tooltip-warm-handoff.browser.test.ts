@@ -16,7 +16,7 @@ import { surfacePrototypeId } from '../../../components/surface-recipes';
 import { launchBrowser, choosePreviewRuntime, applyColorScheme } from './browser-harness';
 import tooltipDemo from './demo-brutalist-tooltip.demo';
 
-const RUNTIMES = ['wc', 'react', 'vue'] as const;
+const RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const;
 const THEMES = ['light', 'dark'] as const;
 const ROUTE = '/en/ui-libraries/brutalist/components/tooltip/';
 let browser: Browser;

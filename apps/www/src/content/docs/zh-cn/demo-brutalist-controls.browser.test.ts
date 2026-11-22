@@ -22,7 +22,7 @@ import {
 } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
-type RuntimeId = (typeof RUNTIMES)[number];
+type RuntimeId = (typeof EVERY_RUNTIME)[number];
 
 const SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 const TABS_ROUTE = '/en/ui-libraries/brutalist/components/tabs/';
@@ -900,7 +900,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     }
   }, 90_000);
 
-  it('composes the transparent Tooltip Group across Web Components, React, and Vue', async () => {
+  it('composes the transparent Tooltip Group across all four Web hosts', async () => {
     const { context, page, previewer } = await openRoute(TOOLTIP_ROUTE, {
       width: 1440,
       height: 900,
@@ -988,7 +988,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       // previewer's own Select, whose items exist only while it is open.
       // Pin the browser preference to Light; both palettes below must come from the host theme API.
       await page.emulateMedia({ colorScheme: 'light' });
-      for (const runtime of RUNTIMES) {
+      for (const runtime of EVERY_RUNTIME) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 7);
         await applyHostTheme(page, 'light');
         // Scoped to the rendered host: the previewer chrome is Proto UI too, so

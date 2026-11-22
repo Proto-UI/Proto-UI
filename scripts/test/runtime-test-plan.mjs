@@ -10,6 +10,8 @@ export const READY_ROUTES = Object.freeze([
   '/en/test/liquid-glass-material/',
   '/en/test/liquid-glass-portal/',
   '/en/ui-libraries/base/image/',
+  '/en/ui-libraries/base/tooltip/',
+  '/zh-cn/ui-libraries/base/tooltip/',
   '/en/ui-libraries/base/collapsible/',
   '/en/ui-libraries/shadcn/collapsible/',
   '/zh-cn/ui-libraries/shadcn/collapsible/',
@@ -81,6 +83,7 @@ export const READY_ROUTES = Object.freeze([
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/test/release-docs-reading.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts',
   'packages/compiler/test/control-label-native.browser.test.ts',
   'packages/compiler/test/transition-native.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',
