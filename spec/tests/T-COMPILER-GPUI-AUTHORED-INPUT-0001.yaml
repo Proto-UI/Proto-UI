@@ -37,6 +37,19 @@ cases:
         C-COMPILER-SCALAR-INPUT-0001-READONLY,
       ]
     expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries. Structural readonly views, aliases, helper calls and mutable stores cannot hide enumerable undefined or another non-JSON nested value. Local-only narrowed views and explicit fresh data snapshots remain admitted.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL
+    title: Native Tab default follows completed input dispatch and current focus eligibility
+    covers:
+      [
+        C-AS-FOCUSABLE-0001-E,
+        C-AS-FOCUSABLE-0001-F,
+        C-AS-FOCUS-SCOPE-0002-H,
+        C-TEXT-CONTROL-0001-G,
+        HC-FOCUS-TARGET-0001-B,
+      ]
+    expectation: Real generated native targets traverse in both directions using the committed host tab order, including ordinary native siblings and excluding disabled or navParticipation none targets. Authored or later native prevention, stopped propagation, current compiled TextControl composition and inactive windows prevent fallback; active scope trapping retains priority. The default action is synchronous after dispatch and cannot be replayed by deferred cleanup.
+    notes:
+      - The witness guards the current native handle, owner view lease and authored focus intent. It does not claim detection of an arbitrary native-only focus-away-and-back round trip to the same handle within an unconsumed keystroke, because the public GPUI API exposes no such generation.
 implementations:
   - id: checked-json-source-provenance
     kind: module-test
@@ -76,8 +89,20 @@ implementations:
       [
         Execute the generated SDK library tests with the test-support feature; never patch emitted Rust.,
       ]
+  - id: generated-native-sequential-focus
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-a11y-value/sequential_focus.rs
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL]
+    notes:
+      - The ordinary tab-focus and tab-scope authored fixtures are compiled afresh. Native test execution and its exact source receipt are required separately; fixture authorship alone is not passing evidence or operating-system keyboard acceptance.
 verifies:
   contracts:
+    - id: C-AS-FOCUSABLE-0001
+      anchors: [C-AS-FOCUSABLE-0001-E, C-AS-FOCUSABLE-0001-F]
+    - id: C-AS-FOCUS-SCOPE-0002
+      anchors: [C-AS-FOCUS-SCOPE-0002-H]
     - id: C-COMPILER-SCALAR-INPUT-0001
       anchors:
         [
@@ -104,7 +129,13 @@ verifies:
           C-A11Y-0001-STATE-CONDITION,
           C-A11Y-0001-STATE-CONDITION-VALIDITY,
         ]
+  hostCaps:
+    - id: HC-FOCUS-TARGET-0001
+      anchors: [HC-FOCUS-TARGET-0001-B]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: strengthened
+    summary: Bind native sequential default-action evidence to existing Focus participation, scope trapping and editing-session criteria without changing their draft lifecycle.
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Bind source admission and native execution to generic activation, applicability, scalar and editing-lease criteria.

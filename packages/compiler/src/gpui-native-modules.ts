@@ -230,11 +230,14 @@ pub fn focus_navigate(owner:&OwnerWeak,roving:bool,operation:&'static str,option
     Value::Undefined
 }
 fn navigate_focus(owner:&OwnerRef,roving:bool,operation:&'static str,options:Value)->bool{
+    navigate_focus_with(owner,roving,operation,options,|target,options|{request_native_focus(target,options);})
+}
+fn navigate_focus_with(owner:&OwnerRef,roving:bool,operation:&'static str,options:Value,request:impl FnOnce(&OwnerRef,Value))->bool{
     let members=focus_members(owner,roving);if members.is_empty(){if roving&&bool_or(options.member("defer",true),false){owner.borrow_mut().modules.focus.pending=Some((operation,options));}return false}
     let current=members.iter().position(|m|m.borrow().focused).or_else(||if roving{members.iter().position(|m|m.borrow().modules.focus.active)}else{owner.borrow().modules.focus.remembered.upgrade().and_then(|remembered|members.iter().position(|m|Rc::ptr_eq(m,&remembered)))});
     let config=if roving{owner.borrow().modules.focus.roving.clone()}else{owner.borrow().modules.focus.scope.clone()};let looping=bool_or(field(&config,"loop"),false);
     let index=match operation{"first"=>Some(0),"last"=>Some(members.len()-1),"selected"=>Some(members.iter().position(|m|m.borrow().modules.focus.selected).unwrap_or(0)),"next"|"prev"=>{let next=match(current,operation){(Some(i),"next")=>i as isize+1,(Some(i),_)=>i as isize-1,(None,"next")=>0,(None,_)=>members.len()as isize-1};if looping{Some(next.rem_euclid(members.len()as isize)as usize)}else if next>=0&&(next as usize)<members.len(){Some(next as usize)}else if !roving{Some(next.clamp(0,members.len()as isize-1)as usize)}else{None}},_=>panic!("unknown native focus navigation")};
-    if let Some(index)=index{let target=&members[index];let pending=!ready(target)&&bool_or(options.member("defer",true),false);owner.borrow_mut().modules.focus.pending=if pending{Some((operation,options.clone()))}else{None};let options=if options.nullish(){record(vec![("reason",Value::string("keyboard"))])}else{options};request_native_focus(target,options);true}else{false}
+    if let Some(index)=index{let target=&members[index];let pending=!ready(target)&&bool_or(options.member("defer",true),false);owner.borrow_mut().modules.focus.pending=if pending{Some((operation,options.clone()))}else{None};let options=if options.nullish(){record(vec![("reason",Value::string("keyboard"))])}else{options};request(target,options);true}else{false}
 }
 pub fn focus_activate(owner:&OwnerWeak,options:Value)->Value{
     let owner=runtime(owner);let use_entry=matches!(owner.borrow().modules.focus.scope.get("entryFallback"),Some(Value::Json(Json::String(mode))) if mode=="entry");
@@ -286,7 +289,7 @@ pub fn modules_drive(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&m
     overlay_input_scope(owner,cx);
     positioning_drive(window);
     if owner.borrow().disposed{return}
-    if live&&ready(owner)&&native_focus_observation_needed(owner){owner.borrow_mut().modules.focus.native=Some(focus.clone());}
+    if live&&ready(owner)&&native_focus_observation_needed(owner){owner.borrow_mut().modules.focus.native=Some(focus.clone());register_sequential_focus_owner(owner,cx);}
     let blur=std::mem::take(&mut owner.borrow_mut().modules.focus.blur_requested);if (blur||text_disabled(owner))&&focus.is_focused(window){window.blur(cx);}
     #[cfg(feature="experimental-focus-tree")]
     drive_entry_intent(owner,focus,window,cx);
@@ -297,9 +300,163 @@ pub fn modules_drive(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&m
 }
 pub fn drive_queued_focus(owner:&OwnerRef,window:&mut Window,cx:&mut App){for other in owners_in(window){if Rc::ptr_eq(owner,&other){continue}let focus=other.borrow().modules.focus.native.clone();if let Some(focus)=focus{modules_drive(&other,&focus,window,cx);}}}
 pub fn modules_commit(owner:&OwnerRef){control_label_commit(owner);overlay_commit(owner);image_mount(owner);topology_refresh();for owner in all_owners(){let pending=owner.borrow().modules.focus.pending.clone();if let Some((operation,options))=pending{navigate_focus(&owner,true,operation,options);}}poll_state_watchers();}
+// GPUI records a native tab order but does not execute Tab's default action.
+// Resolve that host action only after both authored and raw native handlers.
+// In particular a native ancestor may still consume a child's Tab (a point
+// collection, text editor, or application binding) after global_key_down ran.
+struct SequentialFocusInput {
+    serial:u64,pending:Option<SequentialFocusRequest>,owners:Vec<OwnerWeak>,targets:Vec<SequentialFocusTarget>,
+    _capture:gpui::Subscription,_settled:gpui::Subscription,
+}
+impl gpui::Global for SequentialFocusInput{}
+// Keep weak physical identities while the committed GPUI map still holds them.
+// A detached/disposed Proto target must not be mistaken for a native sibling.
+struct SequentialFocusTarget{owner:OwnerWeak,focus:gpui::WeakFocusHandle,window:gpui::WindowId,epoch:u64}
+struct SequentialFocusRequest {
+    serial:u64,window:gpui::WindowId,keystroke:gpui::Keystroke,
+    focused:Option<gpui::WeakFocusHandle>,witness:OwnerWeak,witness_epoch:u64,
+    origin:Option<(OwnerWeak,u64)>,intent:u64,
+}
+fn sequential_tab(key:&gpui::Keystroke)->bool{
+    let modifiers=key.modifiers;
+    portable_key(key).as_deref()==Some("Tab")&&!modifiers.control&&!modifiers.alt&&!modifiers.platform&&!modifiers.function
+}
+fn sequential_focus_owners(window:&Window,cx:&App)->Vec<OwnerRef>{
+    let id=Some(window.window_handle().window_id());
+    cx.global::<SequentialFocusInput>().owners.iter().filter_map(Weak::upgrade)
+        .filter(|owner|ready(owner)&&owner.borrow().window_id==id).collect()
+}
+fn sequential_focus_all(window:&Window,cx:&App)->Vec<OwnerRef>{
+    let id=Some(window.window_handle().window_id());
+    cx.global::<SequentialFocusInput>().owners.iter().filter_map(Weak::upgrade)
+        .filter(|owner|focus_window(owner)==id).collect()
+}
+fn sequential_focus_note(recipient:&OwnerRef,owners:&[OwnerRef]){
+    let id=FOCUS_INTENT_EPOCH.with(|epoch|{let id=epoch.get().wrapping_add(1);epoch.set(id);id});
+    for owner in owners{clear_scope_recipient(owner);retire_entry_intent(owner);}
+    recipient.borrow_mut().modules.focus.intent=id;
+}
+fn sequential_focus_intent(owners:&[OwnerRef])->u64{owners.iter().map(|owner|owner.borrow().modules.focus.intent).max().unwrap_or(0)}
+fn sequential_focus_drive(window:&mut Window,cx:&mut App){
+    for owner in sequential_focus_owners(window,cx){let focus=owner.borrow().modules.focus.native.clone();if let Some(focus)=focus{native_host_callback(&owner,"drive",||modules_drive(&owner,&focus,window,cx));}}
+    window.refresh();
+}
+fn sequential_focus_capture(event:&gpui::KeystrokeEvent,window:&mut Window,cx:&mut App){
+    let serial={let input=cx.global_mut::<SequentialFocusInput>();input.serial=input.serial.wrapping_add(1);input.pending=None;input.serial};
+    if !sequential_tab(&event.keystroke)||!window.is_window_active()||window.default_prevented(){return}
+    let owners=sequential_focus_owners(window,cx);
+    let focused=window.focused(cx);
+    let origin=focused.as_ref().and_then(|focus|owners.iter().find(|owner|owner.borrow().modules.focus.native.as_ref()==Some(focus)));
+    let Some(witness)=origin.or_else(||owners.iter().find(|owner|native_focus_observation_needed(owner)))else{return};
+    if origin.is_some_and(|owner|text_is_composing(owner)){return}
+    let pending=SequentialFocusRequest{
+        serial,window:window.window_handle().window_id(),keystroke:event.keystroke.clone(),
+        focused:focused.as_ref().map(FocusHandle::downgrade),witness:Rc::downgrade(witness),witness_epoch:witness.borrow().epoch,
+        origin:origin.map(|owner|(Rc::downgrade(owner),owner.borrow().epoch)),intent:sequential_focus_intent(&sequential_focus_all(window,cx)),
+    };
+    cx.global_mut::<SequentialFocusInput>().pending=Some(pending);
+    // A stopped event has no settled observer. Retire its request at the end
+    // of this effect cycle; an older cleanup can never erase a newer event.
+    // Focus movement itself is synchronous in the settled observer below.
+    cx.defer(move|cx|{if cx.has_global::<SequentialFocusInput>(){let input=cx.global_mut::<SequentialFocusInput>();if input.pending.as_ref().is_some_and(|request|request.serial==serial){input.pending=None;}}});
+}
+fn sequential_focus_settled(event:&gpui::KeystrokeEvent,window:&mut Window,cx:&mut App){
+    // A resolved action can belong to a replayed prefix ending in this same
+    // key. It never owns the pending unhandled Tab; normal end-of-cycle
+    // cleanup retires a candidate if the current Tab itself was handled.
+    if event.action.is_some(){return}
+    // GPUI can notify an older prefix action while resolving this key. Such
+    // a notification must not consume the current Tab's one-shot request.
+    let matches=cx.global::<SequentialFocusInput>().pending.as_ref().is_some_and(|request|
+        request.keystroke==event.keystroke&&request.window==window.window_handle().window_id());
+    if !matches{return}
+    let Some(request)=cx.global_mut::<SequentialFocusInput>().pending.take()else{return};
+    if request.keystroke!=event.keystroke||request.window!=window.window_handle().window_id()
+        ||!window.is_window_active()||window.default_prevented(){return}
+    let focused=window.focused(cx);
+    if !match(&request.focused,&focused){(None,None)=>true,(Some(before),Some(now))=>before.upgrade().is_some_and(|before|before==*now),_=>false}{return}
+    let Some(witness)=request.witness.upgrade()else{return};
+    let owners=sequential_focus_owners(window,cx);
+    if !ready(&witness)||witness.borrow().epoch!=request.witness_epoch||witness.borrow().window_id!=Some(request.window)
+        ||sequential_focus_intent(&sequential_focus_all(window,cx))!=request.intent{return}
+    if let Some((origin,epoch))=request.origin{
+        let Some(origin)=origin.upgrade()else{return};
+        if !ready(&origin)||origin.borrow().epoch!=epoch||origin.borrow().window_id!=Some(request.window)||text_is_composing(&origin){return}
+    }
+    let app_owners=sequential_focus_all(window,cx);
+    let scope=ACTIVE_SCOPES.with(|scopes|scopes.borrow().iter().rev().filter_map(Weak::upgrade)
+        .find(|scope|scope.borrow().modules.focus.scope_active&&owners.iter().any(|owner|Rc::ptr_eq(owner,scope))));
+    if let Some(scope)=scope{
+        let trapped={let scope=scope.borrow();let config=&scope.modules.focus.scope;
+            bool_or(field(config,"trap"),false)&&matches!(text_or(field(config,"navigation"),"tab").as_str(),"tab"|"tab+arrow")};
+        if trapped{
+            native_host_callback(&scope,"focus-navigation",||navigate_focus_with(&scope,false,
+                if event.keystroke.modifiers.shift{"prev"}else{"next"},record(vec![("reason",Value::string("keyboard"))]),
+                |target,options|{sequential_focus_note(target,&app_owners);queue_native_focus(target,&options,true);}));
+            window.prevent_default();cx.stop_propagation();sequential_focus_drive(window,cx);return
+        }
+    }
+    // GPUI owns ordering, including foreign-native siblings and tab groups.
+    // Its map is a frame snapshot: if this key disabled/detached a target,
+    // keep advancing that same native order until an eligible target or cycle.
+    // Focus facts are delivered at frame completion, after this synchronous
+    // operation; no rejected intermediate target is published as focused.
+    let mut visited=Vec::new();
+    loop{
+        if event.keystroke.modifiers.shift{window.focus_prev(cx);}else{window.focus_next(cx);}
+        let Some(next)=window.focused(cx)else{return};
+        let eligibility={
+            let input=cx.global::<SequentialFocusInput>();
+            input.targets.iter().find(|target|target.window==request.window&&target.focus.upgrade().as_ref()==Some(&next))
+                .map(|target|target.owner.upgrade().is_some_and(|owner|
+                    ready(&owner)&&owner.borrow().epoch==target.epoch&&owner.borrow().window_id==Some(request.window)
+                    &&owner.borrow().modules.focus.native.as_ref()==Some(&next)&&native_tab_participation(&owner)&&!text_disabled(&owner)))
+        };
+        if eligibility!=Some(false){
+            let target=owners.iter().find(|owner|owner.borrow().modules.focus.native.as_ref()==Some(&next));
+            sequential_focus_note(target.unwrap_or(&witness),&app_owners);
+            if let Some(owner)=target{
+                owner.borrow_mut().modules.focus.reason="keyboard";
+                if focused.as_ref()==Some(&next)&&owner.borrow().focused{native_focus_fact(owner,true);}
+            }
+            window.prevent_default();cx.stop_propagation();sequential_focus_drive(window,cx);return
+        }
+        if visited.contains(&next){
+            // No eligible committed target. Preserve a still-valid origin;
+            // otherwise withdraw focus until the next real host frame.
+            if let Some(before)=focused.filter(|before|{
+                cx.global::<SequentialFocusInput>().targets.iter()
+                    .find(|target|target.window==request.window&&target.focus.upgrade().as_ref()==Some(before))
+                    .map_or(true,|target|target.owner.upgrade().is_some_and(|owner|ready(&owner)&&native_focus_available(&owner)))
+            }){window.focus(&before,cx);}else{window.blur(cx);}
+            window.prevent_default();cx.stop_propagation();return
+        }
+        visited.push(next);
+    }
+}
+pub fn register_sequential_focus_owner(owner:&OwnerRef,cx:&mut App){
+    if !cx.has_global::<SequentialFocusInput>(){
+        let capture=cx.intercept_keystrokes(sequential_focus_capture);
+        let settled=cx.observe_keystrokes(sequential_focus_settled);
+        cx.set_global(SequentialFocusInput{serial:0,pending:None,owners:Vec::new(),targets:Vec::new(),_capture:capture,_settled:settled});
+    }
+    let weak=Rc::downgrade(owner);let input=cx.global_mut::<SequentialFocusInput>();
+    input.owners.retain(|owner|owner.strong_count()>0);
+    if !input.owners.iter().any(|owner|Weak::ptr_eq(owner,&weak)){input.owners.push(weak.clone());}
+    input.targets.retain(|target|target.focus.upgrade().is_some());
+    let owner=owner.borrow();
+    if let (Some(focus),Some(window))=(&owner.modules.focus.native,owner.window_id){
+        input.targets.retain(|target|target.window!=window||target.focus.upgrade().as_ref()!=Some(focus));
+        input.targets.push(SequentialFocusTarget{owner:weak,focus:focus.downgrade(),window,epoch:owner.epoch});
+    }
+}
 pub fn focus_key_navigation(event:&gpui::KeyDownEvent,window:&mut Window)->bool{
-    let Some(key)=portable_key(&event.keystroke)else{return false};let id=Some(window.window_handle().window_id());
-    if key=="Tab"{if let Some(scope)=top_scope_in(id).filter(ready){let trapped={let scope=scope.borrow();let config=&scope.modules.focus.scope;bool_or(field(config,"trap"),false)&&matches!(text_or(field(config,"navigation"),"tab").as_str(),"tab"|"tab+arrow")};if trapped{native_host_callback(&scope,"focus-navigation",||navigate_focus(&scope,false,if event.keystroke.modifiers.shift{"prev"}else{"next"},record(vec![("reason",Value::string("keyboard"))])));window.prevent_default();return true;}}return false;}
+    focus_keystroke_navigation(&event.keystroke,window)
+}
+fn focus_keystroke_navigation(keystroke:&gpui::Keystroke,window:&mut Window)->bool{
+    let Some(key)=portable_key(keystroke)else{return false};let id=Some(window.window_handle().window_id());
+    // Tab (including trapped Tab) settles after later native ancestors.
+    if key=="Tab"{return false;}
     let Some(target)=all_owners().into_iter().find(|o|o.borrow().focused&&o.borrow().window_id==id)else{return false};let Some(provider)=focus_provider(&target)else{return false};
     let config=provider.borrow().modules.focus.roving.clone();let navigation=text_or(field(&config,"navigation"),"none");if !matches!(navigation.as_str(),"arrow"|"tab+arrow"){return false}let orientation=text_or(field(&config,"orientation"),"vertical");
     let op=match key.as_str(){"ArrowDown" if orientation!="horizontal"=>Some("next"),"ArrowUp" if orientation!="horizontal"=>Some("prev"),"ArrowRight" if orientation!="vertical"=>Some("next"),"ArrowLeft" if orientation!="vertical"=>Some("prev"),"Home"=>Some("first"),"End"=>Some("last"),_=>None};

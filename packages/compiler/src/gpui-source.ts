@@ -2645,6 +2645,9 @@ impl __PuiNativeRecordValue {
           let _lexical_owner = enter_lexical_owner(&owner);
           let renderer = ${setupCallable}.call_authored(vec![definition_capability(&owner)]);
           Owner::finish(&owner_ref, renderer);
+          // Establish the App's default-action snapshot before any authored
+          // global key capture can replace focus during the same keystroke.
+          register_sequential_focus_owner(&owner_ref, cx);
           let focus_subscriptions = if native_focus_observation_needed(&owner_ref) {
           let focus_owner = owner_ref.clone();
           let on_focus = cx.on_focus(&focus, window, move |view, window, cx| {

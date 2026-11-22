@@ -18,6 +18,33 @@ The pinned GPUI `62e5991` profile exposes the current selection through its nati
 
 While composition is active, ordinary native editing commands cannot navigate, delete, paste, undo or confirm provisional text. The native IME replacement path continues to own that session. Focus traversal also avoids moving away through an unhandled Tab during composition. These tests use GPUI's input handler and are not a claim that a particular OS input method has been exercised.
 
+## Sequential native focus
+
+GPUI records a committed native tab order but does not itself perform the Tab
+default action. The generated host supplies that action after authored and native
+key handlers have completed. An App-local weak owner registry captures one
+ordinary Tab or Shift+Tab request before authored global handlers run, then the
+settled keystroke observer performs focus movement synchronously. A later native
+ancestor can still prevent the default or stop propagation; an action-resolved
+key cannot also acquire the fallback. The deferred cleanup only retires a stopped
+request and never performs delayed navigation.
+
+An active trapped FocusScope retains its in-scope navigation policy. Otherwise
+the host uses GPUI's current native tab map, including ordinary native siblings,
+disabled targets and authored `navParticipation`. This does not make a
+programmatically focusable target a tab stop or implement application collection
+navigation in the host. Modified shortcuts, inactive windows and current compiled
+TextControl composition do not enter this fallback. A replaced, detached or disposed
+owner, changed native focus, or newer authored focus intent invalidates the
+captured request. Facts still come from the actual focus observations.
+
+The public GPUI API does not expose a focus-change generation for an arbitrary
+native handler that moves focus away and back to the identical handle within one
+keystroke without consuming it. The current witness can compare the resulting
+native handle and authored intent, but does not claim to detect that intermediate
+native-only round trip. This bounded host limitation is separate from source
+focus requests and ordinary prevention/propagation behavior.
+
 ## Source prerequisites
 
 The shared source and independent IR checks admit UTF-16 string length, checked scalar Number/String conversion, and numeric Math.floor/Math.round. GPUI's rounding preserves ties toward positive infinity and negative zero rather than using Rust's different round behavior. A readonly finite record can form an outward JSON snapshot without gaining lexical write authority or hiding a capability. The shared closed-call provenance analysis retains actual ordinary fields through structural views, aliases, helper arguments/results, arrays and later writes. At an outward event it rejects hidden non-JSON fields, including enumerable undefined, and unresolved structured provenance. A local readonly view remains legal, and an explicitly fresh record can select proven data fields. Absent optional fields remain distinct from present fields containing undefined. Terminal cancellation branches cannot invalidate the distinct continuing branch's lexical refinement; reachable branch effects remain joined.
