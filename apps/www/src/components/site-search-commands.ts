@@ -492,31 +492,30 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
           prepared.activate();
           activeDialogCandidate = prepared;
           activated = true;
-          composition.activate(
-            replacesOpenDialog
-              ? (panel) => {
-                  const origin = document.activeElement;
-                  const epoch = focusEpoch;
-                  if (
-                    origin &&
-                    origin !== document.body &&
-                    origin !== document.documentElement &&
-                    !panel?.contains(origin)
-                  )
-                    return;
-                  return () => {
-                    const active = document.activeElement;
-                    if (
-                      epoch === focusEpoch &&
-                      (active === origin ||
-                        active === document.body ||
-                        active === document.documentElement)
-                    )
-                      focus('open');
-                  };
-                }
-              : undefined
-          );
+          // Shortcut opening need not focus the opener first, so the Dialog
+          // scope may have no previous opener to restore. Search owns this
+          // explicit handback for every opening, including the initial one.
+          composition.activate((panel) => {
+            const origin = document.activeElement;
+            const epoch = focusEpoch;
+            if (
+              origin &&
+              origin !== document.body &&
+              origin !== document.documentElement &&
+              !panel?.contains(origin)
+            )
+              return;
+            return () => {
+              const active = document.activeElement;
+              if (
+                epoch === focusEpoch &&
+                (active === origin ||
+                  active === document.body ||
+                  active === document.documentElement)
+              )
+                focus('open');
+            };
+          });
         },
         setLocked(nextLocked: boolean) {
           if (homepage && activated) {
