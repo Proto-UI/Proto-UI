@@ -34,7 +34,7 @@ function candidate(): {
   made.push(value);
   return value;
 }
-function mount(family: 'shadcn' | 'brutalist' = 'shadcn', inHeader = false) {
+function mount(family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' = 'shadcn', inHeader = false) {
   document.body.innerHTML =
     '<site-search data-search-initial-family="shadcn"><div data-search-command-mount="open"></div><dialog><div data-search-command-mount="close"></div><div data-search-command-mount="retry"></div></dialog></site-search>';
   const root = document.querySelector<HTMLElement>('site-search')!;
@@ -191,6 +191,28 @@ it('registers Search fixed glyph prototypes before starting any command generati
   expect(getPrototype('lucide-search-icon')).toBe(searchIcon);
   expect(getPrototype('lucide-x-icon')).toBe(closeIcon);
   expect(faults.materialize).not.toHaveBeenCalled();
+});
+
+it('passes only declared Bootstrap Button enums to header and legacy Search commands', async () => {
+  for (const inHeader of [false, true]) {
+    faults.materialize.mockClear();
+    const { handle } = mount('bootstrap-2-3-2', inHeader);
+    await handle.ready;
+    const props = faults.materialize.mock.calls.map(
+      ([, options]) => options.content.demo.root.props
+    );
+    expect(props).toEqual([
+      {
+        variant: 'default',
+        size: 'default',
+        ...(inHeader ? { colorContext: 'default' } : {}),
+        disabled: false,
+      },
+      { variant: 'default', size: 'small', disabled: false },
+      { variant: 'default', size: 'small', disabled: false },
+    ]);
+    await handle.destroy();
+  }
 });
 
 it.each(['shadcn', 'brutalist'] as const)(

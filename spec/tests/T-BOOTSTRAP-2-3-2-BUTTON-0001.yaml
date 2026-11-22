@@ -6,6 +6,20 @@ since: 0.3.0-alpha.1
 lifecycleRationale: Tests cover the bounded visual foundation; stable and cross-host admission are not implied.
 summary: Unit state/token closure plus a collected real-four-Web Button fixture; native/compiler remain outside this slice.
 cases:
+  - id: T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-MOTION
+    title: Entry-only motion ownership, finite CSS and discriminating trajectory oracle
+    covers:
+      - P-BOOTSTRAP-2-3-2-BUTTON-MOTION
+      - P-BOOTSTRAP-2-3-2-BUTTON-BASE
+      - P-BOOTSTRAP-2-3-2-BUTTON-CLOSURE
+    expectation: enabled-entry-only-100ms-linear-motion-with-immediate-revocation
+  - id: T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-MOTION-BROWSER
+    title: Real four-Web pointer and keyboard trajectories with interruption and restoration
+    covers:
+      - P-BOOTSTRAP-2-3-2-BUTTON-MOTION
+      - P-BOOTSTRAP-2-3-2-BUTTON-BASE
+      - P-BOOTSTRAP-2-3-2-BUTTON-PALETTE
+    expectation: native-transition-events-rendered-intermediate-frames-and-bounded-cancellation
   - id: T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-NAVBAR
     title: Opt-in navbar palette and same-owner restoration
     covers:
@@ -74,6 +88,27 @@ cases:
       - P-BOOTSTRAP-2-3-2-BUTTON-BASE
     expectation: real-input-palette-state-and-size-matrix
 implementations:
+  - id: bootstrap-2-3-2-button-motion-unit
+    kind: module-test
+    status: passing
+    path: packages/prototypes/bootstrap-2-3-2/test/button.test.ts
+    required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-MOTION
+    notes:
+      - The seven palette state cases cover enabled hover/focus entry, press, immediate exit, disabled revocation, navbar opt-out and actual raw-prop removal on the same Base owner. CLI tests separately cover document, Shadow and split Root CSS, reduced-motion media projection and unchanged legacy passive paint.
+      - The trajectory oracle rejects old static endpoints, 150ms motion, non-linear easing, geometric movement, untrusted input and invented reverse animation. Unit trajectories are oracle fixtures, not recorded browser observations.
+  - id: bootstrap-2-3-2-button-motion-browser
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-MOTION-BROWSER
+    notes:
+      - Actions-only clean exact-head execution records 96 expected cells across WC, React, Vue and Vue2, light/dark, seven palette entry/exit trajectories, native Tab focus and disabled/navbar/reduced-motion/dispose interruption. Every cell retains its terminal state independently.
+      - Motion comes from actual browser CSS transitions with trusted transition events and rendered rAF positions; the test never injects CSS or input events and never freezes or advances a clock. Disabled/navbar/dispose are public fixture owner updates timed to a measured intermediate frame. Live preference cancellation uses Chromium media emulation after native transitionrun, not a fabricated matchMedia result or physical OS preference claim.
+      - Runtime and theme changes do not infer extra hosts or full-family acceptance. Exact-source actual Actions artifacts and independent review are required before this implementation is accepted.
   - id: bootstrap-2-3-2-button-contract
     kind: module-test
     status: passing
@@ -150,6 +185,9 @@ exercises:
     - P-BOOTSTRAP-2-3-2-BUTTON
 sources:
   - path: packages/prototypes/bootstrap-2-3-2/test/button.test.ts
+  - path: packages/cli/test/bootstrap-button-paint.test.ts
+  - path: apps/www/src/content/docs/zh-cn/bootstrap-button-motion-evidence.test.ts
+  - path: apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
@@ -166,6 +204,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added seven-palette unit and finite complete-paint closure evidence, plus separately planned real-input state/size browser coverage; historical browser results do not establish this matrix.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added the original 100ms entry-only motion contract, finite/reduced-motion CSS and negative trajectory controls, with independently planned actual four-Web interruption and restoration evidence.
 tags:
   - test
   - bootstrap-2-3-2

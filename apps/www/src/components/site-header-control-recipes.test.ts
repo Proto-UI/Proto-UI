@@ -68,4 +68,7 @@ it('keeps responsive geometry discrete while retaining family feedback transitio
     expect(properties).not.toContain(geometry);
   expect(layout).not.toHaveProperty('transitionDuration');
   expect(layout).not.toHaveProperty('transitionTimingFunction');
+  expect(headerResponsiveButtonFeedback('bootstrap-2-3-2')).toEqual({});
+  expect(headerResponsiveButtonFeedback('brutalist')).toEqual(layout);
+  expect(headerResponsiveButtonFeedback('shadcn')).toEqual(layout);
 });

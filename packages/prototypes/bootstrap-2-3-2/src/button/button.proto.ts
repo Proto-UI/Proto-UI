@@ -22,7 +22,7 @@ export interface ButtonProjectionProps {
 
 // Independently expressed Proto UI projection of Bootstrap v2.3.2 buttons.less.
 // Changed from upstream: Base owns all interaction/a11y; original pixel dimensions,
-// a stronger focus ring, no legacy browser hacks or jQuery plugin; background-position motion remains open.
+// a stronger focus ring, reduced-motion cancellation, no legacy browser hacks or jQuery plugin.
 // Upstream source attribution and license: ../../THIRD_PARTY_NOTICES.md.
 
 export default definePrototype<ButtonProjectionProps, ButtonExposes>({
@@ -53,9 +53,23 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
 
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center border font-normal leading-[20px] select-none cursor-pointer'
+        'inline-flex shrink-0 items-center justify-center border font-normal leading-[20px] select-none cursor-pointer transition-none'
       )
     );
+    // buttons.less deliberately animates only entry into hover/focus. Removing
+    // this Rule cancels interpolation immediately; no reverse transition or
+    // extra event/timer owner is introduced. The Web style projection owns the
+    // host's reduced-motion override for this finite paint-only transition.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('colorContext').eq('default'),
+          w.state(disabled).eq(false),
+          w.any(w.state(hovered).eq(true), w.state(focused).eq(true))
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('transition-[background-position] duration-100 ease-linear')),
+    });
     def.rule({
       when: (w) => w.prop('wrap').eq(false),
       intent: (i) => i.feedback.style.use(tw('whitespace-nowrap')),
@@ -104,7 +118,8 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     (Object.keys(bootstrapButtonRestFill) as Array<keyof typeof bootstrapButtonRestFill>).forEach(
       (variant) => {
         // State paint is exclusive: disabled/pressed flatten the image; hover or
-        // any focus preserves it at the upstream endpoint. No motion is claimed.
+        // any focus preserves it at the upstream endpoint. The separate finite
+        // transition Rule controls entry interpolation without changing paint.
         def.rule({
           when: (w) =>
             w.all(

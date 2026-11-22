@@ -7,6 +7,7 @@ it('uses the same public header recipe for theme SSR paint and runtime props', (
   expect(theme).toContain('snapshotStartupStyle(`${family}-button`, buttonProps)');
   expect(theme).toContain('data-variant={buttonProps.variant}');
   expect(theme).toContain('data-size={buttonProps.size}');
+  expect(theme).toContain('data-header-button-size="icon"');
   expect(theme).toContain("data-pui-style={startupTokens.join(' ')}");
   expect(theme).toContain('aria-pressed="false"');
   expect(theme).toContain('event instanceof CustomEvent');
@@ -33,7 +34,9 @@ it('shares theme target geometry before and after both homepage and docs enhance
   );
   expect(theme).toContain('style={headerIconButtonLayout()}');
   expect(fallback).toContain('style={headerIconButtonLayout()}');
-  expect(fallback).toContain('snapshotStartupStyle(`${initialFamily}-button`, headerButtonProps(');
+  expect(fallback).toMatch(
+    /snapshotStartupStyle\(\s*`\$\{initialFamily\}-button`,\s*headerButtonProps\(\s*initialFamily,\s*themeIcon \? 'icon' : 'default'\s*\)/
+  );
   expect(fallback).toContain("data-pui-style={themeTokens.join(' ')}");
   expect(client).toContain('surfaceStyle: headerIconButtonLayout()');
 });

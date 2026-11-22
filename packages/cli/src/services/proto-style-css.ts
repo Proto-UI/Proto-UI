@@ -23,6 +23,11 @@ type CssRule = {
   css: string[];
 };
 
+function isReducedMotionTransition(rule: CssRule): boolean {
+  const utility = splitVariants(rule.token).at(-1);
+  return utility === 'transition-transform' || utility === 'transition-[background-position]';
+}
+
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
 // Bind each generated split selector to its declaration recipe. This detects
@@ -507,6 +512,11 @@ const staticUtilities: Record<string, string[]> = {
   ],
   'transition-[border-color]': [
     'transition-property: border-color;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
+  'transition-[background-position]': [
+    'transition-property: background-position;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
@@ -1090,12 +1100,10 @@ function renderShadowSplitCss(tokens: string[]): string {
   }
   // The split host owns geometry; its preference override must follow the
   // host's ordinary declarations. The inner surface is handled separately.
-  const transformRules = rules.filter(
-    (rule) => splitVariants(rule.token).at(-1) === 'transition-transform'
-  );
-  if (transformRules.length > 0) {
+  const motionRules = rules.filter(isReducedMotionTransition);
+  if (motionRules.length > 0) {
     lines.push(`@media ${SYSTEM_REDUCED_MOTION_MEDIA_QUERY} {`);
-    for (const rule of transformRules)
+    for (const rule of motionRules)
       pushSplitRule(lines, buildSplitHostSelector(rule.token), ['transition-property: none;']);
     lines.push('}');
   }
@@ -1389,12 +1397,10 @@ function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleC
       reducedMotionBlocks.push({ token: rule.token, css: ['animation: none;'] });
     }
   }
-  // Switch and future transform-only transitions remain instantaneous when
-  // the host requests reduced motion. Keep host media syntax in CSS projection,
+  // Transform and background-position movement remain instantaneous when the
+  // host requests reduced motion. Host media syntax stays in CSS projection,
   // never in the prototype's variant-free v0 tokens.
-  for (const rule of rules.filter(
-    (rule) => splitVariants(rule.token).at(-1) === 'transition-transform'
-  )) {
+  for (const rule of rules.filter(isReducedMotionTransition)) {
     reducedMotionBlocks.push({ token: rule.token, css: ['transition-property: none;'] });
   }
   if (reducedMotionBlocks.length > 0) {

@@ -60,6 +60,7 @@ jobs:
             packages/adapters/base/test/web-material-preferences-ownership.test.ts \
             packages/adapters/base/test/web-material-preferences-sequence.test.ts \
             packages/adapters/base/test/web-material-style-tint.test.ts \
+            packages/adapters/base/test/web-material-style-tint-source.test.ts \
             packages/adapters/base/test/web-material-style.test.ts \
             packages/adapters/base/test/web-material-source.test.ts \
             packages/adapters/base/test/web-material-sink.test.ts \

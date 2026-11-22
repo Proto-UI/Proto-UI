@@ -11,6 +11,8 @@ const fixture = readFileSync(fixturePath, 'utf8');
 const browser = readFileSync(browserPath, 'utf8');
 const navbarPath = 'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts';
 const navbar = readFileSync(navbarPath, 'utf8');
+const motionPath = 'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts';
+const motion = readFileSync(motionPath, 'utf8');
 const workflow = parse(
   readFileSync('.github/workflows/bootstrap-state-controls-evidence.yml', 'utf8')
 );
@@ -81,6 +83,7 @@ test('browser test and fixture script have no TypeScript syntax diagnostics', ()
   for (const [fileName, source] of [
     [browserPath, browser],
     [navbarPath, navbar],
+    [motionPath, motion],
     [fixturePath + '.ts', fixture.match(/<script>([\s\S]*?)<\/script>/)?.[1]],
   ]) {
     const result = ts.transpileModule(source, {
@@ -147,6 +150,41 @@ test('historical navbar capture keeps candidate instrumentation outside the pinn
     /node --import tsx "\$GITHUB_WORKSPACE\/scripts\/analysis\/bootstrap-navbar-baseline\.mjs"/
   );
   assert.doesNotMatch(step.run, /\bcp\b|\bcopy\b|git (?:cherry-pick|apply)/);
+});
+
+test('Button motion uses actual native trajectories in an independently guarded sequential lane', () => {
+  const beforeStart = motion.slice(0, motion.indexOf('baseUrl = await startServer(ROUTE)'));
+  assert.match(beforeStart, /GITHUB_ACTIONS !== 'true'/);
+  assert.match(beforeStart, /sourceSha !== expectedSha/);
+  assert.match(beforeStart, /PROTO_UI_BROWSER_BASE_URL/);
+  assert.match(motion, /describe\.skipIf\(!enabled\)/);
+  assert.match(motion, /requestAnimationFrame/);
+  assert.match(motion, /getAnimations\(\)/);
+  assert.match(motion, /transitioncancel/);
+  assert.match(motion, /bootstrapReduceMotion/);
+  assert.match(motion, /assertBootstrapButtonEntryMotion/);
+  assert.match(motion, /assertBootstrapButtonImmediateExit/);
+  assert.match(motion, /seenCells\.has\(name\)/);
+  assert.match(motion, /!expectedCases\.includes\(name\)/);
+  assert.match(motion, /cleanupErrors\.length === 0/);
+  const final = motion.slice(motion.indexOf('afterAll(async'));
+  assert.ok(final.indexOf("attemptCleanup('source server'") < final.indexOf('await manifest('));
+  assert.doesNotMatch(motion, /dispatchEvent|addStyleTag|clock\.install|clock\.pauseAt/);
+  assert.equal(BROWSER_SUITES.filter((suite) => suite === motionPath).length, 1);
+  const phase = createRuntimeTestPlan([])[0];
+  assert.equal(phase.args[phase.args.indexOf(motionPath) - 1], '--exclude');
+  const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === 'button-motion');
+  assert.equal(step.if, '${{ !cancelled() }}');
+  assert.equal(step.env.PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE, '1');
+  assert.ok(step.run.includes(motionPath));
+  assert.ok(step.run.includes('bootstrap-button-motion-evidence.test.ts'));
+  assert.ok(
+    workflow.jobs['browser-evidence'].steps.some(
+      (step) =>
+        step.if === 'always()' &&
+        step.with?.path === '${{ runner.temp }}/bootstrap-button-motion-evidence'
+    )
+  );
 });
 
 test('registered browser suite stays out of the no-server phase', () => {

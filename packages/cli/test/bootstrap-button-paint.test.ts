@@ -4,6 +4,7 @@ import { mergeTwTokensV0 } from '@proto.ui/core';
 import {
   renderProtoStyleTokenCss,
   renderProtoShadowStyleTokenCss,
+  renderProtoShadowSplitStyleArtifact,
 } from '../src/services/proto-style-css';
 import {
   bootstrapButtonRestFill,
@@ -26,6 +27,43 @@ const cases = [
 ];
 
 describe('finite Bootstrap complete paint recipes', () => {
+  it('projects only background-position motion with explicit duration/easing and live reduced-motion overrides', () => {
+    const tokens = ['duration-100', 'ease-linear', 'transition-[background-position]'];
+    expect(mergeTwTokensV0(['transition-none', ...tokens]).tokens).toEqual([
+      'transition-[background-position]',
+      'duration-100',
+      'ease-linear',
+    ]);
+    for (const [target, render] of [
+      ['document', renderProtoStyleTokenCss],
+      ['shadow', renderProtoShadowStyleTokenCss],
+      [
+        'split',
+        (value: string[]) =>
+          renderProtoShadowSplitStyleArtifact(value, { rootTokens: value, templateTokens: [] })
+            .cssText,
+      ],
+    ] as const) {
+      const css = render(tokens);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('transition-property: background-position;');
+      expect(css).not.toContain('transition-property: all;');
+      expect(css.indexOf('transition-duration: 100ms;')).toBeGreaterThan(
+        css.indexOf('transition-duration: 150ms;')
+      );
+      expect(css.indexOf('transition-timing-function: linear;')).toBeGreaterThan(
+        css.indexOf('transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);')
+      );
+      const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
+      expect(reduced).toContain('transition-property: none;');
+      expect(reduced).toContain('transition-[background-position]');
+      if (target === 'split') {
+        const hostReduced = css.slice(css.lastIndexOf('@media (prefers-reduced-motion: reduce)'));
+        expect(hostReduced).toContain(':host([data-pui-split-root-style');
+        expect(hostReduced).toContain('transition-property: none;');
+      }
+    }
+  });
   it.each(cases)(
     'keeps all background properties under one owner for %s / %s',
     (start, end, base) => {
@@ -97,6 +135,8 @@ describe('finite Bootstrap complete paint recipes', () => {
       'text-paint-[var(--ink)_0_1px_1px_white]',
       'border-[rgb(0_0_0/10%)_red_blue_green]',
       'border-[url(https://example.test/image)]',
+      'transition-[background-position,color]',
+      'transition-[background-position;display:none]',
     ]) {
       for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
         const css = render([token]);

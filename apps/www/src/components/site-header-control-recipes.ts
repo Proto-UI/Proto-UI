@@ -45,7 +45,11 @@ export function headerIconButtonLayout() {
 /** Header breakpoints change layout and visible copy atomically. Preserve family
  * feedback transitions, but never interpolate width/padding while text appears.
  * No colors, radii, duration, easing or reduced-motion policy are overridden. */
-export function headerResponsiveButtonFeedback() {
+export function headerResponsiveButtonFeedback(family?: SiteLibraryFamily): Record<string, string> {
+  // Bootstrap already limits its own transition to background-position. An
+  // inline property list would override that family policy and its generated
+  // reduced-motion rule, so this composition has nothing to narrow there.
+  if (family === 'bootstrap-2-3-2') return {};
   return {
     transitionProperty:
       'color, background-color, border-color, outline-color, box-shadow, opacity, transform, translate, scale',

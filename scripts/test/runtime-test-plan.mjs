@@ -177,6 +177,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',

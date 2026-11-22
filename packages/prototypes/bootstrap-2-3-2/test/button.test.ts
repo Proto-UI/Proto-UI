@@ -184,6 +184,58 @@ describe('bootstrap-2-3-2 Button draft projection', () => {
     expect(tokens).toContain('text-[14px]');
     await invokeUnmounted();
   });
+  it.each(colorCases)(
+    'limits %s motion to enabled ordinary hover/focus entry and revokes it on the same owner',
+    async (variant) => {
+      const { controller, root, global, invokeUnmounted } = mount({ variant });
+      const motion = ['transition-[background-position]', 'duration-100', 'ease-linear'];
+      const assertMotion = (active: boolean) => {
+        const tokens = controller.getRuleStyleTokens();
+        for (const token of motion) expect(tokens.includes(token)).toBe(active);
+        expect(tokens).not.toContain('transition-all');
+        expect(tokens).not.toContain('transition-colors');
+      };
+      try {
+        assertMotion(false);
+        root.dispatchEvent(new CustomEvent('pointer.enter'));
+        assertMotion(true);
+        root.dispatchEvent(new CustomEvent('pointer.down'));
+        assertMotion(true); // Flattening the image is not another animated property.
+        root.dispatchEvent(new CustomEvent('pointer.up'));
+        root.dispatchEvent(new CustomEvent('pointer.leave'));
+        assertMotion(false); // No resident reverse animation after leaving.
+        global.dispatchEvent(new CustomEvent('key.down'));
+        root.dispatchEvent(new CustomEvent('host:focus'));
+        assertMotion(true);
+        root.dispatchEvent(new CustomEvent('pointer.enter'));
+        root.dispatchEvent(new CustomEvent('pointer.leave'));
+        assertMotion(true); // Focus keeps the entry state while pointer leaves.
+        root.dispatchEvent(new CustomEvent('host:blur'));
+        assertMotion(false);
+        root.dispatchEvent(new CustomEvent('pointer.enter'));
+        assertMotion(true);
+        controller.applyRawProps({ variant, disabled: true });
+        assertMotion(false);
+        expect(controller.getRuleStyleTokens()).toContain('shadow-none');
+        controller.applyRawProps({ variant });
+        root.dispatchEvent(new CustomEvent('pointer.leave'));
+        root.dispatchEvent(new CustomEvent('pointer.enter'));
+        assertMotion(true);
+        controller.applyRawProps({ variant, colorContext: 'navbar' });
+        assertMotion(false);
+        root.dispatchEvent(new CustomEvent('pointer.leave'));
+        root.dispatchEvent(new CustomEvent('pointer.enter'));
+        assertMotion(false);
+        // Full raw snapshot actually removes the context prop while hovered.
+        controller.applyRawProps({ variant });
+        assertMotion(true);
+        root.dispatchEvent(new CustomEvent('pointer.leave'));
+        assertMotion(false);
+      } finally {
+        await invokeUnmounted();
+      }
+    }
+  );
   it.each(['default', 'primary', 'inverse'] as const)(
     'restores %s paint after opting the same Base owner into the navbar',
     async (variant) => {

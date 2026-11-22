@@ -34,6 +34,9 @@ const results: Array<{ name: string; status: string; errors: unknown }> = [];
 const observations: unknown[] = [];
 const screenshots: string[] = [];
 const pageErrors: string[] = [];
+const cleanupErrors: Array<{ phase: string; error: string }> = [];
+const protocolErrors: string[] = [];
+const seenCases = new Set<string>();
 let browser: Browser | undefined;
 let context: BrowserContext | undefined;
 let page: Page | undefined;
@@ -76,6 +79,8 @@ async function manifest(status: string) {
         observations,
         screenshots,
         pageErrors,
+        cleanupErrors,
+        protocolErrors,
         scope:
           'Actual www homepage and Docs Bootstrap navbar, plus the public four-Web Button fixture. Blue/dark and mobile 44px targets are Proto UI adaptations. No pixel-identical upstream, physical device, Compiler, non-Web, full-family or IME claim.',
       },
@@ -93,6 +98,12 @@ async function capture(name: string, target?: Locator) {
   screenshots.push(filename);
 }
 async function cell(name: string, run: () => Promise<void>) {
+  if (!expectedCases.includes(name) || seenCases.has(name)) {
+    const error = `Unexpected or duplicate Navbar evidence cell: ${name}`;
+    protocolErrors.push(error);
+    throw new Error(error);
+  }
+  seenCases.add(name);
   try {
     await run();
     cases.set(name, { status: 'passed' });
@@ -105,6 +116,13 @@ async function cell(name: string, run: () => Promise<void>) {
     }
   } finally {
     await manifest('running');
+  }
+}
+async function attemptCleanup(phase: string, run: () => Promise<unknown>) {
+  try {
+    await run();
+  } catch (error) {
+    cleanupErrors.push({ phase, error: String(error) });
   }
 }
 async function newPage(theme: 'light' | 'dark', runtime = 'wc') {
@@ -148,6 +166,7 @@ async function paint(control: Locator) {
     return {
       background: style.backgroundColor,
       image: style.backgroundImage,
+      radius: style.borderRadius,
       color: style.color,
       border: style.borderColor,
       shadow: style.boxShadow,
@@ -163,6 +182,56 @@ async function paint(control: Locator) {
       height: rect.height,
     };
   });
+}
+async function assertCommandPaint(name: string, width: number) {
+  const theme = await paint(themeButton());
+  const search = await paint(searchButton());
+  const facts = await themeButton().evaluate((element) => {
+    const header = element.closest('[data-site-header]');
+    const glyph = element.querySelector('svg, .site-header-theme-icon');
+    if (!header || !glyph) throw new Error('Navbar theme command requires its visible glyph.');
+    const glyphStyle = getComputedStyle(glyph);
+    const rect = glyph.getBoundingClientRect();
+    return {
+      background: getComputedStyle(header).backgroundImage,
+      glyphColor: glyph instanceof SVGElement ? glyphStyle.stroke : glyphStyle.borderTopColor,
+      glyphOpacity: glyphStyle.opacity,
+      glyphWidth: rect.width,
+      glyphHeight: rect.height,
+    };
+  });
+  observations.push({ name, phase: 'command-paint', theme, search, ...facts });
+  // The public family context must survive SSR -> WC upgrade. A white glyph
+  // on the ordinary raised field was visible in the first real Docs receipt.
+  expect(theme.background).toBe('rgba(0, 0, 0, 0)');
+  expect(theme.image).toBe('none');
+  expect(theme.color).toBe('rgb(255, 255, 255)');
+  expect(theme.opacity).toBe('1');
+  expect(theme.height).toBe(width < 768 ? 44 : 40);
+  expect(facts.glyphColor).toBe('rgb(255, 255, 255)');
+  expect(facts.glyphOpacity).toBe('1');
+  expect(facts.glyphWidth).toBeGreaterThanOrEqual(16);
+  expect(facts.glyphHeight).toBeGreaterThanOrEqual(16);
+  const colors = facts.background.match(/rgb\([\d\s,]+\)/g) ?? [];
+  expect(colors).toHaveLength(2);
+  const luminance = (color: string) => {
+    const channels = color.match(/[\d.]+/g)!.map((part) => {
+      const value = Number(part) / 255;
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+    return channels[0]! * 0.2126 + channels[1]! * 0.7152 + channels[2]! * 0.0722;
+  };
+  // Both actual computed blue gradient endpoints must contrast with the white
+  // non-text glyph; transparent rest paint leaves those endpoints visible.
+  const contrast = colors.map((color) => 1.05 / (luminance(color) + 0.05));
+  observations.push({ name, phase: 'theme-glyph-contrast', colors, contrast });
+  expect(Math.min(...contrast)).toBeGreaterThanOrEqual(3);
+  // The documentation loader must retain Bootstrap instead of silently
+  // selecting Shadcn. Check the actual painted field, not a stylesheet token.
+  expect(await searchButton().getAttribute('data-site-control-family')).toBe(FAMILY);
+  expect(search.radius).toBe('4px');
+  expect(search.image).toContain('linear-gradient');
+  expect(search.color).toBe('rgb(51, 51, 51)');
 }
 async function selectFamily() {
   await revealHeaderPreferences(page!);
@@ -262,6 +331,7 @@ async function exerciseHeader(name: string, theme: 'light' | 'dark', width: numb
     await page!.keyboard.press('Escape');
   await page!.mouse.move(0, 200);
   await assertGeometry(name, width);
+  await assertCommandPaint(name, width);
   await capture(`${name}-closed`);
   if (width >= 768) {
     const link = page!.locator('[data-site-header-desktop-navigation] a:visible').first();
@@ -348,6 +418,9 @@ async function exerciseHeader(name: string, theme: 'light' | 'dark', width: numb
     .toBe(theme === 'light' ? 'dark' : 'light');
   await themeButton().click();
   await expect.poll(() => page!.locator('html').getAttribute('data-theme')).toBe(theme);
+  await page!.mouse.move(0, 200);
+  await page!.keyboard.press('Tab');
+  await assertCommandPaint(`${name}-theme-restored`, width);
   await searchButton().click();
   const dialog = page!.locator('[role="dialog"]:visible');
   await dialog.waitFor({ state: 'visible' });
@@ -374,6 +447,13 @@ describe.skipIf(!enabled).sequential('Bootstrap navbar exact-head native evidenc
           'Navbar evidence requires its own fresh local source server and evidence directory.'
         );
       execFileSync('git', ['diff', '--exit-code', 'HEAD'], { stdio: 'pipe' });
+      if (
+        execFileSync('git', ['status', '--porcelain', '--untracked-files=normal'], {
+          encoding: 'utf8',
+        }).trim()
+      )
+        throw new Error('Navbar evidence rejects untracked or modified source inputs.');
+      expect(new Set(expectedCases).size).toBe(expectedCases.length);
       baseUrl = await startServer('/en/');
       browser = await launchBrowser();
     } catch (error) {
@@ -383,15 +463,20 @@ describe.skipIf(!enabled).sequential('Bootstrap navbar exact-head native evidenc
     }
   }, 150_000);
   afterEach(async ({ task }) => {
-    results.push({
+    const result = {
       name: task.name,
       status: task.result?.state ?? 'unknown',
       errors:
         task.result?.errors?.map((error) => ({ message: error.message, stack: error.stack })) ?? [],
+    };
+    results.push(result);
+    const previousCleanupErrors = cleanupErrors.length;
+    await attemptCleanup(`${task.name}: failure capture`, async () => {
+      if (page && !page.isClosed() && task.result?.state === 'fail')
+        await capture(`case-${results.length}-failure`);
     });
-    try {
+    await attemptCleanup(`${task.name}: fixture`, async () => {
       if (page && !page.isClosed()) {
-        if (task.result?.state === 'fail') await capture(`case-${results.length}-failure`);
         await page.evaluate(async () => {
           const fixture = (
             window as unknown as { projectionFamilyFixture?: { dispose(): Promise<void> } }
@@ -399,33 +484,35 @@ describe.skipIf(!enabled).sequential('Bootstrap navbar exact-head native evidenc
           await fixture?.dispose();
         });
       }
-    } finally {
-      await context?.close();
-      context = undefined;
-      page = undefined;
-      await manifest('running');
-    }
+    });
+    await attemptCleanup(`${task.name}: context`, async () => context?.close());
+    if (cleanupErrors.length !== previousCleanupErrors) result.status = 'fail';
+    context = undefined;
+    page = undefined;
+    await manifest('running');
   });
   afterAll(async () => {
-    try {
-      const complete = expectedCases.every((name) => cases.get(name)?.status === 'passed');
-      await manifest(
-        !startupError &&
-          complete &&
-          results.length === 12 &&
-          results.every((r) => r.status === 'pass') &&
-          pageErrors.length === 0
-          ? 'passed'
-          : 'failed'
-      );
-      expect(complete, 'Every expected viewport/runtime/theme cell must have passed').toBe(true);
-      expect(results).toHaveLength(12);
-      expect(pageErrors).toEqual([]);
-    } finally {
-      await context?.close();
-      await browser?.close();
-      await stopServer();
-    }
+    await attemptCleanup('final context', async () => context?.close());
+    await attemptCleanup('browser', async () => browser?.close());
+    await attemptCleanup('source server', stopServer);
+    const complete = expectedCases.every((name) => cases.get(name)?.status === 'passed');
+    await manifest(
+      !startupError &&
+        complete &&
+        results.length === 12 &&
+        results.every((r) => r.status === 'pass') &&
+        pageErrors.length === 0 &&
+        cleanupErrors.length === 0 &&
+        protocolErrors.length === 0
+        ? 'passed'
+        : 'failed'
+    );
+    expect(complete, 'Every expected viewport/runtime/theme cell must have passed').toBe(true);
+    expect(results).toHaveLength(12);
+    expect(results.every((result) => result.status === 'pass')).toBe(true);
+    expect(pageErrors).toEqual([]);
+    expect(cleanupErrors).toEqual([]);
+    expect(protocolErrors).toEqual([]);
   }, 60_000);
 
   for (const runtime of RUNTIMES)

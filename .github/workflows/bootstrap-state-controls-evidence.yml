@@ -10,7 +10,7 @@ concurrency:
 jobs:
   browser-evidence:
     runs-on: ubuntu-24.04
-    # Sequential state-controls, candidate navbar and historical captures.
+    # Sequential state-controls, navbar, Button motion and historical captures.
     timeout-minutes: 30
     env:
       PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -80,6 +80,18 @@ jobs:
             packages/prototypes/bootstrap-2-3-2/test/navbar-surface.test.ts \
             apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts \
             --maxWorkers=1 --minWorkers=1
+      - name: Collect native Bootstrap Button entry and cancellation trajectories
+        if: ${{ !cancelled() }}
+        id: button-motion
+        env:
+          PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE: '1'
+          PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-button-motion-evidence
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/cli/test/bootstrap-button-paint.test.ts \
+            apps/www/src/content/docs/zh-cn/bootstrap-button-motion-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
       - name: Preserve terminal status even when setup or browser launch fails
         if: always()
         env:
@@ -138,6 +150,43 @@ jobs:
         with:
           name: bootstrap-navbar-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/bootstrap-navbar-evidence
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preserve independent Button motion terminal status
+        if: always()
+        env:
+          EVIDENCE_STEP_STATUS: ${{ steps.button-motion.outcome }}
+          PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-button-motion-evidence
+        run: |
+          mkdir -p "$PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR"
+          node --input-type=module <<'JS'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import path from 'node:path';
+          const file = path.join(process.env.PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR, 'manifest.json');
+          const previous = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+          const expected = ['wc', 'react', 'vue', 'vue2'].flatMap(runtime => ['light', 'dark'].flatMap(theme =>
+            [...['default', 'primary', 'warning', 'danger', 'success', 'info', 'inverse'].map(variant => `entry-${variant}`),
+              'focus', 'disabled', 'navbar', 'reduced', 'dispose'].map(phase => `${runtime}-${theme}-${phase}`)));
+          writeFileSync(file, JSON.stringify({
+            ...previous,
+            sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+            expectedSha: process.env.PROTO_UI_EXPECTED_HEAD_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            stepStatus: process.env.EVIDENCE_STEP_STATUS,
+            cases: (previous.cases ?? expected.map(name => ({ name, status: 'pending' }))).map(cell =>
+              cell.status === 'pending' ? { ...cell, status: 'blocked', error: 'Motion cell did not reach a terminal observation.' } : cell),
+            status: previous.status === 'passed' && process.env.EVIDENCE_STEP_STATUS === 'success' ? 'passed' : 'failed',
+            scope: 'Native Chromium input and CSS transition observations on the public four-Web fixture; no physical-device, non-Web, Compiler or full-family acceptance.',
+          }, null, 2));
+          JS
+      - name: Retain Button motion frames, native events and terminal screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-button-motion-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/bootstrap-button-motion-evidence
           if-no-files-found: error
           retention-days: 30
       - name: Capture the pinned original navbar on the same browser runner
