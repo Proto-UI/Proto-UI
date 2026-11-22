@@ -1,51 +1,60 @@
-name: Bounded preference source evidence
+name: Sprint 2 original Git object transport
+run-name: Sprint 2 transport c13d4d9 (original authors retained)
 on:
   workflow_dispatch:
-  workflow_call:
 permissions:
   contents: read
 concurrency:
-  group: preference-evidence-${{ github.ref }}
-  cancel-in-progress: true
+  group: sprint2-original-object-publication
+  cancel-in-progress: false
 jobs:
-  four-web-preferences:
+  verify-original-objects:
+    if: ${{ github.repository == 'Proto-UI/Proto-UI' && github.ref == 'refs/heads/sprint2/transport-20261122-01' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
-        run: |
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile
-          CHROME=$(command -v google-chrome || command -v chromium)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Verify bounded preferences in real Web hosts
-        env:
-          PROTO_UI_PREFERENCE_EVIDENCE_DIR: ${{ runner.temp }}/preference-evidence
-        run: |
-          mkdir -p "$PROTO_UI_PREFERENCE_EVIDENCE_DIR"
-          git rev-parse HEAD > "$PROTO_UI_PREFERENCE_EVIDENCE_DIR/source-sha.txt"
-          "$CHROME_PATH" --version > "$PROTO_UI_PREFERENCE_EVIDENCE_DIR/chrome-version.txt"
-          corepack pnpm@10.32.1 exec vitest run \
-            packages/adapters/base/test/web-preference-source.test.ts \
-            packages/adapters/base/test/web-style-support-source.test.ts \
-            packages/runtime/test/contract/rule.style-support-lifecycle.contract.test.ts \
-            packages/runtime/test/contract/rule.preferences-lifecycle.contract.test.ts \
-            apps/www/test/preferences.browser.test.ts --maxWorkers=1 --minWorkers=1
-          rm -rf "$PROTO_UI_PREFERENCE_EVIDENCE_DIR/cache"
+      - name: Verify original objects and fast-forward ancestry without executing them
+        run: node .sprint2-transport/publish-candidate.mjs verify
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: preference-evidence-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/preference-evidence/*.json
-            ${{ runner.temp }}/preference-evidence/*.txt
-            ${{ runner.temp }}/preference-evidence/*.png
+          name: sprint2-transport-verification-${{ github.run_id }}
+          path: ${{ runner.temp }}/sprint2-transport-verify.json
+          if-no-files-found: error
           retention-days: 30
-          if-no-files-found: warn
+  publish-exact-candidate:
+    needs: verify-original-objects
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Import original commits and push one exact lease to the authorized PR branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .sprint2-transport/publish-candidate.mjs publish
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sprint2-transport-publication-${{ github.run_id }}
+          path: ${{ runner.temp }}/sprint2-transport-publish.json
+          if-no-files-found: error
+          retention-days: 30
