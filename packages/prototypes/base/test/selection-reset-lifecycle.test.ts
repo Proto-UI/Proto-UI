@@ -5,6 +5,8 @@ import * as combobox from '../src/combobox';
 import * as command from '../src/command';
 import { datePickerRoot, datePickerDay, asDatePickerRoot } from '../src/date-picker';
 import { asCalendarRoot, CALENDAR_CONTEXT } from '../src/calendar';
+import { asPopoverRoot } from '../src/popover';
+import { POPOVER_CONTEXT } from '../src/popover/shared';
 import { formRoot } from '../src/form';
 import { FORM_FAMILY, FORM_CONTEXT } from '../src/form/shared';
 import { createRuntimeSession } from '@proto.ui/runtime';
@@ -124,6 +126,133 @@ function runtimeHarness() {
   };
 }
 
+it('Calendar captures valid requests before effects and owns registration for its lifetime', async () => {
+  const { make, actions } = runtimeHarness();
+  const order: string[] = [];
+  const captures: Array<{ id: number; viewEpoch: number; value: string }> = [];
+  let register: ReturnType<typeof asCalendarRoot>['registerSelectionCapture'];
+  const proto = definePrototype({
+    name: 'calendar-request-capture',
+    setup(def) {
+      const calendar = asCalendarRoot();
+      register = calendar.registerSelectionCapture;
+      const capture: Parameters<typeof register>[0] = ({ id, viewEpoch, context }) => {
+        order.push('capture');
+        captures.push({ id, viewEpoch, value: context.read(CALENDAR_CONTEXT).value });
+      };
+      expect(register(capture)).toBe(true);
+      expect(register(capture)).toBe(true);
+      def.context.subscribe(CALENDAR_CONTEXT, () => order.push('context'));
+    },
+  });
+  const root = make(proto, null, { defaultValue: '2026-10-10', defaultMonth: '2026-10' });
+  await root.session.mount();
+  order.length = 0;
+  const retiredRequest = root.exposes.requestValue;
+  const off = root.exposes.value.subscribe((event: any) => {
+    if (event.type === 'next') order.push('state');
+  });
+  try {
+    root.session.invokeInCallbackScope(() => {
+      expect(root.exposes.requestValue('bad')).toBe(false);
+      expect(root.exposes.requestValue('2026-10-10')).toBe(false);
+      expect(captures).toEqual([]);
+      expect(root.exposes.requestValue('2026-10-15')).toBe(true);
+      expect(() => register(() => {})).toThrow();
+    });
+    expect(order[0]).toBe('capture');
+    expect(order).toContain('state');
+    expect(order).toContain('context');
+    expect(captures).toEqual([{ id: 1, viewEpoch: 0, value: '2026-10-10' }]);
+    expect(actions).toEqual(['valueChange']);
+    await root.session.unmount();
+    expect(root.exposes.requestValue('2026-10-16')).toBe(false);
+    await root.session.mount();
+    root.session.invokeInCallbackScope(() => root.exposes.requestValue('2026-10-16'));
+    expect(captures[1]).toEqual({ id: 2, viewEpoch: 1, value: '2026-10-15' });
+  } finally {
+    off();
+    await root.session.dispose();
+  }
+  expect(retiredRequest('2026-10-17')).toBe(false);
+  expect(captures).toHaveLength(2);
+});
+
+it('Calendar abandons a failed capture without retiring a later valid request', async () => {
+  const { make, actions } = runtimeHarness();
+  let fail = true;
+  const proto = definePrototype({
+    name: 'calendar-failed-capture',
+    setup() {
+      asCalendarRoot().registerSelectionCapture(() => {
+        if (fail) throw new Error('capture failed');
+      });
+    },
+  });
+  const root = make(proto, null, { defaultValue: '2026-10-10', defaultMonth: '2026-10' });
+  await root.session.mount();
+  try {
+    root.session.invokeInCallbackScope(() => {
+      expect(() => root.exposes.requestValue('2026-10-15')).toThrow('capture failed');
+      expect(root.exposes.value.get()).toBe('2026-10-10');
+      expect(actions).toEqual([]);
+      fail = false;
+      expect(root.exposes.requestValue('2026-10-16')).toBe(true);
+    });
+    expect(root.exposes.value.get()).toBe('2026-10-16');
+    expect(actions).toEqual(['valueChange']);
+  } finally {
+    await root.session.dispose();
+  }
+});
+
+it.each([false, true])(
+  'Popover sessions count accepted openings with controlled=%s',
+  async (controlled) => {
+    const { make } = runtimeHarness();
+    let current: { open: boolean; openSessionId: number };
+    const proto = definePrototype({
+      name: `popover-session-${controlled}`,
+      setup(def) {
+        asPopoverRoot();
+        def.context.subscribe(POPOVER_CONTEXT, (run) => {
+          current = run.context.read(POPOVER_CONTEXT);
+        });
+        def.lifecycle.onMounted((run) => {
+          current = run.context.read(POPOVER_CONTEXT);
+        });
+      },
+    });
+    const root = make(proto, null, controlled ? { open: false } : { defaultOpen: false });
+    await root.session.mount();
+    try {
+      expect(current!).toMatchObject({ open: false, openSessionId: 0 });
+      root.session.invokeInCallbackScope(() => root.exposes.openPopover());
+      if (controlled) {
+        expect(current!).toMatchObject({ open: false, openSessionId: 0 });
+        root.setProps({ open: true });
+      }
+      expect(current!).toMatchObject({ open: true, openSessionId: 1 });
+      root.session.invokeInCallbackScope(() => root.exposes.openPopover());
+      expect(current!).toMatchObject({ open: true, openSessionId: 1 });
+      root.session.invokeInCallbackScope(() => root.exposes.close());
+      if (controlled) {
+        expect(current!).toMatchObject({ open: true, openSessionId: 1 });
+        root.setProps({ open: false });
+      }
+      expect(current!).toMatchObject({ open: false, openSessionId: 1 });
+      if (controlled) root.setProps({ open: true });
+      else root.session.invokeInCallbackScope(() => root.exposes.openPopover());
+      expect(current!).toMatchObject({ open: true, openSessionId: 2 });
+      await root.session.unmount();
+      await root.session.mount();
+      expect(current!).toMatchObject({ open: true, openSessionId: 2 });
+    } finally {
+      await root.session.dispose();
+    }
+  }
+);
+
 it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
   'Date Picker host selection stops retired Day listeners after %s',
   async (operation) => {
@@ -154,6 +283,115 @@ it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
 );
 
 for (const mode of ['single', 'range'] as const) {
+  it(`Date Picker ${mode} completes a new request inside an earlier opening notification`, async () => {
+    const { make, actions } = runtimeHarness();
+    let root: ReturnType<typeof make>;
+    let opened = false;
+    let nested = false;
+    let nestedOpen: unknown;
+    let nestedRequest: unknown;
+    const proto = definePrototype({
+      name: `nested-opening-picker-${mode}`,
+      setup(def) {
+        asCalendarRoot();
+        asPopoverRoot();
+        def.context.subscribe(CALENDAR_CONTEXT, (_run, next) => {
+          if (!next.selectionRequestId || opened) return;
+          opened = true;
+          root.exposes.openPopover('context-subscriber');
+        });
+        def.context.subscribe(POPOVER_CONTEXT, (run, next) => {
+          if (!next.open || nested) return;
+          nested = true;
+          nestedOpen = run.context.read(POPOVER_CONTEXT).open;
+          nestedRequest =
+            mode === 'single'
+              ? root.exposes.requestValue('2026-10-16')
+              : root.exposes.requestRange({ from: '2026-10-10', to: '2026-10-16' });
+        });
+        asDatePickerRoot();
+      },
+    });
+    root = make(proto, null, {
+      ...(mode === 'single'
+        ? { defaultValue: '2026-10-10' }
+        : { defaultRange: { from: '2026-10-10' } }),
+      mode,
+      defaultMonth: '2026-10',
+      defaultOpen: false,
+    });
+    await root.session.mount();
+    try {
+      root.session.invokeInCallbackScope(() => root.exposes.requestValue('2026-10-15'));
+      expect(nestedOpen).toBe(true);
+      expect(nestedRequest).toBe(true);
+      expect(mode === 'single' ? root.exposes.value.get() : root.exposes.getRange()).toEqual(
+        mode === 'single' ? '2026-10-16' : { from: '2026-10-10', to: '2026-10-16' }
+      );
+      expect(root.exposes.open.get()).toBe(false);
+      expect(actions).toEqual([
+        'openChange',
+        mode === 'single' ? 'valueChange' : 'rangeChange',
+        'openChange',
+      ]);
+    } finally {
+      await root.session.dispose();
+    }
+  });
+
+  it(`Date Picker ${mode} keeps a new controlled request through an older close notification`, async () => {
+    const { make, actions } = runtimeHarness();
+    let root: ReturnType<typeof make>;
+    let armed = false;
+    let observed = false;
+    let nestedOpen: unknown;
+    let nestedRequest: unknown;
+    const proto = definePrototype({
+      name: `old-close-picker-${mode}`,
+      setup(def) {
+        asCalendarRoot();
+        asPopoverRoot();
+        def.context.subscribe(POPOVER_CONTEXT, (run, next) => {
+          if (!armed || next.open || observed) return;
+          observed = true;
+          root.exposes.openPopover('context-reopen');
+          nestedOpen = run.context.read(POPOVER_CONTEXT).open;
+          nestedRequest =
+            mode === 'single'
+              ? root.exposes.requestValue('2026-10-16')
+              : root.exposes.requestRange({ from: '2026-10-10', to: '2026-10-16' });
+        });
+        asDatePickerRoot();
+      },
+    });
+    const controlled =
+      mode === 'single' ? { value: '2026-10-10' } : { range: { from: '2026-10-10' } };
+    const props = { ...controlled, mode, defaultMonth: '2026-10', defaultOpen: true };
+    root = make(proto, null, props);
+    await root.session.mount();
+    armed = true;
+    try {
+      root.session.invokeInCallbackScope(() => root.exposes.close('context-oldclose'));
+      expect(nestedOpen).toBe(true);
+      expect(nestedRequest).toBe(true);
+      expect(root.exposes.open.get()).toBe(true);
+      expect(mode === 'single' ? root.exposes.value.get() : root.exposes.getRange()).toEqual(
+        mode === 'single' ? controlled.value : controlled.range
+      );
+      root.setProps({
+        ...props,
+        ...(mode === 'single'
+          ? { value: '2026-10-16' }
+          : { range: { from: '2026-10-10', to: '2026-10-16' } }),
+      });
+      expect(root.exposes.open.get()).toBe(false);
+      expect(actions.filter((name) => name === 'openChange')).toHaveLength(3);
+      expect(actions.at(-1)).toBe('openChange');
+    } finally {
+      await root.session.dispose();
+    }
+  });
+
   it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
     `Date Picker ${mode} synchronous owner acceptance waits for the proposal callback after %s`,
     async (operation) => {

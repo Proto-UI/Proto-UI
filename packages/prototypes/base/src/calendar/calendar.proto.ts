@@ -50,6 +50,8 @@ import type {
   CalendarDayExposes,
   CalendarDayContract,
   CalendarRootAsHookContract,
+  CalendarRootHandles,
+  CalendarSelectionCapture,
   CalendarGridProps,
   CalendarGridExposes,
   CalendarRowProps,
@@ -219,6 +221,15 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   let values: string[] = [];
   let range: CalendarRange = {};
   let selectionId = 0;
+  const selectionCaptures = new Set<CalendarSelectionCapture>();
+  def.expose.method('registerSelectionCapture', (capture: CalendarSelectionCapture) => {
+    if (typeof capture !== 'function') return false;
+    if (selectionCaptures.has(capture)) return true;
+    // This owned cleanup also enforces the setup-only registration boundary.
+    def.lifecycle.onBeforeDispose(() => selectionCaptures.delete(capture));
+    selectionCaptures.add(capture);
+    return true;
+  });
   let publicationId = 0;
   let pendingSelection: {
     id: number;
@@ -417,9 +428,28 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       proposalDelivered: false,
     };
     pendingNavigation = null;
-    // Freeze the request's consumer session before any public State can notify.
-    // A State observer may open/reopen a Picker; that later session must never
-    // be captured as the one this selection is allowed to complete.
+    const capture = Object.freeze({
+      id,
+      viewEpoch: epoch,
+      context: Object.freeze({ read: current.context.read }),
+    });
+    try {
+      for (const record of selectionCaptures) {
+        record(capture);
+        if (
+          owner !== current ||
+          viewEpoch !== epoch ||
+          selectionId !== id ||
+          pendingSelection?.id !== id
+        )
+          return true;
+      }
+    } catch (error) {
+      if (pendingSelection?.id === id) pendingSelection = null;
+      throw error;
+    }
+    // The capture already recorded causality. This ordinary Context transition
+    // may drain after other channels and is not used to infer a request's start.
     current.context.update(CALENDAR_CONTEXT, { ...c, selectionRequestId: id });
     if (
       owner !== current ||
@@ -530,10 +560,19 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
 export const asCalendarRoot = defineAsHook<
   CalendarRootProps,
   CalendarRootExposes,
-  CalendarRootAsHookContract
+  CalendarRootAsHookContract,
+  CalendarRootHandles
 >({
   name: 'as-calendar-root',
   setup: setupRoot,
+  projectHandle(result) {
+    return {
+      ...result,
+      registerSelectionCapture: result.getMethod!(
+        'registerSelectionCapture'
+      ) as CalendarRootHandles['registerSelectionCapture'],
+    };
+  },
 });
 export const calendarRoot = definePrototype({ name: 'base-calendar-root', setup: setupRoot });
 function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {

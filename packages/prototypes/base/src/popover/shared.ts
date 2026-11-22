@@ -5,6 +5,8 @@ export type PopoverOpenFocusReason = 'programmatic' | 'keyboard' | 'pointer';
 export type PopoverContextValue = {
   rootId: string;
   open: boolean;
+  /** Monotonic accepted-opening identity, scoped to rootId. */
+  openSessionId: number;
   openFocusReason: PopoverOpenFocusReason | null;
   returnFocusReason: PopoverOpenFocusReason | null;
   controlled: boolean;
@@ -41,6 +43,7 @@ export function requestPopoverOpen(
     run.context.update(POPOVER_CONTEXT, (prev: PopoverContextValue) => ({
       ...prev,
       open: prev.controlled ? prev.open : nextOpen,
+      openSessionId: prev.openSessionId + (!prev.controlled && !prev.open && nextOpen ? 1 : 0),
       openFocusReason: nextOpen ? focusReason : null,
       returnFocusReason: nextOpen ? null : focusReason,
       requestedOpen: nextOpen,

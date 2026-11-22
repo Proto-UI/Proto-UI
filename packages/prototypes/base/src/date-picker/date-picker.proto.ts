@@ -23,54 +23,47 @@ import { POPOVER_CONTEXT, requestPopoverOpen } from '../popover/shared';
 
 function setupRoot(def: DefHandle<DatePickerRootProps, DatePickerRootExposes>) {
   asPopoverRoot();
-  asCalendarRoot();
+  const calendar = asCalendarRoot();
   let mounted = false;
   let lastCompletion = 0;
-  let lastRequest = 0;
-  let requestSessionOpen = false;
-  const observeRequest = (id: number, open: boolean) => {
-    if (id <= lastRequest) return;
-    lastRequest = id;
-    requestSessionOpen = mounted && open;
-  };
-  def.context.subscribe(CALENDAR_CONTEXT, (run, next) => {
-    // A nested request may already own the provider while an older delivery
-    // finishes notifying its remaining subscribers.
-    if (next.selectionRequestId !== run.context.read(CALENDAR_CONTEXT).selectionRequestId) return;
-    const open = run.context.read(POPOVER_CONTEXT).open;
-    observeRequest(next.selectionRequestId, open);
+  let requestSession: { id: number; rootId: string; openSessionId: number } | null = null;
+  calendar.registerSelectionCapture(({ id, context }) => {
+    const popup = context.read(POPOVER_CONTEXT);
+    requestSession =
+      mounted && popup.open
+        ? { id, rootId: popup.rootId, openSessionId: popup.openSessionId }
+        : null;
+  });
+  def.context.subscribe(CALENDAR_CONTEXT, (run) => {
+    const next = run.context.read(CALENDAR_CONTEXT);
     const completion = next.selectionCommit;
     if (!completion || completion.id <= lastCompletion) return;
     lastCompletion = completion.id;
+    const popup = run.context.read(POPOVER_CONTEXT);
     if (
-      completion.id !== lastRequest ||
+      completion.id !== requestSession?.id ||
       !mounted ||
-      !requestSessionOpen ||
+      requestSession.rootId !== popup.rootId ||
+      requestSession.openSessionId !== popup.openSessionId ||
       !completion.complete ||
       next.disabled ||
       next.readOnly ||
-      !open
+      !popup.open
     )
       return;
     requestPopoverOpen(run, false, 'date-selection', completion.reason);
   });
-  def.context.subscribe(POPOVER_CONTEXT, (run, next, prev) => {
-    // An earlier Calendar subscriber can change the popup before our Calendar
-    // callback runs. Its actual previous open fact still identifies the session
-    // at request start; a later Calendar delivery must not recapture a new one.
-    observeRequest(run.context.read(CALENDAR_CONTEXT).selectionRequestId, prev.open);
-    if (!next.open) requestSessionOpen = false;
-  });
+  def.context.subscribe(POPOVER_CONTEXT);
   def.lifecycle.onMounted(() => {
     mounted = true;
   });
   def.lifecycle.onUnmounted(() => {
     mounted = false;
-    requestSessionOpen = false;
+    requestSession = null;
   });
   def.lifecycle.onBeforeDispose(() => {
     mounted = false;
-    requestSessionOpen = false;
+    requestSession = null;
   });
 }
 export const asDatePickerRoot = defineAsHook<

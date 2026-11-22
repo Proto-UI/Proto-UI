@@ -44,7 +44,7 @@ cases:
 implementations:
   - id: calendar-selection-causal-lifecycle
     kind: runtime-test
-    status: pending
+    status: passing
     path: packages/prototypes/base/test/selection-reset-lifecycle.test.ts
     required: true
     consumesCases:

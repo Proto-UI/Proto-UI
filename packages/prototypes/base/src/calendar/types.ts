@@ -7,6 +7,8 @@ import type {
   FocusRequestOptions,
   CollectionExposes,
   CollectionItemExposes,
+  AsHookResult,
+  RunHandle,
 } from '@proto.ui/core';
 export type CalendarSelectionMode = 'single' | 'multiple' | 'range';
 export type CalendarSelectionReason = 'pointer' | 'keyboard' | 'programmatic';
@@ -43,6 +45,14 @@ export interface CalendarRootProps {
   locale?: string;
   direction?: 'ltr' | 'rtl';
 }
+/** Read during capture only; no effects or retained callback RunHandle. */
+export type CalendarSelectionCapture = (
+  request: Readonly<{
+    id: number;
+    viewEpoch: number;
+    context: Pick<RunHandle<CalendarRootProps>['context'], 'read'>;
+  }>
+) => void;
 export type CalendarRootExposes = CollectionExposes & {
   value: ExposeState<string>;
   mode: ExposeState<string>;
@@ -62,6 +72,8 @@ export type CalendarRootExposes = CollectionExposes & {
   getValues: ExposeMethod<() => string[]>;
   getRange: ExposeMethod<() => CalendarRange>;
   requestMonth: ExposeMethod<(month: string) => boolean>;
+  /** Composition registration is setup-only; runtime registration is a phase error. */
+  registerSelectionCapture: ExposeMethod<(capture: CalendarSelectionCapture) => boolean>;
 };
 export interface CalendarDayProps {
   date?: string;
@@ -123,6 +135,9 @@ export type CalendarRootAsHookContract = {
     disabled: State<boolean>;
     direction: State<string>;
   };
+};
+export type CalendarRootHandles = AsHookResult<CalendarRootProps, CalendarRootAsHookContract> & {
+  registerSelectionCapture(capture: CalendarSelectionCapture): boolean;
 };
 export type CalendarGridProps = Record<string, never>;
 export type CalendarGridExposes = {};
