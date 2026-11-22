@@ -1,4 +1,5 @@
 import type { ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
+import { structuralStatementOrder } from './declaration-order';
 
 const cache = new WeakMap<PrototypeIR, PrototypeIR>();
 type Binding = Extract<StatementIR, { kind: 'const' }>;
@@ -203,8 +204,10 @@ export function pruneDeadValues(input: PrototypeIR): PrototypeIR {
     }
     function rewriteBlock(body: readonly StatementIR[], outer: ReadonlySet<string>): StatementIR[] {
       const available = new Set(outer),
-        result: StatementIR[] = [];
+        result: StatementIR[] = [],
+        retained = new Set<StatementIR>();
       for (const statement of body) {
+        const previousLength = result.length;
         if (statement.kind === 'const') {
           if (
             !uses.has(identity(statement)) &&
@@ -245,6 +248,24 @@ export function pruneDeadValues(input: PrototypeIR): PrototypeIR {
               : {}),
             ...(statement.finally ? { finally: rewriteBlock(statement.finally, available) } : {}),
           });
+        if (result.length !== previousLength) retained.add(statement);
+      }
+      if (
+        body.some(
+          (statement) => statement.kind === 'const' && statement.declarationPosition !== undefined
+        )
+      ) {
+        const logicalPositions = new Map(
+          structuralStatementOrder(body)
+            .filter((statement) => retained.has(statement))
+            .map((statement, index) => [statement, index])
+        );
+        const original = body.filter((statement) => retained.has(statement));
+        return result.map((statement, index) =>
+          statement.kind === 'const' && statement.declarationPosition !== undefined
+            ? { ...statement, declarationPosition: logicalPositions.get(original[index])! }
+            : statement
+        );
       }
       return result;
     }

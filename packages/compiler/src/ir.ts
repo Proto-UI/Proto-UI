@@ -142,6 +142,7 @@ export type ValueType =
   | 'event-control'
   | 'event-or-control'
   | 'host-event'
+  | 'a11y-value-event'
   | 'props'
   | 'focus'
   | 'accessible'
@@ -346,6 +347,8 @@ export type ExpressionIR = ExpressionBase &
         receiver?: ExpressionIR;
         /** Nullish receiver returns undefined without evaluating arguments. */
         optional?: boolean;
+        /** Independently checked registration schema, retained across demand pruning. */
+        inputPayloadType?: 'event' | 'host-event' | 'a11y-value-event';
         arguments: ExpressionIR[];
       }
     | { kind: 'helper-call'; name: string; arguments: ExpressionIR[] }
@@ -354,7 +357,15 @@ export type ExpressionIR = ExpressionBase &
   );
 
 export type StatementIR =
-  | { kind: 'const'; name: string; bindingId?: string; value: ExpressionIR; span: SourceSpan }
+  | {
+      kind: 'const';
+      name: string;
+      bindingId?: string;
+      value: ExpressionIR;
+      /** Original structural position of a hoisted local function declaration. */
+      declarationPosition?: number;
+      span: SourceSpan;
+    }
   | { kind: 'effect'; expression: ExpressionIR; span: SourceSpan }
   | {
       kind: 'if';

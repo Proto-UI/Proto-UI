@@ -146,6 +146,7 @@ export function emitGpuiSource(
     'event.on',
     'event.onGlobal',
     'event.requestDefaultActionPrevention',
+    'eventControl.requestDefaultActionPrevention',
     'focus.configure',
     'focus.setDisabled',
     'focus.focusSelf',
@@ -2035,9 +2036,13 @@ impl __PuiNativeRecordValue {
           case 'positioning.getSnapshot':
             return `positioning_snapshot(${receiverOwner()})`;
           case 'event.on':
-          case 'event.onGlobal':
-            return `listen(&${ownerReference()}, ${argument(0)}, ${node.operation === 'event.onGlobal'}, ${argument(1)}, ${argument(2)})`;
+          case 'event.onGlobal': {
+            const listener =
+              node.inputPayloadType === 'a11y-value-event' ? 'listen_numeric_value' : 'listen';
+            return `${listener}(&${ownerReference()}, ${argument(0)}, ${node.operation === 'event.onGlobal'}, ${argument(1)}, ${argument(2)})`;
+          }
           case 'event.requestDefaultActionPrevention':
+          case 'eventControl.requestDefaultActionPrevention':
             return `prevent(${receiver()})`;
           default:
             throw new Error(`Checked GPUI operation has no direct lowering: ${node.operation}`);

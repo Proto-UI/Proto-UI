@@ -85,13 +85,15 @@ describe('portable pointer facts: capability admission', () => {
         });
     });
   }
-  it('admits a control alias operation on Web without granting payload members', () => {
+  it('admits a control alias operation on Web and GPUI without granting payload members', () => {
     const ir = parse('const control = event.control; control.requestDefaultActionPrevention();');
     expect(
       records(ir).some((node) => node.operation === 'eventControl.requestDefaultActionPrevention')
     ).toBe(true);
-    for (const emit of web) expect(emit(ir).ok, emit.name).toBe(true);
-    for (const emit of native)
+    // GPUI lowers the alias to the same scoped Input capability as direct
+    // event.control; the numeric accessibility native consumer executes it.
+    for (const emit of [...web, emitGpuiSource]) expect(emit(ir).ok, emit.name).toBe(true);
+    for (const emit of [emitQtSource, emitFlutterSource])
       expect(emit(ir), emit.name).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4003' }] });
   });
   for (const emit of ssr) {

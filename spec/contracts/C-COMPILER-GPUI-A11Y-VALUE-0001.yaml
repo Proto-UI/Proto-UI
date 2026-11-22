@@ -1,0 +1,34 @@
+id: C-COMPILER-GPUI-A11Y-VALUE-0001
+type: contract
+title: Numeric accessibility actions through the GPUI host event boundary
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  A real native numeric control must accept the platform accessibility value setter. This bounded private GPUI repair requires native bridge and OS consumer evidence; it does not promote the compiler profile or require every Adapter to implement numeric accessibility actions.
+
+summary: GPUI SetValue forwards a finite native numeric request to the authored owner-local event route without taking ownership of State or domain writes.
+statement:
+  en: >-
+    In the private GPUI source profile, accessible.action('setValue', {event}) registers AccessKit SetValue. The event is an owner-local host:* route; omission selects host:a11y-set-value. A preceding checked literal declaration gives a matching local Event listener the A11ySetValueEventPayload schema: type names the configured route, value is a finite number, and control retains the ordinary synchronous Event capability lifetime. A numeric accessibility request is an input proposal, not an automatic State write. The prototype remains responsible for disabled, range, cancellation, revision and controlled-value policy.
+
+criteria:
+  - id: C-COMPILER-GPUI-A11Y-VALUE-0001-PROJECTION
+    text: The production native accessibility Element projects finite valueNow, valueMin and valueMax facts to AccessKit numeric_value, min_numeric_value and max_numeric_value, including zero and fractional values; valueText remains a string value. Invalid numeric facts are omitted without coercion. Disabled and readOnly retain their existing boolean projection. An owner map or Slider role alone is not evidence that a platform Value interface exists.
+  - id: C-COMPILER-GPUI-A11Y-VALUE-0001-PAYLOAD
+    text: The real GPUI action callback forwards ActionData::NumericValue unchanged as value. Missing data, string-valued ActionData::Value, other data kinds and non-finite numbers do not dispatch a numeric event or fabricate a fallback value. The host bridge does not clamp or mutate the authored State.
+  - id: C-COMPILER-GPUI-A11Y-VALUE-0001-SCHEMA
+    text: Source and serialized IR independently derive the numeric event schema from the checked preceding action declaration. Generic host events, global listeners, unrelated actions, unchecked dynamic routes and erased type assertions cannot grant numeric payload provenance. The first supported source target is GPUI; other targets fail explicitly when the numeric payload is consumed.
+  - id: C-COMPILER-GPUI-A11Y-VALUE-0001-INGRESS
+    text: A numeric listener checks its finite value field before consuming a once registration or invoking authored code, including direct host-event dispatch. Invalid input cannot spend once or trigger callbacks. Declared route names, ordinary event controls and last-action mapping are preserved.
+  - id: C-COMPILER-GPUI-A11Y-VALUE-0001-LIFETIME
+    text: Delivery uses the existing attached native owner and Event callback boundary. Missing actions, inactive views, detach and terminal disposal cannot deliver or revive the action; Event controls expire after their synchronous callback.
+references:
+  contracts: [C-A11Y-0001, C-EVENT-TYPE-0004]
+  hostCaps: [HC-A11Y-0001]
+sources:
+  - path: internal/compiler/gpui-accessibility-value.md
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define the finite numeric accessibility action bridge and its owner-local checked payload boundary.
+tags: [compiler, gpui, accessibility, event, ownership]
