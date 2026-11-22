@@ -13,6 +13,7 @@ import { generatedSourcePath } from './emitter-map';
 import { IR_VERSION, type CompileResult } from './ir';
 import { checkTargetOperations, TARGET_PROFILES } from './targets';
 import { nativeInteractionArtifacts } from './native-interaction';
+import { verifyGpuiCompilationSdk } from './gpui-native-sdk-compatibility';
 import type { SuccessfulProjectGeneration } from './project';
 
 export interface ProjectArtifactOptions {
@@ -224,7 +225,12 @@ export async function writeProjectCompilation(
   openExclusive?: (filename: string) => Promise<ExclusiveOutputFile>
 ): Promise<CompileResult<{ directory: string; files: string[] }>> {
   const planned = projectCompilationArtifacts(generation, options);
-  return planned.ok ? writeArtifactSet(planned.value, directory, openExclusive) : planned;
+  if (!planned.ok) return planned;
+  for (const { compilation } of generation.entries) {
+    const sdk = await verifyGpuiCompilationSdk(compilation.output, directory);
+    if (!sdk.ok) return sdk;
+  }
+  return writeArtifactSet(planned.value, directory, openExclusive);
 }
 
 export async function diffProjectCompilation(
@@ -233,5 +239,10 @@ export async function diffProjectCompilation(
   options: ProjectArtifactOptions
 ): Promise<CompileResult<ArtifactDiff>> {
   const planned = projectCompilationArtifacts(generation, options);
-  return planned.ok ? diffArtifactSet(planned.value, directory) : planned;
+  if (!planned.ok) return planned;
+  for (const { compilation } of generation.entries) {
+    const sdk = await verifyGpuiCompilationSdk(compilation.output, directory);
+    if (!sdk.ok) return sdk;
+  }
+  return diffArtifactSet(planned.value, directory);
 }

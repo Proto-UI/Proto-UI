@@ -175,6 +175,7 @@ fn move_gesture_touch_claim_retains_origin_and_ignores_rival_input(cx: &mut Test
     }).unwrap();
     assert!(lease.is_active());
     let outside = gpui::point(px(500.), px(300.));
+    let released = gpui::point(px(520.), px(290.));
     window.update(cx, |host, window, cx| {
         assert!(!host.target.read(cx).owner.borrow().bounds.unwrap().contains(&outside));
         // Rival finger input stays with GPUI's original logical contact.
@@ -196,7 +197,8 @@ fn move_gesture_touch_claim_retains_origin_and_ignores_rival_input(cx: &mut Test
         assert_eq!(*log.events.borrow(), ["start"]);
         move_touch(window, cx, 1, gpui::TouchPhase::Moved, outside);
         host.stop_up.set(true);
-        move_touch(window, cx, 1, gpui::TouchPhase::Ended, outside);
+        // The terminal sample is observable even without a final Moved event.
+        move_touch(window, cx, 1, gpui::TouchPhase::Ended, released);
         assert!(host.stopped.get(), "touch release completes before a stopped child bubble");
     }).unwrap();
     assert!(!lease.is_active());
@@ -208,8 +210,12 @@ fn move_gesture_touch_claim_retains_origin_and_ignores_rival_input(cx: &mut Test
     assert_eq!(samples[1].position.y, f64::from(f32::from(outside.y)) - f64::from(f32::from(origin.y)));
     assert_eq!(samples[1].total_delta.x, f64::from(f32::from(outside.x)) - f64::from(f32::from(start.x)));
     assert_eq!(samples[1].total_delta.y, f64::from(f32::from(outside.y)) - f64::from(f32::from(start.y)));
-    assert_eq!(samples[2].delta.x, 0.);
-    assert_eq!(samples[2].delta.y, 0.);
+    assert_eq!(samples[2].delta.x, 20.);
+    assert_eq!(samples[2].delta.y, -10.);
+    assert_eq!(samples[2].position.x, f64::from(f32::from(released.x)) - f64::from(f32::from(origin.x)));
+    assert_eq!(samples[2].position.y, f64::from(f32::from(released.y)) - f64::from(f32::from(origin.y)));
+    assert_eq!(samples[2].total_delta.x, f64::from(f32::from(released.x)) - f64::from(f32::from(start.x)));
+    assert_eq!(samples[2].total_delta.y, f64::from(f32::from(released.y)) - f64::from(f32::from(start.y)));
     assert!(log.cancels.borrow().is_empty());
 }
 
@@ -285,6 +291,7 @@ fn move_gesture_retains_window_contact_and_release_precedes_child_bubble(cx: &mu
     let start = move_down(window, cx);
     assert!(lease.is_active());
     let outside = gpui::point(px(500.), px(300.));
+    let released = gpui::point(px(510.), px(325.));
     window.update(cx, |host, window, cx| {
         let bounds = host.target.read(cx).owner.borrow().bounds.unwrap();
         assert!(!bounds.contains(&outside));
@@ -294,7 +301,7 @@ fn move_gesture_retains_window_contact_and_release_precedes_child_bubble(cx: &mu
         }), cx);
         host.stop_up.set(true);
         window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
-            position: outside, button: gpui::MouseButton::Left, ..Default::default()
+            position: released, button: gpui::MouseButton::Left, ..Default::default()
         }), cx);
         assert!(host.stopped.get(), "downstream native child stopped the bubble release");
     }).unwrap();
@@ -304,7 +311,9 @@ fn move_gesture_retains_window_contact_and_release_precedes_child_bubble(cx: &mu
     assert_eq!((samples[0].position.x, samples[0].position.y), (2., 2.));
     assert_eq!(samples[1].total_delta.x, f64::from(f32::from(outside.x - start.x)));
     assert!(samples[1].modifiers.shift && samples[1].modifiers.alt);
-    assert_eq!(samples[2].delta.x, 0.);
+    assert_eq!((samples[2].delta.x, samples[2].delta.y), (10., 25.));
+    assert_eq!(samples[2].total_delta.x, f64::from(f32::from(released.x - start.x)));
+    assert_eq!(samples[2].total_delta.y, f64::from(f32::from(released.y - start.y)));
     assert!(log.cancels.borrow().is_empty());
 }
 

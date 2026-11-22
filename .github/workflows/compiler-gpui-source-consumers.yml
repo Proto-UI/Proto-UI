@@ -40,6 +40,23 @@ jobs:
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
       - name: Install pinned Rust toolchain
         run: rustup toolchain install 1.98.1 --profile minimal
+      - name: Execute headless generated Rust consumers
+        env:
+          RUSTUP_TOOLCHAIN: 1.98.1
+          PROTO_UI_REQUIRE_RUST_DATA_TESTS: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gpui-evidence"
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/compiler/test/rust-data-source.test.ts \
+            packages/compiler/test/rust-data-artifacts.test.ts \
+            --maxWorkers=1 --minWorkers=1 \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/headless-consumer.log"
+      - name: Exercise Cargo graph admission against real dependency syntax
+        env:
+          RUSTUP_TOOLCHAIN: 1.98.1
+          PROTO_UI_REQUIRE_CARGO_GRAPH_TESTS: '1'
+        run: node --test scripts/gpui/test/cargo-graph.test.mjs
       - name: Install Linux native build dependencies
         if: runner.os == 'Linux'
         run: |
@@ -60,6 +77,16 @@ jobs:
           git rev-parse HEAD > "$RUNNER_TEMP/gpui-evidence/source-sha.txt"
           rustc +1.98.1 --version --verbose > "$RUNNER_TEMP/gpui-evidence/rustc.txt"
           node --import tsx packages/compiler/test/fixtures/gpui-ordinary-values/produce.mjs "$RUNNER_TEMP/gpui-evidence/generated" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/producer.log"
+      - name: Verify the full locked GPUI and shared SDK dependency graph
+        run: |
+          set -euo pipefail
+          node scripts/gpui/check-cargo-graph.mjs \
+            --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" \
+            --git https://github.com/zed-industries/zed \
+            --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+            --toolchain 1.98.1 \
+            --output "$RUNNER_TEMP/gpui-evidence/cargo-graph.json" \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/cargo-graph.log"
       - name: Build the default published native SDK
         run: |
           set -euo pipefail

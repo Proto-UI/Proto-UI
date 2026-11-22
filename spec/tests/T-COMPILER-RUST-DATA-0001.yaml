@@ -1,0 +1,59 @@
+id: T-COMPILER-RUST-DATA-0001
+type: test
+title: Checked headless Rust data artifacts and complete native consumers
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  The private data backend needs independent review and source-bound generated Rust executions. These tests do not establish native-window or OS input acceptance.
+
+cases:
+  - id: T-COMPILER-RUST-DATA-0001-CASE-CLOSURE
+    title: Explicit pure closure admission fails closed at source and IR boundaries
+    covers: [C-COMPILER-RUST-DATA-0001-CLOSURE, C-COMPILER-RUST-DATA-0001-OWNER]
+    expectation: Pure helpers are selected by checked binding identity while owner operations, mutations, ambiguity and unknown selectors reject; instance registration is not fabricated.
+  - id: T-COMPILER-RUST-DATA-0001-CASE-RUST
+    title: Ordinary Cargo consumers execute typed generated decisions
+    covers: [C-COMPILER-RUST-DATA-0001-TYPED, C-COMPILER-RUST-DATA-0001-DEPENDENCIES]
+    expectation: A real generated Rust crate builds and executes the expected data transitions and numeric boundaries; full cargo metadata contains no GPUI or component-owner package.
+  - id: T-COMPILER-RUST-DATA-0001-CASE-SOURCE
+    title: Imported source edits invalidate the complete compilation identity
+    covers: [C-COMPILER-RUST-DATA-0001-CLOSURE-IDENTITY]
+    expectation: A source graph with imported and re-exported helpers preserves canonical binding identity and records source-resolution inputs; a helper mutation changes generated results and source hashes.
+  - id: T-COMPILER-RUST-DATA-0001-CASE-PUBLISH
+    title: Data crate publication and retained comparison preserve ownership
+    covers: [C-COMPILER-RUST-DATA-0001-PUBLICATION]
+    expectation: Fresh output records all generated hashes; existing or modified output is preserved and comparison reports actual differences.
+implementations:
+  - id: checked-native-data
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/rust-data-source.test.ts
+    required: true
+    consumesCases: [T-COMPILER-RUST-DATA-0001-CASE-CLOSURE, T-COMPILER-RUST-DATA-0001-CASE-RUST]
+    notes:
+      - Native execution requires an available Cargo toolchain; a skipped native consumer is not a pass.
+  - id: source-and-publication
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/rust-data-artifacts.test.ts
+    required: true
+    consumesCases: [T-COMPILER-RUST-DATA-0001-CASE-SOURCE, T-COMPILER-RUST-DATA-0001-CASE-PUBLISH]
+verifies:
+  contracts:
+    - id: C-COMPILER-RUST-DATA-0001
+      anchors:
+        - C-COMPILER-RUST-DATA-0001-CLOSURE
+        - C-COMPILER-RUST-DATA-0001-TYPED
+        - C-COMPILER-RUST-DATA-0001-OWNER
+        - C-COMPILER-RUST-DATA-0001-CLOSURE-IDENTITY
+        - C-COMPILER-RUST-DATA-0001-DEPENDENCIES
+        - C-COMPILER-RUST-DATA-0001-PUBLICATION
+openQuestions:
+  - id: T-COMPILER-RUST-DATA-0001-Q-ACCEPTANCE
+    question: Stable admission requires independent review of the complete admitted language subset and its source-bound native consumer results.
+    blocks: [activation:T-COMPILER-RUST-DATA-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Bind checked closure, native data execution, source graph and create-only artifact cases to explicit evidence.
+tags: [compiler, rust, data, conformance]

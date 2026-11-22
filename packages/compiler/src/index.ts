@@ -18,11 +18,28 @@ export { emitVueSource } from './vue-source';
 export { emitVue2Source } from './vue2-source';
 export { emitWebComponentSource } from './web-component-source';
 export { emitGpuiSource } from './gpui-source';
+export { emitRustDataSource } from './rust-data-source';
+export type { RustDataOptions, RustDataMethod, RustDataModule } from './rust-data-source';
+export {
+  compileRustDataPrototype,
+  compileRustDataFile,
+  rustDataCompilationArtifacts,
+  writeRustDataCompilation,
+  diffRustDataCompilation,
+} from './rust-data';
+export type {
+  RustDataCompilation,
+  RustDataCompileOptions,
+  RustDataFileCompileOptions,
+} from './rust-data';
 export {
   gpuiNativeSdkFiles,
+  gpuiNativeSdkIdentity,
   GPUI_NATIVE_SDK_PATH,
   GPUI_NATIVE_SDK_VERSION,
 } from './gpui-native-sdk';
+export type { GpuiNativeSdkIdentity } from './gpui-native-sdk';
+export { verifyGpuiNativeSdk } from './gpui-native-sdk-compatibility';
 export { emitQtSource } from './qt-source';
 export { emitFlutterSource } from './flutter-source';
 export { TARGET_PROFILES, resolveTargetProfile, checkTargetOperations } from './targets';

@@ -1,0 +1,39 @@
+id: C-COMPILER-RUST-DATA-0001
+type: contract
+title: Explicit checked pure-data Rust artifacts without component ownership
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  The maintainer requested a headless generated decision layer for native consumers. This private artifact boundary requires independent review and its declared Rust consumer evidence; it is not a stable compiler profile or an Expose API promotion.
+
+summary: Explicit extraction of checked pure module functions produces a typed Rust data crate without instantiating a prototype or importing its native UI owner.
+statement:
+  en: >-
+    A private data-artifact compilation may select named, statically identified pure module functions from a checked prototype source graph. It must prove the entire selected callable closure is portable data computation and emit ordinary typed Rust functions. The artifact does not execute setup, consult an instance registry, or acquire any component state, lifecycle, event, focus or accessibility authority. Its explicit selectors identify source functions, not callable capabilities of a component instance. Ordinary GPUI component methods retain their owner boundary.
+
+  zh-CN: >-
+    私有数据制品编译可以从已检查的原型源图中显式选择静态标识的纯模块函数， 必须证明所选可调用闭包完全属于可移植数据计算，并生成普通强类型 Rust 函数。 该制品不执行 setup、不查询实例注册表，也不取得组件状态、生命周期、事件、 焦点或无障碍权限。显式选择器标识源函数，不代表组件实例的可调用能力； 普通 GPUI 组件方法继续保持其所有者边界。
+
+criteria:
+  - id: C-COMPILER-RUST-DATA-0001-CLOSURE
+    text: Every explicitly selected method resolves to one checked pure module function and its complete helper closure; unknown, ambiguous, owner-dependent or unsupported computation rejects before publication. Serialized IR is checked independently of source parsing.
+  - id: C-COMPILER-RUST-DATA-0001-TYPED
+    text: Public inputs and outputs use declared Rust scalar, record, array and union types within the admitted subset; native execution preserves checked data semantics and evaluation order without a runtime IR evaluator or copied domain state machine.
+  - id: C-COMPILER-RUST-DATA-0001-OWNER
+    text: Extraction never executes setup or claims that a conditional instance registration occurred. The separate data API does not alter GPUI method invocation, disposal, focus, accessibility or host gesture ownership.
+  - id: C-COMPILER-RUST-DATA-0001-CLOSURE-IDENTITY
+    text: File compilation follows the declared source graph and records the transitive source and source-resolution identity; changing an imported helper changes the generated behavior and receipt.
+  - id: C-COMPILER-RUST-DATA-0001-DEPENDENCIES
+    text: The generated data crate has no GPUI, native view or component-owner dependency. Required portable language helpers and external language-support dependencies are explicitly recorded and selected by actual demand.
+  - id: C-COMPILER-RUST-DATA-0001-PUBLICATION
+    text: Artifact inventory and hashes identify the actual generated source, Cargo manifest and supporting files. Publication uses the checked create-only writer; read-only comparison reports modifications and preserves consumer files.
+references:
+  contracts: [C-EXPOSE-0003, C-EXPOSE-0004, C-EXPOSE-0005]
+  decisions: [D-EXPOSE-METHOD-CALL-0001]
+sources:
+  - path: internal/compiler/rust-data-artifacts.md
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define private pure-data extraction independently of component-instance Expose semantics and native view dependencies.
+tags: [compiler, rust, data, native, ownership]

@@ -97,8 +97,41 @@ Equal debug names or matching source text do not make two independently owned de
 
 The library manifest/linker currently covers the Web source artifacts. GPUI's independently generated Rust crates use ordinary Cargo linking and explicit SDK declarations. Those native consumers do not establish support for the Web artifact-library manifest on Rust targets.
 
-An embedding Rust workspace can pass `gpuiDependency: 'workspace'` to the compiler API. The generated component and bundled SDK inherit `[workspace.dependencies].gpui`, so the host and component share native types. This mode uses the GPUI element API with a blanket `IntoElement` implementation and cached path IDs, as in Zed revision `48741fd17d0dec28be6ad664b0a06dc7202086be`. The workspace selects its required GPUI features. With `nativeSdkPath`, generate the shared SDK in the same dependency mode. Standalone generation uses the profile's original pinned GPUI revision.
-Each `gpui-source-v1` output bundles the GPUI SDK as its own `proto-ui-gpui-native` crate. Cargo admits only one package of that name in a workspace, so a consumer with several units emits the SDK once with `proto-compiler emit-gpui-sdk --output <dir>` and compiles every unit with `--native-sdk-path <dir>`. The units then link one SDK crate; its version must match the compiler that produced them.
+An embedding Rust workspace can pass `gpuiDependency: 'workspace'` to the compiler API. The generated component and bundled SDK inherit `[workspace.dependencies].gpui`, so the host and component share native types. This mode uses the GPUI element API with a blanket `IntoElement` implementation and cached path IDs, as in Zed revision `48741fd17d0dec28be6ad664b0a06dc7202086be`. The workspace selects its required GPUI features. With `nativeSdkPath`, generate the shared SDK in the same dependency mode. Standalone generation uses the profile's original pinned GPUI revision. Each `gpui-source-v1` output bundles the GPUI SDK as its own `proto-ui-gpui-native` crate. Cargo admits only one package of that name in a workspace, so a consumer with several units emits the SDK once with `proto-compiler emit-gpui-sdk --output <dir>` and compiles every unit with `--native-sdk-path <dir>`. The units then link one SDK crate; its version must match the compiler that produced them.
+
+The CLI exposes the same workspace mode as the API through `--gpui-dependency workspace`, including `emit-gpui-sdk`, `compile`, `check`, `diff` and `watch`. JSON configuration uses `gpuiDependency: "workspace"`. Emit the shared SDK and all components in the same dependency mode:
+
+```sh
+proto-compiler emit-gpui-sdk --gpui-dependency workspace --output /absolute/output/sdk
+proto-compiler compile src/control.proto.ts --profile gpui-source-v1 \
+  --gpui-dependency workspace --native-sdk-path /absolute/output/sdk \
+  --output /absolute/output/control
+```
+
+Shared SDK compatibility binds the complete compiler-owned source inventory and dependency mode in addition to the SDK version. A file API verifies an absolute shared SDK path against actual bytes. A relative SDK path is relative to the generated Cargo crate and is verified by the checked writer or diff at that output location. Pure `compilePrototype` records the expected SDK identity without claiming a filesystem observation. Project publication also rechecks shared obligations, and watch observes SDK changes even when the authored source is unchanged. Same-version modified SDK source, mismatched mode, missing inputs and unowned build inputs reject; retained output and consumer files are not deleted. Regenerate SDK and components together when their compiler-owned inputs change.
+
+`scripts/gpui/check-cargo-graph.mjs` adds a separate dependency-resolution gate. It runs full `cargo metadata --locked --all-features` without filtering platforms, follows resolved package IDs and checks the actual GPUI Git URL, requested revision, resolved commit and shared SDK identity. Dependency aliases, target-specific tables and build dependencies therefore receive Cargo's real parsing. The [native fixture](test/fixtures/gpui-ordinary-values/README.md) documents its scope and the distinct fresh compilation, Rust execution and OS-input evidence.
+
+### Headless Rust data artifacts
+
+A session that only needs pure decisions can use the separate private Rust data artifact API. This compiles explicitly selected checked module functions and their helper closure into typed Rust functions, with no GPUI, renderer or component owner dependency. It does not instantiate a prototype, execute setup or claim that a conditional Expose registration occurred. Instance methods such as `handle.call_data_method` retain their own registry and lifetime requirements.
+
+```ts
+import { compileRustDataFile, writeRustDataCompilation } from '@proto.ui/compiler';
+
+const result = await compileRustDataFile('src/decisions.proto.ts', {
+  root: '/absolute/source/project',
+  methods: ['plan'],
+  crateName: 'editor-decisions',
+});
+if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+const written = await writeRustDataCompilation(result.value, '/absolute/fresh/data-crate');
+if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+```
+
+The result exposes each generated function's Rust name and typed argument/result schema. A caller-supplied `crateName` keeps application manifests independent of source fingerprints. `compileRustDataFile` follows the ordinary declared source graph, including helper imports and `proto` package exports; the receipt records its complete source and resolution inputs. `compileRustDataPrototype` handles supplied source graphs, and `emitRustDataSource` independently validates serialized IR. `rustDataCompilationArtifacts`, `writeRustDataCompilation` and `diffRustDataCompilation` retain the existing checked create-only publication and read-only comparison boundaries.
+
+The bounded subset admits immutable scalar, record, array and finite-union computation, checked module calls, defaults, conditionals and supported data operators. Owner operations, mutation, recursive call cycles, nested closures and unimplemented type/operation combinations produce explicit diagnostics. Generated fields and operations are type-directed Rust; there is no generic `Value` map or IR interpreter. Reached language primitives preserve portable numeric/string behavior, and any needed language-support dependency is listed separately from UI dependencies. [The draft data-artifact contract](../../internal/compiler/rust-data-artifacts.md) gives the ownership and evidence boundaries. This private format is not a newly admitted UI target or a stable compiler release.
 
 ## Artifact and SDK compatibility
 

@@ -219,6 +219,30 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     category: 'invalid-input',
     meaning: 'GPUI profile requires a valid component identifier.',
   },
+  PUI_GPUI_SDK_COMPATIBILITY: {
+    category: 'invalid-input',
+    meaning:
+      'Shared GPUI SDK contents, dependency mode or ownership inventory do not match the compiler obligation.',
+  },
+  PUI_RUST_DATA_SELECTION: {
+    category: 'unsupported-input',
+    meaning:
+      'Rust data extraction requires a non-empty explicit set of distinct pure method selectors.',
+  },
+  PUI_RUST_DATA_NAME: {
+    category: 'unsupported-input',
+    meaning:
+      'Rust data package or normalized public function names are invalid, reserved or colliding.',
+  },
+  PUI_RUST_DATA_PURITY: {
+    category: 'unsupported-input',
+    meaning: 'A selected Rust data function does not have a proven pure portable helper closure.',
+  },
+  PUI_RUST_DATA_UNSUPPORTED: {
+    category: 'unsupported-input',
+    meaning:
+      'Checked data computation uses a type or operation outside the private Rust data lowering subset.',
+  },
   PUI_GPUI_STYLE: {
     category: 'unsupported-input',
     meaning: 'GPUI profile rejects an admitted style token.',

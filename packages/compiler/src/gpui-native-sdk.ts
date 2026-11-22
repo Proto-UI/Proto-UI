@@ -4,14 +4,48 @@ import { gpuiNativeHostSource } from './gpui-native-host';
 import { gpuiNativeKeySource } from './gpui-native-key';
 import { gpuiNativeMoveSource } from './gpui-native-move';
 import { buildGpuiNativeStyleFiles } from './gpui-native-style';
+import { createHash } from 'node:crypto';
 import type { GeneratedModule } from './ir';
 
 export const GPUI_NATIVE_SDK_PATH = '.proto-ui/gpui-native';
 export const GPUI_NATIVE_SDK_VERSION = '0.2.0';
-const GPUI_PINNED_DEPENDENCY = 'git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8"';
+const GPUI_PINNED_DEPENDENCY =
+  'git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8"';
 
 export function gpuiCargoDependency(useWorkspace: boolean): string {
   return useWorkspace ? 'workspace = true' : GPUI_PINNED_DEPENDENCY;
+}
+
+/** Content compatibility is stricter than Cargo's package version equality. */
+export interface GpuiNativeSdkIdentity {
+  schemaVersion: 1;
+  name: 'proto-ui-gpui-native';
+  version: string;
+  dependencyMode: 'profile' | 'workspace';
+  contentSha256: string;
+}
+
+export function gpuiNativeSdkInventory(useWorkspace = false) {
+  const prefix = `${GPUI_NATIVE_SDK_PATH}/`;
+  return gpuiNativeSdkFiles(useWorkspace)
+    .map((file) => ({
+      path: file.path.slice(prefix.length),
+      kind: file.kind,
+      sha256: createHash('sha256').update(file.contents).digest('hex'),
+    }))
+    .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+}
+
+export function gpuiNativeSdkIdentity(useWorkspace = false): GpuiNativeSdkIdentity {
+  return {
+    schemaVersion: 1,
+    name: 'proto-ui-gpui-native',
+    version: GPUI_NATIVE_SDK_VERSION,
+    dependencyMode: useWorkspace ? 'workspace' : 'profile',
+    contentSha256: createHash('sha256')
+      .update(JSON.stringify(gpuiNativeSdkInventory(useWorkspace)))
+      .digest('hex'),
+  };
 }
 
 const styleVocabularyConstructor = String.raw`
@@ -30,7 +64,9 @@ impl StyleVocabulary {
 const cached = new Map<boolean, NonNullable<GeneratedModule['supportingFiles']>>();
 
 /** One ordinary native-source crate; all composed prototypes share its owner types and registries. */
-export function gpuiNativeSdkFiles(useWorkspace = false): NonNullable<GeneratedModule['supportingFiles']> {
+export function gpuiNativeSdkFiles(
+  useWorkspace = false
+): NonNullable<GeneratedModule['supportingFiles']> {
   const existing = cached.get(useWorkspace);
   if (existing) return existing;
   const style = buildGpuiNativeStyleFiles([]);

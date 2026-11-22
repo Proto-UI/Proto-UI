@@ -5,6 +5,7 @@ import type { SourceMapV3 } from './source-map';
 import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
 import type { ObservableSemantics } from './observable-semantics';
+import type { GpuiNativeSdkIdentity } from './gpui-native-sdk';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
 export const IR_VERSION = 7 as const;
@@ -487,6 +488,8 @@ export interface GeneratedModule {
     backend: CompilerProfile;
     /** Reconstructable compile-time support selection, checked against emitted file bytes. */
     nativeSupport?: { version: 2; id: string; features: readonly string[] };
+    /** Expected native SDK bytes; file checking/publication verifies shared references. */
+    nativeSdk?: GpuiNativeSdkIdentity & { path: string; bundled: boolean };
     /** Statically selected package exports and the package manifests that selected them. */
     sourceResolution?: {
       version: 1;
