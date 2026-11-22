@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "repository": "Proto-UI/Proto-UI",
+  "carrierRef": "refs/heads/evidence/sprint1-matrix-profile-e4f7fa8-20261122",
+  "carrierParent": "e4f7fa8e46c87edaf5354f8d9553b261f66e16c8",
+  "source": {
+    "sha": "e4f7fa8e46c87edaf5354f8d9553b261f66e16c8",
+    "tree": "7a3c626ec6e1ca6a77836502361e47fc62be0ce4"
+  },
+  "diagnosticOnly": true,
+  "formalAcceptance": false,
+  "helperSha256": {
+    "common.mjs": "7defe6f46a236982b4bbd83d9d4cbbe315813f64df3cd77042f981ef338a3645",
+    "matrix.mjs": "583e40d66cb997094bd21e5eba34ed54fcaaf19ccf4a10c5a62855f172e217f8",
+    "matrix-assets.mjs": "adc9747c6f2415726dc590cf88f65580e5cc5b657912002d0ad0dbef75b392c5"
+  },
+  "sourceFiles": [
+    {
+      "path": "scripts/test/sprint1-evidence.mjs",
+      "blob": "8e3e411a4239867323d5c50c6dccd052c84131b3",
+      "sha256": "7deb3ebe93cba1febf5d353bddb92602d55b6d3a567bfaaea3ffd144c441433e"
+    },
+    {
+      "path": "scripts/test/runtime-observation.mjs",
+      "blob": "2a553d3e86f214aa7e4c59d05b695e38d4f8692c",
+      "sha256": "8b9512a724177f442aa3227af91ae9e22b3b92a99e4604e6110db34953b7d990"
+    },
+    {
+      "path": "scripts/test/runtime-ci.mjs",
+      "blob": "8833a674b86967bcdf928b21d7cab59f2198f645",
+      "sha256": "c7a65378f27862fcb6243871fc28799d6bc97eec6a070d99609052a9238503d0"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+      "blob": "b6cd90e3e2d4c79ecbd79676603cff212adb6467",
+      "sha256": "a3c1b08deb78199906a16260ce0c349b6064e797cc46fb5027d24573e77dac95"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
+      "blob": "9f47e1676acc4b36c2155568b75fc2060881b967",
+      "sha256": "4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts",
+      "blob": "bb6367a65209eb162b51d56dd694b4ea3fb1ca9a",
+      "sha256": "1d40c4e675797928a60d6e3d2e7f09c89996e38d85c3574a63db2409f199ee0d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.ts",
+      "blob": "2429200e91d598d161afbb155e4d1aaf880786b4",
+      "sha256": "81aa1fb14d12ea53bf273c4f519f7c07b0881c49791a2499b56c850badaf1cba"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "blob": "966ff688c2c6c853e05dc676e1685e9a7b8b1a50",
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+    }
+  ],
+  "scope": "One read-only Matrix startup CPU and actual-response JS diagnosis at fixed public e4. Original selected case and predicates unchanged; no source publication, PR/Issue writes or product acceptance.",
+  "workflowSha256": "52ac788808a6c225a2cf515b407e83b1a005938291f52f3cfcefbc1be7ace59c"
+}
