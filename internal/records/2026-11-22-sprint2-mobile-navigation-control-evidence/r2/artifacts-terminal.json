@@ -1,0 +1,25 @@
+{
+  "total_count": 1,
+  "artifacts": [
+    {
+      "id": 14762565567,
+      "node_id": "MDg6QXJ0aWZhY3QxNDc2MjU2NTU2Nw==",
+      "name": "sprint2-mobile-control-r2-45041365026-1",
+      "size_in_bytes": 15662240,
+      "url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14762565567",
+      "archive_download_url": "https://api.github.com/repos/Proto-UI/Proto-UI/actions/artifacts/14762565567/zip",
+      "expired": false,
+      "digest": "sha256:6b166144ebb89ccba48d88d160a23d4d98c096a61556317f07ca6f383b2a2777",
+      "created_at": "2026-11-22T16:12:53Z",
+      "updated_at": "2026-11-22T16:12:53Z",
+      "expires_at": "2026-12-22T16:12:50Z",
+      "workflow_run": {
+        "id": 45041365026,
+        "repository_id": 840178061,
+        "head_repository_id": 840178061,
+        "head_branch": "sprint2/transport-20261122-01",
+        "head_sha": "75431ad5bef39ee8dbc8d74a3287f66b5d25475c"
+      }
+    }
+  ]
+}

@@ -1,0 +1,456 @@
+{
+  "kind": "independent-original-wheel-observation-and-viewport-control-audit",
+  "reviewer": "/root/final_review",
+  "reviewedAt": "2026-11-22T16:17:22.841516+00:00",
+  "runId": 45041365026,
+  "artifactId": 14762565567,
+  "carrierHead": "75431ad5bef39ee8dbc8d74a3287f66b5d25475c",
+  "productHead": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "zipSha256": "6b166144ebb89ccba48d88d160a23d4d98c096a61556317f07ca6f383b2a2777",
+  "zipMembersByteCompared": 261,
+  "originalSingleCase": {
+    "passed": 1,
+    "failed": 0,
+    "notSelected": 41,
+    "exitCode": 0,
+    "observedWheel": {
+      "received": true,
+      "trusted": true,
+      "deltaY": -32,
+      "startTop": 2248,
+      "expectedTop": 2216,
+      "includesLeaf": true,
+      "includesScroller": true,
+      "targetTag": "a",
+      "clientX": 205,
+      "clientY": 968,
+      "pathTags": [
+        "a#.astro-osdwpxxd site-native-link",
+        "li#.astro-osdwpxxd",
+        "ul#.astro-osdwpxxd",
+        "details#.astro-osdwpxxd",
+        "li#.astro-osdwpxxd",
+        "ul#.astro-osdwpxxd",
+        "details#.astro-osdwpxxd",
+        "li#.astro-osdwpxxd",
+        "ul#.top-level astro-osdwpxxd",
+        "sl-sidebar-state-persist#.contents",
+        "div#.mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+        "div#starlight__sidebar.mobile-sidebar-pane sidebar-pane astro-ceehzq5e",
+        "nav#.docs-sidebar text-sidebar-foreground astro-ceehzq5e",
+        "div#.min-w-0 min-h-0 p-4 pui-projection-box",
+        "wc-brutalist-popover-content#pui-popover-1-content.pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+        "body#.astro-jy47tizg",
+        "html#.astro-jy47tizg",
+        "[object HTMLDocument]",
+        "[object Window]"
+      ],
+      "ownerAtEvent": {
+        "html": "<wc-brutalist-popover-content data-demo-ref=\"contents-panel\" class=\"pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root\" data-pui-root=\"\" data-demo-owner=\"demo-7\" data-projection-owner=\"site-contents-panel-1-docs-1\" data-projection-family=\"brutalist\" data-projection-runtime=\"wc\" data-projection-generation=\"1\" data-projection-prototype=\"brutalist-popover-content\" data-transition-state=\"entered\" data-open=\"\" data-is-present=\"\" dir=\"ltr\" data-pui-style=\"rounded-base border-2 border-black bg-backgrou",
+        "bounds": {
+          "x": 8,
+          "y": 60,
+          "width": 374,
+          "height": 932,
+          "top": 60,
+          "right": 382,
+          "bottom": 992,
+          "left": 8
+        },
+        "top": 2248
+      },
+      "leafAtEvent": {
+        "x": 55,
+        "y": 942,
+        "width": 301,
+        "height": 44,
+        "top": 942,
+        "right": 356,
+        "bottom": 986,
+        "left": 55
+      }
+    },
+    "actualScrollerAfter": {
+      "top": 2216,
+      "max": 5394,
+      "tag": "wc-brutalist-popover-content"
+    },
+    "conclusion": "DID_NOT_REPRODUCE_PREVIOUS_THREE_WAY_PREDICATE_FAILURE"
+  },
+  "repairedInventory": {
+    "expected": 61,
+    "observedUnique": 61,
+    "passed": 48,
+    "failed": 13,
+    "incomplete": 0,
+    "allOriginal42Retained": true,
+    "targetExpected": 20,
+    "targetPassed": 8,
+    "targetFailed": 12
+  },
+  "source": {
+    "originalObserver": {
+      "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+      "originalRepairedSha256": "78009efe8cd85289acca6b1a86215943cd441a769f557e3c0fbe82dedefc593c",
+      "observerSha256": "3ea5d5a966d3eb7ef711cb6efb0ca316d856824867025c64aaeb2a8d800c7eb8",
+      "selectedCases": 1,
+      "unchangedR1Assertion": true,
+      "kind": "original-helper-one-fresh-context-observation-not-clean-acceptance",
+      "baselineSha256": "1da3edc6f320435bddb7318b0f4dc3160c160688f648025820962c56dc8c3278",
+      "trackedPatchSha256": "d85b3a7737ae2864e8b540227f9ace10c38224f50e17598c1a7b10098f8419e7",
+      "preserved": [
+        "original R1 leaf.hover input",
+        "original three-way wheel assertion",
+        "original group/leaf hit, height and radius assertions"
+      ],
+      "changes": [
+        "passive event path/coordinates/owner observations",
+        "capture before unchanged wheel assertion",
+        "assertion message includes actual observed wheel data"
+      ]
+    },
+    "repairedControl": {
+      "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+      "fixtureSha256": "cd825e63655e16759638241373ea3c55810b82b86fa3203dd5df61a020d39f1d",
+      "kind": "same-product-source-repaired-fixture-control-not-clean-acceptance",
+      "expectedCases": 61,
+      "originalCases": 42,
+      "targetCases": 20,
+      "extraTargetRepetitions": 19,
+      "file": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+      "originalSha256": "1da3edc6f320435bddb7318b0f4dc3160c160688f648025820962c56dc8c3278",
+      "instrumentedSha256": "25d95a60f72140acfa47d7db5b59a9fe604ae044fe7c8a040b91304a5f9da522",
+      "trackedPatchSha256": "8ccad04664eef94c04505c475315bca452d979d27746ef4507d9be861e2cbfe5",
+      "fixtureRepair": [
+        "wait for actual group and leaf enhancement",
+        "genuine native wheel targets the actual visible scroll viewport",
+        "verify trusted wheel, composed path, actual scroll and retention",
+        "preserve point details on any failure"
+      ],
+      "repetitionsOnly": [
+        "unique capture suffixes preserve each observation",
+        "nineteen fresh-context repetitions of the original failed case"
+      ],
+      "preserved": [
+        "same product source head",
+        "all original 42 cases",
+        "all four point coordinates and exact native owner equality",
+        "44 px and radius assertions",
+        "independent no-JS fallback"
+      ]
+    }
+  },
+  "failedStage": {
+    "name": "exact-scroll poll",
+    "instrumentedLine": 284,
+    "unchangedDeadlineMilliseconds": 1000,
+    "failedCaseNames": [
+      "C: en/shadcn/enhanced keeps full mobile navigation targets [control 0]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 0]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 1]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 4]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 5]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 7]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 10]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 11]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 12]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 13]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 14]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 15]",
+      "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [control 18]"
+    ]
+  },
+  "wheelFailures": [
+    {
+      "file": "native-scroll-1-control-0073.json",
+      "eventObservedTop": 690,
+      "derivedExpectedTop": 658,
+      "actualAfterTop": 690,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "ebe83e3c063a6ef82611fb0095b8dff5446f5e5e54b7a55de711828439517d53"
+    },
+    {
+      "file": "native-scroll-11-control-0087.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-14-control-0090.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-15-control-0091.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-16-control-0092.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-17-control-0093.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-18-control-0094.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-19-control-0095.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-22-control-0098.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-4-control-0079.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-5-control-0081.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-8-control-0084.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    },
+    {
+      "file": "native-scroll-9-control-0085.json",
+      "eventObservedTop": 2216,
+      "derivedExpectedTop": 2184,
+      "actualAfterTop": 2216,
+      "trusted": true,
+      "includesScroller": true,
+      "includesLeaf": false,
+      "point": [
+        195,
+        526
+      ],
+      "screenshotSha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f"
+    }
+  ],
+  "passedEnhancedMobile": [
+    {
+      "file": "sidebar-mobile-en-brutalist-enhanced-control-0075.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0082.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0083.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0086.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0088.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0089.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0096.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0097.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0099.json",
+      "eventObservedTop": 2248,
+      "expectedTop": 2216,
+      "afterTop": 2216,
+      "bothOriginalFourPointChecksPassed": true
+    },
+    {
+      "file": "sidebar-mobile-zh-cn-shadcn-enhanced-control-0077.json",
+      "eventObservedTop": 722,
+      "expectedTop": 690,
+      "afterTop": 690,
+      "bothOriginalFourPointChecksPassed": true
+    }
+  ],
+  "captures": {
+    "originalPairs": 2,
+    "repairedPairs": 119,
+    "allSourceBindingsMatch": true,
+    "diagnosticProfileRepeatsPreserved": true
+  },
+  "imagesActuallyViewed": [
+    {
+      "path": "repaired/captures/native-scroll-4-control-0079.png",
+      "sha256": "d48b80c18263cf17ddf84922652c815cbbdfd6f74ac1a9c816ee8329b233bc0f",
+      "visualObservation": "After the failed poll, the light Brutalist drawer shows lower navigation items, with Checkbox Group under the pointer highlighted at viewport center and the current Button row partly below the bottom. Twelve failure PNGs have these exact bytes; only this representative was opened."
+    },
+    {
+      "path": "repaired/captures/native-scroll-1-control-0073.png",
+      "sha256": "ebe83e3c063a6ef82611fb0095b8dff5446f5e5e54b7a55de711828439517d53",
+      "visualObservation": "After the failed poll, the light Shadcn navigation viewport is visible, Radio Group is hovered near center, and the current Tabs row is at the lower edge. The page remains a navigation drawer, not a changed route."
+    }
+  ],
+  "findings": [
+    {
+      "id": "SITE-WHEEL-PROBE-CONTROL-R1-001",
+      "status": "PRIOR_CAUSE_UNRESOLVED_NOT_REPRODUCED_BY_SINGLE_OBSERVED_ATTEMPT",
+      "assessment": "The original helper observation passed all three predicate terms; it does not retroactively explain the prior23 failures."
+    },
+    {
+      "id": "SITE-WHEEL-BASELINE-CONTROL-R2-001",
+      "status": "OPEN",
+      "assessment": "Expected movement is calculated from a scrollTop read inside the wheel listener. Thirteen runs record that same value after the timeout and expect another32px; ten passing enhanced runs record a value32px higher before reaching the same resulting geometry. No pre-input baseline was captured, so compositor-before-listener ordering is a plausible explanation, not an established causal fact. The oracle must instead bind the actual immediately-pre-input state."
+    }
+  ],
+  "recommendedBoundedCorrection": "Record actual scroll state once immediately after pointer positioning and before sending mouse.wheel; calculate the requested/clamped destination from that state, retain listener-observed state as separate evidence, and keep actual trusted owner path, input delta, nonzero movement, original1s/1px/2rAF checks and all original hit/size/radius assertions.",
+  "disposition": "FAILED_CONTROL_PRE_INPUT_BASELINE_REQUIRED",
+  "limitations": [
+    "No product implementation or GitHub mutation by reviewer.",
+    "Images were captured after failure observation; none is claimed to photograph event-dispatch ordering.",
+    "This diagnostic is not final clean-source site42/full304 or complete84 visual acceptance."
+  ]
+}

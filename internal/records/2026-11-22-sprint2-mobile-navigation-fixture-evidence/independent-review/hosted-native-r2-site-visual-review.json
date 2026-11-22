@@ -1,0 +1,1468 @@
+{
+  "kind": "independent-original-site-visual-review",
+  "reviewer": "/root/final_review",
+  "reviewedAt": "2026-11-22T15:22:14.201710+00:00",
+  "runId": 45035380303,
+  "artifactId": 14759694693,
+  "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "zipSha256": "a2ad68dd205806976c845f44abc08eb4e5d72f812ce200b99d794c5aca26b9e6",
+  "fontReceipt": {
+    "path": "/workspace/scratch/44c416809288/evidence/hosted-native-r2/artifact/fonts.txt",
+    "sha256": "21b9b08f72c28eb181dcdeb11ec1f2c0962c71468edfbe19603129f4f1eabcf3",
+    "text": "fonts-noto-cjk\t1:20230817+repack1-3\nNoto Sans CJK SC\n"
+  },
+  "inventory": {
+    "screenshots": 83,
+    "sourceBoundMetadata": 83,
+    "manuallyViewed": 6,
+    "missingComparedWithR1": [
+      "sidebar-mobile-zh-cn-brutalist-enhanced.png"
+    ],
+    "missingReason": "Original mobile group hit assertion fails before capture; failure bounds, hit points and screenshot were not persisted by that original helper."
+  },
+  "findings": [
+    {
+      "id": "VIS-CJK-001",
+      "status": "RESOLVED_IN_REVIEWED_R2_SAMPLES",
+      "evidence": [
+        "sidebar-mobile-zh-cn-brutalist-no-js.png",
+        "tabs-zh-cn-vue2-new-york-v4.png",
+        "hero-zh-cn-dark-enhanced-focus.png",
+        "sidebar-mobile-zh-cn-shadcn-enhanced.png",
+        "sidebar-zh-cn-light-brutalist-enhanced-focus.png",
+        "tabs-zh-cn-vue-nova.png"
+      ],
+      "assessment": "All six actually viewed Chinese originals render readable Chinese text where R1 samples showed missing glyphs. Actual CJK font package/family provenance is retained. This finding closure does not turn the failed queue into a pass."
+    },
+    {
+      "id": "SITE-MOBILE-HIT-R2-001",
+      "status": "OPEN_BLOCKS_READY",
+      "case": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets",
+      "sourceLocation": "sprint2-site.browser.test.ts fullNativeHitTarget line150 called for group at line321",
+      "evidence": [
+        "report.json",
+        "run.log"
+      ],
+      "assessment": "At least one of four original inner-edge points failed exact closest anchor/summary owner equality for the nearest Brutalist summary. Actual failing coordinates/rect/hit target were not recorded; neither layout nor timing cause is established. Original enhanced screenshot is absent because capture occurs after the failed assertion. Separate passing controls cannot replace it."
+    }
+  ],
+  "entries": [
+    {
+      "name": "hero-en-dark-enhanced-focus.png",
+      "sha256": "90c47b5bb376fd3e24f98702ae33150f753bd52c282f98fc92ad4993bf109664",
+      "bytes": 165383,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "1ee1b48e0f24d98a7f79d3a2918ed3f01f4f044be23541ebd075a8b00d7af8fb",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-dark-enhanced-hover.png",
+      "sha256": "d4eb88c228c845be8fe48da7632d307337b4e5aef1a648b908cf2b99a12972dc",
+      "bytes": 164089,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "c4fde72eae5a0466e49141d5b6b4a82796882881646be43ebd81f1f722df2864",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-dark-failed-scripts-focus.png",
+      "sha256": "86ee0103da5929f5b8bb2b23a9156775c206e975fe3c2c3579a378ec111cc5b4",
+      "bytes": 48166,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "04bb100e204ad95a3aa112566ec1a7a429bbe1612a3b52c81eb86c0e3471c457",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-dark-failed-scripts-hover.png",
+      "sha256": "b9f60a5a343a8b643d96b48401426ff65be2d99aa1536b3f113e5258fe0ad650",
+      "bytes": 47117,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "9ee7feee77a1a7946fdb11e3fdf11023357097aa721b5197d2d476395f5ec158",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-light-enhanced-focus.png",
+      "sha256": "032be5c53bcfe24cfe930c71fe9d7f06dd615b411923c3ce657338f80faa097c",
+      "bytes": 164903,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "7a3f024a738160506783241d6c1eac3503e74a7cd2d6536c566822b4a34b08b4",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-light-enhanced-forced-colors.png",
+      "sha256": "bf79f5e2d8b7a4d7a5a2a4dc6f0129235a3394551d17cc987b197f556c25a71e",
+      "bytes": 164378,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "cefe7ba3c067bee1e09e51a2d2b2444fde5906514bb41c12b1a07f17a6306f15",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-light-enhanced-hover.png",
+      "sha256": "852fd5cb9af44ac2fd3d9ae5f5700cc43ea036a7128c716db2433612c603a04c",
+      "bytes": 163464,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "11ffc939c576b110872e275af02451df55daf845250312740ab3bc4e5698a783",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-light-failed-scripts-focus.png",
+      "sha256": "db9e03e17b63a9d6dd55ae12c95c986f815db3a59bc5cbe56cb07789dac72d51",
+      "bytes": 48576,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "01144c26e6a8490db52cab9462f1f5b5d47b48a4b142711007ef2a060c48e32f",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-light-failed-scripts-forced-colors.png",
+      "sha256": "fdc7ce4b268ea0a3be1f7fdd96784c59ab5822ebcd7ce3cde6674309ab60ba25",
+      "bytes": 50325,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "a5b665557a2e729a4d41c1c0075a1f4d648bc802ac63bc041dd0cdee9bcd78c6",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-en-light-failed-scripts-hover.png",
+      "sha256": "6eab25de7e9899514eeb0d18cbfd18617e564a318f07969260990dfa07972e93",
+      "bytes": 47494,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "43df934ed7bcfe1f1da7841cc0f1f9e2f2c3b8452f2f8449a56cd1a535a39bc6",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-dark-enhanced-focus.png",
+      "sha256": "7f201190087ce96fb3ac674f2c5703b5f27363d6161453d94d594efddd32437d",
+      "bytes": 183963,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "4ac5d621b92bb69464c67101584e3ec9d1ca16c7a25df9639ffba09ecdb453f6",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "dark",
+      "manuallyViewed": true,
+      "visualObservation": "Chinese headline/body/card labels and the focused native Hero pill are legible; visible pill focus outline and no prose underline."
+    },
+    {
+      "name": "hero-zh-cn-dark-enhanced-hover.png",
+      "sha256": "b5d0b956e1ece0be31ea01d68582d038ae0af4a212eafd23798f2464e9c88d94",
+      "bytes": 182816,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "d3e0ec6399783953cb0036b5af1d3cb1bb913563246d2bf8b85a5c7aae8abd2e",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-dark-failed-scripts-focus.png",
+      "sha256": "e76029e78d76e33c489835039dffdcb71ba1f5c7d71804ead245d743e17c6631",
+      "bytes": 43494,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "d9fe95bc8f13a8b7051fb76093b7fb338088fe24a69554c48a6d48ad12d62a13",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-dark-failed-scripts-hover.png",
+      "sha256": "883778dbf90435b2ac1f2b523ccbec712af1fc839876efcfde12b9efff61ea3f",
+      "bytes": 42364,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "4f4eefa715990f42d0409d660a73e77e405178b0f0a1d988451b502246d6950a",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-light-enhanced-focus.png",
+      "sha256": "f2a17edb0398c0c31a142d16ce29ab263761889e735f2da7d9c8783916057e3d",
+      "bytes": 182329,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "d2576fe547d1f176f2f69b62b969db761ee3f2d8f1e891c07f16974c1b2a17f4",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-light-enhanced-hover.png",
+      "sha256": "ab413a546260f87c871c64eadc83ea62d59911fb54c874279b454645e384637a",
+      "bytes": 180876,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "d67d6d802bcd733a43f329ad60afad2e8f54971adda0d3957f1c3ab56ef54247",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-light-failed-scripts-focus.png",
+      "sha256": "db9770ba359036b03ede0ef6fcee83db84ecaeac4bc6941f16d1cf42ad6bb14f",
+      "bytes": 43562,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "813fc7375f78e3ba49f4bf7459d2bdd59a8562e03a2e8b717e5d002711d328bf",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hero-zh-cn-light-failed-scripts-hover.png",
+      "sha256": "002e6e2942ba1d54650d353e44cfb1d3c8430b9128ccfef5d53e9f629fd0e884",
+      "bytes": 42436,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "e177d92d853da64ab5f91a2056f19a3c7c3b0d7aad64ca8cc5830a2e4c30bce6",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hook-evidence-en.png",
+      "sha256": "9b8f62f788ad24699800c690291d75fe3b0be4323f3ec292cf0323037cc67800",
+      "bytes": 283843,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "c0d3b33ca95ef619965bb941dfef9f3439e05b9d0625db5e193a6413444ba86b",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/specifications/as-hook/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "hook-evidence-zh-cn.png",
+      "sha256": "dba357717f45af67974cd60dc99f9f3a35f787b7f32ed62eaeae46cdda707c43",
+      "bytes": 374938,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "7379d4ec78eff40f5db15a995c090fa9358f1aba4fba02c22747dcee4f716600",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/specifications/as-hook/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-brutalist-enhanced-focus.png",
+      "sha256": "0a7e1c571d40a17013b76b32db15a154fdc8dabcaf49cc6e6775daf001b82202",
+      "bytes": 131064,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "cd64f4c95ca883c0a2aae72182fd8d6e5be1ae6e3c273ac911abc27aef10fc83",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-brutalist-enhanced-group-hover.png",
+      "sha256": "643cd0b6066eb3191d6b4c1fda74a9b796cbb6b47c4eb992649c4ccfeb71fcca",
+      "bytes": 130612,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "b21509632c6668cb0af431ec2aab3c8bd148bec22ca0741992b49cea2465bfcb",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-brutalist-failed-scripts-focus.png",
+      "sha256": "0cdf240bbc99eaf908d8bfdeaeb6031b58f07ab3412a73152a5df6ca87579b6c",
+      "bytes": 128334,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "af8ae5fd8ed41b52008bd2b90745d2ad45dde41982c32d52ce1d9ed2558b5f11",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-brutalist-failed-scripts-group-hover.png",
+      "sha256": "d7c468c4675d23639e1ae747baf775e96958e97de8f87d8652604d53d0791e4f",
+      "bytes": 130699,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "98ddbfbd962cfc07dcaa10a1cd55a6a4d997e06f2e40d8cef2c469c8e59a8426",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-shadcn-enhanced-focus.png",
+      "sha256": "4c532b02831977414c48f6bdbd7d772b7f2a8bbf189f1f6ce1cfc76461696962",
+      "bytes": 198339,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "fb11be27766788ac3efa36b0c947f837d0e11c927391a45f05ad56a1016eb408",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-shadcn-enhanced-group-hover.png",
+      "sha256": "c7b67ccb28b356f4700ef63ac3d59a31fa502a9733c3e42a3578a7e0a7171358",
+      "bytes": 197676,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "85b2ade77f9cd9abebb56162b4ec4414e2fefad626a037de6138cfda71c31129",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-shadcn-failed-scripts-focus.png",
+      "sha256": "ea99e5b1100f3991b24e63c85b4a9219439ee833895f48471176422797fce433",
+      "bytes": 200384,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "3c67d1a1c40dd8eec1d00959d7e4a64d7e8407741bb1db39db2e7e31eb0cefbd",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-dark-shadcn-failed-scripts-group-hover.png",
+      "sha256": "7fcad832d9852398ff66e8e5f3503ef84a43147f5d355a0a022b196e435d67e3",
+      "bytes": 197754,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "cfe00c92d78535da3a4aaafbd0b4f324630a8fe33484ba1669ed050aae1177cd",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-brutalist-enhanced-focus.png",
+      "sha256": "3f079b4fadea71d51ff556519f48b86e21ca6180786d66ca3568049b461413e0",
+      "bytes": 136701,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "7958166f69ac97389fe05461f6f94be4abb42e09c54d6eccbe454942f6e20b13",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-brutalist-enhanced-group-hover.png",
+      "sha256": "95f3933026802999d4b3a824ea64e414a02d897a764e46eea8f52d3117a3d871",
+      "bytes": 136204,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "ff6fcf6587b18fdd423aa649c00e6894717b05d6884ca7640edf3b1464ab8971",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-brutalist-failed-scripts-focus.png",
+      "sha256": "69d171ebdc017a7dbba3677b50d7fa8eb7a05fbfc550df2722dd0d93f28e17da",
+      "bytes": 134145,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "ac29611a1bd064ea68cea0108546d140b5ac70b0ad1e9fb4e69ed4ed27d6ba3c",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-brutalist-failed-scripts-group-hover.png",
+      "sha256": "b57adcfd4d6e8d65aa397f50a441c5d4312a16cb08b6eb7f65f01c329928f436",
+      "bytes": 136987,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "2f82026b4074736c91d4b4a280427a343904de02ec6aff26e6ee1698c173caa8",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-shadcn-enhanced-focus.png",
+      "sha256": "254f995cc53fd9ff6e9117cc8825bf81992a88d8906f8ad35b25b9e84db4fef3",
+      "bytes": 195337,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "62fb1d2af4d1c5a186d386c3323bbe1494ff972d56178dfc62f5ce013cd591e7",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-shadcn-enhanced-group-hover.png",
+      "sha256": "f0ee109113b800947f5ef42cf81e5673ccd81e3b55c5f69e780790b55298c48e",
+      "bytes": 194519,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "aa9cc5e89683b6e6ac77a4d59bc353ddad9c6ac01ea19ac516c0b8f59f6a80a0",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-shadcn-failed-scripts-focus.png",
+      "sha256": "d5275cec1649b6c2f89bb0e4a316bca5bff1f569c5e054e6e6deb0f7ad9c2bfa",
+      "bytes": 197568,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "ae16178a1a81ad020fe65528c4118a3e0298e1196029b9194706de972a7207e1",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-en-light-shadcn-failed-scripts-group-hover.png",
+      "sha256": "b840b4fa14afb66dfa98f3c005e951e666fcb8221634cf4e2eddc59426708c13",
+      "bytes": 195284,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "f80362442e36d92619fa43dfcabf689266506596a131291edf4d38ba71b8b82b",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-mobile-en-brutalist-enhanced.png",
+      "sha256": "dc54d2eb3ba41e202c57521e5933c552248ced87dfc25ff87e07a9438f43d068",
+      "bytes": 34721,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "7163943da516ade5b41e1fe276815af75182beb3b8ea4a8ebe482d1e9084a364",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-mobile-en-brutalist-no-js.png",
+      "sha256": "db2b8b52578c889ca8b3bbaa5b375cfa74da0c0f23793506216f495cd83fade6",
+      "bytes": 49223,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "978a804452f6b4f4517a45618c832bb516f19c882f26221e38a911b3f7475f02",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-mobile-en-shadcn-enhanced.png",
+      "sha256": "b7c3c71195cfa1a1c86bde9376e83eb59dc97b27a402c5292aeec5adfc578096",
+      "bytes": 64181,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "6247f28ea9ec07e2a68eeb237a0b2dd89cbbcceff40d9faa7a4009945aed49e3",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-mobile-en-shadcn-no-js.png",
+      "sha256": "b607e009503a3edec426a136da45871271f4adcdf7a9c7eb463ccff0986073c6",
+      "bytes": 60864,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "770c8e951c812ac90a371542c4f66ae12283c08343806cb84a4a6149dbd9ebe2",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-mobile-zh-cn-brutalist-no-js.png",
+      "sha256": "773fb29fd962e9bcacfb65b58cdb60efbb1d07458b3aca958243aada2e0774c1",
+      "bytes": 50545,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "99a9361386e50cc087a4903417f5cba84008ee538102a50fd64a7a5703638fc3",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": true,
+      "visualObservation": "Chinese fallback/header and Button page paragraphs render as legible Chinese; actual metadata theme is dark. This is the no-JS passing control, not the failed enhanced instance."
+    },
+    {
+      "name": "sidebar-mobile-zh-cn-shadcn-enhanced.png",
+      "sha256": "41ac6d68f584204ba1f573df18499f048bf013483fe8d7c4598fcb876be68f5d",
+      "bytes": 68846,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "06e96258294ca5e849b2bacd7299b31922dc5fedf345e44253d231dc5f8ec855",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": true,
+      "visualObservation": "Chinese navigation text renders in the actual light mobile enhanced overlay; this separate passing control does not settle the Brutalist failure."
+    },
+    {
+      "name": "sidebar-mobile-zh-cn-shadcn-no-js.png",
+      "sha256": "413af64df8efb33434ef608312429d1d4e9928b1d657b986f69cfa2a72f861b1",
+      "bytes": 66212,
+      "width": 390,
+      "height": 1000,
+      "metadataSha256": "f664fac085930274ab076e04fd4e87299ade4256bc80b6aaa50baf3dd155226b",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-brutalist-enhanced-focus.png",
+      "sha256": "cfccd1d437e339c6a9a1636d5a7c41b14215dcab279d3719c561e565cbce52d4",
+      "bytes": 132918,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "f48dba32132a7465031d87b5b35986327cf3ffcb524c7682ace1d6df380089f5",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-brutalist-enhanced-group-hover.png",
+      "sha256": "c625a8f6e6c4aea006e31f3eafe9a1113e2b6d7300084229bb1580433a4bf460",
+      "bytes": 132465,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "7baa6ef804e3c0020d4cc2df96ad21d3448313e1867e3f86273b9b115ce6191a",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus.png",
+      "sha256": "07e5ae9bc28686947b179d7ef2d5c2c227a38fc5a7c09610eb81d2b668e1eb3f",
+      "bytes": 128282,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "78ecae5e796b3e9c905c694fe3f918edfaf6d67834bcd04896c9f955b908e1b8",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover.png",
+      "sha256": "f6e9e0756ab9b948fa94df61f4bbef37ddbccb6c8b06f53fa011dd9d5888b9f5",
+      "bytes": 130030,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "def8af1a68e912d2998a89dd614a789ef498a198677da43a13bad16e80c5b61c",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-shadcn-enhanced-focus.png",
+      "sha256": "e1e12555fe2987f510010436b46269b1dbd1b3315c9e25ddd3e6f5a616b0b52f",
+      "bytes": 210329,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "a106e5108e5cadf46fc0ac8fde57adaf27cccdbbe526645a8f63a7019ce922e9",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-shadcn-enhanced-group-hover.png",
+      "sha256": "47820a56fa41d89c7a995d5d3da2beccf18b0867628e7ad0459180c3ecd1408d",
+      "bytes": 209522,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "89177953dd309b534bd5b752de844cb4703b45b9a6185650558657fe4d863414",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-shadcn-failed-scripts-focus.png",
+      "sha256": "0decda1db5bcabd7b235ae49eb5cba48794872d81bc82e29ff3e8e9cd0c2d1e7",
+      "bytes": 206090,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "2dfa77cf82c968334697887b8fc4e0702be96cdc8fa89c3d627467ea111e1f9a",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover.png",
+      "sha256": "8072e10b177d674501536d1ed2ee1ba6c6b3f8e7f5941d2519aa16e0432804a7",
+      "bytes": 203904,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "b4f0d756e3e5e4fecc29d57efe692121266812dd52591a221c18fb0d40ce023d",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-brutalist-enhanced-focus.png",
+      "sha256": "ba5195b7575503f88922e3737cdbc0509a50c8317b25fc46db8c6a81325faecf",
+      "bytes": 137795,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "d84c0df52652b665b869c5adcc7f1f9298a5c84c9604dcd7650e93816371fd0f",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": true,
+      "visualObservation": "Chinese header, content and sidebar labels are legible in desktop light mode; focused Brutalist summary outline visible."
+    },
+    {
+      "name": "sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+      "sha256": "d19191157cc013644b8a475fd7c9009e034d07309c72596f3d9d9b209ab8d45e",
+      "bytes": 137289,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "bea7032352863a60714a46f4326d18a6b99796456f348a436a6a0517047155dc",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-brutalist-failed-scripts-focus.png",
+      "sha256": "52bc73edb48c84d97b05f0dac7359f01e07dc5d444400612955a3f4b8d4f4fbe",
+      "bytes": 133267,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "83f62da266de505e47e07cff78f91ac74398ba4fdcc57b071d0b7af694d2a336",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+      "sha256": "57ac2180099d9ef6a61dc4fff6cd145da135a24be920dde2f4b6a13e222d756e",
+      "bytes": 135414,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "120902b2337d2485e2aa3303b711a6931258e17d90c5a12f3adcd00ea97ff262",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-shadcn-enhanced-focus.png",
+      "sha256": "86720bb6d48ee6afe93de8564d6a8227b850690d365ae0dc2070d3faaa89d761",
+      "bytes": 205812,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "a61aaa0f9994e8d7f6e55f8dfe9393fcc47c53b11a1c01d79994c9ae8d6c038d",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-shadcn-enhanced-group-hover.png",
+      "sha256": "72ab16138da9b7ee93977707ed465f6e8bd55d920b548dc41109c7aeb42f2307",
+      "bytes": 204969,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "848e45f6235c9c6e5caecc913b2a0cdd0961d6e6d0b719afc83b0e296956bc70",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-shadcn-failed-scripts-focus.png",
+      "sha256": "730b31777164a1c252780ea0f3eeb624cb350b7d73ffd7acb79b9f455878345a",
+      "bytes": 202321,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "f6f5b64b7fd12bba002f5bc22703ba2a8f5adec22894b8f74155726f5aa35349",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "sidebar-zh-cn-light-shadcn-failed-scripts-group-hover.png",
+      "sha256": "a2b5d9a6d474c6af3a0ebab71bbe1e3c38ad4336ffc03c68da5b4cb40cb0d447",
+      "bytes": 200885,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "5e746a24c54ba93e2dad39354c631ae5f89c176e08307b6ff399d06c65f5b415",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-react-new-york-v4.png",
+      "sha256": "d3b5a2ad684360850bc26e6e44bc7b8a0a5b88b98f3a227f0f90f864ee871ffb",
+      "bytes": 167259,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "d94bde41955fc7dbb3616a65e1af8b6b3261bb350d17b0d0bdb816fc549b5236",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-react-nova.png",
+      "sha256": "d41e8bd6744a660f5064e4c21f158d89c47f408cc3d915f6a7113036a3d81848",
+      "bytes": 170353,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "44afc37f6ad19f0ab598fced815484f6dabedf4527143cc734ea7a4f44b988ca",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-react-rhea.png",
+      "sha256": "e26f769bc3ce3969d672bb9c132bbb7a36134ee4b73a8d9c1ce471c66c37bad3",
+      "bytes": 170657,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "12bf5c9f3f5a3c3e249ddd57fe368705a122af2d1d4235bf07b0cfc8bdfddbf4",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-vue-new-york-v4.png",
+      "sha256": "31069858470a8f0071cdce301fd590b48f720a96fb58eb60cf66351c7dad4c1b",
+      "bytes": 162768,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "f45c16a937ed27e1914b0402a5af7ae8cb8d2c9355ecfd0dc27671170aa7528d",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-vue-nova.png",
+      "sha256": "2e19cc3c4507bd6944935a5c6587b314fbc0f7e95219bb7d80b3cd1b0b6d692b",
+      "bytes": 164086,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "5d9de3f9adb06440128cf3c9b87fc86739df16799b2c62d21fc4489ed8add966",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-vue-rhea.png",
+      "sha256": "49b20eb35d695768cb59fcc4e45aa58e1be87627b4e002c553bbe733261284f5",
+      "bytes": 164137,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "9383a42e7fe5572743e130921d87f60284a70a1b36d54fa8fd07676e06513cd6",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-vue2-new-york-v4.png",
+      "sha256": "8b14911e61cdea3e01fb5b1f8e93ade47462abf8d4fe7dd69dcb70408ca76283",
+      "bytes": 177935,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "b5b59792e9716d35512312c5476fbce28ffaee5c7d425ca6d2be9fb7743944a6",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-vue2-nova.png",
+      "sha256": "01a6c33e2c5e910ec859c37d7a896c2ae86699607466d4a7b4ef467c6b3ddfed",
+      "bytes": 176549,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "36f34c0028d6d26e37d32a52d00b4cdf9776dbce665380a4af177b608fdedb5f",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-vue2-rhea.png",
+      "sha256": "8457475300e01808be2d3628262a44cfb48a3356603994f0b6f0e94ae05de71c",
+      "bytes": 176859,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "3cb2365e5a69ab9a87c5c4edfe741944815233e435b8ca2a7541dc5a2809fe18",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-wc-new-york-v4.png",
+      "sha256": "18ad92851e04d6dc6d17106f8c946a4cd32a4520c067dea2334ac3072f8fab96",
+      "bytes": 185707,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "0e10c4f1eb50d67552f7ddbe78cf0a1200627e855b24148c1f6561f94e025c90",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-wc-nova.png",
+      "sha256": "d4e1ad4b2e33a8b6897f1ce4fa4c8e7e1edf7ce525b6e2272821fb91afbf198b",
+      "bytes": 184360,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "27cc8aafc74b87f9399acc55a87ad11d561fca81e662d8a833df0862a18d35f9",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-en-wc-rhea.png",
+      "sha256": "78581637b22bc13778f17156dd98cb20b928ba2d581b19f65ceff0c89a726ee0",
+      "bytes": 184368,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "33bfe6f265ac3f17417c2d21118a98b7aa182473047468fa01c18f5b181f3e53",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-react-new-york-v4.png",
+      "sha256": "9bdf8b833b64f9ad322faf5c90767f3d74d41a50ce4cad3abd7d6a2bbb32ec31",
+      "bytes": 176406,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "45e5c230aeab6d030b617c8fe872d8fec7dd3f92ff1077572b7f0cc7682034bf",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-react-nova.png",
+      "sha256": "125a611055be2555c8ae205e7dc75467dfe001b3f573817ecdb12ddfdadd9ca8",
+      "bytes": 179595,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "0ed26043c0a36a2930351c817618d4f88b7809dfd058e88474605105752a87b5",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-react-rhea.png",
+      "sha256": "d4a0b0c3de5aa0f7e0cbbe62c20d4658cbbe84c425397eae045fa4fb8dd009a1",
+      "bytes": 179894,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "812fdc851056a31ab68c4c153ed2b96da08570150d1bf98f25133f3919b18523",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-vue-new-york-v4.png",
+      "sha256": "d9698e4d01704a2371c5abc7daab0c9664cc59b15f7e17559149da66db87bb23",
+      "bytes": 170636,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "cf398d0a456329edd5f95229081c459b615047cea5ba97234d5011c2542321ce",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-vue-nova.png",
+      "sha256": "f70b5c2377ab576ac1caf09e26868ed364b5455deb550e89ae139f81d4918ac3",
+      "bytes": 172028,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "5ec2ac02eb7e60a0ff6072a5aa37fcf28d32cba8cc8043ebc13a94d8c3e0dfbd",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": true,
+      "visualObservation": "Chinese profile documentation and nav labels are legible in the actual light screenshot; selected Password and profile nova visible."
+    },
+    {
+      "name": "tabs-zh-cn-vue-rhea.png",
+      "sha256": "914cdc3f3c794fdb8a352d0b17755bc1000c1d7d2989d64e8709c6b25cc546a5",
+      "bytes": 172089,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "89c5e6631930b5063bee2f72c30130f35aca42f06720de6b368884bcfe4c7d4b",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-vue2-new-york-v4.png",
+      "sha256": "0e265869951a022f155346969ce9cee5d448cb17a97fdda48985ed42f87fb340",
+      "bytes": 178818,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "3df9cb45287a18d79c70ba84f23182bcdbf4d551e5aa80d2602c9d1b6220e389",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": true,
+      "visualObservation": "Chinese heading, profile documentation, navigation and labels are legible in the actual dark screenshot; selected Password and profile new-york-v4 are visible."
+    },
+    {
+      "name": "tabs-zh-cn-vue2-nova.png",
+      "sha256": "acef20db7a998dfbec1673a536440388cbcf1aa493c855a9b10bb81b45b37757",
+      "bytes": 179854,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "3dd41c29c3227b992f1933bdd25c1a6282806a980467d11e7fb0f0fece605809",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-vue2-rhea.png",
+      "sha256": "a0041f60f2d2368aabe7069a4c05a9ac0b8ec78147b4a1f46ec83381baf11a25",
+      "bytes": 179994,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "04ff9139205b46ad2a108d51f568e1e03089a9ba55795fe02b1687490f3d0465",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "dark",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-wc-new-york-v4.png",
+      "sha256": "58d641e47373d5eaac3c02428815281b2d7df8a930079be85c430b58c8cf3791",
+      "bytes": 190719,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "5de1c2b8b0e0de8ec594a1d23cd2ec317b207bcf8a9637fc5009765522c7b5fc",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-wc-nova.png",
+      "sha256": "1dcfcdfd9452958cd1fc9c01e146e258f17d1e09375738b5106a2dc7c1cf391d",
+      "bytes": 189376,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "98a135ffb5785ce72771cfb30b477ab71372ff57744ca1c70bc9603557080a54",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    },
+    {
+      "name": "tabs-zh-cn-wc-rhea.png",
+      "sha256": "4f21aa257c55f77708e40e91ed36027b3e51d5a806483bb8b0c546b4f4362c56",
+      "bytes": 189396,
+      "width": 1440,
+      "height": 1000,
+      "metadataSha256": "6b596f18df2fc9a6d28b539cd873bb9b3f4cd119fa8b5d80f49bd3c46de784e2",
+      "source": {
+        "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "theme": "light",
+      "manuallyViewed": false,
+      "visualObservation": null
+    }
+  ],
+  "boundaries": [
+    "Manual visual inspection covers six originals; all other images have only metadata, byte hash and dimension checks here.",
+    "No original image or report was edited and no browser/product test was rerun by this reviewer.",
+    "Screenshots do not independently prove dynamic focus identity or trusted input.",
+    "The original R2 result remains 303/304 with one mobile target failure."
+  ]
+}
