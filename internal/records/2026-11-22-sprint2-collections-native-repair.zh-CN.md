@@ -67,3 +67,9 @@ CSS helper 把既有 Form 的真实站点 Tailwind 编译和字体嵌入提取�
 - 原集合 36、Form/Select 36 应在最终整合提交上重跑，尤其核实真实隐藏、Tab 顺序、VirtualList 滚动与异步校验顺序；本记录不预填绿色。
 - Shenko / Verdant 的实际消费者范围与原 inventory 不变；不把公开 recipe 或此处 Happy DOM 测试记成这些应用的集合组件使用证据。
 - 原物理设备、辅助技术、非 Web、Compiler 额外后端、Harness 完整应用旅程仍由原 Issue 条件和后续 Sprint 承接。
+
+## 整合类型反馈：保留独立 Base 状态 owner
+
+整合 head `9f7c4d500b3defa2fc0a7d614c0418335f54431b` 的 workspace types 揭示本修复新增的 2 个 `TS2345`：`setupDataTableCell` 错把 Base Cell/Header 隐藏状态的 `watch/run Props` 与 Shadcn 投影的 `styleProfile` Props 绑定为同一泛型。修复增加独立 `StateOwnerProps`，保持 `ObservedStateHandle<boolean, StateOwnerProps>` 的完整观察类型；未用 `any`、类型强转、弱化 watch 或增加未声明依赖。
+
+只包含实际 Shadcn `data-table.proto.ts` 及其真实依赖的 strict TypeScript 定向检查已 **exit 0、零诊断**。原整合 2 错、实际命令/配置及最终 3 份相关源码摘要在 [类型反馈回执](evidence/2026-11-22-sprint2-collections-native-repair/data-table-owner-types.json)；完整 workspace types 和原生矩阵仍由最终整合执行，不以此小检查代替。

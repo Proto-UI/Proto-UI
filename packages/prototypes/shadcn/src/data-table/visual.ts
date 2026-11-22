@@ -25,8 +25,13 @@ export function setupDataTableText<
 
 export function setupDataTableCell<
   Props extends ShadcnStyleProps,
+  StateOwnerProps extends object,
   Exposes = Record<string, unknown>,
->(def: DefHandle<Props, Exposes>, hidden: ObservedStateHandle<boolean, Props>, header = false) {
+>(
+  def: DefHandle<Props, Exposes>,
+  hidden: ObservedStateHandle<boolean, StateOwnerProps>,
+  header = false
+) {
   const style = setupDataTableText(def);
   def.feedback.style.use(tw('text-left align-middle whitespace-nowrap'));
   def.rule({
