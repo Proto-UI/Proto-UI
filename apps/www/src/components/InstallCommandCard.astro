@@ -63,7 +63,10 @@ const activeManager =
   id={shellId}
 >
   <div class="install-command-card__toolbar" data-code-toolbar data-site-code-surface="toolbar">
-    <div class="install-command-card__managers" aria-label={isChinese ? '包管理器' : 'Package manager'}>
+    <div
+      class="install-command-card__managers"
+      aria-label={isChinese ? '包管理器' : 'Package manager'}
+    >
       {
         normalizedEntries.map((entry) => (
           <Button
@@ -120,7 +123,9 @@ const activeManager =
   }
 </figure>
 
-<noscript set:html={'<style>@layer base { [data-install-command-card] [data-command-panel][hidden] { display:block!important; } } [data-install-command-card] [data-command-panel] { margin-block:0.5rem; }</style>'} />
+<noscript
+  set:html={'<style>@layer base { [data-install-command-card] [data-command-panel][hidden] { display:block!important; } } [data-install-command-card] [data-command-panel] { margin-block:0.5rem; }</style>'}
+/>
 
 <script>
   import { initInstallCommandCards } from './install-command-card-client';

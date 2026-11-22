@@ -59,9 +59,7 @@
         "bytes": 2834329,
         "format": "esm",
         "entry": "packages/compiler/src/index.ts",
-        "external": [
-          "typescript"
-        ]
+        "external": ["typescript"]
       },
       "resolutions": [
         {
@@ -87,10 +85,7 @@
           "output_directory": "generated/prototypes/transport-badge",
           "generated_source": "generated/prototypes/transport-badge/Component.tsx",
           "generated_sha256": "374b96edef85ee9e6a41571de56b58dfdfff3b6e210f80aa20fd938d6a729496",
-          "generated_imports": [
-            " + phase);\n    const previous = phase;\n    phase = ",
-            "react"
-          ],
+          "generated_imports": [" + phase);\n    const previous = phase;\n    phase = ", "react"],
           "provenance": "generated/prototypes/transport-badge/provenance.json",
           "provenance_sha256": "d3dfb6211abb416831a0829d5f7aa9433a870823827be6be5b9329799fb3e536",
           "compiler_ir_version": 7,
@@ -106,10 +101,7 @@
           "output_directory": "generated/prototypes/message-bubble",
           "generated_source": "generated/prototypes/message-bubble/Component.tsx",
           "generated_sha256": "a70a1e1a61d9a91247e6a476b8eb359d257c871165e83effff9874debd24e77d",
-          "generated_imports": [
-            " + phase);\n    const previous = phase;\n    phase = ",
-            "react"
-          ],
+          "generated_imports": [" + phase);\n    const previous = phase;\n    phase = ", "react"],
           "provenance": "generated/prototypes/message-bubble/provenance.json",
           "provenance_sha256": "bd1859e681d1ff4de6f65ccbba2654c6071a2620fb59bcd71cd1eadc2c113b89",
           "compiler_ir_version": 7,
@@ -169,10 +161,7 @@
       }
     },
     "realisation": {
-      "compiled": [
-        "transport-badge",
-        "message-bubble"
-      ],
+      "compiled": ["transport-badge", "message-bubble"],
       "adapter": [
         {
           "family": "button",
@@ -229,13 +218,7 @@
     "typecheckObservation": {
       "schemaVersion": 1,
       "kind": "actual-application-consumer-command",
-      "command": [
-        "corepack",
-        "pnpm@10.32.1",
-        "exec",
-        "tsc",
-        "--noEmit"
-      ],
+      "command": ["corepack", "pnpm@10.32.1", "exec", "tsc", "--noEmit"],
       "cwd": "/workspace/scratch/828b7e591003/shenko-consumer/crates/shenko-ui/web",
       "sourceBefore": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
       "sourceAfter": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
@@ -295,10 +278,7 @@
     "admissionRuleObservation": {
       "schemaVersion": 1,
       "kind": "actual-application-consumer-command",
-      "command": [
-        "node",
-        "frontend/proto-ui/tools/check-proto-ui-rules.mjs"
-      ],
+      "command": ["node", "frontend/proto-ui/tools/check-proto-ui-rules.mjs"],
       "cwd": "/workspace/scratch/828b7e591003/verdant-consumer",
       "sourceBefore": "91a775546ebd21a87d76d76568195a6513437719",
       "sourceAfter": "91a775546ebd21a87d76d76568195a6513437719",
