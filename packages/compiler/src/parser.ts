@@ -1079,6 +1079,7 @@ class Frontend {
           name: binding.emittedName ?? node.name.text,
           bindingId: binding.bindingId,
           value: binding.parsed!,
+          declarationPosition: output.length,
           span,
         });
       } else if (ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node)) continue;
@@ -3156,6 +3157,7 @@ class Frontend {
       operation,
       ...(receiver ? { receiver } : {}),
       ...(optionalOperation ? { optional: true } : {}),
+      ...(bindings.inputPayloadType ? { inputPayloadType: bindings.inputPayloadType } : {}),
       arguments: args,
       type,
       span,

@@ -2054,21 +2054,8 @@ impl __PuiNativeRecordValue {
             return `positioning_snapshot(${receiverOwner()})`;
           case 'event.on':
           case 'event.onGlobal': {
-            const callback = node.arguments[1];
-            const parameters =
-              callback.kind === 'function'
-                ? callback.function.parameters
-                : typeof callback.type !== 'string' && callback.type.kind === 'callable'
-                  ? callback.type.parameters
-                  : [];
             const listener =
-              parameters[1]?.type === 'a11y-value-event' ||
-              (node.operation === 'event.on' &&
-                node.arguments[0].kind === 'literal' &&
-                typeof node.arguments[0].value === 'string' &&
-                admittedAnalysis.numericAccessibilityEvents.includes(node.arguments[0].value))
-                ? 'listen_numeric_value'
-                : 'listen';
+              node.inputPayloadType === 'a11y-value-event' ? 'listen_numeric_value' : 'listen';
             return `${listener}(&${ownerReference()}, ${argument(0)}, ${node.operation === 'event.onGlobal'}, ${argument(1)}, ${argument(2)})`;
           }
           case 'event.requestDefaultActionPrevention':

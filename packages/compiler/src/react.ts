@@ -25,6 +25,7 @@ import type {
 } from './ir';
 import type { RuleCondition } from './rule-declarations';
 import { observableSemantics, type PropsUpdatePolicy } from './observable-semantics';
+import { unsupportedNumericAccessibility } from './pointer-facts-admission';
 
 /** Direct checked semantic calls; never input-source evaluation or an IR interpreter. */
 export function emitReact(
@@ -34,6 +35,12 @@ export function emitReact(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  // This source projection prints every retained statement and Hook member.
+  const numericDiagnostics = unsupportedNumericAccessibility(ir, 'react-runtime', {
+    statementsAfterTerminal: true,
+    hookMembers: 'all',
+  });
+  if (numericDiagnostics.length) return { ok: false, diagnostics: numericDiagnostics };
   const readValue = createJavaScriptValueReader(ir, typeName);
   const componentName = options.componentName ?? 'CompiledComponent';
   if (

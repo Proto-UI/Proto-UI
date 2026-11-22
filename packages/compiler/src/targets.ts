@@ -665,7 +665,6 @@ export interface TargetOperationAnalysis {
   readonly sites: readonly { operation: Operation; span: SourceSpan }[];
   readonly authoredHooks: readonly string[];
   readonly functions: readonly FunctionIR[];
-  readonly numericAccessibilityEvents: readonly string[];
 }
 /** Calls, host callbacks and outward callables are invocation roots. Creation alone is inert. */
 export function checkTargetOperations(
@@ -687,7 +686,6 @@ export function checkTargetOperations(
   const allowed = new Set(selected.operations);
   const capabilities = new Set(selected.hostCapabilities);
   const operations = new Set<Operation>();
-  const numericAccessibilityEvents = new Set<string>();
   const sites: { operation: Operation; span: SourceSpan }[] = [];
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   const reachedHooks = new Set<string>(),
@@ -726,10 +724,6 @@ export function checkTargetOperations(
     switch (value.kind) {
       case 'operation':
         operation(value.operation, value.span);
-        if (value.operation === 'accessible.action') {
-          const event = declaredSetValueEvent(value.arguments);
-          if (event) numericAccessibilityEvents.add(event);
-        }
         if (
           selected.id === 'gpui-source-v1' &&
           value.operation === 'accessible.action' &&
@@ -883,7 +877,6 @@ export function checkTargetOperations(
           sites,
           authoredHooks: [...reachedHooks],
           functions: [...reachedFunctions],
-          numericAccessibilityEvents: [...numericAccessibilityEvents],
         },
       };
 }
