@@ -26,7 +26,7 @@ criteria:
 
   - id: C-COMPILER-SCALAR-INPUT-0001-READONLY
     text: >-
-      An outward Expose event may snapshot a finite readonly record whose entire value type recursively proves JSON data. Readonly remains a lexical mutation restriction. The event schema removes only readonly metadata, retaining field types and optionality. Capabilities, callable values, open dictionaries, unknown and nested undefined cannot cross this boundary, including hidden fields in a structurally narrowed source view. Independently supplied IR must satisfy the same proof as source admission.
+      An outward Expose event may snapshot a finite readonly record whose entire value type recursively proves JSON data. Readonly remains a lexical mutation restriction. The event schema removes only readonly metadata, retaining field types and optionality. Capabilities, callable values, open dictionaries, unknown and nested undefined cannot cross this boundary, including hidden fields in a structurally narrowed source view. A union retains the nesting depth of its alternatives: it preserves the existing root void boundary without admitting undefined inside a record or array. Independently supplied IR must satisfy the same proof as source admission.
 
 sources:
   - path: packages/compiler/src/value-types.ts

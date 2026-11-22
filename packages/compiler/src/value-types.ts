@@ -264,7 +264,7 @@ export function dataBoundaryType(type: ValueType, top = true): DataType | undefi
     return element ? { kind: 'array', element } : undefined;
   }
   if (type.kind === 'union' || type.kind === 'value-union') {
-    const members = type.members.map((member) => dataBoundaryType(member, false));
+    const members = type.members.map((member) => dataBoundaryType(member, top));
     return members.every((member): member is DataType => member !== undefined)
       ? { kind: 'union', members }
       : undefined;
