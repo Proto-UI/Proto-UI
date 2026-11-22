@@ -2,6 +2,11 @@ name: Liquid Glass matched frame-budget observations
 on:
   workflow_dispatch:
     inputs:
+      notification_probe_only:
+        description: Collect bare-browser DPR notification diagnostics only; not material acceptance
+        type: boolean
+        required: false
+        default: false
       baseline_sha:
         description: Exact baseline commit for the matched observation
         type: string
@@ -25,7 +30,41 @@ env:
   PROGRAM_REGRESSION_SHA: 19d175f454468fa27364c8283e084f3bb7a1016b
   ASTRO_TELEMETRY_DISABLED: '1'
 jobs:
+  notification-probe:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.notification_probe_only == true }}
+    name: Bare-browser DPR diagnostic (no product acceptance)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the exact diagnostic source
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Observe native DPR notifications and CDP ownership
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          node scripts/analysis/liquid-dpr-notification-probe.mjs "$RUNNER_TEMP/liquid-dpr-notification"
+      - name: Retain complete diagnostic observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-dpr-notification-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/liquid-dpr-notification
+          if-no-files-found: error
+          retention-days: 30
   matched-browser:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.notification_probe_only == true) }}
     # Heavy evidence is explicitly dispatched or called by the owned CI cycle.
     # It never adds a separate automatic pull-request lane.
 
