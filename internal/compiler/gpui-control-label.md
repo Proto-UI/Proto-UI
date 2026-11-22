@@ -31,6 +31,11 @@ and leaving an ambiguous frame retires a pending pointer/request turn. A
 stable unique or ambiguous layout does not repeatedly advance the receipt or
 schedule redraws.
 
+The receipt is observed during native prepaint, after layout has collected all
+physical occurrences, as well as at the initial logical mount. Cached authored
+projections can change native parents or occur twice without a new authored
+projection commit; that cache reuse cannot preserve an earlier request turn.
+
 ## Naming and input
 
 Naming projects AccessKit `labelled_by` to the actual label node from the same

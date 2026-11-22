@@ -1,6 +1,6 @@
 // Pinned GPUI Element::write_a11y_info writes the actual AccessKit node.
 export const gpuiNativeA11ySource = String.raw`use gpui::{App, Bounds, Element, ElementId, GlobalElementId, InspectorElementId, LayoutId, Pixels, Window};
-use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view};
+use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view,control_label_commit};
 use std::hash::{Hash,Hasher};
 #[cfg(not(feature = "gpui-modern-element-api"))]
 fn node_id(id: &GlobalElementId) -> gpui::accesskit::NodeId {
@@ -86,7 +86,11 @@ fn prepaint(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorEle
 if let Some(owner)=self.owner.upgrade(){let hitbox=window.insert_hitbox(bounds,gpui::HitboxBehavior::Normal);let hitbox_id=hitbox.id;let window_id=window.window_handle().window_id();{let mut owner=owner.borrow_mut();owner.bounds=Some(bounds);owner.native_hitbox=Some(hitbox);}
 // GPUI retains accessed element state through cached frames and drops it when
 // the actual native subtree disappears. No frame polling or owner disposal.
-if let Some(id)=id{window.with_element_state(id,|state:Option<NativeViewLease>,_|{let mut state=state.filter(|state|std::rc::Weak::ptr_eq(&state.owner,&self.owner)).unwrap_or_else(||NativeViewLease{owner:self.owner.clone(),window:window_id,hitbox:hitbox_id});state.window=window_id;state.hitbox=hitbox_id;((),state)});}}
+if let Some(id)=id{window.with_element_state(id,|state:Option<NativeViewLease>,_|{let mut state=state.filter(|state|std::rc::Weak::ptr_eq(&state.owner,&self.owner)).unwrap_or_else(||NativeViewLease{owner:self.owner.clone(),window:window_id,hitbox:hitbox_id});state.window=window_id;state.hitbox=hitbox_id;((),state)});}
+// A cached authored projection can acquire a different physical binding without
+// another Owner::commit. All layout occurrences are known before prepaint, so
+// observe its exact view receipt here as well as on first logical mounting.
+control_label_commit(&owner);}
 self.element.prepaint(id,inspector,bounds,layout,window,cx)
 }
 fn paint(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorElementId>,bounds:Bounds<Pixels>,layout:&mut Self::RequestLayoutState,prepaint:&mut Self::PrepaintState,window:&mut Window,cx:&mut App){self.element.paint(id,inspector,bounds,layout,prepaint,window,cx)}
