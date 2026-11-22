@@ -2,7 +2,7 @@ import { callableEffectIssue } from './callable-effects';
 import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
 import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
-import { declaredSetValueEvent } from './a11y-event-types';
+import { inferInputPayloadSchemas } from './a11y-event-types';
 import { createHash } from 'node:crypto';
 import { CompilerRejection, reject } from './diagnostics';
 import {
@@ -466,6 +466,7 @@ const EXPRESSION_FIELDS = [
   'elements',
   'entries',
   'operation',
+  'inputPayloadType',
   'receiver',
   'arguments',
   'hookId',
@@ -549,10 +550,10 @@ const EXPRESSION_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   function: ['function'],
   'helper-call': ['name', 'arguments'],
   'authored-hook': ['hookId', 'arguments'],
-  operation: ['operation', 'receiver', 'optional', 'arguments'],
+  operation: ['operation', 'receiver', 'optional', 'inputPayloadType', 'arguments'],
 };
 const STATEMENT_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  const: ['name', 'bindingId', 'value'],
+  const: ['name', 'bindingId', 'value', 'declarationPosition'],
   effect: ['expression'],
   if: ['condition', 'then', 'otherwise'],
   throw: ['value'],
@@ -600,6 +601,9 @@ type Scope = Map<string, Binding>;
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
     assertDataGraph(input);
+    // Schema order follows authored definitions, not this validator's scheduling
+    // of helper/hook typechecks. The derivation never trusts claimed schemas.
+    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR);
     const writtenFields = writtenMemberFields(input);
     let flow = new FlowProof(writtenFields);
 
@@ -732,9 +736,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       copies.set(value, output);
       flow.copyObservation(value, output);
       const changes = replacements.get(value);
-      for (const key of Object.keys(value)) {
-        const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
-        const child = changes && Object.hasOwn(changes, key) ? changes[key] : descriptor.value;
+      for (const key of new Set([...Object.keys(value), ...Object.keys(changes ?? {})])) {
+        const descriptor = Object.getOwnPropertyDescriptor(value, key);
+        const child = changes && Object.hasOwn(changes, key) ? changes[key] : descriptor!.value;
         Object.defineProperty(output, key, {
           value: canonicalCopy(child, copies),
           enumerable: true,
@@ -805,7 +809,6 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       keys.set(id, type);
     }
     const exposures = new Map<string, Record<string, unknown>>();
-    const numericActionEvents = new Set<string>();
     for (const value of array(root.exposes)) {
       const exposure = object(value, [
         'name',
@@ -1787,12 +1790,26 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (operation === 'event.on' || operation === 'event.onGlobal') {
               if (first?.kind !== 'literal' || typeof first.value !== 'string')
                 bad('Input registrations require static types.', location);
-              bindings.inputPayloadType =
-                operation === 'event.on' && numericActionEvents.has(first.value)
-                  ? 'a11y-value-event'
-                  : first.value.startsWith('host:')
-                    ? 'host-event'
-                    : 'event';
+              bindings.inputPayloadType = inputPayloadSchemas.get(
+                node as unknown as Extract<ExpressionIR, { kind: 'operation' }>
+              );
+              if (!bindings.inputPayloadType)
+                bad('Input registration is missing its structural declaration proof.', location);
+              const recordedPayload =
+                node.inputPayloadType === undefined
+                  ? replacements.get(node)?.inputPayloadType
+                  : node.inputPayloadType;
+              if (recordedPayload !== undefined && recordedPayload !== bindings.inputPayloadType)
+                bad(
+                  'Input registration schema does not match its preceding checked declaration.',
+                  location
+                );
+              // Older serialized IR omitted this derived field. Canonicalize a copy;
+              // never mutate the caller or infer it later from reachable actions.
+              if (node.inputPayloadType === undefined)
+                replaceField(node, 'inputPayloadType', bindings.inputPayloadType);
+            } else if (node.inputPayloadType !== undefined) {
+              bad('Only input registrations may record an input payload schema.', location);
             }
             if (operation === 'expose.emit' || operation === 'expose.method') {
               if (operation === 'expose.emit') {
@@ -1860,10 +1877,6 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               bindings
             );
             if (argumentIssues.length) bad(argumentIssues[0].message, location);
-            if (operation === 'accessible.action') {
-              const event = declaredSetValueEvent(args as ExpressionIR[]);
-              if (event) numericActionEvents.add(event);
-            }
             if (operation === 'expose.state') {
               const exposure =
                 first?.kind === 'literal' ? exposures.get(String(first.value)) : undefined;
@@ -1960,6 +1973,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             'catch',
             'finally',
             'bindingId',
+            'declarationPosition',
           ]),
           location = span(node.span);
         exactKindFields(node, STATEMENT_KIND_FIELDS, ['kind', 'span']);

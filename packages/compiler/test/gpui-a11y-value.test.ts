@@ -4,6 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { compilePrototype } from '../src/compile';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
+import { emitGpuiSource } from '../src/gpui-source';
+import { pruneDeadValues } from '../src/demand-pruning';
+import { structuralStatementOrder } from '../src/declaration-order';
 import { gpuiNativeSdkFiles } from '../src/gpui-native-sdk';
 import type { ExpressionIR } from '../src/ir';
 
@@ -83,6 +86,168 @@ describe('C-COMPILER-GPUI-A11Y-VALUE-0001 checked numeric host payload', () => {
       expect(result.value.output.code).toContain('listen_numeric_value(');
     }
   );
+
+  it.each(['()', '(_run)', '(_run, event)'])(
+    'retains each numeric registration schema after its declaration is pruned: %s',
+    (parameters) => {
+      const result = compilePrototype(
+        prototype(`if(false){${action()}}
+          const calls=def.state.numberDiscrete('calls',0);def.expose.state('calls',calls);
+          def.event.on('host:numeric',${parameters}=>calls.set(calls.get()+1),{once:true});`),
+        { profile: 'gpui-source-v1' }
+      );
+      if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+      expect(result.value.output.code).toContain('listen_numeric_value(');
+    }
+  );
+
+  it('does not retroactively change an earlier generic registration on the same route', () => {
+    const result = compilePrototype(
+      prototype(`const calls=def.state.numberDiscrete('calls',0);def.expose.state('calls',calls);
+        def.event.on('host:numeric',()=>calls.set(calls.get()+1),{once:true});
+        ${action()}
+        def.event.on('host:numeric',()=>calls.set(calls.get()+1),{once:true});`),
+      { profile: 'gpui-source-v1' }
+    );
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.output.code.match(/\blisten\(/g)).toHaveLength(1);
+    expect(result.value.output.code.match(/\blisten_numeric_value\(/g)).toHaveLength(1);
+  });
+
+  it('derives omitted serialized registration schemas without mutating its input', () => {
+    const parsed = parsePrototype(
+      prototype(`if(false){${action()}}
+        const calls=def.state.numberDiscrete('calls',0);def.expose.state('calls',calls);
+        def.event.on('host:numeric',()=>calls.set(calls.get()+1),{once:true});`)
+    );
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const retained = structuredClone(parsed.value);
+    for (const operation of operations(retained)) delete operation.inputPayloadType;
+    const original = structuredClone(retained);
+    const result = emitGpuiSource(retained);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    expect(result.value.code).toContain('listen_numeric_value(');
+    expect(retained).toEqual(original);
+  });
+
+  it.each(['host-event', 'event'] as const)(
+    'rejects a serialized numeric registration claiming the weaker %s schema',
+    (inputPayloadType) => {
+      const parsed = parsePrototype(prototype(action() + listener));
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+      const forged = structuredClone(parsed.value);
+      operations(forged).find((node) => node.operation === 'event.on')!.inputPayloadType =
+        inputPayloadType;
+      expect(validateIR(forged)).toMatchObject({ ok: false });
+    }
+  );
+
+  it('does not allow serialized metadata to grant a generic listener numeric provenance', () => {
+    const parsed = parsePrototype(prototype("def.event.on('host:numeric',()=>{});" + action()));
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const forged = structuredClone(parsed.value);
+    operations(forged).find((node) => node.operation === 'event.on')!.inputPayloadType =
+      'a11y-value-event';
+    expect(validateIR(forged)).toMatchObject({ ok: false });
+  });
+
+  it.each([null, false, 0, '', 'unknown', {}, []])(
+    'rejects malformed serialized registration schema metadata: %j',
+    (inputPayloadType) => {
+      const parsed = parsePrototype(prototype(action() + listener));
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+      const forged = structuredClone(parsed.value);
+      Object.assign(operations(forged).find((node) => node.operation === 'event.on')!, {
+        inputPayloadType,
+      });
+      expect(validateIR(forged)).toMatchObject({ ok: false });
+      expect(emitGpuiSource(forged)).toMatchObject({ ok: false });
+    }
+  );
+
+  it.each([
+    ["def.event.on('host:numeric',()=>{});useNumeric();", 1, 0],
+    ["useNumeric();def.event.on('host:numeric',(_run,event)=>{const next=event.value;});", 0, 1],
+    ["def.event.on('host:numeric',()=>{});useNumeric();def.event.on('host:numeric',()=>{});", 1, 1],
+    ["if(false)useNumeric();def.event.on('host:numeric',()=>{});", 0, 1],
+  ] as const)(
+    'preserves registration order across an authored hook: %s',
+    (body, generic, numeric) => {
+      const result = compilePrototype(
+        `import {definePrototype,defineAsHook} from '@proto.ui/core';
+       import {asAccessible} from '@proto.ui/hooks';
+       const useNumeric=defineAsHook({name:'numeric-hook',setup(def){
+         const accessible=asAccessible();${action()}
+       }});
+       export default definePrototype({name:'hook-numeric-order',setup(def){
+         ${body}return r=>r.slot();
+       }});`,
+        { profile: 'gpui-source-v1' }
+      );
+      if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+      expect(result.value.output.code.match(/\blisten\(/g) ?? []).toHaveLength(generic);
+      expect(result.value.output.code.match(/\blisten_numeric_value\(/g) ?? []).toHaveLength(
+        numeric
+      );
+    }
+  );
+
+  it.each([
+    [`def.event.on('host:numeric',()=>{});function declare(){${action()}}declare();`, 1, 0],
+    [`${action()}function register(){${listener}}register();`, 0, 1],
+    [`declare();${listener}function declare(){${action()}}`, 0, 1],
+    [
+      `def.event.on('host:numeric',()=>{});function declare(){${action()}}
+      function register(){${listener}}register();declare();`,
+      1,
+      1,
+    ],
+    [`${listener.replace('const next=event.value;', '')}function declare(){${action()}}`, 1, 0],
+  ] as const)(
+    'retains structural declaration order when local functions are hoisted: %s',
+    (body, generic, numeric) => {
+      const result = compilePrototype(prototype(body), { profile: 'gpui-source-v1' });
+      if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+      expect(result.value.output.code.match(/\blisten\(/g) ?? []).toHaveLength(generic);
+      expect(result.value.output.code.match(/\blisten_numeric_value\(/g) ?? []).toHaveLength(
+        numeric
+      );
+    }
+  );
+
+  it.each([null, false, -1, 0.5, 10000])(
+    'rejects invalid structural declaration positions instead of trusting numeric metadata: %j',
+    (declarationPosition) => {
+      const parsed = parsePrototype(
+        prototype(`function declare(){${action()}}declare();${listener}`)
+      );
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+      const forged = structuredClone(parsed.value);
+      const declaration = forged.setup.body.find(
+        (statement) => statement.kind === 'const' && statement.declarationPosition !== undefined
+      )!;
+      Object.assign(declaration, { declarationPosition });
+      expect(validateIR(forged)).toMatchObject({ ok: false });
+    }
+  );
+
+  it('keeps hoisted structural positions coherent when unused values are pruned', () => {
+    const parsed = parsePrototype(
+      prototype(`const unused=3;
+      const calls=def.state.numberDiscrete('calls',0);def.expose.state('calls',calls);
+      function increment(){calls.set(calls.get()+1);}def.expose.method('increment',()=>increment());`)
+    );
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const checked = validateIR(parsed.value);
+    if (!checked.ok) throw new Error(JSON.stringify(checked.diagnostics));
+    const pruned = pruneDeadValues(checked.value);
+    const ordered = structuralStatementOrder(pruned.setup.body);
+    expect(
+      ordered.some((statement) => statement.kind === 'const' && statement.name === 'unused')
+    ).toBe(false);
+    expect(validateIR(pruned)).toMatchObject({ ok: true });
+    expect(pruneDeadValues(pruned)).toBe(pruned);
+  });
 
   it.each([
     listener,

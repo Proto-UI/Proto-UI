@@ -6,11 +6,12 @@ since: 0.3.0-alpha.2
 lifecycleRationale: >-
   Compiler and native bridge tests cover this bounded private profile. A platform accessibility setter remains a separate required consumer evidence layer, not a claim made by GPUI test-platform execution.
 
+
 cases:
   - id: T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA
     title: Source and independently checked IR bind numeric input to the authored action
     covers: [C-COMPILER-GPUI-A11Y-VALUE-0001-SCHEMA]
-    expectation: The custom and default route compile, while wrong actions, routes, global callbacks, forged IR and other consuming source targets fail explicitly.
+    expectation: The custom and default route compile. Per-registration schema survives pruning for every callback arity, follows structural hook/helper/declaration order, and cannot retroactively change an earlier generic listener. Wrong actions, routes, global callbacks, forged schema/order metadata and other consuming source targets fail explicitly.
   - id: T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-NATIVE
     title: Generated Rust executes the same bridge invoked by the GPUI action callback
     covers:
@@ -20,7 +21,7 @@ cases:
         C-COMPILER-GPUI-A11Y-VALUE-0001-INGRESS,
         C-COMPILER-GPUI-A11Y-VALUE-0001-LIFETIME,
       ]
-    expectation: Finite NumericValue is delivered unchanged, invalid native and direct host inputs cannot invoke or consume once, scoped controls work, and detach or disposal blocks delivery.
+    expectation: Finite NumericValue is delivered unchanged, invalid native and direct host inputs cannot invoke or consume once, including zero/one/two-parameter listeners whose declarations were pruned. A later declaration preserves earlier generic ingress. Scoped controls work, and detach or disposal blocks delivery.
   - id: T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-RUNTIME
     title: Portable Runtime preserves raw host input and authored policy
     covers: [C-COMPILER-GPUI-A11Y-VALUE-0001-PAYLOAD, C-COMPILER-GPUI-A11Y-VALUE-0001-LIFETIME]
@@ -30,6 +31,12 @@ implementations:
     kind: module-test
     status: needs-review
     path: packages/compiler/test/gpui-a11y-value.test.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA]
+  - id: direct-source-target-admission
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/numeric-a11y-emitter-admission.test.ts
     required: true
     consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA]
   - id: native-numeric-bridge
