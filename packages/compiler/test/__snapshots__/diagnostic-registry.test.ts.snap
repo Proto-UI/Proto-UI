@@ -20,7 +20,7 @@ exports[`diagnostic registry > keeps a stable registered code set and category t
   "PUI2024:invalid-ir",
   "PUI3001:invalid-input",
   "PUI3002:output-conflict",
-  "PUI3003:output-conflict",
+  "PUI3003:output-write",
   "PUI3004:invalid-input",
   "PUI3005:compiler-defect",
   "PUI3301:unsupported-input",
@@ -57,6 +57,5 @@ exports[`diagnostic registry > keeps a stable registered code set and category t
   "PUI_QT_NAME:invalid-input",
   "PUI_QT_PUBLIC_DATA:unsupported-input",
   "PUI_QT_STYLE:unsupported-input",
-  "PUI_WC_HYDRATION_MISMATCH:compiler-defect",
 ]
 `;
