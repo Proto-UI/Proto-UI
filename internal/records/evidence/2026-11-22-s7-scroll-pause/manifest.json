@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "compiler-final.log",
+      "bytes": 166532,
+      "sha256": "4b2f94a7b89c1b73d4b78ef828b2f882d820e458eb8e0347c06be7ca3e8d1ec6"
+    },
+    {
+      "path": "review-final.log",
+      "bytes": 11880,
+      "sha256": "fd6b969897307598317fec47d7ff0eb0b0ebc0e50de794dc995753225299b60a"
+    },
+    {
+      "path": "review-native-model.log",
+      "bytes": 49031,
+      "sha256": "8435b6c13911ad9563d832ec518ed963391c729fb449005421201b0946a6065c"
+    },
+    {
+      "path": "review-initial-red.log",
+      "bytes": 14514,
+      "sha256": "13447172fbe2aa1794098cdae4fcab38b9a3d8de346c5dea9886e440ca46b534"
+    },
+    {
+      "path": "qt-negative.log",
+      "bytes": 50166,
+      "sha256": "bca2601b0f7809064e5b40a4b902e1a0c082c56b58c3003fbc0dd9b1b5588bc9"
+    },
+    {
+      "path": "late-reader-negative.log",
+      "bytes": 13851,
+      "sha256": "b70db4be1b8717f2de7c0b7898470f8275189a5f31cd243ca81cbdcf22b63f7b"
+    },
+    {
+      "path": "composed-negative.log",
+      "bytes": 12752,
+      "sha256": "4a2ef314e98760a091a0e50b43231b44d135eb7f7b1941b0fe52bbe13d9025c9"
+    },
+    {
+      "path": "reveal-admission-failed.log",
+      "bytes": 170575,
+      "sha256": "637c2829a3e6fbcab53f22f7d2751f7833e9f3e757c87ffdf9fc6f7a4db2d9bd"
+    },
+    {
+      "path": "runtime-disabled-red.log",
+      "bytes": 29304,
+      "sha256": "654461fe6b43c2fea52d5e5d65971aa13685cf6bcac21807d4f7ac8cecaba089"
+    },
+    {
+      "path": "runtime-disabled-green.log",
+      "bytes": 27722,
+      "sha256": "f221a17afc0f1dc2ee998f17c18fe4315c45b654db9657009ee28e70ad21ac7d"
+    },
+    {
+      "path": "workspace-types-killed.log",
+      "bytes": 145,
+      "sha256": "c575eadf17a6474ccdbe1a4b88528a24b7805c7760e30f9aed1737b32b2e6358"
+    }
+  ]
+}

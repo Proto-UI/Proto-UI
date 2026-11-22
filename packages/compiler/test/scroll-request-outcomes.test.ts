@@ -34,6 +34,17 @@ function operations(value: unknown): Extract<ExpressionIR, { kind: 'operation' }
 }
 
 describe('C-SCROLL-0001 typed request and delivery outcome', () => {
+  it('admits the geometry-free pause with the same structured outcome', () => {
+    const ir = checked(
+      source(`def.expose.method('pause',()=>{
+      const outcome:ScrollSurfaceRequestOutcome=scroll.pauseFollowing();
+      if(outcome.kind==='rejected') return outcome.reason;
+      return outcome.kind;
+    });`)
+    );
+    expect(JSON.stringify(ir)).toContain('scroll.pauseFollowing');
+  });
+
   it.each([
     `{kind:'by',axis:'vertical',delta:20}`,
     `{kind:'to',axis:'horizontal',position:0.5}`,

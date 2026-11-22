@@ -662,6 +662,21 @@ class NativeScroll {
     if (kind == 'to-end') { _pendingEndGeneration = null; endFollow.requestStatus.publish('applied'); }
     return current() ? const {'kind':'dispatched'} : const {'kind':'rejected','reason':'unavailable'};
   }
+  Map<String, Object?> pauseFollowing() {
+    owner.ensureRuntime();
+    if (!owner.hookNames.contains('asScrollSurface')) return const {'kind':'rejected','reason':'not-declared'};
+    if (!owner.ready) return const {'kind':'rejected','reason':'not-mounted'};
+    final policy = config['endFollow'];
+    if (policy is! Map<String,Object?> || policy['mode'] != 'while-at-end') return const {'kind':'rejected','reason':'unavailable'};
+    final axis = policy['axis'] as String? ?? 'vertical';
+    if (!_controller(axis).hasClients || axes.get() != 'both' && axes.get() != axis) return const {'kind':'rejected','reason':'unavailable'};
+    final generation = ++_requestGeneration, epoch = owner.epoch;
+    following = false;
+    if (_pendingEndGeneration != null) { _pendingEndGeneration = null; endFollow.requestStatus.publish('rejected'); }
+    if (!owner.alive || !owner.ready || owner.epoch != epoch) return const {'kind':'rejected','reason':'unavailable'};
+    if (generation == _requestGeneration) _followFacts();
+    return owner.alive && owner.ready && owner.epoch == epoch ? const {'kind':'dispatched'} : const {'kind':'rejected','reason':'unavailable'};
+  }
   Map<String, Object?> getSnapshot() { owner.ensureAlive(); return {'axes': axes.get(), 'scrolling': scrolling.get(), 'projection': projection.get(), 'horizontal': horizontal.snapshot(), 'vertical': vertical.snapshot(), 'endFollow': {'state': endFollow.state.get(), 'requestStatus': endFollow.requestStatus.get()}}; }
   Widget wrap(Widget root) {
     Widget result = root;
@@ -672,9 +687,10 @@ class NativeScroll {
     final policy = config['endFollow'];
     if (policy is Map<String, Object?> && policy['mode'] == 'while-at-end') {
       final control = _controller(policy['axis'] as String? ?? 'vertical');
-      WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !control.hasClients) return; if (following) control.jumpTo(control.position.maxScrollExtent); });
+      final epoch = owner.epoch;
+      WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !owner.ready || owner.epoch != epoch || !control.hasClients) return; if (following) control.jumpTo(control.position.maxScrollExtent); });
     }
-    result = NotificationListener<ScrollMetricsNotification>(onNotification: (event) { if (following) WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !owner.ready) return; final axis = config['endFollow']; if (axis is Map<String,Object?>) { final control = _controller(axis['axis'] as String? ?? 'vertical'); if (control.hasClients) control.jumpTo(control.position.maxScrollExtent); } }); _refresh(); return false; }, child: result);
+    result = NotificationListener<ScrollMetricsNotification>(onNotification: (event) { final epoch = owner.epoch; if (following) WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !owner.ready || owner.epoch != epoch || !following) return; final axis = config['endFollow']; if (axis is Map<String,Object?>) { final control = _controller(axis['axis'] as String? ?? 'vertical'); if (control.hasClients) control.jumpTo(control.position.maxScrollExtent); } }); _refresh(); return false; }, child: result);
     return NotificationListener<ScrollNotification>(onNotification: (event) { if (event is ScrollStartNotification) scrolling.publish(true); if (event is ScrollEndNotification) scrolling.publish(false); if (event is UserScrollNotification) following = event.metrics.pixels >= event.metrics.maxScrollExtent - 1; _refresh(); return false; }, child: result);
   }
   void mount() { if (!_mounted) { _mounted = true; final preference = config['requireProjection'] ?? config['projection']; projection.publish(preference == 'composed' ? 'composed' : 'system'); final policy = config['endFollow']; following = policy is Map<String,Object?> && policy['mode'] == 'while-at-end' && _controller(policy['axis'] as String).hasClients && _controller(policy['axis'] as String).position.extentAfter <= 1; } _refresh(); }

@@ -221,6 +221,7 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'scroll.configure',
   'scroll.bindComposedChrome',
   'scroll.request',
+  'scroll.pauseFollowing',
   'scroll.getSnapshot',
   'textControl.on',
   'textControl.sync',
