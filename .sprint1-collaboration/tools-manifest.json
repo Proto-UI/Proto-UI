@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint1.collaboration-carrier-tools",
+  "files": [
+    {
+      "path": "common.mjs",
+      "sha256": "ebabccb405a48b4a8ad8319d42de25db653de45b41790c9cd6071270d1ab3a7c"
+    },
+    {
+      "path": "preflight.mjs",
+      "sha256": "798132ff1983efb5f2267db7e801835f9c2943786c02c8abbd6209a11bcc0068"
+    },
+    {
+      "path": "helpers/collect-readonly.mjs",
+      "sha256": "7c753cdff1a0d4bb37c34def3411a9f1ce0dc8ab1b3e27f0e7e16acc7a0c45bf"
+    }
+  ]
+}
