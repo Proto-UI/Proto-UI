@@ -10,7 +10,7 @@ concurrency:
 jobs:
   readonly-preflight:
     if: github.repository == 'Proto-UI/Proto-UI' && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/evidence/sprint1-collaboration-preflight-e4f7fa8-20261122' && github.actor == 'cyjin-yl'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
