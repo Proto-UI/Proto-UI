@@ -1,5 +1,15 @@
-import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asAccessible, asCollection, asFocusRoving } from '@proto.ui/hooks';
+import {
+  defineAsHook,
+  definePrototype,
+  delay,
+  type DelayTask,
+  type DefHandle,
+  type RunHandle,
+} from '@proto.ui/core';
+import { asAccessible, asCollection, asFocusRoving, asControlLabel } from '@proto.ui/hooks';
+import { asOptionalFieldControl } from '../field/control-binding.proto';
+import { createChoiceFieldReport } from '../field/choice-report';
+import { FIELD_CONTEXT, FIELD_LABEL_PAIR } from '../field/shared';
 import {
   getRadioGroupItems,
   RADIO_GROUP_CONTEXT,
@@ -14,40 +24,36 @@ import type {
   RadioGroupRootProps,
 } from './types';
 
-function canonicalSelectedItem(
-  items: readonly RadioGroupItemSnapshot[],
-  value: string
-): RadioGroupItemSnapshot | null {
-  if (!value) return null;
-  return items.find((item) => item.value === value) ?? null;
+function selectedItem(items: readonly RadioGroupItemSnapshot[], value: string) {
+  return value ? (items.find((item) => item.value === value) ?? null) : null;
 }
-
-function resolveCurrentItemId(
-  items: readonly RadioGroupItemSnapshot[],
-  value: string,
-  currentItemId: string
-): string {
-  const current = items.find((item) => item.instanceId === currentItemId && !item.disabled);
-  if (current) return current.instanceId;
-  const selected = canonicalSelectedItem(items, value);
-  if (selected && !selected.disabled) return selected.instanceId;
-  return items.find((item) => !item.disabled)?.instanceId ?? '';
+function resolveCurrent(items: readonly RadioGroupItemSnapshot[], value: string, current: string) {
+  return (
+    items.find((item) => item.instanceId === current && !item.disabled)?.instanceId ??
+    items.find((item) => item.value === value && !item.disabled)?.instanceId ??
+    items.find((item) => !item.disabled)?.instanceId ??
+    ''
+  );
 }
-
-function sameContext(a: RadioGroupContextValue, b: RadioGroupContextValue): boolean {
+function sameContext(a: RadioGroupContextValue, b: RadioGroupContextValue) {
   return (
     a.value === b.value &&
     a.controlled === b.controlled &&
     a.disabled === b.disabled &&
+    a.readOnly === b.readOnly &&
     a.selectedItemId === b.selectedItemId &&
     a.currentItemId === b.currentItemId
   );
 }
-
-function setupRadioGroupRoot(def: DefHandle<RadioGroupRootProps, RadioGroupRootExposes>): void {
+export type RadioGroupRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
+/** The same Root owns selection and roving; explicit Field composition only reports it. */
+export function setupRadioGroupRoot(
+  def: DefHandle<RadioGroupRootProps, RadioGroupRootExposes>,
+  options: RadioGroupRootSetupOptions = {}
+): void {
+  const binding = options.fieldBinding ? asOptionalFieldControl() : null;
   const accessible = asAccessible();
   def.anatomy.claim(RADIO_GROUP_FAMILY, { role: 'root' });
-
   const collection = asCollection();
   collection.configure({ family: RADIO_GROUP_FAMILY, itemRole: 'item' });
   const focusRoving = asFocusRoving<RadioGroupRootProps>();
@@ -57,153 +63,255 @@ function setupRadioGroupRoot(def: DefHandle<RadioGroupRootProps, RadioGroupRootE
     loop: true,
     entry: 'selected',
   });
-
   def.props.define({
     value: { type: 'string', empty: 'fallback' },
     defaultValue: { type: 'string', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
+    readOnly: { type: 'boolean', empty: 'fallback' },
     a11yLabel: { type: 'string', empty: 'fallback' },
   });
-  def.props.setDefaults({ defaultValue: '', disabled: false, a11yLabel: '' });
-
-  const value = def.state.string('value', '');
-  const disabled = def.state.bool('disabled', false);
-  const a11yLabel = def.state.string('a11yLabel', '');
-
+  def.props.setDefaults({ defaultValue: '', disabled: false, readOnly: false, a11yLabel: '' });
+  const value = def.state.string('value', ''),
+    disabled = def.state.bool('disabled', false),
+    readOnly = def.state.bool('readOnly', false);
+  const focused = def.state.bool('focused', false),
+    a11yLabel = def.state.string('a11yLabel', '');
   def.expose.state('value', value);
   def.expose.state('disabled', disabled);
+  def.expose.state('readOnly', readOnly);
+  def.expose.state('focused', focused);
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.method('focusFirst', () => focusRoving.focusFirst());
   def.expose.method('focusLast', () => focusRoving.focusLast());
   def.expose.method('focusNext', () => focusRoving.focusNext());
   def.expose.method('focusPrev', () => focusRoving.focusPrev());
   def.expose.method('focusSelected', () => focusRoving.focusSelected());
-
+  def.expose.method('focusSelf', () => {
+    if (!disabled.get()) focusRoving.focusSelected();
+  });
   accessible.role('radiogroup');
   accessible.name(a11yLabel);
   accessible.state('disabled', disabled);
-
+  accessible.state('readOnly', readOnly);
   const initialContext: RadioGroupContextValue = {
     value: '',
     controlled: false,
     disabled: false,
+    readOnly: false,
     selectedItemId: '',
     currentItemId: '',
   };
   def.context.provide(RADIO_GROUP_CONTEXT, initialContext);
-
   let currentRun: RunHandle<RadioGroupRootProps> | null = null;
-  let contextSnapshot = initialContext;
-  let currentPreferenceId = '';
-
-  const publish = (run: RunHandle<RadioGroupRootProps>, preferredCurrentId?: string): void => {
+  let contextSnapshot = initialContext,
+    initialValue = '',
+    currentPreferenceId = '';
+  let requestedCurrentItemId: string | undefined;
+  let mounted = false,
+    viewEpoch = 0,
+    operationEpoch = 0;
+  let unregisterCoordinator: (() => void) | null = null;
+  let focusTask: DelayTask | null = null;
+  const live = (run: RunHandle<RadioGroupRootProps>, view: number, operation: number) =>
+    currentRun === run && viewEpoch === view && operationEpoch === operation;
+  const reportField = (reason: 'sync' | 'change' | 'blur' = 'sync') => {
+    if (binding && currentRun)
+      binding.report({ value: value.get(), focused: focused.get(), composing: false, reason });
+  };
+  const reports = createChoiceFieldReport(
+    () => !!binding && !!currentRun && mounted && !!currentRun.context.tryRead(FIELD_CONTEXT),
+    () => value.get(),
+    reportField
+  );
+  const publish = (run: RunHandle<RadioGroupRootProps>, preferred?: string) => {
+    if (currentRun !== run) return false;
+    const view = viewEpoch,
+      operation = operationEpoch;
     const items = getRadioGroupItems(run);
-    if (preferredCurrentId !== undefined) currentPreferenceId = preferredCurrentId;
-    if (!items.some((item) => item.instanceId === currentPreferenceId && !item.disabled)) {
+    if (!live(run, view, operation)) return false;
+    if (preferred !== undefined) currentPreferenceId = preferred;
+    if (!items.some((item) => item.instanceId === currentPreferenceId && !item.disabled))
       currentPreferenceId = '';
-    }
     const next: RadioGroupContextValue = {
       value: value.get(),
       controlled: run.props.isProvided('value'),
       disabled: disabled.get(),
-      selectedItemId: canonicalSelectedItem(items, value.get())?.instanceId ?? '',
-      currentItemId: resolveCurrentItemId(items, value.get(), currentPreferenceId),
+      readOnly: readOnly.get(),
+      selectedItemId: selectedItem(items, value.get())?.instanceId ?? '',
+      currentItemId: resolveCurrent(items, value.get(), currentPreferenceId),
     };
-    if (sameContext(contextSnapshot, next)) return;
-    contextSnapshot = next;
-    run.context.update(RADIO_GROUP_CONTEXT, next);
-  };
-
-  const submitValueRequest = (run: RunHandle<RadioGroupRootProps>, nextValue: string): boolean => {
-    if (disabled.get() || !nextValue || nextValue === value.get()) return false;
-    const matches = getRadioGroupItems(run).filter((item) => item.value === nextValue);
-    if (matches.length !== 1 || matches[0]?.disabled) return false;
-    const target = matches[0];
-    if (!run.props.isProvided('value')) {
-      value.set(nextValue, 'reason: radio group accepted uncontrolled value request');
+    if (!sameContext(contextSnapshot, next)) {
+      contextSnapshot = next;
+      run.context.update(RADIO_GROUP_CONTEXT, next);
     }
-    publish(run, target.instanceId);
+    return live(run, view, operation);
+  };
+  const sampleFocus = () => {
+    if (!mounted || !currentRun) return;
+    if (!binding) {
+      const current = currentRun;
+      const next = current.anatomy
+        .partsOf(RADIO_GROUP_FAMILY, 'item')
+        .some(
+          (part) => (part.getExpose('focused') as { get?(): boolean } | null)?.get?.() === true
+        );
+      if (currentRun === current) focused.set(next, 'reason: radio current owned focus');
+      return;
+    }
+    focusTask?.cancel();
+    const run = currentRun,
+      view = viewEpoch;
+    focusTask = delay(0, () => {
+      focusTask = null;
+      if (currentRun !== run || viewEpoch !== view) return;
+      const next = run.anatomy
+        .partsOf(RADIO_GROUP_FAMILY, 'item')
+        .some(
+          (part) => (part.getExpose('focused') as { get?(): boolean } | null)?.get?.() === true
+        );
+      const reason = focused.get() && !next ? 'blur' : 'sync';
+      const operation = operationEpoch;
+      focused.set(next, 'reason: radio group current owned focus');
+      if (live(run, view, operation)) reportField(reason);
+    });
+  };
+  if (binding)
+    asControlLabel().target((_run, request) => {
+      if (request.isCurrent() && currentRun && !disabled.get()) focusRoving.focusSelected();
+    }, FIELD_LABEL_PAIR);
+
+  const requestValue = (nextValue: string) => {
+    const run = currentRun;
+    if (!run || !mounted) return false;
+    const preferred = requestedCurrentItemId;
+    requestedCurrentItemId = undefined;
+    // Current-item focus remains independent of value policy, including readonly.
+    if (!publish(run, preferred)) return false;
+    sampleFocus();
+    if (
+      disabled.get() ||
+      readOnly.get() ||
+      typeof nextValue !== 'string' ||
+      !nextValue ||
+      nextValue === value.get()
+    )
+      return false;
+    const matches = getRadioGroupItems(run).filter((item) => item.value === nextValue);
+    if (matches.length !== 1 || matches[0].disabled) return false;
+    const view = viewEpoch,
+      operation = ++operationEpoch,
+      before = value.get();
+    if (!run.props.isProvided('value'))
+      value.set(nextValue, 'reason: radio accepted canonical value');
+    if (!live(run, view, operation) || !publish(run, matches[0].instanceId)) return false;
     run.expose.emit('valueChange', { value: nextValue });
+    if (!live(run, view, operation)) return false;
+    reportField();
+    if (!live(run, view, operation)) return false;
+    reports.schedule(before);
     return true;
   };
-
-  let requestedCurrentItemId: string | undefined;
-
-  const requestValue = (nextValue: string): boolean => {
-    if (!currentRun) return false;
-    const preferredCurrentId = requestedCurrentItemId;
-    requestedCurrentItemId = undefined;
-    publish(currentRun, preferredCurrentId);
-    return submitValueRequest(currentRun, nextValue);
-  };
   def.expose.method('requestValue', requestValue);
-
-  let unregisterCoordinator: (() => void) | null = null;
-
-  const registerCoordinator = (): void => {
+  const registerCoordinator = () => {
     unregisterCoordinator?.();
     unregisterCoordinator = registerRadioGroupCoordinator(value, {
-      setCurrent: (itemId) => {
-        requestedCurrentItemId = itemId;
+      setCurrent: (id) => {
+        requestedCurrentItemId = id;
       },
     });
   };
-
+  const syncPolicy = (run: RunHandle<RadioGroupRootProps>) => {
+    if (currentRun !== run) return;
+    const p = run.props.get();
+    const nextDisabled = binding ? binding.state.fieldDisabled.get() : !!p.disabled;
+    const nextReadOnly = binding ? binding.state.fieldReadOnly.get() : !!p.readOnly;
+    if (nextDisabled !== disabled.get() || nextReadOnly !== readOnly.get()) {
+      operationEpoch++;
+      reports.cancel();
+    }
+    const view = viewEpoch,
+      operation = operationEpoch;
+    disabled.set(nextDisabled, 'reason: radio effective disabled');
+    if (!live(run, view, operation)) return;
+    readOnly.set(nextReadOnly, 'reason: radio effective readonly');
+    if (!live(run, view, operation)) return;
+    a11yLabel.set(p.a11yLabel ?? '', 'reason: radio group accessible label');
+    if (live(run, view, operation) && publish(run)) reportField();
+  };
   def.lifecycle.onCreated((run) => {
     currentRun = run;
+    initialValue = run.props.isProvided('value')
+      ? (run.props.get().value ?? '')
+      : (run.props.get().defaultValue ?? '');
+    value.set(initialValue, 'reason: radio initial canonical value');
     registerCoordinator();
-    const controlled = run.props.isProvided('value');
-    value.set(
-      controlled ? (run.props.get().value ?? '') : (run.props.get().defaultValue ?? ''),
-      'reason: radio group initialize value'
-    );
-    disabled.set(!!run.props.get().disabled, 'reason: radio group initialize disabled');
-    a11yLabel.set(run.props.get().a11yLabel ?? '', 'reason: radio group initialize label');
-    publish(run);
+    syncPolicy(run);
   });
-
   def.lifecycle.onMounted((run) => {
     currentRun = run;
-    publish(run);
+    mounted = true;
+    registerCoordinator();
+    syncPolicy(run);
+    sampleFocus();
   });
-
   def.lifecycle.onUpdated((run) => {
-    currentRun = run;
-    publish(run);
+    if (currentRun === run) publish(run);
   });
-
-  def.lifecycle.onUnmounted(() => {
+  const retire = () => {
+    reports.cancel();
+    focusTask?.cancel();
+    focusTask = null;
+    operationEpoch++;
+    viewEpoch++;
+    mounted = false;
     currentRun = null;
+    requestedCurrentItemId = undefined;
     unregisterCoordinator?.();
     unregisterCoordinator = null;
+  };
+  def.lifecycle.onUnmounted(() => {
+    retire();
+    focused.set(false, 'reason: radio group view focus retired');
   });
-
-  def.anatomy.subscribeParts(RADIO_GROUP_FAMILY, 'item', (run) => publish(run));
-
-  def.context.subscribe(RADIO_GROUP_CONTEXT, (run, next) => {
-    currentRun = run;
-    contextSnapshot = next;
-  });
-
-  def.props.watch(['value', 'disabled', 'a11yLabel'], (run, next) => {
-    if (run.props.isProvided('value')) {
-      value.set(next.value ?? '', 'reason: radio group controlled value sync');
+  def.lifecycle.onBeforeDispose(retire);
+  def.anatomy.subscribeParts(RADIO_GROUP_FAMILY, 'item', (run) => {
+    if (currentRun === run) {
+      publish(run);
+      sampleFocus();
     }
-    disabled.set(!!next.disabled, 'reason: radio group disabled sync');
-    a11yLabel.set(next.a11yLabel ?? '', 'reason: radio group label sync');
-    publish(run);
+  });
+  def.props.watch(['value'], (run, next) => {
+    if (currentRun !== run) return;
+    const view = viewEpoch,
+      operation = operationEpoch;
+    if (run.props.isProvided('value'))
+      value.set(next.value ?? '', 'reason: radio controlled canonical value');
+    if (live(run, view, operation) && publish(run)) reportField();
+  });
+  def.props.watch(['disabled', 'readOnly', 'a11yLabel'], syncPolicy);
+  if (binding)
+    for (const state of [binding.state.fieldDisabled, binding.state.fieldReadOnly])
+      state.watch(() => {
+        if (currentRun) syncPolicy(currentRun);
+      });
+  def.expose.method('resetValue', () => {
+    const run = currentRun;
+    if (!run || !mounted) return false;
+    const view = viewEpoch,
+      operation = ++operationEpoch;
+    reports.cancel();
+    const controlled = run.props.isProvided('value');
+    if (!controlled) value.set(initialValue, 'reason: radio reset canonical value');
+    if (!live(run, view, operation) || !publish(run)) return true;
+    reportField();
+    if (live(run, view, operation) && controlled)
+      run.expose.emit('valueChange', { value: initialValue });
+    return true;
   });
 }
-
 export const asRadioGroupRoot = defineAsHook<
   RadioGroupRootProps,
   RadioGroupRootExposes,
   RadioGroupRootAsHookContract
 >({ name: 'as-radio-group-root', setup: setupRadioGroupRoot });
-
-const radioGroupRoot = definePrototype({
-  name: 'base-radio-group-root',
-  setup: setupRadioGroupRoot,
-});
-
-export default radioGroupRoot;
+export default definePrototype({ name: 'base-radio-group-root', setup: setupRadioGroupRoot });

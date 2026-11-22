@@ -42,7 +42,7 @@ implementations:
     required: true
     consumesCases: [T-TEXT-CONTROL-SELECTION-0001-CASE-OTP]
   - id: otp-native-selection
-    kind: browser-test
+    kind: adapter-test
     status: planned
     path: scripts/analysis/sprint2-input-browser.mjs
     required: true

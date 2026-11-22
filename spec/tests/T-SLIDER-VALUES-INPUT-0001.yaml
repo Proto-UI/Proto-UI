@@ -31,7 +31,7 @@ implementations:
         T-SLIDER-VALUES-INPUT-0001-CASE-FIELD,
       ]
   - id: slider-values-native-input
-    kind: browser-test
+    kind: adapter-test
     status: planned
     path: scripts/analysis/sprint2-input-browser.mjs
     required: true

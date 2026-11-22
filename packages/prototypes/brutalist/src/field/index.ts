@@ -24,3 +24,17 @@ export type {
   FieldTextareaProps,
   FieldTextareaExposes,
 } from '@proto.ui/prototypes-base/field';
+
+export { default as fieldCheckbox, default as brutalistFieldCheckbox } from './checkbox.proto';
+export type { BrutalistFieldCheckboxProps, BrutalistFieldCheckboxExposes } from './checkbox.proto';
+export {
+  default as fieldRadioGroup,
+  default as brutalistFieldRadioGroup,
+} from './radio-group.proto';
+export type {
+  BrutalistFieldRadioGroupProps,
+  BrutalistFieldRadioGroupExposes,
+} from './radio-group.proto';
+
+export { default as fieldSwitch, default as brutalistFieldSwitch } from './switch.proto';
+export type { BrutalistFieldSwitchProps, BrutalistFieldSwitchExposes } from './switch.proto';

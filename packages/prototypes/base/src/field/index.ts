@@ -28,3 +28,16 @@ export type {
   FieldSwitchExposes,
   FieldSwitchAsHookContract,
 } from './switch.proto';
+
+export { default as fieldCheckbox, asFieldCheckbox } from './checkbox.proto';
+export type {
+  FieldCheckboxProps,
+  FieldCheckboxExposes,
+  FieldCheckboxAsHookContract,
+} from './checkbox.proto';
+export { default as fieldRadioGroup, asFieldRadioGroup } from './radio-group.proto';
+export type {
+  FieldRadioGroupProps,
+  FieldRadioGroupExposes,
+  FieldRadioGroupAsHookContract,
+} from './radio-group.proto';

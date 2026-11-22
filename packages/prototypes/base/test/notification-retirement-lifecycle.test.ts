@@ -16,7 +16,16 @@ import {
   AS_TRIGGER_GET_PROTO_CAP,
 } from '@proto.ui/module-as-trigger';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
-import { fieldRoot, fieldControl, fieldTextarea, FIELD_CONTEXT } from '../src/field';
+import {
+  fieldRoot,
+  fieldControl,
+  fieldTextarea,
+  fieldCheckbox,
+  fieldRadioGroup,
+  FIELD_CONTEXT,
+} from '../src/field';
+import { radioGroupItem } from '../src/radio-group';
+import { formRoot, formField } from '../src/form';
 import { toggleGroupRoot, toggleGroupItem } from '../src/toggle-group';
 import { TOGGLE_GROUP_CONTEXT } from '../src/toggle-group/shared';
 import {
@@ -173,6 +182,90 @@ function runtimeHarness() {
     },
   };
 }
+
+for (const kind of ['checkbox', 'radio'] as const)
+  it.each(['reset', 'unmount', 'dispose', 'remount'] as const)(
+    `Field ${kind} retires an old choice proposal after callback %s`,
+    async (boundary) => {
+      const h = runtimeHarness();
+      const root = h.make(fieldRoot, null, {
+        validationMode: 'onChange',
+        externalValidation: true,
+      });
+      const control = h.make(
+        kind === 'checkbox' ? fieldCheckbox : fieldRadioGroup,
+        root.target,
+        kind === 'checkbox' ? { checked: false } : { value: 'a' }
+      );
+      const items =
+        kind === 'radio'
+          ? ['a', 'b'].map((value) => h.make(radioGroupItem, control.target, { value }))
+          : [];
+      const all = [root, control, ...items];
+      let retired = false;
+      const pending: Promise<void>[] = [];
+      const event = kind === 'checkbox' ? 'checkedChange' : 'valueChange';
+      try {
+        for (const item of all) await item.session.mount();
+        h.setActionCallback((name) => {
+          if (name !== event || retired) return;
+          retired = true;
+          if (boundary === 'reset') control.exposes.resetValue();
+          else {
+            pending.push(control.session[boundary === 'dispose' ? 'dispose' : 'unmount']());
+            if (boundary === 'remount') pending.push(control.session.mount());
+          }
+        });
+        const request = () =>
+          kind === 'checkbox'
+            ? control.target.dispatchEvent(new Event('press.commit'))
+            : control.exposes.requestValue('b');
+        expect(() => control.session.invokeInCallbackScope(request)).not.toThrow();
+        expect(retired).toBe(true);
+        await Promise.all(pending);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(h.actions.filter((name) => name === event)).toHaveLength(
+          boundary === 'reset' ? 2 : 1
+        );
+        expect(h.actions).not.toContain('validationRequest');
+        if (boundary === 'remount') {
+          expect(control.exposes.__fieldSnapshot()).toMatchObject({
+            active: true,
+            value: kind === 'checkbox' ? false : 'a',
+          });
+          h.setActionCallback(() => {});
+          expect(() => control.session.invokeInCallbackScope(request)).not.toThrow();
+          expect(h.actions.filter((name) => name === event)).toHaveLength(2);
+        }
+      } finally {
+        h.setActionCallback(() => {});
+        for (const item of all.reverse()) await item.session.dispose();
+      }
+    }
+  );
+
+it('Form reset stops the retired Field continuation after its controlled Checkbox callback disposes it', async () => {
+  const h = runtimeHarness();
+  const form = h.make(formRoot),
+    field = h.make(formField, form.target, { name: 'choice' });
+  const control = h.make(fieldCheckbox, field.target, { checked: false });
+  let retired: Promise<void> | undefined;
+  try {
+    for (const item of [form, field, control]) await item.session.mount();
+    h.setActionCallback((name) => {
+      if (name === 'checkedChange') retired = field.session.dispose();
+    });
+    expect(() =>
+      form.session.invokeInCallbackScope(() => form.exposes.requestReset())
+    ).not.toThrow();
+    expect(retired).toBeDefined();
+    await retired;
+    expect(form.exposes.getValues()).toEqual({});
+  } finally {
+    h.setActionCallback(() => {});
+    for (const item of [control, field, form]) await item.session.dispose();
+  }
+});
 
 it.each([fieldControl, fieldTextarea])(
   '$name reset stops after its controlled callback synchronously disposes the actual Runtime',

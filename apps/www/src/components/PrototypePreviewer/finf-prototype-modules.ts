@@ -456,6 +456,38 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/field');
     registerExactPrototype('shadcn-field-textarea', module.fieldTextarea);
   },
+  'base-field-switch': async () => {
+    const module = await import('@proto.ui/prototypes-base/field');
+    registerExactPrototype('base-field-switch', module.fieldSwitch);
+  },
+  'base-field-checkbox': async () => {
+    const module = await import('@proto.ui/prototypes-base/field');
+    registerExactPrototype('base-field-checkbox', module.fieldCheckbox);
+  },
+  'base-field-radio-group': async () => {
+    const module = await import('@proto.ui/prototypes-base/field');
+    registerExactPrototype('base-field-radio-group', module.fieldRadioGroup);
+  },
+  'shadcn-field-checkbox': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/field');
+    registerExactPrototype('shadcn-field-checkbox', module.fieldCheckbox);
+  },
+  'shadcn-field-radio-group': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/field');
+    registerExactPrototype('shadcn-field-radio-group', module.fieldRadioGroup);
+  },
+  'brutalist-field-checkbox': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/field');
+    registerExactPrototype('brutalist-field-checkbox', module.fieldCheckbox);
+  },
+  'brutalist-field-radio-group': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/field');
+    registerExactPrototype('brutalist-field-radio-group', module.fieldRadioGroup);
+  },
+  'brutalist-field-switch': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/field');
+    registerExactPrototype('brutalist-field-switch', module.fieldSwitch);
+  },
   'base-field-textarea': async () => {
     const module = await import('@proto.ui/prototypes-base/field');
     registerExactPrototype('base-field-textarea', module.fieldTextarea);
