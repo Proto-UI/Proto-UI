@@ -1,0 +1,69 @@
+{
+  "schema": "proto-ui.sprint2.original-consumer-regressions.v1",
+  "candidateHead": "1ce66958ceed249475b1d467a8295078fb6f345a",
+  "compilerInputsSameAs": "a165c4058188aa802b475d1d50ce46ab0d574320",
+  "lockSha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+  "node": "24.22.3",
+  "files": [
+    {
+      "path": "packages/compiler/test/native-support-plan.test.ts",
+      "sha256": "9b2ab77ab9e77f8edbd0bcaa0ef47b451f5579fd9cc95a0dac6da141776ca460",
+      "status": "PASS",
+      "passed": 25,
+      "skipped": 0,
+      "log": "logs/s2-linked-observable-definition.log.gz"
+    },
+    {
+      "path": "packages/compiler/test/observable-consumer.test.ts",
+      "sha256": "f7cb5e1a322b37d77e4a3947b0cf8966108c9f469887004b1151b396f649401c",
+      "status": "PASS",
+      "passed": 13,
+      "skipped": 0,
+      "log": "logs/s2-linked-observable-definition.log.gz"
+    },
+    {
+      "path": "packages/compiler/test/authored-transition-frontend.test.ts",
+      "sha256": "3a5f0208b15deabebe6d598dede43300be31f9c466e0a5269452178df0e1cb76",
+      "status": "PASS",
+      "passed": 4,
+      "skipped": 0,
+      "log": "logs/s2-linked-observable-definition.log.gz"
+    },
+    {
+      "path": "packages/compiler/test/artifact-linking-consumer.test.ts",
+      "sha256": "5ceee63ed26938aea84e888f62f7455f8329c5bf1c5fd88214199460fc7b5ed2",
+      "status": "PASS",
+      "passed": 12,
+      "skipped": 0,
+      "log": "logs/s2-artifact-linking-instrumented.log.gz"
+    },
+    {
+      "path": "packages/compiler/test/text-selection-consumer.test.ts",
+      "sha256": "a197f4a84327d01cce980c7a90fc316966d7a05ab515bada944f635f282fc4e4",
+      "status": "PASS",
+      "passed": 20,
+      "skipped": 0,
+      "log": "logs/s2-current-text-selection-20.log.gz"
+    }
+  ],
+  "originalFailedAttempts": [
+    {
+      "log": "logs/s2-linked-observable-definition.log.gz",
+      "status": "FAIL",
+      "result": "3 files PASS; total 50/54 recorded passes; artifact-linking worker exited unexpectedly before complete terminal collection",
+      "cause": "unknown; no original worker signal was captured"
+    },
+    {
+      "log": "logs/s2-artifact-linking-isolated.log.gz",
+      "status": "FAIL",
+      "result": "artifact-linking standalone 2/12 recorded passes; worker exited unexpectedly",
+      "cause": "unknown; no original worker signal was captured"
+    }
+  ],
+  "finalLinkingEnvironment": {
+    "additionalPreload": "tools/worker-observer.mjs.gz",
+    "purpose": "Observes child_process fork/spawn exit events only; no compiler/test/assertion changes",
+    "exitLog": "logs/s2-link-worker-exits.jsonl.gz",
+    "interpretation": "The successful run only records normal Vitest SIGTERM shutdown. It does not explain prior failures."
+  }
+}
