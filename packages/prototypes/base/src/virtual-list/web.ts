@@ -22,11 +22,10 @@ export function attachWebVirtualList(options: {
   const views = new Map<string, HTMLElement>(),
     measurements = new Map<string, number>(),
     measuredThisTurn = new Set<string>();
+  let observer: ResizeObserver | null = null;
+  let unsubscribe = () => {};
   const leading = content.ownerDocument.createElement('div'),
     trailing = content.ownerDocument.createElement('div');
-  leading.setAttribute('aria-hidden', 'true');
-  trailing.setAttribute('aria-hidden', 'true');
-  content.append(leading, trailing);
   const geometry = () => {
     const keys = collection.snapshot().keys,
       offsets = [0];
@@ -56,7 +55,7 @@ export function attachWebVirtualList(options: {
     refreshNow();
   };
   const refreshNow = () => {
-    if (disposed) return;
+    if (disposed || !lease.isCurrent()) return;
     if (refreshing) {
       queueRefresh();
       return;
@@ -64,10 +63,11 @@ export function attachWebVirtualList(options: {
     refreshing = true;
     const currentEpoch = epoch;
     const isCurrent = (request: WindowRequest) => {
+      // Root exposes are callback-scoped. Retirement revokes those callables,
+      // so test this host's lifetime before consulting the former owner.
+      if (disposed || currentEpoch !== epoch || !lease.isCurrent()) return false;
       const snapshot = collection.snapshot();
       return (
-        !disposed &&
-        currentEpoch === epoch &&
         snapshot.generation === request.generation &&
         snapshot.revision === request.revision &&
         snapshot.status === 'requesting'
@@ -96,8 +96,14 @@ export function attachWebVirtualList(options: {
         measurementsChanged = false,
         discoveredMeasurement = false;
       const abort = () => {
-        collection.reject(request);
-        if (projecting || !collection.snapshot().committed) clearMaterialization();
+        if (!disposed && lease.isCurrent()) {
+          collection.reject(request);
+          if (projecting || !collection.snapshot().committed) clearMaterialization();
+        } else {
+          // A render callback can dispose the actual Root synchronously. Only
+          // physical resources owned by this host remain legal to clean here.
+          clearMaterialization();
+        }
         for (const node of created) if (![...views.values()].includes(node)) node.remove();
       };
       try {
@@ -180,29 +186,58 @@ export function attachWebVirtualList(options: {
       refreshing = false;
     }
   };
-  const observer =
-    typeof ResizeObserver === 'undefined'
-      ? null
-      : new ResizeObserver(() => {
-          if (!disposed) refresh();
-        });
-  observer?.observe(viewport);
-  viewport.addEventListener('scroll', refresh, { passive: true });
-  const unsubscribe = collection.subscribe(() => {
+  const retire = () => {
+    if (disposed) return;
+    disposed = true;
     epoch++;
+    unsubscribe();
+    observer?.disconnect();
+    viewport.removeEventListener('scroll', refresh);
+    clearMaterialization();
+    measurements.clear();
     measuredThisTurn.clear();
-    // setItems/configure/invalidate have revoked the old model commitment.
-    // Revoke its physical views even if the next proposal is unavailable.
-    if (!collection.snapshot().committed) clearMaterialization();
-    const set = new Set(collection.snapshot().keys);
-    for (const key of measurements.keys()) if (!set.has(key)) measurements.delete(key);
-    refresh();
-  });
-  refresh();
+    leading.remove();
+    trailing.remove();
+  };
+  const lease = collection.acquireMaterializer(retire);
+  try {
+    leading.setAttribute('aria-hidden', 'true');
+    trailing.setAttribute('aria-hidden', 'true');
+    content.append(leading, trailing);
+    observer =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => {
+            if (!disposed) refresh();
+          });
+    // Host construction/observation may synchronously retire this owner. Do not
+    // install subscriptions after that retirement, even during initial attach.
+    if (disposed) observer?.disconnect();
+    else observer?.observe(viewport);
+    if (!disposed) {
+      viewport.addEventListener('scroll', refresh, { passive: true });
+      unsubscribe = collection.subscribe(() => {
+        if (disposed || !lease.isCurrent()) return;
+        epoch++;
+        measuredThisTurn.clear();
+        // setItems/configure/invalidate have revoked the old model commitment.
+        // Revoke its physical views even if the next proposal is unavailable.
+        if (!collection.snapshot().committed) clearMaterialization();
+        const set = new Set(collection.snapshot().keys);
+        for (const key of measurements.keys()) if (!set.has(key)) measurements.delete(key);
+        refresh();
+      });
+      if (disposed) unsubscribe();
+      else refresh();
+    }
+  } catch (error) {
+    if (!disposed) lease.release();
+    throw error;
+  }
   return {
     refresh,
     ensureVisible(key, align = 'nearest') {
-      if (disposed) return false;
+      if (disposed || !lease.isCurrent()) return false;
       const { keys, offsets } = geometry(),
         index = keys.indexOf(key);
       if (index < 0) return false;
@@ -215,19 +250,13 @@ export function attachWebVirtualList(options: {
       else if (start < viewport.scrollTop) viewport.scrollTop = start;
       else if (end > viewport.scrollTop + height) viewport.scrollTop = end - height;
       refresh();
+      if (disposed || !lease.isCurrent()) return false;
       return collection.snapshot().materializedKeys.includes(key);
     },
     dispose() {
-      if (disposed) return;
-      disposed = true;
-      epoch++;
-      unsubscribe();
-      observer?.disconnect();
-      viewport.removeEventListener('scroll', refresh);
-      clearMaterialization();
-      leading.remove();
-      trailing.remove();
-      collection.invalidate();
+      // A Root expose wraps the lease in its callback scope. Retirement may
+      // precede this host cleanup, so do not re-enter a terminally disposed Root.
+      if (!disposed) lease.release();
     },
   };
 }

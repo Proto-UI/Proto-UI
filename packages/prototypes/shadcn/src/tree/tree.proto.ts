@@ -200,7 +200,17 @@ export const treeGroup = definePrototype<ShadcnTreeGroupProps, TreeGroupExposes>
   modules: asTreeGroup.modules,
   setup(def) {
     const behavior = asTreeGroup();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1 pl-4'));
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-tree] Group state unavailable.');
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1'));
+    def.rule({
+      when: (w) => w.state(state.direction).eq('ltr'),
+      intent: (i) => i.feedback.style.use(tw('pl-4')),
+    });
+    def.rule({
+      when: (w) => w.state(state.direction).eq('rtl'),
+      intent: (i) => i.feedback.style.use(tw('pr-4')),
+    });
     return behavior.render;
   },
 });
