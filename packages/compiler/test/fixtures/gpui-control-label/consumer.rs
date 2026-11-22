@@ -12,12 +12,14 @@ impl Render for NativeChild {fn render(&mut self,_:&mut Window,_:&mut Context<Se
 
 struct Harness {
     button:Entity<button::CompiledComponent>, label:Entity<label::CompiledComponent>,
-    reference:ControlLabelRef, extra:Vec<Entity<button::CompiledComponent>>, show_label:bool,
+    reference:ControlLabelRef, extra:Vec<Entity<button::CompiledComponent>>, show_label:bool, repeat_label:bool, repeat_target:bool,
 }
 impl Render for Harness {
     fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
         let labels=self.show_label.then(||self.label.clone());
         gpui::div().flex().flex_col().size_full().children(labels).child(self.button.clone()).children(self.extra.clone())
+            .when(self.repeat_label,|view|view.child(gpui::div().id("second-label-parent").child(self.label.clone())))
+            .when(self.repeat_target,|view|view.child(gpui::div().id("second-target-parent").child(self.button.clone())))
     }
 }
 fn associations(reference:&ControlLabelRef)->NativeInstanceAssociations {NativeInstanceAssociations{control_label:Some(reference.clone())}}
@@ -32,7 +34,7 @@ fn open(cx:&mut TestAppContext,reference:Option<ControlLabelRef>)->WindowHandle<
             let mut component=label::CompiledComponent::new_with_associations(json!({}),None,associations(&reference),window,cx).unwrap_or_else(|_|panic!("official Label construction"));
             component.set_slot(vec![NativeSnapshot::text_value(Value::string("Visible caption"))],cx).unwrap_or_else(|_|panic!("Label slot"));component
         });
-        Harness{button,label,reference,extra:Vec::new(),show_label:true}
+        Harness{button,label,reference,extra:Vec::new(),show_label:true,repeat_label:false,repeat_target:false}
     })
 }
 fn frames(cx:&mut VisualTestContext){for _ in 0..3{cx.update(|window,cx|{window.refresh();window.draw(cx).clear(cx);});cx.run_until_parked();}}
@@ -168,9 +170,57 @@ fn an_authored_input_capture_keeps_its_scalar_empty_renderer_and_native_editor(c
     let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);frames(&mut visual);
     window.update(&mut visual,|host,window,cx|{
         let handle=host.input.read(cx).handle();assert!(ready(&handle.owner));
+        assert_eq!(handle.call("sameRun",vec![],window,cx).unwrap_or_else(|_|panic!("handle identity")),json!(true));
         assert_eq!(handle.state("value").unwrap_or_else(|_|panic!("value")),json!("initial"));
         assert_eq!(handle.call("resetValue",vec![json!("new 😀")],window,cx).unwrap_or_else(|_|panic!("reset")),json!(true));
         assert_eq!(handle.state("value").unwrap_or_else(|_|panic!("reset value")),json!("new 😀"));
         assert!(handle.take_failures().is_empty());
     }).unwrap();frames(&mut visual);
+}
+
+
+#[gpui::test]
+fn one_logical_participant_with_two_physical_views_cannot_name_or_activate(cx:&mut TestAppContext){
+    for target_duplicate in [false,true]{
+        let window=open(cx,None);let mut visual=VisualTestContext::from_window(AnyWindowHandle::from(window),cx);frames(&mut visual);
+        let initial=window.update(&mut visual,|host,_,cx|host.label.read(cx).owner.borrow().bounds.expect("unique label").center()).unwrap();
+        visual.simulate_click(initial,Modifiers::default());
+        window.update(&mut visual,|host,_,cx|{
+            assert_eq!(events(host,cx),click_signal());
+            if target_duplicate{host.repeat_target=true;}else{host.repeat_label=true;}cx.notify();
+        }).unwrap();frames(&mut visual);
+        let duplicate_position=window.update(&mut visual,|host,window,cx|{
+            let label=host.label.read(cx).owner.clone();let button=host.button.read(cx).owner.clone();
+            let duplicated=if target_duplicate{button.clone()}else{label.clone()};
+            assert_eq!(duplicated.borrow().modules.a11y_bindings,2,"one actual Entity is laid out through two different native parents");
+            assert!(control_label_diagnostic(&label).is_some(),"ambiguous physical binding has a diagnostic");
+            assert!(!control_label_action_available(&label));
+            assert!(projected(&button).labelled_by().is_empty(),"naming may not choose either native occurrence");
+            assert!(!control_label_accessibility_action(&label,window,cx),"direct assistive input also requires a unique current view");
+            assert!(events(host,cx).is_empty());
+            let position=label.borrow().bounds.expect("last laid-out label").center();position
+        }).unwrap();
+        visual.simulate_click(initial,Modifiers::default());
+        visual.simulate_click(duplicate_position,Modifiers::default());
+        window.update(&mut visual,|host,_,cx|{
+            assert!(events(host,cx).is_empty(),"neither physical occurrence is elected as the pointer owner");
+            host.repeat_target=false;host.repeat_label=false;cx.notify();
+        }).unwrap();frames(&mut visual);
+        window.update(&mut visual,|host,window,cx|{
+            let label=host.label.read(cx).owner.clone();let button=host.button.read(cx).owner.clone();
+            assert_eq!(label.borrow().modules.a11y_bindings,1);assert_eq!(button.borrow().modules.a11y_bindings,1);
+            assert_eq!(control_label_diagnostic(&label),None);
+            assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(events(host,cx),click_signal());
+        }).unwrap();
+        let position=window.update(&mut visual,|host,_,cx|host.label.read(cx).owner.borrow().bounds.unwrap().center()).unwrap();
+        visual.simulate_mouse_down(position,MouseButton::Left,Modifiers::default());
+        window.update(&mut visual,|host,_,cx|{
+            if target_duplicate{host.repeat_target=true;}else{host.repeat_label=true;}cx.notify();
+        }).unwrap();frames(&mut visual);
+        window.update(&mut visual,|host,_,cx|{host.repeat_target=false;host.repeat_label=false;cx.notify();}).unwrap();frames(&mut visual);
+        visual.simulate_mouse_up(position,MouseButton::Left,Modifiers::default());
+        window.update(&mut visual,|host,_,cx|assert!(events(host,cx).is_empty(),"an old pointer request cannot revive after an ambiguous frame is removed")).unwrap();
+        visual.simulate_click(position,Modifiers::default());
+        window.update(&mut visual,|host,_,cx|{assert_eq!(events(host,cx),click_signal());assert!(host.label.read(cx).handle().take_failures().is_empty());}).unwrap();
+    }
 }

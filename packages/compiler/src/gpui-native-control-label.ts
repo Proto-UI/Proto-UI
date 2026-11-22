@@ -14,7 +14,7 @@ impl Drop for ControlLabelBinding {fn drop(&mut self){self.reference.0.borrow_mu
 #[derive(Default)]
 pub struct ControlLabelModule {
     kind:Option<&'static str>,callback:Value,binding:Option<ControlLabelBinding>,notify:Option<Rc<dyn Fn()>>,
-    naming:bool,activation:bool,view:Option<(u64,gpui::WindowId)>,pointer:Option<ControlLabelPointer>,
+    naming:bool,activation:bool,view:Option<(u64,gpui::WindowId,Option<gpui::accesskit::NodeId>)>,pointer:Option<ControlLabelPointer>,
 }
 #[derive(Clone)]
 struct ControlLabelPointer {pair:ControlLabelPair,origin:gpui::Point<Pixels>}
@@ -62,8 +62,13 @@ pub fn control_label_sync(owner:&OwnerWeak,options:Value)->Value{
     if let Some(reference)=reference{control_label_changed(&reference);}Value::Undefined
 }
 pub fn control_label_commit(owner:&OwnerRef){
-    let view={let o=owner.borrow();if !ready(owner){None}else{o.window_id.map(|window|(o.epoch,window))}};
-    let reference={let mut o=owner.borrow_mut();let module=&mut o.modules.control_label;if module.view==view{return}module.view=view;module.binding.as_ref().map(|binding|binding.reference.clone())};
+    // A logical participant may be painted through more than one native
+    // parent. Keep an exact unique-node receipt, without treating each layout
+    // frame as a new lease. Ambiguity and replacement retire pending input;
+    // a stable ambiguous tree must not schedule an endless redraw loop.
+    let view={let o=owner.borrow();if !ready(owner){None}else{o.window_id.map(|window|
+        (o.epoch,window,if o.modules.a11y_frame!=0&&o.modules.a11y_bindings==1{o.modules.a11y_node}else{None}))}};
+    let reference={let mut o=owner.borrow_mut();let module=&mut o.modules.control_label;if module.view==view{return}module.view=view;module.pointer=None;module.binding.as_ref().map(|binding|binding.reference.clone())};
     if let Some(reference)=reference{control_label_changed(&reference);}
 }
 pub fn control_label_detach(owner:&OwnerRef){
@@ -84,7 +89,10 @@ fn control_label_pair(owner:&OwnerRef,frame:Option<u64>)->Result<ControlLabelPai
     if labels.len()!=1||targets.len()!=1{return Err("missing-binding")}
     let label=labels.remove(0);let target=targets.remove(0);let l=label.borrow();let t=target.borrow();
     if l.window_id.is_none()||l.window_id!=t.window_id{return Err("foreign-tree-scope")}
-    if let Some(frame)=frame{if l.modules.a11y_frame!=frame||t.modules.a11y_frame!=frame||l.modules.a11y_bindings!=1||t.modules.a11y_bindings!=1{return Err("missing-view")}}
+    if l.modules.a11y_bindings>1||t.modules.a11y_bindings>1{return Err("ambiguous-view")}
+    let frame=frame.unwrap_or(l.modules.a11y_frame);
+    if frame==0||l.modules.a11y_frame!=frame||t.modules.a11y_frame!=frame||l.modules.a11y_bindings!=1||t.modules.a11y_bindings!=1
+        ||l.modules.a11y_node.is_none()||t.modules.a11y_node.is_none(){return Err("missing-view")}
     Ok(ControlLabelPair{reference,revision,label:Rc::downgrade(&label),target:Rc::downgrade(&target),label_epoch:l.epoch,target_epoch:t.epoch})
 }
 fn control_label_name_conflict(target:&OwnerRef)->bool{
@@ -150,7 +158,9 @@ mod control_label_lease_tests {
         let weak=Rc::downgrade(&owner);control_label_declare(&weak,kind,callback);
         control_label_sync(&weak,record(vec![("naming",Value::boolean(true)),("activation",Value::boolean(true))]));
         set_instance_associations(&owner,NativeInstanceAssociations{control_label:Some(reference.clone())});Owner::finish(&owner,Value::Undefined);
-        {let mut o=owner.borrow_mut();o.window_id=Some(window.window_handle().window_id());o.mounted=true;o.bounds=Some(Bounds::default());o.epoch=1;}
+        {let mut o=owner.borrow_mut();o.window_id=Some(window.window_handle().window_id());o.mounted=true;o.bounds=Some(Bounds::default());o.epoch=1;
+            o.modules.a11y_frame=1;o.modules.a11y_bindings=1;o.modules.a11y_node=Some(gpui::accesskit::NodeId(if kind=="label"{1}else{2}));}
+        control_label_commit(&owner);
         owner
     }
     #[gpui::test]
@@ -172,7 +182,9 @@ mod control_label_lease_tests {
             assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(calls.get(),1);
             assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(calls.get(),2);
             let stale=control_label_pair(&label,None).unwrap();detach_native_view(&target);assert!(!stale.current());
-            {let mut o=target.borrow_mut();o.mounted=true;o.bounds=Some(Bounds::default());o.epoch+=1;}
+            {let mut o=target.borrow_mut();o.mounted=true;o.bounds=Some(Bounds::default());o.epoch+=1;
+                o.modules.a11y_frame=1;o.modules.a11y_bindings=1;o.modules.a11y_node=Some(gpui::accesskit::NodeId(2));}
+            control_label_commit(&target);
             assert!(!stale.current());assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(calls.get(),3);
             Owner::dispose(&label);Owner::dispose(&target);
         }).unwrap();
@@ -187,6 +199,34 @@ mod control_label_lease_tests {
             assert_eq!(control_label_diagnostic(&label),Some("name-conflict"));assert!(control_label_accessibility_action(&label,window,cx));assert_eq!(calls.get(),1);
             set_instance_associations(&target,NativeInstanceAssociations::default());assert_eq!(target.borrow().modules.accessible_text["name"].text(),"Consumer name");
             assert!(!control_label_accessibility_action(&label,window,cx));Owner::dispose(&label);Owner::dispose(&target);
+        }).unwrap();
+    }
+    #[gpui::test]
+    fn pending_requests_cannot_revive_after_unique_node_replacement_or_physical_ambiguity(cx:&mut TestAppContext){
+        let window=cx.update(|cx|cx.open_window(Default::default(),|_,cx|cx.new(|_|Empty)).unwrap());
+        window.update(cx,|_,window,cx|{
+            let reference=ControlLabelRef::new();let label=owner(window,"label",&reference,Value::Undefined);
+            let retained=Rc::new(RefCell::new(Value::Undefined));let captured=retained.clone();
+            let target=owner(window,"target",&reference,Value::Function(Rc::new(move|arguments|{
+                *captured.borrow_mut()=arguments[1].clone();Value::Undefined
+            })));
+            assert!(control_label_accessibility_action(&label,window,cx));let original=retained.borrow().clone();
+            assert!(control_label_request_current(original.clone()).bool());
+            target.borrow_mut().modules.a11y_node=Some(gpui::accesskit::NodeId(3));control_label_commit(&target);
+            assert!(!control_label_request_current(original.clone()).bool(),"a new physical node is a new view lease even if its owner and window stay the same");
+            assert!(control_label_accessibility_action(&label,window,cx));let replaced=retained.borrow().clone();
+            target.borrow_mut().modules.a11y_node=Some(gpui::accesskit::NodeId(2));control_label_commit(&target);
+            assert!(!control_label_request_current(original).bool());assert!(!control_label_request_current(replaced).bool());
+            assert!(control_label_accessibility_action(&label,window,cx));let unique=retained.borrow().clone();
+            target.borrow_mut().modules.a11y_bindings=2;control_label_commit(&target);
+            assert_eq!(control_label_diagnostic(&label),Some("ambiguous-view"));
+            assert!(!control_label_accessibility_action(&label,window,cx));assert!(!control_label_request_current(unique.clone()).bool());
+            let ambiguous_revision=reference.0.borrow().revision;control_label_commit(&target);
+            assert_eq!(reference.0.borrow().revision,ambiguous_revision,"stable ambiguity does not repeatedly notify or invalidate");
+            target.borrow_mut().modules.a11y_bindings=1;control_label_commit(&target);
+            assert!(!control_label_request_current(unique).bool());
+            assert!(control_label_accessibility_action(&label,window,cx));assert!(control_label_request_current(retained.borrow().clone()).bool());
+            Owner::dispose(&label);Owner::dispose(&target);
         }).unwrap();
     }
     #[test]

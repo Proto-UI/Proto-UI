@@ -78,7 +78,7 @@ pub fn authored_hook(owner:&OwnerWeak,name:&str,mode:&'static str,input:Value,in
     {let mut owner=owner_ref.borrow_mut();if mode!="multiple"{owner.authored.entries.insert(name.into(),entry.clone());}
      owner.authored.frames.push(AuthoredFrame{id:order,names:BTreeSet::new(),states:BTreeMap::new(),methods:BTreeMap::new(),children:Vec::new()});}
     let mut guard=CaptureGuard{owner:owner.clone(),open:true};
-    let render=install.call_authored(vec![capability(owner),input.clone(),api.clone()]);
+    let render=install.call_authored(vec![definition_capability(owner),input.clone(),api.clone()]);
     let frame=owner_ref.borrow_mut().authored.frames.pop().expect("capture frame");guard.open=false;
     let result=finish_capture(frame,render);
     // Capture succeeded even if projection subsequently throws. Preserve that
