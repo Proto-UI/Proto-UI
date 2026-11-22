@@ -8,11 +8,12 @@ import {
   openSync,
   readFileSync,
   readlinkSync,
+  realpathSync,
   readdirSync,
   renameSync,
   writeFileSync,
 } from 'node:fs';
-import { isAbsolute, join, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
@@ -58,6 +59,7 @@ export function captureRehearsalSource(rootDir) {
   return {
     revision: git(rootDir, ['rev-parse', 'HEAD']).trim(),
     committedTree: git(rootDir, ['rev-parse', 'HEAD^{tree}']).trim(),
+    indexSha256: sha256(git(rootDir, ['ls-files', '--stage', '-z'])),
     clean: status === '',
     worktreeStatus: status,
     sourceFiles: paths.length,
@@ -75,10 +77,37 @@ function saveReceipt(artifactDir, receipt) {
   renameSync(temporary, destination);
 }
 
+// Resolve existing ancestors as well: an outside symlink must not put evidence
+// in the checkout, even when its final destination does not exist yet.
+function canonicalPath(path) {
+  let ancestor = resolve(path);
+  const remaining = [];
+  while (!lstatSync(ancestor, { throwIfNoEntry: false })) {
+    remaining.unshift(basename(ancestor));
+    ancestor = dirname(ancestor);
+  }
+  return resolve(realpathSync(ancestor), ...remaining);
+}
+
+function sameSource(expected, actual) {
+  return (
+    expected.revision === actual.revision &&
+    expected.committedTree === actual.committedTree &&
+    expected.indexSha256 === actual.indexSha256 &&
+    expected.sourceSha256 === actual.sourceSha256 &&
+    expected.worktreeStatus === actual.worktreeStatus
+  );
+}
+
+const errorRecord = (error) => ({
+  code: error.code ?? null,
+  message: String(error.message ?? error),
+});
+
 /** All original gates remain mandatory. Failure stops execution and retains not-run rows. */
 export function runRehearsal({ rootDir, artifactDir, steps, packageManager, stepTimeoutMs = 0 }) {
-  const resolvedRoot = resolve(rootDir);
-  const resolvedArtifacts = resolve(artifactDir);
+  const resolvedRoot = canonicalPath(rootDir);
+  const resolvedArtifacts = canonicalPath(artifactDir);
   const child = relative(resolvedRoot, resolvedArtifacts);
   if (
     child === '' ||
@@ -90,7 +119,6 @@ export function runRehearsal({ rootDir, artifactDir, steps, packageManager, step
     throw new Error('Rehearsal artifact directory must be empty; preserve earlier receipts.');
   }
   mkdirSync(resolvedArtifacts, { recursive: true });
-  const source = captureRehearsalSource(resolvedRoot);
   const receipt = {
     schemaVersion: 1,
     kind: 'proto-ui.release-rehearsal',
@@ -98,7 +126,7 @@ export function runRehearsal({ rootDir, artifactDir, steps, packageManager, step
     startedAt: new Date().toISOString(),
     finishedAt: null,
     status: 'running',
-    source,
+    source: null,
     sourceAfter: null,
     sourceUnchanged: null,
     qualifiesAsFrozenCandidate: false,
@@ -122,10 +150,23 @@ export function runRehearsal({ rootDir, artifactDir, steps, packageManager, step
       error: null,
       log: null,
       logSha256: null,
+      sourceBefore: null,
+      sourceAfter: null,
+      sourceUnchanged: null,
+      artifactErrors: [],
     })),
   };
   saveReceipt(resolvedArtifacts, receipt);
   let failure = null;
+  let sourceDrifted = false;
+  try {
+    receipt.source = captureRehearsalSource(resolvedRoot);
+  } catch (error) {
+    failure = 'source binding';
+    sourceDrifted = true;
+    receipt.sourceError = String(error.message ?? error);
+  }
+  saveReceipt(resolvedArtifacts, receipt);
   for (const step of receipt.steps) {
     if (failure) {
       step.reason = `Blocked by ${failure}.`;
@@ -137,9 +178,16 @@ export function runRehearsal({ rootDir, artifactDir, steps, packageManager, step
     step.log = `${step.id}.log`;
     saveReceipt(resolvedArtifacts, receipt);
     console.log(`[release rehearsal] ${step.label} (log: ${join(resolvedArtifacts, step.log)})`);
-    const fd = openSync(join(resolvedArtifacts, step.log), 'wx');
-    let result;
+    let fd;
+    let logOwned = false;
+    let result = { status: null, signal: null, error: null };
     try {
+      step.sourceBefore = captureRehearsalSource(resolvedRoot);
+      if (!sameSource(receipt.source, step.sourceBefore)) {
+        throw new Error('Source changed before this required step; command was not run.');
+      }
+      fd = openSync(join(resolvedArtifacts, step.log), 'wx');
+      logOwned = true;
       result = spawnSync(step.command, step.args, {
         cwd: resolvedRoot,
         env: process.env,
@@ -150,16 +198,46 @@ export function runRehearsal({ rootDir, artifactDir, steps, packageManager, step
     } catch (error) {
       result = { status: null, signal: null, error };
     } finally {
-      closeSync(fd);
+      if (fd !== undefined) {
+        try {
+          closeSync(fd);
+        } catch (error) {
+          step.artifactErrors.push(errorRecord(error));
+        }
+      }
     }
     step.finishedAt = new Date().toISOString();
     step.exitCode = result.status;
     step.signal = result.signal;
-    step.error = result.error
-      ? { code: result.error.code ?? null, message: result.error.message }
-      : null;
-    step.logSha256 = sha256(readFileSync(join(resolvedArtifacts, step.log)));
-    step.status = !result.error && result.status === 0 && !result.signal ? 'passed' : 'failed';
+    step.error = result.error ? errorRecord(result.error) : null;
+    // Never digest a pre-existing collision as if it were this process's log.
+    if (logOwned) {
+      try {
+        step.logSha256 = sha256(readFileSync(join(resolvedArtifacts, step.log)));
+      } catch (error) {
+        step.artifactErrors.push(errorRecord(error));
+      }
+    }
+    try {
+      step.sourceAfter = captureRehearsalSource(resolvedRoot);
+      step.sourceUnchanged =
+        step.sourceBefore !== null &&
+        sameSource(receipt.source, step.sourceBefore) &&
+        sameSource(receipt.source, step.sourceAfter);
+    } catch (error) {
+      step.sourceUnchanged = false;
+      step.sourceError = String(error.message ?? error);
+    }
+    sourceDrifted ||= !step.sourceUnchanged;
+    step.status =
+      !result.error &&
+      result.status === 0 &&
+      !result.signal &&
+      step.artifactErrors.length === 0 &&
+      step.sourceUnchanged
+        ? 'passed'
+        : 'failed';
+    if (!step.sourceUnchanged) step.reason = 'Source drift invalidates this required step.';
     if (step.status === 'failed') failure = step.id;
     saveReceipt(resolvedArtifacts, receipt);
     console.log(`[release rehearsal] ${step.label}: ${step.status}`);
@@ -167,15 +245,15 @@ export function runRehearsal({ rootDir, artifactDir, steps, packageManager, step
   try {
     receipt.sourceAfter = captureRehearsalSource(resolvedRoot);
     receipt.sourceUnchanged =
-      receipt.sourceAfter.revision === source.revision &&
-      receipt.sourceAfter.sourceSha256 === source.sourceSha256;
+      !sourceDrifted && receipt.source !== null && sameSource(receipt.source, receipt.sourceAfter);
   } catch (error) {
     receipt.sourceUnchanged = false;
     receipt.sourceError = String(error.message ?? error);
   }
   receipt.finishedAt = new Date().toISOString();
   receipt.status = !failure && receipt.sourceUnchanged ? 'passed' : 'failed';
-  receipt.qualifiesAsFrozenCandidate = receipt.status === 'passed' && source.clean;
+  receipt.qualifiesAsFrozenCandidate =
+    receipt.status === 'passed' && receipt.source.clean && receipt.sourceAfter.clean;
   saveReceipt(resolvedArtifacts, receipt);
   console.log(`[release rehearsal] ${receipt.status}; evidence retained at ${resolvedArtifacts}`);
   return receipt;

@@ -118,7 +118,8 @@ test('source changed by a successful command invalidates the complete run', (t) 
     ...f,
     steps: [step('mutate', 'require("fs").writeFileSync("VERSION", "0.0.0\\n ")')],
   });
-  assert.equal(receipt.steps[0].status, 'passed');
+  assert.equal(receipt.steps[0].status, 'failed');
+  assert.equal(receipt.steps[0].exitCode, 0);
   assert.equal(receipt.sourceUnchanged, false);
   assert.notEqual(receipt.sourceAfter.sourceSha256, receipt.source.sourceSha256);
   assert.equal(receipt.status, 'failed');
@@ -160,3 +161,109 @@ test(
     assert.notEqual(captureRehearsalSource(f.rootDir).sourceSha256, first.sourceSha256);
   }
 );
+
+test('one step cannot change source for a later step to restore and certify', (t) => {
+  const f = fixture(t);
+  const receipt = runRehearsal({
+    ...f,
+    steps: [
+      step('change source', 'require("fs").writeFileSync("VERSION", "0.0.0\\n ")'),
+      step(
+        'check changed source and restore',
+        'require("fs").writeFileSync("VERSION", "0.0.0\\n")'
+      ),
+    ],
+  });
+  assert.equal(receipt.status, 'failed');
+  assert.equal(receipt.qualifiesAsFrozenCandidate, false);
+  assert.equal(receipt.steps[0].sourceUnchanged, false);
+  assert.equal(receipt.steps[1].status, 'not-run');
+  assert.equal(readFileSync(join(f.rootDir, 'VERSION'), 'utf8'), '0.0.0\n ');
+});
+
+test('changing only the index invalidates a clean frozen candidate', (t) => {
+  const f = fixture(t);
+  const receipt = runRehearsal({
+    ...f,
+    steps: [['untrack version', 'git', ['rm', '--cached', 'VERSION']]],
+  });
+  assert.equal(receipt.source.sourceSha256, receipt.sourceAfter.sourceSha256);
+  assert.notEqual(receipt.source.indexSha256, receipt.sourceAfter.indexSha256);
+  assert.equal(receipt.sourceAfter.clean, false);
+  assert.equal(receipt.status, 'failed');
+  assert.equal(receipt.qualifiesAsFrozenCandidate, false);
+});
+
+test(
+  'outside symlinks cannot store evidence inside the checkout',
+  { skip: process.platform === 'win32' },
+  (t) => {
+    const f = fixture(t);
+    const inside = join(f.rootDir, '.git', 'ignored-evidence');
+    mkdirSync(inside);
+    const outside = f.artifactDir + '-symlink';
+    symlinkSync(inside, outside, 'dir');
+    for (const artifactDir of [outside, join(outside, 'new-child')]) {
+      assert.throws(
+        () => runRehearsal({ ...f, artifactDir, steps: [step('check', '')] }),
+        /outside/
+      );
+    }
+    assert.equal(existsSync(join(inside, 'new-child')), false);
+    assert.equal(existsSync(join(inside, 'rehearsal.json')), false);
+  }
+);
+
+test('a log collision preserves old bytes and gives every step a terminal disposition', (t) => {
+  const f = fixture(t);
+  const collision = join(f.artifactDir, 'step-02.log');
+  const receipt = runRehearsal({
+    ...f,
+    steps: [
+      step(
+        'prepare collision',
+        `require("fs").writeFileSync(${JSON.stringify(collision)}, "retained evidence")`
+      ),
+      step('cannot open log', 'console.log("new output")'),
+      step('blocked', 'process.exit(9)'),
+    ],
+  });
+  assert.equal(receipt.status, 'failed');
+  assert.deepEqual(
+    receipt.steps.map(({ status }) => status),
+    ['passed', 'failed', 'not-run']
+  );
+  assert.equal(receipt.steps[1].error.code, 'EEXIST');
+  assert.equal(receipt.steps[1].logSha256, null);
+  assert.equal(readFileSync(collision, 'utf8'), 'retained evidence');
+  assert.deepEqual(readReceipt(f.artifactDir), receipt);
+});
+
+test('a missing completed log is recorded as an evidence failure', (t) => {
+  const f = fixture(t);
+  const receipt = runRehearsal({
+    ...f,
+    steps: [
+      step(
+        'remove own log',
+        `require("fs").unlinkSync(${JSON.stringify(join(f.artifactDir, 'step-01.log'))})`
+      ),
+    ],
+  });
+  assert.equal(receipt.steps[0].exitCode, 0);
+  assert.equal(receipt.steps[0].artifactErrors[0].code, 'ENOENT');
+  assert.equal(receipt.steps[0].logSha256, null);
+  assert.equal(receipt.status, 'failed');
+  assert.deepEqual(readReceipt(f.artifactDir), receipt);
+});
+
+test('initial source binding errors also retain a failed receipt and not-run inventory', (t) => {
+  const f = fixture(t);
+  rmSync(join(f.rootDir, 'VERSION'));
+  const receipt = runRehearsal({ ...f, steps: [step('must not run', '')] });
+  assert.equal(receipt.status, 'failed');
+  assert.equal(receipt.steps[0].status, 'not-run');
+  assert.match(receipt.sourceError, /VERSION/);
+  assert.equal(receipt.qualifiesAsFrozenCandidate, false);
+  assert.deepEqual(readReceipt(f.artifactDir), receipt);
+});
