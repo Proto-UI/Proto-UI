@@ -122,11 +122,21 @@ for (const [family, demo] of Object.entries({
         await vi.waitFor(() => expect(ref('row-0').textContent).toBe('Website[BUSY]'));
         expect(api.call('table', 'filteredCount.get')).toBe(1);
         expect(api.call('table', 'pageSelection.get')).toBe('all');
+        // The Base owner hides an empty authored row without retiring its
+        // structure. A family display projection must not override that fact.
+        expect(ref('row-1').getAttribute('aria-hidden')).toBe('true');
+        expect(ref('row-1').getAttribute('data-pui-style')?.split(/\s+/)).not.toContain(
+          'table-row'
+        );
         const status = ref('state-0'),
           formatted = ref('formatted-0');
         ref('toggle-status').click();
         await vi.waitFor(() => expect(status.getAttribute('aria-hidden')).toBe('true'));
         expect(status.getAttribute('data-pui-style')).toContain('hidden');
+        expect(status.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('table-cell');
+        expect(ref('state-header').getAttribute('data-pui-style')?.split(/\s+/)).not.toContain(
+          'table-cell'
+        );
         expect(ref('state-header').tabIndex).toBe(-1);
         expect(ref('formatted-0')).toBe(formatted);
         expect(api.call('table', 'getStructure')).toMatchObject({ valid: true, columnCount: 2 });

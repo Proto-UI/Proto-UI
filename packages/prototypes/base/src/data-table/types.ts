@@ -93,8 +93,12 @@ export type DataTableRowAsHookContract = {
     focusVisible: ObservedStateHandle<boolean, DataTableRowProps>;
   };
 };
-export type DataTableCellAsHookContract = { state: { displayValue: State<string> } };
-export type DataTableHeaderAsHookContract = { state: { sort: State<string> } };
+export type DataTableCellAsHookContract = {
+  state: { displayValue: State<string>; hidden: State<boolean> };
+};
+export type DataTableHeaderAsHookContract = {
+  state: { sort: State<string>; hidden: State<boolean> };
+};
 export type DataTableCaptionAsHookContract = {};
 export type DataTablePreviousAsHookContract = {
   asHooks: { 'as-button': ReturnType<typeof asButton> };

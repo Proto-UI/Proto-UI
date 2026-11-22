@@ -6,6 +6,7 @@
  * PUI_BROWSER_FAMILIES/RUNTIMES/KINDS optionally bound a diagnostic run.
  */
 import assert from 'node:assert/strict';
+import { assertNativeRecipeInputs, partitionRecipeInputs } from './recipe-input-verification.mjs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -183,6 +184,37 @@ const editor = (name, tag = 'input') =>
   ref(name)
     .locator(tag)
     .or(ref(name).and(page.locator(tag)));
+async function validationReceipt({ old = false, minimum = 1 } = {}) {
+  const receipt = JSON.parse(await ref('validationResults').textContent());
+  const observed = await page.evaluate(() => PuiFormSelect.validationDeliveries());
+  assert.ok(receipt.results.length >= minimum, 'public receipt contains actual delivered requests');
+  for (const result of receipt.results) {
+    assert.equal(typeof result.requestId, 'string');
+    assert.equal(typeof result.accepted, 'boolean');
+    assert.notEqual(result.value, 'rejected', 'validator receives canonical owner values');
+  }
+  if (receipt.results.length)
+    assert.deepEqual(
+      receipt.results.map(({ requestId, accepted }) => ({ requestId, accepted })),
+      observed.slice(-receipt.results.length),
+      'public receipt matches independently observed real resolveValidation returns'
+    );
+  if (old) {
+    assert.equal(receipt.kind, 'old-results');
+    assert.deepEqual(
+      receipt.before,
+      receipt.after,
+      'stale results leave the current request and validity unchanged'
+    );
+    for (const result of receipt.results) {
+      assert.equal(result.accepted, false, 'every delivered old request is actually rejected');
+      if (receipt.before.validity.pending)
+        assert.notEqual(result.requestId, receipt.before.latestRequest.requestId);
+    }
+    assert.equal(receipt.summary, `old-results ${receipt.results.map(() => 'stale').join(',')}`);
+  }
+  return receipt;
+}
 async function form(prefix) {
   const account = editor('accountControl');
   const notes = editor('notes', 'textarea');
@@ -224,15 +256,29 @@ async function form(prefix) {
   await account.fill('lin');
   await settle();
   await click('staleResult');
-  assert.match(await ref('validatorStatus').textContent(), /^old-results stale(?:,stale)*$/);
+  const oldResults = await validationReceipt({ old: true });
+  assert.match(oldResults.summary, /^old-results stale(?:,stale)*$/);
+  assert.equal(oldResults.before.validity.pending, true);
+  assert.equal(oldResults.before.latestRequest.value, 'lin');
   assert.equal((await read('accountField', 'getValidity')).pending, true);
   await click('rejectResult');
+  const rejected = await validationReceipt();
+  assert.equal(rejected.results.length, 1);
+  assert.equal(rejected.results[0].accepted, true);
+  assert.equal(rejected.results[0].value, 'lin');
   assert.equal((await read('accountField', 'getValidity')).invalid, true);
   assert.equal(
     await account.getAttribute('aria-errormessage'),
     await ref('accountError').getAttribute('id')
   );
   const invalid = await capture(`${prefix}-invalid`);
+  // A native change on leaving the editor can have superseded a request
+  // after the first delivery. Deliver that remaining old request as well,
+  // preserving the invalid result and isolating the next two submit attempts.
+  await click('staleResult');
+  const afterCommit = await validationReceipt({ old: true, minimum: 0 });
+  assert.equal((await read('accountField', 'getValidity')).invalid, true);
+  assert.equal((await read('accountField', 'getValidity')).pending, false);
   await click('submit');
   await until('form', 'pending.get', true);
   const first = await ref('validatorStatus').textContent();
@@ -240,9 +286,13 @@ async function form(prefix) {
   await settle();
   assert.notEqual(await ref('validatorStatus').textContent(), first);
   await click('staleResult');
-  assert.equal(await ref('validatorStatus').textContent(), 'old-results stale');
+  const supersededSubmit = await validationReceipt({ old: true });
+  assert.equal(supersededSubmit.summary, 'old-results stale');
   assert.equal(await read('form', 'pending.get'), true);
   await click('acceptResult');
+  const accepted = await validationReceipt();
+  assert.equal(accepted.results.length, 1);
+  assert.equal(accepted.results[0].accepted, true);
   assert.match(await ref('submissionStatus').textContent(), /submitted=1.*"account":"lin"/);
   assert.equal(await account.getAttribute('aria-errormessage'), null);
   await click('submit');
@@ -284,6 +334,7 @@ async function form(prefix) {
       'native label focus and Fieldset naming',
       'controlled owner accept/refuse',
       'latest validation request and stale-result rejection',
+      'actual result returns retained separately from later pending requests',
       'failure and retry',
       'new submission supersedes old attempt',
       'canceled submission stays canceled',
@@ -291,6 +342,7 @@ async function form(prefix) {
       'nested disabled canonical value omission',
       'CheckboxGroup aggregate, reset and multiline restoration',
     ],
+    validationReceipts: [oldResults, rejected, afterCommit, supersededSubmit, accepted],
     pictures: [invalid, await capture(`${prefix}-reset`)],
   };
 }
@@ -644,14 +696,8 @@ try {
           );
           Object.assign(result, await { form, select: selectInput, choices }[kind](prefix));
           result.inputs = await page.evaluate(() => PuiFormSelect.receipts());
-          assert.ok(
-            result.inputs.some((event) => event.trusted),
-            'at least one trusted native input'
-          );
-          assert.ok(
-            result.inputs.every((event) => event.trusted),
-            'fixture never dispatches synthetic input'
-          );
+          Object.assign(result, partitionRecipeInputs(result.inputs));
+          assertNativeRecipeInputs(result.inputs);
           assert.deepEqual(errors.slice(errorStart), []);
           result.status = 'passed';
         } catch (error) {
@@ -664,6 +710,11 @@ try {
         } finally {
           result.pageErrors = errors.slice(errorStart);
           try {
+            result.inputs = await page.evaluate(() => PuiFormSelect.receipts());
+            Object.assign(result, partitionRecipeInputs(result.inputs));
+            result.validationDeliveries = await page.evaluate(() =>
+              PuiFormSelect.validationDeliveries()
+            );
             assert.deepEqual(await page.evaluate(() => PuiFormSelect.dispose()), {
               hostChildren: 0,
               retiredContentConnected: false,

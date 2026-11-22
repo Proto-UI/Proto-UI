@@ -82,12 +82,13 @@ export type TreeItemContract = {
     setSize: State<number>;
     branch: State<boolean>;
     expandedText: State<string>;
+    relationshipKey: State<string>;
     focused: ObservedStateHandle<boolean, TreeItemProps>;
     focusVisible: ObservedStateHandle<boolean, TreeItemProps>;
   };
 };
 export type TreeGroupAsHookContract = {
-  state: { hidden: State<boolean>; direction: State<string> };
+  state: { hidden: State<boolean>; direction: State<string>; relationshipKey: State<string> };
 };
 /** Button is an authored child; its state is not flattened into this frame. */
 export type TreeToggleAsHookContract = { asHooks: { 'as-button': ReturnType<typeof asButton> } };

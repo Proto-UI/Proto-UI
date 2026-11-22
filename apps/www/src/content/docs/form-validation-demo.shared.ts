@@ -131,6 +131,19 @@ export function createFormValidationDemo(family: string): DemoSpec {
         },
         {
           kind: 'box',
+          className: 'text-sm text-muted-foreground',
+          children: [
+            'The latest result receipt is separate from pending requests: leaving the editor may start a new request after an older result arrives. · 结果回执与待处理请求分别记录：离开编辑器时，旧结果返回后仍可能开始新请求。',
+          ],
+        },
+        {
+          kind: 'box',
+          ref: 'validationResults',
+          className: 'whitespace-pre-wrap break-all font-mono text-xs',
+          children: ['No delivered result · 尚未返回结果'],
+        },
+        {
+          kind: 'box',
           ref: 'submissionStatus',
           className: 'font-mono text-xs',
           children: ['No submission · 尚未提交'],
@@ -144,17 +157,55 @@ export function createFormValidationDemo(family: string): DemoSpec {
         groupDisabled = false;
       let submitted = 0;
       const requests: FieldValidationRequest[] = [];
+      let latestRequest: FieldValidationRequest | undefined;
       const policy = () => {
         refs.policyStatus.textContent = `owner=${accepts ? 'accept' : 'reject'} readOnly=${readOnly} groupDisabled=${groupDisabled}`;
+      };
+      const validationSnapshot = () => ({
+        latestRequest: latestRequest
+          ? { requestId: latestRequest.requestId, value: latestRequest.value }
+          : null,
+        validity: api.call('accountField', 'getValidity'),
+      });
+      const deliver = (
+        kind: 'old-results' | 'error' | 'success',
+        held: FieldValidationRequest[],
+        invalid: boolean,
+        errors: string[]
+      ) => {
+        const before = validationSnapshot();
+        const results = held.map((request) => ({
+          requestId: request.requestId,
+          value: request.value,
+          accepted: api.call('accountField', 'resolveValidation', request.requestId, {
+            invalid,
+            errors,
+          }),
+        }));
+        const after = validationSnapshot();
+        const summary =
+          kind === 'old-results'
+            ? `old-results ${results.map(({ accepted }) => (accepted ? 'accepted' : 'stale')).join(',')}`
+            : `${results[0].accepted ? 'accepted' : 'stale'} ${kind} value=${JSON.stringify(results[0].value)}`;
+        // This durable public receipt stores actual resolveValidation return
+        // values. A later change/commit request can update the pending panel
+        // without erasing the result that the application already delivered.
+        refs.validationResults.textContent = JSON.stringify(
+          { kind, summary, results, before, after },
+          null,
+          2
+        );
+        refs.validatorStatus.textContent = summary;
       };
       const resolve = (invalid: boolean) => {
         const request = requests.pop();
         if (!alive || !request) return;
-        const accepted = api.call('accountField', 'resolveValidation', request.requestId, {
+        deliver(
+          invalid ? 'error' : 'success',
+          [request],
           invalid,
-          errors: invalid ? ['Choose another account · 请更换账号'] : [],
-        });
-        refs.validatorStatus.textContent = `${accepted ? 'accepted' : 'stale'} ${invalid ? 'error' : 'success'} value=${JSON.stringify(request.value)}`;
+          invalid ? ['Choose another account · 请更换账号'] : []
+        );
       };
       api.setProps('accountControl', {
         onValueChange: (event: { value: string }) => {
@@ -165,6 +216,7 @@ export function createFormValidationDemo(family: string): DemoSpec {
         onValidationRequest: (request: FieldValidationRequest) => {
           if (!alive) return;
           requests.push(request);
+          latestRequest = request;
           refs.validatorStatus.textContent = `pending value=${JSON.stringify(request.value)} held=${requests.length}`;
         },
       });
@@ -190,13 +242,7 @@ export function createFormValidationDemo(family: string): DemoSpec {
             0,
             pending ? Math.max(0, requests.length - 1) : requests.length
           );
-          const outcomes = old.map((request) =>
-            api.call('accountField', 'resolveValidation', request.requestId, {
-              invalid: true,
-              errors: ['Old result · 旧结果'],
-            })
-          );
-          refs.validatorStatus.textContent = `old-results ${outcomes.map((accepted) => (accepted ? 'accepted' : 'stale')).join(',')}`;
+          deliver('old-results', old, true, ['Old result · 旧结果']);
         },
       });
       api.setProps('cancelSubmit', {
@@ -237,6 +283,7 @@ export function createFormValidationDemo(family: string): DemoSpec {
       return () => {
         alive = false;
         requests.length = 0;
+        latestRequest = undefined;
       };
     },
   };

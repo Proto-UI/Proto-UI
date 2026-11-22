@@ -94,6 +94,7 @@ for (const [family, demo] of Object.entries({
       const host = document.createElement('div');
       document.body.append(host);
       let api!: DemoRuntimeApi;
+      const resolved: Array<{ requestId: unknown; accepted: unknown }> = [];
       const view = await renderDemo({
         runtime,
         host,
@@ -101,7 +102,18 @@ for (const [family, demo] of Object.entries({
           ...demo,
           setup(context) {
             api = context.api;
-            return demo.setup?.(context);
+            return demo.setup?.({
+              ...context,
+              api: {
+                ...context.api,
+                call(ref, path, ...args) {
+                  const accepted = context.api.call(ref, path, ...args);
+                  if (ref === 'accountField' && path === 'resolveValidation')
+                    resolved.push({ requestId: args[0], accepted });
+                  return accepted;
+                },
+              },
+            });
           },
         },
       });
@@ -110,6 +122,30 @@ for (const [family, demo] of Object.entries({
       const exposes = (name: string) => api.getExposes(name) as any;
       const values = () => exposes('form').getValues();
       const validity = () => exposes('accountField').getValidity();
+      const resultReceipt = () => JSON.parse(ref('validationResults').textContent ?? 'null');
+      const assertOldResults = (minimum: number) => {
+        const receipt = resultReceipt();
+        expect(receipt.kind).toBe('old-results');
+        expect(receipt.results.length).toBeGreaterThanOrEqual(minimum);
+        expect(receipt.before).toEqual(receipt.after);
+        for (const result of receipt.results) {
+          expect(typeof result.requestId).toBe('string');
+          expect(result.accepted).toBe(false);
+          expect(result.value).not.toBe('rejected');
+          if (receipt.before.validity.pending)
+            expect(result.requestId).not.toBe(receipt.before.latestRequest.requestId);
+        }
+        if (receipt.results.length)
+          expect(
+            receipt.results.map(
+              ({ requestId, accepted }: { requestId: string; accepted: boolean }) => ({
+                requestId,
+                accepted,
+              })
+            )
+          ).toEqual(resolved.slice(-receipt.results.length));
+        return receipt;
+      };
       const editor = () => {
         const root = ref('accountControl');
         return (
@@ -163,13 +199,30 @@ for (const [family, demo] of Object.entries({
       expect(ref('validatorStatus').textContent).toContain('value="grace"');
       await click('toggleOwner');
       await edit('lin');
+      // A real editor can deliver its change commit as focus moves to the
+      // result button. The controlled report is queued; the click may finish
+      // before that new validator request. Do not confuse the two receipts.
+      editor().dispatchEvent(new Event('change', { bubbles: true }));
       await click('staleResult');
-      expect(ref('validatorStatus').textContent).toMatch(/^old-results stale(?:,stale)*$/);
+      const oldResults = assertOldResults(1);
+      expect(oldResults.summary).toMatch(/^old-results stale(?:,stale)*$/);
+      expect(oldResults.before.validity.pending).toBe(true);
+      // The queued, legitimate commit really ran after delivery; neither its
+      // pending request nor the earlier actual false returns were suppressed.
+      expect(ref('validatorStatus').textContent).toBe('pending value="lin" held=2');
       expect(validity().pending).toBe(true);
       await click('rejectResult');
+      expect(resultReceipt().results).toEqual([{ ...resolved.at(-1), value: 'lin' }]);
+      expect(resultReceipt().results[0].accepted).toBe(true);
       expect(validity()).toMatchObject({ invalid: true, pending: false });
       expect(editor().getAttribute('aria-errormessage')).toBe(ref('accountError').id);
       expect(ref('accountError').textContent).toContain('Choose another account');
+      // Deliver the request superseded by the queued change as well. This
+      // leaves the next submission scenario with exactly its own two attempts.
+      await click('staleResult');
+      const afterCommit = assertOldResults(1);
+      expect(afterCommit.summary).toBe('old-results stale');
+      expect(validity()).toMatchObject({ invalid: true, pending: false });
 
       await click('submit');
       expect(exposes('form').pending.get()).toBe(true);
@@ -180,7 +233,7 @@ for (const [family, demo] of Object.entries({
       await flush();
       expect(ref('validatorStatus').textContent).not.toBe(pendingText);
       await click('staleResult');
-      expect(ref('validatorStatus').textContent).toBe('old-results stale');
+      expect(assertOldResults(1).summary).toBe('old-results stale');
       expect(exposes('form').pending.get()).toBe(true);
       await click('acceptResult');
       expect(ref('submissionStatus').textContent).toContain('submitted=1');

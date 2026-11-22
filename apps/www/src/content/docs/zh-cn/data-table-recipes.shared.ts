@@ -46,7 +46,9 @@ export function createDataTableRecipes(family: 'base' | 'shadcn' | 'brutalist'):
         ]
       ),
     ]);
-    if (row.kind === 'proto') row.className = 'grid grid-flow-col auto-cols-fr';
+    // Consumer utilities follow proto-ui in the real site cascade. Apply our
+    // layout only to visible rows; an empty logical slot must stay hidden.
+    if (row.kind === 'proto') row.className = 'grid-flow-col auto-cols-fr aria-[hidden=false]:grid';
     return row;
   });
   return {

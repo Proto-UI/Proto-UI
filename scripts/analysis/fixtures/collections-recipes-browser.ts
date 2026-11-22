@@ -33,6 +33,7 @@ import type {
   DemoRenderResult,
 } from '../../../apps/www/src/components/PrototypePreviewer/demo-types';
 import type { RuntimeId } from '../../../apps/www/src/components/PrototypePreviewer/runtimes/ids';
+import { observeRecipeInput } from './recipe-input-observation';
 for (const library of [
   baseTree,
   baseTable,
@@ -72,15 +73,21 @@ let view: DemoRenderResult | undefined;
 let api: DemoRuntimeApi | undefined;
 let host: HTMLElement;
 let ownedContent: HTMLElement | undefined;
-const trusted: Array<{ type: string; trusted: boolean; key?: string }> = [];
+const outwardClickRoots = new Set<HTMLElement>();
+// These public prototypes use Base Button's declared click:void outward signal.
+const outwardClickRefs: Record<string, readonly string[]> = {
+  tree: ['toggle'],
+  'data-table': ['toggle-status', 'select-page', 'previous', 'next'],
+  'virtual-list': [],
+};
+const trusted: Array<ReturnType<typeof observeRecipeInput> & { key?: string }> = [];
 for (const type of ['keydown', 'click', 'input', 'wheel'])
   document.addEventListener(
     type,
     (event) => {
       if (host?.contains(event.target as Node))
         trusted.push({
-          type,
-          trusted: event.isTrusted,
+          ...observeRecipeInput(event, outwardClickRoots),
           key: 'key' in event ? String(event.key) : undefined,
         });
     },
@@ -102,6 +109,11 @@ export async function mount(runtime: RuntimeId, family: string, kind: string) {
       ...demo,
       setup(context) {
         api = context.api;
+        if (runtime === 'wc')
+          for (const ref of outwardClickRefs[kind]) {
+            const node = context.refs[ref];
+            if (node) outwardClickRoots.add(node);
+          }
         const cleanup = demo.setup?.(context);
         ownedContent = context.refs.content;
         return cleanup;
@@ -125,6 +137,7 @@ export async function dispose() {
   view = undefined;
   api = undefined;
   ownedContent = undefined;
+  outwardClickRoots.clear();
   await settle();
   return {
     hostChildren: host?.childElementCount ?? 0,

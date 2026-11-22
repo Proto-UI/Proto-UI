@@ -49,6 +49,7 @@ import type {
   DemoRenderResult,
 } from '../../../apps/www/src/components/PrototypePreviewer/demo-types';
 import type { RuntimeId } from '../../../apps/www/src/components/PrototypePreviewer/runtimes/ids';
+import { observeRecipeInput } from './recipe-input-observation';
 for (const library of [
   baseSelect,
   shadcnSelect,
@@ -102,6 +103,31 @@ let api: DemoRuntimeApi | undefined;
 let refs: Record<string, HTMLElement> = {};
 let host: HTMLElement | undefined;
 const inputs: Array<Record<string, unknown>> = [];
+const outwardClickRoots = new Set<HTMLElement>();
+// Explicit public Button refs; FormSubmit/FormReset are separate trigger
+// protocols and do not declare Button's click:void signal.
+const outwardClickRefs: Record<string, readonly string[]> = {
+  form: [
+    'acceptResult',
+    'rejectResult',
+    'staleResult',
+    'cancelSubmit',
+    'toggleOwner',
+    'toggleReadOnly',
+    'toggleDisabled',
+  ],
+  select: ['toggleRefusal'],
+  choices: [
+    'choiceToggleOwner',
+    'choiceReadOnly',
+    'choiceDisabled',
+    'choiceHold',
+    'choiceDeliver',
+    'choiceReplace',
+    'choiceReplaceOnRequest',
+  ],
+};
+const resolved: Array<{ requestId: unknown; accepted: unknown }> = [];
 const retained = new Map<string, { node: HTMLElement; exposes: any }>();
 /** Read-only retention observes actual old owner retirement after a public recipe replacement. */
 export function retain(ref: string, key: string) {
@@ -143,9 +169,7 @@ for (const type of [
         return;
       const pointer = event as PointerEvent;
       inputs.push({
-        type,
-        trusted: event.isTrusted,
-        target: target.closest?.('[data-demo-ref]')?.getAttribute('data-demo-ref'),
+        ...observeRecipeInput(event, outwardClickRoots),
         pointerType: pointer.pointerType,
         buttons: pointer.buttons,
         pointerId: pointer.pointerId,
@@ -162,6 +186,7 @@ export async function mount(runtime: RuntimeId, family: string, kind: string) {
   await dispose();
   host = document.querySelector<HTMLElement>('#fixture')!;
   inputs.length = 0;
+  resolved.length = 0;
   const demo = demos[family][kind];
   view = await renderDemo({
     runtime,
@@ -171,7 +196,23 @@ export async function mount(runtime: RuntimeId, family: string, kind: string) {
       setup(context) {
         api = context.api;
         refs = context.refs;
-        return demo.setup?.(context);
+        if (runtime === 'wc')
+          for (const ref of outwardClickRefs[kind]) {
+            const node = context.refs[ref];
+            if (node) outwardClickRoots.add(node);
+          }
+        return demo.setup?.({
+          ...context,
+          api: {
+            ...context.api,
+            call(ref, path, ...args) {
+              const accepted = context.api.call(ref, path, ...args);
+              if (ref === 'accountField' && path === 'resolveValidation')
+                resolved.push({ requestId: args[0], accepted });
+              return accepted;
+            },
+          },
+        });
       },
     },
   });
@@ -193,12 +234,16 @@ export function setProps(ref: string, props: Record<string, unknown>) {
 export function receipts() {
   return inputs.slice();
 }
+export function validationDeliveries() {
+  return resolved.slice();
+}
 export async function dispose() {
   const content = refs.selectContent;
   await view?.destroy();
   view = undefined;
   api = undefined;
   refs = {};
+  outwardClickRoots.clear();
   retained.clear();
   await settle();
   return {

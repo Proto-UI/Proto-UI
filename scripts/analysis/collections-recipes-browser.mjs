@@ -14,6 +14,8 @@ import path from 'node:path';
 import { build } from 'esbuild';
 import { renderBrutalistThemeCss } from '../../packages/prototypes/brutalist/src/theme.ts';
 import { readCollectionsSourceInventory } from './collections-source-inventory.mjs';
+import { readCollectionsRecipeCss } from './collections-recipe-css.mjs';
+import { assertNativeRecipeInputs, partitionRecipeInputs } from './recipe-input-verification.mjs';
 
 const select = (key, defaults) => process.env[key]?.split(',').filter(Boolean) ?? defaults;
 const families = select('PUI_BROWSER_FAMILIES', ['base', 'shadcn', 'brutalist']);
@@ -41,7 +43,7 @@ const report = {
     viewport: { width: 1100, height: 850 },
   },
   boundary:
-    'Actual public DemoSpecs, real Web Adapters/frameworks and generated CSS. Native Chromium keyboard, pointer, input and wheel. Runtime assets are bundled locally; import retry, physical hardware, screen readers, non-Web and compiler parity are separate acceptance.',
+    'Actual public DemoSpecs, real Web Adapters/frameworks, generated prototype CSS and the ordinary Tailwind consumer stylesheet/fonts. Native Chromium keyboard, pointer, input and wheel. Runtime assets are bundled locally; import retry, physical hardware, screen readers, non-Web and compiler parity are separate acceptance.',
   cases: [],
 };
 const bundle = await build({
@@ -79,6 +81,8 @@ const fixtureStyles = bundle.outputFiles
   .map((file) => file.text)
   .join('\n');
 report.source.bundleSha256 = createHash('sha256').update(script).digest('hex');
+const consumerStyles = await readCollectionsRecipeCss();
+report.source.consumerStyles = consumerStyles.receipt;
 const [theme, tokens] = await Promise.all([
   readFile('apps/www/src/styles/shadcn-theme.css', 'utf8'),
   readFile('apps/www/src/styles/proto-ui-tokens.generated.css', 'utf8'),
@@ -131,9 +135,10 @@ await page.setContent(
   '<!doctype html><html data-theme="light"><head><meta charset="utf-8"></head><body><main><h1>Proto UI · collection recipes</h1><p id="scope"></p><div id="fixture"></div></main></body></html>'
 );
 await page.addStyleTag({
-  content: `@layer reset, theme, proto-ui, consumer;
+  content: `@layer reset, theme, base, proto-ui, components, utilities, consumer;
   @layer reset { *,::before,::after { box-sizing:border-box; } body { margin:0; font:16px/1.5 system-ui,sans-serif; color:#172033; background:#f5f7fb; } }
   @layer theme { ${theme}\n${familyTheme} }
+  ${consumerStyles.css}
   ${tokens}
   ${fixtureStyles}
   @layer consumer { main { padding:40px; } #fixture { width:760px; max-width:100%; min-height:360px; padding:20px; background:white; border:1px solid #dce2eb; } h1 { font-size:24px; } }
@@ -184,7 +189,22 @@ async function tree(prefix) {
   await page.keyboard.press('ArrowRight');
   await until('tree', 'getExpandedKeys', []);
   assert.equal(await visible('branch'), false);
-  assert.equal(await ref('readme').getAttribute('tabindex'), '-1');
+  // A disabled non-native target may remove tabindex; the guaranteed facts
+  // are absence from sequential navigation and rejection of actual focus.
+  assert.equal(await ref('readme').evaluate((node) => node.tabIndex), -1);
+  await ref('readme').evaluate((node) => node.focus());
+  assert.equal(await ref('project').evaluate((node) => document.activeElement === node), true);
+  await read('readme', 'focusSelf');
+  assert.equal(await ref('project').evaluate((node) => document.activeElement === node), true);
+  await page.keyboard.press('Tab');
+  assert.equal(await ref('toggle').evaluate((node) => document.activeElement === node), true);
+  await page.keyboard.press('Tab');
+  assert.equal(
+    await ref('branch').evaluate((node) => node.contains(document.activeElement)),
+    false,
+    'native Tab crosses the collapsed branch without entering a hidden descendant'
+  );
+  await ref('project').focus();
   await page.keyboard.press('ArrowLeft');
   await until('tree', 'getExpandedKeys', ['project']);
   assert.equal(await visible('branch'), true);
@@ -225,6 +245,7 @@ async function dataTable(prefix) {
   await until('table', 'filteredCount.get', 1);
   assert.equal(await ref('row-0').textContent(), 'Website[BUSY]');
   assert.equal(await ref('row-1').getAttribute('aria-hidden'), 'true');
+  assert.equal(await visible('row-1'), false);
   const structure = await read('table', 'getStructure');
   assert.equal(structure.valid, true);
   assert.equal(structure.columnCount, 2);
@@ -232,12 +253,22 @@ async function dataTable(prefix) {
   await settle();
   assert.equal(await visible('state-0'), false);
   assert.equal(await visible('state-header'), false);
-  assert.equal(await ref('state-header').getAttribute('tabindex'), '-1');
+  assert.equal(await ref('state-header').evaluate((node) => node.tabIndex), -1);
+  await ref('state-header').evaluate((node) => node.focus());
+  assert.equal(
+    await ref('toggle-status').evaluate((node) => document.activeElement === node),
+    true
+  );
+  await ref('name-header').focus();
+  await page.keyboard.press('Tab');
+  assert.equal(await ref('row-0').evaluate((node) => document.activeElement === node), true);
   assert.equal((await read('table', 'getStructure')).valid, true);
   const hidden = await capture(`${prefix}-column-hidden`);
   await ref('toggle-status').click();
   await settle();
   assert.equal(await visible('state-0'), true);
+  await ref('state-header').focus();
+  assert.equal(await ref('state-header').evaluate((node) => document.activeElement === node), true);
   await props('table', { rows: [{ id: 'web', name: 'Website', state: 'updated' }] });
   assert.equal(await ref('row-0').textContent(), 'Website[UPDATED]');
   await ref('name-header').focus();
@@ -263,11 +294,20 @@ async function dataTable(prefix) {
   };
 }
 async function virtualList(prefix) {
+  const viewport = ref('viewport');
+  const initialViewport = await viewport.evaluate((node) => ({
+    clientHeight: node.clientHeight,
+    scrollHeight: node.scrollHeight,
+    scrollTop: node.scrollTop,
+    overflowY: getComputedStyle(node).overflowY,
+  }));
+  assert.ok(initialViewport.clientHeight > 0);
+  assert.ok(initialViewport.scrollHeight > initialViewport.clientHeight);
+  assert.match(initialViewport.overflowY, /^(auto|scroll)$/);
   const initial = await read('list', 'getWindow');
   assert.equal(initial.keys.length, 1000);
   assert.equal(initial.status, 'committed');
   assert.ok(initial.materializedKeys.length > 0 && initial.materializedKeys.length <= 60);
-  const viewport = ref('viewport');
   await viewport.hover();
   await page.mouse.wheel(0, 600);
   await page.waitForFunction(
@@ -277,6 +317,11 @@ async function virtualList(prefix) {
     initial.materializedKeys
   );
   const after = await read('list', 'getWindow');
+  const afterScrollTop = await viewport.evaluate((node) => node.scrollTop);
+  assert.ok(
+    afterScrollTop > initialViewport.scrollTop,
+    'native wheel actually scrolls the viewport'
+  );
   assert.ok(after.materializedKeys.length <= 60);
   assert.equal(after.keys.length, 1000);
   assert.equal(
@@ -295,6 +340,8 @@ async function virtualList(prefix) {
     ],
     initial: initial.materializedKeys,
     after: after.materializedKeys,
+    initialViewport,
+    afterScrollTop,
     pictures: [picture],
   };
 }
@@ -319,14 +366,8 @@ try {
             await { tree, 'data-table': dataTable, 'virtual-list': virtualList }[kind](prefix)
           );
           result.inputs = await page.evaluate(() => PuiCollections.inputs());
-          assert.ok(
-            result.inputs.some((event) => event.trusted),
-            'at least one trusted native input'
-          );
-          assert.ok(
-            result.inputs.every((event) => event.trusted),
-            'fixture never dispatches synthetic input'
-          );
+          Object.assign(result, partitionRecipeInputs(result.inputs));
+          assertNativeRecipeInputs(result.inputs);
           assert.deepEqual(errors.slice(errorStart), []);
           result.status = 'passed';
         } catch (error) {
@@ -339,6 +380,8 @@ try {
         } finally {
           result.pageErrors = errors.slice(errorStart);
           try {
+            result.inputs = await page.evaluate(() => PuiCollections.inputs());
+            Object.assign(result, partitionRecipeInputs(result.inputs));
             assert.deepEqual(await page.evaluate(() => PuiCollections.dispose()), {
               hostChildren: 0,
               ownedContentChildren: 0,
