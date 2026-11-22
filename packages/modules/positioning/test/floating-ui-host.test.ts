@@ -85,6 +85,23 @@ describe('module-positioning: Floating UI host', () => {
     lease.dispose();
   });
 
+  it('pins the configured strategy inside the viewport before computePosition yields', () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+    });
+    expect(floating.style.position).toBe('fixed');
+    expect(floating.style.top).toBe('0px');
+    expect(floating.style.left).toBe('0px');
+    lease.dispose();
+  });
+
   it('positions against rendered anchor geometry by default even when the anchor carries a translation', async () => {
     // Reviewer counterexample: a legitimate layout translation (e.g. translate(-50%)
     // centering or an application animation) must keep the floating element where
