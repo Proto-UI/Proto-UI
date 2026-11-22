@@ -142,15 +142,31 @@ test('the fixed serial selection preserves the full original criteria and bounde
   );
   for (const suite of [
     'apps/www/src/content/docs/zh-cn/demo-matrix-activation.test.ts',
+    'apps/www/src/content/docs/zh-cn/site-search-evidence.test.ts',
     'packages/compiler/test/props-update-policy.test.ts',
     'packages/prototypes/base/test/select-legacy-slot.test.ts',
+    'packages/compiler/test/hook-admission.test.ts',
+    'packages/compiler/test/diagnostic-registry.test.ts',
+    'packages/compiler/test/source-graph.test.ts',
     'packages/compiler/test/diagnostic-origin.test.ts',
     'packages/compiler/src/diagnostic-format.test.ts',
+    'packages/compiler/test/public-diagnostic-boundaries.test.ts',
+    'packages/compiler/src/watch.test.ts',
+    'packages/compiler/src/artifact-linking.test.ts',
+    'packages/compiler/src/project.test.ts',
+    'packages/compiler/src/project-output.test.ts',
+    'packages/compiler/src/artifact-output.test.ts',
+    'packages/compiler/test/cli.test.ts',
+    'packages/compiler/test/targets.test.ts',
+    'packages/compiler/test/rule-declarations.test.ts',
+    'packages/compiler/src/style-plan.test.ts',
     'packages/prototypes/base/test/number-field-capabilities.test.ts',
     'packages/prototypes/base/test/number-field-format.test.ts',
   ])
     assert.ok(SPRINT1_UNIT_SUITES.includes(suite));
-  assert.equal(SPRINT1_UNIT_SUITES.length, 27);
+  assert.equal(SPRINT1_UNIT_SUITES.length, 38);
+  assert.equal(new Set(SPRINT1_UNIT_SUITES).size, 38);
+  assert.equal(steps.find((step) => step.id === 'focused-unit').timeoutMs, 120_000);
   const search = steps.find((step) => step.id === 'search-native');
   assert.equal(search.timeoutMs, 1_200_000);
   assert.deepEqual(search.suites, [

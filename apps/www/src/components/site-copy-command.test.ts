@@ -10,7 +10,8 @@ import { createCopyController } from './site-copy-controller';
 import { initSiteCopyCommands, readCopyText } from './site-copy-client';
 import { applySiteLibraryFamily, resolveSiteLibraryFamily } from './site-library-family';
 
-vi.mock('./PrototypePreviewer/projection-theme', () => ({
+vi.mock('./PrototypePreviewer/projection-theme', async (original) => ({
+  ...(await original<typeof import('./PrototypePreviewer/projection-theme')>()),
   resolveProjectionThemeSurfaceStyle: () => ({
     '--pui-background': '#fff',
     '--pui-foreground': '#111',

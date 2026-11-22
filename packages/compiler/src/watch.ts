@@ -4,6 +4,7 @@ import path from 'node:path';
 import { compileProject } from './project';
 import { sourceName } from './source-resolution';
 import { deferred } from './deferred';
+import { unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import type {
   CompileProjectOptions,
   CompilerProject,
@@ -80,7 +81,7 @@ function diagnostic(
     code,
     category,
     message,
-    span: { file: '<watch>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+    span: unknownDiagnosticSpan('<watch>'),
   };
 }
 
@@ -241,7 +242,7 @@ export async function watchProject(
         diagnostics: [
           diagnostic(
             'PUI4004',
-            `Watch report callback failed: ${message(error)}`,
+            `Watch report callback failed: ${unexpectedFailureEvidence(error)}`,
             'compiler-defect'
           ),
         ],
@@ -470,7 +471,7 @@ export async function watchProject(
             diagnostics: [
               diagnostic(
                 'PUI4003',
-                `Project compilation threw: ${message(error)}`,
+                `Project compilation threw: ${unexpectedFailureEvidence(error)}`,
                 'compiler-defect'
               ),
             ],

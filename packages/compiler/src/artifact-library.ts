@@ -14,6 +14,7 @@ import { buildNativeContextArtifacts } from './native-context';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import type { SuccessfulProjectGeneration } from './project';
 import { projectCompilationArtifacts, type ProjectArtifactOptions } from './project-output';
+import { unknownDiagnosticSpan } from './diagnostics';
 
 export const COMPILER_LIBRARY_FORMAT = 'proto-ui.compiler-library' as const;
 export const COMPILER_LIBRARY_VERSION = 1 as const;
@@ -92,7 +93,7 @@ export function libraryRejection<T>(
         code,
         category,
         message,
-        span: { file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+        span: unknownDiagnosticSpan(file),
       },
     ],
   };

@@ -19,7 +19,7 @@ import {
   type ExclusiveOutputFile,
   type OutputArtifact,
 } from './artifact-output';
-import { sourceName } from './source-resolution';
+import { diagnosticInputOrigin, sourceName } from './source-resolution';
 import { FileSourceGraph, type FileSourceSnapshot } from './source-loader';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { attachEmitterMap, generatedSourcePath } from './emitter-map';
@@ -215,16 +215,6 @@ export async function compileFile(
   } catch (error) {
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
     return { ok: false, diagnostics: [defectDiagnostic(error, origin)] };
-  }
-}
-
-/** Origin tracing must not decide whether a requested filesystem path is admitted. */
-function diagnosticInputOrigin(file: string): SourceSpan {
-  try {
-    return unknownDiagnosticSpan(sourceName(file));
-  } catch (error) {
-    if (error instanceof CompilerRejection) return unknownDiagnosticSpan();
-    throw error;
   }
 }
 

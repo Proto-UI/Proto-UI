@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { compileFile, compilePrototype } from '../src/compile';
+import { compileRustDataFile } from '../src/rust-data';
 import { CompilerRejection, unknownDiagnosticSpan } from '../src/diagnostics';
 import { diagnosticsJson, formatCompilerDiagnostic } from '../src/diagnostic-format';
 import * as emitterMap from '../src/emitter-map';
@@ -17,10 +18,16 @@ export default definePrototype({name:'diagnostic-origin',setup(def){
   const enabled=def.state.bool('enabled',true);
   def.expose.state('enabled',enabled);
 }});`;
+const rustSource = `import {definePrototype} from '@proto.ui/core';
+function offset(value:number):number{return value+2;}
+export default definePrototype({name:'diagnostic-rust-data',setup(def){
+  def.expose.method('offset',offset);
+}});`;
 let root: string;
 beforeAll(async () => {
   root = await mkdtemp(path.join(os.tmpdir(), 'pui-diagnostic-origin-'));
   await writeFile(path.join(root, 'entry.proto.ts'), source);
+  await writeFile(path.join(root, 'data.proto.ts'), rustSource);
 });
 afterEach(() => vi.restoreAllMocks());
 afterAll(async () => {
@@ -34,7 +41,7 @@ function diagnostic(result: CompileResult<unknown>): CompilerDiagnostic {
   return result.diagnostics[0];
 }
 
-function unknownOrigin(value: CompilerDiagnostic, file: string) {
+function unknownOrigin(value: CompilerDiagnostic, file: string, authoredSource = source) {
   expect(value.span).toEqual({
     file,
     start: -1,
@@ -44,7 +51,7 @@ function unknownOrigin(value: CompilerDiagnostic, file: string) {
     endLine: 0,
     endColumn: 0,
   });
-  const rendered = formatCompilerDiagnostic(value, { sources: { [file]: source } });
+  const rendered = formatCompilerDiagnostic(value, { sources: { [file]: authoredSource } });
   expect(rendered).toContain(`${file} (source location unknown)`);
   // Supplying source text must not turn the sentinel's offsets into a fake
   // first-line caret. JSON preserves the same explicit unknown location.
@@ -233,4 +240,130 @@ describe('#1457 truthful diagnostic origin at public boundaries', () => {
       "def.state.bool('enabled',true)"
     );
   });
+});
+
+describe('#1457 truthful diagnostic origin at the public Rust data file boundary', () => {
+  const options = { methods: ['offset'] };
+
+  it('preserves a legal normalized relative entry that resolves back inside the root', async () => {
+    const result = await compileRustDataFile(`../${path.basename(root)}/data.proto.ts`, {
+      ...options,
+      root,
+    });
+    expect(result.ok, JSON.stringify(result)).toBe(true);
+    if (result.ok) expect(result.value.ir.source.file).toBe('data.proto.ts');
+  });
+
+  it.each(['missing-entry', 'missing-root', 'closed-missing-entry'] as const)(
+    'retains %s classification and source identity without invented coordinates',
+    async (failure) => {
+      const entry = failure === 'missing-entry' ? 'missing-data.proto.ts' : 'data.proto.ts';
+      const input =
+        failure === 'closed-missing-entry'
+          ? { ...options, sourceSnapshot: { entry, files: {} } }
+          : {
+              ...options,
+              root: failure === 'missing-root' ? path.join(root, 'absent-root') : root,
+            };
+      const value = diagnostic(await compileRustDataFile(entry, input));
+      expect(value).toMatchObject({ code: 'PUI1003', category: 'invalid-input' });
+      unknownOrigin(value, entry, rustSource);
+    }
+  );
+
+  it('retains declared loader Error as invalid input', async () => {
+    vi.spyOn(FileSourceGraph.prototype, 'load').mockRejectedValueOnce(
+      new Error('declared Rust data source read rejection')
+    );
+    const value = diagnostic(await compileRustDataFile('data.proto.ts', { ...options, root }));
+    expect(value).toMatchObject({
+      code: 'PUI1003',
+      category: 'invalid-input',
+      message: expect.stringContaining('declared Rust data source read rejection'),
+    });
+    unknownOrigin(value, 'data.proto.ts', rustSource);
+  });
+
+  for (const ErrorType of [TypeError, ReferenceError, RangeError]) {
+    it.each(['loader', 'snapshot'] as const)(
+      `preserves an unexpected ${ErrorType.name} at %s and its original stack`,
+      async (phase) => {
+        const error = new ErrorType('injected Rust data defect');
+        let result;
+        if (phase === 'loader') {
+          vi.spyOn(FileSourceGraph.prototype, 'load').mockRejectedValueOnce(error);
+          result = await compileRustDataFile('data.proto.ts', { ...options, root });
+        } else {
+          const files = Object.defineProperty({}, 'data.proto.ts', {
+            get() {
+              throw error;
+            },
+          });
+          result = await compileRustDataFile('data.proto.ts', {
+            ...options,
+            sourceSnapshot: { entry: 'data.proto.ts', files },
+          });
+        }
+        const value = diagnostic(result);
+        expect(value).toMatchObject({ code: 'PUI1999', category: 'compiler-defect' });
+        expect(value.message).toContain(error.stack!);
+        unknownOrigin(value, 'data.proto.ts', rustSource);
+      }
+    );
+  }
+
+  it('does not relabel a post-loader Error as invalid input', async () => {
+    const error = new Error('injected post-load Rust data defect');
+    const files = Object.defineProperty({}, 'data.proto.ts', {
+      get() {
+        throw error;
+      },
+    });
+    const value = diagnostic(
+      await compileRustDataFile('data.proto.ts', {
+        ...options,
+        sourceSnapshot: { entry: 'data.proto.ts', files },
+      })
+    );
+    expect(value).toMatchObject({ code: 'PUI1999', category: 'compiler-defect' });
+    expect(value.message).toContain(error.stack!);
+    unknownOrigin(value, 'data.proto.ts', rustSource);
+  });
+
+  it.each(['loader', 'snapshot'] as const)(
+    'preserves a checked %s rejection and its real span',
+    async (phase) => {
+      const expected: CompilerDiagnostic = {
+        code: 'PUI1006',
+        category: 'unsupported-input',
+        message: 'checked Rust data rejection',
+        span: {
+          file: 'dependency.proto.ts',
+          start: 12,
+          end: 19,
+          line: 2,
+          column: 3,
+          endLine: 2,
+          endColumn: 10,
+        },
+      };
+      const error = new CompilerRejection(expected);
+      let result;
+      if (phase === 'loader') {
+        vi.spyOn(FileSourceGraph.prototype, 'load').mockRejectedValueOnce(error);
+        result = await compileRustDataFile('data.proto.ts', { ...options, root });
+      } else {
+        const files = Object.defineProperty({}, 'data.proto.ts', {
+          get() {
+            throw error;
+          },
+        });
+        result = await compileRustDataFile('data.proto.ts', {
+          ...options,
+          sourceSnapshot: { entry: 'data.proto.ts', files },
+        });
+      }
+      expect(diagnostic(result)).toBe(expected);
+    }
+  );
 });

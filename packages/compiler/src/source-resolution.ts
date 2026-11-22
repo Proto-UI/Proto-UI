@@ -1,7 +1,8 @@
 import { realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
-import { reject, unknownDiagnosticSpan } from './diagnostics';
+import { CompilerRejection, reject, unknownDiagnosticSpan } from './diagnostics';
+import type { SourceSpan } from './ir';
 
 export interface SourceEdge {
   specifier: string;
@@ -42,6 +43,16 @@ export function sourceName(file: string): string {
     );
   }
   return normalized;
+}
+
+/** Origin tracing must not decide whether a requested filesystem path is admitted. */
+export function diagnosticInputOrigin(file: string): SourceSpan {
+  try {
+    return unknownDiagnosticSpan(sourceName(file));
+  } catch (error) {
+    if (error instanceof CompilerRejection) return unknownDiagnosticSpan();
+    throw error;
+  }
 }
 
 export function isLocalSourceSpecifier(specifier: string): boolean {
