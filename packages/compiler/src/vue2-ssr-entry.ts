@@ -85,12 +85,12 @@ export async function renderToString(options) {
     if (failure) throw failure.value;
     if (session.failure) throw session.failure.value;
     signal?.throwIfAborted();
-    const carrier = JSON.parse(JSON.stringify({
+    const carrier = validateGeneratedCarrier(JSON.parse(JSON.stringify({
       version: 1, profile: 'vue2-ssr-v1', source: '${source}',
       initialProps: ${prefix}EncodeRaw(options.props),
       initialAttrs: ${prefix}EncodeRaw(options.attrs),
       projections: session.projections,
-    }));
+    })));
     if (!${prefix}Json(carrier) || carrier.projections.length !== session.owners.length) throw new Error('[Vue2 SSR] incomplete request projection.');
     return { html, carrier };
   } catch (error) {
@@ -116,16 +116,21 @@ function ${prefix}Nodes(root) {
   visit(root);
   return nodes;
 }
+/** Validate the complete encoded transport before server publication or client startup. */
+export function validateGeneratedCarrier(input) {
+  const carrier = ${prefix}InitialData(input);
+  if (!carrier || carrier.version !== 1 || carrier.profile !== 'vue2-ssr-v1' || carrier.source !== '${source}' || !${prefix}Json(carrier) || !Array.isArray(carrier.projections)) throw new Error('[Vue2 SSR] invalid source/profile carrier.');
+  ${prefix}DecodeRaw(carrier.initialProps); ${prefix}DecodeRaw(carrier.initialAttrs);
+  for (const projection of carrier.projections) ${prefix}DecodeRaw(projection.raw);
+  return carrier;
+}
 /** Hydrate matching HTML. Resolves only after actual accepted commit and Vue nextTick readiness.
  * options.props/attrs may differ from the carrier; the normal Props update policy is retained.
  */
 export async function hydrate(options) {
   const { Vue, target } = options;
-  const carrier = ${prefix}InitialData(options.carrier);
   ${prefix}CheckVue(Vue);
-  if (!carrier || carrier.version !== 1 || carrier.profile !== 'vue2-ssr-v1' || carrier.source !== '${source}' || !${prefix}Json(carrier) || !Array.isArray(carrier.projections)) throw new Error('[Vue2 SSR] invalid source/profile carrier.');
-  ${prefix}DecodeRaw(carrier.initialProps); ${prefix}DecodeRaw(carrier.initialAttrs);
-  for (const projection of carrier.projections) ${prefix}DecodeRaw(projection.raw);
+  const carrier = validateGeneratedCarrier(options.carrier);
   if (!target || ![1, 8].includes(target.nodeType)) throw new TypeError('[Vue2 SSR] hydration requires the serialized Root or absence comment.');
   const session = { mode: 'hydrate', carrier, owners: [], closed: false, failure: null };
   const before = ${prefix}Nodes(target);

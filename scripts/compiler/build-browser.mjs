@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { hashMetafileInputs } from './browser-inputs.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const compilerRoot = path.join(root, 'packages/compiler');
@@ -66,13 +67,13 @@ export async function buildBrowserCompiler(
     path.join(destination, 'inputs.json'),
     JSON.stringify(result.metafile.inputs, null, 2) + '\n'
   );
-  return { destination, bytes: Buffer.byteLength(bundle), ...manifest };
+  const inputFiles = await hashMetafileInputs(result.metafile);
+  return { destination, bytes: Buffer.byteLength(bundle), ...manifest, inputFiles };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  console.log(
-    JSON.stringify(
-      await buildBrowserCompiler(path.resolve(root, process.argv[2] ?? '.cache/compiler-browser'))
-    )
+  const { inputFiles, ...summary } = await buildBrowserCompiler(
+    path.resolve(root, process.argv[2] ?? '.cache/compiler-browser')
   );
+  console.log(JSON.stringify({ ...summary, inputFiles: Object.keys(inputFiles).length }));
 }

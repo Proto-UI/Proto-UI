@@ -112,6 +112,7 @@ export async function executeRuntimeRequest<P extends PropsBaseType, T>(
           [CONTEXT_PARENT_CAP, () => null],
         ]);
       },
+      onSetupCleanupError: recordCleanupError,
       onLifecycleEvent: options.onLifecycleEvent,
     });
     assertCurrent();

@@ -44,10 +44,12 @@ export function compiledPreviewDocument(
 const input=${payload};
 const send=(type,detail={})=>parent.postMessage({type,revision:input.revision,token:input.token,...detail},'*');
 const urls=[];let retire=()=>{},closed=false;
+const eventProps=(index)=>Object.fromEntries(input.preview.events.map(name=>['on'+name[0].toUpperCase()+name.slice(1),()=>{if(!closed)send('preview-event',{name,index});}]));
 const error=(value)=>{if(!closed)send('preview-error',{message:String(value&&value.message||value).slice(0,2000)});};
 addEventListener('error',(event)=>error(event.error||event.message));
 addEventListener('unhandledrejection',(event)=>error(event.reason));
-// Source-defined links remain visible, but a preview cannot navigate its frame.
+// Admission rejects authored anchors/forms; additionally suppress native defaults
+// from trusted delivery code. CSP alone does not prevent frame self-navigation.
 addEventListener('click',(event)=>{if(event.composedPath().some(node=>node&&node.tagName==='A'&&node.hasAttribute('href')))event.preventDefault();},true);
 addEventListener('submit',(event)=>event.preventDefault(),true);
 addEventListener('message',(event)=>{
@@ -72,19 +74,20 @@ addEventListener('message',(event)=>{
     customElements.define('compiled-preview-control',component);
     const owners=[];
     retire=()=>{const failures=[];for(const owner of owners){try{owner.dispose();}catch(error){failures.push(error);}}if(failures.length)throw new AggregateError(failures,'Preview cleanup failed.');};
-    for(const item of input.items){
+    for(const [index,item] of input.items.entries()){
       const element=document.createElement('compiled-preview-control');element.dataset.previewItem='';element.textContent=item.text||'';
+      for(const name of input.preview.events)element.addEventListener(name,event=>{if(!closed&&event instanceof CustomEvent&&event.target===element)send('preview-event',{name,index});});
       owners.push(element);element.setProps(item.props);stage.append(element);
     }
   }else if(input.target.profile==='react-dom-source-v1'){
     const React=await import('react');const {createRoot}=await import('react-dom/client');if(closed)return;
-    const root=createRoot(stage);retire=()=>root.unmount();root.render(React.createElement(React.Fragment,null,...input.items.map((item,index)=>React.createElement(component,{...item.props,key:index,'data-preview-item':''},item.text||''))));
+    const root=createRoot(stage);retire=()=>root.unmount();root.render(React.createElement(React.Fragment,null,...input.items.map((item,index)=>React.createElement(component,{...item.props,...eventProps(index),key:index,'data-preview-item':''},item.text||''))));
   }else if(input.target.profile==='vue-source-v1'){
     const Vue=await import('vue');if(closed)return;
-    const app=Vue.createApp({render:()=>input.items.map(item=>Vue.h(component,{...item.props,'data-preview-item':''},{default:()=>item.text||''}))});retire=()=>app.unmount();app.mount(stage);
+    const app=Vue.createApp({render:()=>input.items.map((item,index)=>Vue.h(component,{...item.props,...eventProps(index),'data-preview-item':''},{default:()=>item.text||''}))});retire=()=>app.unmount();app.mount(stage);
   }else if(input.target.profile==='vue2-source-v1'){
     const {default:Vue}=await import('vue');if(closed)return;
-    const app=new Vue({render(h){return h('div',input.items.map(item=>h(component,{props:item.props,attrs:{'data-preview-item':''}},[item.text||''])));}});
+    const app=new Vue({render(h){return h('div',input.items.map((item,index)=>h(component,{props:item.props,on:Object.fromEntries(input.preview.events.map(name=>[name,()=>{if(!closed)send('preview-event',{name,index});}])),attrs:{'data-preview-item':''}},[item.text||''])));}});
     retire=()=>app.$destroy();stage.append(app.$mount().$el);
   }else throw new Error('Unsupported preview target '+input.target.profile);
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
@@ -98,7 +101,8 @@ export function mountCompiledPreview(
   result: Extract<BrowserCompileResult, { ok: true }>,
   target: BrowserTargetAssets,
   items: readonly CompiledPreviewItem[],
-  onFailure: (error: Error) => void
+  onFailure: (error: Error) => void,
+  onEvent?: (name: string, index: number) => void
 ): CompiledPreviewMount {
   if (
     !result.preview ||
@@ -118,6 +122,7 @@ export function mountCompiledPreview(
     readySettled = false,
     retirePromise: Promise<void> | undefined;
   let finishRetirement: (() => void) | undefined;
+  let cleanupError: Error | undefined;
   let rejectReady!: (error: Error) => void, resolveReady!: () => void;
   const ready = new Promise<void>((resolve, reject) => {
     resolveReady = resolve;
@@ -134,11 +139,23 @@ export function mountCompiledPreview(
     if (event.source !== frame.contentWindow || event.origin !== 'null') return;
     const message = event.data;
     if (!message || message.token !== token || message.revision !== result.revision) return;
+    if (message.type === 'cleanup-error') {
+      cleanupError = new Error(String(message.message));
+      return;
+    }
     if (message.type === 'disposed') {
       finishRetirement?.();
       return;
     }
     if (disposed) return;
+    if (
+      message.type === 'preview-event' &&
+      result.preview!.events.includes(message.name) &&
+      Number.isInteger(message.index) &&
+      message.index >= 0 &&
+      message.index < items.length
+    )
+      onEvent?.(message.name, message.index);
     if (message.type === 'preview-ready' && message.profile === target.profile) {
       readySettled = true;
       window.clearTimeout(readyDeadline);
@@ -163,12 +180,13 @@ export function mountCompiledPreview(
       window.clearTimeout(readyDeadline);
       if (!readySettled) rejectReady(new DOMException('Preview was retired.', 'AbortError'));
       frame.hidden = true;
-      retirePromise = new Promise<void>((resolve) => {
+      retirePromise = new Promise<void>((resolve, reject) => {
         const finish = () => {
           window.clearTimeout(timeout);
           window.removeEventListener('message', listener);
           frame.remove();
-          resolve();
+          if (cleanupError) reject(cleanupError);
+          else resolve();
         };
         const timeout = window.setTimeout(finish, 250);
         finishRetirement = finish;

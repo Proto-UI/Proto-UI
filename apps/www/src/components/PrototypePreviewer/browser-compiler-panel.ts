@@ -34,6 +34,7 @@ export class BrowserCompilerPanel extends HTMLElement {
   private debounce?: ReturnType<typeof setTimeout>;
   private bound = false;
   private targets = new Map<string, BrowserTargetAssets>();
+  private eventCount = 0;
   private messages(en: string, zh: string) {
     return this.dataset.language === 'zh' ? zh : en;
   }
@@ -108,10 +109,10 @@ export class BrowserCompilerPanel extends HTMLElement {
     this.element<HTMLButtonElement>('[data-compiler-cancel]').disabled = false;
     try {
       const [bundleResponse, build, source] = await Promise.all([
-        fetch('/_compiler/compiler.js', { signal: lifetime.signal, credentials: 'omit' }),
-        this.json<BrowserCompilerBuild>('/_compiler/build.json', lifetime.signal),
+        fetch('/compiler-assets/compiler.js', { signal: lifetime.signal, credentials: 'omit' }),
+        this.json<BrowserCompilerBuild>('/compiler-assets/build.json', lifetime.signal),
         this.json<BrowserSourceAsset>(
-          `/_compiler/source/${encodeURIComponent(this.dataset.prototypeId ?? '')}.json`,
+          `/compiler-assets/source/${encodeURIComponent(this.dataset.prototypeId ?? '')}.json`,
           lifetime.signal
         ),
       ]);
@@ -147,7 +148,7 @@ export class BrowserCompilerPanel extends HTMLElement {
           let target = this.targets.get(profile);
           if (!target) {
             target = await this.json<BrowserTargetAssets>(
-              `/_compiler/targets/${profile}.json`,
+              `/compiler-assets/targets/${profile}.json`,
               lifetime.signal
             );
             this.targets.set(profile, target);
@@ -184,7 +185,12 @@ export class BrowserCompilerPanel extends HTMLElement {
               result,
               asset,
               items,
-              (error) => this.session?.fail(result.revision, error)
+              (error) => this.session?.fail(result.revision, error),
+              (name, index) => {
+                this.dataset.eventCount = String(++this.eventCount);
+                this.element('[data-compiler-events]').textContent =
+                  `${name} · ${this.messages('item', '项目')} ${index + 1} · ${this.eventCount}`;
+              }
             );
           };
         },
@@ -207,7 +213,8 @@ export class BrowserCompilerPanel extends HTMLElement {
 
   private changed() {
     const revision = String(++this.revisionNumber);
-    this.session?.invalidate(revision);
+    if (this.session) this.session.invalidate(revision);
+    else this.renderState({ phase: 'idle', revision });
     clearTimeout(this.debounce);
     this.debounce = setTimeout(() => void this.run(), 250);
   }
@@ -245,6 +252,9 @@ export class BrowserCompilerPanel extends HTMLElement {
     if (state.phase !== 'ready') {
       delete this.dataset.requestSha256;
       delete this.dataset.targetSha256;
+      this.eventCount = 0;
+      this.dataset.eventCount = '0';
+      this.element('[data-compiler-events]').textContent = '';
       this.generated = {};
       this.element<HTMLSelectElement>('[data-generated-file]').replaceChildren();
       this.element('[data-generated-text]').textContent = '';
@@ -274,12 +284,15 @@ export class BrowserCompilerPanel extends HTMLElement {
       if (!state.result || (!state.result.ok && state.result.phase === 'host')) {
         const failed = this.session;
         this.session = undefined;
-        this.generation++;
+        const failedGeneration = ++this.generation;
         this.client?.dispose();
         this.client = undefined;
         this.lifetime?.abort();
         this.lifetime = undefined;
-        void failed?.dispose();
+        void failed?.dispose().catch((error) => {
+          if (failedGeneration === this.generation)
+            diagnostics.textContent += `\n${this.messages('Preview retirement', '预览清理')}: ${String(error)}`;
+        });
       }
     }
     if (state.phase === 'ready') {
@@ -310,7 +323,17 @@ export class BrowserCompilerPanel extends HTMLElement {
     this.lifetime = undefined;
     const generation = ++this.generation;
     this.element<HTMLButtonElement>('[data-compiler-cancel]').disabled = true;
-    await session?.dispose();
+    try {
+      await session?.dispose();
+    } catch (error) {
+      if (generation === this.generation)
+        this.renderState({
+          phase: 'failed',
+          revision: String(this.revisionNumber),
+          message: String(error),
+        });
+      return;
+    }
     if (generation === this.generation)
       this.renderState({ phase: 'disposed', revision: String(this.revisionNumber) });
   }

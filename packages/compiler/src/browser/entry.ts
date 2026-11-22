@@ -1,6 +1,10 @@
 import { compilePrototype } from '../memory';
 import { createHash } from 'node:crypto';
-import { assertPreviewAdmission, prepareBrowserPreview } from './preview-artifact';
+import {
+  assertPreviewAdmission,
+  prepareBrowserPreview,
+  previewStyleTokens,
+} from './preview-artifact';
 import type { BrowserCompileRequest, BrowserCompileResult } from './protocol';
 
 /** Trusted bundle entry. Authored source is an argument to the AST compiler, never eval input. */
@@ -16,7 +20,17 @@ export function compileCanonicalRequest(serialized: string): string {
         requestSha256,
         source: result.value.ir.source,
         output: result.value.output,
-        ...(request.preview ? { preview: prepareBrowserPreview(result.value.output) } : {}),
+        ...(request.preview
+          ? {
+              preview: prepareBrowserPreview(
+                result.value.output,
+                result.value.ir.exposes
+                  .filter((exposure) => exposure.kind === 'event')
+                  .map((exposure) => exposure.name),
+                previewStyleTokens(result.value.ir)
+              ),
+            }
+          : {}),
       }
     : {
         ok: false,

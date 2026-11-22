@@ -6,6 +6,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildBrowserCompiler } from './build-browser.mjs';
 import { FileSourceGraph } from '../../packages/compiler/src/source-loader';
+import {
+  assertSameInputFiles,
+  digest,
+  hashMetafileInputs,
+  mergeInputFiles,
+  snapshotBrowserRepositoryInputs,
+} from './browser-inputs.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const compilerRequire = createRequire(path.join(root, 'packages/compiler/package.json'));
@@ -25,6 +32,7 @@ export interface BrowserSourceAsset {
 
 async function bundleTarget(entry: string, external: string[] = []) {
   const result = await build({
+    absWorkingDir: root,
     entryPoints: [entry],
     bundle: true,
     write: false,
@@ -32,6 +40,7 @@ async function bundleTarget(entry: string, external: string[] = []) {
     platform: 'browser',
     target: 'es2022',
     minify: true,
+    metafile: true,
     external,
     define: {
       'process.env.NODE_ENV': '"production"',
@@ -40,80 +49,158 @@ async function bundleTarget(entry: string, external: string[] = []) {
       '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': 'false',
     },
   });
-  return result.outputFiles[0].text;
+  return {
+    code: result.outputFiles[0].text,
+    inputFiles: await hashMetafileInputs(result.metafile),
+  };
+}
+
+async function browserDeliveryInputs() {
+  // Probe the actual entry imports, including the separate module Worker and
+  // its binary WASM dependency. These probe bundles are not served as UI code.
+  const result = await build({
+    absWorkingDir: root,
+    entryPoints: [
+      'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
+      'packages/compiler/src/browser/worker.ts',
+    ],
+    outdir: path.join(root, '.cache/compiler-browser-input-probe'),
+    bundle: true,
+    write: false,
+    metafile: true,
+    format: 'esm',
+    platform: 'browser',
+    target: 'es2022',
+    loader: { '.wasm': 'file' },
+    plugins: [
+      {
+        name: 'wasm-url-input',
+        setup(builder) {
+          builder.onResolve({ filter: /\/wasm\?url$/ }, ({ path: id }) => ({
+            path: compilerRequire.resolve(id.slice(0, -4)),
+          }));
+        },
+      },
+    ],
+  });
+  return hashMetafileInputs(result.metafile);
+}
+
+/** An uncached build is also the independent current-source receipt oracle. */
+export async function buildBrowserAssets(
+  directory = path.join(root, '.cache/compiler-browser')
+): Promise<Map<string, string>> {
+  const before = await snapshotBrowserRepositoryInputs();
+  const compiler = await buildBrowserCompiler(directory);
+  const assets = new Map<string, string>();
+  assets.set('compiler.js', await readFile(path.join(directory, 'compiler.js'), 'utf8'));
+  assets.set('build.json', await readFile(path.join(directory, 'build.json'), 'utf8'));
+  const react = await bundleTarget(compilerRequire.resolve('react'));
+  const reactDom = await bundleTarget(compilerRequire.resolve('react-dom'), ['react']);
+  const reactClient = await bundleTarget(compilerRequire.resolve('react-dom/client'), [
+    'react',
+    'react-dom',
+  ]);
+  const vue = await bundleTarget(compilerRequire.resolve('vue/dist/vue.runtime.esm-bundler.js'));
+  const vue2 = await bundleTarget(wwwRequire.resolve('vue2-runtime/dist/vue.runtime.esm.js'));
+  const floatingRequire = createRequire(
+    path.join(root, 'packages/modules/positioning/package.json')
+  );
+  const floating = await bundleTarget(floatingRequire.resolve('@floating-ui/dom'));
+  const targets = {
+    'web-component-source-v1': { '@floating-ui/dom': floating },
+    'react-dom-source-v1': {
+      react,
+      'react-dom': reactDom,
+      'react-dom/client': reactClient,
+      '@floating-ui/dom': floating,
+    },
+    'vue-source-v1': { vue, '@floating-ui/dom': floating },
+    'vue2-source-v1': { vue: vue2, '@floating-ui/dom': floating },
+  };
+  const version = async (resolver: NodeRequire, name: string) =>
+    JSON.parse(await readFile(resolver.resolve(`${name}/package.json`), 'utf8')).version as string;
+  const versions = {
+    react: await version(compilerRequire, 'react'),
+    'react-dom': await version(compilerRequire, 'react-dom'),
+    vue: await version(compilerRequire, 'vue'),
+    '@floating-ui/dom': await version(floatingRequire, '@floating-ui/dom'),
+  };
+  const targetInputs: Record<string, Record<string, string>> = {};
+  const targetModulesSha256: Record<string, string> = {};
+  for (const [profile, bundles] of Object.entries(targets)) {
+    const modules = Object.fromEntries(
+      Object.entries(bundles).map(([name, bundle]) => [name, bundle.code])
+    );
+    targetModulesSha256[profile] = digest(JSON.stringify(modules));
+    targetInputs[profile] = mergeInputFiles(
+      ...Object.values(bundles).map((bundle) => bundle.inputFiles)
+    );
+    const selected =
+      profile === 'vue2-source-v1'
+        ? { ...versions, vue: await version(wwwRequire, 'vue2-runtime') }
+        : versions;
+    assets.set(
+      `targets/${profile}.json`,
+      JSON.stringify({
+        format: 1,
+        profile,
+        modules,
+        versions: selected,
+        modulesSha256: targetModulesSha256[profile],
+      })
+    );
+  }
+  const deliveryInputs = await browserDeliveryInputs();
+  const after = await snapshotBrowserRepositoryInputs();
+  assertSameInputFiles(before, after);
+  const sourceFiles = mergeInputFiles(
+    after,
+    compiler.inputFiles,
+    ...Object.values(targetInputs),
+    deliveryInputs
+  );
+  const manifest = {
+    format: 1,
+    kind: 'canonical-browser-build-inputs-v1',
+    sourcePolicy: 'workspace-superset-and-esbuild-inputs-v1',
+    compilerBuild: JSON.parse(assets.get('build.json')!),
+    targetModulesSha256,
+    inputGroups: {
+      compiler: Object.keys(compiler.inputFiles),
+      targets: Object.fromEntries(
+        Object.entries(targetInputs).map(([profile, inputs]) => [profile, Object.keys(inputs)])
+      ),
+      delivery: Object.keys(deliveryInputs),
+    },
+    assets: Object.fromEntries([...assets].map(([name, contents]) => [name, digest(contents)])),
+    sourceFiles,
+  };
+  assets.set('input-manifest.json', JSON.stringify(manifest));
+  return assets;
 }
 
 /** Only trusted compiler/target code is bundled here. Authored proto is served as inert text. */
 export function prepareBrowserAssets(): Promise<Map<string, string>> {
   if (preparation) return preparation;
-  preparation = (async () => {
-    const directory = path.join(root, '.cache/compiler-browser');
-    await buildBrowserCompiler(directory);
-    const assets = new Map<string, string>();
-    assets.set('compiler.js', await readFile(path.join(directory, 'compiler.js'), 'utf8'));
-    assets.set('build.json', await readFile(path.join(directory, 'build.json'), 'utf8'));
-    const react = await bundleTarget(compilerRequire.resolve('react'));
-    const reactDom = await bundleTarget(compilerRequire.resolve('react-dom'), ['react']);
-    const reactClient = await bundleTarget(compilerRequire.resolve('react-dom/client'), [
-      'react',
-      'react-dom',
-    ]);
-    const vue = await bundleTarget(compilerRequire.resolve('vue/dist/vue.runtime.esm-bundler.js'));
-    const vue2 = await bundleTarget(wwwRequire.resolve('vue2-runtime/dist/vue.runtime.esm.js'));
-    const floatingRequire = createRequire(
-      path.join(root, 'packages/modules/positioning/package.json')
-    );
-    const floating = await bundleTarget(floatingRequire.resolve('@floating-ui/dom'));
-    const targets = {
-      'web-component-source-v1': { '@floating-ui/dom': floating },
-      'react-dom-source-v1': {
-        react,
-        'react-dom': reactDom,
-        'react-dom/client': reactClient,
-        '@floating-ui/dom': floating,
-      },
-      'vue-source-v1': { vue, '@floating-ui/dom': floating },
-      'vue2-source-v1': { vue: vue2, '@floating-ui/dom': floating },
-    };
-    const version = async (resolver: NodeRequire, name: string) =>
-      JSON.parse(await readFile(resolver.resolve(`${name}/package.json`), 'utf8'))
-        .version as string;
-    const versions = {
-      react: await version(compilerRequire, 'react'),
-      'react-dom': await version(compilerRequire, 'react-dom'),
-      vue: await version(compilerRequire, 'vue'),
-      '@floating-ui/dom': await version(floatingRequire, '@floating-ui/dom'),
-    };
-    for (const [profile, modules] of Object.entries(targets)) {
-      const selected =
-        profile === 'vue2-source-v1'
-          ? { ...versions, vue: await version(wwwRequire, 'vue2-runtime') }
-          : versions;
-      assets.set(
-        `targets/${profile}.json`,
-        JSON.stringify({
-          format: 1,
-          profile,
-          modules,
-          versions: selected,
-          modulesSha256: createHash('sha256').update(JSON.stringify(modules)).digest('hex'),
-        })
-      );
-    }
-    return assets;
-  })().catch((error) => {
+  preparation = buildBrowserAssets().catch((error) => {
     preparation = undefined;
     throw error;
   });
   return preparation;
 }
 
-let registrations: Promise<{ id: string; entry?: string; exportName?: string }[]> | undefined;
-export function browserSourceRegistrations() {
+interface BrowserSourceRegistration {
+  id: string;
+  entry?: string;
+  exportName?: string;
+}
+let registrations: Promise<BrowserSourceRegistration[]> | undefined;
+export function browserSourceRegistrations(): Promise<BrowserSourceRegistration[]> {
   return (registrations ??= readFile(
     path.join(root, 'internal/compiler/website-demo-migrations.json'),
     'utf8'
-  ).then((text) => JSON.parse(text).prototypes));
+  ).then((text): BrowserSourceRegistration[] => JSON.parse(text).prototypes));
 }
 
 export async function readBrowserSource(id: string): Promise<BrowserSourceAsset> {

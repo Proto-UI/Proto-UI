@@ -134,12 +134,15 @@ function ${p}RootAttributes(projection: GeneratedRenderProjection): Record<strin
   }
   return attributes;
 }
-function ${p}CheckCarrier(carrier: GeneratedHydrationCarrier): void {
+/** Validate the complete encoded transport before server publication or client startup. */
+export function validateGeneratedCarrier(carrier: GeneratedHydrationCarrier): GeneratedHydrationCarrier {
+  carrier = ${p}InitialData(carrier);
   if (carrier.version !== 1 || carrier.profile !== 'react-dom-ssr-v1' || carrier.source !== ${JSON.stringify(ir.source.sha256)})
     throw new Error('[Hydration] carrier version/source/profile mismatch; adoption was not attempted.');
   if (!carrier.projections || typeof carrier.projections !== 'object' || Array.isArray(carrier.projections) || !Object.keys(carrier.projections).length)
     throw new Error('[Hydration] missing initial component projections; adoption was not attempted.');
   for (const projection of Object.values(carrier.projections)) ${p}DecodeData(projection.raw);
+  return carrier;
 }
 class ${p}ServerRequest {
   readonly projections: Record<string, GeneratedRenderProjection> = Object.create(null);
@@ -198,7 +201,8 @@ export function renderGeneratedToString(props: GeneratedComponentProps = {}, opt
     if (request.failures.length) throw request.failures.length === 1 ? request.failures[0]
       : new AggregateError(request.failures, '[SSR] source failures cannot be accepted as Suspense fallback serialization.');
     options.signal?.throwIfAborted();
-    return { html, carrier: { version: 1, profile: 'react-dom-ssr-v1', source: ${JSON.stringify(ir.source.sha256)}, identifierPrefix, html, projections: request.projections } };
+    const carrier = validateGeneratedCarrier({ version: 1, profile: 'react-dom-ssr-v1', source: ${JSON.stringify(ir.source.sha256)}, identifierPrefix, html, projections: request.projections });
+    return { html, carrier };
   } catch (error) { failure ??= { value: error }; throw failure.value; }
   finally {
     options.signal?.removeEventListener('abort', abort);
@@ -216,8 +220,7 @@ export interface GeneratedHydratedRoot {
 /** React adoption is real; recoverable regeneration is diagnosed and never counted as successful adoption. */
 export function hydrateGeneratedRoot(container: Element | Document, props: GeneratedComponentProps, carrier: GeneratedHydrationCarrier,
   options: ${p}HydrationOptions = {}): GeneratedHydratedRoot {
-  carrier = ${p}InitialData(carrier);
-  ${p}CheckCarrier(carrier);
+  carrier = validateGeneratedCarrier(carrier);
   if (options.identifierPrefix !== undefined && options.identifierPrefix !== carrier.identifierPrefix)
     throw new Error('[Hydration] identifierPrefix differs from the server request.');
   if (container.nodeType !== 1) throw new Error('[Hydration] generated single-Root HTML requires an Element container.');

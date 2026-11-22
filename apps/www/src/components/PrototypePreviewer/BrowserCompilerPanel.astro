@@ -40,6 +40,7 @@ const { prototypeId, items = [{ props: {}, text: 'Preview' }], isZh = false } = 
         {isZh ? '展开后加载编译器。' : 'The compiler loads when this panel opens.'}
       </p>
       <div data-compiled-preview aria-label={isZh ? '编译结果预览' : 'Compiled preview'}></div>
+      <output data-compiler-events aria-live="polite"></output>
       <pre data-compiler-diagnostics role="alert" hidden></pre>
       <details data-source-editor>
         <summary>{isZh ? '编辑原型源码' : 'Edit prototype source'}</summary>

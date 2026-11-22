@@ -104,6 +104,8 @@ describe('browser compiler revision ownership', () => {
   it.each([
     { requestSha256: 'b'.repeat(64) },
     { build: { ...build, typescriptVersion: 'another' } },
+    { result: { ok: 'true', revision: 'current' } },
+    { result: { ok: false, revision: 'current', phase: 'compile', diagnostics: {} } },
     { result: { ok: false, revision: 'wrong', phase: 'host', error: { code: 'disposed' } } },
   ])('fails closed on mismatched transport content %j', async (overrides) => {
     const { worker, client } = await initialize();

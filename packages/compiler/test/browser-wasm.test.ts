@@ -178,11 +178,23 @@ describe('canonical compiler in actual QuickJS WASM', () => {
       expect(result.preview?.entry).toBe('pui:generated/entry.ts');
       expect(result.preview?.modules[result.preview.entry]).toContain('pui:preview-budget');
       expect(result.preview?.executionBudget).toBe('100000-checkpoints-per-task-v1');
+      expect(result.preview?.events).toEqual(['click']);
+      expect(result.preview?.styles.join('\n')).toContain('user-select: none');
     }
   }, 150_000);
 
   it('does not grant executable or browsing template elements to the generated preview', () => {
-    for (const tag of ['meta', 'iframe', 'script', 'object', 'embed', 'base', 'link']) {
+    for (const tag of [
+      'meta',
+      'iframe',
+      'script',
+      'object',
+      'embed',
+      'base',
+      'link',
+      'a',
+      'form',
+    ]) {
       const input: BrowserCompileRequest = {
         ...request,
         source: `import {definePrototype} from '@proto.ui/core';

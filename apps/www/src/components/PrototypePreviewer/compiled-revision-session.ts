@@ -88,8 +88,18 @@ export class CompiledRevisionSession {
   private retire(): void {
     const owner = this.owner;
     this.owner = undefined;
-    if (owner)
-      this.retirement = Promise.all([this.retirement, owner.dispose()]).then(() => undefined);
+    if (owner) {
+      let retiring: Promise<void>;
+      try {
+        retiring = owner.dispose();
+      } catch (error) {
+        retiring = Promise.reject(error);
+      }
+      this.retirement = Promise.all([this.retirement, retiring]).then(() => undefined);
+      // Keep the rejection for the next activation/dispose caller, while that
+      // caller may still be waiting for a long-running compiler response.
+      void this.retirement.catch(() => undefined);
+    }
   }
 
   async dispose(): Promise<void> {

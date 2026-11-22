@@ -33,6 +33,87 @@ const sameBuild = (a: BrowserCompilerBuild | undefined, b: BrowserCompilerBuild)
   a.typescriptVersion === b.typescriptVersion &&
   a.execution === b.execution;
 const abort = () => new DOMException('Compiler request was superseded or disposed.', 'AbortError');
+const record = (value: unknown): value is Record<string, any> =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
+function validResult(value: unknown, request: BrowserCompileRequest): boolean {
+  if (!record(value) || typeof value.ok !== 'boolean') return false;
+  if (!value.ok) {
+    if (value.phase === 'compile')
+      return (
+        Array.isArray(value.diagnostics) &&
+        value.diagnostics.every(
+          (entry: unknown) =>
+            record(entry) &&
+            typeof entry.code === 'string' &&
+            typeof entry.message === 'string' &&
+            record(entry.span)
+        )
+      );
+    return (
+      value.phase === 'host' &&
+      record(value.error) &&
+      [
+        'invalid-request',
+        'input-limit',
+        'execution-limit',
+        'wasm-execution',
+        'preview-policy',
+        'disposed',
+      ].includes(value.error.code) &&
+      typeof value.error.message === 'string'
+    );
+  }
+  const profile =
+    typeof request.options.profile === 'string'
+      ? request.options.profile
+      : request.options.profile.profile;
+  if (
+    !record(value.source) ||
+    !/^[a-f0-9]{64}$/.test(value.source.sha256) ||
+    !record(value.output) ||
+    typeof value.output.code !== 'string' ||
+    typeof value.output.profile !== 'string' ||
+    (profile && value.output.profile !== profile) ||
+    !Array.isArray(value.output.dependencies) ||
+    !value.output.dependencies.every(
+      (dependency: unknown) =>
+        record(dependency) &&
+        typeof dependency.name === 'string' &&
+        typeof dependency.version === 'string'
+    )
+  )
+    return false;
+  if (
+    value.output.supportingFiles !== undefined &&
+    (!Array.isArray(value.output.supportingFiles) ||
+      !value.output.supportingFiles.every(
+        (file: unknown) =>
+          record(file) &&
+          typeof file.path === 'string' &&
+          typeof file.contents === 'string' &&
+          ['source', 'style', 'declaration'].includes(file.kind)
+      ))
+  )
+    return false;
+  if (request.preview) {
+    const preview = value.preview;
+    if (
+      !record(preview) ||
+      preview.format !== 1 ||
+      typeof preview.entry !== 'string' ||
+      !record(preview.modules) ||
+      !Object.values(preview.modules).every((source) => typeof source === 'string') ||
+      typeof preview.modules[preview.entry] !== 'string' ||
+      !Array.isArray(preview.styles) ||
+      !preview.styles.every((style: unknown) => typeof style === 'string') ||
+      !Array.isArray(preview.events) ||
+      !preview.events.every((name: unknown) => typeof name === 'string') ||
+      preview.executionBudget !== '100000-checkpoints-per-task-v1'
+    )
+      return false;
+  }
+  return true;
+}
 
 /** Every request is snapshotted before queueing. The caller owns the complete Worker lifetime. */
 export async function createBrowserCompilerClient(
@@ -41,6 +122,14 @@ export async function createBrowserCompilerClient(
   options: BrowserCompilerClientOptions = {}
 ): Promise<BrowserCompilerClient> {
   if (options.signal?.aborted) throw abort();
+  if (
+    build?.format !== 1 ||
+    build.execution !== 'quickjs-wasm' ||
+    !/^[a-f0-9]{64}$/.test(build.compilerSha256) ||
+    typeof build.typescriptVersion !== 'string' ||
+    !build.typescriptVersion
+  )
+    throw new TypeError('Invalid browser compiler build identity.');
   const identity = Object.freeze({ ...build });
   const worker =
     options.workerFactory?.() ??
@@ -149,7 +238,7 @@ export async function createBrowserCompilerClient(
       const completed = running;
       if (
         !sameBuild(message.build, identity) ||
-        !message.result ||
+        !validResult(message.result, completed.request) ||
         message.result.revision !== completed.request.revision ||
         message.requestSha256 !== completed.requestSha256 ||
         ((message.result.ok || message.result.phase !== 'host') &&

@@ -8,6 +8,51 @@ const empty = definePrototype({ name: 'request-empty', setup() {} });
 const identity = <T>(value: T) => value;
 
 describe('C-LIFECYCLE-REQUEST-0001: private request ownership', () => {
+  it.each([undefined, null, false, 0, '', new Error('setup primary')])(
+    'retires resources acquired before setup throws %j, without publishing a session',
+    async (primary) => {
+      const calls: string[] = [];
+      const cleanupErrors: unknown[] = [];
+      const secondary = new Error('setup cleanup secondary');
+      let state!: OwnedStateHandle<number>;
+      let staleWrite!: () => void;
+      const proto = definePrototype({
+        name: 'request-partial-setup',
+        setup(def) {
+          state = def.state.numberDiscrete('value', 7);
+          staleWrite = () => state.set(9);
+          def.lifecycle.onCreated(() => calls.push('unreached created'));
+          def.lifecycle.onBeforeDispose(() => {
+            calls.push(`first:${state.get()}`);
+            throw secondary;
+          });
+          def.lifecycle.onBeforeDispose(() => calls.push(`second:${state.get()}`));
+          throw primary;
+        },
+      });
+      const serialize = vi.fn();
+      await expect(
+        executeRuntimeRequest(proto, {
+          props: {},
+          serialize,
+          onCleanupError(error) {
+            cleanupErrors.push(error);
+            throw new Error('diagnostic');
+          },
+        })
+      ).rejects.toBe(primary);
+      expect(calls).toEqual(['first:7', 'second:7']);
+      expect(cleanupErrors).toEqual([secondary]);
+      expect(serialize).not.toHaveBeenCalled();
+      expect(() => state.get()).toThrow(/disposed/i);
+      expect(staleWrite).toThrow(/disposed/i);
+      // Failed startup did not leave a setup/callback scope active for the next request.
+      await expect(
+        executeRuntimeRequest(empty, { props: {}, serialize: () => 'recovered' })
+      ).resolves.toBe('recovered');
+    }
+  );
+
   it('runs setup/created/render/terminal cleanup once, with zero view epochs and no browser globals', async () => {
     expect(typeof window).toBe('undefined');
     const calls: string[] = [];

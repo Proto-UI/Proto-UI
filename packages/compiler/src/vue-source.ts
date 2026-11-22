@@ -1680,7 +1680,10 @@ export async function renderToString(props: GeneratedProps = {}, options: Genera
     const rendering = ${n('RenderToString')}(app).then(html => { if (session.failure) throw session.failure.value; return html; });
     const html = options.signal ? await Promise.race([rendering, aborted]) : await rendering;
     session.data.html = html;
-    return { html, handoff: JSON.parse(JSON.stringify(session.data)) as GeneratedHandoff };
+    // The receiver checks the expanded envelope, including HTML and every
+    // projection. Raw Props admission alone cannot establish transport bounds.
+    const handoff = ${n('CreateSession')}(false, ${JSON.stringify(ir.source.sha256)}, JSON.parse(JSON.stringify(session.data)) as GeneratedHandoff).data;
+    return { html, handoff };
   } catch (error) { failure ??= { value: error }; throw failure.value; }
   finally {
     if (abort) options.signal?.removeEventListener('abort', abort);

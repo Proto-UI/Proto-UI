@@ -243,7 +243,7 @@ function checkServerAssociationInputs(props: unknown, options: ServerOptions): v
 }
 export class HydrationMismatch extends Error {
   readonly code = 'PUI_WC_HYDRATION_MISMATCH';
-  constructor(readonly reason: string, readonly path = 'Root') { super('WC hydration mismatch at ' + path + ': ' + reason); this.name = 'HydrationMismatch'; }
+  constructor(readonly reason: string, readonly path = 'Root', options?: ErrorOptions) { super('WC hydration mismatch at ' + path + ': ' + reason, options); this.name = 'HydrationMismatch'; }
 }
 export function isPresentation(value: unknown): value is Presentation {
   return !!value && typeof value === 'object' && ['element','text','slot'].includes((value as {kind: string}).kind);
@@ -326,7 +326,7 @@ export function decodeRaw(data: RawData): Record<string, unknown> {
   return raw;
 }
 export function checkCarrier(carrier: Carrier, binding: string, tag: string, artifacts?: ArtifactVersions): void {
-  try { checkData(carrier); } catch { throw new HydrationMismatch('carrier contains non-transport data'); }
+  try { checkData(carrier); } catch (cause) { throw new HydrationMismatch('carrier contains non-transport data', 'Root', { cause }); }
   try {
     assertNoInstanceAssociations(carrier, 'Carrier');
     assertNoInstanceAssociations(carrier?.attributes, 'Root attributes');
@@ -420,6 +420,8 @@ export function finishServer(port: ServerPort, props: Record<string, unknown>, o
   if (!port.present) attributes.style = (attributes.style ? attributes.style + ';' : '') + 'display:none!important';
   const control = port.control ? {...port.control, properties: {...port.control.properties}, attributes: {...port.control.attributes}} : null;
   const carrier: Carrier = {instanceId, artifacts: {...artifacts}, version: 1, profile: 'web-component-ssr-v1', binding, tagName, mode, raw: encodeRaw(props), presentation: JSON.parse(JSON.stringify(port.presentation)), control, attributes, interactionAttributes: {...port.interactionAttributes}, baselines: {...options.rootAttributes}, present: port.present};
+  // Use the actual receiver's complete-envelope boundary before publication.
+  checkCarrier(carrier, binding, tagName, artifacts);
   const tokens = Object.entries(attributes).map(([name, value]) => ' ' + name + '="' + escapeAttribute(value) + '"').join('');
   const slotHtml = typeof options.slotHtml === 'function' ? options.slotHtml(port.parent) : options.slotHtml ?? '';
   if (typeof slotHtml !== 'string') throw new TypeError('Native server slot must serialize to HTML');

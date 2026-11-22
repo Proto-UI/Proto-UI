@@ -131,4 +131,36 @@ describe('compiled revision owner coordination', () => {
     expect(states.at(-1)).toMatchObject({ phase: 'ready', revision: 'good' });
     await session.dispose();
   });
+
+  it('reports a failed retirement and prevents replacement activation until a fresh session', async () => {
+    const states: RevisionState[] = [],
+      mounted: string[] = [];
+    const retirement = deferred<void>();
+    const nextResult = deferred<BrowserCompileResult>();
+    const session = new CompiledRevisionSession({
+      compile: (input) =>
+        input.revision === '1' ? Promise.resolve(success('1')) : nextResult.promise,
+      prepare: async (result) => () => {
+        mounted.push(result.revision);
+        return { ready: Promise.resolve(), dispose: () => retirement.promise };
+      },
+      state: (value) => states.push(value),
+      disposeCompiler() {},
+    });
+    await session.compile(request('1'));
+    const work = session.compile(request('2'));
+    retirement.reject(new Error('retained resource cleanup failed'));
+    // Retirement may settle before a slow compiler response; its rejection is
+    // retained without becoming an unhandled rejection during that interval.
+    await tick();
+    nextResult.resolve(success('2'));
+    await work;
+    expect(mounted).toEqual(['1']);
+    expect(states.at(-1)).toMatchObject({
+      phase: 'failed',
+      revision: '2',
+      message: 'retained resource cleanup failed',
+    });
+    await expect(session.dispose()).rejects.toThrow('retained resource cleanup failed');
+  });
 });

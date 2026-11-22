@@ -29,6 +29,8 @@ export interface BrowserPreviewArtifact {
   entry: string;
   modules: Record<string, string>;
   styles: string[];
+  /** Checked outward event names for ordinary target listener wiring. */
+  events: string[];
   /** Applies only to the preview copies, never to canonical generated source. */
   executionBudget: '100000-checkpoints-per-task-v1';
 }

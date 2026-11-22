@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import path from 'node:path';
 import { sourceName, localSourceCandidates } from '../source-resolution';
 import type { GeneratedModule, PrototypeIR } from '../ir';
@@ -12,7 +13,7 @@ const profiles = new Set([
 ]);
 const moduleId = (file: string) => `pui:generated/${file}`;
 const inertTags = new Set(
-  'a abbr article aside b bdi bdo blockquote br button caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 header hgroup hr i img input ins kbd label legend li main mark menu meter nav ol optgroup option output p picture pre progress q rp rt ruby s samp section select slot small source span strong sub summary sup table tbody td template textarea tfoot th thead time tr u ul var wbr'.split(
+  'abbr article aside b bdi bdo blockquote br button caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em fieldset figcaption figure footer h1 h2 h3 h4 h5 h6 header hgroup hr i img input ins kbd label legend li main mark menu meter nav ol optgroup option output p picture pre progress q rp rt ruby s samp section select slot small source span strong sub summary sup table tbody td template textarea tfoot th thead time tr u ul var wbr'.split(
     ' '
   )
 );
@@ -30,7 +31,7 @@ export function assertPreviewAdmission(ir: PrototypeIR): void {
         !inertTags.has(tag.value.toLowerCase())
       )
         throw new Error(
-          'Preview admission: only literal inert HTML template tags are available; document, executable and embedded browsing elements are unavailable.'
+          'Preview admission: only literal inert HTML template tags are available; navigation, form, document, executable and embedded browsing elements are unavailable.'
         );
     }
     for (const child of Object.values(value)) {
@@ -43,15 +44,48 @@ export function assertPreviewAdmission(ir: PrototypeIR): void {
   ir.moduleBindings?.forEach(visit);
 }
 
+export function previewStyleTokens(ir: PrototypeIR): string[] {
+  const tokens = new Set<string>();
+  const visit = (node: unknown): void => {
+    if (!node || typeof node !== 'object') return;
+    const value = node as Record<string, any>;
+    if (value.kind === 'style-handle') for (const token of value.handle.tokens) tokens.add(token);
+    if (value.kind === 'rule')
+      for (const operation of value.declaration.intent.ops)
+        for (const handle of operation.handles)
+          for (const token of handle.tokens) tokens.add(token);
+    for (const child of Object.values(value)) {
+      if (Array.isArray(child)) child.forEach(visit);
+      else if (child && typeof child === 'object') visit(child);
+    }
+  };
+  visit(ir.setup);
+  ir.hooks.forEach(visit);
+  ir.moduleBindings?.forEach(visit);
+  return [...tokens].sort();
+}
+
 /**
  * Transpiles compiler output, never authored input. The normal generated files
  * remain unchanged. Preview-only module links and execution checkpoints are a
  * delivery boundary around those files, not another semantic implementation.
  */
-export function prepareBrowserPreview(output: GeneratedModule): BrowserPreviewArtifact {
+export function prepareBrowserPreview(
+  output: GeneratedModule,
+  events: string[] = [],
+  tokens: string[] = []
+): BrowserPreviewArtifact {
   if (!profiles.has(output.profile)) throw new Error(`No browser preview for ${output.profile}.`);
   const sources = new Map<string, string>([['entry.ts', output.code]]);
   const styles: string[] = [];
+  if (tokens.length) {
+    const css = renderProtoStyleTokenCss(tokens);
+    if (css.includes('Unsupported Proto UI style tokens'))
+      throw new Error(
+        'Preview admission: the declared style token closure is not supported by the website stylesheet generator.'
+      );
+    styles.push(css);
+  }
   for (const file of output.supportingFiles ?? []) {
     const name = sourceName(file.path);
     if (file.kind === 'style') styles.push(file.contents);
@@ -197,6 +231,7 @@ export function prepareBrowserPreview(output: GeneratedModule): BrowserPreviewAr
     entry: moduleId('entry.ts'),
     modules,
     styles,
+    events,
     executionBudget: '100000-checkpoints-per-task-v1',
   };
 }

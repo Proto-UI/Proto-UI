@@ -19,10 +19,10 @@ const floatingRequire = createRequire(
 );
 
 /** Execute the complete emitted artifact set with the real declared framework. */
-function generated(target: Target, created = '', dispose = '') {
+function generated(target: Target, created = '', dispose = '', extraProp = '') {
   const source = `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'request-owner',setup(def){
-  def.props.define({seed:{type:'number',default:3}});
+  def.props.define({seed:{type:'number',default:3}${extraProp}});
   const count = def.state.numberDiscrete('count',0);
   def.expose.event('phase',{payload:'json'});
   def.lifecycle.onCreated(run=>{count.set(run.props.get().seed);run.expose.emit('phase','created');${created}});
@@ -95,6 +95,42 @@ export default definePrototype({name:'request-owner',setup(def){
   return {
     source,
     module,
+    validateCarrier(carrier: any) {
+      if (target === 'react' || target === 'vue2') return module.validateGeneratedCarrier(carrier);
+      if (target === 'vue')
+        return load('.proto-ui/vue/ssr-v1.ts').createSession(
+          false,
+          parsed.value.source.sha256,
+          carrier
+        ).data;
+      webSupport().checkCarrier(
+        carrier,
+        module.hydrationBinding,
+        module.defaultTagName,
+        module.hydrationArtifacts
+      );
+      return carrier;
+    },
+    renderObserved(props: Record<string, unknown>, events: unknown[]) {
+      if (target !== 'web-component')
+        return this.render({ ...props, onPhase: (phase: unknown) => events.push(phase) });
+      return webSupport().withServerOwner(
+        (port: any, raw: Record<string, unknown>) => {
+          const emit = port.emit.bind(port);
+          port.emit = (key: string, payload: unknown, options: object) => {
+            events.push(payload);
+            emit(key, payload, options);
+          };
+          return module.createHydrationOwner(port, raw);
+        },
+        props,
+        {},
+        module.hydrationBinding,
+        module.defaultTagName,
+        (result: unknown) => result,
+        module.hydrationArtifacts
+      );
+    },
     validateInitialData(carrier: any) {
       if (target === 'react') return module.hydrateGeneratedRoot({}, {}, carrier);
       if (target === 'vue') return module.hydrate({}, carrier);
@@ -151,6 +187,33 @@ async function outcome(run: () => unknown) {
 describe.each<Target>(['react', 'vue', 'vue2', 'web-component'])(
   '%s generated request owner',
   (target) => {
+    it('accepts its entire serialized carrier at the receiving data boundary', async () => {
+      const module = generated(target);
+      const result = await module.render({
+        extra: [[{ value: [undefined, -0, 'accepted'] }]],
+        seed: 5,
+      });
+      const wire = JSON.parse(JSON.stringify(result.carrier ?? result.handoff));
+      expect(module.validateCarrier(wire)).toEqual(wire);
+      expect(result.html).toContain('5');
+    });
+
+    it('rejects an expanded over-depth carrier on the server and still disposes its owner', async () => {
+      const module = generated(target);
+      let extra: unknown = 0;
+      for (let i = 0; i < 40; i++) extra = [extra];
+      const events: unknown[] = [];
+      const result = await outcome(() => module.renderObserved({ extra }, events));
+      expect(result.ok).toBe(false);
+      const error = 'error' in result ? result.error : undefined;
+      const cause = target === 'web-component' && error instanceof Error ? error.cause : error;
+      expect(cause).toBeInstanceOf(TypeError);
+      expect(String(cause)).toMatch(/depth budget/);
+      // Raw input passed admission; overflow was found only after actual creation
+      // and encoding. The same real owner then completed terminal cleanup.
+      expect(events).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
+    });
+
     it('runs created and projection without any browser or physical mount', async () => {
       expect(typeof document).toBe('undefined');
       const module = generated(target);
@@ -331,5 +394,31 @@ describe.each<Target>(['react', 'vue', 'vue2', 'web-component'])(
         if (!result.ok) expect(result.diagnostics[0].code).toBe('PUI4001');
       }
     });
+  }
+);
+
+it('rejects React encoding node expansion before returning an unusable carrier', async () => {
+  const module = generated('react');
+  const events: unknown[] = [];
+  const result = await outcome(() => module.renderObserved({ extra: Array(4000).fill(0) }, events));
+  expect(result.ok).toBe(false);
+  expect(String('error' in result && result.error)).toMatch(/node budget/);
+  expect(events).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
+});
+
+it.each<Target>(['vue2', 'web-component'])(
+  'rejects %s full-carrier byte expansion before returning',
+  async (target) => {
+    const module = generated(target, '', '', ",extra:{type:'string',default:''}");
+    const events: unknown[] = [];
+    const result = await outcome(() =>
+      module.renderObserved({ extra: 'x'.repeat(600000) }, events)
+    );
+    expect(result.ok).toBe(false);
+    const error = 'error' in result ? result.error : undefined;
+    const cause = target === 'web-component' && error instanceof Error ? error.cause : error;
+    expect(cause).toBeInstanceOf(TypeError);
+    expect(String(cause)).toMatch(/byte budget/);
+    expect(events).toEqual(['created', 'created-two', 'dispose', 'dispose-two']);
   }
 );
