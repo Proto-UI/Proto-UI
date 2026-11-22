@@ -10,6 +10,12 @@ This is the single repository-owned coverage matrix for the planned apps/agent-h
 
 The catalog remains authoritative for Proto UI meaning. At this baseline, every P, T, M, and HC identity named below is draft unless a cell explicitly says otherwise. A-REACT-18-19-0001, A-WEB-COMPONENT-0001, A-VUE-3-0001, and A-VUE-2-0001 are active Adapter profiles. A draft entity is current cataloged direction, not a stable guarantee. Uncataloged or none means exactly that; the matrix never manufactures an entity to fill a cell.
 
+## Current external consumers
+
+The Sprint 7 consumer instruction identifies [Shenko](https://github.com/cyjin-yl/shenko) as the real React Harness. Its Inspect timeline and IM conversation consume the Shadcn Message Scroller through the React Adapter; App-owned stable entry anchors and persistence remain explicit. [Verdant](https://github.com/OpenGreendam/verdant) is a separate GPUI compiler consumer. The [consumer inventory](../records/2026-11-22-sprint-7-real-consumers.md) binds their source and realization paths; the [Harness execution record](../records/2026-11-22-sprint-7-harness.md) records the follow-tail results and limits.
+
+These external consumers are additional evidence. They do not rename the planned `apps/agent-harness` paths, switch that plan's Brutalist decision, promote its 63 rows to `dogfooded`, or satisfy #514's original complete matrix. Shenko's fixed Inspector and task/file displays also do not establish #522's resizable Inspector or #523's two admitted Tree fixtures. The two editor rows retain #531's research result, the engine infrastructure exemption, their fallback surfaces and re-review triggers under #745.
+
 ## Production host decision
 
 The recommended primary production host for apps/agent-harness is React 19 through the active A-REACT-18-19-0001 profile, whose governed peer range is React >=18.2.0 <20. This is a non-normative application decision owned by #514. It must not be extrapolated to [#420](https://github.com/Proto-UI/Proto-UI/issues/420), whose website program independently chooses generated Web Components.
