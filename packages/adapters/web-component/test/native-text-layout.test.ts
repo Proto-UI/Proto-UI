@@ -16,6 +16,8 @@ describe('bounded native width contribution', () => {
       let entries: readonly RootStyleEntry[] = entriesFor(['w-full']);
       const applier = createNativeTextLayoutApplier(host, editor, () => entries);
       applier.apply(['w-full']);
+      expect(parseFloat(host.style.minWidth)).toBe(0);
+      expect(host.getAttribute('data-pui-text-boundary-min')).toBe('');
       if (withdrawal === 'replace') {
         entries = entriesFor(['opacity-50']);
         applier.apply(['opacity-50']);
@@ -23,6 +25,8 @@ describe('bounded native width contribution', () => {
         applier.clear();
       }
       expect(host.getAttribute('data-pui-style')).toBe('consumer-host w-full');
+      expect(host.style.minWidth).toBe('');
+      expect(host.hasAttribute('data-pui-text-boundary-min')).toBe(false);
       expect(editor.getAttribute('data-pui-style')).toBe(
         withdrawal === 'replace' ? 'opacity-50' : null
       );
