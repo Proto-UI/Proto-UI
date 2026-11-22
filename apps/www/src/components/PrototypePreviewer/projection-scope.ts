@@ -465,7 +465,18 @@ export function createProjectionScopeController(
       }
     }
 
-    if (previousDisposal) await previousDisposal;
+    if (previousDisposal) {
+      // Publication already committed this generation. Teardown of the replaced
+      // candidate is synchronous DOM work; a macrotask lets readers observe the
+      // committed coordinates before that teardown occupies the thread. The
+      // request still waits for disposal, so callers never see a leaked generation.
+      const { promise, resolve } = Promise.withResolvers<void>();
+      const schedule = globalThis.setTimeout;
+      if (typeof schedule === 'function') schedule(resolve, 0);
+      else resolve();
+      await promise;
+      await previousDisposal;
+    }
 
     return getSnapshot();
   };
