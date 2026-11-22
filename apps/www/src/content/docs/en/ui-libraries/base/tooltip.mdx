@@ -57,6 +57,42 @@ Button retains its role, name, click signal, disabled state and single focus own
 
 For an existing styled prototype, use the same setup composition while preserving its render function: call the styled prototype's `setup(def)`, then `useTooltipTrigger()`, and return the captured render function from your `definePrototype`. Keep the styled prototype's static `modules` declaration. This shares one host and preserves the family's Button presentation; it is separate from the passive action-body styling used by the standalone demo below.
 
+## ShadowRoot
+
+When the command lives inside a real `ShadowRoot`, keep Tooltip Content in that same tree. The Web Adapters normally project overlays into `document.body`. An `aria-describedby` string that names Content outside the command's shadow tree does not produce its accessible description, even when the IDs match and the tooltip is visible.
+
+Register an application-owned scene and a distinct overlay destination before mounting the adapted Tooltip components. `registerWebPortalDestination` is an exported Web host policy from `@proto.ui/adapter-base`; it is not a Tooltip prop. This helper supplies a mount point for React, Vue, Vue 2 or Web Components:
+
+```ts
+import { registerWebPortalDestination } from '@proto.ui/adapter-base';
+
+export function createTooltipScene(container: HTMLElement) {
+  const shell = document.createElement('div');
+  container.append(shell);
+  const shadow = shell.attachShadow({ mode: 'open' });
+  const scene = document.createElement('div');
+  const appMount = document.createElement('div');
+  const overlays = document.createElement('div');
+  scene.append(appMount, overlays);
+  shadow.append(scene);
+  const releasePortal = registerWebPortalDestination(scene, overlays);
+
+  return {
+    shadow,
+    appMount,
+    dispose(unmount: () => void) {
+      unmount();
+      shell.remove();
+      releasePortal();
+    },
+  };
+}
+```
+
+Mount Root, the same-subject command and Content through your chosen Adapter inside `appMount`, and install the family's generated CSS inside `shadow`. Keep `overlays` connected for that owner's lifetime. When leaving the scene, call `dispose` with the framework's unmount/destroy function so the component owner retires before its portal registration is released. The destination must stay inside the scene and outside the projected Content itself.
+
+The native consumer regression covers this composition for Base, Shadcn and Brutalist in all four Web hosts, including Tab order, the browser's computed accessible description, Escape, command remount and cleanup. Its negative control retains the default body destination and observes an empty computed description despite matching ID strings. This is a Web/browser accessibility boundary; native assistive-technology acceptance remains separate.
+
 ## API
 
 Tooltip is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.

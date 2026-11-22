@@ -59,6 +59,8 @@ Button retains its role, name, click signal, disabled state and single focus own
 
 For an existing styled prototype, use the same setup composition while preserving its render function: call the styled prototype's `setup(def)`, then `useTooltipTrigger()`, and return the captured render function from your `definePrototype`. Keep the styled prototype's static `modules` declaration. This shares one host and preserves the family's Button presentation; it is separate from the passive action-body styling used by the standalone demo below.
 
+For a command inside a real ShadowRoot, use the [same-tree portal scene recipe](/en/ui-libraries/base/tooltip/#shadowroot). The default body destination cannot supply that shadow command's accessible description through an ID string alone.
+
 ## API
 
 Passing `open` on Root selects controlled mode. Group delays apply when Root does not set its own.

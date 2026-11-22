@@ -20,7 +20,7 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Brutalist Tooltip 公开四个 Base Tooltip 投影入口：Group 继承同域 delay defaults、warm-window 与 active Tooltip 协调；Root 负责受控或非受控 open state；Trigger 负责 hover/focus 路由和无障碍描述关联；Content 负责 presence、锚定 portal 定位、Escape dismissal 与 `role="tooltip"`。
 
-Group、Root 与 Trigger 是当前编目的 draft 透明投影，具有明确的 Brutalist package identity，且不新增第二套 props、state、timing、events、accessibility 或 visual owner。只有 Content 增加方形高对比 surface。上方交互示例通过一个真实 Group 组合两个非受控 sibling Tooltip，并可在 Web Components、React 与 Vue 之间切换。Content 通过 renderer-owned portal 保持挂载时，将文档 host 从 Light 切换到 Dark 会通过 `--pui-foreground` 与 `--pui-background` 重绘同一个 surface。
+Group、Root 与 Trigger 是当前编目的 draft 透明投影，具有明确的 Brutalist package identity，且不新增第二套 props、state、timing、events、accessibility 或 visual owner。只有 Content 增加 5px 圆角的中性 surface。上方交互示例通过一个真实 Group 组合两个非受控 sibling Tooltip，并可在 Web Components、React 与 Vue 之间切换。Content 通过 renderer-owned portal 保持挂载时，将文档 host 从 Light 切换到 Dark 会通过 `--pui-foreground` 与 `--pui-secondary-background` 重绘同一个 surface。
 
 ## 在 Button 上使用 Tooltip
 
@@ -43,6 +43,8 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 Button 保留 role、name、click signal、disabled state 与唯一焦点 owner；Tooltip 只追加 hover/focus intent 与自有 `aria-describedby` 关联。禁用 Tooltip Root 只关闭 Tooltip，命令仍可操作；禁用命令则同时抑制两者。`useTooltipTrigger` 没有 options，也不新增 outward exposes，要求同一 subject 已有焦点能力。独立 `asTooltipTrigger` 保留原焦点行为与 exposes。
 
 复用已有样式原型时，可在 `definePrototype` 中保留该原型的静态 `modules` 声明，调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回之前保存的 render function。这保留 family Button 呈现并只创建一个宿主；与下方独立 Trigger demo 的 passive action-body 样式工作分别追踪。
+
+命令位于真实 ShadowRoot 时，请使用 [同树 portal scene 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)。默认 body 目标不能只靠相同 ID 字符串为 ShadowRoot 内的命令提供可访问描述。
 
 ## API
 

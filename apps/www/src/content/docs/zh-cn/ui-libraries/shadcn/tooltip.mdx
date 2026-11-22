@@ -59,6 +59,8 @@ Button 保留 role、name、click signal、disabled state 与唯一焦点 owner�
 
 复用已有样式原型时，可在 `definePrototype` 中保留该原型的静态 `modules` 声明，调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回之前保存的 render function。这保留 family Button 呈现并只创建一个宿主；与下方独立 Trigger demo 的 passive action-body 样式工作分别追踪。
 
+命令位于真实 ShadowRoot 时，请使用 [同树 portal scene 配方](/zh-cn/ui-libraries/base/tooltip/#shadowroot)。默认 body 目标不能只靠相同 ID 字符串为 ShadowRoot 内的命令提供可访问描述。
+
 ## API
 
 Root 传入 `open` 进入受控模式。Root 未自设延时时使用 Group 的延时。
