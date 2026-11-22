@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "repository": "Proto-UI/Proto-UI",
+  "expectedActor": "cyjin-yl",
+  "carrierRef": "refs/heads/evidence/sprint1-transfer-diagnostic-e4f7fa8-20261122",
+  "targetRef": "refs/heads/fix/sprint1-reliable-regression-20261122",
+  "expectedPublicHead": "2810f0116b5bfe614b6e76d0a40984f86beebe3f",
+  "target": {
+    "sha": "e4f7fa8e46c87edaf5354f8d9553b261f66e16c8",
+    "tree": "7a3c626ec6e1ca6a77836502361e47fc62be0ce4",
+    "treeListingSha256": "b620e965f6ffcbaee1a8cd2b77e5ad48961e0a9816ede8316017a25963db2d6b"
+  },
+  "typeBaseline": {
+    "sha": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "tree": "513879bf79a93cc9325f5193fa0559e16ea57108"
+  },
+  "bundle": {
+    "file": "source.bundle.b64",
+    "headRef": "HEAD",
+    "bytes": 31635,
+    "sha256": "118a95c978d606fd1b9912748819f69673cc02e72a06b8b5edcc1aaa73a735f8"
+  },
+  "commits": [
+    {
+      "sha": "9b49f62aebce7bfa99f59a87c08fd092eb3c5528",
+      "rawSha256": "8a642f17c1ff817695973d0140f79dc81d342437de60f56df4a844aa516db7a9",
+      "parents": [
+        "2810f0116b5bfe614b6e76d0a40984f86beebe3f"
+      ],
+      "author": "author Codex <codex@openai.com> 1795347039 +0000",
+      "committer": "committer Codex <codex@openai.com> 1795347362 +0000",
+      "subject": "fix(www): preserve the literal AX selector observation mode"
+    },
+    {
+      "sha": "c3ac1d122374fcfbf3bf23c4d3af28944bb63066",
+      "rawSha256": "806401ce9c9921e88bb3bca4a13fd996257493d3ea7b7438ab12526586c4eba4",
+      "parents": [
+        "9b49f62aebce7bfa99f59a87c08fd092eb3c5528"
+      ],
+      "author": "author Codex <codex@openai.com> 1795347041 +0000",
+      "committer": "committer Codex <codex@openai.com> 1795347362 +0000",
+      "subject": "test(www): activate the complete lazy matrix within its original deadline"
+    },
+    {
+      "sha": "038b4253eb9ba5c9e2d14a354e8a50cdf79df2e8",
+      "rawSha256": "62b3c0e48ddeeec182a3339a3c8644f2bf7b610d65c32f7da334cb72cccf129d",
+      "parents": [
+        "c3ac1d122374fcfbf3bf23c4d3af28944bb63066"
+      ],
+      "author": "author Codex <codex@openai.com> 1795347097 +0000",
+      "committer": "committer Codex <codex@openai.com> 1795347362 +0000",
+      "subject": "test(ci): budget full Sprint 1 Search capture"
+    },
+    {
+      "sha": "96836e96f960ea4efa9ad7f0f4b0958d8f326ef1",
+      "rawSha256": "c3106fbc24c17cce7c9eac5a6481e55ad6c2ee03ac3ba6825220645ff4dd960f",
+      "parents": [
+        "038b4253eb9ba5c9e2d14a354e8a50cdf79df2e8"
+      ],
+      "author": "author Codex <codex@openai.com> 1795347605 +0000",
+      "committer": "committer Codex <codex@openai.com> 1795348101 +0000",
+      "subject": "test(ci): retain Sprint 1 production Search captures"
+    },
+    {
+      "sha": "d1339cee8ab8ed9b0f5956b6d72df1b574da3a25",
+      "rawSha256": "239a307859966f04a31f6f1a48f4317707e9e2c120b783b3590963943b65231b",
+      "parents": [
+        "96836e96f960ea4efa9ad7f0f4b0958d8f326ef1"
+      ],
+      "author": "author Codex <codex@openai.com> 1795348071 +0000",
+      "committer": "committer Codex <codex@openai.com> 1795348101 +0000",
+      "subject": "test(ci): require initial Vue production captures"
+    },
+    {
+      "sha": "e4f7fa8e46c87edaf5354f8d9553b261f66e16c8",
+      "rawSha256": "34d101db133442731ae9f508bb1a1bae5fb27162681cbd0bcf787f1985269847",
+      "parents": [
+        "d1339cee8ab8ed9b0f5956b6d72df1b574da3a25"
+      ],
+      "author": "author Codex <codex@openai.com> 1795348235 +0000",
+      "committer": "committer Codex <codex@openai.com> 1795348426 +0000",
+      "subject": "test(www): profile the first production Search runtime swap"
+    }
+  ],
+  "websiteTsRoots": [
+    "apps/www/src/components/site-search-commands.recovery.test.ts",
+    "apps/www/src/components/site-search-commands.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-activation.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-observation.test.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts",
+    "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/site-search-evidence.test.ts",
+    "apps/www/src/content/docs/zh-cn/site-search-evidence.ts",
+    "apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts",
+    "apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts"
+  ],
+  "notTsWebsiteChanges": [
+    "apps/www/scripts/run-search-production-evidence.mjs",
+    "apps/www/scripts/run-search-production-evidence.test.mjs"
+  ],
+  "helperSha256": {
+    "common.mjs": "d61f08ff37fadcaf360511715cf49f6158c8a3341f1bbf72875fac98abd1960f",
+    "publish.mjs": "f74f1ed88ce1773a855c7e1b16d14f2f03de9af70609aacbefdcf206bc85a89e",
+    "diagnose.mjs": "e06f5a139bc26e72a0edbff168f17fef8733a6686a86b77621bd262d6f0cc242",
+    "assets.mjs": "36f9bf07b594608f7f6487e5cbe6f6020ce85779a1d85c12e6cc357367418e61"
+  },
+  "scope": "Original source objects, one PR-branch fast-forward with exact lease, then read-only native/type diagnostics. No merge, PR/Issue metadata, secrets, rules or permission changes.",
+  "workflowSha256": "26f00a5b954e77993f93e9380a9ad76ee2fa3980dc8683dbf05a3c8a0b337c9a"
+}
