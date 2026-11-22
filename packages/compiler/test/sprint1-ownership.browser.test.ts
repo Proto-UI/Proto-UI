@@ -49,11 +49,35 @@ async function runBrowserCase(
   const page = await context.newPage();
   const records: Observation[] = [];
   const errors: string[] = [];
+  const consoleErrors: Array<{
+    message: string;
+    location: { url: string; lineNumber: number; columnNumber: number };
+  }> = [];
+  const networkFailures: Array<{ url: string; resource: string; status?: number; error?: string }> =
+    [];
   let failure: string | undefined;
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
+    if (message.type() === 'error') {
+      errors.push(message.text());
+      consoleErrors.push({ message: message.text(), location: message.location() });
+    }
   });
+  page.on('response', (response) => {
+    if (response.status() >= 400)
+      networkFailures.push({
+        url: response.url(),
+        resource: response.request().resourceType(),
+        status: response.status(),
+      });
+  });
+  page.on('requestfailed', (request) =>
+    networkFailures.push({
+      url: request.url(),
+      resource: request.resourceType(),
+      error: request.failure()?.errorText,
+    })
+  );
   try {
     await page.goto(`${fixture.baseUrl}/sprint1-ownership.html?${query}`);
     await page.waitForFunction(
@@ -106,6 +130,8 @@ async function runBrowserCase(
           compilation,
           records,
           errors,
+          consoleErrors,
+          networkFailures,
           failure,
         },
         null,
