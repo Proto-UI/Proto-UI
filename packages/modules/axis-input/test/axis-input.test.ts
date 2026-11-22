@@ -169,7 +169,9 @@ function harness(withHost = true, travelRole = false, originRole = false) {
     },
   };
 }
-const sample = (phase: 'start' | 'move' | 'end'): AxisInputSample => ({
+const sample = (
+  phase: 'start' | 'move' | 'end'
+): Extract<AxisInputSample, { phase: 'start' | 'move' | 'end' }> => ({
   phase,
   position: 0.5,
   delta: 0,

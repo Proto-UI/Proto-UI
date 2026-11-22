@@ -1,4 +1,4 @@
-import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoNode, DemoSpec } from '../../components/PrototypePreviewer/demo-types';
 import type { FieldValidationRequest } from '@proto.ui/prototypes-base/field';
 
 /** A consumer-owned asynchronous validator. The result controls deliberately

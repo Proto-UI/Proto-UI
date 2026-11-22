@@ -113,7 +113,9 @@ function mount(
   if (kind === 'checkbox') control.append(make(lib.checkbox.checkboxIndicator));
   if (kind === 'switch') control.append(make(lib.switch.switchThumb));
   for (const item of items) {
-    item.textContent = getElementProps(item).value as string;
+    const itemProps = getElementProps(item);
+    if (!itemProps) throw new Error('The mounted radio item must retain its declared props');
+    item.textContent = itemProps.value as string;
     control.append(item);
   }
   field.append(label, help, control, error);

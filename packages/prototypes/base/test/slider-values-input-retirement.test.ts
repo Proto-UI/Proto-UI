@@ -77,10 +77,10 @@ async function fixture() {
           [
             AXIS_INPUT_HOST_CAP,
             {
-              attach(next) {
+              attach(next: AxisInputHostBinding) {
                 binding = next;
                 return {
-                  update(next) {
+                  update(next: AxisInputHostBinding) {
                     binding = next;
                   },
                   dispose() {},
