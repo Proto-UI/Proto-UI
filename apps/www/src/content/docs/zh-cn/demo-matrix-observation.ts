@@ -44,7 +44,10 @@ export function collectMatrixInteractiveFacts(
       return 'textbox';
     }
     if (tag === 'textarea') return 'textbox';
-    if (tag === 'select') return (element as HTMLSelectElement).multiple ? 'listbox' : 'combobox';
+    if (tag === 'select') {
+      const select = element as HTMLSelectElement;
+      return select.multiple || select.size > 1 ? 'listbox' : 'combobox';
+    }
     if (tag === 'button') return 'button';
     return tag;
   };
@@ -56,17 +59,14 @@ export function collectMatrixInteractiveFacts(
           .map((id) => document.getElementById(id)?.textContent ?? '')
           .join(' ')
       : '';
-    // Resolve associated <label for="id"> or wrapping <label> for form controls.
-    const labelText = (() => {
-      const id = element.id;
-      if (id) {
-        const label = document.querySelector<HTMLLabelElement>(`label[for="${CSS.escape(id)}"]`);
-        if (label) return label.textContent ?? '';
-      }
-      const wrapper = element.closest('label');
-      if (wrapper) return wrapper.textContent ?? '';
-      return '';
-    })();
+    // Native labels includes both for/id and wrapping associations once, in
+    // document order. Sampling only the first label hides parity regressions
+    // when a later associated label is lost. This remains a plain-text name
+    // approximation, not the full accessible-name or accessibility-tree algorithm.
+    const labels = (element as HTMLInputElement).labels;
+    const labelText = labels
+      ? Array.from(labels, (label) => label.textContent ?? '').join(' ')
+      : '';
     return (
       element.getAttribute('aria-label') ||
       labelledText ||
