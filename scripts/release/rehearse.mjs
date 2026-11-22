@@ -1,17 +1,35 @@
 #!/usr/bin/env node
 
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { join, resolve } from 'node:path';
 
 import { ROOT_DIR } from './lib.mjs';
+import { runRehearsal } from './rehearsal-receipt.mjs';
 
 const packageManager = JSON.parse(
   readFileSync(join(ROOT_DIR, 'package.json'), 'utf8')
 ).packageManager;
-const artifactDir = mkdtempSync(join(tmpdir(), 'proto-ui-release-rehearsal-'));
-let succeeded = false;
+let artifactDir;
+let stepTimeoutMs = 0;
+for (let index = 0; index < process.argv.slice(2).length; index += 1) {
+  const argv = process.argv.slice(2);
+  if (argv[index] === '--') continue;
+  if (argv[index] === '--out-dir') {
+    const value = argv[++index];
+    if (!value || value.startsWith('--')) throw new Error('--out-dir requires a path.');
+    artifactDir = resolve(value);
+  } else if (argv[index] === '--step-timeout-ms') {
+    const value = argv[++index];
+    if (!/^\d+$/.test(value ?? '') || !Number.isSafeInteger(Number(value)) || Number(value) <= 0) {
+      throw new Error('--step-timeout-ms requires a positive safe integer.');
+    }
+    stepTimeoutMs = Number(value);
+  } else {
+    throw new Error(`Unknown rehearsal argument: ${argv[index]}`);
+  }
+}
+artifactDir ??= mkdtempSync(join(tmpdir(), 'proto-ui-release-rehearsal-'));
 
 const steps = [
   ['Release identity', process.execPath, ['scripts/release/check-version-governance.mjs']],
@@ -48,29 +66,21 @@ const steps = [
     process.execPath,
     ['scripts/release/check-registry-readiness.mjs'],
   ],
-  ['Package publish dry-run', 'corepack', [packageManager, '-s', 'release:stage']],
+  [
+    'Package publish dry-run',
+    'corepack',
+    [packageManager, '-s', 'release:stage', '--', '--out-dir', join(artifactDir, 'staging')],
+  ],
   ['React tarball consumer', 'corepack', [packageManager, '-s', 'release:smoke:react']],
   ['CLI multi-host tarball consumer', 'corepack', [packageManager, '-s', 'release:smoke:cli']],
   ['Documentation build', 'corepack', [packageManager, '-s', 'docs:build']],
 ];
 
-try {
-  for (const [label, command, args] of steps) {
-    console.log(`\n[release rehearsal] ${label}`);
-    const result = spawnSync(command, args, {
-      cwd: ROOT_DIR,
-      env: process.env,
-      stdio: 'inherit',
-      shell: process.platform === 'win32',
-    });
-    if (result.error) throw result.error;
-    if (result.status !== 0) {
-      throw new Error(`${label} failed with exit code ${result.status}`);
-    }
-  }
-  succeeded = true;
-  console.log('\n[release rehearsal] complete: no publication was performed');
-} finally {
-  if (succeeded) rmSync(artifactDir, { recursive: true, force: true });
-  else console.error(`[release rehearsal] snapshot artifacts kept at ${artifactDir}`);
-}
+const receipt = runRehearsal({
+  rootDir: ROOT_DIR,
+  artifactDir,
+  steps,
+  packageManager,
+  stepTimeoutMs,
+});
+process.exitCode = receipt.status === 'passed' ? 0 : 1;
