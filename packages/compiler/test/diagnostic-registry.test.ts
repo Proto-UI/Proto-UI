@@ -102,9 +102,14 @@ const DYNAMIC_CODE_SITES: ReadonlyMap<string, readonly string[]> = new Map([
   ['style-plan.ts|PUI4202|PUI4201', ['unsupported-input', 'invalid-ir']],
 ]);
 
-/** Structural probe for `code: … ? 'PUInnnn' : 'PUInnnn'` sites. */
+/**
+ * Structural probe for `code: … ? 'PUInnnn' : 'PUInnnn'` sites. The condition
+ * may itself contain quoted literals (e.g. `primary.category ===
+ * 'output-conflict'`), so the pre-`?` span excludes only `;` and newline —
+ * code values never contain a literal `?` in this codebase.
+ */
 const DYNAMIC_CODE_PROBE =
-  /code\s*:\s*[^';\n]*\?\s*'(PUI\d{4}|PUI_[A-Z0-9_]+)'\s*:\s*'(PUI\d{4}|PUI_[A-Z0-9_]+)'/g;
+  /code\s*:\s*[^;\n]*\?\s*'(PUI\d{4}|PUI_[A-Z0-9_]+)'\s*:\s*'(PUI\d{4}|PUI_[A-Z0-9_]+)'/g;
 
 function* sources(dir: string): Generator<string> {
   for (const entry of readdirSync(dir)) {

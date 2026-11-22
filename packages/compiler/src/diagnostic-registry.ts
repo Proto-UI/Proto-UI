@@ -21,7 +21,8 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   // Parser/module semantic front end (1xxx) — source conformance failures.
   PUI1001: {
     category: 'unsupported-input',
-    meaning: 'Static type/source graph could not resolve or check the authored type.',
+    meaning:
+      'Static type/source graph could not resolve or check the authored type. Also emitted as invalid-input from explicit-category reject sites in parser-module.ts.',
   },
   PUI1002: {
     category: 'unsupported-input',
@@ -162,11 +163,13 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   },
   PUI4201: {
     category: 'invalid-input',
-    meaning: 'Compiler library manifest or artifact input is invalid.',
+    meaning:
+      'Compiler library manifest or artifact input is invalid. Also emitted as invalid-ir from style-plan.ts when a style contribution cannot be projected.',
   },
   PUI4202: {
     category: 'invalid-input',
-    meaning: 'Style plan could not be applied to the library surface.',
+    meaning:
+      'Style plan could not be applied to the library surface. Also emitted as unsupported-input from style-plan.ts for an unsupported style contribution.',
   },
   PUI4203: {
     category: 'invalid-input',
