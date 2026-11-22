@@ -84,7 +84,11 @@ function setupViewport(
     if (next) label.set(next.a11yLabel, 'message scroller name');
   });
   const scroll = asScrollSurface();
-  scroll.configure({ axes: 'vertical', endFollow: { mode: 'while-at-end', axis: 'vertical' } });
+  scroll.configure({
+    axes: 'vertical',
+    endFollow: Object.freeze({ mode: 'while-at-end', axis: 'vertical' as const }),
+    anchor: Object.freeze({ mode: 'preserve-visible', axis: 'vertical' as const }),
+  });
   def.expose.state('atEnd', scroll.vertical.atEnd);
   def.expose.state('following', scroll.endFollow.state);
   def.expose.state('requestStatus', scroll.endFollow.requestStatus);

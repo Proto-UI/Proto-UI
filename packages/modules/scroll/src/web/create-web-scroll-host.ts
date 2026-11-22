@@ -263,6 +263,17 @@ export function createWebScrollSurfaceHost(
       } | null = null;
       let requestedDepartureAxis: ScrollAxis | null = null;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
+      // Head-element identity of the scroll target's own child list. A batch that
+      // inserts children and replaces this head is head growth, which is the web
+      // host's evidence for content arriving above the anchor.
+      let headNode: Element | null = null;
+      let anchorObservation: {
+        axis: ScrollAxis;
+        viewport: number;
+        extent: number;
+        offset: number;
+      } | null = null;
+      let anchorHeadGrowthPending = false;
       const ownerWindow = target.ownerDocument.defaultView;
       const configuredEndThreshold = options.endThreshold ?? 1;
       const endThreshold = Number.isFinite(configuredEndThreshold)
@@ -505,6 +516,54 @@ export function createWebScrollSurfaceHost(
         const clampedOffset = Math.min(range, Math.max(0, Number.isFinite(offset) ? offset : 0));
         return range - clampedOffset <= endThreshold;
       };
+      const configuredAnchorAxis = (): ScrollAxis | null =>
+        connection.config.anchor?.mode === 'preserve-visible'
+          ? connection.config.anchor.axis
+          : null;
+      const refreshHeadMarkers = () => {
+        headNode = target.firstElementChild;
+      };
+      const readAnchorObservation = (axis: ScrollAxis) => {
+        const layout = readFollowLayout(axis);
+        return Object.freeze({
+          axis,
+          viewport: layout.viewport,
+          extent: layout.extent,
+          offset: axis === 'horizontal' ? horizontalOffset(target) : target.scrollTop,
+        });
+      };
+      const syncAnchorObservation = () => {
+        const axis = configuredAnchorAxis();
+        anchorObservation = axis && isAxisEnabled(axis) ? readAnchorObservation(axis) : null;
+      };
+      // Head growth shifts the anchor down by the extent delta. Compensate only
+      // while the offset is unchanged, the reader is away from the end, and the
+      // end-follow lease does not already own a movement on this axis.
+      const applyAnchorCompensation = (axis: ScrollAxis) => {
+        const next = readAnchorObservation(axis);
+        const previous =
+          anchorObservation && anchorObservation.axis === axis ? anchorObservation : null;
+        const headGrowth = anchorHeadGrowthPending;
+        anchorHeadGrowthPending = false;
+        if (
+          previous &&
+          next.offset === previous.offset &&
+          headGrowth &&
+          next.extent > previous.extent &&
+          !isAxisAtEnd(axis)
+        ) {
+          const delta = next.extent - previous.extent;
+          if (axis === 'horizontal')
+            target.scrollLeft = (next.offset + delta) * horizontalSign(target);
+          else target.scrollTop = next.offset + delta;
+          // The baseline must record the post-compensation offset; otherwise a
+          // second head-growth delivery inside the same frame sees a moved
+          // offset and under-compensates by its own delta.
+          anchorObservation = Object.freeze({ ...next, offset: next.offset + delta });
+          return;
+        }
+        anchorObservation = next;
+      };
       const cancelScheduledEnd = (rejected: boolean) => {
         const pending = scheduledEnd;
         scheduledEnd = null;
@@ -553,6 +612,7 @@ export function createWebScrollSurfaceHost(
             endFollowState = reachedEnd ? 'following' : 'paused';
             if (reachedEnd) readerContacts.clearMovement();
           }
+          syncAnchorObservation();
           if (movement.requestEpoch === endFollowRequestEpoch) {
             endFollowRequestStatus = reachedEnd ? 'applied' : 'rejected';
           }
@@ -592,6 +652,7 @@ export function createWebScrollSurfaceHost(
         // automatic end frame must be canceled from the classified input path.
         if (scheduledEnd?.axis === request.axis) cancelScheduledEnd(true);
         applyRequest(target, request);
+        if (configuredAnchorAxis() === request.axis) syncAnchorObservation();
         if (followAxis === request.axis) {
           const atEndAfterRequest = isAxisAtEnd(request.axis);
           const smoothMovement = ownerWindow?.getComputedStyle(target).scrollBehavior === 'smooth';
@@ -678,31 +739,49 @@ export function createWebScrollSurfaceHost(
       const onLayoutChange = () => {
         if (disposed) return;
         const axis = configuredFollowAxis();
-        if (!axis) {
+        const anchorAxis = configuredAnchorAxis();
+        if (axis) {
+          if (!isAxisEnabled(axis)) {
+            endFollowState = 'paused';
+            endFollowRequestStatus = 'rejected';
+          } else {
+            const nextLayout = readFollowLayout(axis);
+            const layoutChanged =
+              !lastFollowLayout ||
+              lastFollowLayout.axis !== nextLayout.axis ||
+              lastFollowLayout.viewport !== nextLayout.viewport ||
+              lastFollowLayout.extent !== nextLayout.extent;
+            lastFollowLayout = nextLayout;
+            if (endFollowState === 'following' && (layoutChanged || !isAxisAtEnd(axis))) {
+              scheduleEnd(axis);
+            } else if (
+              endFollowState === 'paused' &&
+              requestedDepartureAxis !== axis &&
+              isAxisAtEnd(axis)
+            ) {
+              endFollowState = 'following';
+            }
+          }
+        } else {
           lastFollowLayout = null;
           endFollowState = 'off';
-          publish();
-          return;
         }
-        if (!isAxisEnabled(axis)) {
-          endFollowState = 'paused';
-          endFollowRequestStatus = 'rejected';
-          publish();
-          return;
-        }
-        const nextLayout = readFollowLayout(axis);
-        const layoutChanged =
-          !lastFollowLayout ||
-          lastFollowLayout.axis !== nextLayout.axis ||
-          lastFollowLayout.viewport !== nextLayout.viewport ||
-          lastFollowLayout.extent !== nextLayout.extent;
-        lastFollowLayout = nextLayout;
-        if (endFollowState === 'following' && (layoutChanged || !isAxisAtEnd(axis))) {
-          scheduleEnd(axis);
-          return;
-        }
-        if (endFollowState === 'paused' && requestedDepartureAxis !== axis && isAxisAtEnd(axis)) {
-          endFollowState = 'following';
+        if (anchorAxis && isAxisEnabled(anchorAxis)) {
+          const followOwnsAnchor =
+            axis === anchorAxis &&
+            (endFollowState === 'following' ||
+              endFollowState === 'pending' ||
+              scheduledEnd?.axis === anchorAxis);
+          if (followOwnsAnchor) {
+            // The end-follow lease owns this layout window: anchor evidence is
+            // consumed here, not carried into a later anchor-owned pass where
+            // a non-head growth could be misread as head growth.
+            anchorHeadGrowthPending = false;
+            anchorObservation = readAnchorObservation(anchorAxis);
+          } else applyAnchorCompensation(anchorAxis);
+        } else {
+          anchorObservation = null;
+          anchorHeadGrowthPending = false;
         }
         publish();
       };
@@ -926,6 +1005,7 @@ export function createWebScrollSurfaceHost(
             requestedDepartureAxis = null;
           }
         }
+        syncAnchorObservation();
         publish();
         cancelScrollEndTimer?.();
         const timer = setTimeout(() => {
@@ -935,13 +1015,13 @@ export function createWebScrollSurfaceHost(
         cancelScrollEndTimer = () => clearTimeout(timer);
       };
       const onContentReflow = () => {
-        if (configuredFollowAxis()) onLayoutChange();
+        if (configuredFollowAxis() || configuredAnchorAxis()) onLayoutChange();
       };
       const fontFaceSet: FontFaceSet | undefined = target.ownerDocument.fonts;
       let observingFonts = false;
       const reconcileFontObservation = () => {
         if (!fontFaceSet || typeof fontFaceSet.addEventListener !== 'function') return;
-        const shouldObserve = configuredFollowAxis() !== null;
+        const shouldObserve = configuredFollowAxis() !== null || configuredAnchorAxis() !== null;
         if (shouldObserve && !observingFonts) {
           fontFaceSet.addEventListener('loadingdone', onContentReflow);
           observingFonts = true;
@@ -991,12 +1071,27 @@ export function createWebScrollSurfaceHost(
       let mutationObserver: MutationObserver | undefined;
       const onMutation = (records: MutationRecord[]) => {
         if (disposed) return;
+        if (configuredAnchorAxis() !== null) {
+          const inserted = records.some(
+            (record) =>
+              record.type === 'childList' &&
+              record.target === target &&
+              record.addedNodes.length > 0
+          );
+          // headNode must have existed before the mutation: the first append
+          // to an empty target changes firstElementChild without moving any
+          // existing content, so it is not head growth.
+          if (inserted && headNode && target.firstElementChild !== headNode)
+            anchorHeadGrowthPending = true;
+        }
+        refreshHeadMarkers();
         if (records.some((record) => record.type === 'childList' && record.target === target)) {
           observeGeometry();
         }
         onLayoutChange();
       };
       function observeGeometry() {
+        refreshHeadMarkers();
         resizeObserver?.disconnect();
         mutationObserver?.disconnect();
         resizeObserver?.observe(target);
@@ -1028,6 +1123,7 @@ export function createWebScrollSurfaceHost(
         resetReaderInput();
         cancelScheduledEnd(false);
         requestedDepartureAxis = null;
+        syncAnchorObservation();
         const axis = configuredFollowAxis();
         if (!axis) {
           endFollowState = 'off';
@@ -1061,6 +1157,9 @@ export function createWebScrollSurfaceHost(
         };
         attempt(resetReaderInput);
         requestedDepartureAxis = null;
+        anchorObservation = null;
+        anchorHeadGrowthPending = false;
+        headNode = null;
         attempt(() => cancelScheduledEnd(false));
         attempt(() => cancelScrollEndTimer?.());
         for (const [type, listener, capture] of [

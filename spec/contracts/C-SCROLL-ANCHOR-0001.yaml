@@ -1,0 +1,69 @@
+id: C-SCROLL-ANCHOR-0001
+type: contract
+title: Scroll anchor preserves visible position across head growth and resize
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  zh-CN: Anchor 的 portable policy 与 web host 的 head-growth 补偿规则已形成有界实现和确定性测试；但 head 身份变化作为 prepend 证据仅覆盖 Web DOM 观察路径，原生 host 的等价观察证据与 resize 期间浏览器 boundary clamping 的交叉行为尚未独立审查，因此保持 draft。
+  en: The portable anchor policy and the web host head-growth compensation rule have a bounded implementation and deterministic tests, but head-identity change as prepend evidence only covers the Web DOM observation path, and the equivalent native host observation evidence plus browser boundary clamping interactions during resize remain under independent review, so the contract remains draft.
+summary: Anchor is an opt-in Scroll policy that preserves the reader's visible position when content arrives above the current view (head growth) or the viewport resizes, while end-follow retains ownership of movement at the logical end.
+statement:
+  zh-CN: >-
+    Anchor 是既有 Scroll domain 内的独立可选策略，与 end-follow 正交。Module 拥有 portable policy 配置；Scroll Surface Host Capability 拥有 head 身份观察、extent 变化观察与 layout-ready 的 offset 补偿。Composition 只决定是否 opt in；App Maker 继续拥有消息、未读数与 Live Region 业务语义。
+
+
+  en: >-
+    Anchor is a distinct opt-in policy inside the existing Scroll domain, orthogonal to end-follow. The Module owns the portable policy configuration; the Scroll Surface Host Capability owns head-identity observation, extent-change observation, and layout-ready offset compensation. A composition only decides whether to opt in; the App Maker continues to own message, unread-count, and Live Region business semantics.
+
+
+criteria:
+  - id: C-SCROLL-ANCHOR-0001-POLICY
+    text:
+      zh-CN: Portable configuration 必须把 anchor 表达为带显式 axis 的 `off | preserve-visible` policy；off 是 module 默认值，portable Props、State、Context、Expose 与 policy 不得包含 raw pixel、offset、extent、DOM target 或 controller。
+      en: Portable configuration must express anchor as an `off | preserve-visible` policy with an explicit axis; `off` is the module default, and portable Props, State, Context, Expose, and policy must contain no raw pixel, offset, extent, DOM target, or controller.
+  - id: C-SCROLL-ANCHOR-0001-PREPEND
+    text:
+      zh-CN: 当 head growth（target 直接子列表的插入使 head 元素身份变化）发生后，若 anchor axis 上 offset 未变、extent 增大且 reader 不在 logical end，host 必须把 offset 补偿相同的 extent delta，使可见内容保持原位；同一 layout window 内的重复增长必须 coalesce 为一次补偿。
+      en: After head growth (an insertion into the target's direct child list that changes the head element identity), if the anchor axis offset is unchanged, the extent increased, and the reader is not at the logical end, the host must compensate the offset by the same extent delta so visible content stays in place; repeated growth in one layout window must coalesce into one compensation.
+  - id: C-SCROLL-ANCHOR-0001-END-OWNERSHIP
+    text:
+      zh-CN: 当 end-follow lease 拥有 anchor axis（following、pending 或 scheduled end movement）时，anchor 不得发出补偿；reader 在 logical end 时 head growth 由 end-follow 重新对齐，非 end 插入（head 身份不变）不得触发 anchor 补偿。
+      en: When the end-follow lease owns the anchor axis (following, pending, or a scheduled end movement), anchor must not issue compensation; at the logical end, head growth is realigned by end-follow, and non-end insertions that do not change the head identity must not trigger anchor compensation.
+  - id: C-SCROLL-ANCHOR-0001-RESIZE
+    text:
+      zh-CN: Viewport resize 不得在 anchor axis 上移动 offset（除非 end-follow lease 拥有该 axis）；anchor 只保证 offset 稳定，浏览器 boundary clamping 仍由 host geometry 自然处理，anchor 不得引入额外的 pixel 计算到 portable 层。
+      en: A viewport resize must not move the offset on the anchor axis (unless the end-follow lease owns that axis); anchor only guarantees offset stability, browser boundary clamping is still handled naturally by host geometry, and anchor must introduce no extra pixel arithmetic into the portable layer.
+  - id: C-SCROLL-ANCHOR-0001-INITIAL
+    text:
+      zh-CN: 启用 `preserve-visible` 的新 host lease 必须观察初始 layout 作为基准，但不得补偿（无 pending head growth）；off 的 anchor 不得改变任何 movement。
+      en: A new host lease with `preserve-visible` enabled must observe the initial layout as the baseline without compensating (no pending head growth); an `off` anchor must not change any movement.
+  - id: C-SCROLL-ANCHOR-0001-LIFETIME
+    text:
+      zh-CN: Target/session replacement、detach 与 dispose 必须清除 anchor observation 与 pending head-growth evidence，使旧 epoch 的 mutation、layout 与 observer callback 无法更新新 lease 的 anchor 状态。
+      en: Target or session replacement, detachment, and disposal must clear the anchor observation and pending head-growth evidence so mutation, layout, and observer callbacks from an old epoch cannot update a new lease's anchor state.
+  - id: C-SCROLL-ANCHOR-0001-BOUNDARY
+    text:
+      zh-CN: Composition 可以 opt in 并暴露 anchor 相关的只读 facts 给 app；App Maker 保留 item meaning、unread count 与 Live Region ownership；Scroll domain 不得引入 Message 或 Agent vocabulary，也不得合并 Live Region ownership。
+      en: A composition may opt in and expose anchor-related read-only facts to the app; the App Maker retains item meaning, unread count, and Live Region ownership; the Scroll domain must introduce no Message or Agent vocabulary and must not absorb Live Region ownership.
+sources:
+  - path: https://github.com/Proto-UI/Proto-UI/issues/1099
+    label: Issue 1099 message scroller anchor and announce acceptance
+dependsOn:
+  contracts:
+    - C-SCROLL-0001
+    - C-SCROLL-END-FOLLOW-0001
+relates:
+  contracts:
+    - C-AS-SCROLL-SURFACE-0001
+  modules:
+    - M-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+verifies:
+  tests:
+    - T-SCROLL-ANCHOR-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Defined the opt-in preserve-visible anchor policy, head-growth compensation, end-follow ownership interaction, resize stability, and lifetime cleanup.
+tags: [scroll, anchor, prepend, resize, layout]

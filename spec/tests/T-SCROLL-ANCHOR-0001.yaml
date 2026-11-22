@@ -1,0 +1,83 @@
+id: T-SCROLL-ANCHOR-0001
+type: test
+title: Scroll anchor head-growth and resize conformance
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  zh-CN: 已映射确定性 web host anchor 测试与 message-scroller 组合测试；head 身份观察仅覆盖 Web DOM 路径，原生 host 等价证据与 resize boundary clamping 交叉行为仍待审查，passing 记录不等于稳定准入。
+  en: Deterministic web host anchor tests and message-scroller composition tests are mapped; head-identity observation only covers the Web DOM path, and native host equivalence evidence plus resize boundary clamping interactions remain under review, so recorded passing results do not constitute stable admission.
+summary: Verifies the portable anchor policy, head-growth compensation, end-follow ownership, append non-interference, resize stability, initial baseline, and message-scroller composition facts.
+cases:
+  - id: T-SCROLL-ANCHOR-0001-CASE-POLICY
+    title: portable anchor policy contains no host geometry and defaults off
+    covers:
+      - C-SCROLL-ANCHOR-0001-POLICY
+    expectation: explicit-axis-policy-without-raw-host-geometry-and-off-default
+  - id: T-SCROLL-ANCHOR-0001-CASE-PREPEND
+    title: head growth away from end compensates the offset by the extent delta
+    covers:
+      - C-SCROLL-ANCHOR-0001-PREPEND
+      - C-SCROLL-ANCHOR-0001-END-OWNERSHIP
+      - HC-SCROLL-SURFACE-0001-H
+    expectation: offset-unchanged-head-growth-compensated-and-visible-row-stable
+  - id: T-SCROLL-ANCHOR-0001-CASE-END
+    title: head growth at the end is owned by end-follow and anchor stays silent
+    covers:
+      - C-SCROLL-ANCHOR-0001-END-OWNERSHIP
+      - C-SCROLL-ANCHOR-0001-PREPEND
+      - M-SCROLL-0001-G
+    expectation: following-end-growth-realigns-without-anchor-compensation
+  - id: T-SCROLL-ANCHOR-0001-CASE-APPEND
+    title: non-head appends do not trigger anchor compensation away from end
+    covers:
+      - C-SCROLL-ANCHOR-0001-PREPEND
+      - C-SCROLL-ANCHOR-0001-END-OWNERSHIP
+    expectation: unchanged-head-insertion-leaves-offset-untouched
+  - id: T-SCROLL-ANCHOR-0001-CASE-RESIZE
+    title: viewport resize preserves the anchor axis offset away from end
+    covers:
+      - C-SCROLL-ANCHOR-0001-RESIZE
+      - C-SCROLL-ANCHOR-0001-INITIAL
+    expectation: resize-leaves-offset-stable-and-initial-baseline-uncompensated
+  - id: T-SCROLL-ANCHOR-0001-CASE-PROTOTYPE
+    title: message scroller composition exposes anchor facts without new live-region machinery
+    covers:
+      - C-SCROLL-ANCHOR-0001-BOUNDARY
+      - C-SCROLL-ANCHOR-0001-POLICY
+    expectation: composition-opts-in-and-exposes-read-only-facts-for-app-announce
+implementations:
+  - id: scroll-anchor-web-host
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/anchor.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-ANCHOR-0001-CASE-POLICY
+      - T-SCROLL-ANCHOR-0001-CASE-PREPEND
+      - T-SCROLL-ANCHOR-0001-CASE-END
+      - T-SCROLL-ANCHOR-0001-CASE-APPEND
+      - T-SCROLL-ANCHOR-0001-CASE-RESIZE
+    notes:
+      - Deterministic web host test with synthetic MutationObserver records and fake geometry proves head-growth compensation, end-follow ownership, append non-interference, and resize stability.
+  - id: scroll-anchor-message-scroller
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/message-scroller-anchor.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-ANCHOR-0001-CASE-PROTOTYPE
+    notes:
+      - Composes the base message-scroller through the Web Component adapter and verifies the anchor policy is opted in and the read-only announce facts are exposed.
+verifies:
+  contracts:
+    - C-SCROLL-ANCHOR-0001
+exercises:
+  modules:
+    - M-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Mapped anchor policy, head-growth, end-follow ownership, append, resize, and prototype composition evidence.
+tags: [scroll, anchor, prepend, resize, test]
