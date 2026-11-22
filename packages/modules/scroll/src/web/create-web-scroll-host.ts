@@ -258,6 +258,7 @@ export function createWebScrollSurfaceHost(
       let scheduledEnd: ScheduledEndMovement | null = null;
       let endFollowRequestEpoch = 0;
       let readerIntentUntil = 0;
+      let readerArrivalUntil = 0;
       const readerContacts = createReaderContactSession();
       let contactOrigin: {
         axis: ScrollAxis;
@@ -266,6 +267,12 @@ export function createWebScrollSurfaceHost(
         extent: number;
       } | null = null;
       let requestedDepartureAxis: ScrollAxis | null = null;
+      let explicitPauseObservation: {
+        axis: ScrollAxis;
+        offset: number;
+        viewport: number;
+        extent: number;
+      } | null = null;
       let lastFollowLayout: { axis: ScrollAxis; viewport: number; extent: number } | null = null;
       // Head-element identity of the scroll target's own child list. A batch that
       // inserts children and replaces this head is head growth, which is the web
@@ -594,6 +601,7 @@ export function createWebScrollSurfaceHost(
       };
       const scheduleEnd = (axis: ScrollAxis) => {
         requestedDepartureAxis = null;
+        explicitPauseObservation = null;
         if (disposed) return;
         if (!isAxisEnabled(axis)) {
           cancelScheduledEnd(false);
@@ -671,6 +679,7 @@ export function createWebScrollSurfaceHost(
         // A boundary-clamped departure emits no scroll event, so the pending
         // automatic end frame must be canceled from the classified input path.
         if (scheduledEnd?.axis === request.axis) cancelScheduledEnd(true);
+        if (followAxis === request.axis) explicitPauseObservation = null;
         applyRequest(target, request);
         if (configuredAnchorAxis() === request.axis) syncAnchorObservation();
         if (followAxis === request.axis) {
@@ -777,6 +786,7 @@ export function createWebScrollSurfaceHost(
             } else if (
               endFollowState === 'paused' &&
               requestedDepartureAxis !== axis &&
+              explicitPauseObservation?.axis !== axis &&
               isAxisAtEnd(axis)
             ) {
               endFollowState = 'following';
@@ -802,6 +812,9 @@ export function createWebScrollSurfaceHost(
         } else {
           anchorObservation = null;
           anchorHeadGrowthPending = false;
+        }
+        if (explicitPauseObservation) {
+          explicitPauseObservation = readAnchorObservation(explicitPauseObservation.axis);
         }
         publish();
       };
@@ -865,6 +878,13 @@ export function createWebScrollSurfaceHost(
         if (event.ctrlKey || event.defaultPrevented) return;
         const axis = configuredFollowAxis();
         if (!axis) return;
+        const delta =
+          axis === 'vertical'
+            ? event.deltaY
+            : (event.deltaX || (event.shiftKey ? event.deltaY : 0)) * horizontalSign(target);
+        if (delta === 0) return;
+        readerArrivalUntil =
+          (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
         requestedDepartureAxis = null;
         const leavingEnd =
           axis === 'vertical'
@@ -885,6 +905,7 @@ export function createWebScrollSurfaceHost(
           };
         }
         readerIntentUntil = 0;
+        readerArrivalUntil = 0;
         requestedDepartureAxis = null;
       };
       const onPointerDown = (event: PointerEvent) => {
@@ -971,6 +992,7 @@ export function createWebScrollSurfaceHost(
         readerContacts.reset();
         contactOrigin = null;
         readerIntentUntil = 0;
+        readerArrivalUntil = 0;
       };
       const onKeyDown = (event: KeyboardEvent) => {
         if (event.defaultPrevented) return;
@@ -999,6 +1021,8 @@ export function createWebScrollSurfaceHost(
                 ? 'after'
                 : null;
         if (!scrollDirection) return;
+        readerArrivalUntil =
+          (ownerWindow?.performance.now() ?? Date.now()) + DISCRETE_READER_INTENT_WINDOW_MS;
         requestedDepartureAxis = null;
         if (scrollDirection === 'before') {
           if (findDepartureConsumer(event, axis)) return;
@@ -1012,7 +1036,20 @@ export function createWebScrollSurfaceHost(
         const axis = configuredFollowAxis();
         if (axis && isAxisEnabled(axis)) {
           const atEnd = isAxisAtEnd(axis);
-          const requestedDeparture = requestedDepartureAxis === axis;
+          if (explicitPauseObservation?.axis === axis) {
+            const next = readAnchorObservation(axis);
+            const previous = explicitPauseObservation;
+            const moved =
+              next.offset !== previous.offset &&
+              next.viewport === previous.viewport &&
+              next.extent === previous.extent;
+            const readerArrival =
+              readerArrivalUntil > (ownerWindow?.performance.now() ?? Date.now()) ||
+              readerContacts.hasMovement(axis);
+            explicitPauseObservation = atEnd && moved && readerArrival ? null : next;
+          }
+          const requestedDeparture =
+            requestedDepartureAxis === axis || explicitPauseObservation?.axis === axis;
           if (atEnd && !scheduledEnd && !requestedDeparture) {
             // A scroll callback for another axis at the unchanged followed end
             // is not an arrival; retain evidence for pending native delivery.
@@ -1143,6 +1180,7 @@ export function createWebScrollSurfaceHost(
         resetReaderInput();
         cancelScheduledEnd(false);
         requestedDepartureAxis = null;
+        explicitPauseObservation = null;
         syncAnchorObservation();
         const axis = configuredFollowAxis();
         if (!axis) {
@@ -1177,6 +1215,7 @@ export function createWebScrollSurfaceHost(
         };
         attempt(resetReaderInput);
         requestedDepartureAxis = null;
+        explicitPauseObservation = null;
         anchorObservation = null;
         anchorHeadGrowthPending = false;
         headNode = null;
@@ -1294,9 +1333,11 @@ export function createWebScrollSurfaceHost(
           if (!axis) return false;
           cancelScheduledEnd(true);
           endFollowState = 'paused';
-          // A pause at the current end must survive a no-motion layout report.
-          // Real reader input or an explicit to-end request clears this marker.
+          // Input intent alone cannot resume: a reader must actually arrive at
+          // the end. Keep an observation through stationary contact, editing,
+          // other-axis input and reflow without changing the reader's anchor.
           requestedDepartureAxis = axis;
+          explicitPauseObservation = readAnchorObservation(axis);
           syncAnchorObservation();
           publish();
           return !disposed && policyCurrent();
@@ -1309,6 +1350,7 @@ export function createWebScrollSurfaceHost(
           });
           if (!accepted || !current()) return false;
           if (configuredFollowAxis() === axis) {
+            explicitPauseObservation = null;
             const atEnd = isAxisAtEnd(axis);
             requestedDepartureAxis = atEnd ? null : axis;
             endFollowState = atEnd ? 'following' : 'paused';

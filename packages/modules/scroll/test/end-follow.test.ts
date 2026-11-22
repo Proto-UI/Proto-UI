@@ -169,6 +169,19 @@ describe('module-scroll: end-follow host contract', () => {
     const { frames, target, updateMetrics, snapshots, lease } = installTouchFollowFixture();
     expect(target.scrollTop).toBe(300);
     expect(lease.pauseFollowing!()).toBe(true);
+    // Editing, selecting or moving the other axis does not establish a
+    // reader arrival at the followed end, even when scroll is reported.
+    for (const event of [
+      new MouseEvent('pointerdown', { bubbles: true }),
+      new MouseEvent('pointerup', { bubbles: true }),
+      new KeyboardEvent('keydown', { bubbles: true, key: 'a' }),
+      new WheelEvent('wheel', { bubbles: true, deltaX: 100 }),
+    ]) {
+      target.dispatchEvent(event);
+      target.dispatchEvent(new Event('scroll'));
+      window.dispatchEvent(new Event('resize'));
+      expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    }
     window.dispatchEvent(new Event('resize'));
     expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
     updateMetrics({ scrollHeight: 500 });
