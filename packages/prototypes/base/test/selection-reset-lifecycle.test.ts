@@ -90,6 +90,7 @@ function runtimeHarness() {
               actions.push(name);
               if (
                 name === 'valueChange' ||
+                name === 'rangeChange' ||
                 name === 'execute' ||
                 name === 'openChange' ||
                 name === 'validationRequest'
@@ -103,6 +104,10 @@ function runtimeHarness() {
     return {
       session,
       target,
+      setProps(next: Record<string, unknown>) {
+        props = next;
+        session.controller.applyRawProps(next);
+      },
       get exposes() {
         return exposes;
       },
@@ -146,6 +151,114 @@ it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
     }
   }
 );
+
+for (const mode of ['single', 'range'] as const) {
+  it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
+    `Date Picker ${mode} synchronous owner acceptance waits for the proposal callback after %s`,
+    async (operation) => {
+      const { make, actions, setActionCallback } = runtimeHarness();
+      const initial =
+        mode === 'single' ? { value: '2026-10-10' } : { range: { from: '2026-10-10' } };
+      const accepted =
+        mode === 'single'
+          ? { value: '2026-10-15' }
+          : { range: { from: '2026-10-10', to: '2026-10-15' } };
+      const props = { ...initial, mode, defaultMonth: '2026-10', defaultOpen: true };
+      const root = make(datePickerRoot, null, props);
+      const day = make(datePickerDay, root.target, { date: '2026-10-15' });
+      const proposal = mode === 'single' ? 'valueChange' : 'rangeChange';
+      const openDuringCallback: boolean[] = [];
+      let canonicalDuringCallback: unknown;
+      await root.session.mount();
+      await day.session.mount();
+      setActionCallback((name) => {
+        if (name !== proposal) return;
+        openDuringCallback.push(root.exposes.open.get());
+        root.setProps({ ...props, ...accepted });
+        openDuringCallback.push(root.exposes.open.get());
+        canonicalDuringCallback =
+          mode === 'single' ? root.exposes.value.get() : root.exposes.getRange();
+        if (operation === 'normal') return;
+        void day.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+        void root.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+        if (operation === 'remount') {
+          void root.session.mount();
+          void day.session.mount();
+        }
+      });
+      try {
+        day.target.dispatchEvent(new Event('press.commit'));
+        expect(openDuringCallback).toEqual([true, true]);
+        expect(canonicalDuringCallback).toEqual(
+          mode === 'single' ? accepted.value : accepted.range
+        );
+        expect(actions).toEqual(operation === 'normal' ? [proposal, 'openChange'] : [proposal]);
+      } finally {
+        await day.session.dispose();
+        await root.session.dispose();
+      }
+    }
+  );
+}
+
+it.each(['accepted', 'refused', 'invalid'] as const)(
+  'Date Picker keeps the current completion when a nested proposal is %s',
+  async (nested) => {
+    const { make, actions, setActionCallback } = runtimeHarness();
+    const props = { value: '2026-10-10', defaultMonth: '2026-10', defaultOpen: true };
+    const root = make(datePickerRoot, null, props);
+    const day = make(datePickerDay, root.target, { date: '2026-10-15' });
+    let proposals = 0;
+    let nestedResult: unknown;
+    await root.session.mount();
+    await day.session.mount();
+    setActionCallback((name) => {
+      if (name !== 'valueChange') return;
+      proposals++;
+      if (proposals === 1) {
+        root.setProps({ ...props, value: '2026-10-15' });
+        nestedResult = root.exposes.requestValue(nested === 'invalid' ? 'bad' : '2026-10-16');
+      } else if (nested === 'accepted') root.setProps({ ...props, value: '2026-10-16' });
+    });
+    try {
+      day.target.dispatchEvent(new Event('press.commit'));
+      expect(nestedResult).toBe(nested !== 'invalid');
+      expect(root.exposes.value.get()).toBe(nested === 'accepted' ? '2026-10-16' : '2026-10-15');
+      expect(actions).toEqual(
+        nested === 'invalid'
+          ? ['valueChange', 'openChange']
+          : nested === 'accepted'
+            ? ['valueChange', 'valueChange', 'openChange']
+            : ['valueChange', 'valueChange']
+      );
+      if (nested === 'refused') {
+        expect(root.exposes.open.get()).toBe(true);
+        root.setProps({ ...props, value: '2026-10-16' });
+        expect(actions).toEqual(['valueChange', 'valueChange', 'openChange']);
+      }
+      expect(root.exposes.open.get()).toBe(false);
+    } finally {
+      await day.session.dispose();
+      await root.session.dispose();
+    }
+  }
+);
+
+it('Date Picker does not close a popup first opened inside the proposal callback', async () => {
+  const { make, actions, setActionCallback } = runtimeHarness();
+  const root = make(datePickerRoot, null, { defaultMonth: '2026-10', defaultOpen: false });
+  await root.session.mount();
+  setActionCallback((name) => {
+    if (name === 'valueChange') root.exposes.openPopover('programmatic');
+  });
+  try {
+    root.session.invokeInCallbackScope(() => root.exposes.requestValue('2026-10-15'));
+    expect(actions).toEqual(['valueChange', 'openChange']);
+    expect(root.exposes.open.get()).toBe(true);
+  } finally {
+    await root.session.dispose();
+  }
+});
 
 it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
   'Form reset ends its cached Field traversal after %s',
