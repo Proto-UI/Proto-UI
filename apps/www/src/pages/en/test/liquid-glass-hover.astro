@@ -199,6 +199,10 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
           scene.mount.querySelector<HTMLElement>('.liquid-hover-inset')!.style.padding = '0px';
           // Retain this negative's real destination overlap: the Item's 1px
           // bottom border leaves a 1px gap, inside the 35px contact footprint.
+          // Empty destinations are opacity 0 so they are not painted content.
+          // This negative keeps that same destination visible; otherwise
+          // admission skips it and the closed trigger stays self-optical.
+          scene.overlayMount.style.opacity = '1';
           scene.mount.style.paddingBottom = '0px';
         }
         scene.pause(true);
