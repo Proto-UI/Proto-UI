@@ -80,11 +80,13 @@ jobs:
             local name="$1"
             shift
             cargo test --locked "$@" 2>&1 | tee "$EVIDENCE/$name.log"
-            local result=${PIPESTATUS[0]}
+            local statuses=("${PIPESTATUS[@]}")
+            local result=${statuses[0]}
+            if [ "${statuses[1]}" -ne 0 ]; then result=1; fi
             if [ "$result" -eq 0 ] && ! grep -Eq 'test result: ok\. [1-9][0-9]* passed' "$EVIDENCE/$name.log"; then
               result=1
             fi
-            printf '%s\t%s\n' "$name" "$result" >> "$EVIDENCE/suite-exits.tsv"
+            printf '%s\t%s\n' "$name" "$result" >> "$EVIDENCE/suite-exits.tsv" || failed=1
             if [ "$result" -ne 0 ]; then failed=1; fi
           }
           run_suite workspace --workspace
