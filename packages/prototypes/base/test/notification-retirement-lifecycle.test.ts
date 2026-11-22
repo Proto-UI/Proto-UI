@@ -25,7 +25,7 @@ import {
   fieldRadioGroup,
   FIELD_CONTEXT,
 } from '../src/field';
-import { radioGroupRoot, radioGroupItem } from '../src/radio-group';
+import { radioGroupRoot, radioGroupItem, RADIO_GROUP_FAMILY } from '../src/radio-group';
 import { checkboxRoot } from '../src/checkbox';
 import { formRoot, formField } from '../src/form';
 import { toggleGroupRoot, toggleGroupItem } from '../src/toggle-group';
@@ -184,6 +184,65 @@ function runtimeHarness() {
     },
   };
 }
+
+it.each(['unmount', 'dispose', 'remount', 'owner', 'owner-round-trip'] as const)(
+  'Radio no-op focus notification retires after focused subscriber %s',
+  async (boundary) => {
+    const h = runtimeHarness();
+    const root = h.make(radioGroupRoot, null, { value: 'a' });
+    // An independently authored legal owned item exposes its portable focus fact;
+    // this exercises Root callback ordering without claiming native host focus.
+    const item = h.make(
+      definePrototype({
+        name: 'test-owned-radio-focus-fact',
+        setup(def) {
+          def.anatomy.claim(RADIO_GROUP_FAMILY, { role: 'item' });
+          const focused = def.state.bool('focused', false);
+          def.expose.state('focused', focused);
+          def.expose.method('markFocused', () => focused.set(true));
+          def.expose.method('__collectionItem', () => ({
+            instanceId: 'owned-focus-item',
+            value: 'a',
+            disabled: false,
+          }));
+        },
+      }),
+      root.target
+    );
+    let off = () => {},
+      fired = false;
+    const pending: Promise<void>[] = [];
+    try {
+      await root.session.mount();
+      await item.session.mount();
+      item.session.invokeInCallbackScope(() => item.exposes.markFocused());
+      off = root.exposes.focused.subscribe((event: { next: boolean }) => {
+        if (!event.next || fired) return;
+        fired = true;
+        if (boundary === 'owner' || boundary === 'owner-round-trip') {
+          root.session.controller.applyRawProps({ value: 'b' });
+          if (boundary === 'owner-round-trip')
+            root.session.controller.applyRawProps({ value: 'a' });
+        } else {
+          pending.push(root.session[boundary === 'dispose' ? 'dispose' : 'unmount']());
+          if (boundary === 'remount') pending.push(root.session.mount());
+        }
+      });
+      expect(() =>
+        root.session.invokeInCallbackScope(() => root.exposes.requestValue('a'))
+      ).not.toThrow();
+      expect(fired).toBe(true);
+      expect(h.actions).not.toContain('valueChange');
+      await Promise.all(pending);
+      if (boundary === 'owner') expect(root.exposes.value.get()).toBe('b');
+      if (boundary === 'owner-round-trip') expect(root.exposes.value.get()).toBe('a');
+    } finally {
+      off();
+      await item.session.dispose();
+      await root.session.dispose();
+    }
+  }
+);
 
 for (const proto of [checkboxRoot, fieldCheckbox])
   it.each(['confirm-mixed', 'new-checked', 'owner-round-trip'] as const)(

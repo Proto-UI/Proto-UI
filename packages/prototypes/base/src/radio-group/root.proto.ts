@@ -103,6 +103,7 @@ export function setupRadioGroupRoot(
   };
   def.context.provide(RADIO_GROUP_CONTEXT, initialContext);
   let currentRun: RunHandle<RadioGroupRootProps> | null = null;
+  let valueOwnerEpoch = 0;
   let contextSnapshot = initialContext,
     initialValue = '',
     currentPreferenceId = '';
@@ -190,11 +191,18 @@ export function setupRadioGroupRoot(
   const requestValue = (nextValue: string) => {
     const run = currentRun;
     if (!run || !mounted) return false;
+    const startView = viewEpoch,
+      startOperation = operationEpoch,
+      owner = valueOwnerEpoch,
+      wasNoop = nextValue === value.get();
     const preferred = requestedCurrentItemId;
     requestedCurrentItemId = undefined;
     // Current-item focus remains independent of value policy, including readonly.
     if (!publish(run, preferred)) return false;
     sampleFocus();
+    // Focus observers can retire this owner or commit a newer controlled value.
+    // A no-op coordination call must never become a value proposal afterward.
+    if (!live(run, startView, startOperation) || valueOwnerEpoch !== owner || wasNoop) return false;
     if (
       disabled.get() ||
       readOnly.get() ||
@@ -204,6 +212,7 @@ export function setupRadioGroupRoot(
     )
       return false;
     const matches = getRadioGroupItems(run).filter((item) => item.value === nextValue);
+    if (!live(run, startView, startOperation) || valueOwnerEpoch !== owner) return false;
     if (matches.length !== 1 || matches[0].disabled) return false;
     const view = viewEpoch,
       operation = ++operationEpoch,
@@ -254,8 +263,11 @@ export function setupRadioGroupRoot(
     if (currentRun !== run) return;
     const view = viewEpoch,
       operation = operationEpoch;
-    if (run.props.isProvided('value'))
-      value.set(run.props.get().value ?? '', 'reason: radio controlled canonical value');
+    if (run.props.isProvided('value')) {
+      const next = run.props.get().value ?? '';
+      if (next !== value.get()) valueOwnerEpoch++;
+      value.set(next, 'reason: radio controlled canonical value');
+    }
     if (live(run, view, operation) && publish(run)) reportField();
   };
   def.lifecycle.onCreated((run) => {
