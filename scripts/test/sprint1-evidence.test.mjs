@@ -235,6 +235,15 @@ test('a green production report cannot conceal missing or stale source-bound cap
     (step) => step.id === 'search-production'
   );
   writeSimulated(production, f.sha, f.repo);
+  for (const family of ['shadcn', 'brutalist']) {
+    const firstRuntimePoll = path.join(
+      production.report.captureDirectory,
+      `${family}-runtime-vue-poll.json`
+    );
+    rmSync(firstRuntimePoll);
+    assert.throws(() => assertSprint1StepEvidence(production, f.sha, f.repo), /ENOENT/);
+    writeSimulated(production, f.sha, f.repo);
+  }
   const file = path.join(production.report.captureDirectory, 'shadcn-runtime-react-poll.json');
   rmSync(file);
   assert.throws(() => assertSprint1StepEvidence(production, f.sha, f.repo), /ENOENT/);
@@ -250,7 +259,7 @@ test('a green production report cannot conceal missing or stale source-bound cap
   writeFileSync(file, JSON.stringify({ simulated: true, source: { sha: f.sha, dirty: true } }));
   assert.throws(() => assertSprint1StepEvidence(production, f.sha, f.repo), /clean source/);
   writeSimulated(production, f.sha, f.repo);
-  assert.equal(assertSprint1StepEvidence(production, f.sha, f.repo).sourceBoundCaptures, 12);
+  assert.equal(assertSprint1StepEvidence(production, f.sha, f.repo).sourceBoundCaptures, 14);
 });
 
 test('the existing repair scope and manual serial Sprint 1 owner retain actual workflow wiring', () => {

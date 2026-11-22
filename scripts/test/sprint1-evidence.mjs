@@ -68,7 +68,7 @@ export const SPRINT1_PRODUCTION_CAPTURES = Object.freeze([
   ...['shadcn', 'brutalist'].flatMap((family) => [
     `${family}-destination.json`,
     `${family}-ime-keyboard-destination.json`,
-    ...['react', 'vue2', 'wc'].map((runtime) => `${family}-runtime-${runtime}-poll.json`),
+    ...['vue', 'react', 'vue2', 'wc'].map((runtime) => `${family}-runtime-${runtime}-poll.json`),
   ]),
 ]);
 
