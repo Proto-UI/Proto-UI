@@ -27,6 +27,7 @@ type Owner = {
   reenter: boolean;
   retainedEnter: (() => void) | null;
   retainedEnterCalls: number;
+  retainedEnterOutcome: { rejected: boolean; rejection: string | null } | null;
   target: TransitionTarget;
   dispose(): void;
 };
@@ -116,6 +117,7 @@ export function createTransitionBrowserFixture(generated: Generated) {
         reenter: false,
         retainedEnter: null,
         retainedEnterCalls: 0,
+        retainedEnterOutcome: null,
         target,
         dispose() {},
       };
@@ -212,6 +214,11 @@ export function createTransitionBrowserFixture(generated: Generated) {
         connected: owner.host.isConnected,
         disposed: owner.disposed,
         events: [...owner.events],
+        retainedControl: {
+          captured: typeof owner.retainedEnter === 'function',
+          invocations: owner.retainedEnterCalls,
+          outcome: owner.retainedEnterOutcome,
+        },
         at: performance.now(),
       };
     },
@@ -258,6 +265,7 @@ export function createTransitionBrowserFixture(generated: Generated) {
         rejected = true;
         rejection = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
       }
+      owner.retainedEnterOutcome = { rejected, rejection };
       await settled(owner.target);
       return {
         capturedWhileAlive: true,
