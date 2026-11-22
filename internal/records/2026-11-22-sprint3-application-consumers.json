@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual application producer and focused consumer evidence; existing declared pins, not Sprint 3 candidate adoption or full live application/OS AT acceptance.",
+  "shenko": {
+    "repository": "https://github.com/cyjin-yl/shenko",
+    "revision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+    "tree": "4a53b7e9fe9971c0685b2ab57e4bbc0c57123f13",
+    "authoredSourceStatusAfterBuild": "M crates/shenko-ui/src/static/build-manifest.json",
+    "upstream": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "upstreamTree": "2e2dad99389de4e92ba78cd7cc060a1d7ace6734",
+    "upstreamLock": {
+      "path": "/workspace/scratch/828b7e591003/Proto-UI-shenko-pin/pnpm-lock.yaml",
+      "sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+      "bytes": 263425
+    },
+    "buildLog": {
+      "path": "/workspace/scratch/828b7e591003/shenko-main-consumer-verified.log",
+      "sha256": "52654fc1e5f90b0988db5d07b5ea4eb4eff210ac640b2e9ccf2b49e44f2c3961",
+      "bytes": 5572
+    },
+    "initialInvocationFailure": {
+      "path": "/workspace/scratch/828b7e591003/shenko-main-consumer-build.log",
+      "sha256": "b0ea7142716823a681fa4446033cf6a8756ff28cef771983c1679863738710c4",
+      "bytes": 1076
+    },
+    "packageBuildLog": {
+      "path": "/workspace/scratch/828b7e591003/shenko-pin-build.log",
+      "sha256": "d49b01715e8dde3990c421abd51ebef4673757067aa1e966fca12f76d79bc09e",
+      "bytes": 2530
+    },
+    "packageSelection": {
+      "selected": 42,
+      "totalPublic": 47
+    },
+    "typecheck": "passed",
+    "webTests": {
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0
+    },
+    "buildManifest": {
+      "path": "/workspace/scratch/828b7e591003/shenko-consumer/crates/shenko-ui/src/static/build-manifest.json",
+      "sha256": "baf8a2f0049515bbe01402401c229bbcd3a92e8d5cb6cda946bd049bdc7c8e90",
+      "bytes": 8697
+    },
+    "compiler": {
+      "status": "build_time_compiled",
+      "runtime_imported": false,
+      "profile": "react-dom-source-v1",
+      "package": "packages/compiler",
+      "package_sha256": "393793c94cc5f71cef2d835edc1b4552412743bec00b76ea7f053e2d2cf20f2f",
+      "entry": "packages/compiler/src/index.ts",
+      "entry_sha256": "cdb8b12894027bf3d7a9e9dfd3cdf33c2113efb7f940c5739502316a664dcdfd",
+      "source_tree_sha256": "b93c484bd6e8ee690d49d4fc61a72f684e18ffab80d3a7328f326aa542bd70ad",
+      "typescript": "5.9.3",
+      "bundle": {
+        "path": "generated/compiler/proto-ui-compiler.mjs",
+        "sha256": "5fd999a092eea1c08861995b65e8b4773b0239470adce0ac253ed37c94395de5",
+        "bytes": 2834329,
+        "format": "esm",
+        "entry": "packages/compiler/src/index.ts",
+        "external": [
+          "typescript"
+        ]
+      },
+      "resolutions": [
+        {
+          "specifier": "@floating-ui/dom",
+          "owner": "packages/modules/positioning",
+          "version": "1.8.0",
+          "package_sha256": "59643af1b1bfc5a80b172c21ccbe21ea56eaa0115378f6077d9934458db25ac1"
+        }
+      ],
+      "public_package_selection": {
+        "script": "scripts/build/public-packages.mjs",
+        "selected_package_count": null,
+        "includes_compiler": false,
+        "note": "The compiler exports TypeScript source only and is private, so it is never one of the built public packages; Shenko compiles it at build time instead."
+      },
+      "prototypes": [
+        {
+          "name": "transport-badge",
+          "entry": "prototypes/transport-badge.proto.ts",
+          "entry_sha256": "2ee02ccc9ca4fdd8bb4d031d4d390ba4fe78113d290cd9f011735f77c1d272ae",
+          "profile": "react-dom-source-v1",
+          "component_name": "CompiledTransportBadge",
+          "output_directory": "generated/prototypes/transport-badge",
+          "generated_source": "generated/prototypes/transport-badge/Component.tsx",
+          "generated_sha256": "374b96edef85ee9e6a41571de56b58dfdfff3b6e210f80aa20fd938d6a729496",
+          "generated_imports": [
+            " + phase);\n    const previous = phase;\n    phase = ",
+            "react"
+          ],
+          "provenance": "generated/prototypes/transport-badge/provenance.json",
+          "provenance_sha256": "d3dfb6211abb416831a0829d5f7aa9433a870823827be6be5b9329799fb3e536",
+          "compiler_ir_version": 7,
+          "compiler_backend": "react-dom-source-v1",
+          "compiler_source_sha256": "d96e8c6034df472d348a6be97a150505405bd933c075230e31bf5b8d9b527009"
+        },
+        {
+          "name": "message-bubble",
+          "entry": "prototypes/message-bubble.proto.ts",
+          "entry_sha256": "50915675a5fb64b14bf4784594819ea64a76ceb2234e15f7db3321be03f61e8d",
+          "profile": "react-dom-source-v1",
+          "component_name": "CompiledMessageBubble",
+          "output_directory": "generated/prototypes/message-bubble",
+          "generated_source": "generated/prototypes/message-bubble/Component.tsx",
+          "generated_sha256": "a70a1e1a61d9a91247e6a476b8eb359d257c871165e83effff9874debd24e77d",
+          "generated_imports": [
+            " + phase);\n    const previous = phase;\n    phase = ",
+            "react"
+          ],
+          "provenance": "generated/prototypes/message-bubble/provenance.json",
+          "provenance_sha256": "bd1859e681d1ff4de6f65ccbba2654c6071a2620fb59bcd71cd1eadc2c113b89",
+          "compiler_ir_version": 7,
+          "compiler_backend": "react-dom-source-v1",
+          "compiler_source_sha256": "276686d95d44f9191bef18c29327a20e2b6aa9ec65ac3c61ec7a2c9941f40180"
+        }
+      ]
+    },
+    "artifacts": {
+      "theme-bootstrap.js": {
+        "bytes": 770,
+        "sha256": "6fe832f8731ccbcebfc746413f6d197ed6d3abadaa8c74e032e234b0283e1f4d"
+      },
+      "app.js": {
+        "bytes": 1141997,
+        "sha256": "d6eeca7719da01e6769f041c44f30b8709ac49eb0c7ae50051d8268531f61452"
+      },
+      "chunks/chunk-O3OVBR66.js": {
+        "bytes": 65273,
+        "sha256": "b79d2f7224934764cfc53bf54cda1b6d9252c5ba3d6c30acd341a84f0bad2873"
+      },
+      "chunks/demo-controller-IAYPJLAD.js": {
+        "bytes": 15700,
+        "sha256": "ba878393767fa080bdaf7a9cd520813e6299f65b71b541027280d8fe41fb6901"
+      },
+      "app.css": {
+        "bytes": 62760,
+        "sha256": "fc7f0e247c63b335fa486a661ffbe571989bcf0c5f5d53d1dc289ea3f3bc1304"
+      },
+      "proto-ui-style.css": {
+        "bytes": 294,
+        "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+      },
+      "proto-ui-tokens.generated.css": {
+        "bytes": 165134,
+        "sha256": "d01eed72d9edc64970339c97e259991c02122cba737f8b4a752eea72590566b8"
+      },
+      "shadcn-theme.css": {
+        "bytes": 6473,
+        "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+      },
+      "licenses/PROTO-UI-LICENSE": {
+        "bytes": 1078,
+        "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+      },
+      "licenses/SHADCN-NOTICES.md": {
+        "bytes": 8656,
+        "sha256": "4edb0cb2e55245016029372facc725ca3fda68f6b71c09158e9d82e75a7fddb5"
+      },
+      "licenses/REACT-LICENSE": {
+        "bytes": 1088,
+        "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+      },
+      "licenses/REACT-DOM-LICENSE": {
+        "bytes": 1088,
+        "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+      }
+    },
+    "realisation": {
+      "compiled": [
+        "transport-badge",
+        "message-bubble"
+      ],
+      "adapter": [
+        {
+          "family": "button",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "textarea",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "scroll-area",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "collapsible",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "drawer",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "toggle-group",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "input",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "separator",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "toggle",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        }
+      ]
+    },
+    "limitations": [
+      "Initial optional upstream receipt path was incorrectly supplied as an output; first invocation ENOENT retained, corrected invocation omitted this optional input.",
+      "Tracked generated build-manifest.json changes as a producer output; authored app source was not edited.",
+      "No new live backend/Harness task, native scrolling-follow-tail, physical IME or OS AT acceptance."
+    ]
+  },
+  "verdant": {
+    "repository": "https://github.com/OpenGreendam/verdant",
+    "revision": "91a775546ebd21a87d76d76568195a6513437719",
+    "tree": "db7c40b3bb7bb3f74f8456f3185c352aaccc2f9b",
+    "sourceStatusAfterCheck": "",
+    "upstream": "e56b2d1a3d6b688a1cbc6930dab1d6757304d733",
+    "upstreamTree": "26dbcb4a6d10678a5c0b4ce45d562f8e4ab01072",
+    "upstreamLock": {
+      "path": "/workspace/scratch/828b7e591003/Proto-UI-verdant-pin/pnpm-lock.yaml",
+      "sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+      "bytes": 263425
+    },
+    "compileLog": {
+      "path": "/workspace/scratch/828b7e591003/verdant-main-consumer-compile.log",
+      "sha256": "0ca4f3aaa41151c86d365d921c21dad76d30e8aac1caf31427e7b727b4143b54",
+      "bytes": 410
+    },
+    "retainedReceipt": {
+      "path": "/workspace/scratch/828b7e591003/verdant-consumer/frontend/proto-ui/receipts/pitch-gesture-surface.json",
+      "sha256": "567febe7016cf70eea2d8a1ec3480baa7ea3ac6f0285a9f1c475b8739ccf3d81",
+      "bytes": 4285
+    },
+    "freshCompilation": {
+      "status": "passed",
+      "target": "gpui-source-v1",
+      "authoredUnit": "pitch-gesture-surface",
+      "matchedArtifacts": 20
+    },
+    "admissionRuleCases": 5,
+    "unmergedUpgrade": {
+      "pullRequest": "https://github.com/OpenGreendam/verdant/pull/5",
+      "observedRevision": "9f4afa430e0707ef7b683b74018e1d3e554762bf",
+      "upstreamRevision": "2685caf7ce0bf8ed7cc5e0f2a9d119bbf616d0b5",
+      "newRun": "not-run"
+    },
+    "limitations": [
+      "Fresh compilation byte comparison and admission fixtures do not establish native GPUI runtime, keyboard, accessibility or resource cleanup.",
+      "Main and PR 5 are separate consumer source lines; no PR 5 receipt was assigned to main."
+    ]
+  }
+}
