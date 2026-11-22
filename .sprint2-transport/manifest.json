@@ -3,84 +3,104 @@
   "repository": "Proto-UI/Proto-UI",
   "branch": "sprint2/0.3-semantics-consumers-20261122",
   "transportBranch": "sprint2/transport-20261122-01",
-  "expectedHead": "f0aa85b99ebb27f68bef2bb729dcd6f530965e7f",
-  "targetHead": "c13d4d9e079f1da0488c4f1d7ada45d7dc44f758",
-  "targetTree": "372c2c9df482cdb4369687e68d2dc625b23191e2",
-  "bundleBytes": 154040,
-  "bundleSha256": "b755d61b542d48351f9233e1cec71dc17dd5429e4eb14c97272a91a045367b18",
-  "changedPathsSha256": "46f256c3fd868dacfa6d7472bba4f5bc8cb2d653b239bf5481826ead5e4c5dbf",
+  "expectedHead": "c13d4d9e079f1da0488c4f1d7ada45d7dc44f758",
+  "targetHead": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+  "targetTree": "df8009cd19537fa64c315e6427337d1e3cc24026",
+  "bundleBytes": 4351563,
+  "bundleSha256": "a9581c97e9e9df33e77d2cba4e2b3588d47b56578feb95300562fa5287c5ab97",
+  "changedPathsSha256": "a8351ce804ab18d4bc1a61154cb5bee4843a3a57b202f71424531c1556006e70",
   "commits": [
     {
-      "sha": "4c64eff92e5d319d37159289d6d56f567a7b57e7",
-      "objectSha256": "f4bba010754b4fb4ddf08b829cc4fd39e18ab3fadee39503c232c8b0b3905fcb"
+      "sha": "4cec628388b17e3853cbadce82d027c0da4d5fea",
+      "objectSha256": "c7b1d2e0a33249cf2c8c7653a75aede2d5c70e9498c45bbe7b0b4d65193fa1cf"
     },
     {
-      "sha": "af151b7d3056ebf31c86a739ce4ff63418624063",
-      "objectSha256": "7e9d5603a4fcf52f5df4672cac1fe13c118fd46d4620b22d4915605e939593ec"
+      "sha": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+      "objectSha256": "2218807b8092ceaf30901c7bda72b906da7302887a28b0202e7fea30263bbdef"
     },
     {
-      "sha": "ea7a9b7b4d1888b9dcbc17b650a8b29c75448954",
-      "objectSha256": "f09529f48483fe567da90f0842ba6aaec3087068bf81549fdd7c98522dc71565"
+      "sha": "b42a0897d1302d5563c5ef026e0e61c298c3bb74",
+      "objectSha256": "d3cf33c42478619b9312f5df9cf330722d2ba5915f7d8e2ab0a84ba84505273a"
     },
     {
-      "sha": "a135144ba9f605de4135cdee872f78f293005b86",
-      "objectSha256": "f21295b5f1f1c10daca10010e7117f27d607227a28427ae739b502f2a64fc6d3"
+      "sha": "2e71dc68057491ddc4817f897108bb8b80db0ab9",
+      "objectSha256": "7a03f01db3e2cbe40af07bac2d603d2cacbe284e758e581c71ae146ecf7c1003"
     },
     {
-      "sha": "b12ae710f3fe2fac8b21e98918461becb8ed64e0",
-      "objectSha256": "2be223e5b7c91d4daf199264da7973ab8b08a67863e6c7f8bb7ff55f477afd3f"
+      "sha": "dfb780bc8cc6421a206bd0978e566257fdff560c",
+      "objectSha256": "eee5ce62038a47fb4c3b4d41377533a4c0f4d6eba9c25420acbc82b7813b81b6"
     },
     {
-      "sha": "dfb6346dd318ef6e7a37646e099d4c24c64fc59e",
-      "objectSha256": "52e4c83969abdd3c0188943b163f5075981572963845641f4c474a50c6868bba"
+      "sha": "7b8d6f36f0e524e41d892278d82a1b58d660c4af",
+      "objectSha256": "48fb001a40386d02dda6832203efe04b5a18cb633283a491af34cf5f2a969f86"
     },
     {
-      "sha": "e9771bc1c49c3a3a14aef49b6db851bf82138b6a",
-      "objectSha256": "6f22271d198558c6e02bc6f739251a40ff3f1fa7731ba60010ff5fbb34717288"
+      "sha": "ba932e727807c2d48071c2ac738fd6b39a12b0a1",
+      "objectSha256": "3e07bc50acf54cacead16965d4c7ec8bb4d8b66f5265f2d4163dce8d8523a45a"
     },
     {
-      "sha": "947524510b0df8cb936e28824cbd940811cfd946",
-      "objectSha256": "f121fb3d69c0c18e37ee3cca1ab8a638ac185b3b5a0dab5e22a6c3778cfdca41"
+      "sha": "4900d2b8260c5c89a77761d1df24d9eea2a429a6",
+      "objectSha256": "b16ff7e24444207714ade923dfee81bca26b0c659a34063b55d1f664751fed16"
     },
     {
-      "sha": "f1e25c8591d6ca68ce003438daddbfc5373facaf",
-      "objectSha256": "e6ba558ecb4da0b7149ab968bd7ceaed36bd8bcd5228177582f5fb2074921999"
+      "sha": "06558a3fa0b1fa21ee632114c3ae81c24de9373e",
+      "objectSha256": "4d049ef2efdbfc8aee4a99144ac9bf324aef49e574c5dcca4f4b10aac5c2e79e"
     },
     {
-      "sha": "93aef32ad6cfb160b6f92fb493385fb3414d07d4",
-      "objectSha256": "47fe9836fd910099e1315d467f45559bcfbe97bf32e0d767d7c2aaa8d3f370f8"
+      "sha": "593682a8758a777306f3889b98fef475d4263c44",
+      "objectSha256": "653c5f40f7f359aa1d62f04e62b6246f52f573aee29407f8479bde5c4f081fe0"
     },
     {
-      "sha": "1670c810687ef0604d06e57324f6d809035b2f9d",
-      "objectSha256": "c68ec0ce08aa6376db6ae563d88c4e4b3325bd18f11dbd5bc35113155bd8d9c5"
+      "sha": "69d8e8ab2d6372392e4a86aa3d500b3a733d0f01",
+      "objectSha256": "247e74f1dac18f5e2094f2bf21a5ef6d8611727cf52f16eb76b4658524f296aa"
     },
     {
-      "sha": "a5d00015db71646c650e393451a8f129ef23f578",
-      "objectSha256": "88c40ceeff80ac3bb6902b0cae6993a98a0031325b84deaf6ea0194dc8ee0083"
+      "sha": "45aba53cf1d196d76342899f0963090652e2fc70",
+      "objectSha256": "9b291f9ba7c60259a0e9f1d0b0239345cf12ec215fdd6f53e55b3a5538a6056b"
     },
     {
-      "sha": "d5ec2a8a2733bed7ecb2dd3867cd8fd02810aea1",
-      "objectSha256": "e90e23bc0ad886a0b03680069d0007aa6ff4d07ce408998d56754b68151b46f8"
+      "sha": "2430aeaf1c74dc1f4563a543e0021574e7d5c441",
+      "objectSha256": "65fe9578e6a8f13bb7c0edbeebcddabca661ea572daeae7b2886a16ebf7d82fd"
     },
     {
-      "sha": "8c882c64dac1071fb2ed834eac6650a08aa1c8f0",
-      "objectSha256": "bd913f1647799233e2cec1679df3eba0cd17731691f44272c87a8a27302d1350"
+      "sha": "207c941f4b18a6004a1d69c3221e650f83d0c196",
+      "objectSha256": "71c853503dbe165eca60d4ddfc71fd5b05c5ae610934f4d5bf0d3a2b206c0c3b"
     },
     {
-      "sha": "aec148fb9ef47963969e31ef3e3a9d9f98ee74f5",
-      "objectSha256": "4ba84892b7544659d800445ca5926acdbd578d0d9842bf05b9a67ea6f56588a3"
+      "sha": "22c5a224a2403d96c85af7e7f232be7e4a2b1755",
+      "objectSha256": "d76efca120e4bd25b2aafbca5b808bb58c40941af3de607efd0644f2ec52dc95"
     },
     {
-      "sha": "4afd473573f9c11b7b46b63c723954add9f13c00",
-      "objectSha256": "0dc459d98fd482a4596a8261986bc0a3d522a3659bb199dea04c2749e145eeb3"
+      "sha": "8bff3bacc7e296936d62de29e40bb0b7357b9edc",
+      "objectSha256": "e7251abb1b3581c74399776b3e6df82c9b4bd014ec3663b0b19ffd693b875845"
     },
     {
-      "sha": "c5a222db69a3e253221fdc51b68a2174e5aaf84b",
-      "objectSha256": "8555c62dec5bb802850373d2155997c7c86bad834fc822d9b847840db79a1996"
+      "sha": "16cce8cd957aa4a34b3a7fc89308779fe0aa9929",
+      "objectSha256": "cf30cf8795d1faafd4f2d68ded59a33fac494163c0247fc2b2ff0e7d0a9508cc"
     },
     {
-      "sha": "c13d4d9e079f1da0488c4f1d7ada45d7dc44f758",
-      "objectSha256": "a586547fed273d48dc2f3001dd5caa5abf897df03fdca69323dbfb461f2a2328"
+      "sha": "2419927b6218b75d8e0782285d2748c123411bbe",
+      "objectSha256": "9ecad79860f2286593ed1954b468dc071c4f4ae31e81cb71fa0dd2fd1c3e5eea"
+    },
+    {
+      "sha": "322a87132c88bf7784765d2e2f597ee1d50072ee",
+      "objectSha256": "f1abb09c3a4d4eac21f9a1f062819a339852ac5efbe385e2909886ffd45ce068"
+    },
+    {
+      "sha": "dbcdecb077283d4e3fe11fe1077b74708f24fa4b",
+      "objectSha256": "4e20840b53b0288b67e04a1c4153ec32b41b0d06bb7765d9a7110ad038a7dc00"
+    },
+    {
+      "sha": "6e6a09023cef5b32e568c4f42dce4f38f70a89e4",
+      "objectSha256": "7d17862ffd8a330dc154a0d42d65fb394edbd80857927f056ac46d6d9f3c5129"
+    },
+    {
+      "sha": "afa1e1c9a47d8fb37b97528c973048056e053548",
+      "objectSha256": "b28ec9bd7b78715a15beb2f6c7ca2ba3b027be60e0f48b5219381ac497669176"
+    },
+    {
+      "sha": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+      "objectSha256": "cafba6504847feb326cd630b5ed518a370a263a52e2feb3a3d12348247663274"
     }
   ],
   "authorization": "Current user: execute Sprint 2, submit PR and continue to Ready. This carrier imports the already-authored, signed original Git objects to that exact feature branch; no merge, release, deployment, credential export or rule change."
