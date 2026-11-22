@@ -30,6 +30,19 @@ describe('Field package/CLI closure', () => {
     }
   );
 
+  it.each(['react', 'vue', 'vue2', 'wc'])(
+    '%s projects the Brutalist FieldTextarea workspace export',
+    (host) => {
+      expect(() => renderHostIndex(host, ['brutalist-field'])).toThrow(/workspace-source-only/);
+      const code = renderHostIndex(host, ['brutalist-field'], { sourceMode: 'workspace' });
+      expect(code).toContain('fieldTextarea');
+      expect(code).toContain("from '@proto.ui/prototypes-brutalist/field'");
+      expect(code).toContain(
+        host === 'wc' ? 'BrutalistFieldTextareaElement' : 'BrutalistFieldTextarea'
+      );
+    }
+  );
+
   for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     it(`${family} resolves all atoms and complete authored style tokens without pretending release admission`, async () => {
       for (const host of ['react', 'vue', 'vue2', 'wc']) {

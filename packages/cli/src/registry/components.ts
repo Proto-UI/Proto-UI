@@ -365,6 +365,11 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'BrutalistFieldValidity',
           elementName: 'proto-ui-brutalist-field-validity',
         },
+        {
+          prototypeImport: 'fieldTextarea',
+          exportBaseName: 'BrutalistFieldTextarea',
+          elementName: 'proto-ui-brutalist-field-textarea',
+        },
       ],
       { stylePreset: 'brutalist' }
     ),
