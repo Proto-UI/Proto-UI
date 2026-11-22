@@ -298,7 +298,7 @@ pub fn modules_drive(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&m
     let request=owner.borrow().focus_requested;
     if request&&live&&ready(owner)&&native_focus_available(owner)&&!text_disabled(owner){let (bypass_gate,source)={let mut o=owner.borrow_mut();o.focus_requested=false;(std::mem::take(&mut o.modules.focus.bypass_gate),o.modules.focus.request_source.take())};if bypass_gate||top_scope(owner).map_or(true,|scope|descendant(owner,&scope)){window.focus(focus,cx);if focus.is_focused(window){if let Some((source,id))=source{if let Some(source)=source.upgrade(){let selected=source.borrow().modules.focus.scope_recipient.as_ref().is_some_and(|(_,intent)|*intent==id);if selected{source.borrow_mut().modules.focus.scope_recipient=None;}}}}}}
 }
-pub fn drive_queued_focus(owner:&OwnerRef,window:&mut Window,cx:&mut App){for other in owners_in(window){if Rc::ptr_eq(owner,&other){continue}let focus=other.borrow().modules.focus.native.clone();if let Some(focus)=focus{modules_drive(&other,&focus,window,cx);}}}
+pub fn drive_queued_focus(owner:&OwnerRef,window:&mut Window,cx:&mut App){for other in owners_in(window,cx){if Rc::ptr_eq(owner,&other){continue}let focus=other.borrow().modules.focus.native.clone();if let Some(focus)=focus{modules_drive(&other,&focus,window,cx);}}}
 pub fn modules_commit(owner:&OwnerRef){control_label_commit(owner);overlay_commit(owner);image_mount(owner);topology_refresh();for owner in all_owners(){let pending=owner.borrow().modules.focus.pending.clone();if let Some((operation,options))=pending{navigate_focus(&owner,true,operation,options);}}poll_state_watchers();}
 // GPUI records a native tab order but does not execute Tab's default action.
 // Resolve that host action only after both authored and raw native handlers.
@@ -450,14 +450,14 @@ pub fn register_sequential_focus_owner(owner:&OwnerRef,cx:&mut App){
         input.targets.push(SequentialFocusTarget{owner:weak,focus:focus.downgrade(),window,epoch:owner.epoch});
     }
 }
-pub fn focus_key_navigation(event:&gpui::KeyDownEvent,window:&mut Window)->bool{
-    focus_keystroke_navigation(&event.keystroke,window)
+pub fn focus_key_navigation(event:&gpui::KeyDownEvent,window:&mut Window,cx:&App)->bool{
+    focus_keystroke_navigation(&event.keystroke,window,cx)
 }
-fn focus_keystroke_navigation(keystroke:&gpui::Keystroke,window:&mut Window)->bool{
-    let Some(key)=portable_key(keystroke)else{return false};let id=Some(window.window_handle().window_id());
+fn focus_keystroke_navigation(keystroke:&gpui::Keystroke,window:&mut Window,cx:&App)->bool{
+    let Some(key)=portable_key(keystroke)else{return false};
     // Tab (including trapped Tab) settles after later native ancestors.
     if key=="Tab"{return false;}
-    let Some(target)=all_owners().into_iter().find(|o|o.borrow().focused&&o.borrow().window_id==id)else{return false};let Some(provider)=focus_provider(&target)else{return false};
+    let Some(target)=owners_in(window,cx).into_iter().find(|o|o.borrow().focused)else{return false};let Some(provider)=focus_provider(&target)else{return false};
     let config=provider.borrow().modules.focus.roving.clone();let navigation=text_or(field(&config,"navigation"),"none");if !matches!(navigation.as_str(),"arrow"|"tab+arrow"){return false}let orientation=text_or(field(&config,"orientation"),"vertical");
     let op=match key.as_str(){"ArrowDown" if orientation!="horizontal"=>Some("next"),"ArrowUp" if orientation!="horizontal"=>Some("prev"),"ArrowRight" if orientation!="vertical"=>Some("next"),"ArrowLeft" if orientation!="vertical"=>Some("prev"),"Home"=>Some("first"),"End"=>Some("last"),_=>None};
     if let Some(op)=op{if native_host_callback(&provider,"focus-navigation",||navigate_focus(&provider,true,op,record(vec![("reason",Value::string("keyboard"))]))).unwrap_or(true){window.prevent_default();return true;}}false

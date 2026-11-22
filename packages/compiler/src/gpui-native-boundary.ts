@@ -18,7 +18,7 @@ fn classify_boundary(owner:&OwnerRef,sample:&Value)->&'static str{if !ready(owne
 pub fn boundary_classify(owner:&OwnerWeak,sample:Value,notify:bool)->Value{let owner=runtime(owner);let classification=classify_boundary(&owner,&sample);if notify&&classification=="outside"{let callbacks=owner.borrow().modules.boundary.callbacks.clone();let event=record(vec![("classification",Value::string("outside")),("sample",sample)]);for(active,callback)in callbacks{if active.get(){invoke(&owner,"event",&callback,vec![event.clone()]);}}}Value::string(classification)}
 pub fn native_host_hit(owner:&OwnerRef,position:gpui::Point<Pixels>,window:&Window)->bool{ready(owner)&&hit_participates(owner)&&owner.borrow().native_hitbox.as_ref().is_some_and(|hitbox|hitbox.is_hovered_at(position,window))}
 pub fn native_boundary_press(position:gpui::Point<Pixels>,window:&mut Window,cx:&mut App){
-    let owners=owners_in(window);let target=owners.iter().filter(|owner|native_host_hit(owner,position,window)).max_by_key(|owner|owner.borrow().modules.topology.order).cloned();
+    let owners=owners_in(window,cx);let target=owners.iter().filter(|owner|native_host_hit(owner,position,window)).max_by_key(|owner|owner.borrow().modules.topology.order).cloned();
     let mut candidates:Vec<_>=owners.into_iter().filter(|owner|owner.borrow().modules.boundary.observing).collect();
     let active=candidates.iter().filter(|owner|owner.borrow().modules.boundary.active).max_by_key(|owner|owner.borrow().modules.boundary.stack_order).cloned();if let Some(active)=active{candidates.retain(|owner|Rc::ptr_eq(owner,&active));}
     for owner in candidates{

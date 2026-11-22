@@ -29,6 +29,13 @@ ancestor can still prevent the default or stop propagation; an action-resolved
 key cannot also acquire the fallback. The deferred cleanup only retires a stopped
 request and never performs delayed navigation.
 
+Window and focus identifiers are local to an App. Native input fan-out, boundary
+input and queued host driving therefore select owners from that App's weak
+registry before applying the existing window and mounted-view checks. A matching
+WindowId in another App cannot authorize an event or Entity update there. The
+separate-App native regression exercises this through real physical key dispatch;
+it does not claim a broader rewrite of every portable logical registry.
+
 An active trapped FocusScope retains its in-scope navigation policy. Otherwise
 the host uses GPUI's current native tab map, including ordinary native siblings,
 disabled targets and authored `navParticipation`. This does not make a
