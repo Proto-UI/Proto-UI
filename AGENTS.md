@@ -67,6 +67,8 @@ For compiler work, follow [the thin compiler completion standard](internal/compi
 
 ## Repository map
 
+For documentation ownership, maintained versus historical content, directory entry points, and generated projections, follow the [documentation maintenance guide](internal/governance/documentation-policy.md).
+
 - `spec/**`: cataloged contracts, prototypes, modules, Adapter profiles, decisions, host capabilities, tests, versions, and knowledge.
 - `packages/spec/**`: schema, loader, relation validation, snapshot, and graph tooling for the catalog.
 - `packages/core/**`: protocol syntax and core primitives.
@@ -122,7 +124,7 @@ corepack pnpm@10.32.1 test
 
 Choose verification proportional to the change:
 
-- Agent/documentation-only changes: run `check:agent-operations`, `check:agent-doc`, generate the local Agent project understanding when its snapshot needs inspection, and validate referenced paths.
+- Agent/documentation-only changes: run `check:public-docs` (including repository links and supported package-script references), `check:agent-operations`, and `check:agent-doc`; generate the local Agent project understanding when its snapshot needs inspection. Run `test:public-docs` when changing documentation checks.
 - Spec changes: run the relevant spec/schema/graph tests, `check:prototype-catalog` when prototypes are involved, regenerate projections, then run type checks.
 - Runtime, module, adapter, or prototype behavior changes: run focused tests first, then the relevant workspace-wide checks.
 - Release-governance changes: run the release checks documented under `internal/governance/**`.
