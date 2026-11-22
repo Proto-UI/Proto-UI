@@ -8,6 +8,7 @@ import {
   mkdirSync,
   openSync,
   readFileSync,
+  realpathSync,
   readdirSync,
   renameSync,
   writeFileSync,
@@ -212,27 +213,42 @@ export function finishIncomplete(ledger, reason) {
   return ledger;
 }
 
-function filesUnder(directory) {
-  if (!existsSync(directory)) return [];
-  return readdirSync(directory)
-    .sort()
-    .flatMap((name) => {
-      const file = path.join(directory, name);
-      const stat = lstatSync(file);
+function inspectInventory(directory) {
+  const files = [];
+  const errors = [];
+  try {
+    if (canonicalPath(directory) !== path.resolve(directory))
+      throw new Error(`Evidence directory has a symbolic-link ancestor: ${directory}`);
+  } catch (error) {
+    return { files, errors: [String(error)] };
+  }
+  const visit = (file) => {
+    try {
+      const stat = lstatSync(file, { throwIfNoEntry: false });
+      if (!stat) return;
       if (stat.isSymbolicLink()) throw new Error(`Evidence cannot follow a symbolic link: ${file}`);
-      return stat.isDirectory() ? filesUnder(file) : stat.isFile() ? [file] : [];
-    });
+      if (stat.isDirectory()) {
+        for (const name of readdirSync(file).sort()) visit(path.join(file, name));
+      } else if (stat.isFile()) {
+        const bytes = readFileSync(file);
+        files.push({
+          file: path.relative(directory, file).replaceAll(path.sep, '/'),
+          bytes: bytes.length,
+          sha256: hash(bytes),
+        });
+      } else throw new Error(`Unsupported evidence entry: ${file}`);
+    } catch (error) {
+      errors.push(`${file}: ${String(error)}`);
+    }
+  };
+  visit(directory);
+  return { files, errors };
 }
 
 function fileInventory(directory) {
-  return filesUnder(directory).map((file) => {
-    const bytes = readFileSync(file);
-    return {
-      file: path.relative(directory, file).replaceAll(path.sep, '/'),
-      bytes: bytes.length,
-      sha256: hash(bytes),
-    };
-  });
+  const observed = inspectInventory(directory);
+  if (observed.errors.length) throw new Error(observed.errors.join('\n'));
+  return observed.files;
 }
 
 /** One owned process group. Deadlines are resource limits, never interaction thresholds. */
@@ -404,12 +420,34 @@ export async function startOwnedPreview(directory, head, log) {
   };
 }
 
+// Match the rehearsal runner's existing-ancestor boundary. Resolve symlinks
+// before creating a not-yet-existing child, including ignored checkout paths.
+function canonicalPath(value) {
+  let ancestor = path.resolve(value);
+  const remaining = [];
+  while (!lstatSync(ancestor, { throwIfNoEntry: false })) {
+    remaining.unshift(path.basename(ancestor));
+    ancestor = path.dirname(ancestor);
+  }
+  return path.resolve(realpathSync(ancestor), ...remaining);
+}
+
+export function resolveEvidenceDirectory(value, sourceRoot = repository) {
+  const root = canonicalPath(sourceRoot);
+  const output = canonicalPath(value);
+  const relative = path.relative(root, output);
+  if (
+    !relative ||
+    (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`))
+  )
+    throw new Error('Evidence must stay outside the source checkout.');
+  return output;
+}
+
 function outputDirectory() {
   if (!process.env.SPRINT3_EVIDENCE_DIR)
     throw new Error('Set SPRINT3_EVIDENCE_DIR to a fresh directory outside the checkout.');
-  const output = path.resolve(process.env.SPRINT3_EVIDENCE_DIR);
-  if (output === repository || output.startsWith(`${repository}${path.sep}`))
-    throw new Error('Evidence must stay outside the source checkout.');
+  const output = resolveEvidenceDirectory(process.env.SPRINT3_EVIDENCE_DIR);
   mkdirSync(output, { recursive: true });
   return output;
 }
@@ -529,6 +567,7 @@ async function execute(output, ledger) {
           surface: row.surface,
           preview: row.surface === 'production-docs' ? ledger.preview : null,
         });
+        row.sourceReceiptSha256 = hash(readFileSync(path.join(directory, 'source.json')));
         const reportFile = path.join(directory, 'vitest.json');
         const args = [
           'pnpm@10.32.1',
@@ -683,38 +722,102 @@ async function execute(output, ledger) {
   }
 }
 
-function finalize(output, ledger, publishSummary) {
+export function finalize(output, ledger, publishSummary = false, readSource = sourceState) {
+  // A crash or an unreadable capture during final reconciliation must never
+  // leave the earlier successful aggregate as the last readable receipt.
+  ledger.status = 'failed';
+  ledger.finalization = { status: 'running', startedAt: now() };
+  json(path.join(output, 'results.json'), ledger);
   finishIncomplete(
     ledger,
     'Workflow ended before this suite produced a terminal receipt; inspect workflow-steps.json.'
   );
   if (['not-run', 'running'].includes(ledger.build.status)) ledger.build.status = 'blocked';
-  if (process.env.WORKFLOW_STEP_OUTCOMES)
-    json(path.join(output, 'workflow-steps.json'), JSON.parse(process.env.WORKFLOW_STEP_OUTCOMES));
+  if (process.env.WORKFLOW_STEP_OUTCOMES) {
+    try {
+      json(
+        path.join(output, 'workflow-steps.json'),
+        JSON.parse(process.env.WORKFLOW_STEP_OUTCOMES)
+      );
+    } catch (error) {
+      ledger.errors.push(`Workflow receipt I/O failure: ${String(error)}`);
+    }
+  }
   try {
     ledger.errors.push(
-      ...sourceProblems(sourceState(), { ...ledger.source, head: ledger.expectedHead })
+      ...sourceProblems(readSource(), { ...ledger.source, head: ledger.expectedHead })
     );
   } catch (error) {
     ledger.errors.push(String(error));
   }
-  ledger.errors = [...new Set(ledger.errors)];
   for (const row of ledger.suites) {
-    row.artifacts = fileInventory(path.join(output, row.id, 'captures'));
-    row.screenshotCount = row.artifacts.filter((entry) => entry.file.endsWith('.png')).length;
+    row.executionStatus ??= row.status;
+    const directory = path.join(output, row.id);
+    const observed = inspectInventory(path.join(directory, 'captures'));
+    const problems = [...observed.errors];
+    let directoryOwned = false;
+    try {
+      directoryOwned = canonicalPath(directory) === path.resolve(directory);
+      if (!directoryOwned) problems.push('Suite evidence directory has a symbolic-link ancestor.');
+    } catch (error) {
+      problems.push(`Suite directory unavailable: ${String(error)}`);
+    }
+    // Keep the first executed inventory immutable. Partial/interrupted capture
+    // observations are also retained, but cannot become an execution receipt.
+    row.observedArtifacts = observed.files;
+    if (row.artifacts) {
+      if (JSON.stringify(row.artifacts) !== JSON.stringify(observed.files))
+        problems.push(
+          'Capture inventory drifted after execution (missing, added, or changed bytes).'
+        );
+    } else if (row.executionStatus === 'passed')
+      problems.push('Executed capture inventory is missing.');
+    row.screenshotCount = observed.files.filter((entry) => entry.file.endsWith('.png')).length;
+    if (row.executionStatus === 'passed' && row.screenshots && row.screenshotCount === 0)
+      problems.push('Required native screenshots are missing.');
+    for (const [name, key] of [
+      ['vitest.json', 'reportSha256'],
+      ['browser.log', 'logSha256'],
+      ['source.json', 'sourceReceiptSha256'],
+    ]) {
+      if (!directoryOwned) continue;
+      if (!row[key] && row.executionStatus !== 'passed') continue;
+      try {
+        const file = path.join(directory, name);
+        const stat = lstatSync(file);
+        if (stat.isSymbolicLink() || !stat.isFile())
+          throw new Error('Expected an owned regular receipt file.');
+        const actual = hash(readFileSync(file));
+        row[`observed${key[0].toUpperCase()}${key.slice(1)}`] = actual;
+        if (!row[key] || actual !== row[key])
+          problems.push(`${name} hash drifted after execution.`);
+      } catch (error) {
+        problems.push(`${name} unavailable during finalization: ${String(error)}`);
+      }
+    }
+    row.evidenceProblems = [...new Set([...(row.evidenceProblems ?? []), ...problems])];
+    if (row.evidenceProblems.length) {
+      row.status = 'failed';
+      ledger.errors.push(`${row.id} evidence integrity failed: ${row.evidenceProblems.join(' ')}`);
+    }
     row.visualEvidence = row.screenshotCount
       ? 'captured'
       : 'none-produced; see native state/assertion JSON and logs';
+    try {
+      if (!directoryOwned) throw new Error('Refusing to write through a suite directory alias.');
+      json(path.join(directory, 'result.json'), row);
+    } catch (error) {
+      row.status = 'failed';
+      ledger.errors.push(`${row.id} result receipt I/O failure: ${String(error)}`);
+    }
   }
-  ledger.status =
+  const outcome = () =>
     ledger.errors.length === 0 &&
     ledger.build.status === 'passed' &&
     ledger.suites.every((row) => row.status === 'passed')
       ? 'passed'
       : 'failed';
-  ledger.finalizedAt = now();
-  json(path.join(output, 'results.json'), ledger);
-  for (const row of ledger.suites) json(path.join(output, row.id, 'result.json'), row);
+  ledger.status = outcome();
   const summary = [
     `## Sprint 3 consumer evidence: ${ledger.status}`,
     '',
@@ -734,9 +837,22 @@ function finalize(output, ledger, publishSummary) {
     ...ledger.errors.map((error) => `- Runner failure: ${error.replaceAll('\n', ' ')}`),
     '',
   ].join('\n');
-  writeFileSync(path.join(output, 'summary.md'), summary);
-  if (publishSummary && process.env.GITHUB_STEP_SUMMARY)
-    appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+  try {
+    writeFileSync(path.join(output, 'summary.md'), summary);
+    if (publishSummary && process.env.GITHUB_STEP_SUMMARY)
+      appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+  } catch (error) {
+    ledger.errors.push(`Summary receipt I/O failure: ${String(error)}`);
+  }
+  ledger.errors = [...new Set(ledger.errors)];
+  ledger.status = outcome();
+  ledger.finalizedAt = now();
+  ledger.finalization = {
+    ...ledger.finalization,
+    status: 'complete',
+    finishedAt: ledger.finalizedAt,
+  };
+  json(path.join(output, 'results.json'), ledger);
   return ledger.status === 'passed' ? 0 : 1;
 }
 

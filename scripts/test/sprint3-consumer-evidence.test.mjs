@@ -1,16 +1,21 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import {
   SPRINT3_SUITES,
   finishIncomplete,
+  finalize,
+  resolveEvidenceDirectory,
   runCommand,
   sourceProblems,
   startOwnedPreview,
   vitestProblems,
 } from './sprint3-consumer-evidence.mjs';
+
+const sha = (value) => createHash('sha256').update(value).digest('hex');
 
 const report = () => ({
   success: true,
@@ -172,4 +177,134 @@ test('owned preview serves exact emitted bytes and releases its listener', async
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test('an outside symlink cannot place a new evidence child inside the source checkout', (t) => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'sprint3-canonical-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const source = path.join(directory, 'source');
+  const ignored = path.join(source, 'ignored-build');
+  mkdirSync(ignored, { recursive: true });
+  const alias = path.join(directory, 'outside-alias');
+  symlinkSync(ignored, alias, 'dir');
+  assert.throws(
+    () => resolveEvidenceDirectory(path.join(alias, 'not-created', 'run'), source),
+    /outside/
+  );
+  const sourceAlias = path.join(directory, 'source-alias');
+  symlinkSync(source, sourceAlias, 'dir');
+  assert.throws(
+    () => resolveEvidenceDirectory(path.join(source, 'evidence'), sourceAlias),
+    /outside/
+  );
+  assert.equal(
+    resolveEvidenceDirectory(path.join(directory, 'new', 'run'), sourceAlias),
+    path.join(directory, 'new', 'run')
+  );
+});
+
+function retainedEvidence(t) {
+  const output = mkdtempSync(path.join(tmpdir(), 'sprint3-retained-'));
+  t.after(() => rmSync(output, { recursive: true, force: true }));
+  const directory = path.join(output, 'sample');
+  const captures = path.join(directory, 'captures');
+  mkdirSync(captures, { recursive: true });
+  const image = Buffer.from('diagnostic bytes: integrity fixture, not a browser image');
+  writeFileSync(path.join(captures, 'state.png'), image);
+  const reportBytes = JSON.stringify(report());
+  writeFileSync(path.join(directory, 'vitest.json'), reportBytes);
+  writeFileSync(path.join(directory, 'browser.log'), 'native process log');
+  writeFileSync(path.join(directory, 'source.json'), '{"source":"fixture"}');
+  const source = {
+    head: 'a'.repeat(40),
+    tree: 'b'.repeat(40),
+    worktreeStatus: '',
+    lockSha256: 'c'.repeat(64),
+    runnerSha256: 'd'.repeat(64),
+  };
+  const ledger = {
+    expectedHead: source.head,
+    source,
+    errors: [],
+    limits: [],
+    build: { status: 'passed' },
+    suites: [
+      {
+        id: 'sample',
+        cases: 2,
+        status: 'passed',
+        screenshots: true,
+        artifacts: [{ file: 'state.png', bytes: image.length, sha256: sha(image) }],
+        reportSha256: sha(reportBytes),
+        logSha256: sha('native process log'),
+        sourceReceiptSha256: sha('{"source":"fixture"}'),
+      },
+    ],
+  };
+  const run = () => finalize(output, ledger, false, () => source);
+  const stored = () => JSON.parse(readFileSync(path.join(output, 'results.json'), 'utf8'));
+  assert.equal(run(), 0, 'unchanged retained artifacts are the positive control');
+  assert.equal(stored().status, 'passed');
+  return { output, directory, captures, image, ledger, run, stored };
+}
+
+test('changed or deleted successful screenshots invalidate the persisted receipt', (t) => {
+  const changed = retainedEvidence(t);
+  const original = structuredClone(changed.ledger.suites[0].artifacts);
+  writeFileSync(path.join(changed.captures, 'state.png'), 'changed capture');
+  assert.equal(changed.run(), 1);
+  assert.equal(changed.stored().status, 'failed');
+  assert.equal(changed.stored().suites[0].status, 'failed');
+  assert.deepEqual(changed.stored().suites[0].artifacts, original);
+  assert.notDeepEqual(changed.stored().suites[0].observedArtifacts, original);
+  assert.match(changed.stored().suites[0].evidenceProblems.join('\n'), /inventory drifted/);
+  writeFileSync(path.join(changed.captures, 'state.png'), changed.image);
+  assert.equal(changed.run(), 1, 'restoring bytes does not erase the recorded failure');
+  const deleted = retainedEvidence(t);
+  rmSync(path.join(deleted.captures, 'state.png'));
+  assert.equal(deleted.run(), 1);
+  assert.match(
+    deleted.stored().suites[0].evidenceProblems.join('\n'),
+    /Required native screenshots are missing/
+  );
+});
+
+test('changed or missing Vitest, source and log bytes cannot retain a green outcome', (t) => {
+  for (const file of ['vitest.json', 'source.json', 'browser.log']) {
+    const f = retainedEvidence(t);
+    writeFileSync(path.join(f.directory, file), 'replaced original bytes');
+    assert.equal(f.run(), 1);
+    assert.match(f.stored().suites[0].evidenceProblems.join('\n'), /hash drifted/);
+    assert.equal(f.stored().status, 'failed');
+  }
+  const f = retainedEvidence(t);
+  rmSync(path.join(f.directory, 'vitest.json'));
+  assert.equal(f.run(), 1);
+  assert.match(f.stored().suites[0].evidenceProblems.join('\n'), /vitest.json unavailable/);
+});
+
+test('a final capture symlink or unreadable receipt persists failure and keeps readable observations', (t) => {
+  const f = retainedEvidence(t);
+  symlinkSync(path.join(f.directory, 'browser.log'), path.join(f.captures, 'unowned.png'));
+  assert.equal(f.run(), 1);
+  const saved = f.stored();
+  assert.equal(saved.status, 'failed');
+  assert.equal(saved.suites[0].status, 'failed');
+  assert.match(saved.suites[0].evidenceProblems.join('\n'), /symbolic link/);
+  assert.equal(saved.suites[0].observedArtifacts.length, 1);
+  const unreadable = retainedEvidence(t);
+  rmSync(path.join(unreadable.directory, 'browser.log'));
+  mkdirSync(path.join(unreadable.directory, 'browser.log'));
+  assert.equal(unreadable.run(), 1);
+  assert.equal(unreadable.stored().status, 'failed');
+  assert.match(unreadable.stored().suites[0].evidenceProblems.join('\n'), /owned regular receipt/);
+});
+
+test('final result-write failure cannot leave the earlier successful aggregate', (t) => {
+  const f = retainedEvidence(t);
+  rmSync(path.join(f.directory, 'result.json'));
+  mkdirSync(path.join(f.directory, 'result.json'));
+  assert.equal(f.run(), 1);
+  assert.equal(f.stored().status, 'failed');
+  assert.match(f.stored().errors.join('\n'), /result receipt I\/O failure/);
 });
