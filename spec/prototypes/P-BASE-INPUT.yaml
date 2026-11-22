@@ -27,6 +27,14 @@ criteria:
     text:
       zh-CN: value/defaultValue controlledness、CR/LF normalization、dirty uncontrolled value 与 controlled proposal 必须遵循 Text Control contract。
       en: value/defaultValue controlledness, CR/LF normalization, dirty uncontrolled values, and controlled proposals must follow the Text Control contract.
+  - id: P-BASE-INPUT-RESET
+    text:
+      zh-CN: 'resetValue(value?) 仅重置当前已挂载的 Text Control 编辑 lease。非受控 Input 采用传入的单行 canonical value，省略时采用最近 defaultValue，并返回 true；受控 Input 保留 owner value 并返回 false。两种模式都撤销旧 composition，并同步公开的 composing/value state，不合成 valueChange、change 或 compositionEnd。未挂载实例和非字符串参数返回 false 且不重置；同步观察者若重置、卸载或重挂载，旧调用不得向新 view 写入其剩余 state。方法通过完整 asInputRoot 继承，不改变 Label association 或增加第二 editor。'
+      en: 'resetValue(value?) resets only the current mounted Text Control editing lease. An uncontrolled Input adopts the supplied single-line canonical value, or its latest defaultValue when omitted, and returns true; a controlled Input retains owner value and returns false. Both modes retire the previous composition and synchronize the public composing/value states without synthesizing valueChange, change, or compositionEnd. Detached instances and non-string arguments return false without a reset; if a synchronous observer resets, detaches, or remounts, the retired invocation cannot write its remaining state into the new view. The method is inherited through the complete asInputRoot without changing Label association or adding a second editor.'
+    dependsOn:
+      contracts:
+        - id: C-TEXT-CONTROL-0001
+          since: 0.3.0-alpha.2
   - id: P-BASE-INPUT-EVENTS-AND-IME
     text:
       zh-CN: Root 必须发出 normalized valueChange、change 与 composition payload，并保留 composition candidate。
@@ -64,6 +72,9 @@ verifies:
   tests:
     - T-BASE-INPUT-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Exposed the existing Text Control reset boundary through the complete Input Root with public state and editing-view lifetime guarantees.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.

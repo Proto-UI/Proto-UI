@@ -48,6 +48,8 @@ export type InputRootExposes = {
   composing: ExposeState<boolean>;
   focusSelf: ExposeMethod<(options?: FocusRequestOptions) => void>;
   blurSelf: ExposeMethod<() => void>;
+  /** Reset the mounted editing lease; controlled values remain owner-owned. */
+  resetValue: ExposeMethod<(value?: string) => boolean>;
   valueChange: ExposeEvent<InputValueChangeDetail>;
   change: ExposeEvent<InputChangeDetail>;
   compositionStart: ExposeEvent<InputCompositionDetail>;

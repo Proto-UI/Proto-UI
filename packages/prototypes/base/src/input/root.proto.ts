@@ -87,6 +87,19 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
     if (!disabled.get()) focusable.focusSelf(options);
   });
   def.expose.method('blurSelf', () => focusable.blur());
+  def.expose.method('resetValue', (next?: string) => {
+    const run = currentView;
+    if (!run || (next !== undefined && typeof next !== 'string')) return false;
+    const epoch = ++viewEpoch;
+    const accepted = control.resetValue(next);
+    if (currentView !== run || viewEpoch !== epoch) return false;
+    composing.set(control.snapshot()?.composing ?? false, 'reason: input reset composition');
+    if (currentView !== run || viewEpoch !== epoch) return false;
+    // A composing observer may update owner Props. Read current Text Control
+    // authority after that callback instead of publishing a stale snapshot.
+    value.set(control.snapshot()?.value ?? '', 'reason: input reset value');
+    return currentView === run && viewEpoch === epoch && accepted;
+  });
   asControlLabel().target((_, request) => {
     if (!disabled.get() && request.isCurrent())
       focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
@@ -133,6 +146,12 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   def.lifecycle.onCreated((run) => sync(run.props.get()));
   def.lifecycle.onMounted((run) => {
     currentView = run;
+    const epoch = ++viewEpoch;
+    // Reset may retire its view between logical value adoption and public
+    // state publication. The new editing view publishes current authority.
+    composing.set(control.snapshot()?.composing ?? false, 'reason: input mounted composition');
+    if (currentView !== run || viewEpoch !== epoch) return;
+    value.set(control.snapshot()?.value ?? '', 'reason: input mounted value');
   });
   def.lifecycle.onUnmounted(() => {
     currentView = null;
