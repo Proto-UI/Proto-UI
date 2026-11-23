@@ -50,7 +50,7 @@ These checks exercise the delivered implementation, rather than a mock of the bu
 I read the actual result set at `/tmp/proto-release-families-0GfifX`, inspected the replay source, and independently checked the retained hashes, diagnostics, map contents and runtime traces. The summary is in `compiler-pinned-consumer-readback.json`.
 
 | Profile | Authored families | Exact target dependencies | Result |
-| --- | --- | --- | --- |
+|---|---|---|---|
 | React DOM source | Base / Shadcn / Brutalist Button | React 19.2.6, React DOM 19.2.6 | 3/3 |
 | Vue 3 source | Same three Button sources | Vue 3.5.31 | 3/3 |
 | Vue 2 source | Same three Button sources | Vue 2.6.14 | 3/3 |

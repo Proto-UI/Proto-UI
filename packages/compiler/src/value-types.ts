@@ -331,7 +331,6 @@ export function dataBoundaryType(type: ValueType, top = true): DataType | undefi
 
 /** JSON publication copies data; readonly source fields do not carry authority. */
 export function publishedDataType(type: ValueType): DataType | undefined {
-
   if (isDataValueType(type)) return type;
   if (typeof type === 'string') return undefined;
   if (type.kind === 'object' && type.index === undefined) {

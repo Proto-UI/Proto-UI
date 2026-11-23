@@ -15,7 +15,9 @@
         "role": "button",
         "disabled": false,
         "ariaDisabled": "false",
-        "style": ["select-none"],
+        "style": [
+          "select-none"
+        ],
         "focused": false,
         "text": null,
         "physicalValue": null,

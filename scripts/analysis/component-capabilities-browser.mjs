@@ -574,7 +574,6 @@ async function numberFieldIme(runtime, family, prefix) {
             .filter((event) => !event.isTrusted)
             .every((event) => event.type === 'compositionend'),
           'trusted native events except the insertText compositionend artifact'
-
         );
         assert.equal(control.status, 'passed', 'independent native IME control passed');
         result.compositionTrace = assertNumberFieldImeTrace(

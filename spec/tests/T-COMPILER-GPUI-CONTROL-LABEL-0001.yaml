@@ -40,14 +40,22 @@ implementations:
     path: packages/compiler/test/fixtures/gpui-control-label/consumer.rs
     required: true
     consumesCases:
-      [T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW, T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT, T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL]
+      [
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL,
+      ]
   - id: native-label-request-leases
     kind: runtime-test
     status: needs-review
     path: packages/compiler/src/gpui-native-control-label.ts
     required: true
     consumesCases:
-      [T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW, T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT, T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL]
+      [
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL,
+      ]
 verifies:
   contracts:
     - C-CONTROL-LABEL-0001

@@ -1,4 +1,4 @@
-import { createRendererPrimitives } from './template';
+import { assertSvgProps, isSvgNodeTag } from './svg-tags';
 import type {
   ReservedType,
   SvgTemplateNode,
@@ -9,18 +9,6 @@ import type {
 } from './template';
 import type { OwnedDecorationTarget, TemplateStyleHandle } from './feedback/style';
 
-const svg = createRendererPrimitives().svg;
-const svgTags: readonly string[] = [
-  'svg',
-  'g',
-  'path',
-  'circle',
-  'rect',
-  'line',
-  'polyline',
-  'ellipse',
-  'polygon',
-];
 const svgKeys = [
   'viewBox',
   'width',
@@ -193,10 +181,9 @@ export function snapshotOwnedTemplateBlueprint(input: unknown): TemplateChildren
           fail('ellipse coordinate must be a number');
         result[key] = scalar as string | number;
       }
-      // Reuse the governed constructor's per-tag allowed/required validation,
+      // Reuse the governed factories' per-tag allowed/required validation,
       // but only on our data copy: no author accessor can be read a second time.
-      const factory = tag === 'svg' ? svg.root : svg[tag];
-      factory(result as never);
+      assertSvgProps(tag, result);
       return Object.freeze(result);
     });
   };
@@ -212,8 +199,8 @@ export function snapshotOwnedTemplateBlueprint(input: unknown): TemplateChildren
         record(source, ['kind', 'tag', 'props', 'children']);
         if (captured.read('kind') !== 'svg-node') fail('unsupported node kind');
         const tag = captured.read('tag');
-        if (typeof tag !== 'string' || !svgTags.includes(tag)) fail('unsupported SVG tag');
-        const capturedProps = props(tag as SvgTemplateTag, captured.read('props'));
+        if (!isSvgNodeTag(tag)) fail('unsupported SVG tag');
+        const capturedProps = props(tag, captured.read('props'));
         const capturedChildren = children(captured.read('children'));
         if (
           tag !== 'svg' &&

@@ -17,9 +17,22 @@
   "environment": {
     "node": "v24.22.3",
     "platform": "linux",
-    "families": ["base", "shadcn", "brutalist"],
-    "runtimes": ["wc", "react", "vue", "vue2"],
-    "kinds": ["tree", "data-table", "virtual-list"],
+    "families": [
+      "base",
+      "shadcn",
+      "brutalist"
+    ],
+    "runtimes": [
+      "wc",
+      "react",
+      "vue",
+      "vue2"
+    ],
+    "kinds": [
+      "tree",
+      "data-table",
+      "virtual-list"
+    ],
     "viewport": {
       "width": 1100,
       "height": 850

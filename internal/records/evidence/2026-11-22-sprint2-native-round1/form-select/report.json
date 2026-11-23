@@ -37,9 +37,22 @@
   "environment": {
     "node": "v24.22.3",
     "platform": "linux",
-    "families": ["base", "shadcn", "brutalist"],
-    "runtimes": ["wc", "react", "vue", "vue2"],
-    "kinds": ["form", "select", "choices"],
+    "families": [
+      "base",
+      "shadcn",
+      "brutalist"
+    ],
+    "runtimes": [
+      "wc",
+      "react",
+      "vue",
+      "vue2"
+    ],
+    "kinds": [
+      "form",
+      "select",
+      "choices"
+    ],
     "viewport": {
       "width": 1100,
       "height": 850

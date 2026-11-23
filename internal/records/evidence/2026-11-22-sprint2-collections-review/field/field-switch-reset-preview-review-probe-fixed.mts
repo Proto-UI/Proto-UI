@@ -1,13 +1,9 @@
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { definePrototype } from '@proto.ui/core';
-import { checkboxRoot } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/checkbox/index.ts';
-import { radioGroupRoot } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/index.ts';
-import {
-  fieldCheckbox,
-  fieldRadioGroup,
-  fieldSwitch,
-} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/field/index.ts';
+import {checkboxRoot} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/checkbox/index.ts';
+import {radioGroupRoot} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/index.ts';
+import {fieldCheckbox,fieldRadioGroup,fieldSwitch} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/field/index.ts';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -118,64 +114,26 @@ function runtimeHarness() {
   };
 }
 
-const results: any[] = [];
-for (const changeOwner of [false, true]) {
-  const h = runtimeHarness();
-  const control = h.make(fieldSwitch, null, { checked: false });
-  const signals: any[] = [];
-  let fired = false;
-  await control.session.mount();
-  h.setActionCallback((event, payload) => {
-    signals.push({ event, payload });
-    if (event === 'checkedChange') control.setProps({ checked: payload.checked });
-  });
-  control.session.invokeInCallbackScope(() =>
-    control.target.dispatchEvent(new Event('pointer.down'))
-  );
-  const before = control.exposes.pressed.get();
-  const off = control.exposes.pressed.subscribe((event: any) => {
-    if (event.next !== false || fired) return;
-    fired = true;
-    if (changeOwner) control.setProps({ checked: true });
-  });
-  let thrown: any, result: any;
-  try {
-    try {
-      result = control.session.invokeInCallbackScope(() => control.exposes.resetValue());
-    } catch (error) {
-      thrown = String(error);
-    }
-    results.push({
-      changeOwner,
-      before,
-      observerFired: fired,
-      result,
-      signals,
-      checked: control.exposes.checked.get(),
-      expected: changeOwner
-        ? 'new checked=true owner survives older reset preview teardown'
-        : 'ordinary controlled reset keeps baseline false',
-      passed:
-        !thrown &&
-        before &&
-        fired &&
-        control.exposes.checked.get() === changeOwner &&
-        (!changeOwner || signals.length === 0),
-      thrown,
-    });
-  } finally {
-    off();
-    await control.session.dispose();
-  }
+
+
+
+const results:any[]=[];
+for (const changeOwner of [false,true]) {
+ const h=runtimeHarness();const control=h.make(fieldSwitch,null,{checked:false});
+ const signals:any[]=[];let fired=false;
+ await control.session.mount();
+ h.setActionCallback((event,payload)=>{signals.push({event,payload});if(event==='checkedChange')control.setProps({checked:payload.checked});});
+ control.session.invokeInCallbackScope(()=>control.target.dispatchEvent(new Event('pointer.down')));
+ const before=control.exposes.pressed.get();
+ const off=control.exposes.pressed.subscribe((event:any)=>{
+  if(event.next!==false||fired)return;fired=true;
+  if(changeOwner)control.setProps({checked:true});
+ });
+ let thrown:any,result:any;
+ try {
+  try {result=control.session.invokeInCallbackScope(()=>control.exposes.resetValue());}catch(error){thrown=String(error);}
+  results.push({changeOwner,before,observerFired:fired,result,signals,checked:control.exposes.checked.get(),expected:changeOwner?'new checked=true owner survives older reset preview teardown':'ordinary controlled reset keeps baseline false',passed:!thrown&&before&&fired&&control.exposes.checked.get()===changeOwner&&(!changeOwner||signals.length===0),thrown});
+ } finally {off();await control.session.dispose();}
 }
-const out = {
-  ok: results.every((r) => r.passed),
-  cases: results,
-  boundary:
-    'Independent real FieldSwitch Runtime source probe; public pressed state observer; portable synthetic host.',
-};
-writeFileSync(
-  '/workspace/scratch/44c416809288/evidence/field-switch-reset-preview-review-probe-fixed.json',
-  JSON.stringify(out, null, 2) + '\n'
-);
-console.log(JSON.stringify(out));
+const out={ok:results.every(r=>r.passed),cases:results,boundary:'Independent real FieldSwitch Runtime source probe; public pressed state observer; portable synthetic host.'};
+writeFileSync('/workspace/scratch/44c416809288/evidence/field-switch-reset-preview-review-probe-fixed.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out));

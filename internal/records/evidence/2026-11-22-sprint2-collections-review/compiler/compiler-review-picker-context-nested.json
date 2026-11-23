@@ -12,7 +12,10 @@
       "nestedOpen": true,
       "nestedRequest": true,
       "finalSelection": "2026-10-16",
-      "actions": ["openChange", "valueChange"],
+      "actions": [
+        "openChange",
+        "valueChange"
+      ],
       "expectedOpenAfter": false,
       "pass": false
     },
@@ -29,7 +32,10 @@
         "from": "2026-10-10",
         "to": "2026-10-16"
       },
-      "actions": ["openChange", "rangeChange"],
+      "actions": [
+        "openChange",
+        "rangeChange"
+      ],
       "expectedOpenAfter": false,
       "pass": false
     }

@@ -15,7 +15,9 @@
     "screenshots": 83,
     "sourceBoundMetadata": 83,
     "manuallyViewed": 6,
-    "missingComparedWithR1": ["sidebar-mobile-zh-cn-brutalist-enhanced.png"],
+    "missingComparedWithR1": [
+      "sidebar-mobile-zh-cn-brutalist-enhanced.png"
+    ],
     "missingReason": "Original mobile group hit assertion fails before capture; failure bounds, hit points and screenshot were not persisted by that original helper."
   },
   "findings": [
@@ -37,7 +39,10 @@
       "status": "OPEN_BLOCKS_READY",
       "case": "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets",
       "sourceLocation": "sprint2-site.browser.test.ts fullNativeHitTarget line150 called for group at line321",
-      "evidence": ["report.json", "run.log"],
+      "evidence": [
+        "report.json",
+        "run.log"
+      ],
       "assessment": "At least one of four original inner-edge points failed exact closest anchor/summary owner equality for the nearest Brutalist summary. Actual failing coordinates/rect/hit target were not recorded; neither layout nor timing cause is established. Original enhanced screenshot is absent because capture occurs after the failed assertion. Separate passing controls cannot replace it."
     }
   ],

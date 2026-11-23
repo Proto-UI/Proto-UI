@@ -12,9 +12,13 @@ export default definePrototype<Props>({
       notificationRevision: { type: 'number', default: 0 },
     });
     let current: RunHandle<Props> | null = null;
-    def.lifecycle.onCreated((run) => { current = run; });
+    def.lifecycle.onCreated((run) => {
+      current = run;
+    });
     def.expose.event('renderRequest', { payload: 'json' });
-    def.props.watch(['notificationRevision'], (run) => { run.update(); });
+    def.props.watch(['notificationRevision'], (run) => {
+      run.update();
+    });
     def.lifecycle.onMounted((run) => {
       if (run.props.get().notificationPhase !== 'mounted') return;
       run.expose.emit('renderRequest', { phase: 'mounted' });
