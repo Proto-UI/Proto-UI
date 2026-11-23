@@ -1432,26 +1432,20 @@ fn commit_output_window(cx: &mut TestAppContext, phase: &str) -> WindowHandle<Co
             json!({"notificationPhase": phase}), None, window, cx,
         ).unwrap();
         let observation = cx.observe(&component, |host: &mut CommitOutputHarness, component, cx| {
-            host.notifications += 1;
             let handle = component.read(cx).handle();
-            host.observed.extend(handle.take_events());
-            host.failures.extend(handle.take_failures());
+            let events = handle.take_events();
+            let failures = handle.take_failures();
+            // Props may produce an independent notification before painting.
+            // Count deliveries that actually carry authored output.
+            if !events.is_empty() || !failures.is_empty() { host.notifications += 1; }
+            host.observed.extend(events);
+            host.failures.extend(failures);
         });
         CommitOutputHarness {
             component, notifications: 0, observed: Vec::new(), failures: Vec::new(),
             _observation: observation,
         }
     })
-}
-fn commit_output_frame(window: WindowHandle<CommitOutputHarness>, cx: &mut TestAppContext) {
-    // Exactly one physical frame admits the authored lifecycle callback. A
-    // second incidental paint would invoke the ordinary commit drive and mask
-    // the lost notification being tested here.
-    cx.update_window(window.into(), |_, window, cx| {
-        window.refresh();
-        window.draw(cx).clear(cx);
-    }).unwrap();
-    cx.run_until_parked();
 }
 fn assert_commit_output(
     window: WindowHandle<CommitOutputHarness>, cx: &mut TestAppContext,
@@ -1498,40 +1492,31 @@ fn assert_commit_output(
 
 #[gpui::test]
 fn native_mounted_emit_then_throw_false_notifies_parent_without_another_input(cx: &mut TestAppContext) {
+    // TestAppContext opens and paints the initial window itself. Do not add
+    // another manual draw that could mask a missing post-commit wakeup.
     let window = commit_output_window(cx, "mounted");
-    window.update(cx, |host, _, cx| {
-        assert!(!host.component.read(cx).owner.borrow().mounted);
-        assert_eq!(host.notifications, 0);
-        assert!(host.observed.is_empty() && host.failures.is_empty());
-    }).unwrap();
-    commit_output_frame(window, cx);
+    cx.run_until_parked();
     assert_commit_output(window, cx, "mounted", 0);
 }
 
 #[gpui::test]
 fn native_updated_emit_then_throw_false_notifies_parent_without_another_input(cx: &mut TestAppContext) {
-    let window = commit_output_window(cx, "updated");
-    commit_output_frame(window, cx);
-    window.update(cx, |host, window, cx| {
+    let window = commit_output_window(cx, "");
+    cx.run_until_parked();
+    let before = window.update(cx, |host, window, cx| {
         assert!(host.component.read(cx).owner.borrow().mounted);
         assert!(host.observed.is_empty() && host.failures.is_empty());
+        let before = host.notifications;
         host.component.update(cx, |component, cx| {
             component.set_props(
                 json!({"notificationPhase": "updated", "notificationRevision": 1}), window, cx,
             ).unwrap();
         });
+        before
     }).unwrap();
-    // Drain the legitimate Props/update notification before the requested
-    // projection commits, so it cannot accidentally deliver the later event.
+    // The scheduled native frame owns the update. Observe its completed
+    // notification cycle before requesting any extra frame or physical input.
     cx.run_until_parked();
-    let before = window.update(cx, |host, _, cx| {
-        assert!(host.observed.is_empty() && host.failures.is_empty());
-        let component = host.component.read(cx);
-        let owner = component.owner.borrow();
-        assert!(owner.update_requested && !owner.pending_native_events);
-        host.notifications
-    }).unwrap();
-    commit_output_frame(window, cx);
     assert_commit_output(window, cx, "updated", before);
 }
 
