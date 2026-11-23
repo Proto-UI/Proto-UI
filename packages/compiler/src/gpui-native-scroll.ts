@@ -46,9 +46,8 @@ pub fn attach_scroll_engine(target:OwnerWeak,handle:gpui::ScrollHandle)->Result<
     s.previous_max=handle.max_offset();s.last_input=None;
     let axis=text_or(field(&s.config,"endFollow").member("axis",true),"vertical");
     let (offset,max)=(handle.offset(),handle.max_offset());
-    s.following=if axis=="horizontal"{f32::from(offset.x+max.x)<=1.}else{f32::from(offset.y+max.y)<=1.};
+    s.following=s.explicit_pause_epoch!=Some(epoch)&&if axis=="horizontal"{f32::from(offset.x+max.x)<=1.}else{f32::from(offset.y+max.y)<=1.};
     s.handle=Some(handle);s.reader_input=None;s.observation=Some(scroll_observation(s,epoch));
-    if s.explicit_pause_epoch==Some(epoch){s.following=false;}
     o.dirty=true;o.update_requested=true;
     Ok(ScrollEngineLease{owner:target,id,fallback})
 }
@@ -59,21 +58,15 @@ impl ScrollEngineLease{
     pub fn notify_input(&self,window:&mut Window,cx:&mut App)->bool{
         let Some(owner)=self.owner.upgrade()else{return false};
         if !ready(&owner)||owner.borrow().modules.scroll.external_engine!=self.id||owner.borrow().window_id!=Some(window.window_handle().window_id()){return false}
-        {
-            let mut o=owner.borrow_mut();let epoch=o.epoch;let s=&mut o.modules.scroll;
-            s.last_input=Some(std::time::Instant::now());
-            // The external host reports input after its real engine receives it.
-            // Pause/resume still requires actual followed-axis displacement in
-            // the next stable geometry observation, not an input notification alone.
-            if s.reader_input.is_none(){s.reader_input=s.observation.filter(|before|before.epoch==epoch);}
-            o.dirty=true;
-        }
+        let epoch=owner.borrow().epoch;
+        if !scroll_external_input(&owner,window,epoch){return false}
         let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}window.refresh();true
     }
     pub fn dispose(&self){
         let Some(owner)=self.owner.upgrade()else{return};let mut o=owner.borrow_mut();
         if o.modules.scroll.external_engine!=self.id{return}
-        let epoch=o.epoch;let s=&mut o.modules.scroll;s.external_engine=0;s.handle=Some(self.fallback.clone());
+        let epoch=o.epoch;
+        let s=&mut o.modules.scroll;s.external_engine=0;s.handle=Some(self.fallback.clone());
         if s.pending_end.take().is_some(){s.request_status="rejected".into();}
         s.previous_max=self.fallback.max_offset();s.last_input=None;s.following=false;
         s.reader_input=None;s.observation=Some(scroll_observation(s,epoch));
@@ -262,7 +255,19 @@ pub fn scroll_input(owner:&OwnerRef,event:&gpui::ScrollWheelEvent,window:&Window
     o.dirty=true;
     true
 }
-
+// External engines report an actual host input after applying it. Preserve the
+// previous committed observation; scroll_frame still requires real movement
+// on the followed axis with unchanged geometry before changing follow state.
+fn scroll_external_input(owner:&OwnerRef,window:&Window,epoch:u64)->bool{
+    let mut o=owner.borrow_mut();
+    if o.disposed||!o.mounted||!o.present||o.bounds.is_none()||o.epoch!=epoch||o.window_id!=Some(window.window_handle().window_id())||!o.modules.hooks.contains("scroll"){return false}
+    let s=&mut o.modules.scroll;
+    if s.handle.is_none()||s.external_engine==0{return false}
+    s.last_input=Some(std::time::Instant::now());
+    if s.reader_input.is_none(){s.reader_input=s.observation.filter(|before|before.epoch==epoch);}
+    o.dirty=true;
+    true
+}
 #[cfg(all(test,feature="test-support"))]
 mod scroll_engine_tests {
     use super::*;
