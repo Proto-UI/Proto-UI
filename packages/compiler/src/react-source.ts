@@ -911,6 +911,9 @@ ${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | nu
   let rootGeneration = 0;
   let rootBinding: 'retiring' | 'binding' | null = null;
   let pendingRoot: { value: HTMLElement | null } | undefined;
+  function consumePendingRoot(): { value: HTMLElement | null } | undefined {
+    const request = pendingRoot; pendingRoot = undefined; return request;
+  }
 ${
   decorations
     ? `  const decorationNodes = new WeakMap<object, object>();
@@ -1592,14 +1595,16 @@ ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}   
           try { ${p}CompleteSteps([
 ${atoms.physicalPresentation ? `            () => { ${atoms.detach} },\n` : ''}${decorations ? '            () => { if (previousRoot) releaseDecorations(); },\n' : ''}${interaction ? `            () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? "            () => previousRoot?.removeAttribute('data-pui-style'),\n" : ''}          ]); } catch (error) { failure ??= { error }; }
           if (lifetime !== 'alive') break;
-          if (pendingRoot) { next = pendingRoot.value; pendingRoot = undefined; }
+          const replacement = consumePendingRoot();
+          if (replacement) next = replacement.value;
           root = next; rootBinding = 'binding';
           const generation = ++rootGeneration;
           const current = () => generation === rootGeneration && lifetime === 'alive';
           try { ${p}CompleteSteps([
 ${usesStyle ? `            () => { if (current() && mounted) projectStyle(${p}Style.tokens()); },\n` : ''}${decorations ? '            () => { if (current() && mounted && desiredPresent) bindDecorations(); },\n' : ''}${atoms.physicalPresentation ? `            () => { if (current() && mounted && desiredPresent && root) { ${atoms.mount} } },\n` : ''}${interaction ? `            () => { if (current() && mounted && desiredPresent && viewConnected) ${p}Interaction.mount(); },\n` : ''}          ]); } catch (error) { failure ??= { error }; }
-          if (lifetime !== 'alive' || !pendingRoot) break;
-          next = pendingRoot.value; pendingRoot = undefined;
+          const queued = consumePendingRoot();
+          if (lifetime !== 'alive' || !queued) break;
+          next = queued.value;
         }
       } finally { rootBinding = null; pendingRoot = undefined; }
       if (failure) throw failure.error;
