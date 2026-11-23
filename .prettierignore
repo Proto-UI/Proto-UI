@@ -23,3 +23,14 @@ scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
 
 # Exact audited shader bytes and legal text are emitted by the checked generator.
 packages/adapters/base/src/material/liquidgl-kernel.generated.ts
+
+# Historical evidence bytes bound by retained SHA manifests; see
+# internal/records/2026-11-23-integration-archived-evidence-bytes.md
+internal/records/2026-11-22-sprint2-mobile-navigation-control-evidence/
+internal/records/2026-11-22-sprint2-mobile-navigation-fixture-evidence/
+internal/records/evidence/2026-11-22-sprint2-collections-review/
+internal/records/evidence/2026-11-22-sprint2-compiled-native-repair/
+internal/records/evidence/2026-11-22-sprint2-compiler/
+internal/records/evidence/2026-11-22-sprint2-datepicker-review/
+internal/records/evidence/2026-11-22-sprint2-input/
+internal/records/evidence/2026-11-22-sprint2-native-round1/

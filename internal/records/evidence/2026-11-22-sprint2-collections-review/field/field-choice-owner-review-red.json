@@ -36,7 +36,10 @@
     {
       "name": "ordinary-checkbox",
       "scenario": "new-canonical-owner-in-mixed-callback",
-      "actions": ["indeterminateChange", "checkedChange"],
+      "actions": [
+        "indeterminateChange",
+        "checkedChange"
+      ],
       "checked": true,
       "mixed": false,
       "expected": "only indeterminateChange; do not invert a newer owner decision",
@@ -45,7 +48,10 @@
     {
       "name": "field-checkbox",
       "scenario": "new-canonical-owner-in-mixed-callback",
-      "actions": ["indeterminateChange", "checkedChange"],
+      "actions": [
+        "indeterminateChange",
+        "checkedChange"
+      ],
       "checked": true,
       "mixed": false,
       "expected": "only indeterminateChange; do not invert a newer owner decision",

@@ -16,7 +16,10 @@
             "before": false,
             "after": true,
             "observed": true,
-            "actions": ["openChange", "valueChange"],
+            "actions": [
+              "openChange",
+              "valueChange"
+            ],
             "expectedOpenAfter": true,
             "pass": true
           },
@@ -26,7 +29,10 @@
             "before": false,
             "after": true,
             "observed": true,
-            "actions": ["openChange", "rangeChange"],
+            "actions": [
+              "openChange",
+              "rangeChange"
+            ],
             "expectedOpenAfter": true,
             "pass": true
           }
@@ -46,7 +52,10 @@
             "request": true,
             "after": true,
             "observed": true,
-            "actions": ["openChange", "valueChange"],
+            "actions": [
+              "openChange",
+              "valueChange"
+            ],
             "expectedOpenAfter": true,
             "pass": true
           },
@@ -56,7 +65,10 @@
             "request": true,
             "after": true,
             "observed": true,
-            "actions": ["openChange", "rangeChange"],
+            "actions": [
+              "openChange",
+              "rangeChange"
+            ],
             "expectedOpenAfter": true,
             "pass": true
           }
@@ -80,7 +92,11 @@
             "nestedOpen": true,
             "nestedRequest": true,
             "finalSelection": "2026-10-16",
-            "actions": ["openChange", "valueChange", "openChange"],
+            "actions": [
+              "openChange",
+              "valueChange",
+              "openChange"
+            ],
             "expectedOpenAfter": false,
             "pass": true
           },
@@ -97,7 +113,11 @@
               "from": "2026-10-10",
               "to": "2026-10-16"
             },
-            "actions": ["openChange", "rangeChange", "openChange"],
+            "actions": [
+              "openChange",
+              "rangeChange",
+              "openChange"
+            ],
             "expectedOpenAfter": false,
             "pass": true
           }
@@ -121,7 +141,12 @@
             "after": false,
             "observed": true,
             "finalSelection": "2026-10-16",
-            "actions": ["openChange", "valueChange", "openChange", "openChange"],
+            "actions": [
+              "openChange",
+              "valueChange",
+              "openChange",
+              "openChange"
+            ],
             "expectedOpenAfter": false,
             "pass": true
           },
@@ -140,7 +165,12 @@
               "from": "2026-10-10",
               "to": "2026-10-16"
             },
-            "actions": ["openChange", "rangeChange", "openChange", "openChange"],
+            "actions": [
+              "openChange",
+              "rangeChange",
+              "openChange",
+              "openChange"
+            ],
             "expectedOpenAfter": false,
             "pass": true
           }
