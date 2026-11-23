@@ -91,3 +91,9 @@ scripts/analysis/declarative-agent-ui/upstream/catalog.json
 scripts/analysis/declarative-agent-ui/upstream/common_types.json
 scripts/analysis/declarative-agent-ui/upstream/agent_to_renderer.json
 scripts/analysis/declarative-agent-ui/upstream/LICENSE
+# Frozen source archives and historical evidence retain their original bytes and hashes.
+internal/records/2026-11-22-sprint-7-history-sources/
+internal/records/evidence/2026-11-22-sprint7-history-continuation/
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/

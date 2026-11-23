@@ -771,6 +771,7 @@ export function checkTargetOperations(
             );
           }
         }
+
         break;
       case 'style-handle':
         operation('style.tw', value.span);
