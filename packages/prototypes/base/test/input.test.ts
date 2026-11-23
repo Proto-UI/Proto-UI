@@ -84,6 +84,7 @@ describe('prototypes/base: input', () => {
       'focusVisible',
       'focused',
       'readOnly',
+      'resetValue',
       'value',
     ]);
     element.remove();

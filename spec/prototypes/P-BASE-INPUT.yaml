@@ -15,6 +15,9 @@ criteria:
       contracts:
         - id: C-CONTROL-LABEL-0001
           since: 0.3.0-alpha.1
+  - id: P-BASE-INPUT-EDITOR-HOOK
+    text:
+      en: asInputEditor is the shared contentless text editor hook for controls with direct accessible naming. asInputRoot composes that same editor with the independent ControlLabel target protocol; the shared editor entry does not claim paired Label support. Both entries retain the same TextControl requirements, value/composition/reset and physical focus behavior.
   - id: P-BASE-INPUT-AUTHORING-ENTRIES
     text:
       zh-CN: '`base-input-root` 与 `asInputRoot` 必须是同一 Root protocol 的 direct 与 authored-asHook entries，并复用同一冻结 single-line Text Control requirement。'
@@ -31,6 +34,9 @@ criteria:
     text:
       zh-CN: Root 必须发出 normalized valueChange、change 与 composition payload，并保留 composition candidate。
       en: Root must emit normalized valueChange, change, and composition payloads while preserving composition candidates.
+  - id: P-BASE-INPUT-EDITING-RESET
+    text:
+      en: The explicit resetValue method replaces the mounted editing lease and retires composition without emitting input, change or composition events. Uncontrolled values reset to the supplied value or defaultValue. Controlled canonical ownership stays with Props and returns false. Exposed value and composing states reflect the current reset; a synchronous newer reset or detach supersedes the older callback.
   - id: P-BASE-INPUT-NATIVE-PROPS
     text:
       zh-CN: Root 必须 live-project placeholder、required、name、autoComplete、minLength、maxLength、inputMode 与 enterKeyHint 到同一个 physical input。
@@ -64,6 +70,9 @@ verifies:
   tests:
     - T-BASE-INPUT-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Exposed the existing TextControl editing reset with canonical ownership, composition retirement and reentrant state guards; factored the same directly named editor into asInputEditor while preserving the full asInputRoot ControlLabel target protocol.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.

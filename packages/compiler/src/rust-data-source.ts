@@ -15,6 +15,7 @@ import type {
 } from './ir';
 import { portableDataMethods, type PortableModuleBinding } from './portable-data-methods';
 import { rustDataSupport, type RustDataSupportFeature } from './rust-data-support';
+import { rustMathRound } from './rust-scalar-intrinsics';
 
 export interface RustDataOptions {
   /** Select checked pure module functions by their unambiguous exposed names. Setup is not run. */
@@ -677,6 +678,24 @@ export function emitRustDataSource(
         code = `${functions.get(target)}(${args.join(', ')})?`;
         break;
       }
+      case 'intrinsic':
+        if (node.name === 'math.round') code = rustMathRound(emit(node.arguments[0], 'number'));
+        else if (node.name === 'math.floor')
+          code = `(${emit(node.arguments[0], 'number')}).floor()`;
+        else if (node.name === 'number')
+          code = node.arguments.length
+            ? numeric(emit(node.arguments[0]), data(node.arguments[0].type))
+            : '0.0f64';
+        else if (node.name === 'string')
+          code = node.arguments.length
+            ? textual(emit(node.arguments[0]), data(node.arguments[0].type))
+            : 'String::new()';
+        else
+          throw new Unsupported(
+            `The immutable Rust data artifact does not lower ${node.name}.`,
+            node.span
+          );
+        break;
       case 'unary':
         code =
           node.operator === '!'
