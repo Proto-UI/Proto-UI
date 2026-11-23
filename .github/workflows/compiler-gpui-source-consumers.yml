@@ -8,9 +8,18 @@ on:
         type: boolean
         required: false
         default: false
+      browser_acceptance:
+        description: Run the separate browser compiler and source regression lanes
+        type: boolean
+        required: false
+        default: false
   workflow_call:
     inputs:
       adapter_acceptance:
+        type: boolean
+        required: false
+        default: false
+      browser_acceptance:
         type: boolean
         required: false
         default: false
@@ -23,6 +32,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  browser-compiler:
+    # Use the registered manual entry point to run this revision's reusable
+    # browser workflow independently of either native implementation.
+    if: ${{ inputs.browser_acceptance }}
+    uses: ./.github/workflows/compiler-browser-acceptance.yml
+    with:
+      source_regressions: true
+      production_build: true
+    permissions:
+      contents: read
   adapter-native:
     # A distinct receipt: generated Rust never stands in for the Adapter.
     # The optional input keeps existing full-cycle selection unchanged.
