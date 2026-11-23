@@ -16,6 +16,7 @@ import { gpuiNativeNotifySource } from './gpui-native-notify';
 import { gpuiNativeHoverSource } from './gpui-native-hover';
 import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
 import { gpuiNativeSelectionSource } from './gpui-native-selection';
+import { gpuiNativeKeyBoundarySource } from './gpui-native-key-boundary';
 
 export const gpuiNativeOwnerSource =
   String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
@@ -1096,7 +1097,7 @@ pub fn global_key_down(event:&gpui::KeyDownEvent,window:&mut Window,cx:&mut App)
     if KEY_DISPATCHED.with(|dispatched|dispatched.replace(true)){return}
     let key=portable_key(&event.keystroke);let mut fields=event_fields("key.down");if let Some(key)=&key{fields.insert("key".into(),Json::String(key.clone()));}fields.insert("repeat".into(),Json::Bool(event.is_held));modifiers(&mut fields,event.keystroke.modifiers);
     let mut host_fields=None;
-    let target=KEY_TARGET.with(|target|target.borrow().as_ref().and_then(Weak::upgrade));let mut prevented=false;
+    let target=native_root_key_target(window);let mut prevented=false;
     for owner in owners_in(window,cx){
         if !matches!(key.as_deref(),Some("Enter"|" ")){owner.borrow_mut().suppress_click=false;}
         if has_listener(&owner,"host:keydown",true,false){prevented|=dispatch(&owner,"host:keydown",true,host_fields.get_or_insert_with(||press_fields("host:keydown",&fields)).clone());}
@@ -1170,4 +1171,5 @@ mod callback_handle_identity_tests {
   gpuiNativeNotifySource +
   gpuiNativeHoverSource +
   gpuiNativeControlLabelSource +
-  gpuiNativeSelectionSource;
+  gpuiNativeSelectionSource +
+  gpuiNativeKeyBoundarySource;

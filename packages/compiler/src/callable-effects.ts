@@ -32,12 +32,14 @@ import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 type Known = readonly Atom[];
 type CapturedState = HookCaptureIR['states'][number];
 type TracedOperation = Extract<ExpressionIR, { kind: 'operation' }>;
+type CaptureGetter = 'getState' | 'getMethod' | 'getAsHook' | 'getAsHookHandle';
 type Atom =
   | { kind: 'unknown'; data?: ValueType }
   | { kind: 'undefined' | 'uninitialized' | 'absent' }
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'closure'; fn: FunctionIR; scope: Scope }
   | { kind: 'native'; type: Extract<ValueType, { kind: 'callable' }> }
+  | { kind: 'capture-getter'; capture: Capture; member: CaptureGetter }
   | { kind: 'named-state'; state: CapturedState }
   | { kind: 'cell'; initial: Known; tracked: boolean }
   | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean; array?: boolean }
@@ -46,6 +48,8 @@ type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
 interface CaptureContents {
   render?: Known;
+  states?: Map<string, Known>;
+  events?: Set<string>;
   methods: Map<string, Known>;
   children: Map<string, readonly (Installation | undefined)[]>;
 }
@@ -231,6 +235,8 @@ function analyzeCallableFlow(
   const identities = new Map<FunctionIR, number>();
   const installingHooks = new Set<string>();
   const captureFrames: Capture[] = [];
+  const captureGetters = new WeakMap<Capture, Map<CaptureGetter, Atom>>();
+  const captureFacades = new WeakMap<CaptureContents, Map<string, Known>>();
   const setup: Execution = { phase: 'setup', context: 'setup' };
   const render: Execution = { phase: 'render', context: 'render' };
 
@@ -305,8 +311,16 @@ function analyzeCallableFlow(
       const contents = states.map((state) => state.captures.get(capture) ?? capture);
       const methods = new Set(contents.flatMap((value) => [...value.methods.keys()]));
       const children = new Set(contents.flatMap((value) => [...value.children.keys()]));
+      const names = new Set(contents.flatMap((value) => [...(value.states?.keys() ?? [])]));
       result.captures.set(capture, {
         render: merge(contents.map((value) => value.render ?? UNDEFINED)),
+        states: new Map(
+          [...names].map((name) => [
+            name,
+            merge(contents.map((value) => value.states?.get(name) ?? UNDEFINED)),
+          ])
+        ),
+        events: new Set(contents.flatMap((value) => [...(value.events ?? [])])),
         methods: new Map(
           [...methods].map((name) => [
             name,
@@ -328,6 +342,13 @@ function analyzeCallableFlow(
     store.captures.set(capture, {
       ...prior,
       methods: new Map(prior.methods).set(name, value),
+    });
+  }
+  function writeCaptureState(capture: Capture, state: CapturedState): void {
+    const prior = captureContents(capture);
+    store.captures.set(capture, {
+      ...prior,
+      states: new Map(prior.states).set(state.name, [{ kind: 'named-state', state }]),
     });
   }
   function recordChild(capture: Capture | undefined, name: string, value: Installation): void {
@@ -466,6 +487,8 @@ function analyzeCallableFlow(
           return ['literal', value.value];
         case 'native':
           return ['native', value.type];
+        case 'capture-getter':
+          return ['capture-getter', value.member, visit(value.capture, depth + 1)];
         case 'named-state':
           return ['named-state', value.state.name, value.state.type];
         case 'cell':
@@ -501,6 +524,11 @@ function analyzeCallableFlow(
         case 'capture':
           return [
             'capture',
+            [...(captureContents(value).states ?? [])].map(([name, state]) => [
+              name,
+              state.map((child) => visit(child, depth + 1)),
+            ]),
+            [...(captureContents(value).events ?? [])],
             (captureContents(value).render ?? UNDEFINED).map((child) => visit(child, depth + 1)),
             [...captureContents(value).methods].map(([name, method]) => [
               name,
@@ -714,6 +742,8 @@ function analyzeCallableFlow(
       return branches(
         values.map((value) => () => {
           if (value.kind === 'closure') return call(value, args, execution);
+          if (value.kind === 'capture-getter')
+            return captureLookup(value.capture, value.member, args[0] ?? UNDEFINED);
           if (value.kind === 'native') {
             // A host-supplied callable has an explicit signature. Supplied closures
             // may be retained by that external consumer and become outward roots.
@@ -785,6 +815,8 @@ function analyzeCallableFlow(
         continue;
       }
       if (value.kind === 'closure') callbacks.push({ closure: value, execution, outward: true });
+      else if (value.kind === 'capture-getter')
+        pending.push({ value: value.capture, type: undefined });
       else if (value.kind === 'record')
         for (const [name, field] of fields(value))
           pending.push(...field.map((value) => ({ value, type: fieldType(type, name) })));
@@ -913,6 +945,13 @@ function analyzeCallableFlow(
   }
   function ownFields(value: Atom): Map<string, Known> | undefined {
     if (value.kind === 'record') return fields(value);
+    if (value.kind === 'capture') return captureFacade(value);
+    if (
+      value.kind === 'undefined' ||
+      value.kind === 'absent' ||
+      (value.kind === 'literal' && value.value === null)
+    )
+      return new Map();
     if (value.kind !== 'unknown' || value.data === undefined) return undefined;
     const declared = objectFields(value.data);
     if (
@@ -937,6 +976,113 @@ function analyzeCallableFlow(
     );
   }
 
+  function captureLookup(capture: Capture, member: CaptureGetter, keys: Known): Known {
+    const contents = captureContents(capture);
+    const available =
+      member === 'getMethod'
+        ? [...contents.methods.keys()]
+        : member === 'getState'
+          ? [...(contents.states?.keys() ?? [])]
+          : [...contents.children.keys()];
+    const names = keys.every((key) => key.kind === 'literal' && typeof key.value === 'string')
+      ? keys.map((key) => String((key as Extract<Atom, { kind: 'literal' }>).value))
+      : available;
+    return merge([
+      UNDEFINED,
+      ...names.map((name): Known => {
+        if (member === 'getMethod') return contents.methods.get(name) ?? UNDEFINED;
+        if (member === 'getState') return contents.states?.get(name) ?? UNDEFINED;
+        return (contents.children.get(name) ?? [undefined]).flatMap((child) => {
+          if (!child) return UNDEFINED;
+          if (member === 'getAsHookHandle') return child.handle;
+          return [
+            {
+              kind: 'record',
+              fields: new Map<string, Known>([
+                ['name', [{ kind: 'literal', value: name }]],
+                ['order', dataFact('number')],
+                ['privileged', dataFact('boolean')],
+                ['mode', dataFact('string')],
+                ['result', child.result ?? [child.capture]],
+                ['handle', child.handle],
+              ]),
+            },
+          ];
+        });
+      }),
+    ]);
+  }
+
+  function captureFacade(capture: Capture): Map<string, Known> {
+    const contents = captureContents(capture),
+      cached = captureFacades.get(contents);
+    if (cached) return cached;
+    const optional = (value: Known): Known => merge([value, ABSENT]);
+    const result = new Map<string, Known>();
+    captureFacades.set(contents, result);
+    for (const name of ['props', 'state', 'context', 'event', 'feedback', 'disposers'])
+      result.set(name, optional(UNKNOWN));
+    const states: Known = contents.states?.size
+      ? [{ kind: 'record', fields: contents.states }]
+      : UNDEFINED;
+    const methods: Known = contents.methods.size
+      ? [{ kind: 'record', fields: contents.methods }]
+      : UNDEFINED;
+    const children: Known = contents.children.size
+      ? [
+          {
+            kind: 'record',
+            array: true,
+            fields: new Map(
+              [...contents.children.keys()].map((name, index) => [
+                String(index),
+                captureLookup(capture, 'getAsHook', [{ kind: 'literal', value: name }]),
+              ])
+            ),
+          },
+        ]
+      : UNDEFINED;
+    result.set('stateHandles', optional(states));
+    result.set('methods', optional(methods));
+    result.set('asHooks', optional(children));
+    let getters = captureGetters.get(capture);
+    if (!getters) captureGetters.set(capture, (getters = new Map()));
+    for (const member of ['getState', 'getMethod', 'getAsHook', 'getAsHookHandle'] as const) {
+      let getter = getters.get(member);
+      if (!getter) getters.set(member, (getter = { kind: 'capture-getter', capture, member }));
+      result.set(member, optional([getter]));
+    }
+    const eventKeys: Known = contents.events?.size
+      ? [
+          {
+            kind: 'record',
+            fields: new Map(
+              [...contents.events].map((name) => [
+                name,
+                [{ kind: 'literal', value: name }] as Known,
+              ])
+            ),
+          },
+        ]
+      : UNDEFINED;
+    result.set(
+      'artifacts',
+      optional([
+        {
+          kind: 'record',
+          fields: new Map([
+            ['stateHandles', optional(states)],
+            ['methods', optional(methods)],
+            ['asHooks', optional(children)],
+            ['eventKeys', optional(eventKeys)],
+          ]),
+        },
+      ])
+    );
+    result.set('render', optional(contents.render ?? UNDEFINED));
+    return result;
+  }
+
   function property(values: Known, name: string): Known {
     return values.flatMap((value) =>
       value.kind === 'record'
@@ -945,8 +1091,10 @@ function analyzeCallableFlow(
           : (fields(value).get(name) ?? UNDEFINED).flatMap((field) =>
               field.kind === 'absent' ? UNDEFINED : [field]
             )
-        : value.kind === 'capture' && name === 'render'
-          ? (captureContents(value).render ?? UNDEFINED)
+        : value.kind === 'capture'
+          ? (captureFacade(value).get(name) ?? UNDEFINED).flatMap((field) =>
+              field.kind === 'absent' ? UNDEFINED : [field]
+            )
           : checkDataBoundaries && value.kind === 'unknown' && value.data !== undefined
             ? (() => {
                 try {
@@ -998,7 +1146,9 @@ function analyzeCallableFlow(
                   );
                   if (!reachable) return [];
                   demand?.call?.(value, {
-                    external: present.some((target) => target.kind === 'native'),
+                    external: present.some(
+                      (target) => target.kind === 'native' || target.kind === 'capture-getter'
+                    ),
                     authored: present.flatMap((target) =>
                       target.kind === 'closure' ? [target.fn] : []
                     ),
@@ -1318,6 +1468,27 @@ function analyzeCallableFlow(
           );
         }
         const frame = captureFrames.at(-1);
+        const named = args[0]?.find(
+          (argument) => argument.kind === 'literal' && typeof argument.value === 'string'
+        );
+        if (frame && named?.kind === 'literal') {
+          if (
+            value.operation.startsWith('state.') &&
+            typeof value.type === 'string' &&
+            /^state:(boolean|number|string)$/.test(value.type)
+          )
+            writeCaptureState(frame, { name: String(named.value), type: value.type });
+          if (value.operation === 'expose.event') {
+            const prior = captureContents(frame);
+            store.captures.set(frame, {
+              ...prior,
+              events: new Set(prior.events).add(String(named.value)),
+            });
+          }
+        }
+        if (frame && value.operation === 'expose.state')
+          for (const item of args[1] ?? [])
+            if (item.kind === 'named-state') writeCaptureState(frame, item.state);
         if (trace) {
           const target = value.operation === 'expose.state' ? (args[1] ?? UNKNOWN) : [];
           const introduced = target.flatMap((item) =>
@@ -1327,7 +1498,7 @@ function analyzeCallableFlow(
             trace.operation(value, introduced, target.length === 1 && introduced.length === 1);
           if (frame?.hookId) trace.owned?.operation(frame.hookId, value, introduced);
         }
-        const stateMembers = trace ? privilegedStateMembers(value.operation) : [];
+        const stateMembers = privilegedStateMembers(value.operation);
         const handle: Known | undefined = stateMembers.length
           ? [
               {

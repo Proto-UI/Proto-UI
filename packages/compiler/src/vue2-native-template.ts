@@ -8,6 +8,7 @@ import type {
 } from './ir';
 import { operationArgumentRule, type ArgumentRule } from './operations';
 import { ordinaryValueChildren } from './value-children';
+import { nativeFieldSources } from './native-capture-provenance';
 import {
   nativeShape,
   NativeLexicalScope,
@@ -380,26 +381,11 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     property: string,
     scope: NativeLexicalScope
   ): Callable[] {
-    const visited = new Set<Binding>();
-    while (value.kind === 'reference' || value.kind === 'narrow') {
-      if (value.kind === 'narrow') {
-        value = value.value;
-        continue;
-      }
-      const binding = scope.lookup(value.name);
-      if (!binding?.value || visited.has(binding)) return [];
-      visited.add(binding);
-      value = binding.value;
-      scope = binding.environment;
-    }
-    if (value.kind === 'conditional')
-      return [
-        ...recordField(value.then, property, scope),
-        ...recordField(value.otherwise, property, scope),
-      ];
-    if (value.kind !== 'record') return [];
-    const field = value.entries.find((entry) => entry.key === property);
-    return field ? targets(field.value, scope) : [];
+    return nativeFieldSources(value, property, scope, ir, (callee, environment) =>
+      targets(callee, environment).flatMap((target) =>
+        target.kind === 'authored' ? [{ fn: target.fn, scope: target.scope }] : []
+      )
+    ).flatMap((source) => targets(source.value, source.scope));
   }
 
   function resolveTargets(value: ExpressionIR, scope: NativeLexicalScope): Callable[] {

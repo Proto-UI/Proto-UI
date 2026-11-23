@@ -1,3 +1,4 @@
+import { emitCapturedWebOperation } from './capture-effects';
 import { pruneDeadValues } from './demand-pruning';
 import { ordinaryValueChildren } from './value-children';
 import { nativeVue2AssociationsArtifact } from './native-vue2-associations';
@@ -430,7 +431,21 @@ export function emitVue2Source(
     }
   }
 
-  function expression(value: ExpressionIR, depth: number): string {
+  function expression(value: ExpressionIR, depth: number, captureEffects = true): string {
+    if (hasAuthoredHooks && captureEffects) {
+      if (value.kind === 'operation') {
+        const captured = emitCapturedWebOperation({
+          value: value,
+          prefix: prefix,
+          manager: `${prefix}Authored`,
+          interaction: `${prefix}Owner.interaction`,
+          emit: (item, capture = true) => expression(item, depth, capture),
+        });
+        if (captured !== undefined) return captured;
+      }
+      if (value.kind === 'rule')
+        return `${prefix}Authored.rule(${expression(value, depth, false)})`;
+    }
     switch (value.kind) {
       case 'narrow':
       case 'member-write':
@@ -1569,7 +1584,7 @@ ${
       /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
       state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
       /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn @param {(value: Result) => Result} [project] */
-      method: (key, fn, project) => { setupOnly(); ${hasAuthoredHooks ? 'PUIAuthored.method(key, fn);' : ''} exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
+      method: (key, fn, project) => { setupOnly();  exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
       /** @param {string} key @param {unknown} [spec] */
       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
     },

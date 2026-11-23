@@ -1,8 +1,8 @@
 /** Captures owner-local artifacts; no authored state machine or source plan is stored. */
 export const gpuiNativeAuthoredHooksSource = String.raw`
 #[derive(Default)]
-struct AuthoredHooks { entries:BTreeMap<String,Rc<RefCell<AuthoredEntry>>>, builtins:BTreeMap<String,(u64,Value)>, kinds:BTreeMap<String,bool>, frames:Vec<AuthoredFrame>, root_names:BTreeSet<String>, order:u64 }
-struct AuthoredFrame { id:u64, names:BTreeSet<String>, states:BTreeMap<String,Value>, methods:BTreeMap<String,Value>, children:Vec<Value> }
+struct AuthoredHooks { entries:BTreeMap<String,Rc<RefCell<AuthoredEntry>>>, builtins:BTreeMap<String,(u64,Value)>, kinds:BTreeMap<String,bool>, frames:Vec<AuthoredFrame>, root_names:BTreeSet<String>, state_names:BTreeMap<usize,String>, order:u64 }
+struct AuthoredFrame { id:u64, names:BTreeSet<String>, states:BTreeMap<String,Value>, methods:BTreeMap<String,Value>, children:Vec<Value>, effects:BTreeMap<String,Vec<Value>>, disposers:BTreeMap<String,Vec<Value>>, event_keys:BTreeMap<String,Value> }
 struct AuthoredEntry { order:u64, mode:&'static str, api:Value, result:Value, handle:Value, handle_set:bool }
 struct CaptureGuard { owner:OwnerWeak, open:bool }
 impl Drop for CaptureGuard { fn drop(&mut self){if self.open{if let Some(owner)=self.owner.upgrade(){owner.borrow_mut().authored.frames.pop();}}} }
@@ -13,7 +13,38 @@ fn claim_state_name(owner:&OwnerRef,name:&str)->String {
     if !names.insert(name.into()){value_error(&format!("[State] duplicate state name in setup frame: {name}"))}
     id.map(|id|format!("hook:{id}:{name}")).unwrap_or_else(||name.into())
 }
-fn capture_state(owner:&OwnerRef,name:String,state:Rc<State>){if let Some(frame)=owner.borrow_mut().authored.frames.last_mut(){frame.states.insert(name,Value::BorrowedState(state));}}
+fn capture_state(owner:&OwnerRef,name:String,state:Rc<State>){
+    let mut owner=owner.borrow_mut();owner.authored.state_names.insert(Rc::as_ptr(&state)as usize,name.clone());
+    if let Some(frame)=owner.authored.frames.last_mut(){frame.states.insert(name,Value::BorrowedState(state));}
+}
+pub fn capture_introduced_state(owner:&OwnerWeak,state:Value){
+    let owner=setup(owner);let mut owner=owner.borrow_mut();
+    let projected=match &state{
+        Value::State(state)|Value::BorrowedState(state)=>owner.authored.state_names.get(&(Rc::as_ptr(state)as usize)).cloned().map(|name|(name,Value::BorrowedState(state.clone()))),
+        Value::Observed(_,"focus.focused")=>Some(("focused".into(),state.clone())),
+        Value::Observed(_,"focus.visible")=>Some(("focusVisible".into(),state.clone())),
+        Value::Observed(_,"focus.ready")=>Some(("focusable".into(),state.clone())),
+        _=>None,
+    };
+    if let (Some((name,state)),Some(frame))=(projected,owner.authored.frames.last_mut()){frame.states.insert(name,state);}
+}
+// These functions store receipts of already executed checked setup operations.
+// Bucket values remain opaque; no operation or behavior is interpreted here.
+pub fn capture_effect(owner:&OwnerWeak,bucket:&str,value:Value){
+    let owner=setup(owner);if let Some(frame)=owner.borrow_mut().authored.frames.last_mut(){frame.effects.entry(bucket.into()).or_default().push(value);};
+}
+pub fn capture_disposer(owner:&OwnerWeak,group:&str,value:Value){
+    let owner=setup(owner);if let Some(frame)=owner.borrow_mut().authored.frames.last_mut(){frame.disposers.entry(group.into()).or_default().push(value);};
+}
+pub fn capture_event_key(owner:&OwnerWeak,key:Value){
+    let owner=setup(owner);if let Some(frame)=owner.borrow_mut().authored.frames.last_mut(){frame.event_keys.insert(key.text(),key);};
+}
+pub fn capture_rule(owner:&OwnerWeak,handle:Value)->Value{
+    let target=owner.clone();let captured=handle.clone();
+    let off=Value::Function(Rc::new(move |_|rule_dispose(&target,captured.clone())));
+    capture_effect(owner,"context",record(vec![("op",Value::string("rule")),("handle",handle.clone()),("off",off.clone())]));
+    capture_disposer(owner,"rule",off);handle
+}
 fn capture_method(owner:&OwnerRef,name:String,method:Value){if let Some(frame)=owner.borrow_mut().authored.frames.last_mut(){frame.methods.insert(name,method);}}
 fn record_hook_child(owner:&OwnerRef,name:&str,mode:&str,order:u64,privileged:bool,result:Value,handle:Value){
     if let Some(frame)=owner.borrow_mut().authored.frames.last_mut(){frame.children.push(freeze(record(vec![
@@ -46,15 +77,34 @@ pub fn native_builtin_hook(owner:&OwnerWeak,name:&str,install:impl FnOnce()->Val
     };
     record_hook_child(&owner_ref,name,"once",order,true,result.clone(),result.clone());result
 }
-fn finish_capture(frame:AuthoredFrame,render:Value)->Value {
-    let mut fields=BTreeMap::new();
-    if !frame.states.is_empty(){let states=freeze(record_map(frame.states));fields.insert("stateHandles".into(),states.clone());fields.insert("getState".into(),Value::Function(Rc::new(move|args|states.member(&arg(&args,0).text(),false))));}
-    if !frame.methods.is_empty(){let methods=frame.methods;fields.insert("getMethod".into(),Value::Function(Rc::new(move|args|methods.get(&arg(&args,0).text()).cloned().unwrap_or_default())));}
+fn finish_capture(owner:&OwnerWeak,frame:AuthoredFrame,render:Value)->Value {
+    let mut fields=BTreeMap::new();let mut artifacts=BTreeMap::new();
+    for (bucket,mut effects) in frame.effects { let value=if effects.len()==1{effects.pop().unwrap()}else{Value::Array(Rc::new(effects))};fields.insert(bucket,value); }
+    if !frame.states.is_empty(){
+        let states=freeze(record_map(frame.states));fields.insert("stateHandles".into(),states.clone());artifacts.insert("stateHandles".into(),states.clone());
+        fields.insert("getState".into(),Value::Function(Rc::new(move|args|states.member(&arg(&args,0).text(),false))));
+    }
+    if !frame.methods.is_empty(){
+        let methods=freeze(record_map(frame.methods));fields.insert("methods".into(),methods.clone());artifacts.insert("methods".into(),methods.clone());
+        fields.insert("getMethod".into(),Value::Function(Rc::new(move|args|methods.member(&arg(&args,0).text(),false))));
+    }
     if !frame.children.is_empty(){
-        let children=Rc::new(frame.children);let raw=children.clone();
+        let children=Rc::new(frame.children);let raw=children.clone();let array=Value::Array(children.clone());
+        fields.insert("asHooks".into(),array.clone());artifacts.insert("asHooks".into(),array);
         fields.insert("getAsHook".into(),Value::Function(Rc::new(move|args|{let name=arg(&args,0);raw.iter().find(|child|strict_equal(&child.member("name",false),&name)).cloned().unwrap_or_default()})));
         fields.insert("getAsHookHandle".into(),Value::Function(Rc::new(move|args|{let name=arg(&args,0);children.iter().find(|child|strict_equal(&child.member("name",false),&name)).map(|child|child.member("handle",false)).unwrap_or_default()})));
     }
+    if !frame.event_keys.is_empty(){artifacts.insert("eventKeys".into(),freeze(record_map(frame.event_keys)));}
+    if !artifacts.is_empty(){fields.insert("artifacts".into(),freeze(record_map(artifacts)));}
+    let mut groups=BTreeMap::new();let mut all=Vec::new();let mut disposers=frame.disposers;
+    for group in ["props","context","rule","event","feedback"] {
+        let Some(source)=disposers.remove(group) else{continue};if source.is_empty(){continue}
+        let wrapped:Vec<Value>=source.into_iter().map(|off|{
+            let owner=owner.clone();Value::Function(Rc::new(move |_|{setup(&owner);off.call_authored(vec![]);Value::Undefined}))
+        }).collect();
+        all.extend(wrapped.iter().cloned());groups.insert(group.into(),Value::Array(Rc::new(wrapped)));
+    }
+    if !all.is_empty(){groups.insert("all".into(),Value::Array(Rc::new(all)));fields.insert("disposers".into(),freeze(record_map(groups)));}
     if matches!(render,Value::Function(_)|Value::NativeFunction{..}|Value::Renderer(_)){fields.insert("render".into(),render);}
     freeze(record_map(fields))
 }
@@ -76,11 +126,11 @@ pub fn authored_hook(owner:&OwnerWeak,name:&str,mode:&'static str,input:Value,in
     let api=freeze(record(vec![("name",Value::string(name)),("order",Value::number(order as f64)),("store",record(vec![]))]));
     let entry=Rc::new(RefCell::new(AuthoredEntry{order,mode,api:api.clone(),result:Value::Undefined,handle:Value::Undefined,handle_set:false}));
     {let mut owner=owner_ref.borrow_mut();if mode!="multiple"{owner.authored.entries.insert(name.into(),entry.clone());}
-     owner.authored.frames.push(AuthoredFrame{id:order,names:BTreeSet::new(),states:BTreeMap::new(),methods:BTreeMap::new(),children:Vec::new()});}
+     owner.authored.frames.push(AuthoredFrame{id:order,names:BTreeSet::new(),states:BTreeMap::new(),methods:BTreeMap::new(),children:Vec::new(),effects:BTreeMap::new(),disposers:BTreeMap::new(),event_keys:BTreeMap::new()});}
     let mut guard=CaptureGuard{owner:owner.clone(),open:true};
     let render=install.call_authored(vec![definition_capability(owner),input.clone(),api.clone()]);
     let frame=owner_ref.borrow_mut().authored.frames.pop().expect("capture frame");guard.open=false;
-    let result=finish_capture(frame,render);
+    let result=finish_capture(owner,frame,render);
     // Capture succeeded even if projection subsequently throws. Preserve that
     // raw result for the already-owned registration, as the Core wrapper does.
     entry.borrow_mut().result=result.clone();
@@ -259,4 +309,90 @@ mod authored_renderer_identity_tests {
         assert!(!strict_equal(&captured,&other));
     }
 }
+#[cfg(all(test,feature="test-support"))]
+mod authored_capture_facade_tests {
+    use super::*;
+    fn owner()->OwnerRef {
+        Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary())
+    }
+    fn hook(owner:&OwnerWeak,name:&str,install:Value,project:Value)->Value {
+        authored_hook(owner,name,"once",Value::Undefined,install,project,Value::Undefined)
+    }
+    #[test]
+    fn capture_facade_preserves_shared_artifacts_raw_children_and_projected_handles() {
+        let owner=owner();let weak=Rc::downgrade(&owner);let target=weak.clone();
+        let read=Value::Function(Rc::new(|_|Value::string("seed")));let method=read.clone();
+        let render=Value::Function(Rc::new(|_|Value::string("text")));let render_child=render.clone();
+        let child=Value::Function(Rc::new(move |_|{
+            let state=create_state(&target,"string",Value::string("text"),Value::string("seed"),record(vec![]));
+            capture_effect(&target,"state",state.clone());
+            expose_method(&target,Value::string("read"),method.clone());
+            capture_effect(&target,"context",record(vec![("op",Value::string("expose.method")),("key",Value::string("read")),("fn",method.clone())]));
+            expose_event(&target,Value::string("changed"));capture_event_key(&target,Value::string("changed"));
+            capture_effect(&target,"event",record(vec![("op",Value::string("expose.event")),("key",Value::string("changed"))]));
+            render_child.clone()
+        }));
+        let projected=Value::Function(Rc::new(|args|{let raw=arg(&args,0);let mut fields=own_entries(raw);fields.insert("projected".into(),Value::boolean(true));freeze(record_map(fields))}));
+        let target=weak.clone();let raw_slot=Rc::new(RefCell::new(Value::Undefined));let raw_observed=raw_slot.clone();
+        let outer=Value::Function(Rc::new(move |_|{
+            let first=hook(&target,"child",child.clone(),projected.clone());
+            let again=hook(&target,"child",child.clone(),projected.clone());assert!(strict_equal(&first,&again));
+            *raw_observed.borrow_mut()=first;Value::Undefined
+        }));
+        let capture=hook(&weak,"outer",outer,Value::Undefined);let child=raw_slot.borrow().clone();
+        let descriptor=capture.member("getAsHook",false).call_authored(vec![Value::string("child")]);
+        let raw=descriptor.member("result",false);let handle=descriptor.member("handle",false);
+        assert!(strict_equal(&handle,&child));assert!(!strict_equal(&raw,&handle));
+        assert!(strict_equal(&descriptor,&capture.member("getAsHook",false).call_authored(vec![Value::string("child")])));
+        assert!(strict_equal(&handle,&capture.member("getAsHookHandle",false).call_authored(vec![Value::string("child")])));
+        assert!(capture.member("stateHandles",false).nullish(),"nested state is not flattened");
+        assert_eq!(capture.member("asHooks",false).items().len(),2);
+        assert!(strict_equal(&capture.member("asHooks",false),&capture.member("artifacts",false).member("asHooks",false)));
+        let states=raw.member("stateHandles",false);let methods=raw.member("methods",false);let artifacts=raw.member("artifacts",false);
+        assert!(strict_equal(&states,&artifacts.member("stateHandles",false)));
+        assert!(strict_equal(&methods,&artifacts.member("methods",false)));
+        assert!(strict_equal(&methods.member("read",false),&read));
+        assert!(strict_equal(&read,&raw.member("getMethod",false).call_authored(vec![Value::string("read")])));
+        assert!(strict_equal(&states.member("text",false),&raw.member("getState",false).call_authored(vec![Value::string("text")])));
+        assert!(matches!(states.member("text",false),Value::BorrowedState(_)));
+        assert!(strict_equal(&child.member("getState",false),&raw.member("getState",false)));
+        assert!(strict_equal(&child.member("render",false),&render));
+        assert_eq!(artifacts.member("eventKeys",false).member("changed",false).text(),"changed");
+        assert_eq!(raw.member("getMethod",false).call_authored(vec![Value::string("read")]).call_authored(vec![]).text(),"seed");
+        assert!(raw.try_data().is_none(),"capabilities must never become portable JSON");
+        expose_value(&weak,Value::string("facade"),capture);Owner::finish(&owner,Value::Undefined);
+        let public=owner.borrow().exposes["facade"].clone();let public_child=public.member("getAsHook",false).call(vec![Value::string("child")]).unwrap();
+        assert!(strict_equal(&public_child,&public.member("asHooks",false).items()[0]),"getter lookup returns the same public child record");
+        let projected_public=public_child.member("handle",false);let raw_public=public_child.member("result",false);
+        assert!(strict_equal(&projected_public.member("getMethod",false),&raw_public.member("getMethod",false)));
+        Owner::dispose(&owner);
+        assert!(public.member("getAsHook",false).call(vec![Value::string("child")]).is_err());
+    }
+    #[test]
+    fn capture_disposers_release_real_registrations_only_during_setup() {
+        let owner=owner();let weak=Rc::downgrade(&owner);let target=weak.clone();
+        let install=Value::Function(Rc::new(move |_|{
+            let off=watch_props(&target,None,false,Value::Function(Rc::new(|_|Value::Undefined)));
+            capture_effect(&target,"props",record(vec![("op",Value::string("watchAll")),("off",off.clone())]));
+            capture_disposer(&target,"props",off);Value::Undefined
+        }));
+        let capture=hook(&weak,"watcher",install,Value::Undefined);
+        let disposers=capture.member("disposers",false);let off=disposers.member("all",false).items()[0].clone();
+        assert!(strict_equal(&off,&disposers.member("props",false).items()[0]));
+        assert!(owner.borrow().watchers[0].active.get());off.call_authored(vec![]);assert!(!owner.borrow().watchers[0].active.get());
+        Owner::finish(&owner,Value::Undefined);
+        assert!(off.call(vec![]).is_err(),"captured disposer is setup-only");
+        Owner::dispose(&owner);assert!(off.call(vec![]).is_err());
+    }
+    #[test]
+    fn empty_capture_omits_absent_public_fields() {
+        let owner=owner();let weak=Rc::downgrade(&owner);
+        let capture=hook(&weak,"empty",Value::Function(Rc::new(|_|Value::Undefined)),Value::Undefined);
+        for key in ["props","state","context","event","feedback","stateHandles","methods","asHooks","artifacts","disposers","render","getState","getMethod","getAsHook","getAsHookHandle"] {
+            assert!(!has_own(&capture,&Value::string(key)).bool(),"unexpected empty field: {key}");
+        }
+        Owner::dispose(&owner);
+    }
+}
+
 `;

@@ -21,6 +21,13 @@ describe('GPUI direct control-label lowering', () => {
       expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
     }
   );
+  it('compiles the official InputRoot through its public asHook handle', async () => {
+    const result = await compileFile(
+      'packages/compiler/test/fixtures/gpui-control-label/input-delegate.proto.ts',
+      { root: process.cwd(), profile: 'gpui-source-v1', gpuiDependency: 'workspace' }
+    );
+    expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+  });
   it('admits a callback that tests its live association request', () => {
     const result = compilePrototype(
       prototype(`asControlLabel().target((run,request)=>{
