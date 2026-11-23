@@ -1,0 +1,20 @@
+{
+  "archive": "originals.tar.gz",
+  "bytes": 866835,
+  "sha256": "978842142d52a27631754c664c282b699b47ff454b73d03b3aff172ad41a2377",
+  "members": 967,
+  "uncompressedBytes": 5393854,
+  "manifestSha256": "3906e87841a0d75c054ed681a3d4f22705b602047bab432adbc6a15e8627ed6a",
+  "chunks": [
+    {
+      "name": "part-000.base64",
+      "characters": 600000,
+      "sha256": "607c5a7c7a07f46db5d822b040d0de924eeb33b35542290cd811c2ffa21570d9"
+    },
+    {
+      "name": "part-001.base64",
+      "characters": 555780,
+      "sha256": "60b4bea3945082409cecc2542debfeb3e166018064c89caf657f034336a09acf"
+    }
+  ]
+}

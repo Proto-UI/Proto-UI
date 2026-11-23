@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "kind": "publishable bounded evidence package inventory",
   "pathBase": "this directory",
-  "generatedAt": "2026-11-23T21:41:19.736565+00:00",
+  "generatedAt": "2026-11-23T22:19:31.194108+00:00",
   "selfExcluded": "manifest.json",
-  "fileCountExcludingSelf": 25,
-  "bytesExcludingSelf": 3779123,
+  "fileCountExcludingSelf": 35,
+  "bytesExcludingSelf": 4926210,
   "files": [
     {
       "path": "README.md",
-      "bytes": 10158,
-      "sha256": "b074f0c999ec3e0f67a9e919913fe9280dd6093605f6b277c95b816db7281d73"
+      "bytes": 10664,
+      "sha256": "8512476a244f3f121b74783430696bb7a80f402eece6711b9827abbcc75bbf4f"
     },
     {
       "path": "browser/manifest.json",
@@ -56,6 +56,56 @@
       "path": "budget/review-and-validation-originals.tar.gz",
       "bytes": 22717,
       "sha256": "67fc5b0887f8fd9c98ac30b90b1adad40081307c309c7ce277c8d4d58a5d93b1"
+    },
+    {
+      "path": "collaboration/README.md",
+      "bytes": 4068,
+      "sha256": "bdf56691f8a08350d9b7c89886c1b827ae7378d4649185d349c9720220e147ec"
+    },
+    {
+      "path": "collaboration/automatic-review-disposition.json",
+      "bytes": 1354,
+      "sha256": "694d3275d57d2f0a41aca1ed5c1f1f515b58f085304f04739f10ad7153914283"
+    },
+    {
+      "path": "collaboration/compatibility-recovery.json",
+      "bytes": 4689,
+      "sha256": "28559eb35de0eb78bad706ccd93fc20bb736de1137e63522e4210bb3528c13d1"
+    },
+    {
+      "path": "collaboration/manifest.json",
+      "bytes": 234703,
+      "sha256": "3906e87841a0d75c054ed681a3d4f22705b602047bab432adbc6a15e8627ed6a"
+    },
+    {
+      "path": "collaboration/originals.tar.gz",
+      "bytes": 866835,
+      "sha256": "978842142d52a27631754c664c282b699b47ff454b73d03b3aff172ad41a2377"
+    },
+    {
+      "path": "collaboration/public-definition-byte-continuity.json",
+      "bytes": 19449,
+      "sha256": "f1128f0b06aa158558baed4ea7f0936b6126515b5aaf4457163d240ba3ccdb6a"
+    },
+    {
+      "path": "collaboration/readback.json",
+      "bytes": 6753,
+      "sha256": "228dc1b4910d30c79b6b085c5bb56b9317e1df66b5e8fe3d051e17e1a975d0de"
+    },
+    {
+      "path": "collaboration/reader-correction.json",
+      "bytes": 1682,
+      "sha256": "7290c483c5a1e5dced31f595a0612228953df28c6beb9d1d0095e19ba8ee7ba0"
+    },
+    {
+      "path": "collaboration/transport.json",
+      "bytes": 605,
+      "sha256": "fa4de46ae7a14588581205507dc3ed0c929cb4295bed33b923d35889b3304914"
+    },
+    {
+      "path": "collaboration/verify.py",
+      "bytes": 6443,
+      "sha256": "5e20735315cb0062ec9447779082829332e6fcaf155c77523f3af28c7bbe3ca7"
     },
     {
       "path": "final-budget.json",

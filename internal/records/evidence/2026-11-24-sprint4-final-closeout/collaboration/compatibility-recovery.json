@@ -1,0 +1,110 @@
+{
+  "kind": "sprint4.collaboration-compatibility-recovery",
+  "observedAt": "2026-11-23T22:01:05.233952+00:00",
+  "outcome": "confirmed-no-write-compatible-new-attempt-prepared",
+  "oldJournalRetained": true,
+  "oldJournalState": "halted-unresolved",
+  "oldRequestDigest": "0f7093feb0ffd4f6bbcc51bd5d351724b757f1a87823ab504053954bc27bccfc",
+  "oldFailureDisposition": "pre-write read-only collection failed; exhaustive readback confirms zero mutation",
+  "localIntentSha256": "46048eab41df88195fb3bba2c58eba6544e6ead0515b0e82dd564cf0705a3914",
+  "payloadChanges": [
+    {
+      "path": "/outputDirectory",
+      "before": "final-collaboration-results",
+      "after": "final-collaboration-results-compatible-gh"
+    }
+  ],
+  "binary": {
+    "path": "/tank/shared/projects/proto-ui-agent/sprint4-completion-20261124-1494/github-cli-recovery-v2/runtime/bin/gh",
+    "bytes": 41189536,
+    "sha256": "fa7cff06d4db9eee98e00b10ac93beebfe1822109ac04a6cbbf9d806c21d0073"
+  },
+  "effectiveVersion": "gh version 2.105.0 (2026-11-17)\nhttps://github.com/cli/cli/releases/tag/v2.105.0",
+  "effectiveBinaryPath": "/tank/shared/projects/proto-ui-agent/sprint4-completion-20261124-1494/github-cli-recovery-v2/runtime/bin/gh",
+  "fullCommentCount": 2,
+  "commentIds": [
+    7111879493,
+    7113423733
+  ],
+  "checkedMarkers": [
+    "agent-commit-progress:Proto-UI/Proto-UI#1754:cc6f2c5f",
+    "0f7093feb0ffd4f6bbcc51bd5d351724b757f1a87823ab504053954bc27bccfc"
+  ],
+  "headSha": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "draft": true,
+  "actor": "cyjin-yl",
+  "sourceChecksums": {
+    "final-collaboration-runner.py": "46ed2a4f68183d0e2cc2c781e6ef5b4a58728488e6b972fde4cbaf1988e4c028",
+    "final-collaboration-helper.mjs": "f9f7cce82bced3b2ddb56a12ef635051ff86e650df6dbe63137345df2ef4776c",
+    "final-collaboration-payload.schema.json": "731b9e8f4bd1cb03f67c94b6d96d09a9b08cac9c81adc992009a023b60c8c021"
+  },
+  "boundEvidence": [
+    {
+      "path": "final-collaboration-results/journal.json",
+      "bytes": 906,
+      "sha256": "b0c0b29cf4e11085b26f516832ca762b1f07ed4951a23b044ebbd8404af79635"
+    },
+    {
+      "path": "final-collaboration-results/20261123T214616007758Z-apply-updates/progress-01-cc6f2c5f/request.json",
+      "bytes": 3347,
+      "sha256": "378a7bd526f8415097618212a9818a397c8893ebaecd2f85f26398834ca778c2"
+    },
+    {
+      "path": "final-collaboration-results/20261123T214616007758Z-apply-updates/progress-01-cc6f2c5f/apply.stdout.log",
+      "bytes": 644,
+      "sha256": "7310ea080d53b879e7f9a2262dfea1871719a65c78e4544cbd8a304e368cf586"
+    },
+    {
+      "path": "final-collaboration-results/20261123T214616007758Z-apply-updates/progress-01-cc6f2c5f/apply.stderr.log",
+      "bytes": 1370,
+      "sha256": "4198e72a69f24e70637f4dc9dc6c3499e624a2125f4627f9c3f52b4687183355"
+    },
+    {
+      "path": "final-collaboration-results/20261123T214616007758Z-apply-updates/progress-01-cc6f2c5f/apply.result.json",
+      "bytes": 877,
+      "sha256": "6fd11f7ee37aa5247d58888f468761505ce2cd1bda3c3a3360248d66dad33435"
+    },
+    {
+      "path": "github-cli-recovery-v2/no-write-reconciliation.json",
+      "bytes": 309,
+      "sha256": "235c7af03e03262787f5c0c950f9d4cb25ad2397082b1006a2b70b5747bfb9d3"
+    },
+    {
+      "path": "github-cli-recovery-v2/new-slurp-readback.stdout",
+      "bytes": 9462,
+      "sha256": "8756979837121508ff202f9a3de463b099a9f1a1e228ea289346c8bd84afea8c"
+    },
+    {
+      "path": "github-cli-recovery-v2/new-pr-readback.stdout",
+      "bytes": 20674,
+      "sha256": "89eb6b8b8bf536289732f7bae8fa03ff90de4bb49efe2cc7ecd83dc7b2032eb4"
+    },
+    {
+      "path": "github-cli-recovery-v2/install-receipt.json",
+      "bytes": 2509,
+      "sha256": "7f01bc82daaff07da6e47a4042e926b8a7c87c7ed680a233fe99158876ffeac0"
+    },
+    {
+      "path": "github-cli-recovery-v2/official-release.json",
+      "bytes": 50356,
+      "sha256": "23ac9765d2e2d67cacfa7031bd753f0db95bb275f13c955ae78a72ef79dbcb49"
+    },
+    {
+      "path": "final-collaboration-tools/payload.json",
+      "bytes": 5410,
+      "sha256": "8e766b556eb2131f208c70c39f0b71cbd6f187fb5ec9bb4e1d7b9305da700dc2"
+    },
+    {
+      "path": "final-collaboration-tools/payload-compatible-gh.json",
+      "bytes": 6126,
+      "sha256": "b43410aff8bfd8c99fab54fa77e0dfc07cd6606485737daf17538b643fc3e78c"
+    },
+    {
+      "path": "final-collaboration-results-compatible-gh/20261123T220103140250Z-validate-payload/payload-validation.json",
+      "bytes": 396,
+      "sha256": "a689a73f5b23bbd9fb2a80824031feff8023aad95aa741c25ccb41bade076fa4"
+    }
+  ],
+  "externalWrites": 0,
+  "nextAction": "fresh canonical collect and ordinary repository CLI apply-updates; never reuse old sealed request"
+}

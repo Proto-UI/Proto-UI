@@ -1,0 +1,39 @@
+{
+  "kind": "sprint4.collaboration-reader-correction",
+  "firstAttempt": {
+    "exitCode": 1,
+    "readerSha256": "b84bcc7c500dd75f7a8084b96118582ceaa37ef2f87e7534e3c1492fd652339b",
+    "failure": "AssertionError at line 70: the reader incorrectly expected live-state-matches-desired for a comment receipt.",
+    "actualReceiptVerification": "idempotency-marker-present",
+    "affectedOperations": 13
+  },
+  "correction": {
+    "authority": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41:internal/agent-operations/schemas/collaboration-receipt.schema.json and scripts/agent-operations/collaboration-runtime.mjs",
+    "change": "Require idempotency-marker-present for post-bounded-reconciliation-comment; retain live-state-matches-desired for metadata and Ready.",
+    "readerSha256": "5e20735315cb0062ec9447779082829332e6fcaf155c77523f3af28c7bbe3ca7",
+    "githubOrProductChanges": false,
+    "originalReceiptsChanged": false
+  },
+  "successorAttempt": {
+    "exitCode": 0,
+    "executionChunk": "afc536",
+    "command": "python3 internal/records/evidence/2026-11-24-sprint4-final-closeout/collaboration/verify.py --repo .",
+    "result": {
+      "archiveMembersVerified": 967,
+      "journalOperations": 17,
+      "outcomes": {
+        "applied": 17
+      },
+      "progressCommentsVerified": 13,
+      "issueBodiesVerified": 9,
+      "readyAtHead": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+      "formalReviewCountAtReadback": 0,
+      "oldFailureRetained": true,
+      "confirmedNoWriteRecovery": true,
+      "publicDefinitionBlobsVerified": 61,
+      "githubWritesByThisReader": 0,
+      "testsRunByThisReader": 0
+    },
+    "recordedAt": "2026-11-23T22:19:31.097582+00:00"
+  }
+}

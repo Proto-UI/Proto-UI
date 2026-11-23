@@ -102,3 +102,7 @@ c18 的真实严格运行 [45269915996](https://github.com/Proto-UI/Proto-UI/act
 轻量 [PR CI 45269910724](https://github.com/Proto-UI/Proto-UI/actions/runs/45269910724) 为四个 job 实际成功、18 skipped；原生 DCO 成功。Vercel 因每日部署配额失败，正式 GitHub review 与主线合入尚未发生。数值事务的技术接受不提供这些外部结果，也不完成原私有 IR10 或整个 Sprint 4。
 
 浏览器执行保留 c1，数值严格执行保留 c18。此目录只进入独立 evidence 分支，未为补写收据改动实现 PR head。修改目录后使用 `python3 verify.py --refresh-manifest --repo ../../../..` 回读并刷新索引；单纯复制或回读不重跑浏览器或 canonical CI。
+
+## Final platform closeout
+
+[Governed collaboration, Ready readback and preserved review-limit failure](collaboration/README.md) records the actual final publication. At `2026-11-23T22:14:32.738Z`, PR #1754 was Ready and unmerged at c18; all nine Issue bodies matched their prepared updates and remained open. The automatic Codex review was blocked by account usage limits, with zero formal reviews. This follow-up does not expand any browser, budget, original IR10 or full-Sprint acceptance claim above.

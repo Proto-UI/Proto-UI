@@ -1,0 +1,198 @@
+{
+  "kind": "sprint4.final-platform-readback",
+  "observedAt": "2026-11-23T22:14:32.738Z",
+  "finishedAt": "2026-11-23T22:14:44.002464+00:00",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "pullRequest": 1754,
+  "url": "https://github.com/Proto-UI/Proto-UI/pull/1754",
+  "headSha": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "baseSha": "0fbb52ef832cc27c78e24c28c59a55a16f51d7fe",
+  "isDraft": false,
+  "merged": false,
+  "reviewInputDigest": "e1ca3b3908967477f7986bb76f5daeec44c6a71081fb451583702eb1b4ca48e8",
+  "progressComments": [
+    {
+      "sha": "cc6f2c5fb4d223be4d838471d7aa7b77f4c14f80",
+      "id": "IC_kwDOMhQZjc8AAAABqBoozg",
+      "bodySha256": "2b64d9d6404b8af433a9f0c2a64c92262ae7b699879c3cf87a984aab9cc1d2de"
+    },
+    {
+      "sha": "73ca9d399af7cea52fe66c0d8f9584c89e38c520",
+      "id": "IC_kwDOMhQZjc8AAAABqBpX3A",
+      "bodySha256": "4b1e6e2a328d65ae825505a94f44f6f453f5d9c9d2d2d521b10276837ac9ebc7"
+    },
+    {
+      "sha": "b5d3e4da86e1a01d566417bed9d9c244704ab524",
+      "id": "IC_kwDOMhQZjc8AAAABqBqFJQ",
+      "bodySha256": "333fb759a4bc52fe081b1d282fbc91c4cb20357f0db85906780b482886de82c5"
+    },
+    {
+      "sha": "49b465701447c587401cc20000bf75fb704842fe",
+      "id": "IC_kwDOMhQZjc8AAAABqBq1Fg",
+      "bodySha256": "f67a4422e5fe471aa56d085f9d11cc3b011074dd147a1883e4359a2d8474190a"
+    },
+    {
+      "sha": "282cbca2c375b371470eb75853750ba023f420b3",
+      "id": "IC_kwDOMhQZjc8AAAABqBrjRw",
+      "bodySha256": "e8448020d3c2f2f572ded3725e099bbea81179a5c49c150d96d883023e1b5f9e"
+    },
+    {
+      "sha": "fbbf9b343513fa7f8b4c8496fd3386f42925c26a",
+      "id": "IC_kwDOMhQZjc8AAAABqBsTrg",
+      "bodySha256": "617d4cc0e89e80ab8abb9081032615b4b311100ad2ba91b436854d1e65b095fb"
+    },
+    {
+      "sha": "a1c4be9a4cc7916b301707d814e78c14fc3676b7",
+      "id": "IC_kwDOMhQZjc8AAAABqBtGxQ",
+      "bodySha256": "3669b2f2e72993f3d7c84b0838b6460d2a4e53868bf8b2b7357c1f79bb5eb40f"
+    },
+    {
+      "sha": "31239ef95dfe610ddeb415976721adb7f12d5ba0",
+      "id": "IC_kwDOMhQZjc8AAAABqBt2bw",
+      "bodySha256": "7df71fdc66c536be779b9e196b236bc6a608919a3200e5c26dd2b8c36f847959"
+    },
+    {
+      "sha": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+      "id": "IC_kwDOMhQZjc8AAAABqBumEQ",
+      "bodySha256": "83540741f6379b89956a00f1960c9ba3ad196ce5f7a657e3d526737cbdb0f31c"
+    },
+    {
+      "sha": "996a2a35b9d9ca19e8d0def7c9b6040fb8afe714",
+      "id": "IC_kwDOMhQZjc8AAAABqBvTXQ",
+      "bodySha256": "0a519c8ad15e9d7f3f31220f5dba4ed8b587aa71dc90fd18f080d781c49ba242"
+    },
+    {
+      "sha": "e15c2c4912fd7c748682c1b094cad81f9cfa315e",
+      "id": "IC_kwDOMhQZjc8AAAABqBwOAQ",
+      "bodySha256": "3b9595cc7f2c1bfc574369a8e9f565d9e8fa03037b6f289c618639144d0806ca"
+    },
+    {
+      "sha": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "id": "IC_kwDOMhQZjc8AAAABqBxOHw",
+      "bodySha256": "08a65f5b57ba75db6521f814534d3a89bd899eafa5ddced64f881a7e6545bf28"
+    },
+    {
+      "sha": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+      "id": "IC_kwDOMhQZjc8AAAABqByekw",
+      "bodySha256": "a48e0effc567e8f274977edcaa0d7d8370785576d8a45f0b18209272e410cbab"
+    }
+  ],
+  "commentCount": 17,
+  "formalReviewCount": 0,
+  "reviewThreadCount": 0,
+  "checks": {
+    "SUCCESS": [
+      "ci-config-audit",
+      "lockstep-check",
+      "public_package_plan",
+      "test-plan",
+      "DCO"
+    ],
+    "SKIPPED": [
+      "coverage-governance",
+      "agent-operations-fixtures",
+      "production-suites",
+      "compiler-gpui-consumers",
+      "cycle-plan",
+      "type-check",
+      "rust",
+      "rust-macos",
+      "rust-interop",
+      "release-scan",
+      "public_package_build",
+      "release-stage",
+      "release-consumer-react",
+      "cli-smoke",
+      "test-general",
+      "test-browser",
+      "test",
+      "cycle-report"
+    ],
+    "FAILURE": [
+      "Vercel"
+    ]
+  },
+  "issues": [
+    {
+      "number": 891,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/891",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:30:13Z",
+      "bodySha256": "369663b015794be673f37ce8a2fb3585b305d3585b41255741807236dbdfe258",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 892,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/892",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:30:24Z",
+      "bodySha256": "758d54d313510ea9d47f7e47948c9a4f85e392857aa309dbf7c8fadd7e9fffcf",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 893,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/893",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:30:32Z",
+      "bodySha256": "c5cf7caf01369952d616fd5cd8e17c0a60fdf7b19fd392e97f58638c96a7174a",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 894,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/894",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:30:41Z",
+      "bodySha256": "8effaa714f9be7f1655bf7bb7b9f17dae4442bb7f2e34cc10b3f92219a8baded",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 913,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/913",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:30:50Z",
+      "bodySha256": "959779d35d6e4e26a3be06241c0690de7db1f44962534edd71370965ac90d02f",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 914,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/914",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:30:58Z",
+      "bodySha256": "2a4369c09a32b6f24208ef07d162ba272f8d947557492ec13be0c15b33166679",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 915,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/915",
+      "state": "open",
+      "updatedAt": "2026-11-23T19:31:07Z",
+      "bodySha256": "9a2a916068170a1fd845731f35c80eb2adb983910edc7e760f0c580ca00368e3",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 1143,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1143",
+      "state": "open",
+      "updatedAt": "2026-11-23T22:11:29Z",
+      "bodySha256": "cded424c1b900e638983bdeec6eb682392bfad8ecf5a15e02e9b46dfac9464d4",
+      "preparedBodyMatches": true
+    },
+    {
+      "number": 1089,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1089",
+      "state": "open",
+      "updatedAt": "2026-11-23T22:11:51Z",
+      "bodySha256": "356e983fcefe7dc2da4f9f91767042432e4f372fce0e9d3889eec0a416dbddef",
+      "preparedBodyMatches": true
+    }
+  ],
+  "journalOperationCount": 17,
+  "journalSha256": "609a40fc3d1475ae7e90f0c920a06b1005edd1a08f69291e454f3343be1eaadb",
+  "claims": {
+    "boundedImplementationReadyForReview": true,
+    "allSprint4Complete": false,
+    "privateIR10Replayed": false,
+    "formalApprovalManufactured": false,
+    "mergePerformed": false
+  }
+}

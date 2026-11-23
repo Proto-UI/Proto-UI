@@ -1,0 +1,28 @@
+{
+  "kind": "sprint4.automatic-review-disposition",
+  "headSha": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "source": "final-platform-closeout/review-input.json in originals.tar.gz",
+  "sourceSha256": "aee0ceb25c6024661d14da6061e1f807ce58af91e3cdf2d3d45cf25e48a34cce",
+  "formalReviewCount": 0,
+  "reviewThreadCount": 0,
+  "reviewCompleted": false,
+  "disposition": "Automatic Codex review could not complete because the account reached code-review usage limits.",
+  "actualCodeFindingCount": null,
+  "hasInspectableFindingPayload": false,
+  "rawMachineSummaryFlagsRetained": true,
+  "interpretation": "The failed summary contains has_any_findings/has_unresolved_findings=true, but the accompanying comment explains an account usage limit and no file/line finding payload exists in this canonical input. Preserve both raw comments; infer neither a code defect nor approval.",
+  "comments": [
+    {
+      "id": "IC_kwDOMhQZjc8AAAABqB2u5Q",
+      "author": "chatgpt-codex-connector",
+      "updatedAt": "2026-11-23T22:13:30Z",
+      "bodySha256": "c64c498d5b35988fbbd8fe09c1701043021db34128354f2b71bcbb90141fb353"
+    },
+    {
+      "id": "IC_kwDOMhQZjc8AAAABqB2yHQ",
+      "author": "chatgpt-codex-connector",
+      "updatedAt": "2026-11-23T22:13:32Z",
+      "bodySha256": "619c9f9f66a93f7e7ea60049aa147d2cf183fb706a71e11a710216ed2ba19d92"
+    }
+  ]
+}
