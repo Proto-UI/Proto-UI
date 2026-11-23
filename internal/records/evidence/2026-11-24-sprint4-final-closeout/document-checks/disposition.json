@@ -1,0 +1,37 @@
+{
+  "kind": "sprint4.document-check-disposition",
+  "actualExecutionHead": "1eb751b7ef39285f00e2d2ce49d5c10f8aea177a",
+  "implementationHead": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "publicDocs": "passed",
+  "fullAgentOperations": {
+    "exitCode": 1,
+    "reportedTests": 1360,
+    "reportedPassed": 1358,
+    "reportedFailed": 2,
+    "failedFiles": [
+      "scripts/agent-operations/test/review-pagination.test.mjs",
+      "scripts/agent-operations/test/review-reply-identity.test.mjs"
+    ],
+    "failureCauseEstablished": false,
+    "originalFailureRetained": true
+  },
+  "targetedSuccessor": {
+    "exitCode": 0,
+    "tests": 191,
+    "passed": 191,
+    "failed": 0,
+    "concurrency": 1,
+    "reporter": "tap",
+    "fullSuiteRerun": false
+  },
+  "agentDoc": {
+    "originalPnpmCommand": "failed: tsx CLI IPC listen EPERM",
+    "directNodeBeforeWiring": "failed: missing declared zod dependency in this worktree",
+    "sameScriptAfterWiring": "passed using node --import tsx and the identical lockfile",
+    "cleanInstallClaimed": false,
+    "productSourceChanged": false
+  },
+  "fullAgentOperationsGreenClaimed": false,
+  "permissionOrSandboxChanged": false,
+  "authoritativeEvidence": "All exact commands, times, logs and dependency wiring are in originals.tar.gz."
+}

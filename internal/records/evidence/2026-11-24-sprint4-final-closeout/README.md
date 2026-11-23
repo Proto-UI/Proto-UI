@@ -106,3 +106,7 @@ c18 的真实严格运行 [45269915996](https://github.com/Proto-UI/Proto-UI/act
 ## Final platform closeout
 
 [Governed collaboration, Ready readback and preserved review-limit failure](collaboration/README.md) records the actual final publication. At `2026-11-23T22:14:32.738Z`, PR #1754 was Ready and unmerged at c18; all nine Issue bodies matched their prepared updates and remained open. The automatic Codex review was blocked by account usage limits, with zero formal reviews. This follow-up does not expand any browser, budget, original IR10 or full-Sprint acceptance claim above.
+
+## Additional documentation-check disposition
+
+[Original whole-suite failure and bounded successful follow-ups](document-checks/README.md) retains the evidence-branch documentation checks: public docs passed; Agent operations reported 1,358 pass and two file-level failures; those two files later passed 191/191 in isolation. The same agent-document script passed after resolving local IPC-entry and declared-dependency setup constraints. The whole Agent-operations suite is not claimed green.

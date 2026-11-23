@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "kind": "publishable bounded evidence package inventory",
   "pathBase": "this directory",
-  "generatedAt": "2026-11-23T22:19:31.194108+00:00",
+  "generatedAt": "2026-11-23T22:36:34.731359+00:00",
   "selfExcluded": "manifest.json",
-  "fileCountExcludingSelf": 35,
-  "bytesExcludingSelf": 4926210,
+  "fileCountExcludingSelf": 39,
+  "bytesExcludingSelf": 4973137,
   "files": [
     {
       "path": "README.md",
-      "bytes": 10664,
-      "sha256": "8512476a244f3f121b74783430696bb7a80f402eece6711b9827abbcc75bbf4f"
+      "bytes": 11159,
+      "sha256": "f6e20096ba4dbaf0e35762aa50273a859a62c82888bbb25bfc2dc32967e214f5"
     },
     {
       "path": "browser/manifest.json",
@@ -106,6 +106,26 @@
       "path": "collaboration/verify.py",
       "bytes": 6443,
       "sha256": "5e20735315cb0062ec9447779082829332e6fcaf155c77523f3af28c7bbe3ca7"
+    },
+    {
+      "path": "document-checks/README.md",
+      "bytes": 1790,
+      "sha256": "59d1455e7ce0b6382fcb6e3b565997437c8d904545ec7121d11b42b51054b38f"
+    },
+    {
+      "path": "document-checks/disposition.json",
+      "bytes": 1282,
+      "sha256": "fc1f9e0718d17ae3514a17611afa5765a65bff4602dcaff6d0491a4b5a9df2ec"
+    },
+    {
+      "path": "document-checks/manifest.json",
+      "bytes": 3219,
+      "sha256": "e1eb7206fb114fc862a9ed9fe7a928917a134ecfe2c2866d90014a1961256f4b"
+    },
+    {
+      "path": "document-checks/originals.tar.gz",
+      "bytes": 40141,
+      "sha256": "affc68ac71ccff676961dafb1a6ba719dc2e5cbac52816596d2dc8bf0cc7f39d"
     },
     {
       "path": "final-budget.json",
