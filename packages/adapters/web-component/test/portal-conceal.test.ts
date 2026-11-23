@@ -357,7 +357,8 @@ describe('WC portal conceal rendering barrier', () => {
     setElementProps(root, { open: false });
     (content.getExposes().controls as TransitionControls).complete();
     await flush();
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(content.getExposes().transitionState.get()).toBe('closed');
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
     expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
 
     setElementProps(root, { open: true });

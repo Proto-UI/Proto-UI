@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterTwoHostFrames } from '../host-rendering';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as bootstrap from '../../bootstrap-2-3-2/src/select';
 import * as glass from '../../liquid-glass/src/select';
@@ -441,6 +442,8 @@ for (const [family, projection] of families) {
       trigger.click();
       await settle();
       expect(content.getExposes().transitionState.get()).toBe('closed');
+      await afterTwoHostFrames();
+      await flush();
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
     });
 
