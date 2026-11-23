@@ -1,0 +1,40 @@
+{
+  "typescript": "5.9.3",
+  "excluded": [
+    "pos",
+    "end",
+    "id",
+    "transformFlags",
+    "modifierFlagsCache",
+    "nodeCount",
+    "identifierCount",
+    "symbolCount",
+    "multiLine",
+    "singleQuote"
+  ],
+  "sourceFileTextExcluded": true,
+  "rawTextAndFlagsRetained": true,
+  "files": [
+    {
+      "path": "scripts/analysis/invisible-consumption/observe-button.mjs",
+      "bytes": 9798,
+      "sourceSha256": "b8c65aca7a4d907b2add38d80b0202a8e45bff68235dbe03054784b2b94d70d7",
+      "astSha256": "55af418b28706ad5860800a0ed5950b9bcf025c0f39ddbf4e7754b7bbe2553f0",
+      "commentsSha256": "e6d28e2955fa99108954b34ffbe7f310558740549bdd7271f0023a9da8831061"
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/asset-binding.mjs",
+      "bytes": 1961,
+      "sourceSha256": "3c8e5c12757b9789324fe6c57c05711679c1e63e04adedbd17a2e85de077ef18",
+      "astSha256": "3ec24b4bca075bef93cdcabe3bf834fb0f7a79b625603ec98ff8596fa1f66a7e",
+      "commentsSha256": "e923b2f4b54c1cd7ae05e54625437e2cfce35d77a5368dc9d9dd5f2ae73b431b"
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/test/asset-binding.test.mjs",
+      "bytes": 3198,
+      "sourceSha256": "59d87a49be675075cb384cc6347e1e535e5c45749b982e30a98951fdb987a9fe",
+      "astSha256": "0187924a410d3066bb2e562ff84faab7967e9f79f02c9481492c25d57e44a862",
+      "commentsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  ]
+}
