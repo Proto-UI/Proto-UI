@@ -159,6 +159,70 @@ describe('intrinsic block-size presence extension', () => {
     expect(f.scheduled.size).toBe(0);
     expect(f.releases()).toBe(1);
   });
+  it.each([
+    { initialSize: 0, visible: false },
+    { initialSize: 20, visible: false },
+    { initialSize: 120, visible: true },
+  ])(
+    'does not reuse the released initial $initialSize sample after semantic content grows',
+    ({ initialSize, visible }) => {
+      const f = fixture();
+      f.env.value = { ...f.env.value, intrinsicBlockSize: initialSize, visible };
+      f.commit('entered');
+      expect(f.samples.at(-1)?.blockSize).toBe(initialSize);
+      expect(f.releases()).toBe(1);
+
+      // Children may arrive after the initial entered publication. Once the
+      // transient lease is released, the semantic box owns its current size.
+      f.env.value = { ...f.env.value, intrinsicBlockSize: 139, visible: true };
+      const samples = f.samples.length;
+      f.invalidate();
+      expect(f.samples).toHaveLength(samples);
+      f.commit('leaving');
+      expect(f.outcomes).toEqual([]);
+      expect(f.scheduled.size).toBe(1);
+      f.at(175);
+      expect(f.samples.at(-1)?.blockSize).toBeCloseTo(139 * (1 - cubicProgress(0.5, ease)), 8);
+      f.at(350);
+      expect(f.samples.at(-1)?.blockSize).toBe(0);
+      expect(f.outcomes).toEqual(['finished']);
+      expect(f.scheduled.size).toBe(0);
+    }
+  );
+  it('starts a later leave at current semantic size after a completed animation releases its sampler', () => {
+    const f = fixture();
+    f.commit();
+    f.at(16);
+    f.at(366);
+    expect(f.outcomes).toEqual(['finished']);
+    expect(f.samples.at(-1)?.blockSize).toBe(120);
+    f.env.value = { ...f.env.value, intrinsicBlockSize: 260 };
+    f.invalidate();
+    f.commit('leaving');
+    expect(f.outcomes).toEqual(['finished']);
+    f.at(541);
+    expect(f.samples.at(-1)?.blockSize).toBeCloseTo(260 * (1 - cubicProgress(0.5, ease)), 8);
+    f.at(716);
+    expect(f.samples.at(-1)?.blockSize).toBe(0);
+    expect(f.outcomes).toEqual(['finished', 'finished']);
+  });
+  it('obtains a fresh zero acknowledgement when reopening after terminal leave', () => {
+    const f = fixture();
+    f.commit('leaving');
+    f.at(350);
+    expect(f.outcomes).toEqual(['finished']);
+    f.env.value = { ...f.env.value, intrinsicBlockSize: 80 };
+    f.commit('entering');
+    expect(f.samples.at(-1)?.blockSize).toBe(0);
+    f.at(366);
+    expect(f.samples.at(-1)?.blockSize).toBe(0);
+    expect(f.outcomes).toEqual(['finished']);
+    f.at(541);
+    expect(f.samples.at(-1)?.blockSize).toBeCloseTo(80 * cubicProgress(0.5, ease), 8);
+    f.at(716);
+    expect(f.samples.at(-1)?.blockSize).toBe(80);
+    expect(f.outcomes).toEqual(['finished', 'finished']);
+  });
   it('can leave from an accepted sample when fresh intrinsic input is unavailable', () => {
     const f = fixture();
     f.commit();

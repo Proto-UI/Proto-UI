@@ -179,6 +179,17 @@ export function createPresencePresentationProjector(
     completed = true;
     completedTarget = candidate.targetRevision;
     reasons.add(reason);
+    // Release restores semantic layout, which can change after this endpoint
+    // was applied. Its old sample is no longer the displayed transient owner.
+    // Keep samples for active reversals, but seed the next attempt from its
+    // current semantic endpoint and obtain a new cold-entry acknowledgement.
+    acknowledged = null;
+    target = null;
+    sampler?.dispose();
+    sampler = null;
+    samplerConfig = '';
+    cold = true;
+    awaitingInitialFrame = false;
     completionDepth++;
     try {
       try {
