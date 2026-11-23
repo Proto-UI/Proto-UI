@@ -63,3 +63,23 @@ test('surface retirement rejects stale update and duplicate owner creation', () 
     /Unknown surface update/
   );
 });
+
+test('malformed external messages and updates cannot enter a typed renderer surface', () => {
+  for (const message of [null, false, 42, [], 'invalid']) {
+    assert.throws(() => applyMessage(null, message), /Expected an object for message/);
+  }
+  const current = applyMessage(null, fixture());
+  const before = structuredClone(current);
+  assert.throws(
+    () =>
+      applyMessage(current, {
+        version: '1.0',
+        updateComponents: { surfaceId: current.surfaceId, components: [null] },
+      }),
+    /Expected an object for updated component/
+  );
+  assert.deepEqual(current, before);
+  const invalid = fixture();
+  invalid.createSurface.components[0]['@accessibility'] = false;
+  assert.throws(() => applyMessage(null, invalid), /Expected an object for accessibility/);
+});
