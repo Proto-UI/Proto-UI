@@ -5,6 +5,7 @@ import {
   type BrowserTargetAssets,
 } from '../../../apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox';
 import type { BrowserCompileResult } from '../src/browser/protocol';
+import { IR_VERSION } from '../src/ir';
 
 /** Host protocol tests inject messages/time, not executed iframe or WASM evidence. */
 function preview() {
@@ -13,8 +14,26 @@ function preview() {
   const result = {
     ok: true,
     revision: 'retirement-revision',
-    output: { profile: 'web-component-source-v1' },
-    preview: { format: 1, entry: 'preview', modules: {}, events: [], styles: [] },
+    requestSha256: '0'.repeat(64),
+    source: { file: 'preview.ts', exportName: 'default', sha256: '0'.repeat(64) },
+    output: {
+      profile: 'web-component-source-v1',
+      code: '',
+      dependencies: [],
+      provenance: {
+        source: { file: 'preview.ts', exportName: 'default', sha256: '0'.repeat(64) },
+        irVersion: IR_VERSION,
+        backend: 'web-component-source-v1',
+      },
+    },
+    preview: {
+      format: 1,
+      entry: 'preview',
+      modules: {},
+      events: [],
+      styles: [],
+      executionBudget: '100000-checkpoints-per-task-v1',
+    },
   } as Extract<BrowserCompileResult, { ok: true }>;
   const target: BrowserTargetAssets = {
     format: 1,
