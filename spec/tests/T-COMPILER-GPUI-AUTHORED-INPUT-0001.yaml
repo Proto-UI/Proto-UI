@@ -28,6 +28,10 @@ cases:
         C-TEXT-CONTROL-0001-I,
       ]
     expectation: Reset retires IME and history, controlled truth is retained, UTF-16 selection snaps whole codepoints and rejects wrong windows or inactive leases, and ordinary editing cannot disturb composition. The default GPUI host re-queries the accepted selection through its focused native input handler on the next frame; an unfocused or retired editing lease cannot invalidate another editor.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT-A11Y
+    title: Native text ranges and selection reflect the current editing lease
+    covers: [C-TEXT-CONTROL-0001-F, C-TEXT-CONTROL-0001-G, C-TEXT-CONTROL-0001-I]
+    expectation: The AccessKit consumer reads canonical text from real TextRun nodes, including empty values and trailing hard breaks, and receives the current UTF-16 selection as run-relative character positions with its direction preserved. Native selection actions use the current publication, editing epoch, window and physical view; disabled, composing, replaced and retired targets cannot accept them. Readonly text remains selectable. Character geometry and operating-system input delivery require separate evidence.
   - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-HOVER
     title: Initial and delayed native hover retain the current physical view
     covers: [C-EVENT-TYPE-0003-B, C-EVENT-TYPE-0003-C]
@@ -109,10 +113,15 @@ implementations:
     status: needs-review
     path: packages/compiler/src/gpui-native-text.ts
     required: true
-    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT]
+    consumesCases:
+      [
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT-A11Y,
+      ]
     notes:
       [
         Execute the generated SDK library tests with the test-support feature; never patch emitted Rust.,
+        The actual AccessKit consumer validates text ranges. TestAppContext supplies physical view and input leases but has no platform AT channel; these tests do not establish OS Text interface delivery or character extents.,
       ]
   - id: generated-native-sequential-focus
     kind: runtime-test
@@ -164,6 +173,9 @@ verifies:
     - id: HC-FOCUS-TARGET-0001
       anchors: [HC-FOCUS-TARGET-0001-B]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: strengthened
+    summary: Bind native TextRun and selection projection to real AccessKit consumer execution while retaining separate OS accessibility and geometry acceptance.
   - version: 0.3.0-alpha.2
     change: strengthened
     summary: Map cold-hover ownership, post-failure native output delivery and focused legacy selection notification to real generated consumers without promoting platform acceptance.
