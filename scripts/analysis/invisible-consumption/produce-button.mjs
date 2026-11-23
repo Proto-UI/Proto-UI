@@ -83,6 +83,9 @@ async function prepare(root) {
     inputs.push(ref(root, safeFile(root, destination)));
   }
   const artifactDirectory = path.join(root, 'distribution/generated');
+  // The writer atomically reserves the final directory; its parent is the
+  // producer's responsibility. Do not pre-create the reserved destination.
+  fs.mkdirSync(path.dirname(artifactDirectory));
   const written = await writeCompilation(compiled.value, artifactDirectory);
   save(root, 'operator/write-result.json', written);
   assert.equal(written.ok, true, 'Compiler refused the fresh output destination; retain diagnostic');
