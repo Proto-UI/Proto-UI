@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "existing original failures and decisions retained without repackaging",
+  "pathBase": "this index directory after installation at the stated repositoryPath",
+  "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-final-closeout",
+  "files": [
+    {
+      "path": "../2026-11-24-sprint4-browser-first-pass/originals.tar.gz",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-browser-first-pass/originals.tar.gz",
+      "bytes": 2805045,
+      "sha256": "17ae69acf4266e38118df78784368eb7655a3e3b01700edc62884526f8911856"
+    },
+    {
+      "path": "../2026-11-24-sprint4-browser-first-pass/readback.json",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-browser-first-pass/readback.json",
+      "bytes": 1584,
+      "sha256": "f7a71a48333869ff2cd66db3fc53984570cd2a74dc186aa6a5d93c9595cdfe8f"
+    },
+    {
+      "path": "../2026-11-24-sprint4-browser-preparation/summary.json",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-browser-preparation/summary.json",
+      "bytes": 4353,
+      "sha256": "e30fecc9ec8681937f38f0920bd4ffbb580c6831478af2409816ddf59e3eeb95"
+    },
+    {
+      "path": "../2026-11-24-sprint4-browser-preparation/manifest.json",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-browser-preparation/manifest.json",
+      "bytes": 3867,
+      "sha256": "e663d0273612f432f58aec55cca4e781cb0905ea332ac470b955aa105a7ccb05"
+    },
+    {
+      "path": "../2026-11-24-sprint4-canonical-cost/report.json",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-canonical-cost/report.json",
+      "bytes": 9480,
+      "sha256": "ea9f8fb2775ce53addd8276dc26657fe4f82a2f9cac005b0c027f8e42dab5cd2"
+    },
+    {
+      "path": "../2026-11-24-sprint4-canonical-cost/baseline-originals.tar.gz",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-canonical-cost/baseline-originals.tar.gz",
+      "bytes": 315354,
+      "sha256": "e61a507e5b2df20e1573e6ad2655c00a63e7463d721b12367be86af3cb2e98e2"
+    },
+    {
+      "path": "../2026-11-24-sprint4-canonical-cost/candidate-originals.tar.gz",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-canonical-cost/candidate-originals.tar.gz",
+      "bytes": 315429,
+      "sha256": "0656c0b1e50f1490e904ab73010194a2f254a3186785ebf13cb8b3cd3741805b"
+    },
+    {
+      "path": "../2026-11-24-sprint4-scene-budget/prebudget-originals.tar.gz",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-scene-budget/prebudget-originals.tar.gz",
+      "bytes": 315621,
+      "sha256": "b2fb242e53637823041b5040ec133c868175b06a360ac6cf7cb9fdd05bac4a02"
+    },
+    {
+      "path": "../2026-11-24-sprint4-scene-budget/prebudget-facts.json",
+      "repositoryPath": "internal/records/evidence/2026-11-24-sprint4-scene-budget/prebudget-facts.json",
+      "bytes": 12354,
+      "sha256": "93538f4673f59517fb615c7f1c3a091a473157248c69a7fba3bef06cb5b99f2b"
+    },
+    {
+      "path": "../../2026-11-24-sprint4-scene-package-budget.md",
+      "repositoryPath": "internal/records/2026-11-24-sprint4-scene-package-budget.md",
+      "bytes": 7766,
+      "sha256": "35a2856552763c52bffcdbeb3cc8ce472ebaa1093f4ca68c14f4ec0d52c0dc74"
+    }
+  ],
+  "disposition": "No earlier browser preparation failure, incomplete first artifact set or strict red budget run is rewritten as success."
+}

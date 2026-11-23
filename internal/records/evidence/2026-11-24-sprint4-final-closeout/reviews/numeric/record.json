@@ -1,0 +1,34 @@
+{
+  "head": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "base": "0fbb52ef832cc27c78e24c28c59a55a16f51d7fe",
+  "reviewClass": "review-governance-and-release-evidence",
+  "recommendedAction": "COMMENT",
+  "findingCount": 0,
+  "strictBudget": "9/9 on exact numeric head; two old6/9 failures retained",
+  "packetKey": "e58ce3b4c6deded8af5ac334191f6b36b46f000b3ee640c683fbbaa8bc10269f",
+  "reviewInputDigest": "3ba4ea84c033e6ea2dad09a083b79eb50016fb53b52526a171fc1d1ed5a12357",
+  "packetRawSha256": "5a5372948ebd51b233e37ac02160437c555e0e43d76811edb8ff0042087b6ad4",
+  "finalIndependentReceiptSha256": "fca91f938691c3c210d26f038b5bf9401b460d0d8cd5dcc20b8a3771b8c691ba",
+  "eligibility": "eligible/full under human-assisted current-user; not approval",
+  "packetValidation": "valid",
+  "inspection": "stale=false; duplicate=false",
+  "terminalValidation": "terminal=true; blocked=false",
+  "preservedFailures": [
+    "Two defaultpnpm11.25.0 engine rejections before entering CLI",
+    "Original9fff andc1 canonical strict6/9 outcomes referenced by immutable hashes"
+  ],
+  "separatePlatformState": {
+    "actualCiPassed": 4,
+    "ciSkipped": 18,
+    "dco": "SUCCESS",
+    "vercel": "FAILURE: daily deployment quota",
+    "formalReviews": 0
+  },
+  "scope": "c1f0332e..c18bf8f8 numeric-only transaction; no current-head platform APPROVE or entirePR/Sprint4 acceptance",
+  "externalWrites": 0,
+  "terminalHandoff": "independent/numeric-review-terminal-handoff.json",
+  "manifest": "manifest.json",
+  "archive": "numeric-review-c18bf8f8-originals.tar.gz",
+  "archiveSha256": "6b6bb7fddfab489a4880c1464ae70a6cc3a014b4e2628e6ca02050ae94e65067",
+  "sourceDriftRule": "Any later target or canonical-input change requires reconciliation; this archived packet remains bound to its original head/input."
+}

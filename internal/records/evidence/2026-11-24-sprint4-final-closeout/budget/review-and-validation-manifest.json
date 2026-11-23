@@ -1,0 +1,52 @@
+{
+  "archive": "review-and-validation-originals.tar.gz",
+  "bytes": 22717,
+  "sha256": "67fc5b0887f8fd9c98ac30b90b1adad40081307c309c7ce277c8d4d58a5d93b1",
+  "files": [
+    {
+      "path": "independent/final-receipt.json",
+      "bytes": 10313,
+      "sha256": "fca91f938691c3c210d26f038b5bf9401b460d0d8cd5dcc20b8a3771b8c691ba"
+    },
+    {
+      "path": "independent/audit-numeric-final.py",
+      "bytes": 11979,
+      "sha256": "4e736b54ab66d3aaa0bff5e40954db2df89cca6e65c9fe0e06f50b0e80121188"
+    },
+    {
+      "path": "independent/prevalidation.json",
+      "bytes": 5272,
+      "sha256": "8243f7f61e078408ea719044a5fa4d7157aa09717b7788542a2a62c7ed901fae"
+    },
+    {
+      "path": "workflow/candidate-after.json",
+      "bytes": 3738,
+      "sha256": "4f5c9abd614b4ddee800af883888be7e82e60084029e96a6665379235085c2f1"
+    },
+    {
+      "path": "workflow/budget-to-validate.json",
+      "bytes": 1817,
+      "sha256": "f68a17cd844c4d382eb1a8626fd28cf48127b1ad8e36c896620febe82fb0d2bc"
+    },
+    {
+      "path": "workflow/evidence-final.json",
+      "bytes": 11618,
+      "sha256": "c8293a847f85c3e0038defcab5eec64d6cf2461a17f23299415b4ab9ffdb0aaa"
+    },
+    {
+      "path": "workflow/validate-to-review.json",
+      "bytes": 2167,
+      "sha256": "58d3bdc77ea75c640435ea420563061a992f05c798363a5f94e77ea50f927018"
+    },
+    {
+      "path": "workflow/review-input.json",
+      "bytes": 54693,
+      "sha256": "9f3913778d2cc7810941c19fc75c8fb565da1d24c6a4a682be274503fab7f431"
+    },
+    {
+      "path": "workflow/review-input-digest.json",
+      "bytes": 111,
+      "sha256": "a76f0bae5add0a0aa0f3f890930dc48f20dec3dddfe49a35e0b22d27f8d150cf"
+    }
+  ]
+}

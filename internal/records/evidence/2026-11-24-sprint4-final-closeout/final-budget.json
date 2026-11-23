@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-source final strict package budget receipt",
+  "status": "passed",
+  "numericalCommit": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "workflowRepositoryPath": ".github/workflows/package-budget-evidence.yml",
+  "jobName": "whole-entry-budgets",
+  "requiredCommand": "node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "run": {
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45269915996",
+    "id": 45269915996,
+    "attempt": 1,
+    "jobId": 138026682232,
+    "finishedAt": "2026-11-23T21:29:40.508Z"
+  },
+  "source": {
+    "head": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+    "tree": "66ca6aa462df647185f8265b5bc5d5cbd026ad2d",
+    "workingTreeClean": true,
+    "measuredSourceMatchesHead": true,
+    "scope": [
+      "packages",
+      "scripts/analysis",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "fileCount": 7831,
+    "fingerprintSha256": "dc17be228fca2a1594a4df9dfb1c1031527243916968f7f32b520e767994dad9",
+    "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stableDuringMeasurement": true,
+    "requireClean": true,
+    "expectedSha": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41"
+  },
+  "workflowSteps": {
+    "dependencies": "success",
+    "build": "success",
+    "controls": "success",
+    "gate": "success"
+  },
+  "strictResults": {
+    "expectedEntries": 9,
+    "passed": 9,
+    "failed": 0,
+    "exitCode": 0,
+    "entryResults": [
+      {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "minifiedBytes": 4765,
+        "minifiedSha256": "e87b08922600e8c536cffc5cbc71558d9585f5b871ae9447ef2ab81745c569fe",
+        "gzipBytes": 1797,
+        "budget": 3000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "minifiedBytes": 4083479,
+        "minifiedSha256": "26b69b1c3064b9d317addab1f45ecfe6ec138912ae8c9702392bee23506e2e7e",
+        "gzipBytes": 635917,
+        "budget": 700000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "minifiedBytes": 39584,
+        "minifiedSha256": "9721465cc183566714f8e12b6c5e7b60822f6b5e373341981b6212014c1c105a",
+        "gzipBytes": 12674,
+        "budget": 12800,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "minifiedBytes": 401511,
+        "minifiedSha256": "e09184315da8896f8f1a5ece9d87b053455b590b87479116709a9689ac187717",
+        "gzipBytes": 104169,
+        "budget": 104300,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "minifiedBytes": 606361,
+        "minifiedSha256": "0549e6e99814aeee2b3bcccc3a4c1f02a28c097433cc660dbd8f393aa128ef66",
+        "gzipBytes": 172749,
+        "budget": 172800,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "minifiedBytes": 601759,
+        "minifiedSha256": "1adbcc88185e17fa593eea02b9a01f744d668e1443ede085d5d20e143751d148",
+        "gzipBytes": 171536,
+        "budget": 171600,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "minifiedBytes": 709361,
+        "minifiedSha256": "1e4f56a785647f0b6a9cf3a0d83a889fc20a50d9e9bd9e0c6a947d7c2bbdf483",
+        "gzipBytes": 207303,
+        "budget": 207400,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "minifiedBytes": 14223,
+        "minifiedSha256": "279a5a97679c081413cfcdda89640724b51023c1f6f753d3bbe4cd67640e4a32",
+        "gzipBytes": 4197,
+        "budget": 6000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "minifiedBytes": 30590,
+        "minifiedSha256": "90828dcd1ae0626ccd03a5a3ee2112b90e2a6bbccfb1656c11972d6c4999387f",
+        "gzipBytes": 6741,
+        "budget": 7900,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "consumer light-dom button",
+        "entry": "scripts/analysis/fixtures/consumer-light-button.ts",
+        "minifiedBytes": 739414,
+        "minifiedSha256": "5f0614e55b6f15d0c98929af86ec4a1ba74fab6152e69bcdab26ad3dc4bd23a5",
+        "gzipBytes": 213513
+      },
+      {
+        "name": "consumer direct-shadow button",
+        "entry": "scripts/analysis/fixtures/consumer-shadow-button.ts",
+        "minifiedBytes": 739425,
+        "minifiedSha256": "bd3c48fe0a7dee828eefed6b2a840de22a2ee444567bff1dcceedccf5607c15a",
+        "gzipBytes": 213517
+      }
+    ],
+    "fullClosureReference": "budget/originals.tar.gz#report.json",
+    "terminalProblems": []
+  },
+  "originals": {
+    "archive": {
+      "path": "budget/originals.tar.gz",
+      "bytes": 315520,
+      "sha256": "cd1877fa9ed53d5ae07018592d940392cfa1fd585adbbb7a6d5ec30b0452b581"
+    },
+    "manifest": {
+      "path": "budget/manifest.json",
+      "bytes": 1024,
+      "sha256": "9f5f54daccd3f76cb96bb81f81f5599bbc6f92420a7ebeae36ac23c05e9b6ec9"
+    },
+    "reportMember": "report.json",
+    "reportSha256": "dc5d9ccee8b038b04bef716a92b623d49c33530ce34dd0111851ccbe39f3e969",
+    "terminalMember": "terminal.json",
+    "terminalSha256": "4e4e22556c35a58914265d1db8cb4e94ca60611bb57e5790d5a254776f044cb9"
+  },
+  "independentReview": {
+    "status": "accepted",
+    "path": "budget/numeric-transaction-final-independent-receipt.json",
+    "sha256": "fca91f938691c3c210d26f038b5bf9401b460d0d8cd5dcc20b8a3771b8c691ba",
+    "reviewer": "independent technical reviewer /root/ir10_semantics; no platform APPROVE",
+    "scope": "only separately measured numerical transaction"
+  },
+  "sourceSeparation": "The c1 browser success is retained at its real head. It is not a final strict budget run on this numerical commit.",
+  "actualPublicBuild": {
+    "packages": 47,
+    "manifests": 47,
+    "controls": 28
+  },
+  "platform": {
+    "ciUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45269910724",
+    "lightweightPassedJobs": 4,
+    "skippedJobs": 18,
+    "DCO": "SUCCESS on current c18 head",
+    "reviews": 0,
+    "Vercel": "FAILURE: daily deployment quota",
+    "merge": "not performed"
+  }
+}

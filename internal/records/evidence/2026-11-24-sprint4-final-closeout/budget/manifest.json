@@ -1,0 +1,37 @@
+{
+  "archive": "originals.tar.gz",
+  "bytes": 315520,
+  "sha256": "cd1877fa9ed53d5ae07018592d940392cfa1fd585adbbb7a6d5ec30b0452b581",
+  "files": [
+    {
+      "path": "build.log",
+      "bytes": 2913,
+      "sha256": "2278c04078baed10ce62c5e6e59d1588f0e7bf568c86b3c7507537e5389a4903"
+    },
+    {
+      "path": "controls.log",
+      "bytes": 2955,
+      "sha256": "a6b9edf6d37929b31f31e0515218381e501411f0223f0a1f813be8a0e88ed29a"
+    },
+    {
+      "path": "gate.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "report.json",
+      "bytes": 1551017,
+      "sha256": "dc5d9ccee8b038b04bef716a92b623d49c33530ce34dd0111851ccbe39f3e969"
+    },
+    {
+      "path": "setup.log",
+      "bytes": 1976,
+      "sha256": "e23aaae44c0c40109ce355acc9f92994cb52da6a6bc0cade6da93f498080043b"
+    },
+    {
+      "path": "terminal.json",
+      "bytes": 1374,
+      "sha256": "4e4e22556c35a58914265d1db8cb4e94ca60611bb57e5790d5a254776f044cb9"
+    }
+  ]
+}

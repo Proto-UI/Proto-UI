@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "kind": "publishable bounded evidence package inventory",
+  "pathBase": "this directory",
+  "generatedAt": "2026-11-23T21:41:19.736565+00:00",
+  "selfExcluded": "manifest.json",
+  "fileCountExcludingSelf": 25,
+  "bytesExcludingSelf": 3779123,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 10158,
+      "sha256": "b074f0c999ec3e0f67a9e919913fe9280dd6093605f6b277c95b816db7281d73"
+    },
+    {
+      "path": "browser/manifest.json",
+      "bytes": 88057,
+      "sha256": "5eb8e9e50876d36e302e5083852f5b84d9904c94c79789e1608837867f2a6be3"
+    },
+    {
+      "path": "browser/originals.tar.gz",
+      "bytes": 3141207,
+      "sha256": "22da92c2a76be6a901f0cb9ea294d22f592d8a438ca1efc9684701e29c5ac2f0"
+    },
+    {
+      "path": "budget/audit-numeric-final.py",
+      "bytes": 11979,
+      "sha256": "4e736b54ab66d3aaa0bff5e40954db2df89cca6e65c9fe0e06f50b0e80121188"
+    },
+    {
+      "path": "budget/manifest.json",
+      "bytes": 1024,
+      "sha256": "9f5f54daccd3f76cb96bb81f81f5599bbc6f92420a7ebeae36ac23c05e9b6ec9"
+    },
+    {
+      "path": "budget/numeric-transaction-final-independent-receipt.json",
+      "bytes": 10313,
+      "sha256": "fca91f938691c3c210d26f038b5bf9401b460d0d8cd5dcc20b8a3771b8c691ba"
+    },
+    {
+      "path": "budget/numeric-transaction-prevalidation-review.json",
+      "bytes": 5272,
+      "sha256": "8243f7f61e078408ea719044a5fa4d7157aa09717b7788542a2a62c7ed901fae"
+    },
+    {
+      "path": "budget/originals.tar.gz",
+      "bytes": 315520,
+      "sha256": "cd1877fa9ed53d5ae07018592d940392cfa1fd585adbbb7a6d5ec30b0452b581"
+    },
+    {
+      "path": "budget/review-and-validation-manifest.json",
+      "bytes": 1665,
+      "sha256": "84b9872481f16e1eb685d19f770020705b8c51aa4219fbd7f40df85c0cbefb88"
+    },
+    {
+      "path": "budget/review-and-validation-originals.tar.gz",
+      "bytes": 22717,
+      "sha256": "67fc5b0887f8fd9c98ac30b90b1adad40081307c309c7ce277c8d4d58a5d93b1"
+    },
+    {
+      "path": "final-budget.json",
+      "bytes": 7194,
+      "sha256": "72f928ebb20613a028b046836242d66c19cc4a7f0e6390d9b5e7a93e5b4dda9b"
+    },
+    {
+      "path": "history-index.json",
+      "bytes": 3406,
+      "sha256": "e2e7d45704c9c4fffc62e80caed18de2cd2b1af035303ed737f4ba6f79f00f21"
+    },
+    {
+      "path": "reviews/first-browser-audit-originals.tar.gz",
+      "bytes": 11979,
+      "sha256": "1ba06025f565a67a2129abb151a9896636e981c9904abd81cb4404aeaf72b8c3"
+    },
+    {
+      "path": "reviews/index.json",
+      "bytes": 3605,
+      "sha256": "c2d690b2a7e56dda724ece4bd551dc2bd5d418117ad54570d457a9753385d5ea"
+    },
+    {
+      "path": "reviews/numeric/manifest.json",
+      "bytes": 5141,
+      "sha256": "f28c7f03ee00fad7c4b62338bb96ef689ad10d0dabdfdb5f705908d9a8891178"
+    },
+    {
+      "path": "reviews/numeric/numeric-review-c18bf8f8-originals.tar.gz",
+      "bytes": 33396,
+      "sha256": "6b6bb7fddfab489a4880c1464ae70a6cc3a014b4e2628e6ca02050ae94e65067"
+    },
+    {
+      "path": "reviews/numeric/record.json",
+      "bytes": 1791,
+      "sha256": "70853825e05be5b029cc62e1171de98ffab6d696ef25044ed11f4bad03b532d0"
+    },
+    {
+      "path": "reviews/successor-browser-audit-originals.tar.gz",
+      "bytes": 36318,
+      "sha256": "033020175806a97142b578e3f1f5410f376771abb743f56f85db8d36eaaf55b9"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 14008,
+      "sha256": "43aa49a25ad86f2e543e980c5e8d861ff992c74be66bfca485839717d89ae4b0"
+    },
+    {
+      "path": "visual/index.json",
+      "bytes": 3609,
+      "sha256": "d319a57ed62bc68ed297600de8d7255d5481a8bdb5ca9b6890b9c1f3df9c8c6d"
+    },
+    {
+      "path": "visual/scene-default-unconfigured.png",
+      "bytes": 10022,
+      "sha256": "897257163327360843164c9a5cee8c166444e28b313013313e7b9117787821ec"
+    },
+    {
+      "path": "visual/scene-react-runtime-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "visual/scene-react-runtime-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "visual/scene-wc-compiled-initial-paint.png",
+      "bytes": 10160,
+      "sha256": "b379d12e9bc33811d4df93d444fafc68b8f21574ef8a164fed9bf33c7b8efa3e"
+    },
+    {
+      "path": "visual/scene-wc-compiled-replacement-paint.png",
+      "bytes": 10024,
+      "sha256": "89e95c282fc37566612f44e80b83acadbe417b2ba66a3f5bbe29dea5092b18b0"
+    }
+  ]
+}

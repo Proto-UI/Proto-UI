@@ -1,0 +1,1598 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-bound original browser archive with independent bounded readback",
+  "pathBase": "this manifest directory; file member paths are archive-relative",
+  "archive": {
+    "path": "originals.tar.gz",
+    "bytes": 3141207,
+    "sha256": "22da92c2a76be6a901f0cb9ea294d22f592d8a438ca1efc9684701e29c5ac2f0",
+    "root": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1",
+    "regularFileCount": 250
+  },
+  "actualExecution": {
+    "head": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+    "tree": "ef4ef8fb55f867f41d70717dde180f04d1233d1c",
+    "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/45266835323",
+    "productSourceUnchangedFrom": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+    "originalSuitePath": "/home/runner/work/Proto-UI/Proto-UI/packages/compiler/test/shader-presentation.browser.test.ts"
+  },
+  "selection": {
+    "repositoryPath": "scripts/test/shader-browser-selection.json",
+    "sha256": "e3db32445d1aeb0eef5832f1c39e0d2041b25973d10924000329295c1ecc7133",
+    "originalCases": 28,
+    "sceneCases": 9,
+    "uniqueCases": 37,
+    "fullNames": [
+      "'inline' 'react' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'react' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'vue' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'vue' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'vue2' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'vue2' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'wc' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'inline' 'wc' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'react' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'react' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'vue' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'vue' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'vue2' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'vue2' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'wc' 'runtime' uses real WebGL2, preserves children/input, and retires each view",
+      "'static-data' 'wc' 'compiled' uses real WebGL2, preserves children/input, and retires each view",
+      "compares copy and tint GPU readback with an independent linear premultiplied oracle",
+      "missing host failure preserves opaque fallback and releases partial resources in reverse",
+      "compile host failure preserves opaque fallback and releases partial resources in reverse",
+      "allocation host failure preserves opaque fallback and releases partial resources in reverse",
+      "context loss exposes fallback and restored old context cannot publish again",
+      "a decoded image from a retired view never publishes after release",
+      "throwing preparation invalidates the old decoded image before fallback publication",
+      "cleanup reentry publishes only the newer generation and cannot erase its lease",
+      "late decode failure never overwrites an external paint owner during fallback, recommit or cleanup",
+      "a newer revision detects external ownership before retiring the still-pending old decode",
+      "capability override and reset reacquire fallback without reviving a released binding",
+      "late decode and release from an overridden capability cannot affect its reacquired GPU lease",
+      "'react' 'runtime' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'react' 'compiled' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'vue' 'runtime' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'vue' 'compiled' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'vue2' 'runtime' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'vue2' 'compiled' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'wc' 'runtime' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "'wc' 'compiled' borrows an actual app scene across held decode, revoke, replacement and scope retirement",
+      "the unchanged default scene export retains an opaque fallback without a source capability"
+    ]
+  },
+  "result": {
+    "passed": 37,
+    "failed": 0,
+    "pending": 0,
+    "todo": 0,
+    "scenarioReceiptsVerified": 37
+  },
+  "generatedArtifacts": {
+    "declared": 106,
+    "presentAndHashVerified": 106,
+    "missing": 0,
+    "hiddenSupportArtifactsVerified": 70
+  },
+  "builds": [
+    {
+      "fixture": "shader-presentation-inline-md76Fg",
+      "build": {
+        "path": "browser/shader-presentation-inline-md76Fg/build.json",
+        "bytes": 102485,
+        "sha256": "c7441f8f674c27387b091a1ae696ceb631a2c90d7c5e031944a49bd82e1cb15c"
+      },
+      "sourceGeneratorFilesVerified": 194,
+      "sourceGeneratorSha256": "06201b39a9478db6263de6fd5ae654985a44bb950ed6e1bb0231a6a5a3cc22f9",
+      "profiles": [
+        [
+          "react",
+          "react-dom-source-v1"
+        ],
+        [
+          "vue",
+          "vue-source-v1"
+        ],
+        [
+          "vue2",
+          "vue2-source-v1"
+        ],
+        [
+          "wc",
+          "web-component-source-v1"
+        ]
+      ],
+      "entry": "packages/compiler/test/fixtures/shader-presentation-owner.proto.ts",
+      "artifactDeclared": 34,
+      "artifactRetainedAndHashVerified": 34,
+      "artifactMissing": 0,
+      "bundleSha256": "36ae0a93ba4afa64f2de2fa43903629f75d9ba464247d6edd7c0ea4c38df3fae",
+      "entrySha256": "972b5121b829973f77572b958ba515b9850cf5b8268c498ab5ea38c16eeb8797",
+      "inputChecks": {
+        "trackedSourceVerified": 406,
+        "generatedVerified": 22,
+        "generatedMissing": 0,
+        "externalManifestOnly": 19
+      },
+      "node": "v24.22.3",
+      "esbuild": "0.25.12"
+    },
+    {
+      "fixture": "shader-presentation-scene-flKmDT",
+      "build": {
+        "path": "browser/shader-presentation-scene-flKmDT/build.json",
+        "bytes": 103913,
+        "sha256": "341e566221bf4836a9323d77419d97c1194ab92bbb36304008fbef7517c9f0cd"
+      },
+      "sourceGeneratorFilesVerified": 194,
+      "sourceGeneratorSha256": "06201b39a9478db6263de6fd5ae654985a44bb950ed6e1bb0231a6a5a3cc22f9",
+      "profiles": [
+        [
+          "react",
+          "react-dom-source-v1"
+        ],
+        [
+          "vue",
+          "vue-source-v1"
+        ],
+        [
+          "vue2",
+          "vue2-source-v1"
+        ],
+        [
+          "wc",
+          "web-component-source-v1"
+        ]
+      ],
+      "entry": "packages/compiler/test/fixtures/shader-scene-owner.proto.ts",
+      "artifactDeclared": 38,
+      "artifactRetainedAndHashVerified": 38,
+      "artifactMissing": 0,
+      "bundleSha256": "2d5f2e090bc8c04416d7a66428ba5b8934f7ba4d136addb4b489521187dff614",
+      "entrySha256": "dfa634eb6d534b6acb5f084c876ac52d0539805ee6031aa557467eba0cd8be51",
+      "inputChecks": {
+        "trackedSourceVerified": 406,
+        "generatedVerified": 26,
+        "generatedMissing": 0,
+        "externalManifestOnly": 19
+      },
+      "node": "v24.22.3",
+      "esbuild": "0.25.12"
+    },
+    {
+      "fixture": "shader-presentation-static-data-cb6rif",
+      "build": {
+        "path": "browser/shader-presentation-static-data-cb6rif/build.json",
+        "bytes": 102591,
+        "sha256": "f6dadfc144537c49efb37e1cc6250918da8c2f2e93a13bbd52f34af0e4120eb0"
+      },
+      "sourceGeneratorFilesVerified": 194,
+      "sourceGeneratorSha256": "06201b39a9478db6263de6fd5ae654985a44bb950ed6e1bb0231a6a5a3cc22f9",
+      "profiles": [
+        [
+          "react",
+          "react-dom-source-v1"
+        ],
+        [
+          "vue",
+          "vue-source-v1"
+        ],
+        [
+          "vue2",
+          "vue2-source-v1"
+        ],
+        [
+          "wc",
+          "web-component-source-v1"
+        ]
+      ],
+      "entry": "packages/compiler/test/fixtures/shader-static-data-owner.proto.ts",
+      "artifactDeclared": 34,
+      "artifactRetainedAndHashVerified": 34,
+      "artifactMissing": 0,
+      "bundleSha256": "15870416e8292c87d85416d2fc40ac42b1e64e7bcfd21790b8ea6018b9fd1411",
+      "entrySha256": "d2e9486c5ed2231a1e20533891d9eeee087e551753424a0efe05b0f240b96b27",
+      "inputChecks": {
+        "trackedSourceVerified": 406,
+        "generatedVerified": 22,
+        "generatedMissing": 0,
+        "externalManifestOnly": 19
+      },
+      "node": "v24.22.3",
+      "esbuild": "0.25.12"
+    }
+  ],
+  "sourceBlobsIndependentlyChecked": 608,
+  "isolation": {
+    "nonRoot": true,
+    "uid": 1001,
+    "capabilitiesAllZero": true,
+    "loopbackOnly": true,
+    "noDefaultRoutes": true,
+    "userAndNetworkNamespacesDifferFromParent": true,
+    "chromiumSandboxEnabledInExactHarness": true
+  },
+  "visualReview": {
+    "reviewArchive": "../reviews/successor-browser-audit-originals.tar.gz",
+    "reviewJsonMember": "successor-browser-audit.json",
+    "actualViewedActivePaintImages": 16,
+    "actualViewedFallbackImages": 1,
+    "runtimeCompiledByteIdenticalPairs": 8,
+    "images": [
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-react-runtime-initial-paint.png",
+        "bytes": 10530,
+        "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-react-runtime-replacement-paint.png",
+        "bytes": 10028,
+        "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-react-compiled-initial-paint.png",
+        "bytes": 10530,
+        "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-react-compiled-replacement-paint.png",
+        "bytes": 10028,
+        "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue-runtime-initial-paint.png",
+        "bytes": 10530,
+        "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue-runtime-replacement-paint.png",
+        "bytes": 10028,
+        "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue-compiled-initial-paint.png",
+        "bytes": 10530,
+        "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue-compiled-replacement-paint.png",
+        "bytes": 10028,
+        "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue2-runtime-initial-paint.png",
+        "bytes": 10530,
+        "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue2-runtime-replacement-paint.png",
+        "bytes": 10028,
+        "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue2-compiled-initial-paint.png",
+        "bytes": 10530,
+        "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-vue2-compiled-replacement-paint.png",
+        "bytes": 10028,
+        "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; broad owner behind the control, approximately x32..608/y123..243."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-wc-runtime-initial-paint.png",
+        "bytes": 10160,
+        "sha256": "b379d12e9bc33811d4df93d444fafc68b8f21574ef8a164fed9bf33c7b8efa3e",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; compact owner around the control, approximately x32..282/y122..167."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-wc-runtime-replacement-paint.png",
+        "bytes": 10024,
+        "sha256": "89e95c282fc37566612f44e80b83acadbe417b2ba66a3f5bbe29dea5092b18b0",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; compact owner around the control, approximately x32..282/y122..167."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-wc-compiled-initial-paint.png",
+        "bytes": 10160,
+        "sha256": "b379d12e9bc33811d4df93d444fafc68b8f21574ef8a164fed9bf33c7b8efa3e",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; four-color red/green/blue/teal texture; compact owner around the control, approximately x32..282/y122..167."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-wc-compiled-replacement-paint.png",
+        "bytes": 10024,
+        "sha256": "89e95c282fc37566612f44e80b83acadbe417b2ba66a3f5bbe29dea5092b18b0",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading and ordinary/slot-child control; uniform green paint; compact owner around the control, approximately x32..282/y122..167."
+      },
+      {
+        "path": "browser/shader-presentation-scene-flKmDT/scene-default-unconfigured.png",
+        "bytes": 10022,
+        "sha256": "897257163327360843164c9a5cee8c166444e28b313013313e7b9117787821ec",
+        "viewed": true,
+        "observed": "640x360 screenshot: readable heading, ordinary/slot-child control, opaque dark surround; no shader texture."
+      }
+    ],
+    "extentLimit": "WC compact paint extent differs from React/Vue/Vue2; no cross-host geometry parity claimed.",
+    "rendererLimit": "ANGLE/SwiftShader is software WebGL, not physical GPU performance evidence."
+  },
+  "files": [
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/browser-version.txt",
+      "bytes": 13,
+      "sha256": "a8df10121fb5a62ba90c137f417e4611e587ebf65aedaeaaddb916758009b65d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/build.json",
+      "bytes": 102485,
+      "sha256": "c7441f8f674c27387b091a1ae696ceb631a2c90d7c5e031944a49bd82e1cb15c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/capability-fallback-reacquisition.json",
+      "bytes": 741,
+      "sha256": "5b60025660ba1b7d884dee36cefc48e5850e28c1f6556332d4ba181f9e962143"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/capability-fallback-reacquisition.png",
+      "bytes": 9488,
+      "sha256": "fb23b6e02f30a89b7f81b43fb035b78763719d307efaba52aa0cf0669acebe41"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/capability-stale-decode.json",
+      "bytes": 3481,
+      "sha256": "9415e5a1dad704fdddbcdd70005970b4e09f70c5c9763baa0711ffc83b34d136"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/capability-stale-decode.png",
+      "bytes": 10801,
+      "sha256": "377eb3e2faf46f2b3efff61fdd31f4ed84f7803937cd929aefab4adb6022c5e1"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/cleanup-reentry.json",
+      "bytes": 1748,
+      "sha256": "ffe8a5e58401430cbc4366a25618d1c40eda0daf5c5e2197024fe8e665f549aa"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/cleanup-reentry.png",
+      "bytes": 10491,
+      "sha256": "954e66b04a49e8f12afd1ee1af6e93b9125e8115f27ea3f9aeb537b70a243b5b"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/client.js",
+      "bytes": 4091351,
+      "sha256": "36ae0a93ba4afa64f2de2fa43903629f75d9ba464247d6edd7c0ea4c38df3fae"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/context-loss.json",
+      "bytes": 2088,
+      "sha256": "e51f83a4d25df16ae56455287ad9d5a908e5b670f1444dcf1dab44fcc0cb764e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/context-loss.png",
+      "bytes": 10015,
+      "sha256": "861b29c1221e13a874f28b11cc9735179e96f8642c16a56abd69ed126235a3d0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/entry.ts",
+      "bytes": 892,
+      "sha256": "972b5121b829973f77572b958ba515b9850cf5b8268c498ab5ea38c16eeb8797"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/external-writer-late-decode.json",
+      "bytes": 1211,
+      "sha256": "951c80fdc94fde0fc2fb9e7b3fc44a41214d916bca65383b9a39a8d1dce457fb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/external-writer-late-decode.png",
+      "bytes": 10594,
+      "sha256": "fb6411ddb01855497d27b81a7e8f292f9964da31acbe23f32120004e3c9d0b52"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/external-writer-new-revision.json",
+      "bytes": 1212,
+      "sha256": "f6e060f8d83f3ea56a0b3822984790fec6c79c6e426d7c9423582eae33197400"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/external-writer-new-revision.png",
+      "bytes": 10594,
+      "sha256": "fb6411ddb01855497d27b81a7e8f292f9964da31acbe23f32120004e3c9d0b52"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/failure-allocation.json",
+      "bytes": 1064,
+      "sha256": "654e2dbf0d5bc507ee1c923f2f818ab90da65fda6e43bc6f067cfbffe1364d52"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/failure-allocation.png",
+      "bytes": 10015,
+      "sha256": "861b29c1221e13a874f28b11cc9735179e96f8642c16a56abd69ed126235a3d0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/failure-compile.json",
+      "bytes": 1006,
+      "sha256": "759ccd07dbf3bbb3648a811dd1bb16fc663952e3449cc057e8b3e4f970315673"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/failure-compile.png",
+      "bytes": 10015,
+      "sha256": "861b29c1221e13a874f28b11cc9735179e96f8642c16a56abd69ed126235a3d0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/failure-missing.json",
+      "bytes": 771,
+      "sha256": "283a20f8fc169a5fa8239ac35c3947f567e5d7e22fbdb240c45699051dc02226"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/failure-missing.png",
+      "bytes": 10015,
+      "sha256": "861b29c1221e13a874f28b11cc9735179e96f8642c16a56abd69ed126235a3d0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/.proto-ui/context/react-v1.ts",
+      "bytes": 161,
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/Component.tsx",
+      "bytes": 41659,
+      "sha256": "6735d03b6b9b6630c8d29907d0c70517cb712cf41f73b37e39af1d0c92282c91"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/Component.tsx.map",
+      "bytes": 2008,
+      "sha256": "c500205d45db396838af137e2e9e24969e3b9b35159b7b05ea8f2b1dc9b74f32"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/react/provenance.json",
+      "bytes": 3230,
+      "sha256": "0116ed93e8214ebdcb1dcc9e124a8ed1e4d460f069fd1a793a0179fa7bbca121"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/Component.ts",
+      "bytes": 38658,
+      "sha256": "a809897df376e62cabb060085df30d83d9f2a2d5776b6a7e639f0882f10a3cd3"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/Component.ts.map",
+      "bytes": 1900,
+      "sha256": "76864f200ce9120e535acbc2a93a89f38afaf74d1c75b4e62152cb0881cfeb68"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue/provenance.json",
+      "bytes": 2951,
+      "sha256": "f39526879c0660ff66d93fbd08b3ea9a744eb808be0d1910911eb596576c5fdc"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/Component.js",
+      "bytes": 38856,
+      "sha256": "4345c42bf7158263b50c39bf441cb04103f229f97b77f6c2226cfca5d7e3a02f"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/Component.js.map",
+      "bytes": 2022,
+      "sha256": "57862d88262c2124ecf9a24e2008a47ff9335e2c837f07916f4e23b1f2bee53c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/vue2/provenance.json",
+      "bytes": 2948,
+      "sha256": "b6dc1bad71f856c3acfc35c85be66f5ca40e53b25de33980fb6823f07f6f8d37"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/.proto-ui/web-component/browser-v1.ts",
+      "bytes": 12784,
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/Component.ts",
+      "bytes": 32189,
+      "sha256": "fa52fdee152aeb9f04ccd45d915916fe1f3077d46450dd2f364826799a63f222"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/Component.ts.map",
+      "bytes": 1851,
+      "sha256": "4416e1156e0a8e0a7d2968210b96c4530cd1d2920f313b8d2ded645930924118"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/generated/wc/provenance.json",
+      "bytes": 3068,
+      "sha256": "d65b4c976a526c573027d364b089fbab1b3837c18e86983438a72ce9184621d3"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/gpu-linear-oracle.json",
+      "bytes": 1068,
+      "sha256": "3aad1c85e92ebb1b128c2a21f7d3480308fdc390e71da11cf9b2423cd3716c73"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/gpu-linear-oracle.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/prepare-throw-stale-decode.json",
+      "bytes": 1177,
+      "sha256": "29efba4f211d1ee35a5c7d50f982f41e8a958bb2864e9aa2f64e29d3b3250c87"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/prepare-throw-stale-decode.png",
+      "bytes": 10358,
+      "sha256": "592796b148da697fd89df054314e8e49f91786ee0ee878b72d96d4774d69db46"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/react-compiled-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/react-compiled.json",
+      "bytes": 1802,
+      "sha256": "c9f46eedf9fd232b1d41fc8b4a51b426feff628e454f965dc51152b8ce25a0e7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/react-compiled.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/react-runtime-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/react-runtime.json",
+      "bytes": 3985,
+      "sha256": "ee0b4a6e6598271465d6696867fe5b47b979ec7de0ac52e7b7bb259df024802c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/react-runtime.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/retired-decode.json",
+      "bytes": 1796,
+      "sha256": "a6d58343173056b1909b1161f04209d93b8c2913b8cec960ffa3231f805ac0aa"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/retired-decode.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue-compiled-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue-compiled.json",
+      "bytes": 1800,
+      "sha256": "2813136d2ae99ddae04c27be94cb453f57b4176f32ce144991bd2e5cf1bdcf8b"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue-compiled.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue-runtime-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue-runtime.json",
+      "bytes": 3523,
+      "sha256": "baf8f97349920e59909e93f63cc854cce0ed6b9d69603d0a18e220d43db26bb2"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue-runtime.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue2-compiled-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue2-compiled.json",
+      "bytes": 2232,
+      "sha256": "efbb8bfc1ee0be25354f927a5fa167a2131ce4e6f7d51ec43a8bc600f020a0bb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue2-compiled.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue2-runtime-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue2-runtime.json",
+      "bytes": 3093,
+      "sha256": "5e05c155dc29276949da7f2ab20765196377d18afd49877b5efe0b2e23ae910b"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/vue2-runtime.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/wc-compiled-paint.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/wc-compiled.json",
+      "bytes": 1799,
+      "sha256": "c99e8fa9147332e9c6688843095afb6b14ad7f0c8743ee79785ad8f4ab646b9e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/wc-compiled.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/wc-runtime-paint.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/wc-runtime.json",
+      "bytes": 3522,
+      "sha256": "4eb9f4881fd3655108cdf50d3f64db0431bc4f34cb28c9446e41b3221c8bf628"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-inline-md76Fg/wc-runtime.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/browser-version.txt",
+      "bytes": 13,
+      "sha256": "a8df10121fb5a62ba90c137f417e4611e587ebf65aedaeaaddb916758009b65d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/build.json",
+      "bytes": 103913,
+      "sha256": "341e566221bf4836a9323d77419d97c1194ab92bbb36304008fbef7517c9f0cd"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/client.js",
+      "bytes": 4145526,
+      "sha256": "2d5f2e090bc8c04416d7a66428ba5b8934f7ba4d136addb4b489521187dff614"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/entry.ts",
+      "bytes": 891,
+      "sha256": "dfa634eb6d534b6acb5f084c876ac52d0539805ee6031aa557467eba0cd8be51"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/context/react-v1.ts",
+      "bytes": 161,
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 965,
+      "sha256": "495f5f1f39630f5b5f0e3c9d2901d09b1665e13c4346da77fe7e25b45a88c071"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 3339,
+      "sha256": "e6ab457bfb158dd54a49836ded0f307c730d8d752c86f80766b68c67d5913ad0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/shader/scene-web-v1.ts",
+      "bytes": 15044,
+      "sha256": "15248347a239fc22a86a8cbb7922b0323f1d4c76be1c1600e491d7754a173cdb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/Component.tsx",
+      "bytes": 41930,
+      "sha256": "9d25e2f7b66b521e9260de87af6438ef5d39e1657228b1f842a39686be237f45"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/Component.tsx.map",
+      "bytes": 1775,
+      "sha256": "00d4e3ddb7e5f4672dd97c556d0adb47ebd82d36347e63077b97bef69fa7c3fa"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/react/provenance.json",
+      "bytes": 3386,
+      "sha256": "58aeb7cb187cfbd5b3b94c593c399f5189f7fe8c22737640913a9d8e53669163"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 965,
+      "sha256": "495f5f1f39630f5b5f0e3c9d2901d09b1665e13c4346da77fe7e25b45a88c071"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 3339,
+      "sha256": "e6ab457bfb158dd54a49836ded0f307c730d8d752c86f80766b68c67d5913ad0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/.proto-ui/shader/scene-web-v1.ts",
+      "bytes": 15044,
+      "sha256": "15248347a239fc22a86a8cbb7922b0323f1d4c76be1c1600e491d7754a173cdb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/Component.ts",
+      "bytes": 38830,
+      "sha256": "cbfd0a5c2cb8819d64a19cbfdf08f577ebd451357c9dd148337605e1ddde316d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/Component.ts.map",
+      "bytes": 1668,
+      "sha256": "f0816fa46cb4c4ba00c0c7b2c73383d8d1574167e456f43c11bd8a626cbacf5c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue/provenance.json",
+      "bytes": 3107,
+      "sha256": "7b0ad1f9ed0bfaa221c89ca50932f66b5c42016b3a845dc708394afbb3879b39"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 965,
+      "sha256": "495f5f1f39630f5b5f0e3c9d2901d09b1665e13c4346da77fe7e25b45a88c071"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 3339,
+      "sha256": "e6ab457bfb158dd54a49836ded0f307c730d8d752c86f80766b68c67d5913ad0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/.proto-ui/shader/scene-web-v1.ts",
+      "bytes": 15044,
+      "sha256": "15248347a239fc22a86a8cbb7922b0323f1d4c76be1c1600e491d7754a173cdb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/Component.js",
+      "bytes": 39154,
+      "sha256": "ab2f84b08064edfa9bf1554e7b16c8427bab3ac50f8ad32e9ab9fbfcdfdbba7c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/Component.js.map",
+      "bytes": 1789,
+      "sha256": "b21d4e698647039ec8f5356261aafc341080e773ff44bc6fcb4f1e481ce55c1a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/vue2/provenance.json",
+      "bytes": 3104,
+      "sha256": "672e0c0e38d396fd165d3b34e6e62900f1009a35e308329918f541f0fe7cfa25"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 965,
+      "sha256": "495f5f1f39630f5b5f0e3c9d2901d09b1665e13c4346da77fe7e25b45a88c071"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 3339,
+      "sha256": "e6ab457bfb158dd54a49836ded0f307c730d8d752c86f80766b68c67d5913ad0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/shader/scene-web-v1.ts",
+      "bytes": 15044,
+      "sha256": "15248347a239fc22a86a8cbb7922b0323f1d4c76be1c1600e491d7754a173cdb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/.proto-ui/web-component/browser-v1.ts",
+      "bytes": 12784,
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/Component.ts",
+      "bytes": 32531,
+      "sha256": "ac6744c10f96a88edeb7be22227ee867d16a03d86c9644875db505551ccb6db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/Component.ts.map",
+      "bytes": 1619,
+      "sha256": "bbc6e4a25f9cecf9d477b01b0fc851232b867a2f100e9b3612583a523de923f2"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/generated/wc/provenance.json",
+      "bytes": 3224,
+      "sha256": "7b0385322de8ecffb347be08336665fbc5607bbf9f55b17d1d4c7e29f1462098"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-default-unconfigured.json",
+      "bytes": 782,
+      "sha256": "d5be4d7d201944610a85a43bb099fe206c5229cbb61c88e2315ac3f19ba8637a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-default-unconfigured.png",
+      "bytes": 10022,
+      "sha256": "897257163327360843164c9a5cee8c166444e28b313013313e7b9117787821ec"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-compiled-initial-paint.json",
+      "bytes": 1628,
+      "sha256": "3d0c9375f5b6d67b69ffcf0bb73ff5c15ac76ca141dc2e7833665a32beee1e5e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-compiled-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-compiled-replacement-paint.json",
+      "bytes": 2614,
+      "sha256": "2736c56a1319eb32bb2d3d8ce545828af2a32373450d27fae1050361b93ca3ab"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-compiled-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-compiled.json",
+      "bytes": 2424,
+      "sha256": "0c65a6db945d14172ca28bba524d8d60876e6051e51254ee55dbaf017565daf3"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-compiled.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime-initial-paint.json",
+      "bytes": 2623,
+      "sha256": "cc91eb144666b9df6f2fdc0598149f814e6bb8dc761e2537e4af462b482b3586"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime-replacement-paint.json",
+      "bytes": 3611,
+      "sha256": "8f0eb3634a4641e5fbe641a48d0dd4cae68b8a510b68303bd5fd20985bc3bac0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime.json",
+      "bytes": 3285,
+      "sha256": "b0112953d529359fee8c156502cb01ec92b29b1b3cdc98a8387b19312018392a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-compiled-initial-paint.json",
+      "bytes": 1626,
+      "sha256": "053c0df7bf5766779834ac25b4bb8caca90d4727c7531c0532555c59178fc5c5"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-compiled-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-compiled-replacement-paint.json",
+      "bytes": 2612,
+      "sha256": "02c826d08affcff72a1d8e22e85a88934ed9514d4873ecd8aa059c65f802f7d3"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-compiled-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-compiled.json",
+      "bytes": 2422,
+      "sha256": "a597e6ac86ade78e8fc4d988c1c84a8e214f3fd0349ba46e3a02a33920a4445d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-compiled.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-runtime-initial-paint.json",
+      "bytes": 2621,
+      "sha256": "04f7c96c5ddc8620c0c1a97d192bc8f42b223254d0dd9ea9cf090f7914e913b9"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-runtime-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-runtime-replacement-paint.json",
+      "bytes": 3609,
+      "sha256": "b1a40a5e09c0ebf224633818ac91596c2df7f35853fdf0e44774a6619a1e0a66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-runtime-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-runtime.json",
+      "bytes": 3283,
+      "sha256": "a67cb738f16a1a4a29c01f4de645a42f63afd0587470bac3eb15e520372ba812"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue-runtime.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-compiled-initial-paint.json",
+      "bytes": 1627,
+      "sha256": "44124fad919e0d29f57f1e0c2ff2eb1ebacdafbf576da07499e581062c1c8dab"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-compiled-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-compiled-replacement-paint.json",
+      "bytes": 2613,
+      "sha256": "405ee9ebe3e50272f38af4e10a96f77e53c76ac26f42ae08e38a29c9ad56199d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-compiled-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-compiled.json",
+      "bytes": 2423,
+      "sha256": "cdf18e95e9f3802b2f6c07702edb3735eb8e0e7cb021a986b2cb200ece0d367e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-compiled.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-runtime-initial-paint.json",
+      "bytes": 2123,
+      "sha256": "1cee65d5f88b986b1c6a9bb5e37aaa387c78961c1f8498b443b9072c068c532c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-runtime-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-runtime-replacement-paint.json",
+      "bytes": 3111,
+      "sha256": "45f0510e72d053413bf7043eb2a999b11217c6854e94834d90abf0d70c63f8e1"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-runtime-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-runtime.json",
+      "bytes": 2853,
+      "sha256": "e3dabffcc573b5ae15db9c3f1b8b7d158af1c274072b03822b994704c8ef0388"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-vue2-runtime.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled-initial-paint.json",
+      "bytes": 1625,
+      "sha256": "c3906e8f9df78839c0d361f80bffec4e913ba1859955b4e85784a54afc1152e1"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled-initial-paint.png",
+      "bytes": 10160,
+      "sha256": "b379d12e9bc33811d4df93d444fafc68b8f21574ef8a164fed9bf33c7b8efa3e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled-replacement-paint.json",
+      "bytes": 2611,
+      "sha256": "a4d082b30c60906d23e3ab9046f0a280a74ccd1f9561b9ad2b2475481b6327b5"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled-replacement-paint.png",
+      "bytes": 10024,
+      "sha256": "89e95c282fc37566612f44e80b83acadbe417b2ba66a3f5bbe29dea5092b18b0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled.json",
+      "bytes": 2421,
+      "sha256": "a350e7acb987edfee5c2a63134c11b898111bfa7ed2a41b680a7a01bfd1fe4bf"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-runtime-initial-paint.json",
+      "bytes": 2620,
+      "sha256": "06ce0b67f5d0c52e7b744608a751ad48cf42741d99da8a107c907c0d96828e05"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-runtime-initial-paint.png",
+      "bytes": 10160,
+      "sha256": "b379d12e9bc33811d4df93d444fafc68b8f21574ef8a164fed9bf33c7b8efa3e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-runtime-replacement-paint.json",
+      "bytes": 3608,
+      "sha256": "f7901ad94f65806a20c0d445267bb54b940d36c90210175ca24a2f6c5c48079e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-runtime-replacement-paint.png",
+      "bytes": 10024,
+      "sha256": "89e95c282fc37566612f44e80b83acadbe417b2ba66a3f5bbe29dea5092b18b0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-runtime.json",
+      "bytes": 3282,
+      "sha256": "0d13a1a23739661d2ddc23d8b59e133ded06f1ecfeab22160515077a1b9cdadb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-runtime.png",
+      "bytes": 7754,
+      "sha256": "2604d51c7cfc42ac64ffe9feed5888877c29491c654a95ff2763d9230fa749f8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/browser-version.txt",
+      "bytes": 13,
+      "sha256": "a8df10121fb5a62ba90c137f417e4611e587ebf65aedaeaaddb916758009b65d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/build.json",
+      "bytes": 102591,
+      "sha256": "f6dadfc144537c49efb37e1cc6250918da8c2f2e93a13bbd52f34af0e4120eb0"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/client.js",
+      "bytes": 4096241,
+      "sha256": "15870416e8292c87d85416d2fc40ac42b1e64e7bcfd21790b8ea6018b9fd1411"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/entry.ts",
+      "bytes": 911,
+      "sha256": "d2e9486c5ed2231a1e20533891d9eeee087e551753424a0efe05b0f240b96b27"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/.proto-ui/context/react-v1.ts",
+      "bytes": 161,
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/Component.tsx",
+      "bytes": 44463,
+      "sha256": "b4aae74828862d7f9fc27f193cabe5445c881e03e178eec26650f96b1139cf5c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/Component.tsx.map",
+      "bytes": 2344,
+      "sha256": "f804172e1741ace848dcd7e2b0b996c4c335409a083a5b6bf7ce71d11779b6ec"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/react/provenance.json",
+      "bytes": 3228,
+      "sha256": "343009a89d15deab592eed764c486a6307ca09ec6356e12a7f31fbe80ed175b5"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/Component.ts",
+      "bytes": 41251,
+      "sha256": "3006189e10965546da69a1c13309cfb822a0331b76c735993143fe578aba23c6"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/Component.ts.map",
+      "bytes": 2236,
+      "sha256": "25263f8c5a5de61b52c200f2295e2696734d100ab341d73f882bdb7245abf045"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue/provenance.json",
+      "bytes": 2949,
+      "sha256": "1089bc133253722f8d73081ab0459412074038cd8839a0094f6c66a03ae09b8a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/Component.js",
+      "bytes": 41719,
+      "sha256": "ae2a1ae3260c510d0167f5808cabca1261c5bbb5d45acd5ca3c567d415056b7d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/Component.js.map",
+      "bytes": 2358,
+      "sha256": "36504d939290439a2ab93a9cbe762cd9c354eff7dda837800e4cb6bf905138e5"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/vue2/provenance.json",
+      "bytes": 2946,
+      "sha256": "f33efa66c83a6235d4872a53358f57d107b45b6e5cab6cee87e4ab7660f1ad1d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/.proto-ui/context/scope-v1.ts",
+      "bytes": 8996,
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/.proto-ui/shader/kernel-identities-v1.json",
+      "bytes": 703,
+      "sha256": "452cb3ca28b8cc1aa0ffc8b75a296b33de23a30ed0578db3410a9a0ce5e7690d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/.proto-ui/shader/owner-web-v1.ts",
+      "bytes": 1773,
+      "sha256": "bc4f28695486c009ade9fab391593d73641bac7bf3fb22f71769ea1e48fde61c"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/.proto-ui/shader/webgl2-host-v1.ts",
+      "bytes": 23697,
+      "sha256": "bf4a2ab2544a1b8803689d5274beca53e571dc7761b8e513fe3701b6494a58ed"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/.proto-ui/style/native-v1.ts",
+      "bytes": 5912,
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/.proto-ui/web-component/browser-v1.ts",
+      "bytes": 12784,
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/Component.ts",
+      "bytes": 34784,
+      "sha256": "6dd672abcfbba2fc3a9b77748d0680429c356be3d66d24c3d9cd49782ef56df1"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/Component.ts.map",
+      "bytes": 2187,
+      "sha256": "653bc17362e6e785f2363a19c6b36d3fa28e016a1e1d8b8775e05db61c386903"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/generated/wc/provenance.json",
+      "bytes": 3066,
+      "sha256": "d8eb4bf0af0123ad1ff47cd571a54a7669abf05b0533d6e418ecbe4e1a58a5c8"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/react-compiled-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/react-compiled.json",
+      "bytes": 1802,
+      "sha256": "38dd185098aba307373f6874da26a4efc4dcbbab5163dca9eb178964af991308"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/react-compiled.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/react-runtime-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/react-runtime.json",
+      "bytes": 3985,
+      "sha256": "9876950013cba6dddeff786d5ad8728384fb5199f2676cfb5b60e5a710c8bb25"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/react-runtime.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue-compiled-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue-compiled.json",
+      "bytes": 1800,
+      "sha256": "0a39dbfaafdb16e2b5fa2491c401042cc79a3c07277a07fc0d962ff66831584e"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue-compiled.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue-runtime-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue-runtime.json",
+      "bytes": 3523,
+      "sha256": "c6b924a8f9a155817d5cca77d840e60474fdb21f9886fab6da4eb4a11c4eb85f"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue-runtime.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue2-compiled-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue2-compiled.json",
+      "bytes": 2232,
+      "sha256": "c0a799acf3dcda132d9739c664289a63ec8d3c7f961dbb65a8a571af56d548bb"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue2-compiled.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue2-runtime-paint.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue2-runtime.json",
+      "bytes": 3093,
+      "sha256": "321db8aa98aeabdd040331a422bfe853f94c9be569ce9d5a8ad1248c3def588d"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/vue2-runtime.png",
+      "bytes": 10771,
+      "sha256": "466d20152d22daabdbd7d7bcbd5bbdf89f4692f5066a0ee7d890ffbb66ab130a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/wc-compiled-paint.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/wc-compiled.json",
+      "bytes": 1799,
+      "sha256": "5fe1bbc36e82f69416bcd59faa85b5312a588a787040f452095d399c92c6a4a3"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/wc-compiled.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/wc-runtime-paint.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/wc-runtime.json",
+      "bytes": 3522,
+      "sha256": "0a4f7cbd1fdfdf264e3a5083f16fa480f94a728093dfad63a7c415a9320fa11b"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-static-data-cb6rif/wc-runtime.png",
+      "bytes": 10234,
+      "sha256": "cb0b9bcee1fe66254f13782ec1a04ba1b0f70956da720b23d74bdaaee8da9db7"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser-environment.txt",
+      "bytes": 29,
+      "sha256": "04ce1829b69f68a11eb8ef036a6ab18a63411689e39b9b3331c0d884b707983a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser-vitest.json",
+      "bytes": 12199,
+      "sha256": "df82d6e146cf2a7f0532141047cf2cf2fce4ad2d11f85420b46dcf4f12baed1a"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser.log",
+      "bytes": 86960,
+      "sha256": "a15ea864df47d0c33588acdb5e6836004501d50f2d45de2337cd8a8f4c5346b9"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/isolation-prepare.json",
+      "bytes": 1880,
+      "sha256": "51c693c2152b6eed5bb636ab1d98110a7ea4e9fa8aa4256fd6c1f930d34087a9"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/isolation-run.json",
+      "bytes": 1237,
+      "sha256": "569463793c5b697d5c227f9d9118b12ce78db644a4c0641f39cb528beae6df78"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/lockfile.sha256",
+      "bytes": 81,
+      "sha256": "6de4a07b2ef9daea54b548542e13c29ae4ad4a4281bf4cba11d8cf5e91144d90"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/node-environment.txt",
+      "bytes": 9,
+      "sha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/receipt.json",
+      "bytes": 557,
+      "sha256": "a8204857e593aba6a26953effd2efe42cd9733312fd91276c4dea435ae8f36f6"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/source-prepare.json",
+      "bytes": 304,
+      "sha256": "4355059faa4dbc3b3c15b60a29b6d7e9ca01fa1bef71b1826a2e3447397a1b05"
+    },
+    {
+      "path": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/source-run.json",
+      "bytes": 304,
+      "sha256": "4355059faa4dbc3b3c15b60a29b6d7e9ca01fa1bef71b1826a2e3447397a1b05"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "byte-identical preview copies of five actually reviewed CI screenshots",
+  "pathBase": "this directory",
+  "images": [
+    {
+      "path": "scene-react-runtime-initial-paint.png",
+      "bytes": 10530,
+      "sha256": "af2275244081294d242aa4758f4c796f902c3562437764ebfe59109ce35d067d",
+      "sourceArchive": "../browser/originals.tar.gz",
+      "sourceMember": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime-initial-paint.png",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "theme": "explicit-white-background-fixture-css",
+      "phase": "initial-paint",
+      "actualBrowserHead": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "edited": false,
+      "recaptured": false
+    },
+    {
+      "path": "scene-react-runtime-replacement-paint.png",
+      "bytes": 10028,
+      "sha256": "411bb37887a969df27da3bc655dc00457c54e49182b9efdf893dca1f1cb3a4ef",
+      "sourceArchive": "../browser/originals.tar.gz",
+      "sourceMember": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-react-runtime-replacement-paint.png",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "theme": "explicit-white-background-fixture-css",
+      "phase": "replacement-paint",
+      "actualBrowserHead": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "edited": false,
+      "recaptured": false
+    },
+    {
+      "path": "scene-wc-compiled-initial-paint.png",
+      "bytes": 10160,
+      "sha256": "b379d12e9bc33811d4df93d444fafc68b8f21574ef8a164fed9bf33c7b8efa3e",
+      "sourceArchive": "../browser/originals.tar.gz",
+      "sourceMember": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled-initial-paint.png",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "theme": "explicit-white-background-fixture-css",
+      "phase": "initial-paint",
+      "actualBrowserHead": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "edited": false,
+      "recaptured": false
+    },
+    {
+      "path": "scene-wc-compiled-replacement-paint.png",
+      "bytes": 10024,
+      "sha256": "89e95c282fc37566612f44e80b83acadbe417b2ba66a3f5bbe29dea5092b18b0",
+      "sourceArchive": "../browser/originals.tar.gz",
+      "sourceMember": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-wc-compiled-replacement-paint.png",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "theme": "explicit-white-background-fixture-css",
+      "phase": "replacement-paint",
+      "actualBrowserHead": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "edited": false,
+      "recaptured": false
+    },
+    {
+      "path": "scene-default-unconfigured.png",
+      "bytes": 10022,
+      "sha256": "897257163327360843164c9a5cee8c166444e28b313013313e7b9117787821ec",
+      "sourceArchive": "../browser/originals.tar.gz",
+      "sourceMember": "shader-presentation-c1f0332eed6ba79734b92bd4407b274f45d5c274-45266835323-1/browser/shader-presentation-scene-flKmDT/scene-default-unconfigured.png",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "theme": "explicit-white-background-fixture-css",
+      "phase": "unconfigured-fallback",
+      "actualBrowserHead": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "edited": false,
+      "recaptured": false
+    }
+  ]
+}

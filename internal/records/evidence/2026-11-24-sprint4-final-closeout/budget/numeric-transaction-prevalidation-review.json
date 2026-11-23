@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent actual numeric-diff and input-archive check before post-edit validation",
+  "reviewer": "/root/ir10_semantics",
+  "head": "c18bf8f8c35a4ec1f69791468a5952c4cb460f41",
+  "parent": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+  "disposition": "numeric-only diff, supporting record and input archives are consistent; awaiting exact-head canonical strict validation",
+  "changedFiles": [
+    "internal/records/2026-11-24-sprint4-scene-package-budget.md",
+    "internal/records/evidence/2026-11-24-sprint4-scene-budget/audit-prebudget-continuation.py",
+    "internal/records/evidence/2026-11-24-sprint4-scene-budget/independent-prebudget-receipt.json",
+    "internal/records/evidence/2026-11-24-sprint4-scene-budget/prebudget-facts.json",
+    "internal/records/evidence/2026-11-24-sprint4-scene-budget/prebudget-originals.tar.gz",
+    "internal/records/evidence/2026-11-24-sprint4-scene-budget/transaction-inputs-manifest.json",
+    "internal/records/evidence/2026-11-24-sprint4-scene-budget/transaction-inputs-originals.tar.gz",
+    "scripts/analysis/package-budgets.mjs"
+  ],
+  "checks": {
+    "onlyThreeLiteralChangesToMeasurementFile": true,
+    "otherSixCeilingsUnchanged": true,
+    "measurementPolicyEntriesExternalsCompressionUnchanged": true,
+    "productSpecBuildBrowserImplementationUnchanged": true,
+    "candidateMetadataMatchesExactCommit": true,
+    "supportingRecordHashMatchesCandidate": true,
+    "transactionInputArchiveAllNineMembersVerified": true,
+    "archivedInputsMatchCurrentReceivedFiles": true,
+    "formattedProjectionJsonValuesEqualRawInputs": true,
+    "prebudgetArchiveByteExact": true,
+    "authorityDefinitionsMatchExactGitSourceAndRemainDraft": true,
+    "actualHandoffRoutesAndArtifactDigestsVerified": true,
+    "incomingFactualReportPreservedForValidationRefresh": true
+  },
+  "entries": [
+    {
+      "name": "adapter-react root",
+      "old": 172600,
+      "proposed": 172800,
+      "measuredGzip": 172749,
+      "headroom": 51
+    },
+    {
+      "name": "adapter-vue root",
+      "old": 171400,
+      "proposed": 171600,
+      "measuredGzip": 171536,
+      "headroom": 64
+    },
+    {
+      "name": "adapter-web-component root",
+      "old": 207200,
+      "proposed": 207400,
+      "measuredGzip": 207303,
+      "headroom": 97
+    }
+  ],
+  "recordSha256": "35a2856552763c52bffcdbeb3cc8ce472ebaa1093f4ca68c14f4ec0d52c0dc74",
+  "inputArchiveSha256": "f927783baaf296c77c6c6e51233980b1e6dddd281f420d6b25bcd9330764c3f7",
+  "prebudgetArchiveSha256": "b2fb242e53637823041b5040ec133c868175b06a360ac6cf7cb9fdd05bac4a02",
+  "inputCandidateDigest": "sha256:dbd057f45f51dc66472d8a45c44b54f8d2dac867ff44042b551472a4f47a7420",
+  "inputReportDigest": "sha256:a389fd9384aac9576c0a6a968d674abcd04254981d2230366233e7e7ac236642",
+  "handoffs": [
+    {
+      "file": "validate-to-budget.json",
+      "sha256": "a8c8bf5d2887259a662278f7e9e33a514655eefabe6cfa0d188c567ada00da04",
+      "from": "pui-validate",
+      "to": "pui-package-budget",
+      "artifactDigestsMatch": true
+    },
+    {
+      "file": "budget-to-validate.json",
+      "sha256": "f68a17cd844c4d382eb1a8626fd28cf48127b1ad8e36c896620febe82fb0d2bc",
+      "from": "pui-package-budget",
+      "to": "pui-validate",
+      "artifactDigestsMatch": true
+    }
+  ],
+  "definitions": [
+    {
+      "path": "spec/contracts/C-FEEDBACK-MATERIAL-0001.yaml",
+      "sha256": "a234caedb2f87cd00ea17641b806cf955392831bf89747329f35db9a7092e601",
+      "status": "draft"
+    },
+    {
+      "path": "spec/contracts/C-FEEDBACK-SHADER-PRESENTATION-0001.yaml",
+      "sha256": "af8b7932ddf4fc4f81158f5dc6f173ef26cc2341087738e574475f381be87dd2",
+      "status": "draft"
+    },
+    {
+      "path": "spec/host-caps/HC-FEEDBACK-SHADER-PRESENTATION-0001.yaml",
+      "sha256": "8caefc0399b1ec1777965c163292ff2da5c6f2dd9d74bc8d442b6c944896317b",
+      "status": "draft"
+    },
+    {
+      "path": "spec/tests/T-FEEDBACK-SHADER-PRESENTATION-0001.yaml",
+      "sha256": "a6ff10e10f87a949b32029ee59ff24f3c993a9f3c762b637b2e7e9e2c822e617",
+      "status": "draft"
+    }
+  ],
+  "priorIndependentReceiptSha256": "c5e1a6a0552297042a4273c4a2da16b07eacd1c49cd770c1f5a95ad75e5a7150",
+  "decisionAssessment": "The chosen values are the smallest 100-byte ceilings above the identical measured integrated costs, giving 51/64/97 bytes of stated rounding headroom. The supporting record limits acceptance to the reviewed draft Web capability, preserves original failures, and defers stable definitions, original IR10 rights, formal approval/integration and full Sprint 4 acceptance.",
+  "scopeLimits": [
+    "This is preparatory factual inspection, not the final pui-review verdict or a formal GitHub approval.",
+    "No implementation or browser test was rerun.",
+    "The post-edit canonical strict outcome is not yet available; no pass is inferred from pre-edit numbers.",
+    "Authority observations are inspected retained inputs; this child did not independently re-query GitHub permissions.",
+    "Other agents/integrator supplied the browser visual inspection and broader scene evidence; this audit verifies the numeric transaction and its budget inputs."
+  ],
+  "postEditValidation": "pending",
+  "finalAcceptance": false,
+  "recordedAtUtc": "2026-11-23T21:28:15.535508+00:00"
+}

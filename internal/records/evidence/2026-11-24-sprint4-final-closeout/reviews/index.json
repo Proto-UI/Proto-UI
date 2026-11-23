@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "kind": "byte-exact independent factual review originals",
+  "pathBase": "this index directory",
+  "reviewer": "/root/sprint4_final_acceptance",
+  "canonicalGithubApproval": false,
+  "archives": [
+    {
+      "label": "first",
+      "archive": {
+        "path": "first-browser-audit-originals.tar.gz",
+        "bytes": 11979,
+        "sha256": "1ba06025f565a67a2129abb151a9896636e981c9904abd81cb4404aeaf72b8c3"
+      },
+      "actualBrowserHead": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+      "actualBrowserRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/45262028723",
+      "reportJsonMember": "first-browser-audit.json",
+      "reportMarkdownMember": "first-browser-audit.md",
+      "members": [
+        {
+          "path": "audit-first-browser.py",
+          "bytes": 16447,
+          "sha256": "bd68b645d50fd0d7b5bfd3e81eb0973a4ff32ba5ee1655adfc6ad66d24ad2bdf"
+        },
+        {
+          "path": "first-browser-audit.json",
+          "bytes": 30323,
+          "sha256": "7d2d288bb652da4d25b372d13d2b55354077a6a1018add41b70eb11772b46888"
+        },
+        {
+          "path": "first-browser-audit.md",
+          "bytes": 5414,
+          "sha256": "0f1b67dcb779bc3b5e12b55e24f552c4d84d79df629dda217c1c589b698fea66"
+        },
+        {
+          "path": "first-browser-audit-manifest.json",
+          "bytes": 550,
+          "sha256": "46c378a2d56f65a51e9f42189fff19be460a14e3f9bcf238ece0fe13b6f79fbc"
+        }
+      ]
+    },
+    {
+      "label": "successor",
+      "archive": {
+        "path": "successor-browser-audit-originals.tar.gz",
+        "bytes": 36318,
+        "sha256": "033020175806a97142b578e3f1f5410f376771abb743f56f85db8d36eaaf55b9"
+      },
+      "actualBrowserHead": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+      "actualBrowserRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/45266835323",
+      "reportJsonMember": "successor-browser-audit.json",
+      "reportMarkdownMember": "successor-browser-audit.md",
+      "members": [
+        {
+          "path": "audit-successor-browser.py",
+          "bytes": 25685,
+          "sha256": "4b92a6334447e9151eafedc774bedf7413491683471297412d6a31689468d73f"
+        },
+        {
+          "path": "write-successor-report.py",
+          "bytes": 10987,
+          "sha256": "fbbc246e33302e5989cd1b851eaadcd4138556f27246fc3e381385a8b126cf68"
+        },
+        {
+          "path": "successor-browser-audit.json",
+          "bytes": 138374,
+          "sha256": "649e53b17262179e70560e007fbeba34f7c06f753c84a715c17d8725db4f9348"
+        },
+        {
+          "path": "successor-browser-audit.md",
+          "bytes": 19748,
+          "sha256": "81c043c094bf6ee012371cca937b59719df7edcd7575e76ed10bcc1c3d4bed22"
+        },
+        {
+          "path": "successor-browser-audit-manifest.json",
+          "bytes": 1186,
+          "sha256": "5062c0d50ce73a29d3dbaa5afa186131cd999dd2c570cb8bba842a254e011888"
+        }
+      ]
+    }
+  ],
+  "originalPathsPreserved": "Absolute scratch and runner paths inside historical raw reports are not rewritten; use this relative index and verify.py to replay archive checks.",
+  "firstResult": {
+    "passed": 37,
+    "declaredGeneratedArtifacts": 106,
+    "retainedGeneratedArtifacts": 36,
+    "missingGeneratedArtifacts": 70,
+    "sceneTerminalImagesDoNotProvePaint": true,
+    "originalFindingsRetained": true
+  },
+  "successorResult": {
+    "passed": 37,
+    "declaredGeneratedArtifacts": 106,
+    "retainedAndHashVerifiedGeneratedArtifacts": 106,
+    "activePaintImagesViewed": 16,
+    "fallbackImagesViewed": 1,
+    "scope": "exact c1 fixture only"
+  }
+}
