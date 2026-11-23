@@ -27,15 +27,19 @@ function fixture() {
     ticket = 0;
   const measurements: string[] = [],
     outcomes: string[] = [];
+  let duringMeasurement: (() => void) | null = null;
   const frames = new Map<number, FrameRequestCallback>();
   const original = window.getComputedStyle.bind(window);
   vi.spyOn(window, 'getComputedStyle').mockImplementation((target) => {
     const computed = original(target);
     if (target !== el) return computed;
     return new Proxy(computed, {
-      get(object, key, receiver) {
+      get(object, key) {
         if (key === 'blockSize') {
           measurements.push(el.style.getPropertyValue('block-size'));
+          const callback = duringMeasurement;
+          duringMeasurement = null;
+          callback?.();
           return el.style.getPropertyValue('block-size') || `${natural}px`;
         }
         if (key === 'height') return el.style.getPropertyValue('block-size') || `${natural}px`;
@@ -83,6 +87,9 @@ function fixture() {
     sink,
     natural: (value: number) => {
       natural = value;
+    },
+    duringMeasurement: (callback: () => void) => {
+      duringMeasurement = callback;
     },
     at(time: number) {
       now = time;
@@ -132,4 +139,23 @@ it('view retirement restores both leases before stale callbacks can run', () => 
   expect(f.measurements).toHaveLength(calls);
   expect(f.outcomes).toEqual([]);
   expect(f.frames.size).toBe(0);
+});
+it('cannot reacquire a size lease after retirement reenters the semantic layout read', () => {
+  const f = fixture();
+  f.duringMeasurement(() => f.sink.release(1));
+  f.at(16);
+  expect(f.el.style.getPropertyValue('block-size')).toBe('');
+  expect(f.el.style.overflow).toBe('auto');
+  expect(f.frames.size).toBe(0);
+  expect(f.outcomes).toEqual([]);
+});
+it('preserves an external takeover occurring inside the semantic layout read', () => {
+  const f = fixture();
+  f.duringMeasurement(() => f.el.style.setProperty('block-size', '17px', 'important'));
+  f.at(16);
+  expect(f.el.style.getPropertyValue('block-size')).toBe('17px');
+  expect(f.el.style.getPropertyPriority('block-size')).toBe('important');
+  expect(f.el.style.overflow).toBe('auto');
+  expect(f.frames.size).toBe(0);
+  expect(f.outcomes).toEqual(['projection-failed']);
 });
