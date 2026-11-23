@@ -14,6 +14,8 @@ import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
 import { gpuiNativeSelectionSource } from './gpui-native-selection';
+import { gpuiNativeHoverSource } from './gpui-native-hover';
+import { gpuiNativeNotifySource } from './gpui-native-notify';
 
 export const gpuiNativeOwnerSource =
   String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
@@ -291,7 +293,7 @@ pub struct Owner {
     public_values:PublicValues,
     failures:Vec<NativeFailure>,
     pub phase:&'static str,pub disposed:bool,pub disposing:bool,pub present:bool,pub mounted:bool,pub epoch:u64,
-    pub dirty:bool,pub native_drive:Option<Drive>,pub window_id:Option<gpui::WindowId>,pub update_requested:bool,pub projection_revision:u64,pub committed_revision:u64,
+    pub dirty:bool,pub pending_native_events:bool,pub native_drive:Option<Drive>,pub window_id:Option<gpui::WindowId>,pub update_requested:bool,pub projection_revision:u64,pub committed_revision:u64,
     pub projection:Option<NativeSnapshot>,pub renderer:Value,pub raw:Json,pub raw_value:Value,pub props_value:Value,pub props:Json,pub schemas:BTreeMap<String,Value>,pub defaults:BTreeMap<String,Value>,
     pub states:BTreeMap<String,Rc<State>>,pub exposes:BTreeMap<String,Value>,pub declared_events:BTreeSet<String>,pub emitted:Vec<(String,Json)>,
     pub lifecycle:BTreeMap<String,Vec<Value>>,watchers:Vec<Watcher>,listeners:Vec<Listener>,contributions:Vec<Contribution>,patch:Vec<(String,String)>,suppressed:BTreeSet<String>,
@@ -301,7 +303,7 @@ pub struct Owner {
     pub accessible:bool,pub accessible_role:Value,pub accessible_states:BTreeMap<String,Value>,pub accessible_state_conditions:BTreeMap<String,Value>,pub accessible_actions:BTreeSet<String>,pub name_content:bool,
     pub slot:Vec<NativeSnapshot>,pub bounds:Option<Bounds<Pixels>>,pub native_hitbox:Option<gpui::Hitbox>,pub native_translation:gpui::Point<Pixels>,pub theme:String,pub dark:bool,
     pub style_vocabulary:&'static crate::gpui_native_style::StyleVocabulary,
-    pub modules:Modules,press:NativePress,press_global:bool,window_input_observed:Option<gpui::WeakFocusHandle>,
+    pub modules:Modules,press:NativePress,press_global:bool,window_input_observed:Option<gpui::WeakFocusHandle>,native_hover:NativeHoverState,
 }
 #[cfg(feature="test-support")]
 pub fn native_owner_allocation_count()->usize{OWNERS.with(|owners|owners.borrow().iter().filter(|owner|owner.strong_count()>0).count())}
@@ -322,7 +324,7 @@ pub fn native_resource_counts(owner:&OwnerRef)->Json{
 impl Owner {
     pub fn new(raw:Json,parent:OwnerWeak,context_accepts:fn(&str,&Json)->bool,props_accepts:fn(&Json)->bool,prop_valid:fn(&str,&Json)->bool,style_vocabulary:&'static crate::gpui_native_style::StyleVocabulary)->OwnerRef {
         if !raw.is_object(){value_type_error("raw props must be a record")}
-        let owner=Rc::new(RefCell::new(Self{atoms:NativeHostAtoms::default(),lexical_slots:Vec::new(),authored:AuthoredHooks::default(),public_values:PublicValues::default(),failures:Vec::new(),phase:"setup",disposed:false,disposing:false,present:true,mounted:false,epoch:0,dirty:true,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_state_conditions:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None}));
+        let owner=Rc::new(RefCell::new(Self{atoms:NativeHostAtoms::default(),lexical_slots:Vec::new(),authored:AuthoredHooks::default(),public_values:PublicValues::default(),failures:Vec::new(),phase:"setup",disposed:false,disposing:false,present:true,mounted:false,epoch:0,dirty:true,pending_native_events:false,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_state_conditions:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None,native_hover:NativeHoverState::default()}));
         OWNERS.with(|all|all.borrow_mut().push(Rc::downgrade(&owner)));owner
     }
     pub fn finish(owner:&OwnerRef,renderer:Value){control_label_finish(owner);finish_public_exposes(owner);owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
@@ -361,7 +363,9 @@ impl Owner {
         let(event,epoch)={let mut o=owner.borrow_mut();if o.disposed||!o.present||o.bounds.is_none()||o.projection_revision!=revision||o.committed_revision==revision{return}o.committed_revision=revision;let event=if !o.mounted{o.mounted=true;o.epoch+=1;let epoch=o.epoch;if let Some(projection)=o.modules.focus.entry_projection.as_mut(){projection.binding.epoch=epoch;}"mounted"}else{"updated"};(event,o.epoch)};
         modules_commit(owner);
         {let o=owner.borrow();if o.disposed||!o.present||!o.mounted||o.epoch!=epoch||o.projection_revision!=revision||o.committed_revision!=revision{return}}
-        life(owner,event);
+        let outcome=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||life(owner,event)));
+        native_hover_mounted(owner,epoch);
+        if let Err(failure)=outcome{std::panic::resume_unwind(failure);}
     }
     pub fn dispose(owner:&OwnerRef){
         {let mut owner=owner.borrow_mut();if owner.disposed||owner.disposing{return}owner.disposing=true;}
@@ -379,7 +383,7 @@ impl Owner {
     }
     fn retire(owner:&OwnerRef){
         retire_entry_intent(owner);clear_scope_recipient(owner);
-        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
+        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.dirty=true;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
     }
     // Failed-created retirement extracts owned values inside one short borrow so
     // one destructor panic cannot abort the remaining terminal release attempts;
@@ -388,7 +392,7 @@ impl Owner {
     // therefore retire even when a callback capture's destructor panics.
     fn failed_created_retire(owner:&OwnerRef){
         retire_entry_intent(owner);clear_scope_recipient(owner);
-            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;
+            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.dirty=true;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();
             (std::mem::take(&mut o.projection),std::mem::take(&mut o.renderer),std::mem::take(&mut o.watchers),std::mem::take(&mut o.listeners),std::mem::take(&mut o.contributions),std::mem::take(&mut o.subscriptions),std::mem::take(&mut o.providers),std::mem::take(&mut o.exposes),std::mem::take(&mut o.states),std::mem::take(&mut o.lifecycle),std::mem::take(&mut o.slot),std::mem::take(&mut o.modules))};
         let(projection,renderer,watchers,listeners,contributions,subscriptions,providers,exposes,states,lifecycle,slot,modules)=extracted;
         attempt_failed_created_cleanup(||drop(projection));
@@ -424,9 +428,9 @@ fn attempt_native_cleanup<T>(failure:&mut Option<Box<dyn std::any::Any+Send>>,op
 const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);8]=[control_label_detach,text_detach,image_detach,positioning_detach,overlay_detach,scroll_detach,atoms_detach,crate::gpui_native_move::move_detach];
 fn begin_native_detach(owner:&OwnerRef)->bool{
     withdraw_entry_view(owner);
-    let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
+    let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
 }
-pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}crate::gpui_native_move::move_blur(owner);withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
+pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}crate::gpui_native_move::move_blur(owner);withdraw_entry_view(owner);let mut o=owner.borrow_mut();let hover_mounted=o.native_hover.mounted_epoch==Some(o.epoch);o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.native_hover=NativeHoverState{mounted_epoch:hover_mounted.then_some(o.epoch),needs_sync:hover_mounted,..NativeHoverState::default()};o.window_id=Some(id);}
 pub fn detach_native_view(owner:&OwnerRef){
     let mounted=begin_native_detach(owner);
     let mut failure=None;
@@ -537,7 +541,7 @@ pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{
 pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,value);Value::Undefined}
 pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);capture_method(&owner_ref,key.clone(),callback.clone());owner_ref.borrow_mut().exposes.insert(key,callback);Value::Undefined}
 pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().declared_events.insert(key);Value::Undefined}
-pub fn emit(owner:&OwnerWeak,key:Value,payload:Value)->Value{let owner=runtime(owner);let key=key.text();assert!(owner.borrow().declared_events.contains(&key),"undeclared Expose event");let payload=if matches!(payload,Value::Undefined){Json::Null}else{payload.data()};{let mut owner=owner.borrow_mut();owner.emitted.push((key,payload));owner.dirty=true;}Value::Undefined}
+pub fn emit(owner:&OwnerWeak,key:Value,payload:Value)->Value{let owner=runtime(owner);let key=key.text();assert!(owner.borrow().declared_events.contains(&key),"undeclared Expose event");let payload=if matches!(payload,Value::Undefined){Json::Null}else{payload.data()};{let mut owner=owner.borrow_mut();owner.emitted.push((key,payload));owner.pending_native_events=true;owner.dirty=true;}Value::Undefined}
 pub fn disposer(owner:OwnerRef,active:Rc<Cell<bool>>,setup_only:bool)->Value{let owner=Rc::downgrade(&owner);Value::Function(Rc::new(move |_|{if setup_only{setup(&owner);}else{ensure(&owner);}active.set(false);Value::Undefined}))}
 pub fn style_use(owner:&OwnerWeak,handles:Vec<Value>)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));owner.borrow_mut().contributions.push(Contribution{active:active.clone(),predicate:None,styles:style_items(handles)});disposer(owner,active,true)}
 pub fn rule(owner:&OwnerWeak,predicate:Value,handles:Vec<Value>)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));owner.borrow_mut().contributions.push(Contribution{active:active.clone(),predicate:Some(predicate),styles:style_items(handles)});Value::Resource(active)}
@@ -748,13 +752,14 @@ if owner.borrow().modules.hooks.contains("scroll"){
 }
 let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let owner=owner.clone();let drive=drive.clone();let kind=action.clone();element=element.on_a11y_action(action_from_name(&action),move |data,window,cx|{if dispatch_accessibility_action(&owner,&kind,data){window.prevent_default()}drive(window,cx)});}}
 if control_label_action_enabled(owner){let label=owner.clone();let label_drive=drive.clone();element=element.on_a11y_action(gpui::AccessibleAction::Click,move|_,window,cx|{control_label_accessibility_action(&label,window,cx);label_drive(window,cx);});}
+let hover_view=Rc::new(Cell::new(None));
 if native_pointer_input_needed(owner){
 let capture_down=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_down(move|event,window,cx|{let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_down,"host:mousedown",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_down=owner.clone();let down_drive=drive.clone();element.interactivity().on_any_mouse_down(move|event,window,cx|{if claim_pointer(&on_down){control_label_pointer_down(&on_down,event,window.default_prevented());let mut fields=event_fields("pointer.down");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_down,"pointer.down",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_down,"press.start",press_fields("press.start",&fields));}if prevented{window.prevent_default()}else if !window.default_prevented(){text_pointer_down(&on_down,event,window,cx);}if event.button==gpui::MouseButton::Right&&dispatch_root_route(&on_down,"context.menu",press_fields("context.menu",&fields)){window.prevent_default()}}let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch(&on_down,"host:mousedown",false,fields){window.prevent_default()}down_drive(window,cx)});
 let capture_up=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_up(move|event,window,cx|{let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_up,"host:mouseup",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_up=owner.clone();let up_drive=drive.clone();element.interactivity().on_any_mouse_up(move|event,window,cx|{if claim_pointer(&on_up){let mut fields=event_fields("pointer.up");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_up,"pointer.up",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_up,"press.end",press_fields("press.end",&fields));}if prevented{window.prevent_default()}}let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch(&on_up,"host:mouseup",false,fields){window.prevent_default()}up_drive(window,cx)});
-let on_move=owner.clone();let move_drive=drive.clone();element=element.on_mouse_move(move|event,window,cx|{control_label_pointer_move(&on_move,event);if claim_pointer(&on_move){let mut fields=event_fields("pointer.move");modifiers(&mut fields,event.modifiers);if dispatch_root_route(&on_move,"pointer.move",fields){window.prevent_default()}else if !window.default_prevented(){text_pointer_move(&on_move,event,window,cx);}}let mut fields=event_fields("host:mousemove");modifiers(&mut fields,event.modifiers);if dispatch(&on_move,"host:mousemove",false,fields){window.prevent_default()}move_drive(window,cx)});
-let on_hover=owner.clone();let hover_drive=drive.clone();element=element.on_hover(move|hover,window,cx|{let kind=if *hover{"pointer.enter"}else{"pointer.leave"};let mut prevented=dispatch_root_route(&on_hover,kind,event_fields(kind));if !*hover{control_label_pointer_cancel(&on_hover);prevented|=pointer_intent(&on_hover,"press.cancel",event_fields("press.cancel"));}if prevented{window.prevent_default()}let kind=if *hover{"host:mouseenter"}else{"host:mouseleave"};if dispatch(&on_hover,kind,false,event_fields(kind)){window.prevent_default()}hover_drive(window,cx)});
+let on_move=owner.clone();let move_drive=drive.clone();let hover_motion=hover_view.clone();element=element.on_mouse_move(move|event,window,cx|{control_label_pointer_move(&on_move,event);if claim_pointer(&on_move){let mut fields=event_fields("pointer.move");modifiers(&mut fields,event.modifiers);if dispatch_root_route(&on_move,"pointer.move",fields){window.prevent_default()}else if !window.default_prevented(){text_pointer_move(&on_move,event,window,cx);}}let mut fields=event_fields("host:mousemove");modifiers(&mut fields,event.modifiers);if dispatch(&on_move,"host:mousemove",false,fields){window.prevent_default()}if native_hover_motion(&on_move,hover_motion.get(),window,cx){window.prevent_default()}move_drive(window,cx)});
+let on_hover=owner.clone();let hover_drive=drive.clone();let hover_input=hover_view.clone();element=element.on_hover(move|hover,window,cx|{if let Some(view)=hover_input.get(){if native_hover_input(&on_hover,view,*hover,window,cx){window.prevent_default()}}hover_drive(window,cx)});
 let on_click=owner.clone();let click_drive=drive.clone();element=element.on_click(move|event,window,cx|{let(suppress,cancelled)={let mut o=on_click.borrow_mut();(std::mem::take(&mut o.suppress_click),std::mem::take(&mut o.press.cancelled))};let claimed=claim_click(&on_click);if !cancelled&&!(suppress&&matches!(event,gpui::ClickEvent::Keyboard(_)))&&claimed{if dispatch_root_route(&on_click,"press.commit",click_event_fields("press.commit",event)){window.prevent_default()}control_label_pointer_click(&on_click,event,window.default_prevented(),window,cx);}else{control_label_pointer_cancel(&on_click);}if dispatch(&on_click,"host:click",false,click_event_fields("host:click",event)){window.prevent_default()}global_native_click(event,window,cx);click_drive(window,cx)});
 
 }
@@ -764,7 +769,7 @@ let on_key=owner.clone();element=element.on_key_down(move|event,window,cx|{let m
 let on_key=owner.clone();element=element.on_key_up(move|event,window,cx|{let mut fields=event_fields("host:keyup");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch(&on_key,"host:keyup",false,fields){window.prevent_default()}collect_key(&on_key);global_key_up(event,window,cx);});
 }
 let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();
-element=element.child(canvas(move|_,window,_|{note_host_order(&measured);},move|_,_,window,cx|{
+element=element.child(canvas(move|_,window,_|{note_host_order(&measured);hover_view.set(native_hover_view(&measured,window));},move|_,_,window,cx|{
     if native_pointer_input_needed(&committed){register_pointer_input(window,Some(Rc::downgrade(&committed)));}
     if crate::gpui_native_move::move_owner_has_binding(&committed){crate::gpui_native_move::register_move_input(window,Rc::downgrade(&committed));}
     if native_boundary_input_needed(&committed){window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);}
@@ -776,6 +781,7 @@ element=element.child(canvas(move|_,window,_|{note_host_order(&measured);},move|
             if !current{return}if native_focus_observation_needed(&owner){owner.borrow_mut().modules.focus.native=Some(focus);}
             #[cfg(feature="experimental-focus-tree")]refresh_native_entry(&owner,window);
             Owner::commit(&owner,revision);if owner.borrow().disposed||!owner.borrow().present{return}
+            if native_hover_reconcile(&owner,window,cx){window.prevent_default()}
             poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{drive(window,cx)}
         });
     });
@@ -1114,4 +1120,6 @@ mod callback_handle_identity_tests {
   gpuiNativePositioningSource +
   gpuiNativeOverlaySource +
   gpuiNativeControlLabelSource +
-  gpuiNativeSelectionSource;
+  gpuiNativeSelectionSource +
+  gpuiNativeNotifySource +
+  gpuiNativeHoverSource;
