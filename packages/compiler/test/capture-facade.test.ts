@@ -159,6 +159,24 @@ describe('checked public capture facade', () => {
     expect(validateIR(JSON.parse(JSON.stringify(ir)))).toMatchObject({ ok: true });
   });
 
+  it.each(['result.getMethod', '({...result}).getMethod'])(
+    'checks the actual method phase after copying and renaming its lookup: %s',
+    (lookup) => {
+      const result = parsePrototype(`import {defineAsHook,definePrototype} from '@proto.ui/core';
+        const use=defineAsHook({name:'renamed-capture-lookup',setup(def){
+          def.expose.method('restricted',()=>def.expose.value('late',1));
+        },projectHandle(result){return {resolve:${lookup}};}});
+        export default definePrototype({name:'lookup-phase-consumer',setup(def){
+          const handle=use();const resolve=handle.resolve;
+          def.expose.method('invoke',()=>resolve?.('restricted')?.());
+        }});`);
+      expect(result).toMatchObject({
+        ok: false,
+        diagnostics: [{ code: 'PUI1007', message: expect.stringMatching(/callback|phase/) }],
+      });
+    }
+  );
+
   it.each([
     'return {...result.props};',
     'return {...(result.context as unknown)};',

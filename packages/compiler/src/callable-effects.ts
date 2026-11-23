@@ -29,6 +29,7 @@ import {
   type CallableType,
 } from './value-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
+import { captureFacadeFields } from './capture-types';
 
 type Known = readonly Atom[];
 type CapturedState = HookCaptureIR['states'][number];
@@ -43,7 +44,9 @@ type Atom =
   | { kind: 'cell'; initial: Known; tracked: boolean }
   | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean }
   | { kind: 'getter'; callable: Known }
+  | { kind: 'capture-lookup'; owner: Capture; property: CaptureLookup }
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
+type CaptureLookup = 'getState' | 'getMethod' | 'getAsHook' | 'getAsHookHandle';
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
 interface CaptureContents {
@@ -258,6 +261,7 @@ function analyzeCallableFlow(
   const identities = new Map<FunctionIR, number>();
   const installingHooks = new Set<string>();
   const captureFrames: Capture[] = [];
+  const captureRecords = new WeakMap<Capture, Map<string, RecordValue>>();
   const setup: Execution = { phase: 'setup', context: 'setup' };
   const render: Execution = { phase: 'render', context: 'render' };
 
@@ -276,6 +280,74 @@ function analyzeCallableFlow(
   const snapshot = (): Store => copyStore(store);
   const captureContents = (capture: Capture): CaptureContents =>
     store.captures.get(capture) ?? capture;
+
+  function captureRecord(owner: Capture, key: string, contents: Map<string, Known>): Known {
+    let records = captureRecords.get(owner);
+    if (!records) captureRecords.set(owner, (records = new Map()));
+    let record = records.get(key);
+    if (!record) {
+      record = { kind: 'record', fields: contents, tracked: true };
+      records.set(key, record);
+      allocationSerial++;
+    }
+    store.records.set(record, contents);
+    return [record];
+  }
+
+  /** These atoms originate in an actual installation, never in callable type metadata. */
+  function captureProperty(owner: Capture, property: string): Known {
+    const contents = captureContents(owner);
+    if (property === 'render') return contents.render ?? UNDEFINED;
+    if (property === 'methods') return captureRecord(owner, property, new Map(contents.methods));
+    if (property === 'artifacts')
+      return captureRecord(
+        owner,
+        property,
+        new Map([
+          ['stateHandles', UNKNOWN],
+          ['eventKeys', UNKNOWN],
+          ['methods', captureProperty(owner, 'methods')],
+          ['asHooks', UNKNOWN],
+        ])
+      );
+    if (['getState', 'getMethod', 'getAsHook', 'getAsHookHandle'].includes(property))
+      return [{ kind: 'capture-lookup', owner, property: property as CaptureLookup }];
+    return UNKNOWN;
+  }
+
+  function captureLookup(value: Extract<Atom, { kind: 'capture-lookup' }>, keys: Known): Known {
+    const contents = captureContents(value.owner);
+    if (value.property === 'getState') return UNKNOWN;
+    const read = (key: string): Known => {
+      if (value.property === 'getMethod') return contents.methods.get(key) ?? UNDEFINED;
+      return (contents.children.get(key) ?? [undefined]).flatMap((child): Known => {
+        if (!child) return UNDEFINED;
+        if (value.property === 'getAsHookHandle') return child.handle;
+        return [
+          {
+            kind: 'record',
+            fields: new Map<string, Known>([
+              ['name', [{ kind: 'literal', value: key }]],
+              ['result', child.result ?? [child.capture]],
+              ['handle', child.handle],
+            ]),
+          },
+        ];
+      });
+    };
+    return merge(
+      keys.map((key) =>
+        key.kind === 'literal' && typeof key.value === 'string'
+          ? read(key.value)
+          : merge([
+              UNDEFINED,
+              ...[
+                ...(value.property === 'getMethod' ? contents.methods : contents.children).keys(),
+              ].map(read),
+            ])
+      )
+    );
+  }
   function merge(values: readonly Known[]): Known {
     if (!values.length) return [];
     if (values.every((value) => value === values[0])) return values[0];
@@ -544,6 +616,8 @@ function analyzeCallableFlow(
           ];
         case 'getter':
           return ['get', value.callable.map((child) => visit(child, depth + 1))];
+        case 'capture-lookup':
+          return ['capture-lookup', value.property, visit(value.owner, depth + 1)];
         case 'capture':
           return [
             'capture',
@@ -798,6 +872,7 @@ function analyzeCallableFlow(
       return branches(
         values.map((value) => () => {
           if (value.kind === 'closure') return call(value, args, execution);
+          if (value.kind === 'capture-lookup') return captureLookup(value, args[0] ?? UNDEFINED);
           if (value.kind === 'native') {
             // A host-supplied callable has an explicit signature. Supplied closures
             // may be retained by that external consumer and become outward roots.
@@ -869,6 +944,8 @@ function analyzeCallableFlow(
         continue;
       }
       if (value.kind === 'closure') enqueueCallback({ closure: value, execution, outward: true });
+      else if (value.kind === 'capture-lookup' && value.property !== 'getState')
+        pending.push(...captureLookup(value, UNKNOWN).map((value) => ({ value, type: undefined })));
       else if (value.kind === 'getter')
         pending.push(...value.callable.map((value) => ({ value, type: undefined })));
       else if (value.kind === 'record')
@@ -960,8 +1037,7 @@ function analyzeCallableFlow(
             )
           );
         }
-        if (value.kind === 'capture' && name === 'render')
-          return captureContents(value).render ?? UNDEFINED;
+        if (value.kind === 'capture') return captureProperty(value, name);
         return UNKNOWN;
       })
     );
@@ -994,6 +1070,9 @@ function analyzeCallableFlow(
             copy.set(name, property([value], name, execution, span));
             if (!reachable) return [];
           }
+        else if (value.kind === 'capture')
+          for (const field of captureFacadeFields(undefined, new Map()))
+            copy.set(field.name, captureProperty(value, field.name));
         else if (type)
           for (const field of objectFields(type) ?? []) {
             if (field.accessor) {
@@ -1098,6 +1177,7 @@ function analyzeCallableFlow(
                     closed: present.every(
                       (target) =>
                         target.kind === 'closure' ||
+                        target.kind === 'capture-lookup' ||
                         target.kind === 'undefined' ||
                         target.kind === 'uninitialized' ||
                         target.kind === 'literal'
