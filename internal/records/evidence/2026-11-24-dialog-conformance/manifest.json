@@ -1,0 +1,3047 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-23T19:21:05.084097+00:00",
+  "archive": "raw-evidence.tar.gz",
+  "archiveSha256": "6070865e0f5f49b385563abe580c31dc6c62ff1fcc844e13f81ba06ec8c0b9c1",
+  "archiveBytes": 1520497,
+  "memberCount": 607,
+  "uncompressedFileBytes": 11216437,
+  "members": [
+    {
+      "path": "attempt-01/baseline/cell.json",
+      "bytes": 2296,
+      "sha256": "326fef9497eb366f7e0f622ecb12acdeabaafb666ba7687e0bbcb0b1fc79d926"
+    },
+    {
+      "path": "attempt-01/baseline/execution.json",
+      "bytes": 378,
+      "sha256": "8b84ff31212024f9a439dcbfe89cf24969c5406d62499e118b820103ebad2e42"
+    },
+    {
+      "path": "attempt-01/baseline/integrity.json",
+      "bytes": 8163,
+      "sha256": "8a71358317be64338f47011b9c47ab49bf8e6766aa1be4f7dde1f7c200bc438b"
+    },
+    {
+      "path": "attempt-01/baseline/runner.log",
+      "bytes": 160021,
+      "sha256": "c1d076b4909f4518acfebc11f2b3b8bc1527f7a819c3c71ea852c101ad452a1e"
+    },
+    {
+      "path": "attempt-01/baseline/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-01/baseline/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-01/baseline/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-01/baseline/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-01/baseline/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-01/baseline/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-01/baseline/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-01/baseline/vitest.json",
+      "bytes": 1850,
+      "sha256": "377a59d710ca91ec0f44c757fe0de46a248cacefd0ef66e5901cfb9ec3191ab0"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/cell.json",
+      "bytes": 2552,
+      "sha256": "e307f4d355fdc1a3af3c6932c7f982bd764b3430ccb8b8a69355cda3be3d820a"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/injected/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5075,
+      "sha256": "e25ee3cc139e885b085424115b43772d4a8d9ad3993a7a941bec844b2de07b1d"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/integrity.json",
+      "bytes": 329,
+      "sha256": "2126062bb6e6deb7289d5efdcd4156a89b14964363357744b120942f0862b9ef"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/runner.log",
+      "bytes": 237,
+      "sha256": "9c2d6bc3cacbfe5987a0949d85bee93e64a2fc1b911d854ef24b8e29977d6f9d"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-01/controlled-eager-close/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/cell.json",
+      "bytes": 2546,
+      "sha256": "b029be4b10a41f7988e492c60427a8514bd9d0feaf41774c0401d4ac427a85b4"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/execution.json",
+      "bytes": 383,
+      "sha256": "4b1f8c392171e031aec990b9a730cb205694c8070fcb984c624ae48422aa24dc"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9985,
+      "sha256": "9f781bb2f619c69698a24ad739dba72c18b94bd55feef175e5f17d4ebbfe9050"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/integrity.json",
+      "bytes": 8155,
+      "sha256": "50f85bb8eefbd1b1e40ce28d028b42f5da68a54e4d8740b49f6f3d708f0929e6"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/runner.log",
+      "bytes": 160022,
+      "sha256": "b49b448d81b8c5a291158d914df4945c3b55a52374c60c4a66db31486eebcc66"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-01/focus-no-loop/vitest.json",
+      "bytes": 1850,
+      "sha256": "840186a805bc71e86e36101d11a5aaad1fe6b96574f79162d7e2341ca7e5d313"
+    },
+    {
+      "path": "attempt-01/launch.json",
+      "bytes": 1671,
+      "sha256": "0e149c1b73b97fea8539c7a6932ec1f62fee26370f0ba3b5af34634dab55beac"
+    },
+    {
+      "path": "attempt-01-interruption.json",
+      "bytes": 277,
+      "sha256": "5bc0a6e84f6beda69fa95ec2377418e712ba2744b7353ac4d20949015bc1458e"
+    },
+    {
+      "path": "attempt-01.log",
+      "bytes": 91,
+      "sha256": "02f0be23d1b456c0d510364932ebe4131ba33f46c898c11ed03701550b395ac7"
+    },
+    {
+      "path": "attempt-02/baseline/cell.json",
+      "bytes": 2296,
+      "sha256": "326fef9497eb366f7e0f622ecb12acdeabaafb666ba7687e0bbcb0b1fc79d926"
+    },
+    {
+      "path": "attempt-02/baseline/integrity.json",
+      "bytes": 329,
+      "sha256": "2126062bb6e6deb7289d5efdcd4156a89b14964363357744b120942f0862b9ef"
+    },
+    {
+      "path": "attempt-02/baseline/runner.log",
+      "bytes": 109535,
+      "sha256": "3ac5f148a7e30ad4516d8edd2d9e3a741785311ddd737e8f69823e60b24f0e58"
+    },
+    {
+      "path": "attempt-02/baseline/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-02/baseline/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-02/baseline/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-02/baseline/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-02/baseline/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-02/baseline/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-02/baseline/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-02/launch.json",
+      "bytes": 760,
+      "sha256": "98ab1330d178b5204da5dbee3a96a310fe8c56f496af9d646fb00b8557ddf7dd"
+    },
+    {
+      "path": "attempt-02-interruption.json",
+      "bytes": 247,
+      "sha256": "095bd1b6fcef62aeb51980d2c4e5766bb61bfec02eda8a754b4a8a576e276efc"
+    },
+    {
+      "path": "attempt-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "attempt-03/baseline/cell.json",
+      "bytes": 2296,
+      "sha256": "326fef9497eb366f7e0f622ecb12acdeabaafb666ba7687e0bbcb0b1fc79d926"
+    },
+    {
+      "path": "attempt-03/baseline/execution.json",
+      "bytes": 378,
+      "sha256": "2ec8fe28defd28d07b9d32ce183c9fda75eb0f99f664a1402e70c71419c23ae2"
+    },
+    {
+      "path": "attempt-03/baseline/integrity.json",
+      "bytes": 991,
+      "sha256": "f663669fbe463399fae5928725d01e06b9c7b71d2ff53e3b132b12ac4c8bf79a"
+    },
+    {
+      "path": "attempt-03/baseline/oracle.jsonl",
+      "bytes": 3512,
+      "sha256": "b3c041d85e5bb45463d3a28f95bd172e4d764566510478a26786eb571d557501"
+    },
+    {
+      "path": "attempt-03/baseline/runner.log",
+      "bytes": 297995,
+      "sha256": "c358c6768a122bf6ef9a67be5ef1fff28377930a6789965aebef1426e77bec15"
+    },
+    {
+      "path": "attempt-03/baseline/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-03/baseline/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-03/baseline/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-03/baseline/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-03/baseline/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-03/baseline/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-03/baseline/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-03/baseline/vitest.json",
+      "bytes": 14662,
+      "sha256": "4b414dc5e155f2871b3a051341a3ad60c68eba51e6d271090132516ec518e3a1"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/cell.json",
+      "bytes": 2552,
+      "sha256": "e307f4d355fdc1a3af3c6932c7f982bd764b3430ccb8b8a69355cda3be3d820a"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/execution.json",
+      "bytes": 392,
+      "sha256": "0edeba6cc59cf0960e24ae3c4bc3b6cabd9857ebd0f6158f243e6df091e4ba0a"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/injected/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5075,
+      "sha256": "e25ee3cc139e885b085424115b43772d4a8d9ad3993a7a941bec844b2de07b1d"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/integrity.json",
+      "bytes": 991,
+      "sha256": "e0613e4d60fd32d6f6be7ce55482f1484abb0c0c5c6be7d1ab41159744822c31"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/oracle.jsonl",
+      "bytes": 5188,
+      "sha256": "853865ac787e413ac28eb26bd472433deace185d85656751f7b7e7367812f9fd"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/runner.log",
+      "bytes": 302808,
+      "sha256": "41b014b631804f80138f1cd71422f63a220e5ea082d350b3d72334be39fbfdf2"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/transforms.json",
+      "bytes": 395,
+      "sha256": "dc117307ecec6e573522b1ceff3f2bfe136bef04326846e70aa435c31a1f8fa4"
+    },
+    {
+      "path": "attempt-03/controlled-eager-close/vitest.json",
+      "bytes": 23430,
+      "sha256": "17ed9afc27c3a8114bd3e8f7e315438fad8f7f79ca53280fecd1e38f17b8300d"
+    },
+    {
+      "path": "attempt-03/description-dangling/cell.json",
+      "bytes": 2553,
+      "sha256": "a8e0dedf9f63383137467ab7fc9b7b3ec68d54d6e4010be3e1c60b439b4aee16"
+    },
+    {
+      "path": "attempt-03/description-dangling/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9961,
+      "sha256": "950345324b59d06d09e7a8f42c89ca9339a3f4b2a4c0b43f87afc180f23997f6"
+    },
+    {
+      "path": "attempt-03/description-dangling/integrity.json",
+      "bytes": 329,
+      "sha256": "2126062bb6e6deb7289d5efdcd4156a89b14964363357744b120942f0862b9ef"
+    },
+    {
+      "path": "attempt-03/description-dangling/runner.log",
+      "bytes": 91826,
+      "sha256": "1a142824b7696a2ca28f6c189d1c1023d6bf56d74f134bcaaf676fbed3c612e7"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-03/description-dangling/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/cell.json",
+      "bytes": 2546,
+      "sha256": "b029be4b10a41f7988e492c60427a8514bd9d0feaf41774c0401d4ac427a85b4"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/execution.json",
+      "bytes": 383,
+      "sha256": "7e2ac4e439ae3ad88273ffe049651b314263ffb7dbe4f719d110c39c566e3cea"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9985,
+      "sha256": "9f781bb2f619c69698a24ad739dba72c18b94bd55feef175e5f17d4ebbfe9050"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/integrity.json",
+      "bytes": 991,
+      "sha256": "4c052a1359d1f894464a138a3abea02eaa7f1bc6da477a0e9b110410f2defee2"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/oracle.jsonl",
+      "bytes": 5017,
+      "sha256": "2bbae478a67f62e0911bba6d918e52a364c59613bf0a6659ae845331efe9dd3d"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/runner.log",
+      "bytes": 299152,
+      "sha256": "64a40ee2e67ce24e6a9c0a33afaba7562517c48bb756db55e6ae9ef3c41a0123"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 11836,
+      "sha256": "edb1c1874e1e8a41d40649dc9e3241f3a7f62b1410a21a778d444dbcdcbe28d1"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 6873,
+      "sha256": "acf6e3f76ae832a266b497d27b9bb4f358a86720a9b1d4d88b5704ae1cbb8ad2"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/transforms.json",
+      "bytes": 389,
+      "sha256": "8b8acd32c683d8023c32ab4766ac2f602aa72c3bd2d58b7b43e56af4641cb69a"
+    },
+    {
+      "path": "attempt-03/focus-no-loop/vitest.json",
+      "bytes": 16462,
+      "sha256": "6e511f54bd201a86604dd2ce1d5534126fc2a9f2dc4e8679605237892512a59e"
+    },
+    {
+      "path": "attempt-03/launch.json",
+      "bytes": 2137,
+      "sha256": "6c09e000467be0c3872f0cb6c844b63efc1f07ad3ffd7d248e0b8f21a52069ee"
+    },
+    {
+      "path": "attempt-03-interruption.json",
+      "bytes": 271,
+      "sha256": "b4a127bd50a3a1ea8607b1112c556aa233016952a81a36123af2ed2d3df63eb4"
+    },
+    {
+      "path": "attempt-03.log",
+      "bytes": 148,
+      "sha256": "909211a263c7eecadca831a6528dddb1155493fa46fa2ffbf63f30ffae995240"
+    },
+    {
+      "path": "attempt-04/baseline/cell.json",
+      "bytes": 2424,
+      "sha256": "2e4c394745ebbaae408c11a503997810f897815cd27f992e46ee5296efa3782b"
+    },
+    {
+      "path": "attempt-04/baseline/execution.json",
+      "bytes": 378,
+      "sha256": "d8acd4dc7a5e2bc1aa69279bdecd95a27de551b33c04da70b80c8aae2289f29f"
+    },
+    {
+      "path": "attempt-04/baseline/integrity.json",
+      "bytes": 991,
+      "sha256": "cf06518146c98ec63e89a55a8c6a57b41db384db950b1bb26f9d4220c12070e7"
+    },
+    {
+      "path": "attempt-04/baseline/oracle.jsonl",
+      "bytes": 3512,
+      "sha256": "b3c041d85e5bb45463d3a28f95bd172e4d764566510478a26786eb571d557501"
+    },
+    {
+      "path": "attempt-04/baseline/runner.log",
+      "bytes": 295674,
+      "sha256": "7171f33e5d40c0f2c4d4f883b9135713a725052d6b463406aaf5df2a3640ba56"
+    },
+    {
+      "path": "attempt-04/baseline/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "attempt-04/baseline/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-04/baseline/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-04/baseline/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-04/baseline/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-04/baseline/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-04/baseline/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-04/baseline/vitest.json",
+      "bytes": 10950,
+      "sha256": "dff1751479d563a23b20d5d4558769a33191ef6d107752e017025512900eff59"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/cell.json",
+      "bytes": 2680,
+      "sha256": "30e88faf47162daf6a172debd4fe30f0fe550d7fbcf76ef81fab3de7f4d940b5"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/execution.json",
+      "bytes": 392,
+      "sha256": "76c735a6326f99121184554a3a29be21a39b0ad7db64d43bb4f5f4305e28e63c"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/injected/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5075,
+      "sha256": "e25ee3cc139e885b085424115b43772d4a8d9ad3993a7a941bec844b2de07b1d"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/integrity.json",
+      "bytes": 991,
+      "sha256": "302826da9df9f87e54d161fa73875c345e2f9583a513ae2490822110b4250412"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/oracle.jsonl",
+      "bytes": 5185,
+      "sha256": "4c7a8d31e14e15335d6126bad2f23566fd9bb7112e6be2d6bf47fa885231ee76"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/runner.log",
+      "bytes": 300794,
+      "sha256": "0e356e80524b273514ca2f82d0376750e9303436b758aa2eef2703093c427105"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/transforms.json",
+      "bytes": 395,
+      "sha256": "dc117307ecec6e573522b1ceff3f2bfe136bef04326846e70aa435c31a1f8fa4"
+    },
+    {
+      "path": "attempt-04/controlled-eager-close/vitest.json",
+      "bytes": 19691,
+      "sha256": "5872a5ef1d1bebe954ee06efd8625218232613cc9a2352fa06a9495ded14f309"
+    },
+    {
+      "path": "attempt-04/description-dangling/cell.json",
+      "bytes": 2681,
+      "sha256": "4d2bdd92a656c1d25506547b4f35929a112affa353e758bbebfcd1dbf18b2652"
+    },
+    {
+      "path": "attempt-04/description-dangling/execution.json",
+      "bytes": 390,
+      "sha256": "57b81967ab2e9e97bbdf0b3cff9e7386b37a04449fbd394ce3d312cab640e5b2"
+    },
+    {
+      "path": "attempt-04/description-dangling/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9961,
+      "sha256": "950345324b59d06d09e7a8f42c89ca9339a3f4b2a4c0b43f87afc180f23997f6"
+    },
+    {
+      "path": "attempt-04/description-dangling/integrity.json",
+      "bytes": 991,
+      "sha256": "240b9723667ee0ed5ef1ca074a87235a64f4d10e831b2e87c8727b7e95532a6c"
+    },
+    {
+      "path": "attempt-04/description-dangling/oracle.jsonl",
+      "bytes": 5384,
+      "sha256": "6a17b43bb51c4ad0a710da3236bb3657e5fd9ff33361b1fd5053d58a36a02be9"
+    },
+    {
+      "path": "attempt-04/description-dangling/runner.log",
+      "bytes": 297986,
+      "sha256": "430941c8528a0be7ef8167a411aa6e5aa9827c40a4cc2119b57e1434a93c813e"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-04/description-dangling/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-04/description-dangling/transforms.json",
+      "bytes": 396,
+      "sha256": "8cae315f04740953115c32bf10f2d4451fbb0168ee46226399374ae11ad9f4d3"
+    },
+    {
+      "path": "attempt-04/description-dangling/vitest.json",
+      "bytes": 14482,
+      "sha256": "3ca28e8dcdb75801691735ae4f0f3abcc6019c767bb58f6ce1baa788b3536cd4"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/cell.json",
+      "bytes": 2674,
+      "sha256": "874669ac35762a3f3e51d4f609ae26ad05d1129f450a0552682d6a7da735c8b0"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/execution.json",
+      "bytes": 383,
+      "sha256": "1a01de2a98a7f290818b79aee5d604fd92759820c4d2e6f9aaecf93e5c2ab9b4"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9985,
+      "sha256": "9f781bb2f619c69698a24ad739dba72c18b94bd55feef175e5f17d4ebbfe9050"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/integrity.json",
+      "bytes": 991,
+      "sha256": "c79b2dc4469c30f76e91dbc5a7100fd8df2b897749a75aad4cc72ea6cc67b344"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/oracle.jsonl",
+      "bytes": 5014,
+      "sha256": "697f1b21fae2650a74969e096b7000ae05c061925e74d72971b6cdba74d445da"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/runner.log",
+      "bytes": 299729,
+      "sha256": "e24db383bb8aec16b728d6c53623c56d03870f7fffa5204f004046d95113c3b0"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/transforms.json",
+      "bytes": 389,
+      "sha256": "8b8acd32c683d8023c32ab4766ac2f602aa72c3bd2d58b7b43e56af4641cb69a"
+    },
+    {
+      "path": "attempt-04/focus-no-loop/vitest.json",
+      "bytes": 16448,
+      "sha256": "3eebbc4724dcf7661d7a9294b1418a01989f56f0733f02f3d293ac76c23afb99"
+    },
+    {
+      "path": "attempt-04/launch.json",
+      "bytes": 3576,
+      "sha256": "13916a295cbb5e2e762dbb7762dcba36235eb0d341fbada7edf2c606def492c5"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/cell.json",
+      "bytes": 2685,
+      "sha256": "0c233affae0d0dcf0617ac29ab885910f294ff58a8f3e63ba47eadfc398bec21"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/execution.json",
+      "bytes": 390,
+      "sha256": "cd0d44fa8162af86ddc0ad52ed45dc39b3add4999e36eae13d7303364210a0ed"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 10038,
+      "sha256": "bd33dfef45f44c0750a41c154c7fb62cea0097ec2c0a784d30b1b51c70bfc49f"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/integrity.json",
+      "bytes": 991,
+      "sha256": "b3098c0612c2335daad9da657c353f0ccabf8bbedaa6578c720b09da8c31d1db"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/oracle.jsonl",
+      "bytes": 3512,
+      "sha256": "b3c041d85e5bb45463d3a28f95bd172e4d764566510478a26786eb571d557501"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/runner.log",
+      "bytes": 295797,
+      "sha256": "5d4eb2d142a9ad6efe39892f424f14e3086da35c87d0aca081c212d389820286"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/transforms.json",
+      "bytes": 396,
+      "sha256": "9edbac4cb3947251a2af4380695dc85b5ea918e6d1e5825146265331b0d5dc6e"
+    },
+    {
+      "path": "attempt-04/legal-rounded-border/vitest.json",
+      "bytes": 10939,
+      "sha256": "9e1a4755085b810a2bd4caeb9e12e93afd5f0bbfb9993cb92c7c3e56bff97ad5"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/cell.json",
+      "bytes": 2684,
+      "sha256": "f4687bfa9d0d7e69e4073d464ace25327b8fc4c583592fcce8001a9609f93435"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/execution.json",
+      "bytes": 393,
+      "sha256": "8c1f35bc18597e68527f4bbbef91c0f2cce3465158c5d03d9acdbe50aca6eb99"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 10028,
+      "sha256": "23cb62ad92ae8b3430247151c4c5c801454621d591c92def97a1cf5f9f336e53"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/integrity.json",
+      "bytes": 991,
+      "sha256": "720daf5128af582a59831e7d0b375757b1e2b5d28fa6b1b640198892397b82d4"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/oracle.jsonl",
+      "bytes": 7102,
+      "sha256": "8e36cce7faf8c4928e9d2dca37e29e869e2f4bd315dc6221b358d9131b4593a8"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/runner.log",
+      "bytes": 304500,
+      "sha256": "03cfd8fc3bc5da11cae8ffe493a6c96500b97540674a2bc9d827bd064fa24a74"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/transforms.json",
+      "bytes": 399,
+      "sha256": "b1ffa3bff8ee32711c6f61f54b3eb871fc3c44813be3da02a3250609f161d0cc"
+    },
+    {
+      "path": "attempt-04/presence-early-complete/vitest.json",
+      "bytes": 27009,
+      "sha256": "f2142d46adff5f451b5864e42b9776931f1c0cc198c4720f43cff3c5de535045"
+    },
+    {
+      "path": "attempt-04/study-report.json",
+      "bytes": 110852,
+      "sha256": "c79afedf06839ddabc0ee7da676945a8fc0481791794c659c51644d9a46e9538"
+    },
+    {
+      "path": "attempt-04-report.log",
+      "bytes": 110853,
+      "sha256": "f9c5560fd04973e0822acdbe2524b34d512e4e536ce159c89121e1d4b74d96cb"
+    },
+    {
+      "path": "attempt-04.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "attempt-04.log",
+      "bytes": 316,
+      "sha256": "cb6c0c553dcb172afc8d943429185eae297e73aa3b5dc52304b73d8fc83a9750"
+    },
+    {
+      "path": "check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "classifier-and-preparation-final.log",
+      "bytes": 1409,
+      "sha256": "8bd876cb72ebdb4721e23fd6bfd7f6827167cf37d1222c06fd792d1e6a81adbc"
+    },
+    {
+      "path": "classifier-local-before.log",
+      "bytes": 976,
+      "sha256": "11b6abb882dd7c04e9796d81180ea2d126d44f2b3763b54f1f4dd243cc84ee61"
+    },
+    {
+      "path": "classifier-refactor.log",
+      "bytes": 977,
+      "sha256": "682953c2b112eda9070a821520d670dfaaf189895171026e5c2119ced19baec4"
+    },
+    {
+      "path": "final-09/baseline/cell.json",
+      "bytes": 3204,
+      "sha256": "4467497d4f1ea5a73179cb29be261eee0c2f300ef02c19a486f4c7d55930cfa7"
+    },
+    {
+      "path": "final-09/baseline/execution.json",
+      "bytes": 378,
+      "sha256": "59abec1762496f22b020cd3a8c73dd4b6847907915bda76ac2125a4ea7340eab"
+    },
+    {
+      "path": "final-09/baseline/integrity.json",
+      "bytes": 991,
+      "sha256": "da93e556a8d66d29ebefb990ccf98a492dee2b15da6355ac6556bf0919a7e23f"
+    },
+    {
+      "path": "final-09/baseline/oracle.jsonl",
+      "bytes": 3512,
+      "sha256": "b3c041d85e5bb45463d3a28f95bd172e4d764566510478a26786eb571d557501"
+    },
+    {
+      "path": "final-09/baseline/preparations.json",
+      "bytes": 423,
+      "sha256": "cc64c93050fce6407abfe441f7cccbef6f8fc3826a9983d7c70c582f62545a4f"
+    },
+    {
+      "path": "final-09/baseline/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/baseline/runner.log",
+      "bytes": 295738,
+      "sha256": "03438302ba6bfec8deeb962ee5453100c9b781f4ec4ae4c8671b62122559623f"
+    },
+    {
+      "path": "final-09/baseline/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/baseline/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/baseline/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/baseline/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/baseline/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/baseline/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/baseline/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/baseline/vitest.json",
+      "bytes": 10939,
+      "sha256": "cb3c35eece8a2f659b187844f054fc7ae852307534f89c1d262dae8f8a3ff4bd"
+    },
+    {
+      "path": "final-09/controlled-eager-close/cell.json",
+      "bytes": 3460,
+      "sha256": "b05495be7f94c6aa143be632d41ad911c2b26ea371eb210d39765a9b264d07f5"
+    },
+    {
+      "path": "final-09/controlled-eager-close/execution.json",
+      "bytes": 392,
+      "sha256": "4104caa9f980fe4d32ea2040ece5c2642df63947c7b00b5145a7728eabf3573f"
+    },
+    {
+      "path": "final-09/controlled-eager-close/injected/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5075,
+      "sha256": "e25ee3cc139e885b085424115b43772d4a8d9ad3993a7a941bec844b2de07b1d"
+    },
+    {
+      "path": "final-09/controlled-eager-close/integrity.json",
+      "bytes": 991,
+      "sha256": "66ec99ac74979be89cb6c888b730b317ee827763708c156ff446d392889de582"
+    },
+    {
+      "path": "final-09/controlled-eager-close/oracle.jsonl",
+      "bytes": 5185,
+      "sha256": "4c7a8d31e14e15335d6126bad2f23566fd9bb7112e6be2d6bf47fa885231ee76"
+    },
+    {
+      "path": "final-09/controlled-eager-close/preparations.json",
+      "bytes": 437,
+      "sha256": "ee4d52208b37532380423dea3a28799e1876643b22bdbdc260644e80be9f3af3"
+    },
+    {
+      "path": "final-09/controlled-eager-close/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/controlled-eager-close/runner.log",
+      "bytes": 300677,
+      "sha256": "2cec1176053210ed071c50f46a4dfd507fea0e998f397fcb62accaeb917c4c86"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/controlled-eager-close/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/controlled-eager-close/transforms.json",
+      "bytes": 395,
+      "sha256": "dc117307ecec6e573522b1ceff3f2bfe136bef04326846e70aa435c31a1f8fa4"
+    },
+    {
+      "path": "final-09/controlled-eager-close/vitest.json",
+      "bytes": 19665,
+      "sha256": "7e0ad77896e02f2d59d58926523437c67af475af02be5c6ceb5f40f06c9d8d76"
+    },
+    {
+      "path": "final-09/description-dangling/cell.json",
+      "bytes": 3461,
+      "sha256": "1d08b71d67e6f220538eae2922495523ee8fc3f2a1ce6f75b155097d25defae0"
+    },
+    {
+      "path": "final-09/description-dangling/execution.json",
+      "bytes": 390,
+      "sha256": "253fc907ef9265c8914fde4500f8782b3c3ea4f45b456d7210b8904a72835a60"
+    },
+    {
+      "path": "final-09/description-dangling/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9961,
+      "sha256": "950345324b59d06d09e7a8f42c89ca9339a3f4b2a4c0b43f87afc180f23997f6"
+    },
+    {
+      "path": "final-09/description-dangling/integrity.json",
+      "bytes": 991,
+      "sha256": "a8f74f0d2e6e0db76c4fd37d181dac8472388bf36b44309787618754e1c7a91a"
+    },
+    {
+      "path": "final-09/description-dangling/oracle.jsonl",
+      "bytes": 5384,
+      "sha256": "6a17b43bb51c4ad0a710da3236bb3657e5fd9ff33361b1fd5053d58a36a02be9"
+    },
+    {
+      "path": "final-09/description-dangling/preparations.json",
+      "bytes": 435,
+      "sha256": "dfb83c543c255334fc2429ac169bf896538a5c3e9c3e9dc5fb398d0697b78dc7"
+    },
+    {
+      "path": "final-09/description-dangling/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/description-dangling/runner.log",
+      "bytes": 297984,
+      "sha256": "6e144ffe3b454a07b058d4c1b3739a3c832e8aa6656acad9142ced6702cc9a3b"
+    },
+    {
+      "path": "final-09/description-dangling/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/description-dangling/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/description-dangling/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/description-dangling/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/description-dangling/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/description-dangling/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/description-dangling/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/description-dangling/transforms.json",
+      "bytes": 396,
+      "sha256": "8cae315f04740953115c32bf10f2d4451fbb0168ee46226399374ae11ad9f4d3"
+    },
+    {
+      "path": "final-09/description-dangling/vitest.json",
+      "bytes": 14465,
+      "sha256": "82797aea290d6cf57081c6d30e64496503633db17e6dba9e5fc8d52894957ce1"
+    },
+    {
+      "path": "final-09/focus-no-loop/cell.json",
+      "bytes": 3454,
+      "sha256": "e5e0f39ffc18faa56457bbcd06fc82c908b31afb90e125635bb31e9a253e9b1f"
+    },
+    {
+      "path": "final-09/focus-no-loop/execution.json",
+      "bytes": 383,
+      "sha256": "47a99831440e69a0d202be5728deb800bf811b7611a7d2cc2488515b80428c83"
+    },
+    {
+      "path": "final-09/focus-no-loop/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9985,
+      "sha256": "9f781bb2f619c69698a24ad739dba72c18b94bd55feef175e5f17d4ebbfe9050"
+    },
+    {
+      "path": "final-09/focus-no-loop/integrity.json",
+      "bytes": 991,
+      "sha256": "50ce2ae73cf91f629970119a534270e2b6983a7f038b1a065c0da94c823f8b0d"
+    },
+    {
+      "path": "final-09/focus-no-loop/oracle.jsonl",
+      "bytes": 5014,
+      "sha256": "697f1b21fae2650a74969e096b7000ae05c061925e74d72971b6cdba74d445da"
+    },
+    {
+      "path": "final-09/focus-no-loop/preparations.json",
+      "bytes": 428,
+      "sha256": "f6a115888c7753cb7374f6a18d10d0f0e346c6895761a45e9fff4a441305f5cb"
+    },
+    {
+      "path": "final-09/focus-no-loop/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/focus-no-loop/runner.log",
+      "bytes": 299713,
+      "sha256": "ed4ae58501fd92030e97a57f6d5e280f73eacca4cb3face0d3d18849852d2390"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/focus-no-loop/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/focus-no-loop/transforms.json",
+      "bytes": 389,
+      "sha256": "8b8acd32c683d8023c32ab4766ac2f602aa72c3bd2d58b7b43e56af4641cb69a"
+    },
+    {
+      "path": "final-09/focus-no-loop/vitest.json",
+      "bytes": 16442,
+      "sha256": "ab0bd40e188df9da91cf19cd86c0f925116375d13ae9063b4330d8a981cb7178"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/cell.json",
+      "bytes": 3457,
+      "sha256": "9eebfb3bf6140713698932249a1172b19b2190fa183aae612083e54b4e0029ed"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/execution.json",
+      "bytes": 396,
+      "sha256": "decb9805216640092bd2ac8df405db81fa9494e5baa1ae8780a8cf6680f33ca2"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/injected/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5549,
+      "sha256": "8c814c5861ad8c1ac928310dc4a90086a131ced7572a1c77a6c7f9efef10e6bb"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/integrity.json",
+      "bytes": 991,
+      "sha256": "2a94dec49b400b048e2073ca5c002c9515e63c93eac3ba4f1e55d97de6997243"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/oracle.jsonl",
+      "bytes": 5029,
+      "sha256": "6e0bdbda83d1a4375e4617ed9841197771bf43cb33a7986ef684fbe612c85f40"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/preparations.json",
+      "bytes": 441,
+      "sha256": "74fff9d277bc0e1683dfc2c0ec8df3c2f95929aa4698a70d2b1598d7c8118f98"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/runner.log",
+      "bytes": 296808,
+      "sha256": "6bb533c0ea2cde089cfa986797ed87eeadbca104fc704a454ca2b278e9b523e9"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/transforms.json",
+      "bytes": 402,
+      "sha256": "de015ea330017b2cac4c9a79bb370905bedf57298fc14cb26b64bd77669e0f32"
+    },
+    {
+      "path": "final-09/heldout-cancel-routes-save/vitest.json",
+      "bytes": 12639,
+      "sha256": "c8665e01d9c8084329685a53d98eb5ac12159cc331eeda05e4bc23d547c8e66f"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/cell.json",
+      "bytes": 3464,
+      "sha256": "05400c30820afe52b401a4c915defc4d3ed9937ca4f48aa1e95706a59127b60c"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/execution.json",
+      "bytes": 399,
+      "sha256": "a8599c3878a0c55a8e1ad2f5bac0a80a0403ffdc8929f68c59e2a7e518b18602"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/injected/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "83f591f522f660ee518f6435cf6b9b60b22646b25941678cb7a24465b970e468"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/integrity.json",
+      "bytes": 991,
+      "sha256": "9b34878b763e06c640cfdeccb39fc5da320a510b2c6eea31560de16d45af24bc"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/oracle.jsonl",
+      "bytes": 3512,
+      "sha256": "b3c041d85e5bb45463d3a28f95bd172e4d764566510478a26786eb571d557501"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/preparations.json",
+      "bytes": 444,
+      "sha256": "63585e5875cc167206efe337ead94761c841840a4ba3e9b8c8d562d749a02233"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/runner.log",
+      "bytes": 295693,
+      "sha256": "fe255938aa82d6aac7f11bb049eccaa00962e27b6bc9a71007f247cf54c8ee01"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/transforms.json",
+      "bytes": 405,
+      "sha256": "aa9fb6f11742ebf70918f22970425de3ad63efb36efea87a6f74d63a59ada695"
+    },
+    {
+      "path": "final-09/heldout-legal-article-wrapper/vitest.json",
+      "bytes": 10924,
+      "sha256": "392f123d693616be3fc33e9d22cf7a307c1d7e3a3c34f0d444bf507c270a2087"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/cell.json",
+      "bytes": 3457,
+      "sha256": "fd4f4216e933ab68556ac98b9bd11e670cf7fd3aaf1b5f922ae1675b74bf29fa"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/execution.json",
+      "bytes": 396,
+      "sha256": "d8c0c84a51462f99cf131cb94b5d10ce776f550cd594ba8a2233bb94bc39f434"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9930,
+      "sha256": "41a917bf685522813fd814cf144e6df9768b8b86fc132641506e98231f78f83b"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/integrity.json",
+      "bytes": 991,
+      "sha256": "7fe96b7d2563c50b1659e4b1894ea647eae362b1faf0e78494edfc5b75cff3af"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/oracle.jsonl",
+      "bytes": 5032,
+      "sha256": "72ee07f2c1afa0f46de7f381d343c570873b624abb51ceeaaccb50f525dc1a87"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/preparations.json",
+      "bytes": 441,
+      "sha256": "e3570ae25c80864911afa9c7277e083c2168dd8c3675d5a0f000597235593559"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/runner.log",
+      "bytes": 299265,
+      "sha256": "287e3477304a161ddc2b97777ffab703ae15d92d4fc5b8de757f0b47ebc86afe"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/transforms.json",
+      "bytes": 402,
+      "sha256": "c13af23d514daedaa82439808d7a250e790def4aaef4b11cbf5e5891dd714434"
+    },
+    {
+      "path": "final-09/heldout-missing-live-title/vitest.json",
+      "bytes": 16314,
+      "sha256": "4d81f05a2eaf3bcf60ed51033655b38da0039003f12e150f606ebdd2d2f3846e"
+    },
+    {
+      "path": "final-09/launch.json",
+      "bytes": 5069,
+      "sha256": "ee111d01ea7b5e1170eb59ee6f853960488df79ba0019b491ef573948cbc47ec"
+    },
+    {
+      "path": "final-09/legal-rounded-border/cell.json",
+      "bytes": 3465,
+      "sha256": "e3c9c933e356bb56908cfca74e025dcfa1180ccca3fd5da7526e31391ed9d214"
+    },
+    {
+      "path": "final-09/legal-rounded-border/execution.json",
+      "bytes": 390,
+      "sha256": "a9d4e4cc067eef4e04607013c7bd6470e22e43055734c900c556bc127067eeca"
+    },
+    {
+      "path": "final-09/legal-rounded-border/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 10038,
+      "sha256": "bd33dfef45f44c0750a41c154c7fb62cea0097ec2c0a784d30b1b51c70bfc49f"
+    },
+    {
+      "path": "final-09/legal-rounded-border/integrity.json",
+      "bytes": 991,
+      "sha256": "f063e383ce00389bdca9b34ad65a2dfda3dadaceef20b066af5c95e81ec10100"
+    },
+    {
+      "path": "final-09/legal-rounded-border/oracle.jsonl",
+      "bytes": 3512,
+      "sha256": "b3c041d85e5bb45463d3a28f95bd172e4d764566510478a26786eb571d557501"
+    },
+    {
+      "path": "final-09/legal-rounded-border/preparations.json",
+      "bytes": 435,
+      "sha256": "3246f4ff51fe373353d0b7ea3fae880592da1ca709f8030ae7af54d587d496a1"
+    },
+    {
+      "path": "final-09/legal-rounded-border/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/legal-rounded-border/runner.log",
+      "bytes": 295684,
+      "sha256": "cc823577a4a05e42c30cadb64c7c6bf7b95504806f5f723d84e7a9cdc2e7c24e"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/legal-rounded-border/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/legal-rounded-border/transforms.json",
+      "bytes": 396,
+      "sha256": "9edbac4cb3947251a2af4380695dc85b5ea918e6d1e5825146265331b0d5dc6e"
+    },
+    {
+      "path": "final-09/legal-rounded-border/vitest.json",
+      "bytes": 10922,
+      "sha256": "4cba29bc089101b2b50e6aadf9c0796fa54e9dfa46cdf029fa8f4c906d4f6321"
+    },
+    {
+      "path": "final-09/presence-early-complete/cell.json",
+      "bytes": 3464,
+      "sha256": "1376ed78eb2827f2d9b2cef22b88fd6962ac916c37fe62bc3e4a32ee32b7d5cd"
+    },
+    {
+      "path": "final-09/presence-early-complete/execution.json",
+      "bytes": 393,
+      "sha256": "adbd9e361c183e8dabd7017a266555360e9fbc5eeef753faa5fa7ab9be9806d3"
+    },
+    {
+      "path": "final-09/presence-early-complete/injected/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 10028,
+      "sha256": "23cb62ad92ae8b3430247151c4c5c801454621d591c92def97a1cf5f9f336e53"
+    },
+    {
+      "path": "final-09/presence-early-complete/integrity.json",
+      "bytes": 991,
+      "sha256": "f52d353c40199497b0314992430438cd8547d3526fd05323f20a6f02efa9d933"
+    },
+    {
+      "path": "final-09/presence-early-complete/oracle.jsonl",
+      "bytes": 7102,
+      "sha256": "8e36cce7faf8c4928e9d2dca37e29e869e2f4bd315dc6221b358d9131b4593a8"
+    },
+    {
+      "path": "final-09/presence-early-complete/preparations.json",
+      "bytes": 438,
+      "sha256": "b4ab81dc847dd470f22d3d8dfcf9a3b3b2947c86e231915f49df46a228f84fb3"
+    },
+    {
+      "path": "final-09/presence-early-complete/prepared/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 17043,
+      "sha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+    },
+    {
+      "path": "final-09/presence-early-complete/runner.log",
+      "bytes": 304461,
+      "sha256": "5400f52d03fa36019802a0ca884cd31dd35b11b4bfb05669a2cd4918bc1752f8"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/packages/adapters/web-component/test/dialog-overlay.test.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/packages/prototypes/base/src/dialog/content.proto.ts",
+      "bytes": 9983,
+      "sha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/packages/prototypes/base/src/dialog/root.proto.ts",
+      "bytes": 5087,
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/packages/prototypes/base/test/dialog-controlled-dismissal.test.ts",
+      "bytes": 2832,
+      "sha256": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/packages/prototypes/base/test/dialog.test.ts",
+      "bytes": 27677,
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/fixture.ts",
+      "bytes": 5551,
+      "sha256": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/freeze/check-freeze.json",
+      "bytes": 1693,
+      "sha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/freeze/held-out-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/oracle.test.ts",
+      "bytes": 6590,
+      "sha256": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/plan.json",
+      "bytes": 13691,
+      "sha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/report.mjs",
+      "bytes": 13518,
+      "sha256": "c00da092749c3d020c8023518dbad1b5d6a0070fa4eb6680a98003ea47180219"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/report.test.mjs",
+      "bytes": 6852,
+      "sha256": "9b61884b3532c564b41fc20d23701140c621d6fc237e3bddeb19ee01beed563f"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/source-variant.mjs",
+      "bytes": 7689,
+      "sha256": "52e22a776df8bcbab6182d46bdf151219df39d491fb505246502d28411269165"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+      "bytes": 2763,
+      "sha256": "2b6960328af5e49e65cd251020111f70bb7b3dba4dba7b2b22be5761b8cfa23b"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/analysis/dialog-conformance-study/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/scripts/test/dialog-run-integrity-reporter.mjs",
+      "bytes": 4037,
+      "sha256": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+    },
+    {
+      "path": "final-09/presence-early-complete/sources/vitest.config.ts",
+      "bytes": 4369,
+      "sha256": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3"
+    },
+    {
+      "path": "final-09/presence-early-complete/transforms.json",
+      "bytes": 399,
+      "sha256": "b1ffa3bff8ee32711c6f61f54b3eb871fc3c44813be3da02a3250609f161d0cc"
+    },
+    {
+      "path": "final-09/presence-early-complete/vitest.json",
+      "bytes": 27004,
+      "sha256": "31a4a08ba6705be46b71c8b489a7f08bf26898faae3c40f6fa45b897bd0d18e8"
+    },
+    {
+      "path": "final-09/study-report.json",
+      "bytes": 146324,
+      "sha256": "93cf10112ac41693a8b099c20daf74a6406ea6412824a047f2e2c5d6cc691525"
+    },
+    {
+      "path": "final-09-report.log",
+      "bytes": 146325,
+      "sha256": "989dbaafb45317ccb798d9a7dadd139b70ef3aa5532717732d8e6f843f039243"
+    },
+    {
+      "path": "final-09.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "final-09.log",
+      "bytes": 502,
+      "sha256": "c764fe008f5c20d80351652a41258b13f418fd036cae30c62b5a87f207ac7942"
+    },
+    {
+      "path": "focus-cancelable.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "focus-cancelable.json",
+      "bytes": 6547,
+      "sha256": "2a8a504e42e770fbf3657df757156ef2d95f9f56eda17f968262103d86b0de49"
+    },
+    {
+      "path": "focus-cancelable.log",
+      "bytes": 292327,
+      "sha256": "09a5dc400cd445df3545ffa0aee6d4a02ad03212bdf3ec6263f287a6e35e4a19"
+    },
+    {
+      "path": "focus-enter-completed.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "focus-enter-completed.json",
+      "bytes": 3089,
+      "sha256": "a46d60d7b93e2ae4c1e33f55a0afd6a7af20d7d24e77ee893765ed7ecf3d3ab6"
+    },
+    {
+      "path": "focus-enter-completed.log",
+      "bytes": 292332,
+      "sha256": "92861b0b9975d2e7280f452c1e1eba34f8c58cbe50915a8af823598a7f36bb01"
+    },
+    {
+      "path": "focus-isolated.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "focus-isolated.json",
+      "bytes": 4804,
+      "sha256": "567806c8333091dd10e4964e845d6a64c04ed572c398fe13370c4841ac3f136d"
+    },
+    {
+      "path": "focus-isolated.log",
+      "bytes": 292325,
+      "sha256": "d05a397f1fd681e8db0e11aa2ec6a3ff83a97e432c09e3777d86bdf8fe348394"
+    },
+    {
+      "path": "github/issue-1161.json",
+      "bytes": 5290,
+      "sha256": "7c086762f9b48d3b9c175cd692cf7a5b8749b08635e87a4dec4221567b832275"
+    },
+    {
+      "path": "github/issue-1177.json",
+      "bytes": 4405,
+      "sha256": "be02b59dcd0f8856a8deaa29e0d7c15ac049994bb9f29b99bb2970ddf73a7a88"
+    },
+    {
+      "path": "github/issue-1178.json",
+      "bytes": 90266,
+      "sha256": "46fe311820c26e72761ba58307c70d725cd7fcd6b27b61e3fda94cb029f4942b"
+    },
+    {
+      "path": "github/issue-1191.json",
+      "bytes": 9844,
+      "sha256": "0587b639e852f3722909451ec281f890ca0fba370ba09b7ab1098ebbb49183e1"
+    },
+    {
+      "path": "github/issue-754-comments-page-1.json",
+      "bytes": 15184,
+      "sha256": "c71358a3c777af291a587f9312e5ba2057ca54900dea90f7088df871d6e58f8b"
+    },
+    {
+      "path": "github/issue-754.json",
+      "bytes": 14384,
+      "sha256": "79e0eeb2e70716c5b7b44851952586d2ee513d29c7c8b3bd0813de536d4a9d06"
+    },
+    {
+      "path": "github/retrieval.json",
+      "bytes": 141,
+      "sha256": "77349e3d92ccee632d3e786d1a3533b18dbbfea6eaf2b58bb228e014c6c7ebc4"
+    },
+    {
+      "path": "governance/authority-map.json",
+      "bytes": 746,
+      "sha256": "3f8b8d7b3510b01e8a3111982ee2a6a9bfc2de42c1294990f9acac44b3cd1de3"
+    },
+    {
+      "path": "governance/bounded-subject.json",
+      "bytes": 133,
+      "sha256": "e657a9705646e58fab429c7e93b60ade1fd922d369c1017002e320444b81ce34"
+    },
+    {
+      "path": "governance/candidate-change.json",
+      "bytes": 1893,
+      "sha256": "f4bddac972f910e43de53a26ae38c9ba90e93c282c0bd88e98c28b34beef37e0"
+    },
+    {
+      "path": "governance/capability-envelope.json",
+      "bytes": 283,
+      "sha256": "65e74a120ef29ca9d5882f0e8b2af81b1d410b7f2495e72e4f614213c5fa8ab1"
+    },
+    {
+      "path": "governance/documentation-scope.json",
+      "bytes": 450,
+      "sha256": "a62da66c3e0c754859fe01821fb5346d9b312029021d35600d87729e9db14249"
+    },
+    {
+      "path": "governance/evidence-plan.json",
+      "bytes": 122,
+      "sha256": "9a465ee3506f607edd51cd0f8b240f2006bc440c5a5ea9c5f8a09bc74ad47e7c"
+    },
+    {
+      "path": "governance/evidence-report.json",
+      "bytes": 4335,
+      "sha256": "b21da2e997add9ed2f21b3ba7a28502d005c9da0a47f814b3370e356ea47b0ef"
+    },
+    {
+      "path": "governance/governed-behavior.json",
+      "bytes": 278,
+      "sha256": "ca2fc52f6fc1f1aabb16c4fe93f0f7390b28518c1f9752805aefe7aa73f7b38d"
+    },
+    {
+      "path": "governance/implementation-authorization.json",
+      "bytes": 269,
+      "sha256": "8eec4ca66be0399a130c62b9fd2ad89e73ef6888d78565df1a8e95c5fa686384"
+    },
+    {
+      "path": "governance/request-context.json",
+      "bytes": 195,
+      "sha256": "0221799338b6d3cb2e18b93e76dedca3363976b6bf892f78e44ec5a72446a62d"
+    },
+    {
+      "path": "governance/test-handoff.json",
+      "bytes": 1697,
+      "sha256": "174e41561ef74614327e877d55a18f395831853e67c3b4a54be12937d836717a"
+    },
+    {
+      "path": "governance/trace-handoff.json",
+      "bytes": 1425,
+      "sha256": "b703159868bcd9c327acfb1d26a0ca0e51a616fc71a84f716feeaf3dddba6d75"
+    },
+    {
+      "path": "governance/validate-to-docs-handoff.json",
+      "bytes": 2324,
+      "sha256": "bed75615f009f93aec8e443040646b8dec270b6306892f3898a8731a1cb37007"
+    },
+    {
+      "path": "original-source/oracle.test.ts",
+      "bytes": 11525,
+      "sha256": "23ec78113ba82ad53332ee0c9561fa62569b21379455f120b6395bfd3a3ba3df"
+    },
+    {
+      "path": "original-source/plan.json",
+      "bytes": 6074,
+      "sha256": "7f5000265d72c356a96424e8369e50f1ae3cd105ab0c9146e41d181db18a7885"
+    },
+    {
+      "path": "original-source/report.mjs",
+      "bytes": 11354,
+      "sha256": "2d9fb45283e344b8c11970c35c0ff9b7a9fa08f0782fe3f8f2cfcd70a045d62c"
+    },
+    {
+      "path": "original-source/report.test.mjs",
+      "bytes": 5189,
+      "sha256": "f79820852b219fb96ed8ca47fd1f819d236fc9ccca4d0f2321d01dd384f61f15"
+    },
+    {
+      "path": "original-source/run.mjs",
+      "bytes": 3614,
+      "sha256": "558bc7f68997ec6b6e82a0647189628e248f4ee34b5b4212faba2a3e4339a064"
+    },
+    {
+      "path": "original-source/source-variant.mjs",
+      "bytes": 3820,
+      "sha256": "0cafd099c018fb826665b845d4133cf9917a75b409f034dba20aeea5f868cdd2"
+    },
+    {
+      "path": "original-source/vitest.config.mjs",
+      "bytes": 1159,
+      "sha256": "07c0c519469c9dfd56dee2a0d8856ad989d036eb1d18fed93a031cf2ce3b4278"
+    },
+    {
+      "path": "public-calibration-plan.json",
+      "bytes": 7827,
+      "sha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5"
+    },
+    {
+      "path": "remote-preflight/classifier-before.log",
+      "bytes": 975,
+      "sha256": "ef3fdc77f5885a7fa48bb99ae6aed3fe0e360901eb3b623c3cfa7a58e2d8c02e"
+    },
+    {
+      "path": "remote-preflight/original-precondition.log",
+      "bytes": 889,
+      "sha256": "96b93051d34019af77380f7beffda3f2856b92040493f23216668e9082647577"
+    },
+    {
+      "path": "remote-preflight/retrieval.json",
+      "bytes": 486,
+      "sha256": "11ce46e04ea5907f6c75876dd456f879fcd4c3ac4da354572cb31dfa3553edf2"
+    },
+    {
+      "path": "root-heldout-variants.json",
+      "bytes": 3556,
+      "sha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790"
+    },
+    {
+      "path": "wc-overlay-before-cancelable.ts",
+      "bytes": 16963,
+      "sha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2"
+    }
+  ],
+  "verification": "Every archived member read back and compared to original SHA-256 and byte count; source files and prior failed runs retained unchanged."
+}
