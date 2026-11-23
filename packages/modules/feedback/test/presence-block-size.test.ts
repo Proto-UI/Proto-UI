@@ -159,6 +159,23 @@ describe('intrinsic block-size presence extension', () => {
     expect(f.scheduled.size).toBe(0);
     expect(f.releases()).toBe(1);
   });
+  it('can leave from an accepted sample when fresh intrinsic input is unavailable', () => {
+    const f = fixture();
+    f.commit();
+    f.at(16);
+    f.at(191);
+    const displayed = f.samples.at(-1)!.blockSize!;
+    f.env.value = { ...f.env.value, intrinsicBlockSize: null };
+    f.commit('leaving');
+    expect(f.samples.at(-1)?.blockSize).toBe(displayed);
+    expect(f.outcomes).toEqual([]);
+    f.at(241);
+    expect(f.samples.at(-1)!.blockSize!).toBeGreaterThan(0);
+    expect(f.samples.at(-1)!.blockSize!).toBeLessThan(displayed);
+    f.at(541);
+    expect(f.samples.at(-1)?.blockSize).toBe(0);
+    expect(f.outcomes).toEqual(['finished']);
+  });
   it.each([50, 260])('retargets intrinsic changes to %s from the last accepted sample', (size) => {
     const f = fixture();
     f.commit();

@@ -347,8 +347,11 @@ export function createPresencePresentationProjector(
     const next = vector(endpoint, env);
     // An initially visible view may never have published an entered frame.
     // Its first leave starts at the semantic entered endpoint, not its target.
+    // Once a sample exists, leaving must not require fresh intrinsic geometry.
     const initial = vector(
-      candidate.owner.phase === 'leaving' ? candidate.entered : candidate.closed,
+      candidate.owner.phase === 'leaving' && acknowledged === null
+        ? candidate.entered
+        : candidate.closed,
       env
     );
     if (!next || !initial) {
