@@ -150,6 +150,10 @@ function runtimeHarness() {
     return {
       session,
       target,
+      setProps(next: Record<string, unknown>) {
+        props = next;
+        session.controller.applyRawProps(next);
+      },
       input(value: string, composing = true) {
         textValue = value;
         connection.onEvent({
@@ -327,6 +331,105 @@ for (const proto of [checkboxRoot, fieldCheckbox])
       }
     }
   );
+
+// P-BASE-FIELD-CHOICES-RESET/VALUES/LIFETIME: these synthetic host callbacks
+// execute the real Runtime; newer checked commits retire reset proposals.
+for (const proto of [checkboxRoot, fieldCheckbox]) {
+  it.each(['ordinary-reset', 'confirm-mixed', 'new-checked', 'owner-round-trip'] as const)(
+    `${proto.name} reset mixed callback preserves the checked owner: %s`,
+    async (mode) => {
+      const h = runtimeHarness();
+      const control = h.make(proto, null, { checked: false, indeterminate: true });
+      const proposals: boolean[] = [],
+        mixedProposals: boolean[] = [],
+        ownerReads: boolean[] = [];
+      try {
+        await control.session.mount();
+        if (mode === 'confirm-mixed') {
+          control.setProps({ checked: true, indeterminate: false });
+          expect(control.exposes.checked.get()).toBe(true);
+          expect(control.exposes.indeterminate.get()).toBe(false);
+        }
+        h.setActionCallback((name, detail) => {
+          if (name === 'indeterminateChange') {
+            mixedProposals.push(detail.indeterminate);
+            if (mode !== 'ordinary-reset') {
+              control.setProps({ checked: true, indeterminate: detail.indeterminate });
+              ownerReads.push(control.exposes.checked.get());
+              if (mode === 'owner-round-trip') {
+                control.setProps({ checked: false, indeterminate: detail.indeterminate });
+                ownerReads.push(control.exposes.checked.get());
+              }
+            }
+          }
+          if (name === 'checkedChange') {
+            proposals.push(detail.checked);
+            control.setProps({ checked: detail.checked, indeterminate: true });
+          }
+        });
+        let accepted: boolean | undefined;
+        control.session.invokeInCallbackScope(() => {
+          accepted = control.exposes.resetValue();
+        });
+        expect(accepted).toBe(true);
+        expect(ownerReads).toEqual(
+          mode === 'ordinary-reset' ? [] : mode === 'owner-round-trip' ? [true, false] : [true]
+        );
+        expect(mixedProposals).toEqual([true]);
+        expect(proposals).toEqual(
+          mode === 'ordinary-reset' || mode === 'confirm-mixed' ? [false] : []
+        );
+        expect(control.exposes.checked.get()).toBe(mode === 'new-checked');
+        expect(control.exposes.indeterminate.get()).toBe(true);
+      } finally {
+        h.setActionCallback(() => {});
+        await control.session.dispose();
+      }
+    }
+  );
+
+  it.each(['new-checked', 'owner-round-trip'] as const)(
+    `${proto.name} reset entry checked owner retires during pressed cleanup: %s`,
+    async (mode) => {
+      const h = runtimeHarness();
+      const control = h.make(proto, null, { checked: false, indeterminate: true });
+      const ownerReads: boolean[] = [];
+      let fired = false,
+        off = () => {};
+      try {
+        await control.session.mount();
+        control.session.invokeInCallbackScope(() =>
+          control.target.dispatchEvent(new Event('pointer.down'))
+        );
+        expect(control.exposes.pressed.get()).toBe(true);
+        off = control.exposes.pressed.subscribe((event: { next: boolean }) => {
+          if (event.next !== false || fired) return;
+          fired = true;
+          control.setProps({ checked: true, indeterminate: true });
+          ownerReads.push(control.exposes.checked.get());
+          if (mode === 'owner-round-trip') {
+            control.setProps({ checked: false, indeterminate: true });
+            ownerReads.push(control.exposes.checked.get());
+          }
+        });
+        let accepted: boolean | undefined;
+        control.session.invokeInCallbackScope(() => {
+          accepted = control.exposes.resetValue();
+        });
+        expect(accepted).toBe(true);
+        expect(fired).toBe(true);
+        expect(ownerReads).toEqual(mode === 'owner-round-trip' ? [true, false] : [true]);
+        expect(h.actions).not.toContain('indeterminateChange');
+        expect(h.actions).not.toContain('checkedChange');
+        expect(control.exposes.checked.get()).toBe(mode === 'new-checked');
+        expect(control.exposes.indeterminate.get()).toBe(true);
+      } finally {
+        off();
+        await control.session.dispose();
+      }
+    }
+  );
+}
 
 it.each(['reset', 'unmount', 'dispose', 'remount'] as const)(
   'FieldSwitch reset retires continuation after controlled callback %s',

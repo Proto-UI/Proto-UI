@@ -1,0 +1,64 @@
+{
+  "preparedSourceTree": "1d42b5ebc45b989fa3d4dfc53ed6ef24b98274f9",
+  "parents": [
+    "28e71ca672aa62d60f70cc5b9c827f409ccb3ea2",
+    "d71d04b55408089fb3ac8ceb120b9b23091670f2"
+  ],
+  "archiveSha256": "eee78fc293c8394905be32b7f2a054edcdfdf7b4d2d64268306f067680e9f237",
+  "archiveBytes": 105828,
+  "independentReviewSha256": "f5e407d3f304ea272d0dfab30ab2b503f634fa393c0fd3ec20fd0488d6715a37",
+  "currentIntegrationAttempt": {
+    "cases": 348,
+    "passed": 347,
+    "failed": 1,
+    "skipped": 0,
+    "failure": "One Vue portal case exceeded its unchanged 5-second limit; original full attempt is preserved."
+  },
+  "targetedCompleteFile": {
+    "cases": 64,
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 40.29012417793274,
+    "originalCaseTimeoutMs": 5000,
+    "supervisorSeconds": 90
+  },
+  "cancelledNodeFileRecheck": {
+    "name": "cancelled-node-file",
+    "args": ["node", "--test", "scripts/test/run-runtime-tests.test.mjs"],
+    "exit": 0,
+    "timedOut": false,
+    "timeoutSeconds": 90,
+    "seconds": 16.790900468826294,
+    "sourceTree": "1d42b5ebc45b989fa3d4dfc53ed6ef24b98274f9"
+  },
+  "parentHostedAcceptance": {
+    "head": "d71d04b55408089fb3ac8ceb120b9b23091670f2",
+    "browserSuiteRun": 45191126888,
+    "conclusion": "failure",
+    "stages": [
+      "2026-11-23T14:38:04.9966994Z [sprint1] PASS node-controls: 0",
+      "2026-11-23T14:38:04.9967330Z [sprint1] PASS focused-unit: 0",
+      "2026-11-23T14:38:04.9967630Z [sprint1] PASS integration-unit: 0",
+      "2026-11-23T14:38:04.9967888Z [sprint1] PASS styles: 0",
+      "2026-11-23T14:38:04.9968100Z [sprint1] PASS number-field-0.3: 0",
+      "2026-11-23T14:38:04.9976173Z [sprint1] PASS number-field-experimental: 0",
+      "2026-11-23T14:38:04.9978698Z [sprint1] PASS dialog-observer-native: 0",
+      "2026-11-23T14:38:04.9979407Z [sprint1] FAIL matrix-accessibility-consumer: AssertionError [ERR_ASSERTION]: Vitest must report success",
+      "2026-11-23T14:38:04.9983589Z [sprint1] PASS search-native: 0",
+      "2026-11-23T14:38:04.9983805Z [sprint1] PASS ownership-native: 0",
+      "2026-11-23T14:38:04.9984023Z [sprint1] PASS search-props-ab: 0",
+      "2026-11-23T14:38:04.9984242Z [sprint1] PASS search-production: 0"
+    ],
+    "matrixFailure": "The original 60,000 ms activation/initialization phase expired; one original Matrix test failed and the three dependent tests were unrun/skipped. The separate diagnostic snapshot also exceeded its unchanged 1,000 ms bound.",
+    "startupThemeRun": 45191139156,
+    "startupThemeConclusion": "success",
+    "scope": "Public parent source, not the unpublished merged root candidate. No aggregate whole-Sprint1 acceptance pass."
+  },
+  "limits": [
+    "The 348-case aggregate was not repeated or relabeled green.",
+    "Parent d71 hosted results are not the final merged-head results.",
+    "The original Matrix 1308-preview 60-second acceptance remains open.",
+    "Two valid scheduled cycles, physical IME/AT and independent integration approval remain separate."
+  ]
+}

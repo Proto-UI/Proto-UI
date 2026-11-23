@@ -46,6 +46,28 @@ cases:
       - C-AS-HOOK-0007-H
     expectation: nested-as-hook-result-not-flattened
 implementations:
+  - id: compiler-public-capture-runtime
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/capture-facade-runtime.test.ts
+    required: true
+    consumesCases:
+      [
+        T-AS-HOOK-0002-CASE-CALLER-EFFECTS,
+        T-AS-HOOK-0002-CASE-RESULT-ARTIFACTS,
+        T-AS-HOOK-0002-CASE-SETUP-DISPOSERS,
+        T-AS-HOOK-0002-CASE-NESTED-RESULT,
+      ]
+    notes:
+      - Actual React, Vue 3, Vue 2 and Web Component consumers retain shared public references and execute real event unsubscribe tokens. Internal receipt bucket layout remains opaque.
+  - id: generated-native-capture-artifacts
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-ordinary-values/capture_facade.rs
+    required: true
+    consumesCases: [T-AS-HOOK-0002-CASE-RESULT-ARTIFACTS, T-AS-HOOK-0002-CASE-NESTED-RESULT]
+    notes:
+      - Actual native mount, rendered text, emitted events, retained callable lifetime and per-owner isolation are separate from compiler acceptance.
   - id: runtime-as-hook-result-contract
     kind: runtime-test
     status: passing

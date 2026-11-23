@@ -3,7 +3,6 @@ title: 'Liquid Glass Button'
 description: '用透明层次呈现常规操作，以克制的染色突出主要操作。'
 ---
 
-import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
@@ -55,22 +54,12 @@ Liquid Glass Button 用柔和的边缘高光与背景折射，将操作控件与
 
 ## 安装
 
-<div data-adapter-panel="wc">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add wc liquid-glass-button" manager="npm" />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <InstallCommandCard
-    command="npx @proto.ui/cli@latest add react liquid-glass-button"
-    manager="npm"
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <InstallCommandCard
-    command="npx @proto.ui/cli@latest add vue liquid-glass-button"
-    manager="npm"
-  />
+<div data-liquid-glass-button-availability="workspace-source-only">
+  <p>
+    Liquid Glass Button 当前以 Proto-UI 工作区源码提供。目前 CLI 不支持为 Web Components、React、Vue
+    或 Vue 2 安装此组件。
+  </p>
+  <p>下方预览和示例使用工作区源码。示例中的应用本地封装路径属于应用自行维护的模块。</p>
 </div>
 
 ## 用法
@@ -129,11 +118,50 @@ export function Demo() {
   </div>
 </template>
 
-<script setup>
-import { LiquidGlassButton } from '../proto-ui/components/vue';
-</script>
+<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
+
     `}
-  />
+
+/>
+
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
+    <LiquidGlassButton>Back</LiquidGlassButton>
+  </div>
+</template>
+
+<script>
+import Vue from 'vue';
+import { createVue2Adapter } from '@proto.ui/adapter-vue2';
+import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
+
+const adapt = createVue2Adapter({
+  extend: Vue.extend.bind(Vue),
+  nextTick: Vue.nextTick.bind(Vue),
+  set: Vue.set.bind(Vue),
+  delete: Vue.delete.bind(Vue),
+});
+const LiquidGlassButton = adapt(liquidGlassButton);
+
+export default {
+  components: { LiquidGlassButton },
+};
+</script>
+
+    `}
+
+/>
+
 </div>
 
 ### 强调
@@ -188,11 +216,50 @@ export function Demo() {
   </div>
 </template>
 
-<script setup>
-import { LiquidGlassButton } from '../proto-ui/components/vue';
-</script>
+<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
+
     `}
-  />
+
+/>
+
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
+    <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
+  </div>
+</template>
+
+<script>
+import Vue from 'vue';
+import { createVue2Adapter } from '@proto.ui/adapter-vue2';
+import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
+
+const adapt = createVue2Adapter({
+  extend: Vue.extend.bind(Vue),
+  nextTick: Vue.nextTick.bind(Vue),
+  set: Vue.set.bind(Vue),
+  delete: Vue.delete.bind(Vue),
+});
+const LiquidGlassButton = adapt(liquidGlassButton);
+
+export default {
+  components: { LiquidGlassButton },
+};
+</script>
+
+    `}
+
+/>
+
 </div>
 
 ### 禁用
@@ -247,11 +314,50 @@ export function Demo() {
   </div>
 </template>
 
-<script setup>
-import { LiquidGlassButton } from '../proto-ui/components/vue';
-</script>
+<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
+
     `}
-  />
+
+/>
+
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
+    <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
+  </div>
+</template>
+
+<script>
+import Vue from 'vue';
+import { createVue2Adapter } from '@proto.ui/adapter-vue2';
+import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
+
+const adapt = createVue2Adapter({
+  extend: Vue.extend.bind(Vue),
+  nextTick: Vue.nextTick.bind(Vue),
+  set: Vue.set.bind(Vue),
+  delete: Vue.delete.bind(Vue),
+});
+const LiquidGlassButton = adapt(liquidGlassButton);
+
+export default {
+  components: { LiquidGlassButton },
+};
+</script>
+
+    `}
+
+/>
+
 </div>
 
 ## 材质与无障碍

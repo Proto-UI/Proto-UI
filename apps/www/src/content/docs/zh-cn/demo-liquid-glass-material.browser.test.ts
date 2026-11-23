@@ -710,38 +710,109 @@ describe.sequential('V2 optical paint through four real Web Adapter runtimes', (
       }, 150000);
   it('the actual public Button documentation uses the same optical path on all four runtime panels', async () => {
     await preference('light');
-    await page.goto(`${baseUrl}/en/ui-libraries/liquid-glass/button/`, {
-      waitUntil: 'networkidle',
-    });
-    const headerRuntime = page.locator('.site-header-runtime').first();
-    for (const runtime of RUNTIMES) {
-      await choosePreviewRuntime(page, headerRuntime, runtime);
-      const panel = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
-        has: page.locator(
-          '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="true"]'
-        ),
-      });
-      await panel.waitFor({ state: 'visible' });
-      const button = panel.getByRole('button', { name: 'Back', exact: true });
-      await expect
-        .poll(() => button.getAttribute('data-material-quality'), { timeout: 30000 })
-        .toBe('self-optical');
-      expect(
-        await panel
-          .locator('.liquid-functional-demo')
-          .evaluate((el) => getComputedStyle(el).backgroundImage)
-      ).toBe('none');
-      expect(await panel.locator('[data-material-backdrop]').count()).toBeGreaterThan(0);
-      await button.click();
-      await expect.poll(() => panel.getByRole('status').textContent()).not.toBe('0 activations');
-      await capture(`public-button-${runtime}`);
-      observations.push({
-        publicRoute: '/en/ui-libraries/liquid-glass/button/',
-        runtime,
-        quality: 'self-optical',
-        actualPreviewer: true,
-        baseActivation: true,
-      });
+    for (const locale of ['en', 'zh-cn'] as const) {
+      const publicRoute = `/${locale}/ui-libraries/liquid-glass/button/`;
+      await page.goto(`${baseUrl}${publicRoute}`, { waitUntil: 'networkidle' });
+      const headerRuntime = page.locator('.site-header-runtime').first();
+      for (const runtime of RUNTIMES) {
+        await choosePreviewRuntime(page, headerRuntime, runtime);
+        const panel = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
+          has: page.locator(
+            '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="true"]'
+          ),
+        });
+        await panel.waitFor({ state: 'visible' });
+        const button = panel.getByRole('button', { name: 'Back', exact: true });
+        await expect
+          .poll(() => button.getAttribute('data-material-quality'), { timeout: 30000 })
+          .toBe('self-optical');
+        expect(
+          await panel
+            .locator('.liquid-functional-demo')
+            .evaluate((el) => getComputedStyle(el).backgroundImage)
+        ).toBe('none');
+        expect(await panel.locator('[data-material-backdrop]').count()).toBeGreaterThan(0);
+        await button.click();
+        await expect.poll(() => panel.getByRole('status').textContent()).not.toBe('0 activations');
+
+        const installation = page.locator(
+          '[data-liquid-glass-button-availability="workspace-source-only"]'
+        );
+        expect(await installation.count()).toBe(1);
+        await installation.scrollIntoViewIfNeeded();
+        await installation.waitFor({ state: 'visible' });
+        const installationText = await installation.innerText();
+        expect(installationText).toContain(
+          locale === 'en' ? 'available as workspace source' : '以 Proto-UI 工作区源码提供'
+        );
+        expect(installationText).toContain(
+          locale === 'en'
+            ? 'CLI installation for this component is not currently supported'
+            : '目前 CLI 不支持'
+        );
+        for (const hostLabel of ['Web Components', 'React', 'Vue', 'Vue 2']) {
+          expect(installationText).toContain(hostLabel);
+        }
+        expect(installationText).not.toContain('@proto.ui/cli');
+
+        const usagePanels = page.locator(`[data-adapter-panel="${runtime}"]`).filter({
+          has: page.locator(
+            '.proto-previewer[data-demo-id="demo-liquid-glass-button"][data-projection-toolbar="false"]'
+          ),
+        });
+        expect(await usagePanels.count()).toBe(3);
+        const examples = [
+          { label: 'Back', code: '>Back</' },
+          { label: 'Continue', code: 'variant="prominent"' },
+          { label: 'Unavailable', code: 'disabled' },
+        ];
+        for (const [index, example] of examples.entries()) {
+          const usage = usagePanels.nth(index);
+          await usage.scrollIntoViewIfNeeded();
+          await usage.waitFor({ state: 'visible' });
+          const preview = usage.locator('.proto-previewer');
+          expect(await preview.getAttribute('data-initial-runtime')).toBe(runtime);
+          await expect.poll(() => preview.getAttribute('data-projection-state')).toBe('ready');
+          await usage
+            .getByRole('button', { name: example.label, exact: true })
+            .waitFor({ state: 'visible' });
+          const toggle = usage.locator('[data-code-toggle]');
+          if ((await toggle.count()) && (await toggle.getAttribute('aria-expanded')) === 'false') {
+            await toggle.click();
+            await expect.poll(() => toggle.getAttribute('aria-expanded')).toBe('true');
+          }
+          const code = usage.locator('[data-code-content]');
+          await code.scrollIntoViewIfNeeded();
+          await code.waitFor({ state: 'visible' });
+          const codeText = await code.innerText();
+          expect(codeText).toContain(example.code);
+          expect(codeText).toContain(
+            runtime === 'wc'
+              ? 'wc-liquid-glass-button'
+              : runtime === 'vue2'
+                ? 'createVue2Adapter'
+                : `../proto-ui/components/${runtime}`
+          );
+          if (runtime === 'vue2') {
+            expect(codeText).toContain('Vue.extend.bind(Vue)');
+            expect(codeText).toContain('components: { LiquidGlassButton }');
+            expect(codeText).not.toContain('<script setup>');
+          }
+        }
+        await panel.scrollIntoViewIfNeeded();
+        await capture(
+          locale === 'en' ? `public-button-${runtime}` : `public-button-${locale}-${runtime}`
+        );
+        observations.push({
+          publicRoute,
+          runtime,
+          quality: 'self-optical',
+          actualPreviewer: true,
+          baseActivation: true,
+          workspaceSourceOnly: true,
+          visibleUsageSections: examples.map((example) => example.label),
+        });
+      }
     }
   }, 150000);
 

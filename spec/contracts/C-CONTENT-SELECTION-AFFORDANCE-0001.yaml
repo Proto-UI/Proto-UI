@@ -4,7 +4,7 @@ title: Bounded host content-selection affordances preserve useful text and editi
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: This bounded revision catalogs an existing select-none host affordance, adds explicit restoration and deterministic merging, and remains draft pending independent review and real-browser cross-Adapter evidence. Reusable control-label association and native host selection realization are not admitted here.
+  en: This bounded revision catalogs an existing select-none host affordance, adds explicit restoration and deterministic merging, and remains draft pending independent review and real-browser cross-Adapter evidence. Reusable control-label association is separately defined; the GPUI source host has only the bounded none/auto mapping described below, not general native selectable-content realization.
 summary: Explicit subject-local selection affordances are a narrow exception to visual-only Feedback, not an editor, selection state, or copy-protection channel.
 statement:
   en: >-
@@ -25,13 +25,9 @@ criteria:
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-LABELS
     text:
       en: >-
-        A short actionable control label can use the control's policy only under an admitted semantic
-        association and activation owner. A sibling visual label, accessible-name text copy or styling alias
-        does not establish that association. The associated Label declares its subject policy through the
-        explicit bounded selection vocabulary defined by C-CONTROL-LABEL-0001, whose derived default still
-        suppresses only actionable labels; explicit auto, text and none values lower only to these three
-        tokens. Long descriptions remain content. This contract introduces no Label identity or association
-        API and does not amend existing Checkbox anatomy omissions.
+        A short actionable control label can use the control's policy only under an admitted semantic association and activation owner. A sibling visual label, accessible-name text copy or styling alias does not establish that association. The associated Label declares its subject policy through the explicit bounded selection vocabulary defined by C-CONTROL-LABEL-0001, whose derived default still suppresses only actionable labels; explicit auto, text and none values lower only to these three tokens. Long descriptions remain content. This contract introduces no Label identity or association API and does not amend existing Checkbox anatomy omissions.
+
+
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-BOUNDARY
     text:
       en: Selection affordance changes must not clear or programmatically select document text, intercept clipboard commands, cancel arbitrary pointer/keyboard default actions, mutate control state, replace labels or synthesize focus. Text Control retains the selection, cursor, IME and native editing-chrome requirements of C-TEXT-CONTROL-0001. Placeholder paint is not an editor value or proof of an editor selection defect.
@@ -43,7 +39,7 @@ criteria:
       en: The Web style compiler must realize each admitted token only on its authored data-pui-style subject using the matching user-select value and its WebKit-prefixed equivalent. Author validation rejects selection:select-auto, selection:select-text and selection:select-none; internal compiler artifacts carrying these highlight compositions must retain unsupported-token diagnostics instead of emitting inert user-select on a highlight pseudo-element. It must not install a document-wide suppression/reset. Browser differences for ranges crossing unselectable content remain observable host behavior; CSS suppression is not copy protection and does not restrict programmatic Selection or accessibility APIs.
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-SUPPORT
     text:
-      en: Token acceptance and CSS generation do not certify native selection support or every browser. Unsupported native properties or tokens retain explicit diagnostics. GPUI/AppKit/SwiftUI/Flutter/Qt selection fidelity and real assistive-technology conformance are outside this slice.
+      en: Token acceptance and CSS generation do not certify native selection support or every browser. Unsupported native properties or tokens retain explicit diagnostics. The GPUI source host consumes none/auto using its ordinary native Text/String default, which has no content-selection range owner; it never rewrites TextControl selection, IME or clipboard behavior. Explicit text restoration remains an unsupported native host prerequisite, not an alias for none. General GPUI/AppKit/SwiftUI/Flutter/Qt selection fidelity and real assistive-technology conformance are outside this slice.
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-THEME-PAINT
     text:
       en: Public Web theme selection paint consumes the existing selection background/foreground roles at low cascade priority without changing host selection behavior. Scoped family boundaries and palette-only variable banks must not repaint unrelated content. Explicit component highlight paint retains precedence; editable text and ordinary document text remain selectable. Light-DOM evidence does not certify separate shadow stylesheet installation or native hosts.
@@ -59,6 +55,7 @@ references:
     - P-SHADCN-TOGGLE
     - P-SHADCN-CHECKBOX
 sources:
+  - path: packages/compiler/src/gpui-native-selection.ts
   - path: packages/cli/src/legacy/type.ts
   - path: packages/prototypes/brutalist/src/theme.ts
   - path: packages/core/src/spec/feedback/semantic-merge.ts
@@ -69,6 +66,9 @@ verifies:
     - T-CONTENT-SELECTION-AFFORDANCE-0001
     - T-CONTROL-LABEL-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Specified the GPUI ordinary-text none/auto host default mapping, independent editable selection ownership and explicit unsupported text restoration boundary.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Bound the associated-label affordance to the explicit Label selection policy vocabulary while retaining association ownership and long-description selectability.

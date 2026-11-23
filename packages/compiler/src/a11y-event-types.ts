@@ -1,6 +1,13 @@
 import { structuralStatementOrder } from './declaration-order';
 import { reject, unknownDiagnosticSpan } from './diagnostics';
-import type { AuthoredHookIR, ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
+import type {
+  AuthoredHookIR,
+  ExpressionIR,
+  FunctionIR,
+  PrototypeIR,
+  SourceSpan,
+  StatementIR,
+} from './ir';
 import { ordinaryValueChildren } from './value-children';
 
 export const DEFAULT_SET_VALUE_EVENT = 'host:a11y-set-value';
@@ -54,7 +61,8 @@ interface SchemaContext {
  * operation contracts afterwards; the shape checks here keep discovery closed.
  */
 export function inferInputPayloadSchemas(
-  input: PrototypeIR
+  input: PrototypeIR,
+  validateSpan: (value: unknown) => SourceSpan
 ): ReadonlyMap<Registration, InputPayloadSchema> {
   const schemas = new Map<Registration, InputPayloadSchema>();
   const malformed = (message: string): never =>
@@ -154,7 +162,7 @@ export function inferInputPayloadSchemas(
       record<ExpressionIR>(statement.value);
       scope.set(name(statement.name), { declaration: statement, scope, module: false });
     }
-    for (const statement of structuralStatementOrder(body)) {
+    for (const statement of structuralStatementOrder(body, (item) => validateSpan(item.span))) {
       switch (statement.kind) {
         case 'const': {
           const binding = scope.get(statement.name)!;

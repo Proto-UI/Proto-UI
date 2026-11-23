@@ -239,8 +239,9 @@ export function setupCheckboxRoot(
     const run = currentRun;
     if (!run || !mounted) return false;
     const view = viewEpoch,
-      operation = ++operationEpoch;
-    const live = () => isCurrent(run, view, operation);
+      operation = ++operationEpoch,
+      owner = checkedOwnerEpoch;
+    const live = () => isCurrent(run, view, operation) && checkedOwnerEpoch === owner;
     reports.cancel();
     pressed.set(false, 'reason: checkbox reset retires press');
     if (!live()) return true;
@@ -248,7 +249,7 @@ export function setupCheckboxRoot(
     if (!live()) return true;
     if (!controlledIndeterminate)
       indeterminate.set(initialIndeterminate, 'reason: checkbox reset canonical mixed');
-    if (!live() || !publish(run)) return true;
+    if (!live() || !publish(run) || !live()) return true;
     reportField();
     if (!live()) return true;
     if (controlledIndeterminate)

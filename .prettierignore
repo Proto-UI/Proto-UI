@@ -24,6 +24,18 @@ scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
 # Exact audited shader bytes and legal text are emitted by the checked generator.
 packages/adapters/base/src/material/liquidgl-kernel.generated.ts
 
+# Frozen Sprint 7 source and review records retain their exact accepted bytes.
+internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json
+internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md
+internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-checkpoint-review.json
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-manual-decisions.json
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent-review.json
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
+
 # Historical evidence bytes bound by retained SHA manifests; see
 # internal/records/2026-11-23-integration-archived-evidence-bytes.md
 internal/records/2026-11-22-sprint2-mobile-navigation-control-evidence/
@@ -104,3 +116,14 @@ internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
+
+# Exact original Sprint 7 terminal observations; retained hashes bind these bytes.
+internal/records/evidence/2026-11-23-s7-declarative-types/summary.json
+internal/records/evidence/2026-11-23-s7-tabs-calibration/reports.json
+
+# Frozen source archives and historical evidence retain their original bytes and hashes.
+internal/records/2026-11-22-sprint-7-history-sources/
+internal/records/evidence/2026-11-22-sprint7-history-continuation/
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/

@@ -145,6 +145,126 @@ export const SPRINT3_SUITES = Object.freeze([
   },
 ]);
 
+// Profiles are separate acceptance inventories. The historical default remains
+// exactly 14 files / 364 cases; public Base Select is never added to that total.
+const BASE_SELECT_SUITES = Object.freeze([
+  Object.freeze({
+    id: 'public-base-select',
+    file: `${docs}demo-base-select.browser.test.ts`,
+    cases: 8,
+    surface: 'production-docs',
+    seconds: 900,
+    screenshots: true,
+  }),
+]);
+const SPRINT3_PROFILES = Object.freeze({
+  default: Object.freeze({
+    id: 'default',
+    suites: SPRINT3_SUITES,
+    probePath: '/en/ui-libraries/base/button/',
+  }),
+  'base-select': Object.freeze({
+    id: 'base-select',
+    suites: BASE_SELECT_SUITES,
+    probePath: '/en/ui-libraries/base/select/',
+  }),
+});
+const SUITE_PLAN_FIELDS = ['id', 'file', 'cases', 'surface', 'seconds', 'screenshots'];
+const SELECT_CAPTURE_CASES = Object.freeze(
+  ['en', 'zh-cn'].flatMap((locale) =>
+    ['wc', 'react', 'vue', 'vue2'].map((runtime) => ({
+      stem: `base-select-${locale}-${runtime}`,
+      route: `/${locale}/ui-libraries/base/select/`,
+      runtime,
+    }))
+  )
+);
+
+export function sprint3Profile(id = 'default') {
+  if (typeof id !== 'string' || !Object.hasOwn(SPRINT3_PROFILES, id))
+    throw new Error(`Unknown Sprint 3 evidence profile: ${String(id)}.`);
+  return SPRINT3_PROFILES[id];
+}
+
+export function parseEvidenceProfile(args) {
+  if (args.length === 0) return sprint3Profile();
+  if (args.length !== 2 || args[0] !== '--profile')
+    throw new Error('Expected only --profile default|base-select after the operation.');
+  return sprint3Profile(args[1]);
+}
+
+export function profileBinding(id = 'default') {
+  const profile = sprint3Profile(id);
+  return {
+    id: profile.id,
+    files: profile.suites.length,
+    cases: profile.suites.reduce((sum, row) => sum + row.cases, 0),
+    inventorySha256: hash(JSON.stringify(profile.suites)),
+    probePath: profile.probePath,
+  };
+}
+
+export function profileProblems(ledger, expectedId = 'default') {
+  let profile;
+  try {
+    profile = sprint3Profile(expectedId);
+  } catch (error) {
+    return [String(error)];
+  }
+  const problems = [];
+  const expected = profileBinding(expectedId);
+  for (const [key, value] of Object.entries(expected))
+    if (ledger.profile?.[key] !== value) problems.push(`Profile binding differs: ${key}.`);
+  if (!Array.isArray(ledger.suites) || ledger.suites.length !== profile.suites.length) {
+    problems.push('Profile suite inventory has missing or extra files.');
+  } else {
+    profile.suites.forEach((planned, index) => {
+      const row = ledger.suites[index];
+      for (const key of SUITE_PLAN_FIELDS)
+        if (row?.[key] !== planned[key])
+          problems.push(`Profile suite plan differs: ${index}.${key}.`);
+    });
+  }
+  return problems;
+}
+
+function selectCaptureProblems(directory, artifacts, expectedHead) {
+  const problems = [];
+  const expectedNames = SELECT_CAPTURE_CASES.flatMap(({ stem }) => [
+    `${stem}.json`,
+    `${stem}.png`,
+  ]).sort();
+  if (JSON.stringify(artifacts.map(({ file }) => file).sort()) !== JSON.stringify(expectedNames))
+    problems.push('Base Select requires exactly eight JSON and eight PNG case captures.');
+  for (const { stem, route, runtime } of SELECT_CAPTURE_CASES) {
+    try {
+      const file = path.join(directory, `${stem}.json`);
+      if (canonicalPath(file) !== path.resolve(file) || !lstatSync(file).isFile())
+        throw new Error('Case capture is not an owned regular file.');
+      const receipt = JSON.parse(readFileSync(file, 'utf8'));
+      if (
+        receipt.testSource !== expectedHead ||
+        receipt.route !== route ||
+        receipt.runtime !== runtime ||
+        receipt.outcome !== 'PASS' ||
+        receipt.failure !== null ||
+        !Array.isArray(receipt.errors) ||
+        receipt.errors.length !== 0 ||
+        typeof receipt.browser !== 'string' ||
+        receipt.browser.length === 0 ||
+        (receipt.servedPageRevision !== null && receipt.servedPageRevision !== expectedHead)
+      )
+        problems.push(`Base Select case binding or outcome differs: ${stem}.`);
+      const screenshot = artifacts.find((entry) => entry.file === `${stem}.png`);
+      if (!screenshot || screenshot.bytes <= 0)
+        problems.push(`Base Select case screenshot missing or empty: ${stem}.`);
+    } catch (error) {
+      problems.push(`Base Select case unavailable: ${stem}: ${String(error)}`);
+    }
+  }
+  return problems;
+}
+
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const now = () => new Date().toISOString();
 const json = (file, value) => {
@@ -481,7 +601,8 @@ function outputDirectory() {
   return output;
 }
 
-function initialize(output) {
+function initialize(output, profileId = 'default') {
+  const profile = sprint3Profile(profileId);
   const file = path.join(output, 'results.json');
   if (existsSync(file))
     throw new Error(
@@ -491,6 +612,7 @@ function initialize(output) {
   const expectedHead = process.env.CANDIDATE_SHA ?? process.env.GITHUB_SHA;
   const ledger = {
     schemaVersion: 1,
+    profile: profileBinding(profile.id),
     startedAt: now(),
     expectedHead,
     source,
@@ -510,7 +632,7 @@ function initialize(output) {
     ],
     errors: sourceProblems(source, { head: expectedHead }),
     build: { status: 'not-run' },
-    suites: SPRINT3_SUITES.map((suite) => ({
+    suites: profile.suites.map((suite) => ({
       ...suite,
       status: 'not-run',
       sourceSha256: existsSync(path.join(repository, suite.file))
@@ -523,7 +645,7 @@ function initialize(output) {
   return ledger;
 }
 
-async function execute(output, ledger) {
+async function execute(output, ledger, profileId = 'default') {
   const abort = new AbortController();
   const interrupt = () => abort.abort();
   process.on('SIGTERM', interrupt);
@@ -539,7 +661,10 @@ async function execute(output, ledger) {
         ? 'Runner resource deadline exhausted.'
         : null;
   const verifySource = () => {
-    const problems = sourceProblems(sourceState(), { ...ledger.source, head: ledger.expectedHead });
+    const problems = [
+      ...sourceProblems(sourceState(), { ...ledger.source, head: ledger.expectedHead }),
+      ...profileProblems(ledger, profileId),
+    ];
     if (problems.length) throw new Error(problems.join('\n'));
   };
   let preview;
@@ -603,6 +728,7 @@ async function execute(output, ledger) {
         delete env.PROTO_UI_SCROLL_CORNER_CAPTURE_ONLY;
         json(path.join(directory, 'source.json'), {
           ...ledger.source,
+          profile: ledger.profile,
           suite: row.file,
           suiteSha256: row.sourceSha256,
           surface: row.surface,
@@ -659,6 +785,8 @@ async function execute(output, ledger) {
         row.logSha256 = hash(readFileSync(path.join(directory, 'browser.log')));
         problems.push(...vitestProblems(report, row.cases, row.file));
         row.artifacts = fileInventory(captures);
+        if (profileId === 'base-select')
+          problems.push(...selectCaptureProblems(captures, row.artifacts, ledger.expectedHead));
         row.screenshotCount = row.artifacts.filter((entry) => entry.file.endsWith('.png')).length;
         if (row.screenshots && row.screenshotCount === 0)
           problems.push('Expected native visual evidence was not produced.');
@@ -736,7 +864,7 @@ async function execute(output, ledger) {
           ledger.expectedHead,
           path.join(output, 'preview-requests.jsonl')
         );
-        const probePath = '/en/ui-libraries/base/button/';
+        const probePath = sprint3Profile(profileId).probePath;
         const response = await fetch(`${preview.url}${probePath}`, {
           signal: AbortSignal.timeout(10_000),
         });
@@ -791,12 +919,31 @@ async function execute(output, ledger) {
   }
 }
 
-export function finalize(output, ledger, publishSummary = false, readSource = sourceState) {
+export function finalize(
+  output,
+  ledger,
+  publishSummary = false,
+  readSource = sourceState,
+  expectedProfileId
+) {
   // A crash or an unreadable capture during final reconciliation must never
   // leave the earlier successful aggregate as the last readable receipt.
   ledger.status = 'failed';
   ledger.finalization = { status: 'running', startedAt: now() };
   json(path.join(output, 'results.json'), ledger);
+  // Real receipts and every CLI call require an explicit, immutable profile.
+  // Older low-level artifact unit fixtures have neither schema nor profile.
+  const profileRequired =
+    expectedProfileId !== undefined ||
+    ledger.schemaVersion !== undefined ||
+    ledger.profile !== undefined;
+  const requestedProfile = expectedProfileId ?? 'default';
+  const bindingProblems = profileRequired ? profileProblems(ledger, requestedProfile) : [];
+  ledger.profileProblems = [...new Set([...(ledger.profileProblems ?? []), ...bindingProblems])];
+  if (ledger.profileProblems.length)
+    ledger.errors.push(`Evidence profile validation failed: ${ledger.profileProblems.join(' ')}`);
+  let profile;
+  if (profileRequired && bindingProblems.length === 0) profile = sprint3Profile(requestedProfile);
   finishIncomplete(
     ledger,
     'Workflow ended before this suite produced a terminal receipt; inspect workflow-steps.json.'
@@ -848,10 +995,21 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
     );
   for (const row of ledger.suites) {
     row.executionStatus ??= row.status;
+    // Do not consume or write paths from an unbound or drifted inventory.
+    if (bindingProblems.length) {
+      if (row.status === 'passed') row.status = 'failed';
+      row.evidenceProblems = [
+        ...new Set([...(row.evidenceProblems ?? []), 'Suite rejected by the requested profile.']),
+      ];
+      continue;
+    }
+    const requiresPassedEvidence = profile
+      ? row.status === 'passed' || row.executionStatus === 'passed'
+      : row.executionStatus === 'passed';
     const directory = path.join(output, row.id);
     const observed = inspectInventory(path.join(directory, 'captures'));
     const problems = [...observed.errors];
-    if (row.id === SOURCE_CANARY_SUITE && (row.executionStatus === 'passed' || row.sourceCanary)) {
+    if (row.id === SOURCE_CANARY_SUITE && (requiresPassedEvidence || row.sourceCanary)) {
       const sourceEvidence = inspectSourceCanary(
         path.join(directory, 'source-canary'),
         row.sourceCanary,
@@ -875,10 +1033,9 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
         problems.push(
           'Capture inventory drifted after execution (missing, added, or changed bytes).'
         );
-    } else if (row.executionStatus === 'passed')
-      problems.push('Executed capture inventory is missing.');
+    } else if (requiresPassedEvidence) problems.push('Executed capture inventory is missing.');
     row.screenshotCount = observed.files.filter((entry) => entry.file.endsWith('.png')).length;
-    if (row.executionStatus === 'passed' && row.screenshots && row.screenshotCount === 0)
+    if (requiresPassedEvidence && row.screenshots && row.screenshotCount === 0)
       problems.push('Required native screenshots are missing.');
     for (const [name, key] of [
       ['vitest.json', 'reportSha256'],
@@ -886,7 +1043,7 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
       ['source.json', 'sourceReceiptSha256'],
     ]) {
       if (!directoryOwned) continue;
-      if (!row[key] && row.executionStatus !== 'passed') continue;
+      if (!row[key] && !requiresPassedEvidence) continue;
       try {
         const file = path.join(directory, name);
         const stat = lstatSync(file);
@@ -900,6 +1057,52 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
         problems.push(`${name} unavailable during finalization: ${String(error)}`);
       }
     }
+    if (profile && directoryOwned && requiresPassedEvidence && problems.length === 0) {
+      const planned = profile.suites.find((entry) => entry.id === row.id);
+      try {
+        const report = JSON.parse(readFileSync(path.join(directory, 'vitest.json'), 'utf8'));
+        problems.push(...vitestProblems(report, planned.cases, planned.file));
+      } catch (error) {
+        problems.push(`Profile Vitest report unavailable: ${String(error)}`);
+      }
+      try {
+        const receipt = JSON.parse(readFileSync(path.join(directory, 'source.json'), 'utf8'));
+        if (
+          JSON.stringify(receipt.profile) !== JSON.stringify(profileBinding(profile.id)) ||
+          receipt.suite !== planned.file ||
+          receipt.suiteSha256 !== row.sourceSha256 ||
+          receipt.surface !== planned.surface ||
+          receipt.head !== ledger.expectedHead ||
+          receipt.tree !== ledger.source.tree ||
+          receipt.lockSha256 !== ledger.source.lockSha256 ||
+          receipt.runnerSha256 !== ledger.source.runnerSha256 ||
+          receipt.sourceServerSha256 !== ledger.source.sourceServerSha256 ||
+          JSON.stringify(receipt.preview) !==
+            JSON.stringify(planned.surface === 'production-docs' ? ledger.preview : null)
+        )
+          problems.push('Suite source receipt does not bind this profile and candidate.');
+        if (
+          planned.surface === 'production-docs' &&
+          (ledger.preview?.head !== ledger.expectedHead ||
+            ledger.preview?.probePath !== profile.probePath ||
+            ledger.preview?.distManifestSha256 !== ledger.build.distManifestSha256 ||
+            !/^[a-f0-9]{64}$/.test(ledger.build.distManifestSha256 ?? ''))
+        )
+          problems.push('Owned production preview does not bind the selected profile.');
+      } catch (error) {
+        problems.push(`Profile source receipt unavailable: ${String(error)}`);
+      }
+      if (profile.id === 'base-select')
+        problems.push(
+          ...selectCaptureProblems(
+            path.join(directory, 'captures'),
+            observed.files,
+            ledger.expectedHead
+          )
+        );
+    }
+    if (profile && row.status === 'passed' && row.executionStatus !== 'passed')
+      problems.push('Passed suite has a non-passed execution status.');
     row.evidenceProblems = [...new Set([...(row.evidenceProblems ?? []), ...problems])];
     if (row.evidenceProblems.length) {
       row.status = 'failed';
@@ -919,7 +1122,9 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
   const outcome = () =>
     ledger.errors.length === 0 &&
     ledger.build.status === 'passed' &&
-    ledger.suites.every((row) => row.status === 'passed')
+    ledger.suites.every(
+      (row) => row.status === 'passed' && (!profileRequired || row.executionStatus === 'passed')
+    )
       ? 'passed'
       : 'failed';
   ledger.status = outcome();
@@ -927,6 +1132,9 @@ export function finalize(output, ledger, publishSummary = false, readSource = so
     `## Sprint 3 consumer evidence: ${ledger.status}`,
     '',
     `Candidate: \`${ledger.expectedHead}\``,
+    ...(profileRequired
+      ? [`Profile: \`${requestedProfile}\` (separate acceptance inventory).`]
+      : []),
     '',
     '| Suite | Expected cases | Outcome | Screenshots |',
     '|---|---:|---|---:|',
@@ -966,14 +1174,28 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   try {
     const operation = process.argv[2];
     if (!['init', 'run', 'finalize'].includes(operation))
-      throw new Error('Usage: node scripts/test/sprint3-consumer-evidence.mjs init|run|finalize');
+      throw new Error(
+        'Usage: node scripts/test/sprint3-consumer-evidence.mjs init|run|finalize [--profile default|base-select]'
+      );
+    const profile = parseEvidenceProfile(process.argv.slice(3));
     const output = outputDirectory();
     const ledger =
       operation === 'init'
-        ? initialize(output)
+        ? initialize(output, profile.id)
         : JSON.parse(readFileSync(path.join(output, 'results.json'), 'utf8'));
-    if (operation === 'run') await execute(output, ledger);
-    if (operation !== 'init') process.exitCode = finalize(output, ledger, operation === 'finalize');
+    if (operation === 'run') {
+      const problems = profileProblems(ledger, profile.id);
+      if (problems.length) ledger.errors.push(...problems);
+      else await execute(output, ledger, profile.id);
+    }
+    if (operation !== 'init')
+      process.exitCode = finalize(
+        output,
+        ledger,
+        operation === 'finalize',
+        sourceState,
+        profile.id
+      );
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

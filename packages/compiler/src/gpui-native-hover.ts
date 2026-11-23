@@ -29,8 +29,9 @@ fn native_hover_current(owner:&OwnerRef,view:NativeHoverView,window:&Window)->bo
 }
 fn native_hover_mounted(owner:&OwnerRef,epoch:u64) {
     let mut o=owner.borrow_mut();
-    // Mark completion only after the authored lifecycle returned. A mounted
-    // callback can detach, dispose or replace this physical view synchronously.
+    // Mark completion after the authored lifecycle turn, including its error
+    // boundary. A failure cannot disable a still-live view's later input;
+    // synchronous detach, disposal or replacement still retires this epoch.
     if !o.disposed&&!o.disposing&&o.present&&o.mounted&&o.epoch==epoch {
         if o.native_hover.mounted_epoch!=Some(epoch){o.native_hover.needs_sync=true;}
         o.native_hover.mounted_epoch=Some(epoch);
@@ -55,7 +56,7 @@ fn native_hover_flush(owner:&OwnerRef,window:&mut Window)->bool {
     let kind=if hover{"pointer.enter"}else{"pointer.leave"};
     let mut prevented=dispatch_root_route(owner,kind,event_fields(kind));
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}
-    if !hover{prevented|=pointer_intent(owner,"press.cancel",event_fields("press.cancel"));}
+    if !hover{control_label_pointer_cancel(owner);prevented|=pointer_intent(owner,"press.cancel",event_fields("press.cancel"));}
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}
     let kind=if hover{"host:mouseenter"}else{"host:mouseleave"};
     prevented|=dispatch(owner,kind,false,event_fields(kind));
@@ -145,7 +146,7 @@ mod native_hover_tests {
             root
         }
     }
-    fn owner(trace:Rc<RefCell<Vec<String>>>,retire_on_mount:bool)->OwnerRef {
+    fn owner(trace:Rc<RefCell<Vec<String>>>,retire_on_mount:bool,fail_on_mount:bool)->OwnerRef {
         let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,
             |_|true,|_,_|true,crate::gpui_native_style::vocabulary());
         let weak=Rc::downgrade(&owner);
@@ -167,16 +168,19 @@ mod native_hover_tests {
                 if let Some(owner)=target.upgrade(){Owner::dispose(&owner)}Value::Undefined
             })));
         }
+        if fail_on_mount {
+            register_life(&weak,"mounted",Value::Function(Rc::new(|_|throw_value(Value::boolean(false)))));
+        }
         Owner::finish(&owner,Value::Undefined);owner
     }
     fn open(cx:&mut TestAppContext,trace:Rc<RefCell<Vec<String>>>,retire:bool)->WindowHandle<Host> {
         cx.open_window(size(px(160.),px(80.)),move |_,cx| {
-            let owner=owner(trace,retire);let content=cx.new(|_|Content);
+            let owner=owner(trace,retire,false);let content=cx.new(|_|Content);
             owner.borrow_mut().slot=vec![NativeSnapshot::native_view(content.clone().into())];
             Host{owner,focus:cx.focus_handle(),shown:false,_content:content}
         })
     }
-    fn frames(window:WindowHandle<Host>,cx:&mut TestAppContext) {
+    fn frames<T:Render>(window:WindowHandle<T>,cx:&mut TestAppContext) {
         for _ in 0..3 {
             cx.update_window(window.into(),|_,window,cx| {
                 window.refresh();window.draw(cx).clear(cx);
@@ -192,6 +196,71 @@ mod native_hover_tests {
             host.shown=true;cx.notify();
         }).unwrap();
         frames(window,cx);
+    }
+
+    struct LabelHost { label:OwnerRef, target:OwnerRef, focus:FocusHandle }
+    impl Render for LabelHost {
+        fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
+            let mut root=div().size_full().flex().flex_col();
+            for (owner,path) in [(&self.label,"hover-label"),(&self.target,"hover-target")] {
+                // Terminal owners deliberately have no projection to paint.
+                if owner.borrow().disposed { continue; }
+                Owner::project(owner);
+                let snapshot=owner.borrow().projection.clone().unwrap();
+                root=root.child(paint_native_root(&snapshot,owner,&self.focus,path.into(),Rc::new(|_,_|{})));
+            }
+            root
+        }
+    }
+    #[gpui::test]
+    fn current_hover_leave_cancels_label_activation_but_retired_leave_does_not(cx:&mut TestAppContext) {
+        let calls=Rc::new(Cell::new(0));let observed=calls.clone();
+        let window=cx.open_window(size(px(160.),px(80.)),move |_,cx| {
+            let reference=ControlLabelRef::new();
+            let make=|target| {
+                let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,
+                    |_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+                let weak=Rc::downgrade(&owner);let observed=observed.clone();
+                initialize_instance_associations(&owner,InstanceAssociations{control_label:Some(reference.clone())});
+                as_accessible(&weak);
+                control_label_declare(&weak,target,Value::Function(Rc::new(move |_| {
+                    observed.set(observed.get()+1);Value::Undefined
+                })),Value::Undefined);
+                control_label_sync(&weak,record(vec![("naming",Value::boolean(true)),("activation",Value::boolean(true))]));
+                owner.borrow_mut().slot=vec![NativeSnapshot::text_value(Value::string(if target{"Target"}else{"Label"}))];
+                Owner::finish(&owner,Value::Undefined);owner
+            };
+            LabelHost{label:make(false),target:make(true),focus:cx.focus_handle()}
+        });
+        window.update(cx,|_,window,_|window.activate_window()).unwrap();frames(window,cx);
+        window.update(cx,|host,window,cx| {
+            let position=host.label.borrow().bounds.unwrap().origin+point(px(2.),px(2.));
+            window.simulate_mouse_move(position,cx);
+            let current=native_hover_view(&host.label,window).unwrap();
+            let retired=NativeHoverView{epoch:current.epoch.wrapping_sub(1),..current};
+            for stale in [true,false] {
+                native_hover_input(&host.label,current,true,window,cx);
+                window.dispatch_event(gpui::PlatformInput::MouseDown(gpui::MouseDownEvent {
+                    position,button:gpui::MouseButton::Left,..Default::default()
+                }),cx);
+                assert!(host.label.borrow().modules.control_label.pointer.as_ref()
+                    .is_some_and(|pointer|pointer.request.is_current()),"native down starts a current label turn");
+                native_hover_input(&host.label,if stale{retired}else{current},false,window,cx);
+                assert_eq!(host.label.borrow().modules.control_label.pointer.is_some(),stale,
+                    "only a leave from the current native view may cancel its pending label activation");
+                window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
+                    position,button:gpui::MouseButton::Left,..Default::default()
+                }),cx);
+                assert_eq!(calls.get(),1,"a cancelled hover turn cannot activate on the subsequent native click");
+            }
+            Owner::dispose(&host.label);Owner::dispose(&host.target);
+        }).unwrap();
+        frames(window,cx);
+        window.update(cx,|host,_,_| {
+            assert!(host.label.borrow().disposed&&host.target.borrow().disposed);
+            assert!(host.label.borrow().projection.is_none()&&host.target.borrow().projection.is_none());
+            assert_eq!(calls.get(),1,"terminal native frames cannot revive retired label activation");
+        }).unwrap();
     }
 
     #[gpui::test]
@@ -254,6 +323,27 @@ mod native_hover_tests {
         window.update(cx,|host,_,_| {
             assert!(host.owner.borrow().disposed);
             assert!(host.owner.borrow().native_hover.pending.is_none());
+        }).unwrap();
+    }
+    #[gpui::test]
+    fn mounted_callback_failure_keeps_current_hover_and_exact_error(cx:&mut TestAppContext) {
+        let trace=Rc::new(RefCell::new(Vec::new()));let output=trace.clone();
+        let window=cx.open_window(size(px(160.),px(80.)),move |_,cx| {
+            let owner=owner(output,false,true);let content=cx.new(|_|Content);
+            owner.borrow_mut().slot=vec![NativeSnapshot::native_view(content.clone().into())];
+            Host{owner,focus:cx.focus_handle(),shown:false,_content:content}
+        });
+        cold_mount(window,cx);
+        assert_eq!(&*trace.borrow(),&["mounted","pointer.enter","host:mouseenter"],
+            "an authored mount failure does not retire an otherwise current native view");
+        window.update(cx,|host,window,cx| {
+            let failures=take_native_failures(&host.owner);
+            assert_eq!(failures.len(),1);
+            assert!(matches!(failures[0].error,Value::Json(Json::Bool(false))));
+            window.simulate_mouse_move(point(px(120.),px(60.)),cx);
+            window.simulate_mouse_move(point(px(10.),px(10.)),cx);
+            assert_eq!(trace.borrow().len(),7,"the current view keeps real leave and enter delivery");
+            Owner::dispose(&host.owner);
         }).unwrap();
     }
     #[gpui::test]

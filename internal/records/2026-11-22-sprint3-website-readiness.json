@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "kind": "current-source-obligations; no product acceptance is earned by this ledger",
   "observedCheckout": {
-    "revision": "914c09f4e5bdec494616b39c22a2479ee67bcc27",
-    "dirty": true
+    "revision": "4518981d4876bd8d244f5f204a427dda6fe9ed18",
+    "dirty": false
   },
   "source": {
-    "inputDigest": "6897034b8534f23cdb1c3018d04a080efe9fe7b6ad39e51cec47a38ec765d71c",
-    "inventoryInputDigest": "68f2efe3fbefb24caf223252c6cbbd16dbb99e54eb07a6492900dbb4e1507d1c",
+    "inputDigest": "7efaf09e80362f451be0bedc86b80843b155fa7ac1eff5c43b942282bd94c7d7",
+    "inventoryInputDigest": "e9d52fc7068dade2d1eb5fee05cbae2f09b5f0d34a0631d00ac8ea35873885b0",
     "inputFiles": 370,
     "inputResolution": "Re-run with --details to recover every route source path and its exact input SHA-256; inputs include all MDX pages, package exports, policy, runtime list, Code modules, registry and inspected producers.",
     "supportingInputs": [
@@ -25,7 +25,7 @@
       },
       {
         "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-        "sha256": "512567c5f376fbc5a55448aae4589fc2d56814c78216d930ea069e5a63149219"
+        "sha256": "09e2046f94faf337ab37360e6c6239264fa1190415af578d561e92f3f4f3df65"
       },
       {
         "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -33,7 +33,7 @@
       },
       {
         "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-        "sha256": "2611501cb59055d0bf428559f0e86be6050bdc09ac1255d84d967e4f11e4428a"
+        "sha256": "008827e9e757d342728638b51f0b62fdc753c70479f6a6c4324c6fdbaedae286"
       },
       {
         "path": "apps/www/src/content/docs/demo_components/base-checkbox/baseCheckboxCode.ts",
@@ -49,7 +49,7 @@
       },
       {
         "path": "apps/www/src/content/docs/demo_components/base-select/baseSelectCode.ts",
-        "sha256": "f6e71431f885a1cd3d79de96f1b85a0cd451406748fd5a342c1e94bea9479017"
+        "sha256": "7bfaba678e96697725772fe0a518d5f84df797eda434fc6fcc3e3b25017d8ae4"
       },
       {
         "path": "apps/www/src/content/docs/demo_components/base-tooltip/baseTooltipCode.ts",
@@ -89,11 +89,11 @@
       },
       {
         "path": "packages/cli/src/registry/components.ts",
-        "sha256": "4c14b498d60e080619fa7e5f627d032cce4dd4c0407ae96f71e716292e6da7fe"
+        "sha256": "0f27aec3862ce804763d2ff14b048bddbee2fb7b97a47aa4bd4dbc0f6711fd95"
       },
       {
         "path": "packages/cli/src/registry/finf-components.ts",
-        "sha256": "b47fbdba3d5e9e8d8f625d6892ed6289cc5180904ce6e8e871cea281009f8247"
+        "sha256": "2bd51d547771b03253f88f51356d8d02dcc50735098fbee7e8d7ec10619b8856"
       },
       {
         "path": "packages/cli/src/registry/shadcn-component-presets.generated.ts",
@@ -109,20 +109,23 @@
       }
     ]
   },
-  "locales": ["en", "zh-cn"],
+  "locales": [
+    "en",
+    "zh-cn"
+  ],
   "familyKeyExpansion": "A family key expands to <family>:<locale> for every locale above; localeRows are additional exact inventory row IDs. Row.source in the existing inventory identifies the actual MD/MDX path, including policy aliases.",
   "summary": {
     "routes": 340,
     "families": 170,
-    "previews": 450,
-    "previewHostCells": 1582,
+    "previews": 488,
+    "previewHostCells": 1712,
     "codeMapFiles": 10,
     "codeMapDemoIds": 24,
     "codeMapHostEntries": 91,
     "disabledWithoutCodeExampleRoutes": 172,
     "disabledWithoutCodeExampleOrFenceRoutes": 164,
-    "missingPreviewSourceHostCells": 1472,
-    "omittedHostRoutes": 26,
+    "missingPreviewSourceHostCells": 1592,
+    "omittedHostRoutes": 24,
     "fullMatrixAcceptance": "not-established"
   },
   "historicalCounts": {
@@ -282,7 +285,11 @@
   "children": [
     {
       "id": "s3.www.usage.disabled-without-code",
-      "originalConditions": ["1042.acceptance.1", "1042.acceptance.2", "1042.acceptance.3"],
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
       "owner": "Sprint 3 website / original documentation and family source owners",
       "state": "open",
       "action": "Supply matching public Usage; no CodeExample or fenced code exists.",
@@ -375,7 +382,11 @@
     },
     {
       "id": "s3.www.usage.disabled-with-fenced-code",
-      "originalConditions": ["1042.acceptance.1", "1042.acceptance.2", "1042.acceptance.3"],
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
       "owner": "Sprint 3 website / original documentation and family source owners",
       "state": "open",
       "action": "Reuse the authored code and complete missing host/setup/preview correspondence.",
@@ -390,7 +401,11 @@
     },
     {
       "id": "s3.www.usage.enabled-without-source",
-      "originalConditions": ["1042.acceptance.1", "1042.acceptance.2", "1042.acceptance.3"],
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
       "owner": "Sprint 3 website / original documentation and family source owners",
       "state": "open",
       "action": "Supply matching source; enabling codePanel alone does not produce Code.",
@@ -471,7 +486,11 @@
     },
     {
       "id": "s3.www.usage.preview-source-unverified",
-      "originalConditions": ["1042.acceptance.1", "1042.acceptance.2", "1042.acceptance.3"],
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
       "owner": "Sprint 3 website / original documentation and family source owners",
       "state": "open",
       "action": "Review and execute the existing source for every declared host; presence is not acceptance.",
@@ -490,7 +509,11 @@
     },
     {
       "id": "s3.www.usage.code-example-unverified",
-      "originalConditions": ["1042.acceptance.1", "1042.acceptance.2", "1042.acceptance.3"],
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
       "owner": "Sprint 3 website / original documentation and family source owners",
       "state": "open",
       "action": "Execute the displayed complete files against the declared installed version and real Preview.",
@@ -510,8 +533,15 @@
     {
       "id": "s3.www.delivery.public-target",
       "owner": "Sprint 2 reproducible delivery owner; Sprint 3 installed-consumer acceptance owner",
-      "producerIssues": [1458, 1154],
-      "acceptanceIssues": [1042, 1175, 1673],
+      "producerIssues": [
+        1458,
+        1154
+      ],
+      "acceptanceIssues": [
+        1042,
+        1175,
+        1673
+      ],
       "state": "open",
       "action": "Bind the declared fixed version, actual public target and npm/pnpm/npx/dlx results in a clean consumer.",
       "routeCount": 138,
@@ -591,8 +621,14 @@
     {
       "id": "s3.www.delivery.workspace-source-only",
       "owner": "Sprint 2 reproducible delivery owner; Sprint 3 installed-consumer acceptance owner",
-      "producerIssues": [1458],
-      "acceptanceIssues": [1042, 1175, 1673],
+      "producerIssues": [
+        1458
+      ],
+      "acceptanceIssues": [
+        1042,
+        1175,
+        1673
+      ],
       "state": "open",
       "action": "Use the supported pinned-source delivery from #1458; public add rejects these targets. Do not relabel the workspace registry as installed admission.",
       "routeCount": 186,
@@ -696,8 +732,14 @@
     {
       "id": "s3.www.delivery.no-component-target",
       "owner": "Sprint 2 reproducible delivery owner; Sprint 3 installed-consumer acceptance owner",
-      "producerIssues": [1458],
-      "acceptanceIssues": [1042, 1175, 1673],
+      "producerIssues": [
+        1458
+      ],
+      "acceptanceIssues": [
+        1042,
+        1175,
+        1673
+      ],
       "state": "open",
       "action": "Use and verify the actual exported package subpath and public Adapter. A missing component facade is not a missing package export, and no add command may be invented.",
       "routeCount": 16,
@@ -717,116 +759,163 @@
   "omittedHosts": {
     "id": "s3.www.host-declarations",
     "owner": "Sprint 3 website with original runtime/Adapter owner #568",
-    "originalConditions": ["1042.acceptance.3", "1042.acceptance.5"],
+    "originalConditions": [
+      "1042.acceptance.3",
+      "1042.acceptance.5"
+    ],
     "state": "open",
     "action": "Verify the existing real demo through the omitted host before exposing it publicly; preserve unsupported or failing outcomes.",
     "rows": [
       {
         "row": "base:checkbox:en",
-        "missing": ["react", "vue", "vue2"]
+        "missing": [
+          "react",
+          "vue",
+          "vue2"
+        ]
       },
       {
         "row": "base:checkbox:zh-cn",
-        "missing": ["react", "vue", "vue2"]
+        "missing": [
+          "react",
+          "vue",
+          "vue2"
+        ]
       },
       {
         "row": "base:dialog:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:dialog:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:dropdown-menu:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:dropdown-menu:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:hover-card:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:hover-card:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:radio-group:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:radio-group:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:scroll-area:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:scroll-area:zh-cn",
-        "missing": ["vue2"]
-      },
-      {
-        "row": "base:select:en",
-        "missing": ["vue2"]
-      },
-      {
-        "row": "base:select:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:separator:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:separator:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:switch:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:switch:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:tabs:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:tabs:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:textarea:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:textarea:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:toggle:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:toggle:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:transition:en",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       },
       {
         "row": "base:transition:zh-cn",
-        "missing": ["vue2"]
+        "missing": [
+          "vue2"
+        ]
       }
     ],
-    "routeCount": 26,
+    "routeCount": 24,
     "families": [
       "base:checkbox",
       "base:dialog",
@@ -834,7 +923,6 @@
       "base:hover-card",
       "base:radio-group",
       "base:scroll-area",
-      "base:select",
       "base:separator",
       "base:switch",
       "base:tabs",
@@ -847,29 +935,45 @@
   "otherRequiredChildren": [
     {
       "id": "s3.www.generated-consumers",
-      "originalConditions": ["1042.acceptance.3"],
+      "originalConditions": [
+        "1042.acceptance.3"
+      ],
       "owner": "Sprint 2 compiler/real-consumer owner",
-      "producerIssues": [732, 733, 1055, 1061, 1145],
+      "producerIssues": [
+        732,
+        733,
+        1055,
+        1061,
+        1145
+      ],
       "state": "open",
       "action": "Preserve source x target x actual consumer identity. Public Adapter source examples cannot stand in for compiled consumers; authoring can proceed independently of this producer acceptance."
     },
     {
       "id": "s3.www.button-runtime-navigation",
-      "originalConditions": ["1042.acceptance.4", "1042.acceptance.5", "1042.acceptance.6"],
+      "originalConditions": [
+        "1042.acceptance.4",
+        "1042.acceptance.5",
+        "1042.acceptance.6"
+      ],
       "owner": "Sprint 3 website with #420/#568 and original #1438/#1435 owners",
       "state": "open",
       "action": "Complete supported Button compositions, runtime state/focus, cold/failure/no-JS, native previous/next links, keyboard, themes, 320/390/desktop and enlarged-text journeys on the combined candidate."
     },
     {
       "id": "s3.www.catalog-78",
-      "originalConditions": ["1141:Repair public docs 78 family catalog drift"],
+      "originalConditions": [
+        "1141:Repair public docs 78 family catalog drift"
+      ],
       "owner": "Current 0.3 execution owner with original #1090 source keys",
       "state": "open",
       "action": "Reconcile all original 78 family catalog/availability/route/nav rows and original receipts. This 170-family export inventory does not replace them."
     },
     {
       "id": "s3.www.dropdown-anatomy",
-      "originalConditions": ["1141:Repair Dropdown anatomy replay model"],
+      "originalConditions": [
+        "1141:Repair Dropdown anatomy replay model"
+      ],
       "owner": "Original Dropdown anatomy replay owner",
       "state": "open",
       "action": "Retain the production retained-shell/readContrastAuditSubject 24-frame oracle, probe-only negative control, owner/generation/physical portal/currentLease, extras==0 and independent paint assertions."
@@ -886,7 +990,10 @@
     },
     {
       "id": "s3.www.historical-source",
-      "originalConditions": ["1042.acceptance.1", "1175:original R5 execution/source"],
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1175:original R5 execution/source"
+      ],
       "owner": "Original evidence/archive owners with Sprint 3 history coordinator",
       "state": "blocked-on-original-material",
       "action": "Recover the original #1042 518-row/5784-cell matrix and #1175 fixed Camoufox driver/archive. Keep R5 76 phases=0 pass/76 fail and 155 subjects=5 pass/145 fail/5 unknown; current runs cannot rewrite them."
@@ -910,38 +1017,77 @@
     "files": [
       {
         "file": "apps/www/src/content/docs/demo_components/base-checkbox/baseCheckboxCode.ts",
-        "demoIds": ["demo-base-checkbox"],
-        "hosts": ["react", "vue", "wc"],
+        "demoIds": [
+          "demo-base-checkbox"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
         "containsWebsiteAlias": false
       },
       {
         "file": "apps/www/src/content/docs/demo_components/base-dialog/baseDialogCode.ts",
-        "demoIds": ["demo-base-dialog"],
-        "hosts": ["react", "vue", "wc"],
+        "demoIds": [
+          "demo-base-dialog"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
         "containsWebsiteAlias": true
       },
       {
         "file": "apps/www/src/content/docs/demo_components/base-hover-card/baseHoverCardCode.ts",
-        "demoIds": ["demo-base-hover-card"],
-        "hosts": ["react", "vue", "wc"],
+        "demoIds": [
+          "demo-base-hover-card"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
         "containsWebsiteAlias": true
       },
       {
         "file": "apps/www/src/content/docs/demo_components/base-select/baseSelectCode.ts",
-        "demoIds": ["demo-base-select"],
-        "hosts": ["react", "vue", "vue2", "wc"],
+        "demoIds": [
+          "demo-base-select"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
         "containsWebsiteAlias": false
       },
       {
         "file": "apps/www/src/content/docs/demo_components/base-tooltip/baseTooltipCode.ts",
-        "demoIds": ["demo-base-tooltip"],
-        "hosts": ["react", "vue", "vue2", "wc"],
+        "demoIds": [
+          "demo-base-tooltip"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
         "containsWebsiteAlias": false
       },
       {
         "file": "apps/www/src/content/docs/demo_components/base-transition/baseTransitionCode.ts",
-        "demoIds": ["demo-base-transition-command", "demo-base-transition-controlled"],
-        "hosts": ["react", "vue", "wc"],
+        "demoIds": [
+          "demo-base-transition-command",
+          "demo-base-transition-controlled"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
         "containsWebsiteAlias": true
       },
       {
@@ -959,19 +1105,38 @@
           "demo-button-states",
           "demo-button-variants"
         ],
-        "hosts": ["react", "vue", "vue2", "wc"],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
         "containsWebsiteAlias": false
       },
       {
         "file": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
-        "demoIds": ["demo-shadcn-dialog"],
-        "hosts": ["react", "vue", "vue2", "wc"],
+        "demoIds": [
+          "demo-shadcn-dialog"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
         "containsWebsiteAlias": true
       },
       {
         "file": "apps/www/src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode.ts",
-        "demoIds": ["demo-shadcn-hover-card"],
-        "hosts": ["react", "vue", "vue2", "wc"],
+        "demoIds": [
+          "demo-shadcn-hover-card"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
         "containsWebsiteAlias": true
       },
       {
@@ -982,7 +1147,12 @@
           "demo-shadcn-tabs-preset-nova",
           "demo-shadcn-tabs-preset-rhea"
         ],
-        "hosts": ["react", "vue", "vue2", "wc"],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
         "containsWebsiteAlias": false
       }
     ]
