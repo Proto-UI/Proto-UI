@@ -12,8 +12,8 @@ import {
   valueTypeEqual,
   joinValueTypes,
   objectValueType,
+  dataBoundaryType,
   isTemplateChildType,
-  publishedDataType,
 } from './value-types';
 export { isTemplateChildType } from './value-types';
 import {
@@ -1086,7 +1086,25 @@ export const OPERATION_RULES = {
       {
         role: 'value',
         optional: true,
-        valueSchema: objectValueType([{ name: 'when', type: 'state:boolean', optional: true }]),
+        valueSchema: {
+          kind: 'value-union',
+          members: [
+            'void',
+            {
+              kind: 'object',
+              fields: [
+                {
+                  name: 'when',
+                  optional: true,
+                  type: {
+                    kind: 'value-union',
+                    members: ['state:boolean', 'borrowed:boolean', 'observed:boolean'],
+                  },
+                },
+              ],
+            },
+          ],
+        },
       },
     ],
     [effect('declare', 'accessibility')],
@@ -1985,6 +2003,35 @@ export const OPERATION_RULES = {
     [record],
     [effect('declare', 'view')]
   ),
+  'scroll.sync': rule(
+    'scroll',
+    'sync',
+    callbackPhase,
+    'void',
+    [
+      {
+        role: 'value',
+        valueSchema: {
+          kind: 'record',
+          fields: [
+            {
+              name: 'axes',
+              optional: true,
+              type: {
+                kind: 'union',
+                members: [
+                  { kind: 'literal', value: 'horizontal' },
+                  { kind: 'literal', value: 'vertical' },
+                  { kind: 'literal', value: 'both' },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+    [effect('write', 'view')]
+  ),
   'scroll.bindComposedChrome': rule(
     'scroll',
     'bindComposedChrome',
@@ -2025,6 +2072,14 @@ export const OPERATION_RULES = {
     [record],
     [effect('write', 'view')]
   ),
+  'textControl.resetValue': rule(
+    'text-control',
+    'resetValue',
+    callbackPhase,
+    'boolean',
+    [{ role: 'value', schema: { kind: 'union', members: ['string', 'void'] }, optional: true }],
+    [effect('write', 'view')]
+  ),
   'textControl.snapshot': rule(
     'text-control',
     'snapshot',
@@ -2032,14 +2087,6 @@ export const OPERATION_RULES = {
     { kind: 'union', members: [textSnapshot, 'null'] },
     [],
     [effect('read', 'view')]
-  ),
-  'textControl.resetValue': rule(
-    'text-control',
-    'resetValue',
-    callbackPhase,
-    'boolean',
-    [{ role: 'value', types: [{ kind: 'union', members: ['string', 'void'] }], optional: true }],
-    [effect('write', 'view')]
   ),
   'imageView.on': rule(
     'image-view',
@@ -2899,8 +2946,8 @@ export function validateOperationArguments(
         if (!bindings.eventPayloadType)
           reject('missing-signature', 'Emitted events require a declared payload signature.');
         else if (
-          !publishedDataType(argument.type) ||
-          !isAssignable(publishedDataType(argument.type)!, bindings.eventPayloadType)
+          !dataBoundaryType(argument.type) ||
+          !assignable(dataBoundaryType(argument.type)!, bindings.eventPayloadType)
         )
           reject('argument-type', 'Event payload does not match the declared signature.');
         break;

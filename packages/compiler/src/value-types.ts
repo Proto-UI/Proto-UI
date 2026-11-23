@@ -251,23 +251,35 @@ export function objectValueType(fields: ObjectValueType['fields']): ValueType {
     : { kind: 'object', fields };
 }
 
-/** JSON publication copies data; readonly source fields do not carry authority. */
-export function publishedDataType(type: ValueType): DataType | undefined {
-  if (isDataValueType(type)) return type;
-  if (typeof type === 'string') return undefined;
-  if (type.kind === 'object' && type.index === undefined) {
+/** Prove an outward JSON snapshot without erasing the expression's readonly view.
+ * Capabilities, callbacks, open dictionaries and nested undefined are never data. */
+export function dataBoundaryType(type: ValueType, top = true): DataType | undefined {
+  if (typeof type === 'string')
+    return ['boolean', 'number', 'string', 'null'].includes(type) || (top && type === 'void')
+      ? (type as DataType)
+      : undefined;
+  if (type.kind === 'literal') return type;
+  if (type.kind === 'array') {
+    const element = dataBoundaryType(type.element, false);
+    return element ? { kind: 'array', element } : undefined;
+  }
+  if (type.kind === 'union' || type.kind === 'value-union') {
+    const members = type.members.map((member) => dataBoundaryType(member, top));
+    return members.every((member): member is DataType => member !== undefined)
+      ? { kind: 'union', members }
+      : undefined;
+  }
+  if (
+    (type.kind === 'record' || type.kind === 'object') &&
+    !('index' in type && type.index !== undefined)
+  ) {
     const fields: { name: string; type: DataType; optional?: boolean }[] = [];
     for (const field of type.fields) {
-      const data = publishedDataType(field.type);
-      if (!data) return undefined;
-      fields.push({ name: field.name, type: data, ...(field.optional ? { optional: true } : {}) });
+      const value = dataBoundaryType(field.type, false);
+      if (!value) return undefined;
+      fields.push({ name: field.name, type: value, ...(field.optional ? { optional: true } : {}) });
     }
     return { kind: 'record', fields };
-  }
-  if (type.kind === 'value-union') {
-    const members = type.members.map(publishedDataType);
-    if (members.every((member): member is DataType => member !== undefined))
-      return parseDataType({ kind: 'union', members });
   }
   return undefined;
 }

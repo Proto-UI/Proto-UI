@@ -1,0 +1,144 @@
+id: T-COMPILER-GPUI-AUTHORED-INPUT-0001
+type: test
+title: Generated GPUI activation, conditional accessibility and editing-lease execution
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  These executable source-to-native tests exercise the actual emitted components and SDK host atoms. The GPUI test platform does not establish OS accessibility or real IME delivery; source-bound native receipts and independent review are required separately.
+
+cases:
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-ACTIVATION
+    title: Assistive activation executes authored policy before outward signaling
+    covers: [C-A11Y-0001-F, C-A11Y-0001-DECLARATION-LIFETIME]
+    expectation: Default and Expose activation enter press.commit, explicit host inputs retain their route, disabled policy executes, and retired owners cannot deliver.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION
+    title: Current State controls whether an accessibility fact is applicable
+    covers: [C-A11Y-0001-STATE-CONDITION, C-A11Y-0001-STATE-CONDITION-VALIDITY]
+    expectation: The native node omits inactive facts and restores their current values, declaration replacement includes the condition, and invalid runtime conditions remain unmodified while omitted.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT
+    title: Text reset and native selection preserve editing authority
+    covers:
+      [
+        C-TEXT-CONTROL-0001-RESET,
+        C-TEXT-CONTROL-0001-D,
+        C-TEXT-CONTROL-0001-E,
+        C-TEXT-CONTROL-0001-F,
+        C-TEXT-CONTROL-0001-G,
+        C-TEXT-CONTROL-0001-I,
+      ]
+    expectation: Reset retires IME and history, controlled truth is retained, UTF-16 selection snaps whole codepoints and rejects wrong windows or inactive leases, and ordinary editing cannot disturb composition.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA
+    title: Checked scalar and readonly data source executes unchanged
+    covers:
+      [
+        C-COMPILER-SCALAR-INPUT-0001-LENGTH,
+        C-COMPILER-SCALAR-INPUT-0001-CONVERSION,
+        C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
+        C-COMPILER-SCALAR-INPUT-0001-READONLY,
+      ]
+    expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries. Structural readonly views, aliases, helper calls and mutable stores cannot hide enumerable undefined or another non-JSON nested value. Local-only narrowed views and explicit fresh data snapshots remain admitted.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL
+    title: Native Tab default follows completed input dispatch and current focus eligibility
+    covers:
+      [
+        C-AS-FOCUSABLE-0001-E,
+        C-AS-FOCUSABLE-0001-F,
+        C-AS-FOCUS-SCOPE-0002-H,
+        C-TEXT-CONTROL-0001-G,
+        HC-FOCUS-TARGET-0001-B,
+      ]
+    expectation: Real generated native targets traverse in both directions using the committed host tab order, including ordinary native siblings and excluding disabled or navParticipation none targets. Authored or later native prevention, stopped propagation, current compiled TextControl composition and inactive windows prevent fallback; active scope trapping retains priority. The default action is synchronous after dispatch and cannot be replayed by deferred cleanup.
+    notes:
+      - The witness guards the current native handle, owner view lease and authored focus intent. It does not claim detection of an arbitrary native-only focus-away-and-back round trip to the same handle within an unconsumed keystroke, because the public GPUI API exposes no such generation.
+implementations:
+  - id: checked-json-source-provenance
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/json-boundary-provenance.test.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
+  - id: checked-authored-inputs
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/gpui-authored-inputs.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
+      ]
+  - id: generated-native-inputs
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-ACTIVATION,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT,
+        T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
+      ]
+  - id: native-editor-leases
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/src/gpui-native-text.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT]
+    notes:
+      [
+        Execute the generated SDK library tests with the test-support feature; never patch emitted Rust.,
+      ]
+  - id: generated-native-sequential-focus
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-a11y-value/sequential_focus.rs
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL]
+    notes:
+      - The ordinary tab-focus and tab-scope authored fixtures are compiled afresh. Native test execution and its exact source receipt are required separately; fixture authorship alone is not passing evidence or operating-system keyboard acceptance.
+      - The separate-App regression retains live owners with colliding App-local window identifiers and dispatches real keys. Current-App event fan-out and host driving must not invoke or update the other App's Entity; no fixture exception or weaker identity assertion is used.
+      - Repeated Props updates and host driving on the same physical epoch/window/handle must not notify the App focus registry. A real detach/reattach registers the replacement binding, after which steady-state updates remain silent. The executable assertion observes native registry effects rather than a machine-dependent time limit; current target eligibility is still checked at dispatch.
+verifies:
+  contracts:
+    - id: C-AS-FOCUSABLE-0001
+      anchors: [C-AS-FOCUSABLE-0001-E, C-AS-FOCUSABLE-0001-F]
+    - id: C-AS-FOCUS-SCOPE-0002
+      anchors: [C-AS-FOCUS-SCOPE-0002-H]
+    - id: C-COMPILER-SCALAR-INPUT-0001
+      anchors:
+        [
+          C-COMPILER-SCALAR-INPUT-0001-LENGTH,
+          C-COMPILER-SCALAR-INPUT-0001-CONVERSION,
+          C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
+          C-COMPILER-SCALAR-INPUT-0001-READONLY,
+        ]
+    - id: C-TEXT-CONTROL-0001
+      anchors:
+        [
+          C-TEXT-CONTROL-0001-RESET,
+          C-TEXT-CONTROL-0001-D,
+          C-TEXT-CONTROL-0001-E,
+          C-TEXT-CONTROL-0001-F,
+          C-TEXT-CONTROL-0001-G,
+          C-TEXT-CONTROL-0001-I,
+        ]
+    - id: C-A11Y-0001
+      anchors:
+        [
+          C-A11Y-0001-F,
+          C-A11Y-0001-DECLARATION-LIFETIME,
+          C-A11Y-0001-STATE-CONDITION,
+          C-A11Y-0001-STATE-CONDITION-VALIDITY,
+        ]
+  hostCaps:
+    - id: HC-FOCUS-TARGET-0001
+      anchors: [HC-FOCUS-TARGET-0001-B]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: strengthened
+    summary: Bind native sequential default-action evidence to existing Focus participation, scope trapping and editing-session criteria without changing their draft lifecycle.
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Bind source admission and native execution to generic activation, applicability, scalar and editing-lease criteria.
+tags: [compiler, gpui, input, accessibility, text-control]

@@ -144,6 +144,11 @@ export function emitGpuiSource(
     'hook.asTrigger',
     'hook.asFocusable',
     'hook.asAccessible',
+    'hook.asControlLabel',
+    'controlLabel.label',
+    'controlLabel.target',
+    'controlLabel.sync',
+    'controlLabelRequest.isCurrent',
     'event.on',
     'event.onGlobal',
     'event.requestDefaultActionPrevention',
@@ -229,6 +234,7 @@ export function emitGpuiSource(
     'hitParticipation.registerRegion',
     'hitParticipation.unregisterRegion',
     'scroll.configure',
+    'scroll.sync',
     'scroll.request',
     'scroll.getSnapshot',
     'collection.configure',
@@ -239,8 +245,8 @@ export function emitGpuiSource(
     'hook.asTextControl',
     'textControl.on',
     'textControl.sync',
-    'textControl.snapshot',
     'textControl.resetValue',
+    'textControl.snapshot',
     'hook.asImageView',
     'imageView.on',
     'imageView.sync',
@@ -333,6 +339,18 @@ export function emitGpuiSource(
         code: 'PUI_GPUI_HOST_REQUIRED',
         category: 'unsupported-input',
         message: `GPUI operation ${node.operation} has no concrete pinned host lowering. No success fallback is emitted.`,
+        span: node.span,
+      });
+    if (
+      node.kind === 'operation' &&
+      ((node.operation === 'controlLabel.label' && node.arguments.length > 0) ||
+        (node.operation === 'controlLabel.target' && node.arguments.length > 1))
+    )
+      diagnostics.push({
+        code: 'PUI_GPUI_CONTROL_LABEL_ANATOMY',
+        category: 'unsupported-input',
+        message:
+          'GPUI ControlLabel supports direct typed InstanceAssociations; anatomy-pair descriptors require an explicit host lowering.',
         span: node.span,
       });
     if (
@@ -924,7 +942,7 @@ impl __PuiNativeRecordValue {
         let identity=self.identity().expect("native aggregate identity").clone();
         // An invalid render result still owns every evaluated native field. It
         // cannot be painted or boxed back into the generic Value representation.
-        native::gpui_native_owner::NativeSnapshot { identity, observation:None,valid:false,slot_count:0,
+        native::gpui_native_owner::NativeSnapshot { identity, observation:None,valid:false,slot_count:0,passive_content:false,
             frame:Rc::new(move|_,_,_,_,_,_|{let _retained=&self;Vec::new()}),
             text:Rc::new(|_|String::new()) }
     }
@@ -1008,7 +1026,7 @@ impl __PuiNativeRecordValue {
     return `{ let ${tagName} = ${tagCode}; let _ = ${tagName}; let ${propsName} = ${propsCode}; let ${childrenName} = ${childCode};
       let ${stylesName} = if ${propsName}.nullish() { Vec::new() } else { let style = ${propsName}.member("style",false); if style.nullish(){Vec::new()}else{style_items(vec![style])} };
       let frame_children = ${childrenName}.clone(); let text_children = ${childrenName}.clone();
-      native::gpui_native_owner::NativeSnapshot { identity:Rc::new(()),observation:None,valid:${childrenName}.valid,slot_count:${childrenName}.slot_count,
+      native::gpui_native_owner::NativeSnapshot { identity:Rc::new(()),observation:None,valid:${childrenName}.valid,slot_count:${childrenName}.slot_count,passive_content:${childrenName}.passive_content,
         frame:Rc::new(move |owner,focus,parent_path,drive,slot,index| {
           let path=format!("{parent_path}-{}",*index);*index+=1;
           let tokens:Vec<String> = ${stylesName}.iter().map(|(token,_)|token.clone()).collect();
@@ -1047,6 +1065,32 @@ impl __PuiNativeRecordValue {
     ): { fn: FunctionIR; environment: NativeLexicalScope }[] {
       if (node.kind === 'function') return [{ fn: node.function, environment: scope }];
       if (node.kind === 'narrow') return resolve(node.value, scope);
+      // An authored capture is nominal provenance, not a structural record.
+      // Its render member is the setup result captured by that exact hook.
+      // Preserve scalar/null render callbacks at the native renderer boundary
+      // without converting arbitrary records or guessing a component identity.
+      if (node.kind === 'member' && node.property === 'render') {
+        const captures = valueAlternatives(node.object.type).filter(
+          (type): type is Extract<ExpressionIR['type'], { kind: 'capture' }> =>
+            typeof type !== 'string' && type.kind === 'capture'
+        );
+        if (captures.length) {
+          if (active.has(node)) return [];
+          active.add(node);
+          try {
+            return captures.flatMap((capture) => {
+              const hook = ir.hooks.find((hook) => hook.id === capture.hookId);
+              return hook
+                ? returnedValues(hook.setup).flatMap((result) =>
+                    result.value ? resolve(result.value, result.scope) : []
+                  )
+                : [];
+            });
+          } finally {
+            active.delete(node);
+          }
+        }
+      }
       if (node.kind === 'conditional')
         return [...resolve(node.then, scope), ...resolve(node.otherwise, scope)];
       if (node.kind === 'reference') {
@@ -1203,7 +1247,7 @@ impl __PuiNativeRecordValue {
     // native repaint never re-runs a factory or lexical environment.
     return `{ let callable=${value}; match callable {
       Value::NativeFunction{identity,render} => capture_renderer(Value::NativeFunction{identity,render:render.clone()},render),
-      Value::Renderer(adapter) => Value::Renderer(adapter),
+      Value::Renderer(adapter) => Value::Renderer(adapter),${valueAlternatives(node.type).includes('void') ? '\n      Value::Undefined => Value::Undefined,' : ''}
       Value::Function(callback) => capture_renderer(Value::Function(callback.clone()),Rc::new(move |arguments:Vec<Value>| { ${result} })),
       _ => panic!("checked setup result must be a callable")
     } }`;
@@ -1850,6 +1894,16 @@ impl __PuiNativeRecordValue {
             return builtin(`as_focusable(&${ownerReference()})`);
           case 'hook.asAccessible':
             return builtin(`as_accessible(&${ownerReference()})`);
+          case 'hook.asControlLabel':
+            return builtin(`module_handle(&${ownerReference()}, "control-label")`);
+          case 'controlLabel.label':
+            return `control_label_declare(${receiverOwner()}, "label", Value::Undefined)`;
+          case 'controlLabel.target':
+            return `control_label_declare(${receiverOwner()}, "target", ${argument(0)})`;
+          case 'controlLabel.sync':
+            return `control_label_sync(${receiverOwner()}, ${argument(0)})`;
+          case 'controlLabelRequest.isCurrent':
+            return `control_label_request_current(${receiver()})`;
           case 'focus.configure':
             return `focus_setup_config(${receiverOwner()}, "focus", ${argument(0)})`;
           case 'focus.setDisabled':
@@ -1997,6 +2051,8 @@ impl __PuiNativeRecordValue {
             return builtin(`scroll_setup(&${ownerReference()})`);
           case 'scroll.configure':
             return `scroll_configure(${receiverOwner()}, ${argument(0)})`;
+          case 'scroll.sync':
+            return `scroll_sync(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.request':
             return `scroll_request(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.getSnapshot':
@@ -2007,10 +2063,10 @@ impl __PuiNativeRecordValue {
             return `text_on(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'textControl.sync':
             return `text_sync(${receiverOwner()}, ${argument(0)})`;
-          case 'textControl.snapshot':
-            return `text_snapshot(${receiverOwner()})`;
           case 'textControl.resetValue':
             return `text_reset_value(${receiverOwner()}, ${argument(0)})`;
+          case 'textControl.snapshot':
+            return `text_snapshot(${receiverOwner()})`;
           case 'hook.asImageView':
             return builtin(`image_setup(&${ownerReference()})`);
           case 'imageView.on':
@@ -2538,9 +2594,10 @@ impl __PuiNativeRecordValue {
   pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: Vec<Subscription>, _window_activation: Option<(gpui::WindowId, Subscription)>, _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription>, _entry_readiness: Option<(gpui::WindowId, Subscription)> }
   impl ${componentName} {
       pub fn create_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> { Self::create(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
-      pub fn create(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> {
+      pub fn create(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> { Self::create_with_associations(raw_props,parent,NativeInstanceAssociations::default(),window,cx) }
+      pub fn create_with_associations(raw_props: Json, parent: Option<OwnerWeak>, associations: NativeInstanceAssociations, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> {
           let mut failure = None;
-          let entity = cx.new(|cx| Self::new(raw_props, parent, window, cx).unwrap_or_else(|error| {
+          let entity = cx.new(|cx| Self::new_with_associations(raw_props, parent, associations, window, cx).unwrap_or_else(|error| {
               failure = Some(error);
               // A failed construction still returns normally through GPUI's
               // entity insertion. This inert temporary is dropped immediately
@@ -2552,10 +2609,18 @@ impl __PuiNativeRecordValue {
           match failure { Some(error) => Err(error), None => Ok(entity) }
       }
       pub fn new_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> { Self::new(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
-      pub fn new(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> {
+      pub fn new(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> { Self::new_with_associations(raw_props,parent,NativeInstanceAssociations::default(),window,cx) }
+      pub fn new_with_associations(raw_props: Json, parent: Option<OwnerWeak>, associations: NativeInstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> {
           catch_authored(|| {
           let owner_ref = Owner::new(raw_props, parent.unwrap_or_default(), accepts_context, accepts_props, prop_valid, style_vocabulary());
-          let owner = Rc::downgrade(&owner_ref);
+          let owner = Rc::downgrade(&owner_ref);${
+            admittedAnalysis.operations.includes('hook.asControlLabel')
+              ? `
+          let notify_view=cx.entity().downgrade();let notify_cx=cx.to_async();
+          configure_control_label_host(&owner_ref,Rc::new(move||{let view=notify_view.clone();notify_cx.spawn(async move|cx|{let _=view.update(cx,|_,cx|cx.notify());}).detach();}));`
+              : ''
+          }
+          set_instance_associations(&owner_ref, associations);
           let focus = cx.focus_handle();
           let view = cx.entity().downgrade();
           let drive_owner=owner.clone(); let drive_focus=focus.clone();
@@ -2589,6 +2654,9 @@ impl __PuiNativeRecordValue {
           let _lexical_owner = enter_lexical_owner(&owner);
           let renderer = ${setupCallable}.call_authored(vec![definition_capability(&owner)]);
           Owner::finish(&owner_ref, renderer);
+          // Establish the App's default-action snapshot before any authored
+          // global key capture can replace focus during the same keystroke.
+          register_sequential_focus_owner(&owner_ref, cx);
           let focus_subscriptions = if native_focus_observation_needed(&owner_ref) {
           let focus_owner = owner_ref.clone();
           let on_focus = cx.on_focus(&focus, window, move |view, window, cx| {
@@ -2638,7 +2706,7 @@ impl __PuiNativeRecordValue {
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
       fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-          if !native_focus_observation_needed(&self.owner) && !native::gpui_native_move::move_owner_has_binding(&self.owner) { self._window_activation.take(); return; }
+          if !native_window_observation_needed(&self.owner) { self._window_activation.take(); return; }
           let id = window.window_handle().window_id();
           if self._window_activation.as_ref().is_some_and(|(bound, _)| *bound == id) { return; }
           self._window_activation.take();
@@ -2700,6 +2768,10 @@ impl __PuiNativeRecordValue {
           self.bind_window_activation(window, cx);
           #[cfg(feature = "experimental-focus-tree")] self.bind_entry_readiness(window, cx);
           let drive = self.owner.borrow().native_drive.as_ref().expect("live native owner drive").clone();
+          // Drawing consumes only repaint dirtiness. A parent Render can call
+          // an exposed method before this child is laid out: its independent
+          // pending_native_events flag survives until the coalesced drive wakes
+          // the consumer. Repeated slot projection cannot create a notify loop.
           self.owner.borrow_mut().dirty = false;
           let snapshot = self.owner.borrow().projection.clone().expect("live native projection");
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));

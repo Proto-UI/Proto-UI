@@ -73,10 +73,10 @@ import {
   checkedCall,
   arrayEveryCallbackParameters,
   intrinsicResult,
-  publishedDataType,
   valueAlternatives,
   canNarrowValue,
   erasesRuntimeAuthority,
+  dataBoundaryType,
 } from './value-types';
 import {
   STATIC_CORE_VALUES,
@@ -3124,7 +3124,7 @@ class Frontend {
     if (operation === 'expose.emit') {
       const names = finiteStringKeys(args[0])!;
       const kind = this.eventKinds.get(names[0])!;
-      const payload = publishedDataType(args[1]?.type ?? 'void');
+      const payload = dataBoundaryType(args[1]?.type ?? 'void');
       if (
         payload === undefined ||
         (kind === 'void' && payload !== 'void') ||
