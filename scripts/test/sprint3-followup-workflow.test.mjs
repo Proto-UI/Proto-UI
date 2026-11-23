@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { createServer } from 'node:net';
 import path from 'node:path';
 import { test } from 'node:test';
 import YAML from 'yaml';
@@ -125,12 +126,12 @@ test('independent complete native files retain exact candidate checkout and froz
   }
 });
 
-test('owned runner paths are distinct, outside checkout and retain the source four separately', (t) => {
-  const directory = mkdtempSync(path.join(tmpdir(), 'sprint3 followup runner paths '));
+test('owned runner paths fit actual Unix browser sockets and retain the source four separately', async (t) => {
+  const directory = mkdtempSync(path.join(tmpdir(), 's3p-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const all = [];
   for (const suite of ['drawer', 'scroll', 'image-preview', 'installed']) {
-    const runner = path.join(directory, suite);
+    const runner = path.join(directory, 'runner-' + all.length);
     mkdirSync(runner);
     const envFile = path.join(runner, 'github-env');
     const selected = suite === 'installed' ? installed : direct;
@@ -141,7 +142,7 @@ test('owned runner paths are distinct, outside checkout and retain the source fo
         GITHUB_ENV: envFile,
         CANDIDATE_SHA: 'a'.repeat(40),
         FOLLOWUP_SUITE: suite,
-        GITHUB_RUN_ID: '10',
+        GITHUB_RUN_ID: '45202101258',
         GITHUB_RUN_ATTEMPT: '2',
       },
     });
@@ -156,6 +157,23 @@ test('owned runner paths are distinct, outside checkout and retain the source fo
     );
     assert.ok(values.TMPDIR.startsWith(runner + path.sep));
     assert.ok(existsSync(values.TMPDIR));
+    // Chromium uses a Unix-domain socket beneath TMPDIR. Reserve its real
+    // singleton suffix; Linux sockaddr_un must also retain the trailing NUL.
+    const chromeDirectory = path.join(values.TMPDIR, 'com.google.Chrome.XXXXXX');
+    const singletonSocket = path.join(chromeDirectory, 'SingletonSocket');
+    assert.ok(
+      Buffer.byteLength(singletonSocket) < 108,
+      'Chrome singleton socket path exceeds the Linux limit: ' + singletonSocket
+    );
+    mkdirSync(chromeDirectory);
+    const server = createServer();
+    await new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(singletonSocket, resolve);
+    });
+    await new Promise((resolve, reject) => {
+      server.close((error) => (error ? reject(error) : resolve()));
+    });
     all.push(values.SPRINT3_FOLLOWUP_EVIDENCE_DIR);
     if (suite === 'installed')
       assert.equal(

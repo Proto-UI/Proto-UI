@@ -59,8 +59,8 @@ jobs:
         timeout-minutes: 3
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
             > "$PUI_EVIDENCE_DIR/font-environment.txt"
           fc-match 'Noto Sans CJK SC' >> "$PUI_EVIDENCE_DIR/font-environment.txt"

@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           SPRINT3_FOLLOWUP_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-direct-$FOLLOWUP_SUITE-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          FOLLOWUP_TMP="$RUNNER_TEMP/sprint3-direct-tmp-$FOLLOWUP_SUITE-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3-XXXXXX")
           mkdir -p "$SPRINT3_FOLLOWUP_EVIDENCE_DIR" "$FOLLOWUP_TMP"
           printf '%s\n' "SPRINT3_FOLLOWUP_EVIDENCE_DIR=$SPRINT3_FOLLOWUP_EVIDENCE_DIR" "TMPDIR=$FOLLOWUP_TMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
@@ -71,8 +71,8 @@ jobs:
             "$CHROME" --version &&
             test -f apps/www/node_modules/playwright-core/cli.js &&
             node apps/www/node_modules/playwright-core/cli.js install ffmpeg &&
-            sudo apt-get update -qq &&
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk fontconfig &&
+            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk fontconfig -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig &&
             for CJK_LANGUAGE in zh-cn ja ko; do
               case "$CJK_LANGUAGE" in
@@ -129,7 +129,7 @@ jobs:
         run: |
           set -euo pipefail
           FOLLOWUP_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-installed-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          FOLLOWUP_TMP="$RUNNER_TEMP/sprint3-installed-tmp-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3-XXXXXX")
           mkdir -p "$FOLLOWUP_EVIDENCE_DIR" "$FOLLOWUP_TMP"
           printf '%s\n' "FOLLOWUP_EVIDENCE_DIR=$FOLLOWUP_EVIDENCE_DIR" \
             "SPRINT3_FOLLOWUP_EVIDENCE_DIR=$FOLLOWUP_EVIDENCE_DIR/public-select-source" \
