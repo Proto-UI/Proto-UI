@@ -3,6 +3,7 @@ import type {
   PresentationViewBinding,
   StyleHandle,
   Translation,
+  PresentationChannel,
 } from '@proto.ui/core';
 import { createResidentMotionSampler } from '../motion/sampler';
 import type {
@@ -10,19 +11,24 @@ import type {
   PresencePresentationSink,
   ResolvedPresenceEndpoint,
 } from './sink';
-export type PresenceSample = Readonly<{ translate?: readonly [number, number]; opacity?: number }>;
+export type PresenceSample = Readonly<{
+  translate?: readonly [number, number];
+  opacity?: number;
+  blockSize?: number;
+}>;
 export type PresenceEnvironment = Readonly<{
   preference: 'reduce' | 'no-preference' | 'unknown';
   visible: boolean;
   width: number | null;
   height: number | null;
   rootFontPx: number | null;
-  supported: readonly ('translate' | 'opacity')[];
+  intrinsicBlockSize?: number | null;
+  supported: readonly PresentationChannel[];
 }>;
 export type PresencePresentationHost = {
   readonly binding: PresentationViewBinding;
   now(): number;
-  environment(): PresenceEnvironment;
+  environment(channels?: readonly PresentationChannel[]): PresenceEnvironment;
   subscribe(callback: () => void): () => void;
   requestFrame(callback: () => void): unknown;
   cancelFrame(ticket: unknown): void;
@@ -55,8 +61,16 @@ function vector(
 ): readonly number[] | null {
   const translation = endpoint.translate ? resolveTranslation(endpoint.translate, env) : [0, 0];
   if (!translation) return null;
-  return Object.freeze([translation[0], translation[1], endpoint.opacity ?? 1]);
+  const size =
+    endpoint.blockSize === 'intrinsic' ? env.intrinsicBlockSize : (endpoint.blockSize ?? 0);
+  if (typeof size !== 'number' || !Number.isFinite(size) || size < 0) return null;
+  return Object.freeze([translation[0], translation[1], endpoint.opacity ?? 1, size]);
 }
+const channelsOf = (candidate: PresencePresentationFrame): PresentationChannel[] => [
+  ...(candidate.closed.translate ? ['translate' as const] : []),
+  ...(candidate.closed.opacity !== undefined ? ['opacity' as const] : []),
+  ...(candidate.closed.blockSize !== undefined ? ['blockSize' as const] : []),
+];
 /** Neutral presentation only. No component state, layout or ViewIntent writer. */
 export function createPresencePresentationProjector(
   host: PresencePresentationHost
@@ -117,6 +131,7 @@ export function createPresencePresentationProjector(
       ...(candidate.closed.opacity !== undefined
         ? { opacity: Math.max(0, Math.min(1, value[2])) }
         : {}),
+      ...(candidate.closed.blockSize !== undefined ? { blockSize: Math.max(0, value[3]) } : {}),
     };
     let accepted = false;
     try {
@@ -166,7 +181,7 @@ export function createPresencePresentationProjector(
       complete(candidate, 'projection-failed', token);
       return false;
     }
-    const env = host.environment();
+    const env = host.environment(channelsOf(candidate));
     if (!current(candidate, token)) return false;
     const endpoint =
       candidate.owner.phase === 'leaving' || candidate.owner.phase === 'closed'
@@ -214,6 +229,8 @@ export function createPresencePresentationProjector(
     // typed declarations remain representable and receive explicit diagnostics.
     const enteredNeutral =
       (candidate.entered.opacity === undefined || candidate.entered.opacity === 1) &&
+      (candidate.closed.blockSize === undefined ||
+        (candidate.closed.blockSize === 0 && candidate.entered.blockSize === 'intrinsic')) &&
       (!candidate.entered.translate ||
         candidate.entered.translate.every(
           (axis) => axis.px === 0 && axis.rootText === 0 && axis.ownBox === 0
@@ -246,7 +263,7 @@ export function createPresencePresentationProjector(
       settle('invalid-policy');
       return;
     }
-    const env = host.environment();
+    const env = host.environment(channelsOf(candidate));
     if (!current(candidate, token)) return;
     if (env.preference !== 'no-preference') {
       settle(env.preference === 'reduce' ? 'reduced-motion' : 'unknown-preference');
@@ -256,11 +273,8 @@ export function createPresencePresentationProjector(
       settle('hidden');
       return;
     }
-    const channels = [
-      ...(candidate.closed.translate ? ['translate'] : []),
-      ...(candidate.closed.opacity !== undefined ? ['opacity'] : []),
-    ];
-    if (channels.some((channel) => !env.supported.includes(channel as 'translate' | 'opacity'))) {
+    const channels = channelsOf(candidate);
+    if (channels.some((channel) => !env.supported.includes(channel))) {
       settle('missing-capability');
       return;
     }

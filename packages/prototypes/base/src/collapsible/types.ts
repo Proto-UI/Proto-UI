@@ -8,6 +8,7 @@ import type {
   State,
 } from '@proto.ui/core';
 import type { CollapsibleOpenReason } from './shared';
+import type { TransitionHandles } from '../transition/types';
 
 export interface CollapsibleRootProps {
   open?: boolean;
@@ -62,6 +63,7 @@ export interface CollapsibleContentProps {
 export type CollapsibleContentExposes = {
   open: ExposeState<boolean>;
   hidden: ExposeState<boolean>;
+  bindPresence: ExposeMethod<(transition: TransitionHandles) => void>;
 };
 
 export type CollapsibleContentStateHandles = {
@@ -70,3 +72,9 @@ export type CollapsibleContentStateHandles = {
 };
 
 export type CollapsibleContentAsHookContract = { state: CollapsibleContentStateHandles };
+export type CollapsibleContentHandles = AsHookResult<
+  CollapsibleContentProps,
+  CollapsibleContentAsHookContract
+> & {
+  bindPresence(transition: TransitionHandles): void;
+};

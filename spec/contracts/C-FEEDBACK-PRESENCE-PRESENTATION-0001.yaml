@@ -11,7 +11,7 @@ statement:
 criteria:
   - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-DECLARATION
     text:
-      en: Setup-only recipes are immutable detached snapshots with matching nonempty endpoint channels. Only translate and opacity are admitted. Translate is a dense pair of finite affine px, rootText and ownBox coefficients, or a nonempty finite case selection over a borrowed readable State identity. Opacity is finite in [0,1]. Easing is a finite cubic-bezier tuple with x coordinates in [0,1]. All declaration fields and array entries are own data properties; accessors, sparse arrays, unsupported channels and unknown keys reject without evaluation. Unresolved dynamic cases diagnose instead of guessing. Scale, cycles and layout animation are unsupported.
+      en: Setup-only recipes are immutable detached snapshots with matching nonempty endpoint channels. This base contract admits translate and opacity; the named C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001 extension separately admits its bounded blockSize channel. Translate is a dense pair of finite affine px, rootText and ownBox coefficients, or a nonempty finite case selection over a borrowed readable State identity. Opacity is finite in [0,1]. Easing is a finite cubic-bezier tuple with x coordinates in [0,1]. All declaration fields and array entries are own data properties; accessors, sparse arrays, unsupported channels and unknown keys reject without evaluation. Unresolved dynamic cases diagnose instead of guessing. Scale, cycles and other layout animation remain unsupported.
   - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-AUTHORITY
     text:
       en: References resolve through instance-local registries, never through a forged declaration string, component name, source path or DOM object. Exported owner references carry no publication authority. The private writer alone publishes immutable phase frames; the host mints and validates physical view bindings. Completion checks current owner, logical attempt, owner revision, physical binding and endpoint target revision. Authored completion callbacks are ordinary Proto source program operations in legal runtime scope, not opaque host callbacks. Unsupported compilers diagnose these operations explicitly rather than erase them.
@@ -46,7 +46,7 @@ verifies:
 revisions:
   - version: 0.3.0-alpha.2
     change: revised
-    summary: Added an explicit live React DOM source candidate using the canonical owner controller, projector, motion sampler and Web sink with independently recorded source identities; other Compiler targets remain unsupported.
+    summary: Added an explicit live React DOM source candidate using the canonical owner controller, projector, motion sampler and Web sink with independently recorded source identities; separately named the draft intrinsic block-size extension without widening the base translate/opacity profile or promoting other Compiler targets.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Define a bounded presentation-only source and host protocol with explicit independent completion safety.

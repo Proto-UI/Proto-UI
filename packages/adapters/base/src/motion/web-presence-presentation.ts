@@ -186,13 +186,16 @@ function createDocumentPresenceSink(
   const clearZeroOpacityOwner = () => {
     if (zeroOpacityOwners.get(el) === ownsZeroOpacity) zeroOpacityOwners.delete(el);
   };
+  let styleRevision = 0;
   const clear = () => {
+    styleRevision++;
     clearZeroOpacityOwner();
     translation?.release();
     translation = null;
     clearOwnedStyles();
   };
   const write = (name: string, value: string) => {
+    styleRevision++;
     if (!writeOwnedStyle(name, value)) return false;
     if (name === 'opacity') {
       if (Number.parseFloat(value) === 0 && ownsZeroOpacity())
@@ -203,10 +206,39 @@ function createDocumentPresenceSink(
   };
   const px = (value: string | undefined) =>
     value && /^-?(?:\d+\.?\d*|\.\d+)px$/.test(value) ? Number.parseFloat(value) : null;
+  const intrinsicBlockSize = () => {
+    const lease = writes.get('block-size');
+    if (lost.has('block-size') || (lease && !owned('block-size', lease))) return null;
+    // The canonical style owner restores the current semantic baseline. A
+    // constrained scroll extent cannot prove shrinkage; release and reacquire
+    // this single lease synchronously around the actual layout read.
+    const revision = styleRevision;
+    if (lease && !writeOwnedStyle('block-size', undefined)) return null;
+    const semantic = {
+      value: el.style.getPropertyValue('block-size'),
+      priority: el.style.getPropertyPriority('block-size'),
+    };
+    try {
+      const css = win?.getComputedStyle(el);
+      const vertical =
+        css?.writingMode?.startsWith('vertical') || css?.writingMode?.startsWith('sideways');
+      const value = px(css?.blockSize) ?? px(vertical ? css?.width : css?.height);
+      return value !== null && Number.isFinite(value) && value >= 0 ? value : null;
+    } finally {
+      if (lease && live() && revision === styleRevision && !writes.has('block-size')) {
+        if (owned('block-size', semantic)) {
+          writeOwnedStyle('block-size', lease.value);
+        } else {
+          // Preserve takeover during the read; never resurrect an old lease.
+          lost.add('block-size');
+        }
+      }
+    }
+  };
   return createPresencePresentationProjector({
     binding,
     now: () => win?.performance.now() ?? performance.now(),
-    environment() {
+    environment(channels = []) {
       detectLoss();
       const css = win?.getComputedStyle(el);
       const dimension = (axis: 'width' | 'height') => {
@@ -238,9 +270,15 @@ function createDocumentPresenceSink(
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
-        supported: (['translate', 'opacity'] as const).filter(
+        intrinsicBlockSize: channels.includes('blockSize') ? intrinsicBlockSize() : null,
+        supported: (['translate', 'opacity', 'blockSize'] as const).filter(
           (name) =>
-            !lost.has(name) && (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px'))
+            !lost.has(name) &&
+            (name !== 'translate' || !!win?.CSS?.supports?.('translate', '1px')) &&
+            (name !== 'blockSize' ||
+              (!lost.has('block-size') &&
+                !lost.has('overflow') &&
+                !!win?.CSS?.supports?.('block-size', '1px')))
         ),
       };
     },
@@ -302,6 +340,8 @@ function createDocumentPresenceSink(
         translation ??= acquireWebTranslation(el, 'presentation');
         if (!translation.canWrite()) return false;
       }
+      if (sample.blockSize !== undefined && (lost.has('block-size') || lost.has('overflow')))
+        return false;
       // All channels pass ownership preflight before the first channel is written.
       if (
         sample.translate &&
@@ -313,6 +353,11 @@ function createDocumentPresenceSink(
         return false;
       if (!current() || !live()) return false;
       if (sample.opacity !== undefined && !write('opacity', String(sample.opacity))) return false;
+      if (sample.blockSize !== undefined) {
+        if (!write('overflow', 'hidden')) return false;
+        if (!current() || !live()) return false;
+        if (!write('block-size', `${sample.blockSize}px`)) return false;
+      }
       return current() && live();
     },
     release: clear,
