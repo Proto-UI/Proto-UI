@@ -318,6 +318,30 @@ describe('proto style css renderer', () => {
     }
   });
 
+  it('keeps the logical inline padding and inset utilities beside the physical ones', () => {
+    for (const { render } of STYLE_CSS_LANES) {
+      const css = render(['ps-2', 'pe-8', 'start-2', 'end-2']);
+      expect(css).toContain('padding-inline-start: 0.5rem;');
+      expect(css).toContain('padding-inline-end: 2rem;');
+      expect(css).toContain('inset-inline-start: 0.5rem;');
+      expect(css).toContain('inset-inline-end: 0.5rem;');
+      // The logical utilities never fall back to a physical side.
+      expect(css).not.toContain('padding-left:');
+      expect(css).not.toContain('padding-right:');
+      expect(css).not.toContain('left: 0.5rem;');
+      expect(css).not.toContain('right: 0.5rem;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      // The physical utilities keep their own declarations and bounds.
+      const physical = render(['pl-2', 'pr-8', 'left-2', 'right-2']);
+      expect(physical).toContain('padding-left: 0.5rem;');
+      expect(physical).toContain('padding-right: 2rem;');
+      expect(physical).toContain('left: 0.5rem;');
+      expect(physical).toContain('right: 0.5rem;');
+      expect(physical).not.toContain('Unsupported Proto UI style tokens');
+      expect(render(['ps-7.5'])).toContain('padding-inline-start: 1.875rem;');
+    }
+  });
+
   it('keeps directional edge paint after all-edge shorthands in document and Shadow CSS', () => {
     const tokens = [
       'border',
