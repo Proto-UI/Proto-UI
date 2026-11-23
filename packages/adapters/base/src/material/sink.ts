@@ -5,7 +5,7 @@ import { createContactMotion } from './contact-motion';
 import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
 import { contactProfile, contactPaintOutset } from './contact-profile';
 import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';
-import { prepareOpticalImage } from './image-prepare';
+import { createOpticalImageCache } from './image-prepare';
 import { observeMaterialGeometry } from './geometry-watch';
 import type { EffectsPort } from '@proto.ui/core';
 import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';
@@ -133,6 +133,7 @@ function createDocumentMaterialSink(
   const program = acquireWebOpticalProgram(document, () => {
     invalidate('optical-context-invalidated');
   });
+  const images = createOpticalImageCache(document);
   let retired = false,
     painting = false,
     again = false;
@@ -244,6 +245,7 @@ function createDocumentMaterialSink(
     const previous = releaseImage;
     releaseImage = () => {};
     previous();
+    if (!keepNeutral) images.clear();
   };
   let safeFallback: Parameters<typeof rgbaCss>[0] | null = null;
   const owned = new Map<string, { before: [string, string]; applied: [string, string] }>();
@@ -831,8 +833,7 @@ function createDocumentMaterialSink(
       }
       const ticket = { signature, lease, cancel() {} };
       pending = ticket;
-      ticket.cancel = prepareOpticalImage(
-        document,
+      ticket.cancel = images.prepare(
         image,
         () => {
           if (!currentDocument() || pending !== ticket || frameContactEpoch !== contactEpoch)
@@ -986,7 +987,9 @@ function createDocumentMaterialSink(
           }
           lastOwnedStyle = host.getAttribute('style');
           lastOwnedTokens = host.getAttribute('data-pui-style');
-        }
+        },
+        // Preserve held output through release without caching source admission.
+        tracksContact && !!motionFrame.contact?.strength && !motionFrame.animating
       );
     } catch (error) {
       if (currentDocument() && last) {
@@ -1035,6 +1038,7 @@ function createDocumentMaterialSink(
   } catch (error) {
     retired = true;
     sourceRefresh.dispose();
+    images.dispose();
     for (const dispose of disposers) {
       try {
         dispose();
@@ -1072,6 +1076,7 @@ function createDocumentMaterialSink(
       for (const dispose of [
         cancelPending,
         clearImage,
+        images.dispose,
         ...disposers,
         program.release,
         () => initialPaint?.retire(),
