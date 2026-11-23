@@ -94,12 +94,12 @@ jobs:
       - name: Execute generated Rust consumers and resource controls
         run: |
           set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary --test delivery -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
       - name: Execute the generated numeric accessibility action bridge
         run: |
           set -euo pipefail
           node --import tsx packages/compiler/test/fixtures/gpui-a11y-value/produce.mjs "$RUNNER_TEMP/gpui-evidence/numeric-action" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-producer.log"
-          cargo +1.98.1 metadata --offline --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/numeric-metadata.json"
+          cargo +1.98.1 metadata --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/numeric-metadata.json"
           node scripts/gpui/check-cargo-graph.mjs \
             --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             --git https://github.com/zed-industries/zed \
@@ -126,6 +126,210 @@ jobs:
         with:
           name: compiler-gpui-source-${{ runner.os }}-${{ github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/gpui-evidence
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  # A bounded exact-source lane. ci.yml deliberately skips expensive checks on
+  # pull_request; dispatch/call this workflow for source validation before integration.
+  source-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      NODE_OPTIONS: --max-old-space-size=4096
+      RUSTUP_TOOLCHAIN: 1.98.1
+      PROTO_UI_REQUIRE_RUST_DATA_TESTS: '1'
+      CARGO_BUILD_JOBS: '1'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Initialize exact-source command receipts
+        id: receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/compiler-source-regressions"
+          mkdir -p "$evidence"
+          printf 'PROTO_SOURCE_EVIDENCE=%s\n' "$evidence" >> "$GITHUB_ENV"
+          git rev-parse HEAD > "$evidence/source-sha.txt"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git rev-parse 'HEAD^{tree}' > "$evidence/source-tree.txt"
+          git status --short --untracked-files=no > "$evidence/source-status-before.txt"
+          sha256sum package.json pnpm-lock.yaml > "$evidence/dependency-inputs.sha256"
+          cp .github/workflows/compiler-gpui-source-consumers.yml "$evidence/workflow.yml"
+          uname -a > "$evidence/runner.txt"
+          printf 'run_id=%s\nrun_attempt=%s\ntelemetry_disabled=%s\nnode_options=%s\nrust_toolchain=%s\nrequire_rust_data_tests=%s\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$ASTRO_TELEMETRY_DISABLED" \
+            "$NODE_OPTIONS" "$RUSTUP_TOOLCHAIN" "$PROTO_UI_REQUIRE_RUST_DATA_TESTS" \
+            > "$evidence/environment.txt"
+          cat > "$evidence/run-check.sh" <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          label="$1"
+          shift
+          evidence="$RUNNER_TEMP/compiler-source-regressions"
+          printf '%q ' "$@" > "$evidence/$label.command.txt"
+          printf '\n' >> "$evidence/$label.command.txt"
+          date --utc --iso-8601=seconds > "$evidence/$label.started.txt"
+          set +e
+          "$@" 2>&1 | tee "$evidence/$label.log"
+          statuses=("${PIPESTATUS[@]}")
+          set -e
+          exit_code="${statuses[0]}"
+          if [[ "$exit_code" -eq 0 ]]; then
+            exit_code="${statuses[1]}"
+          fi
+          printf '{"commandExit":%s,"logExit":%s,"exit":%s}\n' \
+            "${statuses[0]}" "${statuses[1]}" "$exit_code" > "$evidence/$label.exit.json"
+          date --utc --iso-8601=seconds > "$evidence/$label.finished.txt"
+          exit "$exit_code"
+          BASH
+      - uses: actions/setup-node@v4
+        id: node
+        with:
+          node-version: 24.22.3
+      - name: Install frozen JavaScript dependencies
+        id: install
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" node-version node --version
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" corepack-enable corepack enable
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" pnpm-version corepack pnpm@10.32.1 --version
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" install corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Install the required headless Rust toolchain
+        id: rust
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" rust-install rustup toolchain install 1.98.1 --profile minimal
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" rust-version rustc --version --verbose
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" cargo-version cargo --version
+      - name: Discover the host Chrome and record installed tools
+        id: browser
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" browser-discovery bash -euo pipefail -c '
+            browser_path=""
+            for browser_name in google-chrome google-chrome-stable chromium chromium-browser; do
+              if browser_path="$(command -v "$browser_name")"; then
+                break
+              fi
+            done
+            if [[ -z "$browser_path" || ! -x "$browser_path" ]]; then
+              printf "Chrome/Chromium is required for source and public Input consumers.\n" >&2
+              exit 1
+            fi
+            printf "CHROME_PATH=%s\n" "$browser_path" >> "$GITHUB_ENV"
+            printf "executable=%s\n" "$browser_path"
+            "$browser_path" --version
+          '
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" installed-tools node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          assert.equal(process.versions.node, '24.22.3');
+          const manifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          assert.equal(manifest.packageManager, 'pnpm@10.32.1');
+          const installed = Object.fromEntries(['typescript', 'tsx', 'vitest'].map((name) => {
+            const pkg = JSON.parse(fs.readFileSync('node_modules/' + name + '/package.json', 'utf8'));
+            return [name, pkg.version];
+          }));
+          console.log(JSON.stringify({ node: process.version, packageManager: manifest.packageManager, installed }, null, 2));
+          JS
+      - name: Generate styles and check workspace, documentation and type contracts
+        id: types
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" styles corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" workspace-types corepack pnpm@10.32.1 -s check:types:workspace
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" docs-types corepack pnpm@10.32.1 -s check:types:docs
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" type-contracts corepack pnpm@10.32.1 -s test:types
+      - name: Execute the complete compiler source test directory
+        id: compiler
+        timeout-minutes: 25
+        env:
+          COMPILER_EVIDENCE_DIR: ${{ runner.temp }}/compiler-source-regressions/compiler-browser
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/compiler-source-regressions/compiler-browser
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" compiler corepack pnpm@10.32.1 exec vitest run \
+            packages/compiler/test --maxWorkers=1 --minWorkers=1 \
+            --reporter=default --reporter=json \
+            --outputFile="$PROTO_SOURCE_EVIDENCE/compiler-vitest.json"
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" compiler-report node --input-type=module - "$PROTO_SOURCE_EVIDENCE" <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const evidence = process.argv[2];
+          const report = JSON.parse(fs.readFileSync(evidence + '/compiler-vitest.json', 'utf8'));
+          assert.equal(report.success, true);
+          assert.equal(report.numFailedTests, 0);
+          assert.ok(report.numPassedTests > 0, 'The compiler source suite must execute.');
+          const skipped = report.testResults.flatMap((file) =>
+            file.assertionResults.filter((test) => ['pending', 'todo', 'skipped'].includes(test.status))
+              .map((test) => ({ file: file.name, name: test.fullName, status: test.status })));
+          // Existing Dart/Flutter and historical corpus-capture conditions remain
+          // explicit skipped evidence; this Linux lane does not claim those hosts.
+          fs.writeFileSync(evidence + '/compiler-skipped-tests.json', JSON.stringify(skipped, null, 2) + '\n');
+          console.log(JSON.stringify({
+            passed: report.numPassedTests, failed: report.numFailedTests,
+            pending: report.numPendingTests, todo: report.numTodoTests, skipped,
+          }, null, 2));
+          JS
+      - name: Exercise the real public Input in both languages and four runtimes
+        id: input
+        timeout-minutes: 15
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/compiler-source-regressions/public-input
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" public-input corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$PROTO_SOURCE_EVIDENCE/public-input-vitest.json"
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" public-input-report node --input-type=module - "$PROTO_SOURCE_EVIDENCE/public-input-vitest.json" <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.success, true);
+          assert.equal(report.numTotalTests, 8, 'Both languages and all four runtimes must execute.');
+          assert.equal(report.numPassedTests, 8);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.numPendingTests, 0);
+          assert.equal(report.numTodoTests ?? 0, 0);
+          console.log('All 8 public Input browser journeys passed without skips.');
+          JS
+      - name: Check public documentation, prototype catalog and schema fixtures
+        id: docs
+        run: |
+          set -euo pipefail
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" input-registration corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-base-input.test.ts \
+            apps/www/src/components/PrototypePreviewer/input-registration.test.ts \
+            --maxWorkers=1 --minWorkers=1
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" public-docs corepack pnpm@10.32.1 -s check:public-docs
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" prototype-catalog corepack pnpm@10.32.1 -s check:prototype-catalog
+          bash "$PROTO_SOURCE_EVIDENCE/run-check.sh" schema-fixtures corepack pnpm@10.32.1 exec vitest run \
+            packages/spec/fixtures/test --maxWorkers=1 --minWorkers=1
+      - name: Record step outcomes without promoting skipped or interrupted work
+        if: always()
+        env:
+          SOURCE_STEP_RESULTS: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/compiler-source-regressions"
+          mkdir -p "$evidence"
+          printf '%s\n' "$SOURCE_STEP_RESULTS" > "$evidence/step-outcomes.json"
+          git status --short --untracked-files=no > "$evidence/source-status-after.txt"
+          git diff --binary > "$evidence/source-diff-after.patch"
+      - name: Retain source identities, command exits, logs and browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-source-regressions-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compiler-source-regressions
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 30

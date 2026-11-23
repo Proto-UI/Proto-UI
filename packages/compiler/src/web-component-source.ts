@@ -1379,14 +1379,23 @@ ${styled ? `    ${p}Style.refresh();\n` : ''}
 ${interacting ? `    ${p}Interaction.refresh();\n` : ''}
     if (!hydrated) { hydrated = true; return; }
     const changed = Object.keys(specs).filter((key) => !Object.is(prev[key], resolved[key]));
-    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => own(previousRaw, key) !== own(raw, key) || !Object.is(previousRaw[key], raw[key])) : changed;
+    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : changed;
     const next = resolved, nextRaw = raw;
     const previousWindow = propsWindow; propsWindow = {raw: nextRaw, resolved: next};
-    try { for (const watcher of [...watchers]) {
-      const all = watcher.raw ? rawChanged : changed;
-      const matched = watcher.keys === null ? all : all.filter((key) => watcher.keys!.includes(key));
-      if (watcher.active && matched.length) invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
-    } } finally { propsWindow = previousWindow; }
+    const batch = [...watchers];
+    try {
+      if (rawChanged.length && batch.some(watcher => watcher.raw && watcher.active)) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+      // Raw-all observers precede keyed raw observers, then resolved observers;
+      // retain registration order and cancellation within each group.
+      for (const group of ['raw-all', 'raw-keyed', 'resolved']) for (const watcher of batch) {
+        if (!alive || disposing) return;
+        const category = watcher.raw ? watcher.keys === null ? 'raw-all' : 'raw-keyed' : 'resolved';
+        if (!watcher.active || category !== group) continue;
+        const all = watcher.raw ? rawChanged : changed;
+        const matched = watcher.keys === null ? all : all.filter((key) => watcher.keys!.includes(key));
+        if (matched.length) invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      }
+    } finally { propsWindow = previousWindow; }
   }
   function drainEmissions(): void {
     ${emitNotificationDrain({ queue: 'emissions', draining: 'emitting', alive: 'alive && !disposing' })}
