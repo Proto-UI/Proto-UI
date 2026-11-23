@@ -5,6 +5,7 @@ import { styleContains } from '../../test-utils/style';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import * as ShadcnPackage from '../src';
 import * as radioGroupFamily from '../src/radio-group';
+import { fieldRadioGroup, shadcnFieldRadioGroup } from '../src/field';
 
 const { ShadcnRadioGroupRoot, ShadcnRadioGroupItem, ShadcnRadioGroupIndicator } = radioGroupFamily;
 
@@ -89,7 +90,13 @@ describe('prototypes/shadcn: radio group', () => {
       Object.fromEntries(
         Object.entries(ShadcnPackage).filter(([name]) => name.toLowerCase().includes('radiogroup'))
       )
-    ).toEqual(expected);
+    ).toEqual({
+      ...expected,
+      // P-BASE-FIELD-CHOICES is a separate explicit composition; it does
+      // not add an anatomy part to the exact ./radio-group entry above.
+      fieldRadioGroup,
+      shadcnFieldRadioGroup,
+    });
     expect([
       ShadcnRadioGroupRoot.name,
       ShadcnRadioGroupItem.name,
@@ -140,9 +147,13 @@ describe('prototypes/shadcn: radio group', () => {
       'focusNext',
       'focusPrev',
       'focusSelected',
+      'focusSelf',
+      'focused',
       'getCollectionCount',
       'getCollectionItems',
+      'readOnly',
       'requestValue',
+      'resetValue',
       'value',
     ]);
     expect(Object.keys(first.getExposes()).sort()).toEqual([

@@ -101,6 +101,7 @@ describe('prototypes/base: textarea', () => {
       'focusVisible',
       'focused',
       'readOnly',
+      'resetValue',
       'value',
     ]);
     expect(target.hasAttribute('data-pui-a11y-actions')).toBe(false);
