@@ -8,7 +8,7 @@ import type {
 } from './ir';
 import { operationArgumentRule, type ArgumentRule } from './operations';
 import { ordinaryValueChildren } from './value-children';
-import { nativeFieldSources } from './native-capture-provenance';
+import { createNativeFieldResolver } from './native-capture-provenance';
 import {
   nativeShape,
   NativeLexicalScope,
@@ -363,6 +363,14 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   }
   const callableParameters = new WeakMap<object, Callable[]>();
   const resolving = new Map<ExpressionIR, Set<NativeLexicalScope>>();
+  const fieldSources = createNativeFieldResolver(
+    ir,
+    (callee, environment) =>
+      targets(callee, environment).flatMap((target) =>
+        target.kind === 'authored' ? [{ fn: target.fn, scope: target.scope }] : []
+      ),
+    moduleScope
+  );
 
   function targets(value: ExpressionIR, scope: NativeLexicalScope): Callable[] {
     const contexts = resolving.get(value) ?? new Set<NativeLexicalScope>();
@@ -381,11 +389,9 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     property: string,
     scope: NativeLexicalScope
   ): Callable[] {
-    return nativeFieldSources(value, property, scope, ir, (callee, environment) =>
-      targets(callee, environment).flatMap((target) =>
-        target.kind === 'authored' ? [{ fn: target.fn, scope: target.scope }] : []
-      )
-    ).flatMap((source) => targets(source.value, source.scope));
+    return fieldSources(value, property, scope).flatMap((source) =>
+      targets(source.value, source.scope)
+    );
   }
 
   function resolveTargets(value: ExpressionIR, scope: NativeLexicalScope): Callable[] {
