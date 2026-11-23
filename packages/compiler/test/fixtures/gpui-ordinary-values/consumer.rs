@@ -1471,9 +1471,12 @@ fn assert_commit_output(
         assert!(owner.mounted && owner.present && !owner.disposed);
         assert!(!owner.pending_native_events && !owner.update_requested);
         assert_eq!(owner.committed_revision, owner.projection_revision);
-        assert!(owner.emitted.is_empty() && owner.failures.is_empty(),
-            "the real parent observer consumed both published outputs");
-        owner.projection_revision
+        assert!(owner.emitted.is_empty(), "the real parent observer consumed the event");
+        let revision = owner.projection_revision;
+        drop(owner);
+        assert!(component.handle().take_failures().is_empty(),
+            "the real parent observer consumed the failure through the public handle");
+        revision
     }).unwrap();
     // Subsequent ordinary frames must neither retry the failed lifecycle list
     // nor keep notifying from its now-drained event queue.
@@ -1487,7 +1490,9 @@ fn assert_commit_output(
         assert_eq!(owner.projection_revision, revision,
             "event delivery does not request an authored projection");
         assert!(!owner.pending_native_events && !owner.update_requested);
-        assert!(owner.emitted.is_empty() && owner.failures.is_empty());
+        assert!(owner.emitted.is_empty());
+        drop(owner);
+        assert!(component.handle().take_failures().is_empty());
     }).unwrap();
 }
 
