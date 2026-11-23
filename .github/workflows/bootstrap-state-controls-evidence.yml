@@ -61,6 +61,15 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           test -n "$CHROME"
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Install and record Chinese composition evidence fonts
+        env:
+          PROTO_UI_BOOTSTRAP_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-state-controls-evidence
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$PROTO_UI_BOOTSTRAP_EVIDENCE_DIR/font-environment.txt"
+          fc-match -f '%{family}\n%{file}\n' 'sans-serif:lang=zh-cn' >> "$PROTO_UI_BOOTSTRAP_EVIDENCE_DIR/font-environment.txt"
       - name: Configure the official Astro evidence surface
         run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
       - name: Check fixture boundaries and source token closure

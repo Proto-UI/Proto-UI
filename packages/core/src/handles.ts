@@ -6,6 +6,10 @@ import type {
 import type { ResidentMotionDeclaration } from './resident-motion';
 // packages/core/src/handles.ts
 import type { MaterialCandidate, MaterialSlot } from './material';
+import type {
+  MaterialPaintReservation,
+  MaterialPaintReservationDeclaration,
+} from './material-paint-reservation';
 import type { ShaderPresentationDeclaration } from './shader-presentation';
 import {
   EventListenerToken,
@@ -265,6 +269,8 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
   feedback: {
     presence: { owner(): PresenceOwnerDeclaration<Props> };
     material: {
+      /** Draft explicit layout part; setup-only, four-Web transport only. */
+      reserve(declaration: MaterialPaintReservationDeclaration): MaterialPaintReservation;
       declare(slot: MaterialSlot): UnUse;
       use(candidate: MaterialCandidate): UnUse;
       /** Draft finite shader graph; setup-only, exclusive root paint owner. */
@@ -373,6 +379,7 @@ export interface RendererHandle<Props extends PropsBaseType> {
   el: ElementFactory;
   slot(): TemplateNode;
   decoration(target: OwnedDecorationTarget): TemplateNode;
+  paintReservation(target: MaterialPaintReservation, children: TemplateChildrenInput): TemplateNode;
   r: ReservedFactories;
   svg: SvgFactories;
   read: RenderReadHandle<Props>; // render 阶段可用的 readonly 快照视图

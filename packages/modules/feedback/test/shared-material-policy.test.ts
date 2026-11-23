@@ -39,6 +39,28 @@ function input(): MaterialPolicyInput {
 }
 
 describe('shared material policy (eligibility, never paint evidence)', () => {
+  it('requires a current reservation only for an explicitly opted-in slot and retains all source guards', () => {
+    const data = input();
+    const declared = { ...data, slot: { ...data.slot!, paintReservation: 'required' as const } };
+    expect(resolveMaterialPolicy(declared)).toMatchObject({
+      decision: 'opaque-fallback',
+      diagnostics: ['paint-reservation-unavailable'],
+    });
+    expect(resolveMaterialPolicy({ ...declared, paintReservation: 'ready' })).toMatchObject({
+      decision: 'eligible',
+    });
+    expect(
+      resolveMaterialPolicy({
+        ...declared,
+        paintReservation: 'ready',
+        source: { ...data.source!, current: false },
+      })
+    ).toMatchObject({
+      decision: 'opaque-fallback',
+      diagnostics: ['source-lease-unavailable-or-mismatched'],
+    });
+    expect(resolveMaterialPolicy(data)).toMatchObject({ decision: 'eligible' });
+  });
   it('allows static liquid glass without a model or button state in author intent', () => {
     expect(resolveMaterialPolicy(input())).toMatchObject({
       decision: 'eligible',

@@ -44,3 +44,4 @@ export {
 export { createWebOwnedDecorationPortalGate } from './platform/web-owned-decoration-portal';
 
 export { createWebShaderPresentationSink } from './material/shader-webgl2';
+export { createWebMaterialPaintReservationRef } from './material/paint-reservation';

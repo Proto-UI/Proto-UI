@@ -1,3 +1,4 @@
+import { MATERIAL_PAINT_RESERVATION_CAP } from '@proto.ui/module-feedback';
 import {
   beginWebPortalMaterialEpoch,
   getWebPortalDestinationGeneration,
@@ -328,7 +329,10 @@ export function createVue2OwnerModules<Props extends PropsBaseType>(
   } = args;
 
   return createCapsWiring()
-    .use('feedback', args.ownedDecoration ? [[OWNED_DECORATION_CAP, true]] : [])
+    .use('feedback', [
+      [MATERIAL_PAINT_RESERVATION_CAP, true],
+      ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
@@ -496,6 +500,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
+      [MATERIAL_PAINT_RESERVATION_CAP, true],
       ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
       [EFFECTS_CAP, effectsPort],
       [

@@ -175,6 +175,10 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         },
       },
       material: {
+        reserve(declaration) {
+          ensureSetup('def.feedback.material.reserve');
+          return feedback.material.reserve(declaration);
+        },
         shader(declaration) {
           ensureSetup('def.feedback.material.shader');
           const off = feedback.material.shader(declaration);

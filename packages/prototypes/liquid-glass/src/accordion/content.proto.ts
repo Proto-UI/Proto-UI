@@ -11,7 +11,7 @@ export default definePrototype<AccordionContentProps, AccordionContentExposes>({
     asAccordionContent();
     def.feedback.style.use(
       tw(
-        'block min-w-0 bg-background rounded-2xl px-4 pb-4 text-base leading-relaxed break-words overflow-x-auto'
+        'block min-w-0 w-[calc(100cqw_-_2px)] mx-auto bg-background rounded-2xl px-4 pb-4 text-base leading-relaxed break-words overflow-x-auto'
       )
     );
   },

@@ -7,6 +7,8 @@ import type {
   MaterialSlot,
   MaterialCandidate,
   MaterialIntentFrame,
+  MaterialPaintReservation,
+  MaterialPaintReservationDeclaration,
 } from '@proto.ui/core';
 import type { ModuleFacade, ModuleHooks, ModuleScope } from '@proto.ui/core';
 
@@ -21,6 +23,10 @@ export interface FeedbackFacade extends ModuleFacade {
     registerSource(source: object): void;
   };
   material: {
+    reserve(declaration: MaterialPaintReservationDeclaration): MaterialPaintReservation;
+    /** Internal template admission; never exposed through run. */
+    hasReservations(): boolean;
+    validateReservationTemplate(targets: readonly MaterialPaintReservation[]): void;
     /** Setup-only single owned slot and whole candidate contributions. */
     declare(slot: MaterialSlot): () => void;
     use(candidate: MaterialCandidate): () => void;
