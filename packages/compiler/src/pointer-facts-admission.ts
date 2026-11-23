@@ -11,6 +11,10 @@ import {
 
 type Binding = { fn: FunctionIR; scope: Scope };
 type Scope = Map<string, Binding | undefined>;
+type EmittedClosure = {
+  statementsAfterTerminal?: boolean;
+  hookMembers?: 'setup' | 'all';
+};
 
 /** Call only after validateIR. Admission follows the target's actual emitted closure.
  * This narrow check does not promote native/SSR profiles or change their older operations.
@@ -28,6 +32,25 @@ export function unsupportedPointerFacts(
       value.operation === 'eventControl.requestDefaultActionPrevention')
       ? 'Portable pointer facts / control-alias operations'
       : undefined
+  );
+}
+
+/** Numeric action payload fields require a host implementation, including at direct entries. */
+export function unsupportedNumericAccessibility(
+  ir: PrototypeIR,
+  target: string,
+  emitted: EmittedClosure = { hookMembers: 'setup' }
+): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(
+    ir,
+    target,
+    'emitted-declarations',
+    (value) =>
+      value.kind === 'member' && value.object.type === 'a11y-value-event'
+        ? 'Numeric accessibility action payloads'
+        : undefined,
+    undefined,
+    emitted
   );
 }
 
@@ -147,7 +170,8 @@ function unsupportedSourceExpressions(
   target: string,
   closure: 'reached' | 'emitted-declarations',
   unsupported: (value: ExpressionIR) => string | undefined,
-  unsupportedFunction: (value: FunctionIR) => string | undefined = () => undefined
+  unsupportedFunction: (value: FunctionIR) => string | undefined = () => undefined,
+  emitted: EmittedClosure = {}
 ): CompilerDiagnostic[] {
   const diagnostics: CompilerDiagnostic[] = [];
   const functions = new Set<FunctionIR>();
@@ -204,8 +228,10 @@ function unsupportedSourceExpressions(
         const hook = hooks.get(value.hookId);
         if (hook) {
           fn(hook.setup, new Map(moduleScope));
-          if (hook.projectHandle) fn(hook.projectHandle, new Map(moduleScope));
-          if (hook.configure) fn(hook.configure, new Map(moduleScope));
+          if (emitted.hookMembers !== 'setup') {
+            if (hook.projectHandle) fn(hook.projectHandle, new Map(moduleScope));
+            if (hook.configure) fn(hook.configure, new Map(moduleScope));
+          }
         }
         return;
       }
@@ -284,10 +310,12 @@ function unsupportedSourceExpressions(
           break;
         case 'throw':
           expression(statement.value, scope);
-          return;
+          if (!emitted.statementsAfterTerminal) return;
+          break;
         case 'return':
           if (statement.value) expression(statement.value, scope);
-          return;
+          if (!emitted.statementsAfterTerminal) return;
+          break;
       }
     }
   }
@@ -295,6 +323,12 @@ function unsupportedSourceExpressions(
   statements(ir.moduleBindings ?? [], moduleScope);
   fn(ir.setup, moduleScope);
   if (closure === 'emitted-declarations')
-    for (const hook of ir.hooks) fn(hook.setup, new Map(moduleScope));
+    for (const hook of ir.hooks) {
+      fn(hook.setup, new Map(moduleScope));
+      if (emitted.hookMembers === 'all') {
+        if (hook.projectHandle) fn(hook.projectHandle, new Map(moduleScope));
+        if (hook.configure) fn(hook.configure, new Map(moduleScope));
+      }
+    }
   return diagnostics;
 }

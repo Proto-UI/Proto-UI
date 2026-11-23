@@ -36,3 +36,24 @@ corepack pnpm@10.32.1 test:public-docs
 ```
 
 Failures name the affected file/export, the governed release or catalog source, and the expected remediation so CI output can be acted on without reproducing a live registry check.
+
+## Repository documentation references
+
+`check:public-docs` also runs the repository reference check. To inspect it independently:
+
+```sh
+corepack pnpm@10.32.1 check:repository-docs
+node scripts/docs/check-repository-docs.mjs --json
+```
+
+The checker uses the existing Markdown parser to inspect actual links, images and reference links in maintained repository prose. Code examples are not interpreted as links. Relative targets must exist and remain inside the repository, including after symlink resolution. It checks directory entrypoints and static `pnpm` script invocations against the relevant package manifest, including package-local commands, exact package filters and `--dir`/`-C` selectors. It also checks the existing generator/command boundary for the Git-ignored Agent projection.
+
+For static command checking, an unqualified command starts in the nearest package containing the document; a shell fence can change directory with a literal `cd`. In package-local documentation, encode a root command with `-w` or an explicit selector even when prose also explains its working directory. This makes the command independently usable without asking the checker to infer shell context from natural language.
+
+Command classification follows the pinned pnpm 10.32.1 dispatch in `dist/pnpm.cjs`: its native command registry, first-argument npm forwarding table and script aliases. For example, `pnpm root` does not require a package script; an explicit `run root` invocation does. Native npm forwarding such as `pnpm view --help` applies only when the forwarded command is the first pnpm argument. The script aliases `pnpm t` and `pnpm tst` check `scripts.test` in the selected package; an explicit `run t` or `run-script t` invocation checks `scripts.t`.
+
+For deterministic documentation checks, write executable tools as `pnpm exec <tool>`. Bare executable shorthand is valid pnpm syntax, but this checker does not resolve the installed binary environment. An undeclared bare command therefore fails with both explicit `run` and `exec` remedies instead of being reported as a nonexistent executable. A misspelled or removed script still fails; explicitly selecting `run` never receives a native-command exemption.
+
+`repository-doc-policy.mjs` declares the required entrypoints and bounded exceptions with reasons. New Markdown defaults to maintained. Dated records, retained planning documents, test inputs and evidence retain their original context; maintained directory indexes remain checked. Release directories are frozen only when their version has an active V entity under `spec/versions/`; draft release notes remain maintained. The JSON report enumerates every classified document, excluded scope and recognized command context outside the static subset. `skippedCommands` counts only recognized `pnpm`/`cd` fragments; it does not inventory arbitrary shell syntax such as environment assignments before a command. A zero count does not certify every shell example.
+
+This is a reference-integrity check, not proof of semantic freshness. It does not fetch external URLs, resolve website routes as filesystem paths, validate heading fragments or execute dynamic shell examples. Website routes remain covered by the public gate and site build; semantic ownership and lifecycle review follow [the documentation policy](../../internal/governance/documentation-policy.md).

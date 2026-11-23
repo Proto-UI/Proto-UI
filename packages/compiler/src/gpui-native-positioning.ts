@@ -27,7 +27,7 @@ pub fn positioning_connect(owner:&OwnerWeak,connection:Value)->Value {
     let owner=ensure(owner);assert!(!matches!(owner.borrow().phase,"render"|"before-dispose"),"positioning binding phase required");
     let anchor=connection.member("anchor",false).owner();let floating=connection.member("floating",false).owner();
     ensure(&anchor);ensure(&floating);let config=PositionConfig::read(&connection.member("config",false));let callback=connection.member("onResolved",false);
-    assert!(matches!(callback,Value::Undefined|Value::Function(_)),"anchored resolution requires a callable");
+    assert!(matches!(callback,Value::Undefined)||callback.is_callback(),"anchored resolution requires a callable");
     let weak=Rc::downgrade(&owner);let mut owner=owner.borrow_mut();let position=&mut owner.modules.positioning;
     let registered=position.connection.is_some();
     let same=position.connection.as_ref().is_some_and(|old|Weak::ptr_eq(&old.anchor,&anchor)&&Weak::ptr_eq(&old.floating,&floating));
@@ -114,7 +114,7 @@ impl gpui::Element for PositionedRoot {
             if !floating.upgrade().is_some_and(|owner|ready(&owner))||!anchor.upgrade().is_some_and(|owner|ready(&owner)){return}
             if !controller.borrow().modules.positioning.connection.as_ref().is_some_and(|connection|connection.generation==generation){return}
             let snapshot=record(vec![("side",Value::string(side)),("align",Value::string(align)),("strategy",Value::string(config.strategy))]);controller.borrow_mut().modules.positioning.snapshot=snapshot.clone();
-            if matches!(callback,Value::Function(_)){native_host_callback(&controller,"positioning",||invoke(&controller,"positioning",&callback,vec![snapshot]));}
+            if callback.is_callback(){native_host_callback(&controller,"positioning",||invoke(&controller,"positioning",&callback,vec![snapshot]));}
             let drive=controller.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx);}
         });}
     }

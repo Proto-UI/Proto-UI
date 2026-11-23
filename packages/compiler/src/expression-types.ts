@@ -231,6 +231,16 @@ export function memberDataType(
       results.push('void');
       continue;
     }
+    if (
+      key === 'length' &&
+      (member === 'string' ||
+        (typeof member !== 'string' &&
+          member.kind === 'literal' &&
+          typeof member.value === 'string'))
+    ) {
+      results.push('number');
+      continue;
+    }
     if (typeof member === 'string' || member.kind === 'literal')
       throw new TypeError(`Member ${String(key)} is unsupported on primitive data.`);
     if (member.kind === 'record') {
@@ -287,8 +297,13 @@ export function conditionRefinements(
     const [array, search] = condition.arguments;
     // Only an immutable binding can carry this proof beyond the comparison.
     // The receiver is checked again by portable intrinsic admission.
-    if (search?.kind === 'reference' && fresh(search) &&
-      array && typeof array.type !== 'string' && array.type.kind === 'array')
+    if (
+      search?.kind === 'reference' &&
+      fresh(search) &&
+      array &&
+      typeof array.type !== 'string' &&
+      array.type.kind === 'array'
+    )
       return [[search.name, array.type.element]];
     return [];
   }

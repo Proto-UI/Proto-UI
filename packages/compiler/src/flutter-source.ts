@@ -2,6 +2,7 @@ import { pruneDeadValues } from './demand-pruning';
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
+  unsupportedNumericAccessibility,
   unsupportedPointerFacts,
   unsupportedDartOrdinaryValues,
 } from './pointer-facts-admission';
@@ -35,6 +36,8 @@ export function emitFlutterSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const numericDiagnostics = unsupportedNumericAccessibility(ir, 'flutter-source');
+  if (numericDiagnostics.length) return { ok: false, diagnostics: numericDiagnostics };
   const moduleParts = partitionModuleBindings(ir);
   const controlLabelDiagnostics = unsupportedControlLabel(
     ir,

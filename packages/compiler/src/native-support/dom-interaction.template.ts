@@ -26,7 +26,7 @@ export type NativeFocus = {
   blur(): void; isFocused(): boolean; setNavParticipation(value: 'auto' | 'none'): void; setRovingStatus(status: { selected?: boolean; active?: boolean }): void;
 };
 export type NativeAccessible = {
-  state(key: string, state: NativeState): void;
+  state(key: string, state: NativeState, options?: { when?: NativeState<boolean> }): void;
   action(key: string, spec?: { event?: string }): void;
   role(role: string | NativeState<string>): void;
   nameFromContent(): void;
@@ -96,7 +96,7 @@ export function createNativeInteraction<Run>(options: {
   let pendingFocus: NativeFocusOptions | undefined, hasPendingFocus = false, didAutoFocus = false;
   let role: string | NativeState<string> | undefined, contentName = false;
   const identity = options.identity ?? {}, registrations: Registration<Run>[] = [], removals: (() => void)[] = [], subscriptions: (() => void)[] = [];
-  const states = new Map<string, NativeState>(), actions = new Map<string, { event?: string }>();
+  const states = new Map<string, NativeState>(), stateConditions = new Map<string, NativeState<boolean>>(), actions = new Map<string, { event?: string }>();
   const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
   let sequence = 0, suppressKeyboardClick = false, pressKey: string | null = null, pointer: number | null = null;
   let globalPressKey: string | null = null, globalPointer: number | null = null, suppressGlobalKeyboardClick = false;
@@ -160,6 +160,7 @@ export function createNativeInteraction<Run>(options: {
     for (const [key, state] of states) {
       if (!Object.hasOwn(stateAttributes, key)) continue;
       const value = state.get();
+      if (stateConditions.has(key) && stateConditions.get(key)!.get() !== true) continue;
       write(stateAttributes[key], scalar(key, value));
       if (key === 'hidden') write('hidden', value === true ? '' : null);
     }
@@ -194,9 +195,13 @@ export function createNativeInteraction<Run>(options: {
     }
     for (const [name, value] of Object.entries(next)) project(name, value);
   }
+  function subscribe(state: NativeState, callback: () => void): (() => void) | undefined {
+    if (options.subscribeState) return options.subscribeState(state, callback);
+    if ('subscribe' in state && typeof state.subscribe === 'function') return (state as NativeObservedState<unknown>).subscribe(callback);
+    return undefined;
+  }
   function watch(state: NativeState) {
-    if (options.subscribeState) subscriptions.push(options.subscribeState(state, refresh));
-    else if ('subscribe' in state && typeof state.subscribe === 'function') subscriptions.push((state as NativeObservedState<unknown>).subscribe(refresh));
+    const off = subscribe(state, refresh); if (off) subscriptions.push(off);
   }
   function register<Type extends string>(kind: 'root' | 'global', type: Type, callback: (run: Run, event: Type extends \`host:\${string}\` ? Event : NativeInput) => void, hostOptions?: NativeHostOptions): NativeListenerToken {
     options.ensureSetup('event.' + (kind === 'root' ? 'on' : 'onGlobal'));
@@ -265,7 +270,7 @@ export function createNativeInteraction<Run>(options: {
     setRovingStatus(status) { modules.setRovingStatus(status); },
   };
   const accessibleBase: Omit<NativeAccessible, keyof NativeAccessibleExtension> = {
-    state(key, state) { options.ensureSetup('accessible.state'); states.set(key, state); watch(state); refresh(); },
+    state(key, state, condition) { options.ensureSetup('accessible.state'); const when = condition?.when; if (when !== undefined && typeof when.get() !== 'boolean') throw new Error('[Accessible] when must be a Boolean State.'); states.set(key, state); stateConditions.delete(key); if (when !== undefined) stateConditions.set(key, when); refresh(); },
     action(key, spec = {}) { options.ensureSetup('accessible.action'); actions.set(key, { ...spec }); refresh(); },
     role(value) { options.ensureSetup('accessible.role'); role = value; if (typeof value !== 'string') watch(value); refresh(); },
     nameFromContent() { options.ensureSetup('accessible.nameFromContent'); contentName = true; modules.accessible.name(''); refresh(); },
@@ -296,6 +301,13 @@ export function createNativeInteraction<Run>(options: {
     root = target; host = options.getHost?.() ?? target;
     const rootOwner = { identity, parent: options.getLogicalParent ?? (() => null), trigger: () => trigger, target };
     rootOwners.set(target, rootOwner); rootOwners.set(host, rootOwner); logicalOwners.set(identity, rootOwner);
+    if (__nativeFeature('a11y')) {
+      const epoch = generation;
+      const notify = () => { if (active(epoch, target)) refresh(); };
+      for (const state of new Set([...states.values(), ...stateConditions.values()])) {
+        const off = subscribe(state, notify); if (off) removals.push(off);
+      }
+    }
     if (__nativeFeature('event')) {
     const epoch = generation, global = target.ownerDocument.defaultView ?? target.ownerDocument;
     const valid = () => deliverable(epoch, target);
@@ -527,7 +539,7 @@ export function createNativeInteraction<Run>(options: {
       attempt(() => modules.unmount()); attempt(unmount); attempt(() => modules.dispose());
       for (const off of subscriptions.splice(0)) attempt(off);
       if (__nativeFeature('event')) registrations.length = 0;
-      if (__nativeFeature('a11y')) { states.clear(); actions.clear(); }
+      if (__nativeFeature('a11y')) { states.clear(); stateConditions.clear(); actions.clear(); }
       if (__nativeFeature('focus')) { nativeNotifications.length = 0; focused.clear(); focusVisible.clear(); focusable.clear(); hasPendingFocus = false; }
       if (failed) throw failure;
     },

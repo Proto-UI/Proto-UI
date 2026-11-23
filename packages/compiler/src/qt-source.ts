@@ -9,6 +9,7 @@ import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
   unsupportedJavaScriptIntrinsics,
+  unsupportedNumericAccessibility,
   unsupportedPointerFacts,
 } from './pointer-facts-admission';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -47,6 +48,8 @@ export function emitQtSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const numericDiagnostics = unsupportedNumericAccessibility(ir, 'qt-source');
+  if (numericDiagnostics.length) return { ok: false, diagnostics: numericDiagnostics };
   const moduleParts = partitionModuleBindings(ir);
   const sharedModuleNames = new Set(moduleParts.shared.map((binding) => binding.name));
   let emittingModule = false;

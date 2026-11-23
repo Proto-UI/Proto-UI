@@ -1,0 +1,1161 @@
+[
+  {
+    "number": 2,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "Transition 的原需求是 Level0 无外观动画组件；guangliang2019 在关闭时写 DONE。只保留当时完成声明，评论没有原实现提交或动画生命周期验收回执。后续 #1018 的现行 Transition 验收不倒填成 2024 年证据。",
+    "bodySha256": "de112a93aabeca1c791eaf7738fc94cd29d77c40f940f221da2874ce24d74aac",
+    "discussionSha256": "fad4971de88766167790a51e09e52926e5ea22ff1f990453072fa6ac09a8c3bf",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/2",
+      "https://github.com/Proto-UI/Proto-UI/issues/2#issuecomment-2307118031"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/2",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 3,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原需求仅是 Headless Button。2026-09-15 补证明确固定源码 4d288346 的 WC 真实鼠标/Space/Enter、disabled 和焦点行为，P-BASE-BUTTON 与 T-BASE-BUTTON-0001 仍 draft；该评论自己说明并非 2024 年重现，完整历史/其他 Adapter 仍 partial。保留 2024 年关闭状态并分开标注较晚 WC 证据。",
+    "bodySha256": "1c767c74ba76ea622d0f790d44e9dd3f54fd46e5ad51107d8931213a5e5896e5",
+    "discussionSha256": "059e4100be46460d835ce52b71406093dce41495ec7c15d900381a2c0949a675",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/3",
+      "https://github.com/Proto-UI/Proto-UI/issues/3#issuecomment-5673875673"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/3",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 4,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原需求是 overlay 组件基础。对象关闭且无讨论，无法从本 Issue 恢复关闭原因、实现版本和焦点/清理验收；保留明确的信息缺口，不根据 closed 推断所有 Overlay 语义已验收。",
+    "bodySha256": "2a266b1c774324be9f38e4e521eada245bfa4b6a31d857b3056289323e1c6328",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/4"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/4",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 5,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "Headless Tab 的关闭时评论仅为 done。历史完成声明有明确作者与时间，未附原版本、键盘交互或生命周期回执。保持该历史终态，现代 Tabs 条件由其实际执行项继续承接。",
+    "bodySha256": "7d09d23ebf1f4531fa12eaabd43212d8b85e877a7a97847dd12df21d7e7d8248",
+    "discussionSha256": "d477718af37d840e2d9685b8f4cc42fd3b1a7fa54784eb3080cc5944320c49ef",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/5",
+      "https://github.com/Proto-UI/Proto-UI/issues/5#issuecomment-2292912941"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/5",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 7,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "需求为局部 Context 的 Provider/Consumer；guangliang2019 在关闭时声明 done。该历史声明不等同于后来跨 owner、编译器 Context 或所有 Adapter 当前一致性通过。",
+    "bodySha256": "da3172bb55f6435f9512f7fc45bbf763601efe3277e1f0d11c970bb39e8c1715",
+    "discussionSha256": "5fffb09151d6b2b27d89c71c9a5514cd5ed518784a3e3458b0ddca3ce5d171de",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/7",
+      "https://github.com/Proto-UI/Proto-UI/issues/7#issuecomment-2292912138"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/7",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 23,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原范围是 History API 与既有 Context 上的微型网站 Router；关闭前声明 DONE / throw something together。保留原取舍，缺少具体 commit 和导航资源清理证据，不把它解释为现行路由规范。",
+    "bodySha256": "5ae9a134d27dd79d7383b0f0d492516c96d78929cb3b2787cc15b21d322c5959",
+    "discussionSha256": "b10cc249052f10f9ee06effc97759ffcfe71eac7cd84d4c67787ca6a94c9a9ad",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/23",
+      "https://github.com/Proto-UI/Proto-UI/issues/23#issuecomment-2394975003"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/23",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 24,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原范围是文档代码高亮，要求避免比站点更大的既有依赖；关闭前 DONE 声明可追溯。该时期体积和手写实现条件保留，未恢复原构建或体积测量。",
+    "bodySha256": "4e1aa3c6e2a5c6d8251388f3ca09df175e885792725cf795ccba9a88b811d0d5",
+    "discussionSha256": "6145e72510e157d95ecc6ef8d6d4d62a62df39be4452491a06318a6b9ff56b8b",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/24",
+      "https://github.com/Proto-UI/Proto-UI/issues/24#issuecomment-2323797013"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/24",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 25,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原需求是结构化文档的简化 Markdown 实现；维护者在 2026-03-28 明确称旧实现相关问题已在近期重构中移除或修复。保存这项取代/修复处置，不声称取回了原 parser 的逐项验收。",
+    "bodySha256": "8d4b7fe6d3bd9c55c0fb8f0e1ab5178ebd6e9df1e158ff7309e1d81ae0692510",
+    "discussionSha256": "ff6a40fdaac1d743fc9c924dba5979a22d1d35bdbbcbc7066747fd9aeaaa6d8e",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/25",
+      "https://github.com/Proto-UI/Proto-UI/issues/25#issuecomment-4146335765"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/25",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 26,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原需求是独立于 Markdown 的数据驱动丰富 API Table。当前关闭、零评论，关闭原因和消费路径回执未在该对象中保留；维持历史状态并登记缺口。",
+    "bodySha256": "a1af24075031fed4bb38e53293e75a1a363d57fd54813bbc296571a4adc8465a",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/26"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/26",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 27,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原需求是 npx 将组件源码和 JSON 声明的依赖关系写入指定目录。当前关闭、零评论，原安装链证据不可据此恢复；当前 #1458 的可复现消费条件仍独立保留。",
+    "bodySha256": "e31973a25ee85856cc1ba635b8815765cfba94385ead71b858bb3d38625d9139",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/27"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/27",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 30,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原需求用 Select 验证刚完成的 Overlay 可用性；维护者在关闭前写 DONE。只确认历史任务声明，不转化为后来 Select readiness、受控值或非 Web 验收。",
+    "bodySha256": "86c459b135e00001cdbf76cc9a9daa854abe7e771509aaf22e3ae7311ff8123c",
+    "discussionSha256": "d18e623561d0748b77d4208d97a15cde202e1547b95b5574205ddb58321e2f82",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/30",
+      "https://github.com/Proto-UI/Proto-UI/issues/30#issuecomment-2367253961"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/30",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 31,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "closed-with-explicit-disposition",
+    "rationale": "维护者明确告知早期 Message/game UI 方案过时、不再继续，并将愿意贡献的 shangxinxiaolin 引向 #145；贡献者同意停止并转到新项。原需求经显式方向处置关闭，不记成 Message 功能已交付。",
+    "bodySha256": "dca21b74bb0d97de251bfd714e310939774522cd4b128e12b2c2ad2eb453cc9e",
+    "discussionSha256": "2e551d73b52beccf7e12b80f869442ad8ff9eeb6b2a99cd96f9ec22c5a8ee179",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/31",
+      "https://github.com/Proto-UI/Proto-UI/issues/31#issuecomment-3848057432",
+      "https://github.com/Proto-UI/Proto-UI/issues/31#issuecomment-3848945887",
+      "https://github.com/Proto-UI/Proto-UI/issues/31#issuecomment-3854952159",
+      "https://github.com/Proto-UI/Proto-UI/issues/31#issuecomment-3860302419",
+      "https://github.com/Proto-UI/Proto-UI/issues/31#issuecomment-3860394508"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": []
+  },
+  {
+    "number": 37,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "closed-with-explicit-disposition",
+    "rationale": "原问题是 Overlay 连接时移动 DOM 导致子元素 disconnect/connect；维护者明确方向已改变、暂不沿原 template/MutationObserver 白名单方案推进，并允许未来重开讨论。保存方向撤回，不能称原内存/生命周期问题不存在。",
+    "bodySha256": "6d013bb75bda7a9a4b40047825de3e77b1e9c89bdf7cebcc11768db0a100cc83",
+    "discussionSha256": "04fbaf03d6c68da71ee185da7e27cdee7940fe3b95829acca8af5c0f0f0e328a",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/37",
+      "https://github.com/Proto-UI/Proto-UI/issues/37#issuecomment-4146343928"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": []
+  },
+  {
+    "number": 43,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求包含表单验证/UI/提交以及 ContextProvider 可作 Consumer 的前置重构。关闭且无评论，保留两个责任层的原范围，原实现与验收未被当前状态证明。",
+    "bodySha256": "c2943af44b3b201b1421de9f45f2232b460c4c76acab71a140e0cfe46737bf7b",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/43"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/43",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 48,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原正文为空，评论形成博客/文档站模板方向，后来维护者明确说旧实现事项在重构中已移除或修复。保留评论中的完整提案与该处置，不虚构最初任务正文。",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "d622583ad5160dc17f71e47ef7e8ca4ed1c4216c18bef477727e26d2559b9d32",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/48",
+      "https://github.com/Proto-UI/Proto-UI/issues/48#issuecomment-2380355351",
+      "https://github.com/Proto-UI/Proto-UI/issues/48#issuecomment-2394962989",
+      "https://github.com/Proto-UI/Proto-UI/issues/48#issuecomment-2395021335",
+      "https://github.com/Proto-UI/Proto-UI/issues/48#issuecomment-2398776102",
+      "https://github.com/Proto-UI/Proto-UI/issues/48#issuecomment-4146336438"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/48",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 50,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原例子要求 Select 的 value/arrow 可省略又可定制；关闭时 DONE 是唯一结果声明。完整 anatomy 原例保留，后续新 Select 状态契约不倒填该历史验收。",
+    "bodySha256": "dbc9f9231c72dacff73686bfdb86827bbccebae7c688bf5777150d5cf9bd1659",
+    "discussionSha256": "426e19aba90565b344044dcc6ff721c160bfabbad651a5919ecaff6ac1163de2",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/50",
+      "https://github.com/Proto-UI/Proto-UI/issues/50#issuecomment-2382372625"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/50",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 60,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原范围是在 ScrollArea 工作中探索 WC 动画、CSS 加速、曲线、加载、条件渲染和动态帧率；维护者只承诺补简单需求文档。对象后来关闭，没有找到该文档或逐项性能结果，记录原范围与证据缺口。",
+    "bodySha256": "2364fc60584a6e35c60f3b729a064fdca2177b0884da01d0733f630b12fa3c24",
+    "discussionSha256": "ebfe660684b2afd42923e90f206863f1076363e1f3a1498e9332ea7697c00a45",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/60",
+      "https://github.com/Proto-UI/Proto-UI/issues/60#issuecomment-2401867390"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/60",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 67,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原正文为空、无讨论，唯一可恢复的需求范围是 Radio & Checkbox 标题；关闭不提供更详细规格或测试。把缺失源明确记录，禁止编造复合验收。",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/67"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/67",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 72,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "Dialog Component 只有标题、正文为空且无评论；保留原对象与关闭时间。当前 Dialog 焦点、dismiss、嵌套等条件不能被擅自倒填成原需求或历史通过。",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/72"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/72",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 75,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原报告是切换文档左侧 Tab 时堆内存持续增长。维护者两条关闭时评论称重构后泄漏消失，只剩浏览器调试工具波动；保留两条独立 source ID，不将重复文本去重为丢失历史。原 heap 采样未附。",
+    "bodySha256": "f757038020da0cee0f94a9eb990ebf8f7f9009c0245fd4c70a372fc6675e08c9",
+    "discussionSha256": "e19b2e5212557d65a2b0fdedea3bf9924ec58ed8e2ac8ed4ff745f8acdd57d0c",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/75",
+      "https://github.com/Proto-UI/Proto-UI/issues/75#issuecomment-2808974586",
+      "https://github.com/Proto-UI/Proto-UI/issues/75#issuecomment-2808974981"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/75",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 82,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "标题要求 OOP→FP，原正文为空；关闭时维护者称新内核上线且范式重构完成。保留这项历史架构决定，缺失原设计边界和特定提交，不能补造规范生命周期。",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "bea8983a1d585c37cef73652c5118e92bc76c3447823921fe007ed8d1c1bc6d6",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/82",
+      "https://github.com/Proto-UI/Proto-UI/issues/82#issuecomment-2788170682"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/82",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 88,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "Switch Component 只有标题、无正文或讨论；记录历史关闭与源缺口，不声称已验证现代 Switch 全部宿主语义。",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/88"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/88",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 120,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "closed-with-explicit-disposition",
+    "rationale": "原 CppAdapter Renderer 包含嵌套结构、Tailwind 风格 class、slot 及 C++ render 闭包示例，并曾单独报价。维护者后来明确因重构/方向变化不沿原方案继续。保存完整原规格和撤回决定，不能将关闭统计成 C++ 后端已交付。",
+    "bodySha256": "0b59720cb25923c98a018c51587f42303a16672b9eabda60e7f62828c05c6b45",
+    "discussionSha256": "cc1961a1ccd61ea2d581773e54c4ac25da8102024376b18df79ca36805437398",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/120",
+      "https://github.com/Proto-UI/Proto-UI/issues/120#issuecomment-3290098904",
+      "https://github.com/Proto-UI/Proto-UI/issues/120#issuecomment-4146355085"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": []
+  },
+  {
+    "number": 121,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原目标是 next-www 的 Shadcn 风格主题切换；关闭评论明确归功 dlyyds。保留实际贡献归属和历史文件路径，当前 main 的路径变化不改写当时来源；原 PR/视觉证据待关联。",
+    "bodySha256": "9cc99d46659ccb356debfd242d7cd4fa88256cfe2ae2b3a90b3d7b89f0b42410",
+    "discussionSha256": "e4d12bae65125838d23a9c66ab20178070cf4b4807243bbad4238bc5c9fe4c4a",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/121",
+      "https://github.com/Proto-UI/Proto-UI/issues/121#issuecomment-3326389043"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/121",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 123,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原条件包括全站语言持久化、多文件 tabs、Starlight兼容、响应式及依赖约束。全部 checkbox 仍未勾选且无评论，closed 不能替代逐项证据；完整条件留在账本中。",
+    "bodySha256": "9b05dff2b4cc160b92b9f3ad1b86d67bb6aee0362a8a16a76d6e75e20740f8bd",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/123"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/123",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 124,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原 i18n 条件为中文默认/英文、导航切换、同页路由及样式一致；dlyyds 认领被维护者接受。关闭没有附条件验收，保留 owner 的历史认领但不推断其当前仍在工作。",
+    "bodySha256": "476281c0147694058c58b544f34ab726c8501fc9d994aa8474eee47049370c0e",
+    "discussionSha256": "c0da3e5cd5d6883cccb267ddcbd6fb4592182b1faf2f6acbffa64a3505e4cbe9",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/124",
+      "https://github.com/Proto-UI/Proto-UI/issues/124#issuecomment-3328074702",
+      "https://github.com/Proto-UI/Proto-UI/issues/124#issuecomment-3328093690"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/124",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 125,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "维护者把实现边界收敛为 Starlight 默认 Image 样式，必要时才重写组件，并将 shangxinxiaolin 指到 next-www。当前关闭，但 Markdown 集成/响应式/SVG/主题等原条件未勾选；原实现与验收待从对应 PR 关联。",
+    "bodySha256": "295d0f50ec309f67e44052d2dd6a7ea08c38b2ed3257a46794a987394000adef",
+    "discussionSha256": "92ceee50a85b03d3c667e930318fb22c0519e59c4289196d33a046365eb21419",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/125",
+      "https://github.com/Proto-UI/Proto-UI/issues/125#issuecomment-3326477725",
+      "https://github.com/Proto-UI/Proto-UI/issues/125#issuecomment-3759371857",
+      "https://github.com/Proto-UI/Proto-UI/issues/125#issuecomment-3759787083"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/125",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 126,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "closed-with-explicit-disposition",
+    "rationale": "讨论先经历 Tailwind 依赖问题，维护者后来承认仓库脏依赖；最终关闭评论给出 apps/www/src/styles/search-trigger.css、modal定位/主题的具体实现路径，并明确早期 assignee 无需继续。保存两次环境解释的时间顺序；新 #848 的1000ms性能条件不是本旧样式 Issue 的已通过证据。",
+    "bodySha256": "845c3f86dcc249420dd92d23045e658f848eeb18d439b435e1235a303c60c927",
+    "discussionSha256": "c655c162bce6ccaf597d62c63e3f3ccedad839597c5cfcc0518c1b272583ead1",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/126",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-3326485694",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-3326578532",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-3326602153",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-3327641685",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-3328018097",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-3649034137",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-4092388587",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-4095594413",
+      "https://github.com/Proto-UI/Proto-UI/issues/126#issuecomment-5086865097"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": []
+  },
+  {
+    "number": 128,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原首页 demo 要求 CTA 下交互、原型语法、体现 runtime 技术切换并保留扩展，当前阶段只要求 WC。关闭无评论且原checkbox未勾选，不能改成四宿主或用标题推出已交付。",
+    "bodySha256": "ee21456d603381c18fb39179663501c9f80f7f0d9c61617b9a33a6a2aba19c93",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/128"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/128",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 129,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原新手原型教程要求从零流程、至少2–3代码样例和文档站集成。关闭无评论，保留数量与目录原文；原完成载体需要与历史文档提交关联。",
+    "bodySha256": "253d8fe7f4a8c35995127f6657917dab2a2ae7fe7b945d20bc439c09516f1150",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/129"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/129",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 130,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "维护者明确 Resolved/Closing，原范围仅最小 ReactAdapter 渲染/交互与 WC 并列切换，不要求全面特性对等。保留该限定关闭声明，不能扩展成现行四宿主或编译器验收。",
+    "bodySha256": "5bb4547aa041aabd7e1e61c0405d09df29df64bfc8bfa02fe9e4ab717fa614ee",
+    "discussionSha256": "7894ba898187306f002e8faf9575b4dd03d66b37e7da6fcf6065fa7cc5ba1c19",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/130",
+      "https://github.com/Proto-UI/Proto-UI/issues/130#issuecomment-4146349931"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/130",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 131,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求明确独立 Adapter 行为规范、MUST/SHOULD/MAY、生命周期/Props/事件/a11y/错误/性能、至少两个 Adapter 的 conformance 和 PR CI；关闭零评论、checkbox未勾选。类型存在或当前 source presence 不能代替独立定义及其生命周期证据。",
+    "bodySha256": "bd01f3c66b7dbcfc00262f5d15986754c2a0c2c18907d73de1a09aa9602c21f2",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/131"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/131",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 132,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "closed-with-explicit-disposition",
+    "rationale": "原 i18n Select 条件均已勾选；维护者在关闭前逐项验证桌面/移动、self names、路由同步、明暗主题/focus以及无重依赖，并确认 shangxinxiaolin 的贡献。保留这项具体历史接受；没有把它升级成后来所有 Select 组件协议通过。",
+    "bodySha256": "91963455b7b83fb6a1ecad52739d06492fdba3cfaef0f858b9c92abf3d400ed8",
+    "discussionSha256": "943547b6ea74b17a1ce0fb8f7f45ff3900a21f8c37e6889186ad29fea25ad7b3",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/132",
+      "https://github.com/Proto-UI/Proto-UI/issues/132#issuecomment-3580148738",
+      "https://github.com/Proto-UI/Proto-UI/issues/132#issuecomment-3580169738",
+      "https://github.com/Proto-UI/Proto-UI/issues/132#issuecomment-3580171402",
+      "https://github.com/Proto-UI/Proto-UI/issues/132#issuecomment-3594908859"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": []
+  },
+  {
+    "number": 133,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原迁移包含完整demo/目标路由清单、桌面移动明暗、说明、重定向、CI与性能/a11y，明确不含全量内容重写或最终目录删除。维护者较早 Resolved 评论与较晚关闭时间并存；未勾选条件和未附映射/回执继续保留。",
+    "bodySha256": "3f7f018e4e9501b336c028844ca39a9d962b8a217325ed934b5315a510c42766",
+    "discussionSha256": "5ea0d8964305f84a46a94653d0fe144d170130ea897a6ea2802a7b406aa6fe20",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/133",
+      "https://github.com/Proto-UI/Proto-UI/issues/133#issuecomment-4146352686"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/133",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 140,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原理论导论要求三角色、三条信息流、图示、约5分钟独立阅读，并明确不写具体 API 或框架对比。Zhong-Qijun 的认领被接受；后续 #144 明确此前文档已合入但放错路径，提供实现存在的交叉来源。原独立阅读/图示全部接受未由关闭本身证明。",
+    "bodySha256": "e3384ddaef35904761f3e0aba94d49a2c04cc3e6eab5dbc2c9eee52b9415ff3d",
+    "discussionSha256": "3ae4fe1d7d385c776b9ef15c745f05bc1299b02ad9a448a20660a8922da3442c",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/140",
+      "https://github.com/Proto-UI/Proto-UI/issues/140#issuecomment-3764888122",
+      "https://github.com/Proto-UI/Proto-UI/issues/140#issuecomment-3764891747"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/140",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 144,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "后续项确认 #140 文档已合入错误目录，要求迁移白皮书内容根、ASCII文件名、SVG、导航与构建；明暗和英文是明确可选项。Zhong-Qijun再次认领；保留必选/可选差别，不能把可选未勾选作为擅增阻塞。",
+    "bodySha256": "677562620c0dc93db731958b0704fec36411a668dc56d6cb0d43865f54be22da",
+    "discussionSha256": "1b8a3c85642c4cb3e321a9bad731ce69c02fe45c4c41d9380928dc5f7214d91a",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/144",
+      "https://github.com/Proto-UI/Proto-UI/issues/144#issuecomment-3821660862",
+      "https://github.com/Proto-UI/Proto-UI/issues/144#issuecomment-3821675846"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/144",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 145,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "closed-with-explicit-disposition",
+    "rationale": "维护者关闭评论具体给出 WikiTerm.astro 的 hover/focus、tap pin、Escape、双语摘要及wiki链接，并说明由后来仓库工作实现、原贡献者不再需动作。保留明确实现与owner释放依据，原Markdown/触屏等条件仍按该评论的范围解读。",
+    "bodySha256": "7913afea491a93296b68ad059e27a7a411d2c372eeab2e0a0f88afc62b24ec41",
+    "discussionSha256": "07968a7d041e0b9c83f111cff30c37c1fc9681a83c3f7da38f5a44930d359172",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/145",
+      "https://github.com/Proto-UI/Proto-UI/issues/145#issuecomment-3860348153",
+      "https://github.com/Proto-UI/Proto-UI/issues/145#issuecomment-3860579506",
+      "https://github.com/Proto-UI/Proto-UI/issues/145#issuecomment-5086864302"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": []
+  },
+  {
+    "number": 154,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原 Previewer 需求包含函数props不经JSON丢失、默认children/slot、WC/React/Vue三runtime、SSR兼容、旧用法与setProps；guangliang2019认领。关闭没有结果评论，保留完整三runtime条件，后续 compiler consumer验收不能倒填旧实现。",
+    "bodySha256": "d7389a339517d321683c41d2241dd49ee712a9b90312162dbf1b62ae6821d643",
+    "discussionSha256": "7bb15f2ee41fd5e2aed59db149b36fb866c536ddd9557225ea90955fb23fb528",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/154",
+      "https://github.com/Proto-UI/Proto-UI/issues/154#issuecomment-3940307567"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/154",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 187,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "维护者书面冻结 v0 默认CLI、WC另有script并列主路径、manual npm为备选，并逐项说明原因及README/QuickStart承接。该决策源真实存在；文档实际落实属于原第三条件，不能仅用决策评论代验收。现行0.3固定版本路线由#1458独立承接。",
+    "bodySha256": "d58515b293840c418e4f2eb8bedf701923d7dfad2e6aed76390f6de77cbc3531",
+    "discussionSha256": "3af5fdabcdb77a013cf7b29daa14eb1cbec9c2e61910f1450e73c8c6d8e87d1d",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/187",
+      "https://github.com/Proto-UI/Proto-UI/issues/187#issuecomment-4240408991"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/187",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 188,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "维护者明确列出v0.1.0五个承诺包、公开非首发包、internal/dependency包，以及新增包准入；原分类/版本保留，不把它覆盖成当前0.3范围。release scan与文档执行结果需由相应发布项承接。",
+    "bodySha256": "444815a2e41376edb28e41c622bd2d4b5f90ec99e8ce82225aa8d29254312506",
+    "discussionSha256": "81400e3be43268075719828d703376143dbf451e6ff7bbc2b1298870a56f0978",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/188",
+      "https://github.com/Proto-UI/Proto-UI/issues/188#issuecomment-4241184940"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/188",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 189,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求首发base/shadcn原型清单、每项测试/docs/demo与支持边界。关闭零评论，不能由后来的全库目录倒推当时冻结清单；原计量集合待从v0发布记录关联。",
+    "bodySha256": "e963cae64ced0cfff19eec9d551f3978402bd5b4d6e6205189e29468bee3e286",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/189"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/189",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 190,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求对冻结首发包执行release scan、逐blocker清零并回填；关闭零评论。当前scan成功不应替代旧运行回执，保留原截止与冻结包分母。",
+    "bodySha256": "6a8118140964f9f3a577919de4929f1fe83b74abddcb12fbf4fec59fb7f979f7",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/190"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/190",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 191,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求逐首发包补README，说明用途、安装、包角色；关闭零评论。源码现存README不构成当时发布包覆盖证明，保留原包集合及文件历史待关联。",
+    "bodySha256": "b69696890065a23e3b257f6388893d7804f4498474d302ef7a4045ddf6a7bf32",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/191"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/191",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 192,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求首发包exports/metadata问题清单、修正及release scan不再阻塞；关闭零评论。保留问题库存和执行结果缺口，不能以当前构建通过替代原发布边界。",
+    "bodySha256": "cae210fe250ed40c99642c7fb8cdca2030e48fa29e9a4fbe05de0cb28375209f",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/192"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/192",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 193,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求至少一次干净staging/dry-run并记录命令、结果及问题。关闭零评论且原checkbox未勾选；脚本存在不能代替该实际彩排。原日志需从相关发布PR/records关联。",
+    "bodySha256": "5abaeb3d858c9b98d998c5c2ca1ec7b6e37d9541b88498725ab051dd28fcf7e7",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/193"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/193",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 194,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原英文QuickStart必须移除未可用流程、真实命令目录成立并与README/status/roadmap一致；关闭零评论。保留具体路径和三条条件，当前更新不自动证明v0历史安装验收。",
+    "bodySha256": "bfacedd8bd75366e61584f8dc80c29a4ec01fd89299751f724f4a012d4715067",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/194"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/194",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 195,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原中文QuickStart与英文项分开，要求真实路径、命令目录和入口口径一致。关闭零评论，双语条件独立保留，不能用英文验收代理中文。",
+    "bodySha256": "cba6cbc6ba141d151e6b6d8375091ffd5b13616929269dc7ebd0f4cda062a5cf",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/195"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/195",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 196,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求在干净环境按QuickStart真正运行Button并回填问题修复。关闭零评论；当前源码或孤立unit test不足以恢复原clean-install smoke，保留执行证据缺口。",
+    "bodySha256": "8a1faa2acb8c71efe7cd9aea3b36bbec021712d7fba20a65fcf1bf444d436c60",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/196"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/196",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 197,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求干净环境跑通复合Dialog并记录caveat，显式用于超出最小happy path的价值证明。关闭零评论；保留实际安装/交互条件，不以Button smoke代理。",
+    "bodySha256": "372de80f18f56404183421f771ab6f83d817ab484e71d10e08aefabac85765eb",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/197"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/197",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  },
+  {
+    "number": 198,
+    "state": "reviewed",
+    "reviewer": "Codex /root/governance",
+    "reviewMethod": "Read the complete current issue body and every frozen top-level comment; preserve original archived criteria separately. No fresh product review or historical-body reconstruction is claimed.",
+    "group": "historical-terminal-with-evidence-gap",
+    "rationale": "原要求README、双语status/roadmap、QuickStart、Hero/CTA承诺一致，不暗示超出v0范围。关闭零评论，所有指定入口及原v0范围完整保留；后续0.3的不同范围必须分版本陈述。",
+    "bodySha256": "1933ccaed3c64bc1413016693644c6f9af9bce446cc96adc3997b88f7d3677e0",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/198"
+    ],
+    "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
+    "remaining": [
+      {
+        "condition": "Recover the exact original implementation/review/validation carrier if it is needed to claim technical completion beyond the recorded historical disposition.",
+        "owner": "Historical source owner and Sprint 7 governance integration owner",
+        "nextAction": "Use retained PR events and original records to bind the historical carrier; retain unavailable evidence explicitly rather than relabel a current run.",
+        "source": "https://github.com/Proto-UI/Proto-UI/issues/198",
+        "disposition": "historical-source-gap"
+      }
+    ]
+  }
+]

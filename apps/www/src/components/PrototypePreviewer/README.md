@@ -222,7 +222,7 @@ RuntimeBox 的 canvas 由对应 family 的公开 Surface 绘制；运行时工�
 
 - 不要再手写 prototype safelist
 - 新增 prototypes 样式时，优先保持 `tw(...)` 参数是静态可解析的字符串或静态映射
-- `pnpm --filter apps-www dev/build` 会自动在前置脚本里刷新 generated Proto UI style
+- `pnpm --filter apps-www dev` 和 `pnpm --filter apps-www build` 会自动在前置脚本里刷新 generated Proto UI style
 
 ## 🚀 最佳实践
 
