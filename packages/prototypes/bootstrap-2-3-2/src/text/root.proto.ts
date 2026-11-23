@@ -12,43 +12,44 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     // No selection override: document text is selectable, control text inherits
     // its actual owner's selection policy, including inside portaled controls.
     const inherited = asTextRoot();
-    // Pixel sizes retain the fixed 2.3.2 variables/type/hero-unit recipes.
+    // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION preserves the scalable Text vocabulary.
+    // Its explicit 2xl exception is 24.5px at a 16px root, expressed in rem.
     // Choosing a visual size does not turn this passive slot into a heading.
     def.rule({
       when: (w) => w.prop('size').eq('xs'),
-      intent: (i) => i.feedback.style.use(tw('text-[10.5px] leading-[20px]')),
+      intent: (i) => i.feedback.style.use(tw('text-xs')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('sm'),
-      intent: (i) => i.feedback.style.use(tw('text-[11.9px] leading-[20px]')),
+      intent: (i) => i.feedback.style.use(tw('text-sm')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('base'),
-      intent: (i) => i.feedback.style.use(tw('text-[14px] leading-[20px]')),
+      intent: (i) => i.feedback.style.use(tw('text-base')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('lg'),
-      intent: (i) => i.feedback.style.use(tw('text-[17.5px] leading-[20px]')),
+      intent: (i) => i.feedback.style.use(tw('text-lg')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('xl'),
-      intent: (i) => i.feedback.style.use(tw('text-[21px] leading-[30px]')),
+      intent: (i) => i.feedback.style.use(tw('text-xl')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('2xl'),
-      intent: (i) => i.feedback.style.use(tw('text-[24.5px] leading-[40px]')),
+      intent: (i) => i.feedback.style.use(tw('text-[1.53125rem]')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('3xl'),
-      intent: (i) => i.feedback.style.use(tw('text-[31.5px] leading-[40px]')),
+      intent: (i) => i.feedback.style.use(tw('text-3xl')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('4xl'),
-      intent: (i) => i.feedback.style.use(tw('text-[38.5px] leading-[40px]')),
+      intent: (i) => i.feedback.style.use(tw('text-4xl')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('5xl'),
-      intent: (i) => i.feedback.style.use(tw('text-[60px] leading-none')),
+      intent: (i) => i.feedback.style.use(tw('text-5xl')),
     });
     def.rule({
       when: (w) => w.prop('tone').eq('default'),
@@ -112,7 +113,7 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     });
     def.rule({
       when: (w) => w.all(w.prop('leading').eq('relaxed'), w.prop('size').eq('2xl')),
-      intent: (i) => i.feedback.style.use(tw('leading-[40px]')),
+      intent: (i) => i.feedback.style.use(tw('leading-[2.5rem]')),
     });
     def.rule({
       when: (w) => w.prop('tracking').eq('normal'),
