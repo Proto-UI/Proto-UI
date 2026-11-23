@@ -1,6 +1,7 @@
 # Independent local review: Sprint 2 website slice
 
-Reviewer: `/root/collections` (no implementation changes to the reviewed website slice). Execution: human-assisted / current-user. Review class: local source and executable-consumer review; no GitHub review submission or whole-PR approval is claimed.
+Reviewer: `/root/collections` (no implementation changes to the reviewed website slice).
+Execution: human-assisted / current-user. Review class: local source and executable-consumer review; no GitHub review submission or whole-PR approval is claimed.
 
 ## Source binding
 

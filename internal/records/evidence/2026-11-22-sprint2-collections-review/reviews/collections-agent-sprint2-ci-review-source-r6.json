@@ -2,10 +2,20 @@
   "sourceCommit": "dbcdecb077283d4e3fe11fe1077b74708f24fa4b",
   "scope": "Read-only independent source delta; no new native/type execution",
   "workspaceTypes": {
-    "command": ["corepack", "pnpm@10.32.1", "check:types:workspace"],
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "check:types:workspace"
+    ],
     "resolvedScript": "tsc -p tsconfig.workspace.json --noEmit",
-    "requires": ["public-packages", "styles"],
-    "subsequentSuitesRequire": ["public-packages", "styles"],
+    "requires": [
+      "public-packages",
+      "styles"
+    ],
+    "subsequentSuitesRequire": [
+      "public-packages",
+      "styles"
+    ],
     "failedTypesFailsAggregateButDoesNotSuppressIndependentSuites": true
   },
   "suiteCount": 10,

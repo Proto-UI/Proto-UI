@@ -1,6 +1,11 @@
 {
   "schema": "proto-ui.sprint2.consumer-inventory.v1",
-  "statusVocabulary": ["PASS", "FAIL", "UNSUPPORTED", "UNTESTED"],
+  "statusVocabulary": [
+    "PASS",
+    "FAIL",
+    "UNSUPPORTED",
+    "UNTESTED"
+  ],
   "scope": "Frozen actual source × declared target × observed consumer mode. Source-admission rows do not certify ordinary installation, browser execution, platform execution or all original Issue conditions. Separate execution receipts remain source-bound.",
   "candidate": {
     "head": "ee943e59d6f6bd9a418c2ba6f11487e349d5ccc1",
@@ -30,7 +35,10 @@
       "repository": "https://github.com/cyjin-yl/shenko",
       "revision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
       "target": "React 19.3.1 (consumer); admitted compiler React 19.2.6 independently checked",
-      "compiledPrototypes": ["transport-badge", "message-bubble"],
+      "compiledPrototypes": [
+        "transport-badge",
+        "message-bubble"
+      ],
       "adapterFamilies": [
         "button",
         "textarea",
@@ -48,7 +56,9 @@
       "repository": "https://github.com/OpenGreendam/verdant",
       "revision": "91a775546ebd21a87d76d76568195a6513437719",
       "target": "gpui-source-v1; inherits actual workspace GPUI e5f2f9db75e97613232b5c1946333e61fa3828ab",
-      "compiledPrototypes": ["pitch-gesture-surface"]
+      "compiledPrototypes": [
+        "pitch-gesture-surface"
+      ]
     }
   ],
   "sourceAdmission": [
@@ -1404,7 +1414,13 @@
   ],
   "absentUsage": {
     "scope": "Authored public entry imports in the frozen consumer sources; aggregate bundled library definitions are not application usage evidence.",
-    "entries": ["Tree", "DataTable", "VirtualList", "Resizable", "Carousel"],
+    "entries": [
+      "Tree",
+      "DataTable",
+      "VirtualList",
+      "Resizable",
+      "Carousel"
+    ],
     "Shenko": "No direct authored consumer usage found in the frozen source inventory",
     "Verdant": "No direct authored consumer usage found in the frozen source inventory"
   }

@@ -1382,9 +1382,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           )
             return;
         }
-        if (snapshot.present && wasConcealing && owner.hasView) {
-          // The retained epoch never unmounted. Reveal it immediately so a
-          // newer open/focus request is not queued behind the canceled barrier.
+        if (
+          snapshot.present &&
+          owner.hasView &&
+          (wasConcealing || thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR))
+        ) {
+          // Marker-first close can reenter before concealment starts. The
+          // retained epoch never unmounted, so project the newer present intent
+          // immediately instead of queuing it behind the old retirement.
           setViewDetached(false);
           return;
         }
