@@ -284,3 +284,91 @@ export default definePrototype({name:'captured-style-helper',setup(def){
   expect(tokens(heldRoot)).toEqual(new Set(['ring-2']));
   expect(host.querySelector('[data-pui-root]')).toBe(heldRoot);
 });
+
+it('keeps mixed viewport Rules unknown after source refusal and reacquires them on remount', async () => {
+  const add = window.addEventListener;
+  let refuse = true;
+  vi.spyOn(window, 'addEventListener').mockImplementation(function (type, callback, options) {
+    if (type === 'resize' && refuse) throw new Error('viewport source unavailable');
+    return add.call(window, type, callback, options);
+  });
+  vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(1024);
+  document.documentElement.dataset.theme = 'dark';
+  const { CompiledComponent } = await loadNative();
+  const { host, root } = mount();
+  const tree = (present: boolean) => React.createElement(CompiledComponent, { present });
+  await React.act(async () => {
+    root.render(tree(true));
+  });
+  expect(tokens(host.querySelector('[data-pui-root]'))).toEqual(
+    new Set(['bg-black', 'text-sm', 'opacity-100'])
+  );
+  refuse = false;
+  await React.act(async () => {
+    root.render(tree(false));
+  });
+  await React.act(async () => {
+    root.render(tree(true));
+  });
+  expect(tokens(host.querySelector('[data-pui-root]'))).toEqual(
+    new Set(['bg-black', 'text-lg', 'opacity-100'])
+  );
+});
+
+it('projects child-only viewport Rules with one shared lease and preserves the generated owner', async () => {
+  const authored = `import {definePrototype,tw} from '@proto.ui/core';
+export default definePrototype({name:'decoration-meta-consumer',setup(def){
+  def.props.define({present:{type:'boolean',default:true}});
+  def.props.watch(['present'],(run,next)=>run.lifecycle.setPresent(next.present ?? true));
+  const target=def.feedback.style.declareDecoration();
+  def.feedback.style.to(target).use(tw('opacity-25'));
+  def.rule({when:w=>w.meta('viewport.width').gte(768),intent:i=>i.feedback.style.to(target).use(tw('opacity-100'))});
+  def.expose.event('created',{payload:'void'});
+  def.lifecycle.onCreated(run=>run.expose.emit('created'));
+  return r=>[r.decoration(target),r.slot()];
+}});`;
+  const width = vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(900);
+  const add = vi.spyOn(window, 'addEventListener'),
+    remove = vi.spyOn(window, 'removeEventListener');
+  const { CompiledComponent } = await loadNative(authored);
+  const { host, root } = mount();
+  let created = 0;
+  const tree = (present: boolean) =>
+    React.createElement(
+      CompiledComponent,
+      {
+        present,
+        onCreated: () => {
+          created++;
+        },
+      },
+      React.createElement('input', { defaultValue: 'caller-owned input' })
+    );
+  await React.act(async () => {
+    root.render(tree(true));
+  });
+  const leaf = host.querySelector('span[aria-hidden="true"][inert]')!;
+  const input = host.querySelector('input');
+  expect(leaf).not.toBeNull();
+  expect(tokens(leaf)).toEqual(new Set(['opacity-100']));
+  expect(add.mock.calls.filter(([type]) => type === 'resize')).toHaveLength(1);
+  width.mockReturnValue(700);
+  await React.act(async () => {
+    window.dispatchEvent(new Event('resize'));
+  });
+  expect(tokens(leaf)).toEqual(new Set(['opacity-25']));
+  expect(host.querySelector('input')).toBe(input);
+  await React.act(async () => {
+    root.render(tree(false));
+  });
+  expect(remove.mock.calls.filter(([type]) => type === 'resize')).toHaveLength(1);
+  width.mockReturnValue(1000);
+  await React.act(async () => {
+    root.render(tree(true));
+  });
+  expect(created).toBe(1);
+  expect(tokens(host.querySelector('span[aria-hidden="true"][inert]'))).toEqual(
+    new Set(['opacity-100'])
+  );
+  expect(add.mock.calls.filter(([type]) => type === 'resize')).toHaveLength(2);
+});

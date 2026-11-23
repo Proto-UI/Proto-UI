@@ -98,6 +98,7 @@ export type NativeDecorationTarget = Readonly<object>;
 export type NativeDecorationBinding = { target: NativeDecorationTarget; sink(value: Readonly<{ kind: 'tw'; tokens: readonly string[] }>): void };
 export interface NativeStyle {
   meta(key: string): unknown;
+  metaKeys(): readonly string[];
   use(...handles: NativeStyleHandle[]): () => void;
   patch(...handles: NativeStyleHandle[]): void;
   suppress(...handles: NativeStyleHandle[]): void;
@@ -128,6 +129,11 @@ export function templateStyleTokens(handle: NativeStyleHandle): string {
   validate(handle);
   return handle.tokens.join(' ');
 }
+function completeStyleSteps(steps: readonly (() => void)[]): void {
+  let failure: { error: unknown } | undefined;
+  for (const step of steps) { try { step(); } catch (error) { failure ??= { error }; } }
+  if (failure) throw failure.error;
+}
 export function createNativeStyle(options: {
   ensureSetup(): void;
   ensureRuntime(): void;
@@ -144,8 +150,15 @@ export function createNativeStyle(options: {
   let decorationsBound = false;
   let mounted = false, disposed = false, nextRuleId = 1;
   let metaGeneration = 0;
+  let acquiringMeta = false, retiringMeta = 0, remountRequested = false;
   let releaseMeta: (() => void) | undefined;
   let projected: readonly string[] = [];
+  const current = (generation: number) => mounted && !disposed && generation === metaGeneration && options.isAlive();
+  function remount(): void {
+    if (!remountRequested || acquiringMeta || retiringMeta || disposed) return;
+    remountRequested = false;
+    style.mount();
+  }
   function snapshot(includeRules = mounted): string[] {
     const merged = new Map<string, string>();
     function append(handles: readonly NativeStyleHandle[]): void {
@@ -162,8 +175,10 @@ export function createNativeStyle(options: {
   }
   function refresh(): void {
     if (!mounted || disposed || !options.isAlive()) return;
-    for (const target of decorations.values()) target.style.refresh();
+    const generation = metaGeneration;
+    for (const target of decorations.values()) { if (!current(generation)) return; target.style.refresh(); }
     const next = snapshot();
+    if (!current(generation)) return;
     if (next.length === projected.length && next.every((token, index) => token === projected[index])) return;
     projected = next;
     options.project(next);
@@ -176,8 +191,15 @@ export function createNativeStyle(options: {
     for (const handle of handles) validate(handle);
     return { handles, active: true };
   }
-  const style = {
-    meta(key: string): unknown { return key.startsWith('preference.') && !mounted ? 'unknown' : options.getMeta?.(key) ?? (mounted && !disposed ? options.meta?.read(key) : undefined); },
+  const style: NativeStyle = {
+    meta(key: string): unknown {
+      if ((key.startsWith('preference.') || key === 'viewport.width') && (!mounted || disposed)) return 'unknown';
+      return options.getMeta?.(key) ?? (mounted && !disposed ? options.meta?.read(key) : undefined);
+    },
+    metaKeys(): readonly string[] {
+      return [...new Set([...rules.filter(rule => rule.active).flatMap(rule => rule.metaKeys),
+        ...[...decorations.values()].flatMap(target => target.style.metaKeys())])];
+    },
     use(...handles: NativeStyleHandle[]): () => void {
       options.ensureSetup();
       const chunk = record(handles);
@@ -212,7 +234,13 @@ export function createNativeStyle(options: {
       if (disposed || mounted || decorationsBound) throw new Error('[Style] decoration declaration lifetime ended');
       const identity = Object.freeze({});
       const target = { style: null as unknown as NativeStyle, sink: null as NativeDecorationBinding['sink'] | null };
-      target.style = createNativeStyle({ ...options, project(tokens) { target.sink?.({ kind: 'tw', tokens }); } });
+      // Decorations are physical projections of this logical owner. They borrow
+      // its paired readers; only the owner acquires the union of reached sources.
+      target.style = createNativeStyle({
+        ensureSetup: options.ensureSetup, ensureRuntime: options.ensureRuntime,
+        isAlive: () => !disposed && options.isAlive(), getMeta: key => style.meta(key),
+        project(tokens) { target.sink?.({ kind: 'tw', tokens }); },
+      });
       decorations.set(identity, target);
       return identity;
     },
@@ -235,11 +263,13 @@ export function createNativeStyle(options: {
       try {
         for (const binding of bindings) decorations.get(binding.target)!.sink = binding.sink;
         if (mounted) for (const target of decorations.values()) target.style.mount();
-      } catch (error) { style.releaseDecorations(); throw error; }
+      } catch (error) { try { style.releaseDecorations(); } catch {} throw error; }
     },
     releaseDecorations(): void {
       decorationsBound = false;
-      for (const target of decorations.values()) { target.style.unmount(); target.sink = null; }
+      const targets = [...decorations.values()];
+      for (const target of targets) target.sink = null;
+      completeStyleSteps(targets.map(target => () => target.style.unmount()));
     },
     rule(test: () => boolean, handles: readonly NativeStyleHandle[], metaKeys: readonly string[] = [], target?: NativeDecorationTarget): NativeRuleHandle {
       options.ensureSetup();
@@ -260,30 +290,63 @@ export function createNativeStyle(options: {
     refresh,
     mount(): void {
       if (disposed || !options.isAlive()) return;
+      if (acquiringMeta || retiringMeta) { if (!mounted) remountRequested = true; return; }
       if (!mounted) { mounted = true; ++metaGeneration; }
       const generation = metaGeneration;
       if (!releaseMeta && (options.subscribeMeta || options.meta)) {
         const releases: (() => void)[] = [];
-        const release = () => { let failed = false, first: unknown; for (const off of releases.splice(0)) { try { off(); } catch (error) { if (!failed) { failed = true; first = error; } } } if (failed) throw first; };
-        const notify = () => { if (mounted && generation === metaGeneration) refresh(); };
+        let active = true;
+        const release = () => { if (!active) return; active = false; completeStyleSteps(releases.splice(0)); };
+        const acquire = (off: () => void) => { if (active && current(generation)) releases.push(off); else off(); };
+        const notify = () => { if (current(generation)) refresh(); };
+        // Publish the in-progress lease before calling the host. Reentrant mount
+        // cannot duplicate it, and withdrawal can retire returned resources.
+        releaseMeta = release; acquiringMeta = true;
+        let failure: { error: unknown } | undefined;
         try {
-          if (options.subscribeMeta) releases.push(options.subscribeMeta(notify));
-          if (options.meta) releases.push(options.meta.subscribe(notify, [...new Set(rules.filter(rule => rule.active).flatMap(rule => rule.metaKeys))]));
-        } catch (error) { if (generation === metaGeneration) { mounted = false; ++metaGeneration; } try { release(); } catch {} throw error; }
-        if (!mounted || disposed || generation !== metaGeneration) { release(); return; }
-        releaseMeta = release;
+          if (options.subscribeMeta) acquire(options.subscribeMeta(notify));
+          if (current(generation) && options.meta) acquire(options.meta.subscribe(notify, style.metaKeys()));
+        } catch (error) {
+          failure = { error };
+          if (releaseMeta === release) releaseMeta = undefined;
+          if (generation === metaGeneration) { mounted = false; ++metaGeneration; }
+          try { release(); } catch {}
+        } finally { acquiringMeta = false; }
+        try { remount(); } catch (error) { failure ??= { error }; }
+        if (failure) throw failure.error;
+        if (!current(generation)) return;
       }
-      const next = snapshot(); options.project(next); projected = next;
-      if (decorationsBound) for (const target of decorations.values()) target.style.mount();
+      const next = snapshot();
+      if (!current(generation)) return;
+      projected = next; options.project(next);
+      if (decorationsBound) for (const target of decorations.values()) { if (!current(generation)) return; target.style.mount(); }
     },
-    unmount(): void { mounted = false; ++metaGeneration; const release = releaseMeta; releaseMeta = undefined; projected = []; try { release?.(); } finally { style.releaseDecorations(); } },
+    unmount(): void {
+      mounted = false; ++metaGeneration; remountRequested = false;
+      const release = releaseMeta; releaseMeta = undefined; projected = [];
+      ++retiringMeta;
+      let failure: { error: unknown } | undefined;
+      try { completeStyleSteps([() => style.releaseDecorations(), () => release?.()]); }
+      catch (error) { failure = { error }; }
+      finally { --retiringMeta; }
+      try { remount(); } catch (error) { failure ??= { error }; }
+      if (failure) throw failure.error;
+    },
     tokens(): readonly string[] { return snapshot(); },
     readMeta(key: string): unknown { return mounted && !disposed ? options.meta?.read(key) : undefined; },
     serverTokens(): readonly string[] {
       if (disposed || !options.isAlive()) throw new Error('[Style] owner is terminally disposed');
       return snapshot(true);
     },
-    dispose(): void { disposed = true; mounted = false; ++metaGeneration; const release = releaseMeta; releaseMeta = undefined; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; try { release?.(); } finally { for (const target of decorations.values()) target.style.dispose(); decorations.clear(); } },
+    dispose(): void {
+      if (disposed) return;
+      disposed = true; mounted = false; ++metaGeneration; remountRequested = false;
+      const release = releaseMeta; releaseMeta = undefined;
+      const targets = [...decorations.values()]; decorations.clear(); decorationsBound = false;
+      for (const target of targets) target.sink = null;
+      chunks.length = 0; rules.length = 0; patches.clear(); projected = [];
+      completeStyleSteps([...targets.map(target => () => target.style.dispose()), () => release?.()]);
+    },
   };
   return style;
 }
