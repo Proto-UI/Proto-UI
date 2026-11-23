@@ -1,10 +1,6 @@
 {
   "kind": "source-bound-raw-evidence-v1",
   "baseHead": "d9958d163436ea08d4a19b325d9e7f5dad3dc951",
-  "actualEmittedFilesVerified": {
-    "producer-original": 135,
-    "producer-green": 132
-  },
   "files": [
     {
       "path": "baseline-status.json.gz",
@@ -216,5 +212,16 @@
       "gzipBytes": 5521,
       "gzipSha256": "6334891125ec28a7ec92ec8f78f84b8054399c2ac63b60a4d739aa8cc73f98a9"
     }
-  ]
+  ],
+  "actualEmittedFileChecks": {
+    "producer-original": {
+      "receiptFileRecordChecks": 135,
+      "distinctEmittedArtifactPaths": 132
+    },
+    "producer-green": {
+      "receiptFileRecordChecks": 132,
+      "distinctEmittedArtifactPaths": 132
+    }
+  },
+  "countScope": "File-record checks and distinct emitted artifact paths covered by the module receipts; both variants cover the same actual paths and bytes."
 }

@@ -31,3 +31,7 @@ The manifest in `internal/records/evidence/2026-11-23-gpui-scroll-profile-integr
 The root agent independently reviewed the GPUI-only admission, public positive and negative controls, and unchanged lifecycle case; the producer deletion and generated-manifest evidence were supplied for supplemental review. This source review is not GitHub approval. PR #1738 remains Draft while its separate actual browser cleanup failure is repaired. No merge or release is claimed.
 
 Agent: ChatGPT / Codex, continuing the user's authorized implementation and readiness work.
+
+## Clarified emitted-artifact counts
+
+The original receipt causes 135 file-hash checks; the deduplicated receipt causes 132. Both cover the same 132 distinct emitted artifact paths with identical bytes. Removing the second Scroll reader emission removes duplicate receipt entries and a duplicate Cargo alias; the first consumer and all its generated files remain. See the companion Checkbox session refresh record for the exact path/hash comparison.
