@@ -378,6 +378,7 @@
     "src/checkbox/index.ts",
     "src/checkbox/indicator.proto.ts",
     "src/checkbox/preset.ts",
+    "src/checkbox/root-visual.ts",
     "src/checkbox/root.proto.ts",
     "src/checkbox/types.ts",
     "src/collapsible/content.proto.ts",
