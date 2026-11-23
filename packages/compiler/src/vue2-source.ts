@@ -440,6 +440,17 @@ export function emitVue2Source(
           manager: `${prefix}Authored`,
           interaction: `${prefix}Owner.interaction`,
           emit: (item, capture = true) => expression(item, depth, capture),
+          declaration: (item, name, initializer, argumentIndex) => {
+            // Hoisting a props map must retain the original call's contextual
+            // type: its checked literal discriminants otherwise widen to string.
+            const type =
+              value.operation === 'props.define' && argumentIndex === 0
+                ? `Record<string, ${prefix}PropSpec>`
+                : ['lexical-cell', 'record', 'object-spread'].includes(item.kind)
+                  ? typeName(item.type)
+                  : undefined;
+            return `${type ? `/** @type {${type}} */ ` : ''}const ${name} = ${initializer};`;
+          },
         });
         if (captured !== undefined) return captured;
       }
