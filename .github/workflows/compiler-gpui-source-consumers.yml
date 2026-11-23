@@ -114,11 +114,60 @@ jobs:
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1 --nocapture \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-sdk-controls.log"
+      - name: Verify explicit native scroll pause against ordinary requests
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_pause -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-pause-consumer.log"
+      - name: Verify native scroll reader displacement and append behavior
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_reader -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-reader-consumer.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: compiler-gpui-source-${{ runner.os }}-${{ github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/gpui-evidence
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  flutter-scroll-consumer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Record the exact source before preparing native dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/flutter-scroll-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/flutter-scroll-evidence/source-sha.txt"
+      - name: Install frozen JavaScript dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Prepare the pinned Flutter SDK and isolated offline package cache
+        run: |
+          set -euo pipefail
+          node scripts/ci/prepare-flutter-scroll-sdk.mjs "$RUNNER_TEMP/flutter-scroll-sdk" "$RUNNER_TEMP/flutter-scroll-evidence" 2>&1 | tee "$RUNNER_TEMP/flutter-scroll-evidence/preparation.log"
+      - name: Execute the original Flutter Widget consumer wrapper
+        run: |
+          set -euo pipefail
+          test -n "$PROTO_UI_FLUTTER"
+          test -x "$PROTO_UI_FLUTTER"
+          corepack pnpm@10.32.1 exec vitest run packages/compiler/test/flutter-scroll-outcomes.native.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile.json="$PROTO_UI_FLUTTER_EVIDENCE_DIR/vitest.json" 2>&1 | tee "$PROTO_UI_FLUTTER_EVIDENCE_DIR/native.log"
+      - name: Require executed wrapper and complete native Widget evidence
+        run: node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compiler-flutter-scroll-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/flutter-scroll-evidence
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 30

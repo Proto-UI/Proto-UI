@@ -92,6 +92,10 @@ dependencies.push([
   'public_mutation',
   emit('public_mutation', readFileSync(path.join(fixture, 'public-mutation.proto.ts'), 'utf8')),
 ]);
+dependencies.push([
+  'scroll_reader',
+  emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),
+]);
 const hookOnceSource = readFileSync(path.join(fixture, 'hook-once.proto.ts'), 'utf8');
 for (const [name, exportName] of [
   ['hook_pending', 'default'],
@@ -203,6 +207,14 @@ writeFileSync(
 mkdirSync(path.join(output, 'transition/tests'));
 copyFileSync(path.join(fixture, 'consumer.rs'), path.join(output, 'transition/tests/ordinary.rs'));
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
+for (const [source, target, field] of [
+  ['scroll-pause-consumer.rs', 'scroll_pause.rs', 'scrollPauseConsumerSha256'],
+  ['scroll-reader-consumer.rs', 'scroll_reader.rs', 'scrollReaderConsumerSha256'],
+]) {
+  copyFileSync(path.join(fixture, source), path.join(output, 'transition/tests', target));
+  receipt[field] = digest(readFileSync(path.join(fixture, source)));
+}
+
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.
 const scalarInputs = [

@@ -555,6 +555,25 @@ class NativeScrollFollowFacts {
   final NativeState<String> state, requestStatus;
   void dispose() { state.subscribers.clear(); requestStatus.subscribers.clear(); }
 }
+class _NativeScrollObservation {
+  _NativeScrollObservation(this.position, this.epoch, this.generation)
+    : minimum = position.minScrollExtent, maximum = position.maxScrollExtent,
+      viewport = position.viewportDimension,
+      pixels = position.pixels.clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+  final ScrollPosition position;
+  final int epoch, generation;
+  final double minimum, maximum, viewport, pixels;
+  bool current(NativeOwner<Object?> owner, int requestGeneration, ScrollPosition value) =>
+    owner.alive && owner.ready && owner.epoch == epoch && requestGeneration == generation &&
+    identical(position, value);
+  bool sameLayout(ScrollPosition value) => value.hasContentDimensions &&
+    minimum == value.minScrollExtent && maximum == value.maxScrollExtent &&
+    viewport == value.viewportDimension;
+  bool movedToEnd(ScrollPosition value) {
+    final next = value.pixels.clamp(value.minScrollExtent, value.maxScrollExtent).toDouble();
+    return sameLayout(value) && next != pixels && value.maxScrollExtent - next <= 1;
+  }
+}
 class NativeScroll {
   NativeScroll(this.owner) : horizontal = NativeScrollAxisFacts(owner, 'scroll.horizontal'), vertical = NativeScrollAxisFacts(owner, 'scroll.vertical'), axes = NativeState<String>(owner,'string','scroll.axes','vertical',const {},observed:true), projection = NativeState<String>(owner,'string','scroll.projection','unresolved',const {},observed:true), scrolling = NativeState<bool>(owner,'bool','scroll.scrolling',false,const {},observed:true), endFollow = NativeScrollFollowFacts(owner) { _horizontalControl.addListener(_refresh); _verticalControl.addListener(_refresh); _offCommit = owner.onCommit(_refreshChrome); }
   final NativeOwner<Object?> owner;
@@ -564,7 +583,8 @@ class NativeScroll {
   final NativeState<bool> scrolling;
   final NativeScrollFollowFacts endFollow;
   Map<String, Object?> config = {}, chrome = {};
-  bool following = false, _mounted = false;
+  bool following = false, _mounted = false, _explicitlyPaused = false;
+  _NativeScrollObservation? _readerObservation, _followObservation;
   int _requestGeneration = 0;
   int? _pendingEndGeneration;
   late final void Function() _offCommit;
@@ -573,6 +593,71 @@ class NativeScroll {
   void configure(Map<String, Object?> patch) { owner.ensureSetup(); config = {...config, ...patch}; if (!['vertical','horizontal','both'].contains(config['axes'] ?? 'vertical')) throw ArgumentError('Invalid scroll axes'); if (!['auto','system','composed'].contains(config['projection'] ?? 'auto')) throw ArgumentError('Invalid scroll projection'); axes.publish(config['axes'] as String? ?? 'vertical'); _followFacts(); }
   void bindComposedChrome(Map<String, Object?> binding) { owner.ensureSetup(); if (chrome.isNotEmpty && !identical(chrome, binding)) throw StateError('Composed chrome may be bound only once'); chrome = binding; }
   ScrollController _controller(String axis) => axis == 'horizontal' ? _horizontalControl : _verticalControl;
+  ScrollPosition? _followPosition() {
+    final policy = config['endFollow'];
+    if (policy is! Map<String,Object?> || policy['mode'] != 'while-at-end') return null;
+    final axis = policy['axis'] as String? ?? 'vertical';
+    final control = _controller(axis);
+    if (!owner.alive || !owner.ready || !control.hasClients ||
+        axes.get() != 'both' && axes.get() != axis) return null;
+    return control.position.hasContentDimensions ? control.position : null;
+  }
+  ScrollPosition? _ownedNotificationPosition(BuildContext? context) {
+    if (context == null || !context.mounted) return null;
+    final position = Scrollable.maybeOf(context)?.position;
+    if (position == null) return null;
+    return _verticalControl.positions.any((value) => identical(value, position)) ||
+      _horizontalControl.positions.any((value) => identical(value, position)) ? position : null;
+  }
+  _NativeScrollObservation _observe(ScrollPosition position) =>
+    _NativeScrollObservation(position, owner.epoch, _requestGeneration);
+  bool _nativeScroll(ScrollNotification event) {
+    if (!owner.alive || !owner.ready) return false;
+    final position = _ownedNotificationPosition(event.context);
+    if (position == null) return false;
+    if (event is ScrollStartNotification) scrolling.publish(true);
+    if (event is ScrollEndNotification) scrolling.publish(false);
+    if (!owner.alive || !owner.ready) return false;
+    if (identical(position, _followPosition())) {
+      if (event is UserScrollNotification) {
+        // Direction alone is intent, never proof of actual reader arrival.
+        _readerObservation = event.direction == ScrollDirection.idle ? null : _observe(position);
+      } else if (event is ScrollUpdateNotification) {
+        // A new native drag sample may follow an explicit pause within the
+        // same contact. Programmatic jumps have neither drag details nor a
+        // retained reader observation; public requests retire that observation.
+        final before = _readerObservation ??
+          (event.dragDetails != null ? _followObservation : null);
+        final current = _observe(position);
+        if (before != null && before.current(owner, _requestGeneration, position)) {
+          if (before.movedToEnd(position)) _explicitlyPaused = false;
+          following = !_explicitlyPaused && position.extentAfter <= 1;
+          _readerObservation = current;
+        }
+        _followObservation = current;
+      }
+    }
+    _refresh();
+    return false;
+  }
+  bool _nativeMetrics(ScrollMetricsNotification event) {
+    if (!owner.alive || !owner.ready) return false;
+    final position = _ownedNotificationPosition(event.context);
+    if (position == null) return false;
+    if (identical(position, _followPosition())) {
+      // Layout can change bounds or clamp an offset, but is not reader input.
+      _readerObservation = null;
+      _followObservation = _observe(position);
+      final epoch = owner.epoch, generation = _requestGeneration;
+      if (following) WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!owner.alive || !owner.ready || owner.epoch != epoch ||
+            generation != _requestGeneration || !following) return;
+        if (identical(position, _followPosition())) position.jumpTo(position.maxScrollExtent);
+      });
+    }
+    _refresh();
+    return false;
+  }
   void _followFacts() { final policy = config['endFollow']; endFollow.state.publish(policy is! Map<String,Object?> || policy['mode'] != 'while-at-end' ? 'off' : !owner.ready ? 'pending' : following ? 'following' : 'paused'); }
   void _refresh() { if (!owner.alive || !owner.ready) return; horizontal.refresh(_horizontalControl); vertical.refresh(_verticalControl); _followFacts(); _refreshChrome(); }
   void _refreshChrome() {
@@ -604,7 +689,7 @@ class NativeScroll {
         late final PointerRoute route;
         route = (sample) {
           if (!owner.alive || !owner.ready || sample is PointerUpEvent || sample is PointerCancelEvent) { GestureBinding.instance.pointerRouter.removeRoute(event.pointer, route); _dragRoutes.remove(event.pointer); return; }
-          if (sample is PointerMoveEvent && travel > 0) { final delta = axis == 'horizontal' ? sample.position.dx - initial.dx : sample.position.dy - initial.dy; owner.inScope('event', () => request({'kind':'control-drag','axis':axis,'position':(start + delta / travel).clamp(0,1)})); }
+          if (sample is PointerMoveEvent && travel > 0) { final delta = axis == 'horizontal' ? sample.position.dx - initial.dx : sample.position.dy - initial.dy; owner.inScope('event', () => _request({'kind':'control-drag','axis':axis,'position':(start + delta / travel).clamp(0,1)}, readerRequest: true)); }
         };
         _dragRoutes[event.pointer] = route; GestureBinding.instance.pointerRouter.addRoute(event.pointer, route);
       };
@@ -622,7 +707,7 @@ class NativeScroll {
         if (thumbRect == null || thumbRect.contains(event.position)) return;
         final coordinate = axis == 'horizontal' ? event.position.dx : event.position.dy;
         final start = axis == 'horizontal' ? thumbRect.left : thumbRect.top;
-        owner.inScope('event', () => request({'kind':'page','axis':axis,'direction':coordinate < start ? 'before' : 'after'}));
+        owner.inScope('event', () => _request({'kind':'page','axis':axis,'direction':coordinate < start ? 'before' : 'after'}, readerRequest: true));
       };
       track.target.pointerRoute = trackPointer;
       _chromeOwned[track.target] = (oldTrack == null ? track.target.geometry.value : oldTrack.$1, trackPreviousRoute, track.target.geometry.value, trackPointer); seen.add(track.target);
@@ -631,10 +716,13 @@ class NativeScroll {
   }
   void _releaseTarget(NativeHostTarget target) { final old = _chromeOwned.remove(target); if (old == null || !target.alive) return; if (target.geometry.value == old.$3) target.geometry.value = old.$1; if (target.pointerRoute == old.$4) target.pointerRoute = old.$2; }
   void _releaseChrome() { for (final target in List.of(_chromeOwned.keys)) _releaseTarget(target); for (final entry in _dragRoutes.entries) GestureBinding.instance.pointerRouter.removeRoute(entry.key,entry.value); _dragRoutes.clear(); }
-  Map<String, Object?> request(Map<String, Object?> request) {
+  Map<String, Object?> request(Map<String, Object?> request) => _request(request);
+  Map<String, Object?> _request(Map<String, Object?> request, {bool readerRequest = false}) {
     owner.ensureRuntime();
     final kind = request['kind'];
     final generation = ++_requestGeneration, epoch = owner.epoch;
+    _readerObservation = null;
+    _followObservation = null;
     Map<String, Object?> reject(String reason) {
       if (kind == 'to-end' && owner.alive && owner.epoch == epoch && (generation == _requestGeneration || _pendingEndGeneration == generation)) {
         if (_pendingEndGeneration == generation) _pendingEndGeneration = null;
@@ -654,9 +742,14 @@ class NativeScroll {
     final destination = kind == 'by' ? metrics.pixels + (request['delta'] as num).toDouble() : kind == 'page' ? metrics.pixels + metrics.viewportDimension * (request['direction'] == 'before' ? -1 : 1) : kind == 'to-end' ? metrics.maxScrollExtent : metrics.minScrollExtent + (metrics.maxScrollExtent - metrics.minScrollExtent) * (request['position'] as num).clamp(0,1);
     if (kind == 'to-end') { _pendingEndGeneration = generation; endFollow.requestStatus.publish('pending'); }
     if (!current()) return reject('unavailable');
+    final before = _observe(metrics);
     control.jumpTo(destination.clamp(metrics.minScrollExtent, metrics.maxScrollExtent).toDouble());
     if (!current()) return reject('unavailable');
-    following = kind == 'to-end' || metrics.pixels >= metrics.maxScrollExtent - 1;
+    if (identical(metrics, _followPosition())) {
+      if (kind == 'to-end' || readerRequest && before.movedToEnd(metrics)) _explicitlyPaused = false;
+      following = !_explicitlyPaused && metrics.extentAfter <= 1;
+      _followObservation = _observe(metrics);
+    }
     _refresh();
     if (!current()) return reject('unavailable');
     if (kind == 'to-end') { _pendingEndGeneration = null; endFollow.requestStatus.publish('applied'); }
@@ -672,6 +765,10 @@ class NativeScroll {
     if (!_controller(axis).hasClients || axes.get() != 'both' && axes.get() != axis) return const {'kind':'rejected','reason':'unavailable'};
     final generation = ++_requestGeneration, epoch = owner.epoch;
     following = false;
+    _explicitlyPaused = true;
+    _readerObservation = null;
+    final position = _followPosition();
+    _followObservation = position == null ? null : _observe(position);
     if (_pendingEndGeneration != null) { _pendingEndGeneration = null; endFollow.requestStatus.publish('rejected'); }
     if (!owner.alive || !owner.ready || owner.epoch != epoch) return const {'kind':'rejected','reason':'unavailable'};
     if (generation == _requestGeneration) _followFacts();
@@ -687,14 +784,14 @@ class NativeScroll {
     final policy = config['endFollow'];
     if (policy is Map<String, Object?> && policy['mode'] == 'while-at-end') {
       final control = _controller(policy['axis'] as String? ?? 'vertical');
-      final epoch = owner.epoch;
-      WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !owner.ready || owner.epoch != epoch || !control.hasClients) return; if (following) control.jumpTo(control.position.maxScrollExtent); });
+      final epoch = owner.epoch, generation = _requestGeneration;
+      WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !owner.ready || owner.epoch != epoch || generation != _requestGeneration || !control.hasClients) return; if (following) control.jumpTo(control.position.maxScrollExtent); });
     }
-    result = NotificationListener<ScrollMetricsNotification>(onNotification: (event) { final epoch = owner.epoch; if (following) WidgetsBinding.instance.addPostFrameCallback((_) { if (!owner.alive || !owner.ready || owner.epoch != epoch || !following) return; final axis = config['endFollow']; if (axis is Map<String,Object?>) { final control = _controller(axis['axis'] as String? ?? 'vertical'); if (control.hasClients) control.jumpTo(control.position.maxScrollExtent); } }); _refresh(); return false; }, child: result);
-    return NotificationListener<ScrollNotification>(onNotification: (event) { if (event is ScrollStartNotification) scrolling.publish(true); if (event is ScrollEndNotification) scrolling.publish(false); if (event is UserScrollNotification) following = event.metrics.pixels >= event.metrics.maxScrollExtent - 1; _refresh(); return false; }, child: result);
+    result = NotificationListener<ScrollMetricsNotification>(onNotification: _nativeMetrics, child: result);
+    return NotificationListener<ScrollNotification>(onNotification: _nativeScroll, child: result);
   }
   void mount() { if (!_mounted) { _mounted = true; final preference = config['requireProjection'] ?? config['projection']; projection.publish(preference == 'composed' ? 'composed' : 'system'); final policy = config['endFollow']; following = policy is Map<String,Object?> && policy['mode'] == 'while-at-end' && _controller(policy['axis'] as String).hasClients && _controller(policy['axis'] as String).position.extentAfter <= 1; } _refresh(); }
-  void unmount() { _mounted = false; _pendingEndGeneration = null; _releaseChrome(); horizontal.reset(); vertical.reset(); scrolling.publish(false); projection.publish('unresolved'); endFollow.requestStatus.publish('idle'); following = false; _followFacts(); }
+  void unmount() { _mounted = false; _pendingEndGeneration = null; _explicitlyPaused = false; _readerObservation = null; _followObservation = null; _releaseChrome(); horizontal.reset(); vertical.reset(); scrolling.publish(false); projection.publish('unresolved'); endFollow.requestStatus.publish('idle'); following = false; _followFacts(); }
   void dispose() { _offCommit(); _releaseChrome(); _verticalControl.dispose(); _horizontalControl.dispose(); vertical.dispose(); horizontal.dispose(); axes.subscribers.clear(); projection.subscribers.clear(); scrolling.subscribers.clear(); endFollow.dispose(); }
 }
 class NativeTextControl<P> {
