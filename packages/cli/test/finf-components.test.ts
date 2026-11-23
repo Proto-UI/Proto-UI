@@ -24,6 +24,9 @@ describe('Finf workspace-source facade boundaries', () => {
         manifest.private
           ? { types: `./src/${component}/index.ts`, default: `./src/${component}/index.ts` }
           : {
+              // Base publishes its authored entry for compiler source resolution;
+              // this condition does not admit the workspace-only CLI facade.
+              ...(family === 'base' ? { proto: `./src/${component}/index.ts` } : {}),
               types: `./dist/${component}/index.d.ts`,
               import: `./dist/${component}/index.js`,
               default: `./dist/${component}/index.js`,

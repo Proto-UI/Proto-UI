@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue834.bounded-source-reference",
+  "revision": "4adb6076a6d9e93ddfd6eb02d07ce06c319eb2d2",
+  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners plus the Button example producer. Transitive/runtime and served-source proof remain unobserved. The extracted InstallCommandCard client is included as a direct owner. The earlier reference and its recorded-revision mismatches are retained separately.",
+  "sourceAdmission": "unverified",
+  "sources": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+      "sha256": "2611501cb59055d0bf428559f0e86be6050bdc09ac1255d84d967e4f11e4428a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
+      "sha256": "f25f1b0ccd7faf348e2b32d8a3230d60c07c773ad981882c158ab8bb590edb30"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
+      "sha256": "34eaea1715c148b12d9fcae18358463ad74eb0fc74f9cf75b419a11f4544f142"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-themes.mjs",
+      "sha256": "0ed06f21952d00ee1e956182ba47e30a38f8a8f7c6d02bbcc790a52ff28220da"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "sha256": "512567c5f376fbc5a55448aae4589fc2d56814c78216d930ea069e5a63149219"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
+      "sha256": "b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "sha256": "5abf6359d556daf21777892ed99cec3b57d18c5102cfcaa9569987ab76086151"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
+      "sha256": "a313d5a363ec493b3ccd8284a5b3533367de344374148e781896b8916477411f"
+    },
+    {
+      "path": "apps/www/src/components/InstallCommandCard.astro",
+      "sha256": "05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7"
+    },
+    {
+      "path": "apps/www/src/components/SiteCopyBootstrap.astro",
+      "sha256": "25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3"
+    },
+    {
+      "path": "apps/www/src/components/site-copy-client.ts",
+      "sha256": "b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d"
+    },
+    {
+      "path": "apps/www/src/components/site-copy-command.ts",
+      "sha256": "75e31bef21c8e6cd2db3647f201b42403836fe3de530529d994b553c85bd604d"
+    },
+    {
+      "path": "apps/www/src/components/site-copy-controller.ts",
+      "sha256": "1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba"
+    },
+    {
+      "path": "apps/www/src/components/hidden-first-activation.ts",
+      "sha256": "d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/base-transition/baseTransitionCode.ts",
+      "sha256": "bbfa4916d6715c0070750d7638e71cf69254727f8b078a5b941bc2f288e7abd5"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/button/buttonCode.ts",
+      "sha256": "6450f95db2c6373faa6ec98def3463dc1a11646371efa7d818d5c418705dd798"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
+      "sha256": "9ce21e5ae6885a62ffc038fc363a330e8411b7242fbbaf139d402d942a3b06db"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
+      "sha256": "d22631b1ce4efd6aedaa8ea03de1e8507ff5ce3b76d5e4dc04d8b9337a5ff54f"
+    },
+    {
+      "path": "apps/www/astro.config.mjs",
+      "sha256": "eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7"
+    },
+    {
+      "path": "apps/www/package.json",
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
+      "sha256": "57975c6ead3d8d850ccedbe47192a7f8914beea23f626de60169162ca5e32375"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
+      "sha256": "0651680190b40b18a93e09103a26474b62df5d587ddad08366af720e759fee13"
+    },
+    {
+      "path": "apps/www/src/utils/conversionUtils.ts",
+      "sha256": "de79eb0937b97e8da41c1646df77787fa8bddabe956f0f3a5d1ed47a4df5ef80"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
+      "sha256": "58dc6a7cda823502e29d4b000d0cc2934b7acf7b8a2ba177be598aa93b471c4e"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-removal.ts",
+      "sha256": "468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19"
+    },
+    {
+      "path": "apps/www/src/components/docs-header-preparation.ts",
+      "sha256": "545b76fa19b9633d52915c20c8e5ddb7e340dc9a73e43b88b6c790d0a42aa244"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/button/button-usage.ts",
+      "sha256": "4330b1d2095ef54e848c4521f53a0722baebba56edf59650e3e81602de3a2d40"
+    },
+    {
+      "path": "apps/www/src/components/install-command-card-client.ts",
+      "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
+    }
+  ]
+}

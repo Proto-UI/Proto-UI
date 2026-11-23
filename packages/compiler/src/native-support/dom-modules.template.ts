@@ -875,11 +875,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     throw new Error('[TextControl] unsupported physical declaration.');
   const textListeners = new Map<string, Set<(run: Run, event: NativeTextEvent) => void>>();
   let textDeclared = false, textInitialized = false, textValue = '', textComposing = false, textMode = 'uncontrolled', textEpoch = 0;
-  const textCleanups: (() => void)[] = [];
-  function retireText() { ++textEpoch; queueTextSelection = null; textObservation = null; for (const cleanup of textCleanups.splice(0)) cleanup(); }
   let textPatch: NativeConfig = {};
   let queueTextSelection: (() => void) | null = null;
-  let textObservation: { epoch: number; lease: number; ownerValue: string } | null = null;
+  let textObservation: { epoch: number; ownerValue: string } | null = null;
+  const textCleanups: (() => void)[] = [];
+  function retireText() { ++textEpoch; queueTextSelection = null; textObservation = null; for (const cleanup of textCleanups.splice(0)) cleanup(); }
   const canonicalText = (value: string) => { const normalized = value.replace(/\r\n?/g, '\n'); return textDeclaration?.config.lineMode === 'single' ? normalized.replace(/\n/g, '') : normalized; };
   function readTextSelection(target: HTMLInputElement | HTMLTextAreaElement, source: string): NativeTextSelection | null {
     try {
@@ -933,7 +933,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       // A real canonical transition retires the prior candidate window, even if
       // a later explicit transition returns to its original string value.
       if (textValue !== previousValue) textObservation = null;
-      applyText(!(textObservation?.epoch === generation && textObservation.lease === textEpoch && textObservation.ownerValue === textValue)); requestPresentation();
+      applyText(!(textObservation?.epoch === generation && textObservation.ownerValue === textValue)); requestPresentation();
     },
     resetValue(value) {
       runtime('textControl.resetValue');
@@ -948,15 +948,14 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   };
   function attachText() {
     retireText();
-    if (!textDeclared || !ready()) return;
+    if (!textDeclared) return;
     applyText(true);
     const target = root as HTMLInputElement | HTMLTextAreaElement, epoch = generation, lease = textEpoch;
     let lastSelection: string | undefined, selectionQueued = false;
     const current = () => lease === textEpoch && epoch === generation && ready() && root === target && (options.isReady?.() ?? true);
-    const bind = (eventTarget: EventTarget, type: string, callback: (event: Event) => void) => {
+    const listenText = (source: EventTarget, type: string, callback: (event: Event) => void) => {
       const guarded = (event: Event) => { if (current()) callback(event); };
-      eventTarget.addEventListener(type, guarded);
-      textCleanups.push(() => eventTarget.removeEventListener(type, guarded));
+      source.addEventListener(type, guarded); textCleanups.push(() => source.removeEventListener(type, guarded));
     };
     const emitSelection = () => {
       if (!current()) return;
@@ -966,7 +965,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       lastSelection = identity;
       const event: NativeTextEvent = Object.freeze({ type: 'selectionchange', value, composing: textComposing, data: null, inputType: null, selection });
       const listeners = textListeners.get('selectionchange');
-      const previous = textObservation, observation = value !== textValue ? { epoch, lease, ownerValue: textValue } : null;
+      const previous = textObservation, observation = value !== textValue ? { epoch, ownerValue: textValue } : null;
       if (observation) textObservation = observation;
       try { for (const callback of [...listeners ?? []]) { if (!current()) break; if (listeners?.has(callback)) options.invoke(() => callback(options.getRun(), event)); } }
       finally { if (observation && textObservation === observation) textObservation = previous; }
@@ -976,19 +975,19 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       selectionQueued = true;
       queueMicrotask(() => { selectionQueued = false; emitSelection(); });
     };
-    for (const type of ['select','selectionchange','keyup','pointerup','focus','blur']) bind(target, type, emitSelection);
-    bind(target.ownerDocument, 'selectionchange', () => {
+    for (const type of ['select','selectionchange','keyup','pointerup','focus','blur']) listenText(target, type, emitSelection);
+    listenText(target.ownerDocument, 'selectionchange', () => {
       if ((target.getRootNode() as Document | ShadowRoot).activeElement === target) emitSelection();
     });
-    for (const type of ['input','change','compositionstart','compositionupdate','compositionend']) bind(target, type, native => {
+    for (const type of ['input','change','compositionstart','compositionupdate','compositionend']) listenText(target, type, native => {
       const editing = native as InputEvent;
       if (type === 'compositionstart' || type === 'input' && editing.isComposing) textComposing = true;
       if (type === 'compositionend') textComposing = false;
       const source = target.value, value = canonicalText(source);
       if (textMode === 'uncontrolled' && (type === 'input' || type === 'change')) textValue = value;
-      const event: NativeTextEvent = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null, selection: readTextSelection(target, source) });
+      const event = Object.freeze({ type, value, composing: textComposing, data: typeof editing.data === 'string' ? canonicalText(editing.data) : null, inputType: type === 'input' && typeof editing.inputType === 'string' ? editing.inputType : null, selection: readTextSelection(target, source) });
       const previous = textObservation;
-      const observation = textMode === 'controlled' && ['input','change','compositionend'].includes(type) && value !== textValue ? { epoch, lease, ownerValue: textValue } : null;
+      const observation = textMode === 'controlled' && ['input','change','compositionend'].includes(type) && value !== textValue ? { epoch, ownerValue: textValue } : null;
       if (observation) textObservation = observation;
       try { for (const callback of [...textListeners.get(type) ?? []]) { if (!current()) break; options.invoke(() => callback(options.getRun(), event)); } }
       finally { if (observation && textObservation === observation) textObservation = previous; }

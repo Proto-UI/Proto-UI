@@ -167,20 +167,6 @@ describe('native String conversion', () => {
     ).toBe(false);
   });
 
-  it('admits only proven scalar GPUI coercion', () => {
-    const text = program('const value=String(1);');
-    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
-    const unknown = compilePrototype(
-      program(
-        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
-      ),
-      { profile: 'gpui-source-v1' }
-    );
-    expect(unknown.ok).toBe(false);
-    if (!unknown.ok)
-      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
-  });
-
   it('admits bounded scalar conversion in GPUI', () => {
     const text = program(`
       def.expose.method('convert',(value:string|number|boolean|null)=>String(value));
@@ -207,9 +193,19 @@ describe('native String conversion', () => {
       ).toBe(true);
   });
 
-  it('keeps direct Qt/Flutter conversion unsupported', () => {
+  it('admits only proven scalar GPUI coercion and keeps direct Qt/Flutter unsupported', () => {
     const text = program('const value=String(1);'),
       ir = portable(text);
+    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+    const unknown = compilePrototype(
+      program(
+        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
+      ),
+      { profile: 'gpui-source-v1' }
+    );
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok)
+      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
     for (const result of [emitQtSource(ir), emitFlutterSource(ir)]) {
       expect(result.ok).toBe(false);
       if (!result.ok)

@@ -79,16 +79,19 @@ function prototypeName(value: unknown): string | null {
 }
 
 // CheckboxGroup is a separately governed composition, not an extra Checkbox
-// anatomy part. Keep the package-wide set exact instead of excluding Group or
+// anatomy part. FieldCheckbox is likewise governed by P-BASE-FIELD-CHOICES.
+// Keep the package-wide set exact instead of excluding Group/Field or
 // selecting only already-known keys, which could hide new accidental exports.
 const EXPECTED_CHECKBOX_EXPORTS = {
   BrutalistCheckboxIndicator: 'brutalist-checkbox-indicator',
   BrutalistCheckboxRoot: 'brutalist-checkbox-root',
   brutalistCheckboxIndicator: 'brutalist-checkbox-indicator',
   brutalistCheckboxRoot: 'brutalist-checkbox-root',
+  brutalistFieldCheckbox: 'brutalist-field-checkbox',
   checkboxGroupAll: 'brutalist-checkbox-group-all',
   checkboxGroupItem: 'brutalist-checkbox-group-item',
   checkboxGroupRoot: 'brutalist-checkbox-group-root',
+  fieldCheckbox: 'brutalist-field-checkbox',
 };
 
 function checkboxExports(entry: Record<string, unknown>) {
@@ -224,6 +227,9 @@ describe('prototypes/brutalist: checkbox', () => {
       'hovered',
       'indeterminate',
       'pressed',
+      // P-BASE-FIELD-CHOICES-POLICY/RESET also govern the ordinary Root.
+      'readOnly',
+      'resetValue',
     ]);
     expect(indicator.hasAttribute('role')).toBe(false);
     expect(indicator.hasAttribute('aria-checked')).toBe(false);

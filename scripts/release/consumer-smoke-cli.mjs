@@ -430,7 +430,8 @@ function verifyGeneratedConsumer(root) {
     assert(tokensCss.includes(expected), `generated token CSS is missing ${expected}`);
   }
   for (const expected of [
-    'createReactAdapter(React)',
+    "import { createPortal } from 'react-dom'",
+    'createReactAdapter({ ...React, createPortal })',
     'export const ShadcnButton = adapt(shadcnButton)',
     'export const BaseButton = adapt(button)',
     'export const ShadcnSwitch = React.forwardRef',

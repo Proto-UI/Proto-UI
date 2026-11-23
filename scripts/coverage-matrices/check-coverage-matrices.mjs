@@ -784,7 +784,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The reading viewport retains the public ScrollArea lease and the blocked
   // documentation-media owner; both authored source identities are required.
   'apps/www/src/components/documentation-image-reading-viewport.proto.ts': Object.freeze({
-    sourceSha256: '5c756216acffabcae06d99c1dd7e75fab539c4943207b8f63a2d6f4b8bde04bc',
+    sourceSha256: '38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec',
     companionSource: Object.freeze({
       path: 'apps/www/src/components/documentation-image-controls.ts',
       sha256: 'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07',
@@ -9762,11 +9762,11 @@ const PROMOTION_RETRY_PLUGIN_SHA256 =
 // the current configuration to the general package resolver profiles below.
 const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
   'e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c';
-// Exact public S4 + S5 configuration merge: only the two declared shader
-// chunk owners and three lazy compiler dependency exclusions are new. The
-// four Retry import owners and all helper identities remain unchanged.
+// Exact public S4 + S5 configuration: the two declared shader chunk owners,
+// three lazy compiler dependency exclusions and module Worker output are
+// reviewed additions. The four Retry owners and all helpers remain unchanged.
 const WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256 =
-  'dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99';
+  'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

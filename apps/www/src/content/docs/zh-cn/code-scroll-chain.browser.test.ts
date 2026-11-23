@@ -384,6 +384,17 @@ async function verifyPassiveCausality(
       // Re-establish the identical initial geometry before measuring either stage.
       await pre.evaluate((element) => element.scrollIntoView({ block: 'center' }));
       await page.evaluate(() => new Promise(requestAnimationFrame));
+      // Computed style and animation frames alone did not make the restored
+      // policy effective in the retained standalone Chromium reproduction.
+      // Capture a real viewport paint before either native-input stage. This
+      // read-only observation preserves the PRE, geometry, policy and inputs.
+      const policyImageName = `${entry.name}-${stageName}-policy.png`;
+      const policyImage = await page.screenshot({ path: join(out, policyImageName) });
+      (entry.causality.policyCaptures ??= []).push({
+        stage: stageName,
+        file: policyImageName,
+        sha256: createHash('sha256').update(policyImage).digest('hex'),
+      });
       const initial = await facts(page, pre);
       await page.evaluate(
         () =>

@@ -239,6 +239,23 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             await expect
               .poll(() => undo.evaluate((el) => document.activeElement === el))
               .toBe(true);
+            // Focus and visibility can precede the end of the public zoom-in
+            // keyframe. Measure its final geometry after native completion;
+            // leave the animation and the original size tolerances intact.
+            await expect
+              .poll(
+                () =>
+                  editMenu.evaluate((element) =>
+                    element
+                      .getAnimations()
+                      .every(
+                        (animation) =>
+                          !animation.pending && ['finished', 'idle'].includes(animation.playState)
+                      )
+                  ),
+                { timeout: 1000 }
+              )
+              .toBe(true);
             const item = await facts(undo);
             expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(
               scrollBeforeEntry

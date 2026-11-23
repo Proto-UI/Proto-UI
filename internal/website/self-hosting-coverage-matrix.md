@@ -361,7 +361,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/adapter-preference.ts` | `www.demo.runtime-select`, `www.shell.adapter-select` | `ce782a88af08dcc150ec5d4d29c3145e4a90bba86392ad86561a0fe5d313bc93` |
 | `apps/www/src/components/code-example-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs` | `4d78d40daf862af7f343e838d5ab16d08e92b856c8145964dcb2276c1e26e5b9` |
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07` |
-| `apps/www/src/components/documentation-image-reading-viewport.proto.ts` | `www.docs.whitepaper-diagram-viewer` | `5c756216acffabcae06d99c1dd7e75fab539c4943207b8f63a2d6f4b8bde04bc` |
+| `apps/www/src/components/documentation-image-reading-viewport.proto.ts` | `www.docs.whitepaper-diagram-viewer` | `38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec` |
 | `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `e2abfa0874a8f921827c94cc2c473369d55c5a462c4e07c1d38c0da73aae824c` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `8072d25e7b3d8ec5dd2967e3bd0cab93ab5485601965766627f8e1115a6fc6d1` |

@@ -2560,6 +2560,7 @@ it('Image rest-only applicability retains the actual passive source and historic
     productionDemos[
       '../src/content/' + authoredSources.image.recipePath.slice('apps/www/src/content/'.length)
     ];
+  assertDemoSpec(recipe);
   const manifest = PROJECTION_FAMILY_MANIFESTS.brutalist.families.image;
   const identities = new Set<string>();
   collectPrototypeIds(recipe.root, identities);
@@ -3023,6 +3024,7 @@ for (const runtime of runtimes) {
       }
       const source =
         productionDemos['../src/content/docs/zh-cn/demo-brutalist-dropdown-menu.demo.ts'];
+      assertDemoSpec(source);
       const items: any[] = [];
       const visit = (node: any) => {
         if (node?.prototypeId === 'brutalist-dropdown-item') items.push(node);

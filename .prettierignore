@@ -91,3 +91,15 @@ scripts/analysis/declarative-agent-ui/upstream/catalog.json
 scripts/analysis/declarative-agent-ui/upstream/common_types.json
 scripts/analysis/declarative-agent-ui/upstream/agent_to_renderer.json
 scripts/analysis/declarative-agent-ui/upstream/LICENSE
+
+# Frozen Sprint 7 source and review records retain their exact accepted bytes.
+internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json
+internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md
+internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-checkpoint-review.json
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-manual-decisions.json
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent-review.json
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
