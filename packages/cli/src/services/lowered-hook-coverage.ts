@@ -15,6 +15,7 @@ import {
   type SourceGraphVersionTracker,
 } from './hook-source-summary.js';
 import { loweredHookStates } from './prototype-style-tokens.js';
+import { closedLocalRuleHelpers, helperArgumentBeforeVisit } from './closed-rule-helpers.js';
 
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
@@ -447,6 +448,9 @@ export function scanRuleStateReads(
   const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
   const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
   sourceSummary.registerSource(source);
+  const closedHelpers = closedLocalRuleHelpers(source, sourceSummary);
+  const closedHelperNames = new Set([...closedHelpers].map((helper) => helper.name!.text));
+  const helperScopes = new Map<ts.FunctionDeclaration, Scope>();
 
   const usages: HookStateUsage[] = [];
   const unresolved: UnresolvedStateRead[] = [];
@@ -2608,6 +2612,12 @@ export function scanRuleStateReads(
    */
   const collectEscapedNames = (node: ts.Node, names: Set<string>): void => {
     const value = unwrapWritten(node);
+    // Passing a canonical setup closure to Core does not pass each value read
+    // by its body. writeNamesOf still visits that body separately, including
+    // every actual write, return and opaque call. Ordinary callbacks and a
+    // same-named local factory retain the conservative escape boundary.
+    if (ts.isFunctionLike(value) && sourceSummary.isAuthoredSetup(value, value.getSourceFile()))
+      return;
     if (ts.isIdentifier(value)) {
       names.add(value.text);
       return;
@@ -4142,6 +4152,13 @@ export function scanRuleStateReads(
   };
 
   const visit = (node: ts.Node, scope: Scope): void => {
+    // Only a helper whose complete use set is proved may replace its raw
+    // declaration walk with the actual invocations below. An exported,
+    // escaped, reassigned, unknown or uncalled helper keeps that raw walk.
+    if (ts.isFunctionDeclaration(node) && closedHelpers.has(node)) {
+      helperScopes.set(node, scope);
+      return;
+    }
     const current = introducesScope(node)
       ? {
           parent: scope,
@@ -4582,6 +4599,27 @@ export function scanRuleStateReads(
       // The callee and the arguments are evaluated in order, and the call
       // receives the objects its arguments denoted while they were evaluated.
       visit(node.expression, current);
+      const target = unwrap(node.expression);
+      const resolvedHelper =
+        ts.isIdentifier(target) && closedHelperNames.has(target.text)
+          ? sourceSummary.resolveSourceFunction(target, source)
+          : null;
+      const helper =
+        resolvedHelper &&
+        ts.isFunctionDeclaration(resolvedHelper) &&
+        closedHelpers.has(resolvedHelper) &&
+        helperScopes.has(resolvedHelper)
+          ? resolvedHelper
+          : null;
+      const helperParameters: Scope | null = helper
+        ? {
+            parent: helperScopes.get(helper)!,
+            bindings: new Map(),
+            node: helper,
+            sourceSummary,
+            versions: current.versions,
+          }
+        : null;
       const mutation = hookSourceCallMutation(node);
       // The receiver is evaluated before the arguments, so the container it
       // denotes is captured before they are visited: a later argument that
@@ -4596,6 +4634,40 @@ export function scanRuleStateReads(
       const readsOnly = provenAccessorCallee(node, current, receiver);
       const captured: CapturedArgument[] = [];
       for (const argument of node.arguments) {
+        if (helper && helperParameters) {
+          const parameter = helper.parameters[captured.length];
+          const assigned = helperArgumentBeforeVisit(argument, sourceSummary, (part) =>
+            sourceResolveCandidates(part, current).map(({ value }) => value)
+          );
+          // Read each argument before later arguments can rebind its name.
+          // The shared version tracker still observes later writes through
+          // the same borrowed container before the helper body executes.
+          if (!assigned) {
+            // Effects within this argument have not run yet. Capturing a
+            // member through them would incorrectly certify its old State.
+            helperParameters.bindings.set((parameter.name as ts.Identifier).text, {
+              kind: 'opaque',
+              sourceAuthority: true,
+              bindingNode: parameter,
+            });
+          } else {
+            declareValue(parameter.name, assigned, helperParameters, current);
+            const resolved = sourceResolve(assigned, current);
+            if (
+              ts.isIdentifier(parameter.name) &&
+              resolved.matched &&
+              resolved.value.kind === 'object' &&
+              sourceValueHasProvenance(resolved.value)
+            )
+              helperParameters.bindings.set(parameter.name.text, {
+                kind: 'handleBag',
+                hook: sourceHookLabel(assigned, current) ?? '<source-hook>',
+                sourceValue: resolved.value,
+                sourceAuthority: true,
+                bindingNode: parameter,
+              });
+          }
+        }
         captured.push(
           captureArgument(
             argument,
@@ -4604,6 +4676,22 @@ export function scanRuleStateReads(
           )
         );
         visit(argument, current);
+      }
+      if (helper?.body && helperParameters) {
+        for (const [name, binding] of helperParameters.bindings) {
+          if (!sourceBinding(binding) || binding.kind === 'handle') continue;
+          const held = sourceBindingValues(binding);
+          const currentValues = [
+            ...new Set(held.flatMap((value) => current.versions.versions(value))),
+          ];
+          if (currentValues.length)
+            helperParameters.bindings.set(name, {
+              ...binding,
+              sourceValue: currentValues[0],
+              sourceAlternatives: currentValues.slice(1),
+            });
+        }
+        visit(helper.body, helperParameters);
       }
       applyCallMutation(node, current, captured, receiver, readsOnly);
       return;

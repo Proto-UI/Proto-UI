@@ -3131,7 +3131,8 @@ function sourceSummaryValue(node, scope) {
   if (
     !ts.isCallExpression(node) &&
     !ts.isPropertyAccessExpression(node) &&
-    !ts.isElementAccessExpression(node)
+    !ts.isElementAccessExpression(node) &&
+    !ts.isObjectLiteralExpression(node)
   )
     return null;
   const value = unwrapTransparent(node);
@@ -3582,6 +3583,25 @@ function resolveExpressionBase(node, scope) {
       }
     }
     const value = asMapValue(entries);
+    if (node.properties.some(ts.isSpreadAssignment)) {
+      // A spread makes a fresh container and follows authored overwrite
+      // order. The shared source graph proves those copied members, while
+      // preserving nested identities; a later write to the original outer
+      // container must not rewrite this clone's captured State leaves.
+      const source = sourceSummaryValue(node, scope);
+      const sources = source?.resolvedValues ?? (source ? [source.resolved.value] : []);
+      if (sources.length > 0 && sources.every(sourceMembersProven))
+        return {
+          ...value,
+          semanticMap: source.semanticMap,
+          sourceValue: source.resolved.value,
+          sourceValues: sources,
+        };
+      // An unknown spread can overwrite earlier fields or run getters before
+      // later fields are read. Preserve token inventory without certifying a
+      // convenient subset of the handle map.
+      return value;
+    }
     return semantics.size > 0 ? { ...value, semanticMap: semantics } : value;
   }
 
