@@ -26,3 +26,11 @@ Node 24.22.3 and the locked pnpm 10.32.1 workspace were used. Each worktree inst
 The separate installed-consumer job on the older 1658768 candidate completed Tooltip 12/12, Select 4/4 and its one historical old-CLI negative control, with independent consumed-byte/receipt verification; its separate public Select source file passed 4/4 (artifact 14832624839). These are genuine older-candidate results.
 
 New-head direct/native/production browser acceptance and the complete release rehearsal remain to run. Four strict whole-entry package budgets remain genuinely over their current ceilings and require their own evidence-backed transaction or a semantics-preserving reduction. No package threshold, product implementation, capability lifecycle, release approval or integration permission changes here.
+
+## Follow-up on the integrated 6a2 source
+
+The later original native job 137806713683 and rehearsal job 137806713175 in run 45206446598 each reached the same stalled 61.2 MB Ubuntu font download, then hit their original five-minute setup deadline before their product cases. Those complete original ZIPs are retained separately in [evidence/2026-11-23-sprint3-font-retry-followup/manifest.json](evidence/2026-11-23-sprint3-font-retry-followup/manifest.json).
+
+On the separately published numeric-transaction baseline 15963a323d9a6d8a0f61aae32942e2172128bdab, the same 20-second HTTP/HTTPS read timeout and two retries now cover all three original CJK steps (native, separate Base Select, rehearsal). All three keep their original five-minute total bound, mandatory font install, dpkg records and independent complete producers. No browser case or original assertion is removed. The complete workflow/receipt controls passed 32/32 with zero skips and the scheduling policy passed.
+
+The earlier four package-budget failures above remain historical facts; their standalone cost transaction is recorded separately in [2026-11-23-sprint3-package-budget.json](2026-11-23-sprint3-package-budget.json). The current follow-up does not claim a repaired mirror, a new native pass or final canonical package acceptance. The production cleanup failure remains separately owned by the source-input repair.
