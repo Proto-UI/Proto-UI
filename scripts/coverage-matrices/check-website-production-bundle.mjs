@@ -376,7 +376,12 @@ function closure(chunksByFileName, rootFileName, edgeFields) {
   return seen;
 }
 
-function collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName) {
+function collectMaterialDiagnosticIssues(
+  root,
+  bundleGraph,
+  chunksByFileName,
+  reviewedWebsiteControlChunks
+) {
   const identity = root.facadeModuleId;
   const owner = REVIEWED_MATERIAL_DIAGNOSTIC_OWNERS.get(identity);
   const issues = [];
@@ -403,6 +408,7 @@ function collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName) {
     if ([...record.imports, ...record.dynamicImports].some((id) => !modulesById.has(id)))
       complete = false;
   }
+  const staticChunks = closure(chunksByFileName, root.fileName, ['imports']);
   const reachedChunks = closure(chunksByFileName, root.fileName, ['imports', 'dynamicImports']);
   const emittedModules = new Set(
     [...reachedChunks].flatMap((file) => chunksByFileName.get(file)?.moduleIds ?? [])
@@ -418,15 +424,32 @@ function collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName) {
       `material diagnostic entry \`${identity}\` requires complete unique module-edge provenance`
     );
   }
+  const bridgeModules =
+    complete && reviewedWebsiteControlChunks.size === 1
+      ? closure(modulesById, REVIEWED_WEBSITE_CONTROL_MODULE, ['imports', 'dynamicImports'])
+      : new Set();
+  // Preserve the existing finite static shell-bridge permission per chunk.
+  // Co-location grants no source import permission to the diagnostic producer;
+  // its actual module closure is checked separately below. Dynamic-only bridge
+  // delivery and the same Adapter identity in another chunk remain forbidden.
   // Check emitted bytes even when the claimed module graph is invalid.
-  for (const id of emittedModules) {
-    if (
-      forbiddenFrameworkFamily(id) !== null ||
-      (isProtoUiAdapterModule(id) && !REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES.has(id))
-    )
-      issues.push(
-        `material diagnostic entry \`${identity}\` reaches an unreviewed runtime or Adapter module: ${id}`
-      );
+  for (const fileName of reachedChunks) {
+    for (const id of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+      const existingStaticBridge =
+        staticChunks.has(fileName) &&
+        reviewedWebsiteControlChunks.has(fileName) &&
+        isReviewedWebsiteControlAdapterModule(id) &&
+        bridgeModules.has(id);
+      if (
+        forbiddenFrameworkFamily(id) !== null ||
+        (isProtoUiAdapterModule(id) &&
+          !REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES.has(id) &&
+          !existingStaticBridge)
+      )
+        issues.push(
+          `material diagnostic entry \`${identity}\` reaches an unreviewed runtime or Adapter module: ${id}`
+        );
+    }
   }
   if (!complete) return issues;
   const rootModules = closure(modulesById, identity, ['imports', 'dynamicImports']);
@@ -441,7 +464,18 @@ function collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName) {
     )
   )
     issues.push(`material diagnostic entry \`${identity}\` has no producer-owned optical program`);
-  for (const id of new Set([...rootModules, ...emittedModules])) {
+  for (const id of emittedModules) {
+    if (REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES.has(id) && !ownerModules.has(id))
+      issues.push(
+        'material diagnostic entry ' +
+          identity +
+          ' emits material outside its producer boundary: ' +
+          id
+      );
+  }
+  // Every route-originating source path remains material-only, including imports
+  // targeting a permitted static bridge chunk. Chunk placement is not ownership.
+  for (const id of rootModules) {
     if (
       forbiddenFrameworkFamily(id) !== null ||
       (isProtoUiAdapterModule(id) &&
@@ -514,6 +548,15 @@ export function collectWebsiteProductionBundleIssues({
     }
   }
 
+  const reviewedWebsiteControlChunks = new Set(
+    chunks
+      .filter((chunk) =>
+        chunk.moduleIds.some(
+          (moduleId) => moduleIdWithoutQuery(moduleId) === REVIEWED_WEBSITE_CONTROL_MODULE
+        )
+      )
+      .map((chunk) => chunk.fileName)
+  );
   const approvedDemoRoots = chunks.filter(
     (chunk) =>
       (chunk.isEntry || chunk.isDynamicEntry) &&
@@ -543,7 +586,14 @@ export function collectWebsiteProductionBundleIssues({
       issues.push(
         `material diagnostic entry \`${root.facadeModuleId}\` must have one unique route entry`
       );
-    issues.push(...collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName));
+    issues.push(
+      ...collectMaterialDiagnosticIssues(
+        root,
+        bundleGraph,
+        chunksByFileName,
+        reviewedWebsiteControlChunks
+      )
+    );
   }
   const reviewedNullFacadeRuntimeChunks = chunks.filter(
     (chunk) =>
@@ -718,15 +768,6 @@ export function collectWebsiteProductionBundleIssues({
     }
   }
 
-  const reviewedWebsiteControlChunks = new Set(
-    chunks
-      .filter((chunk) =>
-        chunk.moduleIds.some(
-          (moduleId) => moduleIdWithoutQuery(moduleId) === REVIEWED_WEBSITE_CONTROL_MODULE
-        )
-      )
-      .map((chunk) => chunk.fileName)
-  );
   if (reviewedWebsiteControlChunks.size !== 1) {
     issues.push(
       `production bundle graph must contain exactly one reviewed Website control bridge chunk (found ${reviewedWebsiteControlChunks.size})`
