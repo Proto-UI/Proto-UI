@@ -404,18 +404,28 @@
         "field/field-choice-focus-retirement-probe-fixed.json",
         "field/field-choice-focus-review-fixed.json"
       ],
-      "cases": [6, 3, 6],
+      "cases": [
+        6,
+        3,
+        6
+      ],
       "kind": "real Runtime + source Adapter, no native browser"
     },
     {
       "source": "42ee3b9c35f227622e6f2914f83f7dcc55938700",
-      "receipts": ["field/field-switch-reset-preview-review-probe-fixed.json"],
-      "cases": [2],
+      "receipts": [
+        "field/field-switch-reset-preview-review-probe-fixed.json"
+      ],
+      "cases": [
+        2
+      ],
       "kind": "real Runtime source, no native browser"
     },
     {
       "source": "095ecbdde4902941a13032386765dac59ebd7e6b",
-      "receipts": ["field/field-choice-stylesheet-review.json"],
+      "receipts": [
+        "field/field-choice-stylesheet-review.json"
+      ],
       "kind": "ordinary site stylesheet generation only"
     }
   ],

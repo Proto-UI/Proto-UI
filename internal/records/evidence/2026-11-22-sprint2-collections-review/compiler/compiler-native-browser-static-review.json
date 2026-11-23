@@ -12,7 +12,9 @@
   "generatedArtifactsVerified": 207,
   "actualBundleInputsVerified": 181,
   "sourceFilesComparedWithReviewedCommit": 164,
-  "sourceMismatches": ["packages/compiler/test/sprint2-native-browser-fixture.ts"],
+  "sourceMismatches": [
+    "packages/compiler/test/sprint2-native-browser-fixture.ts"
+  ],
   "bundleBytes": 4587670,
   "bundleSha256": "ad9693622d3a1161d47d511db8688fdcc9883ca2bea6836d1adbf1621e9a055b",
   "nativeBrowserCasesExecutedByReviewer": 0,

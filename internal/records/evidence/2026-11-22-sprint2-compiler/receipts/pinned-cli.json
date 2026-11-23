@@ -920,7 +920,9 @@
     {
       "name": "original-build",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["build.mjs"],
+      "args": [
+        "build.mjs"
+      ],
       "cwd": "/tmp/proto-pinned-cli-qe7c7c/consumer",
       "status": 0,
       "signal": null,
@@ -930,7 +932,10 @@
     {
       "name": "original-runtime",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["runtime.mjs", "section"],
+      "args": [
+        "runtime.mjs",
+        "section"
+      ],
       "cwd": "/tmp/proto-pinned-cli-qe7c7c/consumer",
       "status": 0,
       "signal": null,
@@ -961,7 +966,9 @@
     {
       "name": "edited-build",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["build.mjs"],
+      "args": [
+        "build.mjs"
+      ],
       "cwd": "/tmp/proto-pinned-cli-qe7c7c/consumer",
       "status": 0,
       "signal": null,
@@ -971,7 +978,10 @@
     {
       "name": "edited-runtime",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": ["runtime.mjs", "article"],
+      "args": [
+        "runtime.mjs",
+        "article"
+      ],
       "cwd": "/tmp/proto-pinned-cli-qe7c7c/consumer",
       "status": 0,
       "signal": null,
@@ -1011,7 +1021,9 @@
           "/tmp/proto-pinned-cli-qe7c7c/watch/3b41e2da-20be-4296-8b45-4d7f37e2cc6b/revision-2/provenance.json"
         ]
       },
-      "changedFiles": ["label.ts"],
+      "changedFiles": [
+        "label.ts"
+      ],
       "diagnostics": []
     },
     {
@@ -1061,7 +1073,9 @@
           "/tmp/proto-pinned-cli-qe7c7c/watch/3b41e2da-20be-4296-8b45-4d7f37e2cc6b/revision-3/provenance.json"
         ]
       },
-      "changedFiles": ["entry.proto.ts"],
+      "changedFiles": [
+        "entry.proto.ts"
+      ],
       "diagnostics": []
     }
   ],
@@ -1075,7 +1089,10 @@
         "version": "19.2.6",
         "location": "node_modules/react",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react@19.2.6/node_modules/react",
-        "requiredBy": ["<consumer-root>", "react-dom@19.2.6"],
+        "requiredBy": [
+          "<consumer-root>",
+          "react-dom@19.2.6"
+        ],
         "files": 27,
         "bytes": 171604,
         "treeSha256": "db1ebaa19076d6021ff517e3e411f89c5b6d9a13b595b6da11cc243211b51a0b"
@@ -1085,7 +1102,9 @@
         "version": "19.2.6",
         "location": "node_modules/react-dom",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom",
-        "requiredBy": ["<consumer-root>"],
+        "requiredBy": [
+          "<consumer-root>"
+        ],
         "files": 43,
         "bytes": 7319413,
         "treeSha256": "c3047cfe7bc9441e757e379eafff960f75c8e95792c24db48cb7f41ddd88d75d"
@@ -1095,7 +1114,9 @@
         "version": "5.9.3",
         "location": "node_modules/typescript",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-        "requiredBy": ["<consumer-root>"],
+        "requiredBy": [
+          "<consumer-root>"
+        ],
         "files": 132,
         "bytes": 23625066,
         "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -1105,7 +1126,9 @@
         "version": "15.11.7",
         "location": "node_modules/happy-dom",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-        "requiredBy": ["<consumer-root>"],
+        "requiredBy": [
+          "<consumer-root>"
+        ],
         "files": 4696,
         "bytes": 12229182,
         "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -1115,7 +1138,10 @@
         "version": "19.2.14",
         "location": "node_modules/@types/react",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react",
-        "requiredBy": ["<consumer-root>", "@types/react-dom@19.2.3"],
+        "requiredBy": [
+          "<consumer-root>",
+          "@types/react-dom@19.2.3"
+        ],
         "files": 16,
         "bytes": 410399,
         "treeSha256": "7f7480284788df82d54ccbe7bca0ce306e16f344715793951c01d5d1f649c02d"
@@ -1125,7 +1151,9 @@
         "version": "19.2.3",
         "location": "node_modules/@types/react-dom",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react-dom@19.2.3_@types+react@19.2.14/node_modules/@types/react-dom",
-        "requiredBy": ["<consumer-root>"],
+        "requiredBy": [
+          "<consumer-root>"
+        ],
         "files": 17,
         "bytes": 30063,
         "treeSha256": "e92f36efdbc4e014bf7dbebdd91d1a618a7338312c1a52bb468e09b4ca6f4114"
@@ -1135,7 +1163,9 @@
         "version": "0.27.0",
         "location": "node_modules/scheduler",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler",
-        "requiredBy": ["react-dom@19.2.6"],
+        "requiredBy": [
+          "react-dom@19.2.6"
+        ],
         "files": 15,
         "bytes": 82665,
         "treeSha256": "f71f4e7be5efc80ebdad148b62d55a9d3a81d245b93be93bc6d6c753580c55c9"
@@ -1145,7 +1175,9 @@
         "version": "4.5.0",
         "location": "node_modules/entities",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-        "requiredBy": ["happy-dom@15.11.7"],
+        "requiredBy": [
+          "happy-dom@15.11.7"
+        ],
         "files": 68,
         "bytes": 412892,
         "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -1155,7 +1187,9 @@
         "version": "7.0.0",
         "location": "node_modules/webidl-conversions",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-        "requiredBy": ["happy-dom@15.11.7"],
+        "requiredBy": [
+          "happy-dom@15.11.7"
+        ],
         "files": 4,
         "bytes": 24242,
         "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -1165,7 +1199,9 @@
         "version": "3.0.0",
         "location": "node_modules/whatwg-mimetype",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-        "requiredBy": ["happy-dom@15.11.7"],
+        "requiredBy": [
+          "happy-dom@15.11.7"
+        ],
         "files": 8,
         "bytes": 16809,
         "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -1175,7 +1211,9 @@
         "version": "3.2.3",
         "location": "node_modules/csstype",
         "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-        "requiredBy": ["@types/react@19.2.14"],
+        "requiredBy": [
+          "@types/react@19.2.14"
+        ],
         "files": 5,
         "bytes": 1253449,
         "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"

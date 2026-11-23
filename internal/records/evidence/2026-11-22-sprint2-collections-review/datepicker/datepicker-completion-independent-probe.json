@@ -5,25 +5,39 @@
       "mode": "single",
       "scenario": "noop-nested",
       "passed": true,
-      "actions": ["valueChange", "openChange"]
+      "actions": [
+        "valueChange",
+        "openChange"
+      ]
     },
     {
       "mode": "single",
       "scenario": "retire-then-contained-throw",
       "passed": true,
-      "actions": ["valueChange", "valueChange", "openChange"]
+      "actions": [
+        "valueChange",
+        "valueChange",
+        "openChange"
+      ]
     },
     {
       "mode": "range",
       "scenario": "noop-nested",
       "passed": true,
-      "actions": ["rangeChange", "openChange"]
+      "actions": [
+        "rangeChange",
+        "openChange"
+      ]
     },
     {
       "mode": "range",
       "scenario": "retire-then-contained-throw",
       "passed": true,
-      "actions": ["rangeChange", "rangeChange", "openChange"]
+      "actions": [
+        "rangeChange",
+        "rangeChange",
+        "openChange"
+      ]
     }
   ],
   "boundary": "Independent real Runtime/Calendar source probe; synthetic portable host events, no native browser."

@@ -482,6 +482,28 @@ test('reusable compiler inputs preserve Adapter and manual browser acceptance bo
   assertReusableCompilerCallers(workflows);
   const mutations = [
     (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = 'true';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = '${{ inputs.adapter_acceptance }}';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].uses = './.github/workflows/unreviewed.yml';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.production_build = false;
+    },
+    (workflow) => {
       workflow.on.workflow_call = null;
     },
     (workflow) => {

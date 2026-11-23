@@ -9,7 +9,10 @@
       "before": false,
       "after": true,
       "observed": true,
-      "actions": ["openChange", "valueChange"],
+      "actions": [
+        "openChange",
+        "valueChange"
+      ],
       "expectedOpenAfter": true,
       "pass": true
     },
@@ -19,7 +22,10 @@
       "before": false,
       "after": true,
       "observed": true,
-      "actions": ["openChange", "rangeChange"],
+      "actions": [
+        "openChange",
+        "rangeChange"
+      ],
       "expectedOpenAfter": true,
       "pass": true
     }

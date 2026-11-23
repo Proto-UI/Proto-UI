@@ -10,6 +10,7 @@ import {
   assertBodyPortal,
   assertOldCliCounterfactual,
   assertServedArtifacts,
+  assertSelectCommit,
 } from './verify-native.mjs';
 
 const candidate = 'a'.repeat(40);
@@ -137,5 +138,57 @@ test('terminal served-output proof cannot be empty, failed or detached from prep
     () =>
       assertServedArtifacts([...responses, { ...responses[0], path: '/unknown.js' }], execution),
     /unknown artifact/
+  );
+});
+
+function committedSelect(attributes = {}) {
+  const state = {
+    'data-value': 'vue',
+    'data-text-value': 'Vue',
+    ...attributes,
+  };
+  return { state, root: { getAttribute: async (name) => state[name] } };
+}
+
+test('a real committed Select may finish its leaf render after its root attributes', async () => {
+  const { root } = committedSelect();
+  let reads = 0;
+  await assertSelectCommit(root, {
+    textContent: async () => (++reads === 1 ? 'Pick a framework' : 'Vue'),
+  });
+  assert(reads >= 2, 'the displayed leaf must actually be observed after it commits');
+});
+
+test('a permanently stale Select display still fails the original bounded observer', async () => {
+  const { root } = committedSelect();
+  await assert.rejects(
+    assertSelectCommit(root, { textContent: async () => 'Pick a framework' }),
+    (error) =>
+      error instanceof assert.AssertionError &&
+      error.actual === 'Pick a framework' &&
+      error.expected === 'Vue'
+  );
+});
+
+test('a Vue leaf cannot conceal inconsistent committed Select text metadata', async () => {
+  const { root } = committedSelect({ 'data-text-value': 'React' });
+  await assert.rejects(
+    assertSelectCommit(root, { textContent: async () => 'Vue' }),
+    (error) =>
+      error instanceof assert.AssertionError && error.actual === 'React' && error.expected === 'Vue'
+  );
+});
+
+test('a leaf completion cannot accept a different root value acquired while waiting', async () => {
+  const { state, root } = committedSelect();
+  await assert.rejects(
+    assertSelectCommit(root, {
+      textContent: async () => {
+        state['data-value'] = 'react';
+        return 'Vue';
+      },
+    }),
+    (error) =>
+      error instanceof assert.AssertionError && error.actual === 'react' && error.expected === 'vue'
   );
 });
