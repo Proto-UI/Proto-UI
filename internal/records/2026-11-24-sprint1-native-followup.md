@@ -1,56 +1,48 @@
-# Sprint 1 native follow-up — 2026-11-24
+# Sprint 1: completed native runs at 0b0b861b and f419483e
 
-This development checkpoint continues PR #1745 from `f419483e78403817fbe5aa6146caec30ab90352a`. It preserves the concurrent main integration, Calendar repair, Vue compiler repair, host-capability criterion identity repair and CLI helper work. The fourteen independently reviewed source files are bound by byte hash in the [manifest](evidence/2026-11-24-sprint1-native-followup/manifest.json). No issue, umbrella criterion, Draft status or acceptance gate is closed by this record.
+These are completed, source-bound native results. Both workflows ended **failed** for the concrete remaining conditions below. Successful selected work is preserved without turning either workflow green or applying its result to a later changed source.
 
-## Search ownership and failure recovery
+## Selected Sprint 1 at 0b0b861b
 
-The composition now observes the current query owner's public `focused` fact. A late focus-entry notification schedules one coalesced microtask so the existing focus epoch has completed before the composition considers another paint. The paint request is admitted only for the same current owner, opening, action and eligible failure state. Actual focus still goes through the existing author commit/publication path and is recorded as complete only after the Retry action's public focused state confirms it.
+[Run 45249497810](https://github.com/Proto-UI/Proto-UI/actions/runs/45249497810), job `137955073268`, used exact source `0b0b861bf18a18d20aa2f0e627ba477dbab463e5`. The before/after checkout and tree agree, both clean. All twelve selected steps produced terminal results; there is no interrupted current step or unexplained extra result.
 
-Replacement, terminal disconnect, close, dispose and a newer focus intention invalidate the pending request. A synchronous subscription or unsubscription callback cannot make an older identity callback replace a newer InputShell binding. When the query disconnects during subscription, the composition clears and disposes its old InputShell pair before returning; it does not read the terminal control again. A new query that is already focused before the actual microtask-batched identity publication uses that publication's existing paint. No timer, animation-frame wait, DOM focus listener, public option or timing budget is added.
-
-The final complete 54-case file passed. The exact prior `0b0b861` implementation with the 50-case file passed 41 and failed nine. The intermediate candidate with all 54 cases passed 53 and failed the Shadcn terminal-owner control. The final repair passes all 54 with source unchanged. Two ordering controls use the real `createDemoPublicInstances` publisher; the remaining deterministic public-fact controls retain their disclosed harness ordering. These are composition ownership proofs, not a claim that the remaining original native HEAD 503 failure has already been resolved.
-
-The production evidence owner also rejects an output directory whose physical ancestor aliases the protected build or repository output. File, directory and ancestor-alias controls preserve ordinary safe output and the original owner/cleanup behavior.
-
-## Geometry, compiler fixtures and source bindings
-
-The neutral native fixture records the existing positioning repair on real DOM geometry, text ranges and hit tests. Flat and nested content run visible, cold, reopened and collision-disabled cases. The original host passed four of eight; the repaired host passes all eight under the same 1,000 ms oracle. The final formatted fixture is registered in the runtime plan and again passed eight of eight. The inspected cold and reopened captures keep all four labelled rows above the anchor in the 320 by 1000 viewport, without clipped text. This controlled host fixture does not substitute for website, Select, framework or complete family acceptance.
-
-The Bootstrap draft projection check now uses the authored `3xl` font value of 1.875 rem. All four original runtime cases and their paint assertions remain. The fallback pagination title inherits the existing title font and uses the corresponding unitless line-height, removing the mismatched 11.9 px override. Original native font and seven-height comparisons remain to be rerun on the published candidate.
-
-The GPUI fixture producer restores the actual `external_scroll` dependency and module while retaining the concurrent duplicate-module removal. The full generated Cargo graph has 38 unique modules, 37 dependencies and six test targets, with the original lockfile retained. The complete producer-to-Cargo metadata controls pass 20 of 20; the deletion-only baseline passes 19 and fails the missing `external_scroll` inventory assertion.
-
-The concurrent Vue `context-key-binding` implementation is preserved. Additional source controls cover captured required and optional keys, lifecycle/remount use, the actual Shadcn Button compile path, and a missing-key negative. The union of the three complete related files passes 18 of 18.
-
-The browser compiler registry retains the existing reviewed closure and explicitly binds the owned blueprint, template and SVG-tag helpers. Its 31 source files and 65 import edges remain finite and fingerprinted. The same 58 host-source and compiler-closure controls pass on the integrated source. The existing markup provenance fixture remains source-admission-unverified: its 31 actual digests match and its 36 controls pass, without promoting browser provenance to accepted evidence. The concurrent full spec catalog loads 1,319 files with zero reported issues.
-
-## Executed evidence and limitations
-
-The [raw archive](evidence/2026-11-24-sprint1-native-followup/raw-evidence.zip) retains original outputs, failed attempts, source bindings, native captures and command receipts. Overlapping selections are not added together.
-
-| Selection | Actual result |
+| Selected step | Terminal result |
 | --- | --- |
-| Final Search composition file | 54/54 passed, zero skipped |
-| Original seven Sprint 1 Node files | 232/232 passed within the original 90-second owner |
-| Compiler host-source and closure selection | 58/58 passed; exact name pattern retained in the receipt |
-| GPUI producer and Cargo graph file | 20/20 passed |
-| Vue context/compiler union | 18/18 passed |
-| Markup provenance controls | 36/36 passed; actual 31-source binding matched |
-| Complete spec loader | 1,319 files, zero issues |
-| Final neutral positioning browser fixture | 8/8 passed; original baseline 4/8 |
+| Node controls | 228 passed. |
+| Focused unit files | 44 complete files, 678/678. The former Select hidden-marker fixture failures are absent on this source. |
+| Integration unit files | 16 complete files, 537/537. |
+| Generated website styles | Completed successfully. |
+| Number Field, release families | 12 native journeys, plus controlled/uncontrolled composition for their 24 owners. |
+| Number Field, experimental families | 8 native journeys, plus controlled/uncontrolled composition for their 16 owners. |
+| Dialog observer native | Three complete files, 25/25, including the four-host × three-opening-state disposal matrix. |
+| Demo Matrix | Original all-adapter case failed at its 60,000 ms initialization condition. The other three file cases were explicitly outside this selection, not passed. |
+| Search native | Complete 84/84 file, retaining its original case-specific readiness, zoom, nested-scroll, keyboard and visibility assertions. |
+| Ownership native | Complete 11/11 file. |
+| Search paired comparison | Five pairs in each selected family/theme/width cell, 80 completed readiness samples: 40 current and 40 forced-write. |
+| Production Search | 3/4. Both IME paths and the full Brutalist HEAD503/retry/runtime/reopen journey passed. Shadcn HEAD503 Retry focus still failed its original 1,000 ms assertion. |
 
-The additional unfiltered coverage-checker test-file acquisition reached its 120-second outer bound before reporting completed individual cases. It remains an incomplete result, separate from the successful 58-case selection and from the final whole-repository checker. A combined local website attempt reached the 1.5 GiB resource limit after server startup and completed no website cases. Its existing bounded owner reported no surviving processes. Neither failed acquisition is counted as acceptance.
+The original Shadcn failure receipt records one injected HEAD503, a visible Retry action and an empty query. Its terminal active element is the query input, and the focus trace contains opener → input without a Retry entry. This is the actual remaining focus failure, not a readiness-sample omission. The later [query-entry repair](./2026-11-24-sprint1-search-query-entry.md) addresses the missing retry signal and requires its own native successor.
 
-Chrome's first startup attempt with the long task temporary path failed. Using a short task-owned temporary directory let the same installed Chrome, sandbox setting and neutral fixture execute. The evidence supports this controlled difference, not an unobserved operating-system root cause. All subsequent native fixture receipts retain that explicit environment.
+The twelve disposal receipts cover each of WC, React, Vue 3 and Vue 2 while the opening is unstarted, active or pending. They report successful terminal disposal, including retained delivery after destruction in the pending case. This accepts that bounded E matrix at this source. It does not accept the full first-error/framework/detach/rebind/dispose G combination, and later Adapter disposal or Search subscription changes need their affected successor evidence.
 
-A prior formatting change had altered a protected train-budget raw JSON payload. This checkpoint restores its exact original bytes: Git blob `97e8b120877c261d267fa5c0510785e79bc0c2ae`, SHA-256 `effc8565d3402699a5e487f4020e6ec265833b830822e49675fe6b094d97fdd9`. The original formatting protection and other seven protected payloads remain in place; no evidence is regenerated to make a historical result appear different.
+Native CDP composition is kept distinct from a physical operating-system IME. The independent plain-input controls and rejected synthetic-event control remain in the receipts; one legacy expectation that every event is trusted is explicitly false in the raw observations. No physical IME, touch, pen or screen-reader result is inferred.
 
-## Current original native results and remaining work
+## Projection families at f419483e
 
-The exact `0b0b861` [Sprint 1 run](https://github.com/Proto-UI/Proto-UI/actions/runs/45249497810) completed 10 of 12 producers successfully. Its focused and integration units, both Number Field owners, Dialog, ownership, Search props A/B and the full 84-case native Search file passed. Matrix still failed its original 60,000 ms initialization phase, and production Search passed three of four: the Shadcn HEAD 503 recovery still failed Retry focus at the original 1,000 ms assertion. These are observations of that old head, not of this checkpoint.
+[Run 45254544690](https://github.com/Proto-UI/Proto-UI/actions/runs/45254544690), job `137972794970`, used exact source `f419483e78403817fbe5aa6146caec30ab90352a`. Its capability producer completed **100/100 selected native journeys**: five families × four Web hosts × five kinds. Each of Calendar, Date Picker, Number Field, Resizable and Carousel contributes 20 cases. The report retains source/tree/style identities and Chromium `157.0.8103.78`, Node `24.22.3`, Linux, light theme and a 1100 × 850 viewport.
 
-The exact `333f2b19` [Matrix diagnostic](https://github.com/Proto-UI/Proto-UI/actions/runs/45248740693) acknowledged profiler start but its first 20-second checkpoint could not stop the profiler within the existing two-second bound. No CPU sample was retained. Its final page snapshot was unavailable. The raw network counts and truncated pending list cannot locate the blocking work; a further bounded progress diagnostic remains to be implemented.
+For Sprint 1, the Calendar cases cover native range/multiple interaction and the selected day/range projections, including the recorded headless accessibility boundary. Date Picker covers partial input remaining open, complete accepted ranges closing the descendants, controlled refusal, callback acceptance and stale completion retirement across close/reopen. The Number Field cases cover their recorded locale/edit/scrub/refusal/cancellation and composition boundaries. Resizable and Carousel results are retained as neighboring selected consumers; they are not extra Sprint 1 deliverables.
 
-CLI analysis work is separate from this checkpoint. In the concurrent `f419483e` closed-helper path, three added definition-mutation/escape controls actually fail their first subject-gap assertion: 42 of 45 pass. Later assertions in those failed cases are not claimed as executed. A different finite certificate candidate passed 439 controls but does not cover that new scanner path. Both the whole lowered inventory and the independent producer-lifetime repair remain open.
+The later `check:styles:preset` step failed with **“Draft family tokens are stale. Run pnpm styles:preset:generate.”** Its following Bootstrap Button, Liquid Button and new-projection browser suites did not execute. The capability producer's 100 successes therefore do not make the entire workflow successful.
 
-The original seven commitments in #1178, #848, #1488 (H/F), #1098, #1453, #1156 and #1457 retain their bounded development and acceptance distinctions. The checkpoint does not supply scheduled recovery, real downstream application adoption, physical IME/assistive-technology evidence, complete native CI, an independent platform approval or a Ready decision. The next executable work is published-source native recovery, Matrix diagnosis, the complete CLI gate and final current-head validation/review.
+These selected Calendar/Date Picker results do not cover every original unavailable interior, controlled mode, locale/RTL, zoom, focus-return, physical-input or assistive-technology condition. Captured geometry and screenshots do not imply that an independent visual review occurred.
+
+## Durable receipts and exact retention scope
+
+The [manifest](./evidence/2026-11-24-sprint1-native-followup/manifest.json) binds source identities, step counts and original artifact IDs. The complete original Sprint 1 artifact has 1,345 members, 23,965,352 bytes and SHA-256 `2a4ff79729755411164b9e1e99c1a68d32dea3efd88b704909bfc37de27f942a`. The complete projection artifact has 361 members, 8,136,029 bytes and SHA-256 `89643fb7e0772fc79318ca948cfad55f7fce9478408329ce9a96116b8444561c`.
+
+The checked-in carriers are explicit selections: all Sprint 1 JSON/log/text/HTML evidence plus failure/disposal screenshots, and the complete projection capability report with the original terminal job log. Each full original ZIP has a member-by-member name/size/hash index. Every retained member was compared to that original index, and both retained ZIPs passed CRC checks. Omitted screenshots are still identified in the full index and the original GitHub artifact; the smaller carrier is not mislabeled a complete image archive.
+
+Post-publication readback found that the normal formatting hook changed the whitespace of the derived projection member-index JSON file; the Sprint 1 index bytes were unchanged. Both parsed values and every original member identity are identical. The manifest now binds their actual committed bytes, retains both pre-hook originals in `original-indexes.zip`, and records the earlier manifest identity. The raw selected ZIPs and compressed original job log did not change. This reconciliation corrects the index-carrier hashes rather than rewriting any browser result.
+
+The current follow-up starts from `6ccb36ad473b72e75b3b86ee9ea5a5989b73ac5b`. Matrix diagnostic run `45259452427` again failed the original 60,000 ms condition. Its new process sampler captured 15 observations, while its bounded trace remained partial and hit the 256-chunk output cap. Those diagnostics require their own analysis and are not a successful Matrix result. Selected Sprint 1 run `45259534428` was still executing when this checkpoint was prepared; its dispatch is not counted as a successful successor.

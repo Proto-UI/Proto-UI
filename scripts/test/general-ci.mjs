@@ -1,57 +1,14 @@
 // Run every governed general check, retaining a red check without suppressing
 // later evidence. This changes scheduling only; every original command blocks.
 import { spawn } from 'node:child_process';
-import { createWriteStream, readFileSync } from 'node:fs';
+import { createWriteStream, existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { corepackInvocation } from './runtime-test-plan.mjs';
 import { runtimeRoot, writeJson } from './runtime-ci.mjs';
 import { runtimeSourceSnapshot } from './runtime-observation.mjs';
-
-export function generalCheckPlan(manifest, specBase) {
-  if (!/^[a-f0-9]{40}$/.test(specBase ?? ''))
-    throw new Error('Exact spec-authoring base is required');
-  const scripts = manifest.scripts.test.split(' && ').map((command) => {
-    const match = /^corepack pnpm@10\.32\.1 -s ([\w:-]+)$/.exec(command);
-    if (!match) throw new Error(`Unrecognized general gate command: ${command}`);
-    return match[1];
-  });
-  if (scripts.filter((script) => script === 'test:runtime').length !== 1)
-    throw new Error('The complete general plan must retain exactly one runtime phase');
-  const runtime = manifest.scripts['test:runtime'].split(' && ');
-  if (
-    runtime.length !== 2 ||
-    !/^node --test [\w./ -]+$/.test(runtime[0]) ||
-    runtime[1] !== 'node scripts/test/run-runtime-tests.mjs'
-  )
-    throw new Error('Unrecognized runtime controls/execution boundary');
-  const pnpm = (id, args = []) => ({ id, args: ['pnpm@10.32.1', '-s', id, ...args] });
-  return [
-    pnpm('check:spec-authoring', ['--', '--base', specBase]),
-    pnpm('check:public-docs'),
-    // The general inventory includes ordinary consumers of the displayed
-    // public-package examples. Their createRequire resolves actual dist
-    // exports, so build that graph in this job before executing the tests.
-    pnpm('build:packages'),
-    // test:public-docs is already in the root chain; avoid executing it twice.
-    ...scripts.flatMap((script) =>
-      script === 'test:runtime'
-        ? [
-            {
-              id: 'test:runtime:controls',
-              executable: process.execPath,
-              args: runtime[0].split(' ').slice(1),
-            },
-            {
-              id: 'test:runtime:execute',
-              executable: process.execPath,
-              args: ['scripts/test/run-runtime-tests.mjs'],
-            },
-          ]
-        : [pnpm(script)]
-    ),
-  ];
-}
+import { generalCheckPlan, generalJobPlan } from './general-check-plan.mjs';
+export { generalCheckPlan } from './general-check-plan.mjs';
 
 export async function executeGeneralChecks(steps, execute, checkpoint = () => {}) {
   if (!steps.length) throw new Error('General checks cannot be empty');
@@ -81,8 +38,15 @@ export async function executeGeneralChecks(steps, execute, checkpoint = () => {}
 async function runGeneralCi(directory) {
   const sourceBefore = runtimeSourceSnapshot(runtimeRoot);
   const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
-  const steps = generalCheckPlan(manifest, process.env.SPEC_AUTHORING_BASE);
-  writeJson(path.join(directory, 'general-plan.json'), { sourceBefore, steps });
+  const job = process.env.PROTO_UI_GENERAL_JOB ?? 'combined';
+  const specBase = job === 'general' ? null : process.env.SPEC_AUTHORING_BASE;
+  const steps =
+    job === 'combined'
+      ? generalCheckPlan(manifest, specBase)
+      : generalJobPlan(manifest, job, specBase);
+  const resultFile = path.join(directory, `result-${job === 'combined' ? 'general' : job}.json`);
+  rmSync(resultFile, { force: true });
+  writeJson(path.join(directory, 'general-plan.json'), { sourceBefore, job, specBase, steps });
   const invocation = corepackInvocation();
   const result = await executeGeneralChecks(
     steps,
@@ -125,19 +89,31 @@ async function runGeneralCi(directory) {
     (progress) =>
       writeJson(path.join(directory, 'general-progress.json'), {
         sourceBefore,
+        job,
+        specBase,
         planned: steps.map((step) => step.id),
         ...progress,
       })
   );
   const sourceAfter = runtimeSourceSnapshot(runtimeRoot);
   const sourceStable = JSON.stringify(sourceBefore) === JSON.stringify(sourceAfter);
-  writeJson(path.join(directory, 'general-checks.json'), {
+  const checks = {
+    job,
+    specBase,
+    steps,
     sourceBefore,
     sourceAfter,
     sourceStable,
     ...result,
     passed: result.passed && sourceStable,
-  });
+  };
+  writeJson(path.join(directory, 'general-checks.json'), checks);
+  if (job === 'governance') writeJson(resultFile, checks);
+  else if (job === 'general' && existsSync(resultFile))
+    writeJson(resultFile, {
+      ...JSON.parse(readFileSync(resultFile, 'utf8')),
+      generalChecks: checks,
+    });
   for (const step of result.results)
     console.log(
       `[general-ci] ${step.passed ? 'PASS' : 'FAIL'} ${step.id} (exit=${step.exitCode}; signal=${step.signal})`

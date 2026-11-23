@@ -26,7 +26,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/ir-validation.ts': Object.freeze({
-    sourceSha256: '99a5f98e932938c4371bdb630f85c222f8eb4731673a385d56e93c4bfdeeef5e',
+    sourceSha256: 'b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/spec/feedback/tokens']),
   }),

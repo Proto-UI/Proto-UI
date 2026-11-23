@@ -8,7 +8,7 @@ import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Page, Request, Response } from 'playwright-core';
+import type { Browser, Page, Request, Response } from 'playwright-core';
 import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
 
 let directory: string;
@@ -96,6 +96,52 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     expect(context.newCDPSession).not.toHaveBeenCalled();
     expect(page.eventNames()).toEqual([]);
     expect(await readdir(directory)).toEqual([]);
+  });
+  it('retains network and process CPU after the browser trace checkpoint without starting a page profiler', async () => {
+    vi.useFakeTimers();
+    const { page, session, context } = fixture();
+    const cpu = { send: vi.fn(async () => ({ processInfo: [] })), detach: vi.fn(async () => {}) };
+    const trace = Object.assign(new EventEmitter(), {
+      send: vi.fn(async (method: string) => {
+        if (method === 'Tracing.end')
+          trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
+        return {};
+      }),
+      detach: vi.fn(async () => {}),
+    });
+    const browser = {
+      newBrowserCDPSession: vi.fn().mockResolvedValueOnce(cpu).mockResolvedValueOnce(trace),
+    };
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, {
+      ...options(),
+      ownedBrowser: browser as unknown as Browser,
+    });
+    await vi.advanceTimersByTimeAsync(25_000);
+    const later = request('http://127.0.0.1:4321/later-module.ts');
+    page.emit('request', later);
+    page.emit('response', { request: () => later, status: () => 200 } as Response);
+    page.emit('requestfinished', later);
+    await handle.finish();
+    const facts = await result();
+    expect(context.newCDPSession).not.toHaveBeenCalled();
+    expect(session.send).not.toHaveBeenCalled();
+    expect(facts).toMatchObject({
+      profileMode: 'browser-trace',
+      profileState: 'disabled-for-browser-trace',
+      chunks: [],
+      network: { requested: 1, responses: 1, finished: 1, failed: 0 },
+    });
+    const browserFacts = JSON.parse(
+      await readFile(join(directory, 'demo-matrix/browser-diagnostic/status.json'), 'utf8')
+    );
+    expect(browserFacts).toMatchObject({
+      cpu: { sampleCount: 6 },
+      trace: { state: 'complete', stopReason: 'checkpoint' },
+    });
+    expect(trace.send.mock.calls.filter(([method]) => method === 'Tracing.start')).toHaveLength(1);
+    expect(trace.send.mock.calls.filter(([method]) => method === 'Tracing.end')).toHaveLength(1);
+    expect(page.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
   });
   it('captures bounded own-page resource facts and strips URL credentials, queries and source payloads', async () => {
     const { page, session } = fixture();

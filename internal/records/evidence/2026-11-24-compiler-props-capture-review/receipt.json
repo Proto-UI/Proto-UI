@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "purpose": "bounded independent read and seven-source-probe review of capture provenance / Props advice",
+  "head_at_archive": "f419483e78403817fbe5aa6146caec30ab90352a",
+  "command": "node --import tsx /workspace/scratch/62ffef219b8e/props-policy-work/capture-review.mts",
+  "source_before_after": true,
+  "source_snapshot_matches_execution": {
+    "packages/compiler/src/callable-effects.ts": true,
+    "packages/compiler/src/ir-validation.ts": true,
+    "packages/compiler/src/props-update-analysis.ts": true
+  },
+  "first_probe": {
+    "passed": 5,
+    "total": 7,
+    "errors": "Probe duplicated public expose name (PUI1006); a RunHandle public method parameter is intentionally unsupported (PUI4003). Neither was a product regression."
+  },
+  "final_probe": {
+    "passed": 7,
+    "total": 7,
+    "cases": "Five admitted compile-time observations and two intentional admission refusals; not seven browser journeys."
+  },
+  "files": [
+    {
+      "path": "capture-review-first.mts.gz",
+      "uncompressed_sha256": "8f74e2442f2c0ec7dae4ccb0e09db167738ef40ff2e8dd51641cce9e73665d8f",
+      "bytes": 3605
+    },
+    {
+      "path": "capture-review-first.json.gz",
+      "uncompressed_sha256": "3eee491bd33a21241f3d870336a4a4742f8b3a7d65138871b78fb57d11556887",
+      "bytes": 11482
+    },
+    {
+      "path": "capture-review.mts.gz",
+      "uncompressed_sha256": "76347f87e2927c438ee03f1db98466b38c096d114d9a1149363e109f20b644c9",
+      "bytes": 3694
+    },
+    {
+      "path": "capture-review.json.gz",
+      "uncompressed_sha256": "3a080a421c110d099fa5d632fa0d7796f2162ff415195084b4b4920c8ee77f10",
+      "bytes": 11724
+    },
+    {
+      "path": "packages__compiler__src__callable-effects.ts.gz",
+      "repository_path": "packages/compiler/src/callable-effects.ts",
+      "uncompressed_sha256": "568e99355e0f076c290e46b6dc652d7e8b23665c024146f7923274769297530d",
+      "bytes": 64434,
+      "identity": "captured after execution; hash equals recorded before/after"
+    },
+    {
+      "path": "packages__compiler__src__ir-validation.ts.gz",
+      "repository_path": "packages/compiler/src/ir-validation.ts",
+      "uncompressed_sha256": "b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535",
+      "bytes": 103882,
+      "identity": "captured after execution; hash equals recorded before/after"
+    },
+    {
+      "path": "packages__compiler__src__props-update-analysis.ts.gz",
+      "repository_path": "packages/compiler/src/props-update-analysis.ts",
+      "uncompressed_sha256": "f960a6632384b69c1852d14f926f16787426e29880c6103564eaf4dcf11d0a90",
+      "bytes": 4934,
+      "identity": "captured after execution; hash equals recorded before/after"
+    },
+    {
+      "path": "capture-identity-review.mts.gz",
+      "uncompressed_sha256": "e4d971071c203d1ba9858d085880b85f33f3b5cfbd7ba6601a9fd31af7aa1e0e",
+      "bytes": 1620
+    },
+    {
+      "path": "capture-identity-refresh.json.gz",
+      "uncompressed_sha256": "5621afc0faecbd60eb18f91ecf9e67760ed0ef0fda76c61edcaaff6f131273e3",
+      "bytes": 1069
+    },
+    {
+      "path": "capture-identity-stable.json.gz",
+      "uncompressed_sha256": "c32deeedf22bbbb92050ccf441c2184897442d62eb56bd675aae7977a53dbbc0",
+      "bytes": 24402
+    },
+    {
+      "path": "capture-identity-source-snapshot.json.gz",
+      "uncompressed_sha256": "ec54d0b1d2e52dc7aa56ec517b87b5f7a843ccd7ece767915c847f02b8307583",
+      "bytes": 183
+    },
+    {
+      "path": "capture-identity-effects-source.ts.gz",
+      "repository_path": "packages/compiler/src/callable-effects.ts",
+      "uncompressed_sha256": "568e99355e0f076c290e46b6dc652d7e8b23665c024146f7923274769297530d",
+      "bytes": 64434,
+      "identity": "identity-probe post-run snapshot matches execution before/after"
+    },
+    {
+      "path": "capture-cache-review.mts.gz",
+      "bytes": 2536,
+      "uncompressed_sha256": "072f793de323905ef7627d5c327deba073ac9bbcc4b1531b9368ec06cb9158e9"
+    },
+    {
+      "path": "capture-cache-review.json.gz",
+      "bytes": 3177,
+      "uncompressed_sha256": "62d5e37dd4d02749b80b273b4dcc80c840bc78d87b4867efdbbbfd8cacaf48e3"
+    },
+    {
+      "path": "identity-successor__packages__compiler__src__expression-types.ts.gz",
+      "bytes": 22568,
+      "repository_path": "packages/compiler/src/expression-types.ts",
+      "uncompressed_sha256": "160cdaddcef9c51798902ab1eb02098a8fc45afd5a5084c5fa2afedfd324d62c",
+      "identity": "post-run snapshot agrees with successor probe before/after"
+    },
+    {
+      "path": "identity-successor__packages__compiler__src__ir-validation.ts.gz",
+      "bytes": 103882,
+      "repository_path": "packages/compiler/src/ir-validation.ts",
+      "uncompressed_sha256": "b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535",
+      "identity": "post-run snapshot agrees with successor probe before/after"
+    },
+    {
+      "path": "identity-successor__packages__compiler__src__callable-effects.ts.gz",
+      "repository_path": "packages/compiler/src/callable-effects.ts",
+      "uncompressed_sha256": "22b44b5815dea2fee4a08fc7c657df5cbbdd066936b74a3be10ba6107aa47dcf",
+      "bytes": 65250,
+      "identity": "root checkpoint supplied later; byte hash equals independent probe before/after"
+    }
+  ],
+  "additional_identity_review": {
+    "status": "blocking defect found; root integration owner repairing",
+    "source_sha256": "568e99355e0f076c290e46b6dc652d7e8b23665c024146f7923274769297530d",
+    "refresh_variant": {
+      "actual": "PUI1007 finite analysis boundary",
+      "elapsedMs": 17685.055814
+    },
+    "stable_variant": {
+      "actual": "parse and JSON-serialized IR validation accepted",
+      "elapsedMs": 68.47527
+    },
+    "cause": "Each capture methods access manufactures a tracked record location; outward callback assigning the same real bag repeatedly expands the quiescent store."
+  },
+  "identity_successor": {
+    "executed_before_after_equal": true,
+    "results": [
+      {
+        "name": "original repeated-bag counterexample",
+        "passed": true,
+        "elapsedMs": 58.800677999999834,
+        "actual": "parse and serialized IR accepted"
+      },
+      {
+        "name": "mutable spread accepts a lawful replacement",
+        "passed": true,
+        "elapsedMs": 15.388140000000021,
+        "actual": "parse and serialized IR accepted"
+      },
+      {
+        "name": "mutable spread retains its illegal replacement across a facade read",
+        "passed": true,
+        "elapsedMs": 7.867326000000048,
+        "actual": [
+          {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "state.bool is not permitted in callback.",
+            "span": {
+              "file": "capture-cache-review.proto.ts",
+              "start": 319,
+              "end": 347,
+              "line": 3,
+              "column": 170,
+              "endLine": 3,
+              "endColumn": 198
+            }
+          }
+        ]
+      }
+    ],
+    "post_run_source_matches": {
+      "packages/compiler/src/callable-effects.ts": false,
+      "packages/compiler/src/expression-types.ts": true,
+      "packages/compiler/src/ir-validation.ts": true
+    },
+    "scope": "Stable capture identity and independence of mutable spread clone; does not cover absent/conditional artifacts.",
+    "recovered_callable_snapshot": {
+      "source": "/workspace/scratch/62ffef219b8e/compiler-ci-repairs/identity-candidate2-source/packages/compiler/src/callable-effects.ts",
+      "sha256": "22b44b5815dea2fee4a08fc7c657df5cbbdd066936b74a3be10ba6107aa47dcf",
+      "matches_execution": true
+    }
+  },
+  "presence_successor_read": {
+    "kind": "independent read only; no additional execution by this reviewer",
+    "source_sha256": "34bd5a87d0e991e627ac1b67697fc1af59a4d554cb54f1b26d577cb601f60c8b",
+    "conclusion": "No further blocking defect found in the bounded absent/conditional capture facade review.",
+    "preserved_boundaries": [
+      "empty artifacts absent",
+      "conditional getters and bags retain undefined",
+      "State/Event metadata is may-inventory only",
+      "stable facade identity",
+      "mutable spread independence",
+      "unknown callable provenance"
+    ],
+    "execution_owner": "/root integration owner; separate final receipts",
+    "reported_execution": {
+      "complete_suites": 28,
+      "cases": 387,
+      "partitions": [70, 123, 125, 69],
+      "skipped": 0,
+      "pending": 0,
+      "scoped_types_exit": 0,
+      "source_inventory_files": 587
+    },
+    "not_claimed": [
+      "this reviewer reran 387",
+      "whole Compiler acceptance",
+      "workspace acceptance",
+      "native browser acceptance"
+    ]
+  }
+}

@@ -5,9 +5,12 @@ import type { Browser, CDPSession } from 'playwright-core';
 const COMMAND_LIMIT_MS = 2_000;
 const CPU_INTERVAL_MS = 5_000;
 const OWNER_LIMIT_MS = 180_000;
+const TRACE_WINDOW_MS = 20_000;
 const TRACE_LIMIT_BYTES = 16 * 1024 * 1024;
 const TRACE_CHUNK_LIMIT = 256;
-const TRACE_CATEGORIES = ['devtools.timeline', 'v8.execute', 'disabled-by-default-v8.cpu_profiler'];
+// The 6ccb receipt hit the chunk cap with timeline events before any profile
+// facts were retained. Keep one early CPU-only window; never restart it.
+const TRACE_CATEGORIES = ['disabled-by-default-v8.cpu_profiler'];
 
 async function bounded<T>(work: Promise<T>, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -140,6 +143,8 @@ export async function startMatrixBrowserDiagnostic(
   let finishPromise: Promise<void> | undefined;
   let deadline: ReturnType<typeof setTimeout> | undefined;
   let cpuTimer: ReturnType<typeof setTimeout> | undefined;
+  let traceTimer: ReturnType<typeof setTimeout> | undefined;
+  let traceFinishPromise: Promise<void> | undefined;
   let cpuWork: Promise<void> | undefined;
   let cpuSession: CDPSession | undefined;
   let traceSession: CDPSession | undefined;
@@ -161,6 +166,7 @@ export async function startMatrixBrowserDiagnostic(
   };
   const trace = {
     state: 'starting',
+    stopReason: null as 'checkpoint' | 'owner-finish' | 'diagnostic-deadline' | null,
     startAcknowledgedAt: null as string | null,
     stopRequestedAt: null as string | null,
     stopAcknowledgedAt: null as string | null,
@@ -209,6 +215,8 @@ export async function startMatrixBrowserDiagnostic(
       cpu: { ...cpu },
       trace: {
         ...trace,
+        requestedWindowMs: TRACE_WINDOW_MS,
+        windowOrigin: 'trace start acknowledgement; early stop does not end the CPU/network owner',
         bufferLimitBytes: TRACE_LIMIT_BYTES,
         outputEventLimitBytes: TRACE_LIMIT_BYTES,
         outputChunkLimit: TRACE_CHUNK_LIMIT,
@@ -301,6 +309,26 @@ export async function startMatrixBrowserDiagnostic(
       'Browser tracing stop/flush'
     );
   };
+  const finishTrace = (reason: 'checkpoint' | 'owner-finish' | 'diagnostic-deadline') =>
+    (traceFinishPromise ??= (async () => {
+      traceRetired = true;
+      trace.stopReason = reason;
+      clearTimeout(traceTimer);
+      await endTrace().catch((error) => {
+        trace.stopError = String(error);
+        trace.error ??= trace.stopError;
+      });
+      traceAccepting = false;
+      removeTraceListeners();
+      trace.state =
+        trace.completeAt && trace.stopAcknowledgedAt
+          ? 'complete'
+          : trace.startAcknowledgedAt || trace.retainedEvents
+            ? 'partial'
+            : 'unavailable';
+      await detach(traceSession);
+      snapshot();
+    })());
   const sampleCpu = async () => {
     if (finished || cpuRetired || !cpuSession) return;
     const requestedAt = new Date().toISOString();
@@ -371,6 +399,7 @@ export async function startMatrixBrowserDiagnostic(
     }
     trace.startAcknowledgedAt = new Date().toISOString();
     trace.state = 'recording';
+    traceTimer = setTimeout(() => void finishTrace('checkpoint'), TRACE_WINDOW_MS);
     snapshot();
   };
   snapshot();
@@ -392,7 +421,7 @@ export async function startMatrixBrowserDiagnostic(
     }),
   ]);
   snapshot();
-  const finish = (reason: string) =>
+  const finish = (reason: 'owner-finish' | 'diagnostic-deadline') =>
     (finishPromise ??= (async () => {
       finished = true;
       finishReason = reason;
@@ -400,21 +429,9 @@ export async function startMatrixBrowserDiagnostic(
       traceRetired = true;
       clearTimeout(deadline);
       clearTimeout(cpuTimer);
-      await Promise.all([
-        cpuWork,
-        endTrace().catch((error) => {
-          trace.stopError = String(error);
-          trace.error ??= trace.stopError;
-        }),
-      ]);
-      traceAccepting = false;
-      removeTraceListeners();
-      trace.state =
-        trace.completeAt && trace.stopAcknowledgedAt
-          ? 'complete'
-          : trace.startAcknowledgedAt || trace.retainedEvents
-            ? 'partial'
-            : 'unavailable';
+      // An early stop may still own its bounded flush/detach. Share that work
+      // before writing the owner's terminal receipt; never stop or restart twice.
+      await Promise.all([cpuWork, finishTrace(reason)]);
       if (cpu.state !== 'unavailable') cpu.state = cpu.sampleCount ? 'captured' : 'unavailable';
       await Promise.all([detach(cpuSession), detach(traceSession)]);
       snapshot();

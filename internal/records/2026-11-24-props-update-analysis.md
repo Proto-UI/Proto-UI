@@ -1,5 +1,7 @@
 # Sprint 1 #1453: bounded Props update advice and scheduling-owner trace
 
+Later follow-ups resolve the owner proposal recorded below: [exact owner and compatibility disposition](./2026-11-24-props-update-owner-binding.md) binds the existing lifecycle owner without activating drafts or changing defaults. [The real Shenko application receipt](./2026-11-24-shenko-props-application.md) records normal-build verification, actual native transitions, the discovered CSS defect and its source-bound successor in Shenko PR #403. The earlier observations and their original scope remain preserved here.
+
 Date: 2026-11-24 (Beijing). This is an implementation and evidence record. It does not promote a draft contract or close the whole Issue.
 
 ## Implemented condition

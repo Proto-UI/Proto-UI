@@ -24,3 +24,13 @@ This is unit evidence for the combined implementation. It does not establish the
 - `evidence/2026-11-24-sprint1-native-concurrent-merge/raw-evidence.zip`
 
 The manifest records archive and entry SHA-256 digests. This reconciliation does not mark the PR Ready, close an issue, relax a threshold, or replace required independent platform review.
+
+## Subsequent concurrent head
+
+A second normal merge retains `d13f8111fa5fe4d4e2dc246de3ac350bc179dde3`, including the checked compiler-capture repair, independent general/governance CI producers, native terminal-result inventory, real Shenko application evidence and the single early CPU-only Matrix trace. Product files merged without conflict.
+
+Two independently added record files had the same name. The incoming completed-run record and manifest keep their original paths and bytes. This session's independently verified repair checkpoint is retained at [2026-11-24-sprint1-verified-native-repairs.md](./2026-11-24-sprint1-verified-native-repairs.md); its manifest and unchanged raw archive move together to `evidence/2026-11-24-sprint1-verified-native-repairs`. Only the checkpoint's relative evidence links change. Its archive SHA-256 remains `5f15c2e124478252b199dbae53355f8056cf575c47681e28df38006a2697dbcf`. Neither evidence set is replaced by the other.
+
+The compiler source boundary initially passed 57 of its 58 original controls after the second merge. The sole failure was the exact `ir-validation.ts` source pin: the concurrent compiler repair changes `objectFields(value)` to the already-imported `checkedSpreadFields(value, captureFields)`. Independent review confirmed unchanged imports and the existing companion/owner boundaries. The registry now binds the reviewed source SHA-256 `b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535`; the original 58 assertions remain unchanged. The separate 31-source markup profile contains no `packages/compiler/*` member and is preserved byte for byte, including its unverified admission status.
+
+After the single fingerprint correction, the original source-boundary selection passed **58/58** with unchanged sources. The second-merge verification also passed the complete original seven Node files (**236/236** with the incoming CI controls), five affected complete unit files (**117/117**, including the 63-case Search union), and the public documentation gate. These selections overlap prior checks and are not summed. Original failure and successor receipts are retained in [d13-manifest.json](./evidence/2026-11-24-sprint1-native-concurrent-merge/d13-manifest.json) and its `d13-reconciliation.zip` carrier. The separate private CLI products and diagnostic work remain unstaged and outside this native merge.
