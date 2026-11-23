@@ -116,6 +116,7 @@ export async function compileRustDataFile(
       exportName: options.exportName,
       methods: options.methods,
       crateName: options.crateName,
+      sourceLicense: options.sourceLicense,
     });
     if (result.ok && snapshot.sourceResolution)
       result.value.output.provenance.sourceResolution = snapshot.sourceResolution;
