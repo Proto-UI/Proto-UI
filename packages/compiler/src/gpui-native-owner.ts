@@ -789,7 +789,17 @@ let on_key=owner.clone();element=element.on_key_down(move|event,window,cx|{let m
 let on_key=owner.clone();element=element.on_key_up(move|event,window,cx|{let mut fields=event_fields("host:keyup");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch(&on_key,"host:keyup",false,fields){window.prevent_default()}collect_key(&on_key);global_key_up(event,window,cx);});
 }
 let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();
-element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);hover_view.set(native_hover_view(&measured,window));},move|_,_,window,cx|{
+element=element.child(canvas(move|_,window,_|{
+    note_host_order(&measured);
+    let external_scroll=measured.borrow().modules.scroll.external_engine!=0;
+    if !external_scroll{scroll_frame(&measured,window);}
+    hover_view.set(native_hover_view(&measured,window));
+},move|_,_,window,cx|{
+    // A bound child viewport commits and clamps its real ScrollHandle during
+    // prepaint. Observe it after the whole prepaint pass, never its raw wheel
+    // offset while the parent canvas is traversed ahead of that child.
+    let external_scroll=committed.borrow().modules.scroll.external_engine!=0;
+    if external_scroll{scroll_frame(&committed,window);}
     if native_pointer_input_needed(&committed){register_pointer_input(window,Some(Rc::downgrade(&committed)));}
     if crate::gpui_native_move::move_owner_has_binding(&committed){crate::gpui_native_move::register_move_input(window,Rc::downgrade(&committed));}
     if native_boundary_input_needed(&committed){window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);}
