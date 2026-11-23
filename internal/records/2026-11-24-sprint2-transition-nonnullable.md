@@ -12,6 +12,6 @@ A standalone Node check, capped at 768 MB, passed eight independent assertions c
 
 The real Base Transition entry then compiled successfully for `react-dom-source-v1` and `gpui-source-v1`. These are source-generation results, not native execution receipts. The existing authored Transition regression expectation was updated to retain the newly authored `transitionClosedViewRetained` State, rather than erase that contribution from the checked source.
 
-The source-type and authored Transition test suites are staged for the next coordinated integration regression window. They were not run concurrently with the root's memory-intensive full Compiler suite.
+The coordinated regression completed with **39/39 source-value tests and 4/4 authored Transition tests**. The latter includes cold IR, original dependency provenance, changed machine behavior from supplied source and packaged source-resolution checks. A bounded TypeScript program over the five changed source roots and six related test roots plus their complete imported graph reported **0 diagnostics**. This is separate from the workspace-wide gate.
 
 Other real consumers still have explicit separate boundaries: Drawer currently reaches Context aggregate evaluation-order analysis, and Bootstrap Collapsible reaches the `AsHookResult` intersection's indexed member type. This repair does not claim either consumer, the reached block-size channel, or the full original issue denominator is accepted.
