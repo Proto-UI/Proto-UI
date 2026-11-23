@@ -6,7 +6,9 @@ use gpui::{
     prelude::*, point, px, size, Bounds, Context, Entity, InputEvent, Pixels,
     Point, Render, TestAppContext, Window, WindowHandle,
 };
-use proto_ui_gpui_native::gpui_native_owner::{scroll_snapshot, NativeSnapshot};
+use proto_ui_gpui_native::gpui_native_owner::{
+    attach_scroll_engine, scroll_snapshot, NativeSnapshot, ScrollEngineLease,
+};
 use serde_json::json;
 use std::{cell::Cell, rc::Rc};
 
@@ -56,6 +58,29 @@ struct ReaderHarness {
     component: Entity<scroll_reader::CompiledComponent>,
     rows: Entity<Rows>,
     measured: Rc<Cell<Option<Bounds<Pixels>>>>,
+    external: Option<Rc<ScrollEngineLease>>,
+}
+
+struct ExternalViewport {
+    rows: Entity<Rows>,
+    handle: gpui::ScrollHandle,
+    lease: Rc<ScrollEngineLease>,
+}
+
+impl Render for ExternalViewport {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let lease = self.lease.clone();
+        gpui::div()
+            .id("external-scroll-reader-viewport")
+            .size_full()
+            .overflow_x_scroll()
+            .overflow_y_scroll()
+            .track_scroll(&self.handle)
+            .child(self.rows.clone())
+            .on_scroll_wheel(move |_, window, cx| {
+                assert!(lease.notify_input(window, cx), "current external engine input lease");
+            })
+    }
 }
 
 impl Render for ReaderHarness {
@@ -116,15 +141,31 @@ fn invoke(window: WindowHandle<ReaderHarness>, cx: &mut TestAppContext, name: &s
 }
 
 fn open(cx: &mut TestAppContext) -> WindowHandle<ReaderHarness> {
+    open_with_engine(cx, false)
+}
+
+fn open_with_engine(cx: &mut TestAppContext, external_engine: bool) -> WindowHandle<ReaderHarness> {
     let window = cx.open_window(size(px(600.), px(400.)), |window, cx| {
         let measured = Rc::new(Cell::new(None));
         let rows = cx.new(|_| Rows { count: 24, measured: measured.clone() });
         let component = scroll_reader::CompiledComponent::create(json!({}), None, window, cx)
             .expect("compile and construct the authored Scroll fixture");
+        let owner = component.read(cx).owner.clone();
+        let (slot, external) = if external_engine {
+            let handle = gpui::ScrollHandle::new();
+            let lease = Rc::new(attach_scroll_engine(Rc::downgrade(&owner), handle.clone())
+                .expect("bind the actual native viewport before mount"));
+            let viewport = cx.new(|_| ExternalViewport {
+                rows: rows.clone(), handle, lease: lease.clone(),
+            });
+            (NativeSnapshot::native_view(viewport.into()), Some(lease))
+        } else {
+            (NativeSnapshot::native_view(rows.clone().into()), None)
+        };
         component.update(cx, |view, cx| {
-            view.set_slot(vec![NativeSnapshot::native_view(rows.clone().into())], cx).unwrap();
+            view.set_slot(vec![slot], cx).unwrap();
         });
-        ReaderHarness { component, rows, measured }
+        ReaderHarness { component, rows, measured, external }
     });
     window.update(cx, |_, window, _| window.activate_window()).unwrap();
     frames(window, cx);
@@ -262,4 +303,50 @@ fn other_axis_wheel_motion_cannot_revoke_vertical_pause(cx: &mut TestAppContext)
     assert_eq!(grown.offset, horizontal.offset);
     assert_eq!(grown.state, "paused");
     assert!(!grown.at_end);
+}
+
+#[gpui::test]
+fn external_engine_retains_pause_until_actual_follow_axis_reader_arrival(cx: &mut TestAppContext) {
+    let window = open_with_engine(cx, true);
+    let paused = pause(window, cx);
+    window.update(cx, |host, window, cx| {
+        assert!(host.external.as_ref().unwrap().notify_input(window, cx));
+    }).unwrap();
+    frames(window, cx);
+    let stationary = observe(window, cx);
+    assert_eq!(stationary.offset, paused.offset);
+    assert_eq!(stationary.state, "paused", "a native notification alone is not reader movement");
+
+    wheel(window, cx, point(px(0.), px(-4096.)));
+    let clamped = observe(window, cx);
+    assert_eq!(clamped.offset, paused.offset);
+    assert_eq!(clamped.state, "paused", "clamped external input cannot resume follow");
+
+    append(window, cx, 8);
+    let grown = observe(window, cx);
+    assert!(grown.max.y > paused.max.y);
+    assert_eq!(grown.offset, paused.offset);
+    assert_eq!(grown.state, "paused");
+    assert!(!grown.at_end);
+
+    wheel(window, cx, point(px(-4096.), px(0.)));
+    let horizontal = observe(window, cx);
+    assert!(horizontal.offset.x < grown.offset.x, "actual external horizontal movement");
+    assert_eq!(horizontal.offset.y, grown.offset.y);
+    assert_eq!(horizontal.state, "paused", "the follow axis remains stationary");
+
+    wheel(window, cx, point(px(0.), px(-4096.)));
+    let arrived = observe(window, cx);
+    assert_eq!(arrived.max, horizontal.max);
+    assert_eq!(arrived.viewport.size, horizontal.viewport.size);
+    assert!(arrived.offset.y < horizontal.offset.y);
+    assert!(arrived.at_end);
+    assert_eq!(arrived.state, "following", "actual external reader arrival resumes follow");
+
+    append(window, cx, 5);
+    let following = observe(window, cx);
+    assert!(following.max.y > arrived.max.y);
+    assert_eq!(following.offset.y, -following.max.y);
+    assert!(following.at_end);
+    assert_eq!(following.state, "following");
 }
