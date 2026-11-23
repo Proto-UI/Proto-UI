@@ -1,12 +1,13 @@
 import { definePrototype, type RunHandle } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
 
-type Props = { notificationPhase: string; notificationRevision: number };
+type Props = { value: number; notificationPhase: string; notificationRevision: number };
 
 export default definePrototype<Props>({
   name: 'state-validation-boundary',
   setup(def) {
     def.props.define({
+      value: { type: 'number', default: 0 },
       notificationPhase: { type: 'string', default: 'none' },
       notificationRevision: { type: 'number', default: 0 },
     });
@@ -36,6 +37,14 @@ export default definePrototype<Props>({
     });
     def.expose.method('emitOnly', (value: number) => {
       if (current) current.expose.emit('renderRequest', { value });
+    });
+    def.props.watch(['value'], (run, next) => {
+      run.expose.emit('renderRequest', { value: next.value });
+      if (next.value === 13) throw false;
+    });
+    def.expose.method('emitThenThrow', () => {
+      if (current) current.expose.emit('renderRequest', { value: 21 });
+      throw 0;
     });
     const scroll = asScrollSurface();
     scroll.configure({ axes: 'vertical', endFollow: { mode: 'while-at-end', axis: 'vertical' } });

@@ -29,8 +29,9 @@ fn native_hover_current(owner:&OwnerRef,view:NativeHoverView,window:&Window)->bo
 }
 fn native_hover_mounted(owner:&OwnerRef,epoch:u64) {
     let mut o=owner.borrow_mut();
-    // Mark completion only after the authored lifecycle returned. A mounted
-    // callback can detach, dispose or replace this physical view synchronously.
+    // Mark completion after the authored lifecycle turn, including its error
+    // boundary. A failure cannot disable a still-live view's later input;
+    // synchronous detach, disposal or replacement still retires this epoch.
     if !o.disposed&&!o.disposing&&o.present&&o.mounted&&o.epoch==epoch {
         if o.native_hover.mounted_epoch!=Some(epoch){o.native_hover.needs_sync=true;}
         o.native_hover.mounted_epoch=Some(epoch);
@@ -144,7 +145,7 @@ mod native_hover_tests {
             root
         }
     }
-    fn owner(trace:Rc<RefCell<Vec<String>>>,retire_on_mount:bool)->OwnerRef {
+    fn owner(trace:Rc<RefCell<Vec<String>>>,retire_on_mount:bool,fail_on_mount:bool)->OwnerRef {
         let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,
             |_|true,|_,_|true,crate::gpui_native_style::vocabulary());
         let weak=Rc::downgrade(&owner);
@@ -166,11 +167,14 @@ mod native_hover_tests {
                 if let Some(owner)=target.upgrade(){Owner::dispose(&owner)}Value::Undefined
             })));
         }
+        if fail_on_mount {
+            register_life(&weak,"mounted",Value::Function(Rc::new(|_|throw_value(Value::boolean(false)))));
+        }
         Owner::finish(&owner,Value::Undefined);owner
     }
     fn open(cx:&mut TestAppContext,trace:Rc<RefCell<Vec<String>>>,retire:bool)->WindowHandle<Host> {
         cx.open_window(size(px(160.),px(80.)),move |_,cx| {
-            let owner=owner(trace,retire);let content=cx.new(|_|Content);
+            let owner=owner(trace,retire,false);let content=cx.new(|_|Content);
             owner.borrow_mut().slot=vec![NativeSnapshot::native_view(content.clone().into())];
             Host{owner,focus:cx.focus_handle(),shown:false,_content:content}
         })
@@ -253,6 +257,27 @@ mod native_hover_tests {
         window.update(cx,|host,_,_| {
             assert!(host.owner.borrow().disposed);
             assert!(host.owner.borrow().native_hover.pending.is_none());
+        }).unwrap();
+    }
+    #[gpui::test]
+    fn mounted_callback_failure_keeps_current_hover_and_exact_error(cx:&mut TestAppContext) {
+        let trace=Rc::new(RefCell::new(Vec::new()));let output=trace.clone();
+        let window=cx.open_window(size(px(160.),px(80.)),move |_,cx| {
+            let owner=owner(output,false,true);let content=cx.new(|_|Content);
+            owner.borrow_mut().slot=vec![NativeSnapshot::native_view(content.clone().into())];
+            Host{owner,focus:cx.focus_handle(),shown:false,_content:content}
+        });
+        cold_mount(window,cx);
+        assert_eq!(&*trace.borrow(),&["mounted","pointer.enter","host:mouseenter"],
+            "an authored mount failure does not retire an otherwise current native view");
+        window.update(cx,|host,window,cx| {
+            let failures=take_native_failures(&host.owner);
+            assert_eq!(failures.len(),1);
+            assert!(matches!(failures[0].error,Value::Json(Json::Bool(false))));
+            window.simulate_mouse_move(point(px(120.),px(60.)),cx);
+            window.simulate_mouse_move(point(px(10.),px(10.)),cx);
+            assert_eq!(trace.borrow().len(),7,"the current view keeps real leave and enter delivery");
+            Owner::dispose(&host.owner);
         }).unwrap();
     }
     #[gpui::test]

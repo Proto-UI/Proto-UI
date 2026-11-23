@@ -82,10 +82,12 @@ describe('shared GPUI SDK compatibility', () => {
       expect(owner).toContain(
         '#[cfg(feature="gpui-text-selection-notification")]\n    window.notify_text_selection_changed(focus);'
       );
-      expect(owner).toContain('#[cfg(not(feature="gpui-text-selection-notification"))]');
+      expect(owner).toContain(
+        '#[cfg(not(feature="gpui-text-selection-notification"))]\n    if focus.is_focused(window){'
+      );
       expect(owner).toContain('window.invalidate_character_coordinates();');
       expect(owner).toContain(
-        'fn legacy_selection_notifies_the_live_native_input_and_respects_focus'
+        'fn legacy_selection_notifies_the_live_native_input_and_respects_focus('
       );
     }
   );
