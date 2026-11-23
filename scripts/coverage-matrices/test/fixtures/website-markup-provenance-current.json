@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "9a49049da3c55cd5fc8969b56fa6d49ac7b5e1fd",
+  "revision": "28c1a8e62d0d9f013efe5700ed6b70e4cc5a0329",
   "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately.",
   "sourceAdmission": "unverified",
   "sources": [
@@ -79,7 +79,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99"
+      "sha256": "ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae"
     },
     {
       "path": "apps/www/package.json",
