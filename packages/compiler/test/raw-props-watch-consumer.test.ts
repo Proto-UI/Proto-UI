@@ -35,6 +35,65 @@ afterEach(async () => {
 });
 
 it.each(nativeOwnerProfiles)(
+  'preserves all-key watcher snapshots, ordering and disposal in generated %s',
+  async (profile) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = await mountNativeOwner(
+      `import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'all-watch-owner',setup(def){
+        def.props.define({value:{type:'number',default:1}});
+        let trace='';let rawKeys='';let resolvedKeys='';let windows='';let cancelled=0;
+        let aligned=false;
+        const stopped=def.props.watchRawAll(()=>{cancelled++;});stopped();
+        def.props.watch(['value'],()=>{trace+='K';});
+        def.props.watchRaw(['value'],()=>{trace+='R';});
+        const stop=def.props.watchAll((run,next,prev,info)=>{
+          trace+='A';resolvedKeys=String(info.changedKeysMatched);
+          windows=String(prev.value)+'>'+String(next.value);
+        });
+        def.props.watchRawAll((run,next,prev,info)=>{
+          trace+='a';rawKeys=String(info.changedKeysMatched);
+          aligned=run.props.getRaw()===next && String(info.changedKeysMatched)===String(info.changedKeysAll);
+        });
+        def.expose.method('trace',()=>trace);
+        def.expose.method('rawKeys',()=>rawKeys);
+        def.expose.method('resolvedKeys',()=>resolvedKeys);
+        def.expose.method('windows',()=>windows);
+        def.expose.method('aligned',()=>aligned);
+        def.expose.method('cancelled',()=>cancelled);
+        def.expose.method('stop',()=>stop());
+        return r=>r.el('output','all-watch');
+      }});`,
+      profile,
+      { props: { value: 1 } }
+    );
+    cleanups.push(owner.dispose);
+    const exposed = owner.handle.getExposes();
+    expect(exposed.trace()).toBe('');
+    await owner.setProps({ value: 1, other: 1 });
+    expect(exposed.trace()).toBe('a');
+    expect(exposed.rawKeys()).toBe('other');
+    expect(exposed.resolvedKeys()).toBe('');
+    await owner.setProps({ value: 2, other: 2 });
+    expect(exposed.trace()).toBe('aaRKA');
+    expect(exposed.rawKeys()).toBe('value,other');
+    expect(exposed.resolvedKeys()).toBe('value');
+    expect(exposed.windows()).toBe('1>2');
+    expect(exposed.aligned()).toBe(true);
+    await owner.setProps({ value: 2, other: 2 });
+    expect(exposed.trace()).toBe('aaRKA');
+    exposed.stop();
+    exposed.stop();
+    await owner.setProps({ value: 3, other: 2 });
+    expect(exposed.trace()).toBe('aaRKAaRK');
+    expect(exposed.cancelled()).toBe(0);
+    await owner.dispose();
+    expect(() => exposed.trace()).toThrow(/dispos|alive|terminal/i);
+  },
+  30_000
+);
+
+it.each(nativeOwnerProfiles)(
   'dispatches keyed raw snapshot diffs through a real generated %s owner',
   async (profile) => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});

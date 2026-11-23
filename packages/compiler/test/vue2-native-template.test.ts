@@ -1112,13 +1112,13 @@ describe('Vue2 compiler-native child construction', () => {
   it.each([
     ['props.watchAll', 'def.props.watchAll(()=>{})'],
     ['props.watchRawAll', 'def.props.watchRawAll(()=>{})'],
-  ])('retains the existing Vue2 target rejection for %s', (operation, call) => {
+  ])('retains the ordinary Vue2 all-key disposer for %s', async (_operation, call) => {
     const input = prototype(`${props}return ${call};`);
-    // Actual emit result and all diagnostics are captured before compile throws.
-    // This is a rejection control, not native implementation of this operation.
-    expect(() => compile(input)).toThrow(
-      `"code":"PUI4003","category":"unsupported-input","message":"Operation ${operation} is not implemented by vue2-source-v1.`
-    );
+    // The earlier target rejection is retained in the dated red receipt.
+    // These are setup disposers, so returning one must not create a View.
+    const view = await mount(input);
+    expect(view.host.textContent).toBe('');
+    expect(view.host.querySelector('[data-live-slot]')).toBeNull();
   });
 });
 

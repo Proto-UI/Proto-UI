@@ -361,11 +361,6 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
   });
 }
 
-const VUE2_DEFERRED_OPERATIONS: ReadonlySet<Operation> = new Set([
-  'props.watchAll',
-  'props.watchRawAll',
-] as Operation[]);
-
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
   'feedback.style.presence',
@@ -479,9 +474,8 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '2.6.14',
     mode: 'source',
     implemented: true,
-    // Vue2 keeps its explicit rejection control for all-key props watchers.
-    // Keyed raw watch is accepted by the full Shadcn and raw-props consumers.
-    operations: webOperations.filter((operation) => !VUE2_DEFERRED_OPERATIONS.has(operation)),
+    // All-key and keyed props watchers share the checked snapshot dispatcher.
+    operations: webOperations,
     hostCapabilities: nativeHostCapabilities,
     dependencies: [{ name: 'vue', version: '2.6.14', role: 'target' }, ...floatingUiDependency],
     helpers: [
