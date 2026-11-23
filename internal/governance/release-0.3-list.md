@@ -1,6 +1,6 @@
 # 0.3 release delivery list
 
-Production deadline: **2026-11-04 23:59 Asia/Shanghai**. Feature integration target: **2026-11-08 23:59**. Acceptance/repair stage: November 9–22; RC: November 23–27; final decision: November 28–30. See [the governing plan](release-0.3-plan.md).
+Release-list production: **2026-11-04 23:59 Asia/Shanghai**. Feature completion and integration: **2026-11-05 – 2026-11-27** (dev freeze 2026-11-27). Acceptance maintenance: **2026-11-28 – 2026-12-02**. Final release decision and publication: **2026-12-03 – 2026-12-04**, target 0.3 publication **2026-12-04**. Progress is tracked in Issue #1673. See [the governing plan](release-0.3-plan.md).
 
 This is a source inventory, **not a claim that these capabilities have passed acceptance**. The frozen [source ledger](release-0.3-source-ledger.json) binds package surfaces, CLI entries, 203 original Finf comment checkboxes, 68 named delivery criteria, and the 187-open-Issue snapshot to their sources. It captured 1,233 Issue checkbox conditions; the additive [source corrections](release-0.3-source-corrections.json) restore five omitted conditions, giving the current effective denominator of **1,238**. Historical checks remain historical; each current development and acceptance result needs its own exact source and evidence. Mixed Issue conditions retain `criterion-split` until their concrete family and prerequisite role are reconciled; the snapshot does not authorize title-only closure or deferral. Counts of export roots or aliases are not counts of independent Prototypes.
 

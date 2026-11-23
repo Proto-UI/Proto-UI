@@ -1225,6 +1225,5 @@ mod callback_handle_identity_tests {
   gpuiNativeControlLabelSource +
   gpuiNativeNotifySource +
   gpuiNativeHoverSource +
-  gpuiNativeControlLabelSource +
   gpuiNativeSelectionSource +
   gpuiNativeKeyBoundarySource;
