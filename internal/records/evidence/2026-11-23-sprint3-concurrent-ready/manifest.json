@@ -1,0 +1,68 @@
+{
+  "preparedSourceTree": "01bc4cc7d2bc4d72176c8ae254754e3081ecf9da",
+  "parents": [
+    "5f39fe4aa9461d1c9e36f69248b506cd2a949e1d",
+    "1658768483ba5d81e4502a64945fe5c0a21dda1d"
+  ],
+  "archiveSha256": "20e81cf3d86b098eafe68fe03fae3cd1d820cb4abda2e8503aa2e38ee560c7e1",
+  "archiveBytes": 25312,
+  "normalMergePreservesBothHistories": true,
+  "currentProductionControls": {
+    "total": 82,
+    "passed": 81,
+    "failed": 1,
+    "skipped": 0,
+    "failure": "Actual production bundle input resolves through this RAM checkout dependency symlink to another owned worktree. The unchanged repository-bound input guard rejects it. Canonical clean-checkout acceptance remains required."
+  },
+  "currentConcurrentControls": {
+    "node": {
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python": {
+      "passed": 9,
+      "failed": 0
+    },
+    "shader": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "resolution": {
+    "tree": "01bc4cc7d2bc4d72176c8ae254754e3081ecf9da",
+    "parents": [
+      "5f39fe4aa9461d1c9e36f69248b506cd2a949e1d",
+      "1658768483ba5d81e4502a64945fe5c0a21dda1d"
+    ],
+    "choices": {
+      "packages/adapters/base/test/shader-unused-capability.test.ts": {
+        "source": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+        "sha256": "f3efbc446732156e32a408f742633ed810155901dbd637d71559008d54f91a8a"
+      },
+      "scripts/compiler/browser-assets.ts": {
+        "source": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+        "sha256": "a00266c5529cb5f667c43a21d19cea76607a1bae04e46c6ba9c7d526aacc2c44"
+      },
+      "scripts/compiler/build-browser.mjs": {
+        "source": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+        "sha256": "11f10da368411bc7f97feed68f2a0f23c6e5715f6d7749a44a5302d4b04e993f"
+      },
+      "scripts/compiler/browser-inputs.mjs": {
+        "source": "5f39fe4aa9461d1c9e36f69248b506cd2a949e1d",
+        "sha256": "f3104fdae6681e621dda3ca4af42cce64f80f50880339f0ae28090cbc7775f8f"
+      }
+    },
+    "rationale": "Keep the concurrent public tw factory and equivalent root const wiring; keep the reviewed module-origin resolver that validates the three workspace identities. Preserve all concurrent installed consumers/workflows and their new real-bundle caller-cwd negative test unchanged.",
+    "productionFixtureSha256": "c3073e3545c55b2f5f7889df844091aa5ec4866f76fbee92a811057c1a7fa4a2"
+  },
+  "independentNewTestReviewSha256": "31623921db3eca5a3a8c67d0a1c3e5ddc113bbe7e44700e533456ac72b61bf42",
+  "limitations": [
+    "Original 364 native cases, separate Select 8 and all 15 rehearsal stages remain source-bound producers.",
+    "Strict measured budgets and full production compiler/retirement acceptance are not established by source controls.",
+    "Independent direct and installed Tooltip/Select consumers remain actual native/application acceptance.",
+    "The earlier workspace type command has two missing generated Shadow stylesheet declarations; no complete type pass is claimed.",
+    "Static review is not GitHub APPROVED. Normal DCO/CI/review/integration requirements remain."
+  ]
+}

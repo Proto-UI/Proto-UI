@@ -71,8 +71,8 @@ it('an installed but undeclared shader host stays physically idle through ordina
     fallback: [0, 0, 0, 1],
   };
   const active = createWebShaderPresentationSink(root, effects);
-  expect(() =>
-    active.commit({ view: 1, revision: 1, style: { kind: 'tw', tokens: [] }, declaration })
-  ).toThrow('physical shader root acquired');
+  expect(() => active.commit({ view: 1, revision: 1, style: tw(''), declaration })).toThrow(
+    'physical shader root acquired'
+  );
   expect(root).toHaveBeenCalledTimes(1);
 });

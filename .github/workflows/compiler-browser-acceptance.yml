@@ -51,7 +51,8 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          node --test scripts/compiler/browser-production.test.mjs \
+          node --test scripts/compiler/browser-assets-production.test.mjs \
+            scripts/compiler/browser-production.test.mjs \
             scripts/compiler/browser-delivery-index.test.mjs \
             2>&1 | tee "$PUI_EVIDENCE_DIR/production-controls.log"
       - name: Install and record Chinese fonts for the bilingual captures
