@@ -90,7 +90,7 @@ if let Some(id)=id{window.with_element_state(id,|state:Option<NativeViewLease>,_
 self.element.prepaint(id,inspector,bounds,layout,window,cx)
 }
 fn paint(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorElementId>,bounds:Bounds<Pixels>,layout:&mut Self::RequestLayoutState,prepaint:&mut Self::PrepaintState,window:&mut Window,cx:&mut App){self.element.paint(id,inspector,bounds,layout,prepaint,window,cx)}
-fn a11y_role(&self)->Option<gpui::Role>{let owner=self.owner.upgrade()?;if !owner.borrow().accessible{return self.element.a11y_role()}self.role.or_else(||self.element.a11y_role()).or(Some(gpui::Role::GenericContainer))}
+fn a11y_role(&self)->Option<gpui::Role>{let owner=self.owner.upgrade()?;if crate::gpui_native_owner::control_label_is_label(&owner){return Some(gpui::Role::Label)}if !owner.borrow().accessible{return self.element.a11y_role()}self.role.or_else(||self.element.a11y_role()).or(Some(gpui::Role::GenericContainer))}
 fn a11y_synthetic_children(&mut self,prepaint:&mut Self::PrepaintState,builder:&mut gpui::A11ySubtreeBuilder){self.element.a11y_synthetic_children(prepaint,builder);let Some(owner)=self.owner.upgrade()else{return};let merge=resolved(&owner.borrow().modules.accessible_tree.member("mergeChildren",true));if !merge.nullish()&&merge.bool(){builder.parent_node().clear_children();builder.parent_node().set_label(text_content(&owner.borrow().projection,&owner.borrow().slot));}}
 fn write_a11y_info(&self,node:&mut gpui::accesskit::Node){
 self.element.write_a11y_info(node);
@@ -98,10 +98,15 @@ let Some(owner_ref)=self.owner.upgrade()else{return};
 crate::gpui_native_owner::text_accessible(&owner_ref,node);
 crate::gpui_native_owner::image_accessible(&owner_ref,node);
 let native_disabled=node.is_disabled();
+let label=crate::gpui_native_owner::control_label_is_label(&owner_ref);
+let derived_name=crate::gpui_native_owner::control_label_name(&owner_ref);
+if label{if crate::gpui_native_owner::control_label_action_enabled(&owner_ref){node.add_action(gpui::accesskit::Action::Click);}else{node.remove_action(gpui::accesskit::Action::Click);}}
 let owner=owner_ref.borrow();
 for(key,spec)in &owner.modules.accessible_relations{project_relation(node,key,spec,owner.modules.a11y_frame,owner.window_id);}
-if owner.name_content{node.set_label(text_content(&owner.projection,&owner.slot));}
-for(key,value)in &owner.modules.accessible_text{let value=resolved(value);if value.nullish(){continue}match key.as_str(){"name"=>node.set_label(value.text()),"description"=>node.set_description(value.text()),"id"=>{},_=>panic!("unmapped accessible text field")}}
+if let Some(label_node)=derived_name{node.clear_label();node.set_labelled_by(vec![label_node]);}
+else if owner.name_content{node.set_label(text_content(&owner.projection,&owner.slot));}
+if label{let text=text_content(&owner.projection,&owner.slot);if !text.is_empty(){node.set_label(text);}}
+for(key,value)in &owner.modules.accessible_text{let value=resolved(value);if value.nullish(){continue}match key.as_str(){"name"=>{if derived_name.is_none()||!value.text().is_empty(){node.set_label(value.text());}},"description"=>node.set_description(value.text()),"id"=>{},_=>panic!("unmapped accessible text field")}}
 if matches!(resolved(&owner.accessible_role),Value::Json(serde_json::Value::String(role))if role=="heading"){if let Some(level)=crate::gpui_native_owner::accessible_level_value(&owner.modules.accessible_level){node.set_level(level);}}
 for(key,state)in &owner.accessible_states{let value=state.get();if value.nullish()||token_is(&value,""){continue}match key.as_str(){
 "valueNow"=>{if let Some(value)=finite_number(&value){node.set_numeric_value(value)}},

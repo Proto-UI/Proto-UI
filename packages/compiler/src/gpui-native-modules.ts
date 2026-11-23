@@ -6,11 +6,12 @@ impl StaticDeclaration { pub fn identity(&'static self)->usize{self as *const Se
 impl Default for Value { fn default()->Self{Self::Undefined} }
 #[derive(Default)]
 pub struct Modules {
+    pub control_label:ControlLabelModule,
     pub boundary:BoundaryModule,pub hit:HitModule,pub scroll:ScrollModule,
     pub topology:Topology,pub hooks:BTreeSet<&'static str>,pub focus:FocusModule,pub state_watchers:Vec<NativeStateWatch>,
     pub text:TextModule,pub image:ImageModule,pub positioning:PositioningModule,pub overlay:OverlayModule,
     pub accessible_text:BTreeMap<String,Value>,pub accessible_relations:BTreeMap<String,Value>,
-    pub accessible_tree:Value,pub accessible_level:Value,pub action_events:BTreeMap<String,String>,pub a11y_node:Option<gpui::accesskit::NodeId>,
+    pub accessible_tree:Value,pub accessible_level:Value,pub action_events:BTreeMap<String,String>,action_identities:BTreeMap<String,Rc<()>>,pub a11y_node:Option<gpui::accesskit::NodeId>,
     pub a11y_frame:u64,pub a11y_bindings:usize,
     pub trigger_child:OwnerWeak,
 }
@@ -313,7 +314,7 @@ pub fn accessible_relation(owner:&OwnerWeak,key:Value,mut value:Value)->Value{
     else{assert!(matches!(target,Value::Json(Json::String(_))|Value::State(_)|Value::BorrowedState(_)|Value::Observed(_,_)|Value::ObjectRef(_)),"[A11y] relation target must be a string, State, or semantic-object ref");}
     owner.borrow_mut().modules.accessible_relations.insert(key.text(),value);Value::Undefined
 }
-pub fn accessible_action_spec(owner:&OwnerWeak,key:Value,spec:Value)->Value{let owner=setup(owner);let key=key.text();let event=text_or(spec.member("event",true),&default_accessibility_event(&key));let mut o=owner.borrow_mut();o.accessible_actions.insert(key.clone());o.modules.action_events.insert(key,event);Value::Undefined}
+pub fn accessible_action_spec(owner:&OwnerWeak,key:Value,spec:Value)->Value{let owner=setup(owner);let key=key.text();let event=text_or(spec.member("event",true),&default_accessibility_event(&key));let mut o=owner.borrow_mut();o.accessible_actions.insert(key.clone());o.modules.action_identities.insert(key.clone(),Rc::new(()));o.modules.action_events.insert(key,event);Value::Undefined}
 #[derive(Clone)]
 pub struct NativeStateWatch{source:Value,previous:Value,callback:Value,active:Rc<Cell<bool>>,disconnected:bool}
 pub fn state_default(receiver:Value,value:Value)->Value{let (Value::State(state)|Value::BorrowedState(state))=receiver else{value_type_error("State handle required")};setup(&state.owner);let next=normalize_state(state.kind,value,&state.spec,true);*state.value.borrow_mut()=next;Value::Undefined}

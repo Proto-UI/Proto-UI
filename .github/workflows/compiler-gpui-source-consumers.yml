@@ -13,7 +13,17 @@ on:
         type: boolean
         required: false
         default: false
+      adapter_acceptance:
+        description: Run the separate GPUI Adapter native acceptance lane
+        type: boolean
+        required: false
+        default: false
   workflow_call:
+    inputs:
+      adapter_acceptance:
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -37,6 +47,13 @@ jobs:
     permissions:
       contents: read
 
+  adapter-native:
+    # A distinct receipt: generated Rust never stands in for the Adapter.
+    # The optional input keeps existing full-cycle selection unchanged.
+    if: ${{ inputs.adapter_acceptance }}
+    uses: ./.github/workflows/gpui-adapter-acceptance.yml
+    permissions:
+      contents: read
   native-consumer:
     strategy:
       fail-fast: false
@@ -133,6 +150,18 @@ jobs:
             --output "$RUNNER_TEMP/gpui-evidence/numeric-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test a11y_value -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-consumer.log"
+      - name: Execute unchanged compiled Button Toggle and Label consumers
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
+      - name: Verify bounded native text-selection style mapping
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test style_mapping -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/style-mapping-consumer.log"
+      - name: Verify native accessibility activation through authored operations
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test a11y_activation -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/a11y-activation-consumer.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

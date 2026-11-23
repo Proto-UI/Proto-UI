@@ -4,12 +4,15 @@ import {
   LEGACY_TEXT_MULTILINE_V1,
 } from './native-support/legacy-text-v1.template';
 import { fullNativeModuleTemplate } from './native-support/artifacts';
-const DOM_MODULE_TEMPLATE = fullNativeModuleTemplate();
+let fullTemplate: string | undefined;
+const fullTemplateSource = () => (fullTemplate ??= fullNativeModuleTemplate());
 
 export const nativeAdapterModulesArtifact = {
   path: '.proto-ui/interaction/adapter-modules-v1.ts',
   kind: 'source' as const,
-  contents: DOM_MODULE_TEMPLATE,
+  get contents() {
+    return fullTemplateSource();
+  },
 };
 
 /** Legacy v1 module assembly is structural; no source-text surgery. */
@@ -45,7 +48,7 @@ export function nativeOwnershipArtifact(interactionSource: string) {
     contents:
       '// Native logical identity and physical-root ownership. No capability factory.\n' +
       selectSupportDeclarations(
-        DOM_MODULE_TEMPLATE,
+        fullTemplateSource(),
         [...ownershipTypes, ...ownershipMaps, ...ancestry],
         true
       ) +
@@ -58,12 +61,10 @@ export function nativeAdapterModulesWithOwnership(options: { controlLabel?: bool
     kind: 'source' as const,
     contents:
       "import { owners, activeScopes, parts, targets, hostIds, logicalRoot, ancestor, descends, hostOrder, isElement, targetOf, contains, type Claim, type Owner } from './ownership-v1';\n" +
-      omitSupportDeclarations(options.controlLabel ? fullNativeModuleTemplate(options) : DOM_MODULE_TEMPLATE, [
-        'Claim',
-        'Owner',
-        ...ownershipMaps,
-        ...ancestry,
-      ]),
+      omitSupportDeclarations(
+        options.controlLabel ? fullNativeModuleTemplate(options) : fullTemplateSource(),
+        ['Claim', 'Owner', ...ownershipMaps, ...ancestry]
+      ),
   };
 }
 export function nativeTextControlArtifact(singleLine: boolean) {

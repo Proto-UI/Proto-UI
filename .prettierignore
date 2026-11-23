@@ -38,3 +38,10 @@ internal/records/evidence/2026-11-22-sprint2-native-round1/
 # Original Sprint 4 raw observations and execution receipts.
 internal/records/evidence/2026-11-22-sprint4/
 internal/records/evidence/2026-11-23-sprint-followthrough/sprint4-source-admission/
+
+# Original Sprint 5 source, native, and publication evidence bytes.
+internal/records/evidence/2026-11-22-sprint5-gpui-public/
+internal/records/evidence/2026-11-22-sprint5-gpui/
+internal/records/evidence/2026-11-22-sprint5-integration/
+internal/records/evidence/2026-11-23-sprint5-compiled-control-label/
+internal/records/evidence/2026-11-23-sprint5-continuation/

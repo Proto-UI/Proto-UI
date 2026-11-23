@@ -311,11 +311,14 @@ describe('fresh-target own-data Object.assign', () => {
     expect(validateIR(ir).ok).toBe(false);
   });
 
-  it('retains explicit GPUI and direct Qt/Flutter unsupported diagnostics', () => {
+  it('admits fresh GPUI plain records while retaining native Error and Qt/Flutter diagnostics', () => {
     const text = program(`Object.assign({},{value:1});`),
       ir = portable(text);
+    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
     for (const result of [
-      compilePrototype(text, { profile: 'gpui-source-v1' }),
+      compilePrototype(program("Object.assign(new Error('x'),{value:1});"), {
+        profile: 'gpui-source-v1',
+      }),
       emitQtSource(ir),
       emitFlutterSource(ir),
     ]) {

@@ -1251,12 +1251,18 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
   });
 ${
   ssr
-    ? `  function disposeNow() {
+    ? `  function disposeNow(exhaustive = false) {
     if (lifetime !== 'alive') return;
     lifetime = 'disposing'; phase = 'callback';
-    for (const off of authorStateWatchCleanups.splice(0)) off();
     let failure: { error: unknown } | undefined;
-    try { dispatch(callbacks.beforeDispose); } catch (error) { failure = { error }; }
+    for (const off of authorStateWatchCleanups.splice(0)) try { off(); } catch (error) { failure ??= { error }; }
+    try {
+      if (exhaustive) {
+        for (const callback of callbacks.beforeDispose) {
+          try { invoke(() => callback(${p}RunHandle)); } catch (error) { failure ??= { error }; }
+        }
+      } else dispatch(callbacks.beforeDispose);
+    } catch (error) { failure ??= { error }; }
     finally {
 ${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= { error }; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= { error }; }` : ''}
       try { context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} } catch (error) { failure ??= { error }; }
@@ -1292,7 +1298,7 @@ ${interaction ? `        ${p}Interaction.projectAttributes();\n` : ''}        sl
           attributes: { 'data-pui-root': '',
             ...(tokens.length ? { 'data-pui-style': tokens.join(' ') } : {}),
 ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}          }, raw: ${p}EncodeData(raw) };
-      } catch (error) { try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[SSR] preparation and disposal failed.'); } throw error; }
+      } catch (error) { try { disposeNow(!serverPrepared); } catch { /* The initiating failure retains identity, including undefined. */ } throw error; }
     },
 `
     : ''

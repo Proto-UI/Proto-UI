@@ -1,0 +1,56 @@
+id: C-LIFECYCLE-OWNER-INITIALIZATION-0001
+type: contract
+title: Cross-owner initialization transfers bounded data without transferring execution identity
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Sprint 5 selects fresh browser ownership and explicit data initialization, while retaining active same-owner L1 semantics. Independent definition and real browser conformance remain outstanding; arbitrary runtime-state migration and public SSR admission are not established by this draft.
+  zh-CN: Sprint 5 选择全新的浏览器 owner 与显式数据初始化，并保留 active 的同 owner L1 语义。独立定义评审与真实浏览器一致性尚待完成；本草案不建立任意 runtime state 迁移或公开 SSR 准入。
+summary: Reusing HTML is a view operation; a new logical owner runs its own setup/created and accepts only validated, source-bound initial data.
+statement:
+  en: >-
+    Browser hydration, source revision replacement and cross-owner initialization create a fresh logical Proto owner. Only detach/rebind of the same still-alive instance preserves its execution identity under C-LIFECYCLE-0008. An explicitly governed initialization carrier may seed a different owner with finite data; it never continues the former owner's State, Context, closures, live handles, native view state or resource leases. DOM or source equality is not evidence of owner survival.
+
+
+  zh-CN: >-
+    浏览器 hydration、源 revision 替换与跨 owner 初始化都创建新的逻辑 Proto owner。只有同一个仍 alive 的 instance 的 detach/rebind 才按 C-LIFECYCLE-0008 保留执行身份。显式治理的初始化 carrier 可以把有限数据交给另一个 owner，但不会延续旧 owner 的 State、Context、closure、live handle、原生 view state 或资源 lease。DOM 或源相等不证明 owner 存活。
+
+
+criteria:
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-A
+    text: Fresh owner creation runs setup and created once and allocates distinct State and Context identities. Same-owner detach/rebind retains those identities and does not repeat setup/created. Tests must observe identities and effect counts rather than infer them from equal DOM or equal output.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-B
+    text: Validate the entire bounded, finite data tree before starting the receiving owner. Reject cycles, functions, symbols, accessors, non-data prototypes, live handles/closures/leases, unsupported encodings and exceeded depth/node/byte budgets. Reading a rejected getter is not validation. Explicit encodings preserve admitted undefined and negative zero values; duplicate record keys and malformed encoding tags are rejected.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-C
+    text: Carrier integrity checks prove compatibility, not provenance or authentication. The application selects its trusted carrier channel and remains responsible for verifying remote provenance and domain schemas. The in-process boundary accepts trusted caller objects or actual decoded wire data, not arbitrary untrusted live JavaScript objects; reflective validation can execute Proxy traps and is not a sandbox. Mutable transported data is cloned. Transport input cannot restore execution identity; the current controlling owner retains its existing host-profile bindings and authority under the Props update contract.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
+    text: The replacing host invalidates prior callback and asynchronous generations, retires the old owner and its listeners/leases, and observes terminal cleanup before activating a replacement. No successful replacement can leave two active owners or rerun the old created callback. Terminal disposal overrides all pending replacements and attach requests.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+    text: Invalid initialization leaves an unstarted candidate. Partial startup, rejected adoption, abort or supersession retires every acquired candidate resource. Late work cannot publish, revive an owner or overwrite a newer revision. Recovery creates a fresh owner from explicitly selected current input; it never silently revives the retired owner.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-F
+    text: Context providers and subscriptions are recreated within the receiving ownership graph. Native host children and view state remain outside the active L1 guarantee unless their host profile explicitly admits preservation. A serialized projection is a view-adoption input, not a general State snapshot or a grant to restore arbitrary mutable cells.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-G
+    text: State initialization, transport trust, physical adoption and owner lifecycle evidence are recorded separately. Private hydration experiments and browser preview replacement may implement bounded combinations; neither passes another route's acceptance or admits an unsupported canonical target.
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-H
+    text: An initialization carrier declares schema version, source/compiler/target binding and the revision or request it describes. Compatibility is validated before receiving-owner startup, independently from data-shape validation. The originating source alone cannot prove the compiler/helper closure, a matching revision or trusted provenance.
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0001
+    - C-LIFECYCLE-0002
+    - C-LIFECYCLE-0008
+references:
+  contracts:
+    - C-LIFECYCLE-REQUEST-0001
+sources:
+  - path: internal/records/2026-11-22-sprint5-request-owner.md
+  - path: packages/runtime/src/instance/initial-data.ts
+openQuestions:
+  - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001-Q-ADMISSION
+    question: Independent shared-definition review and full source-bound browser/target evidence remain required. Automatic migration of arbitrary runtime State is not selected by this bounded data-initialization contract.
+    blocks:
+      - activation:C-LIFECYCLE-OWNER-INITIALIZATION-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Selected fresh logical ownership with bounded data initialization, explicit trust and retirement, without changing same-owner L1 or admitting a public SSR profile.
+tags: [lifecycle, owner, initialization, hydration, state, isolation]

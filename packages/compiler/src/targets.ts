@@ -7,7 +7,11 @@ import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
 import { declaredSetValueEvent } from './a11y-event-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
-import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
+import {
+  GPUI_UNAVAILABLE_OPERATIONS,
+  GPUI_MISSING_FOCUS_TREE,
+  gpuiIntrinsicSupported,
+} from './gpui-capabilities';
 import {
   observableSemantics,
   type ObservableSemantics,
@@ -473,10 +477,17 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
     mode: 'source',
     implemented: true,
-    operations: [
-      ...nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
-      'eventControl.requestDefaultActionPrevention',
-    ],
+    operations: (
+      [
+        ...nativeOperations,
+        'eventControl.requestDefaultActionPrevention',
+        'hook.asControlLabel',
+        'controlLabel.label',
+        'controlLabel.target',
+        'controlLabel.sync',
+        'controlLabelRequest.isCurrent',
+      ] as Operation[]
+    ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
       { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
@@ -793,7 +804,8 @@ export function checkTargetOperations(
       case 'intrinsic':
         if (
           value.name === 'string' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
         )
           diagnostic(
             'PUI4003',
@@ -802,7 +814,8 @@ export function checkTargetOperations(
           );
         if (
           value.name === 'object.assign' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
         )
           diagnostic('PUI4003', `Object.assign is not implemented by ${selected.id}.`, value.span);
         break;

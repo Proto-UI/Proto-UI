@@ -3,8 +3,11 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
+import ts from 'typescript';
 import { parsePrototype } from '../../../src/parser.ts';
 import { emitGpuiSource } from '../../../src/gpui-source.ts';
+import { compileFile } from '../../../src/compile.ts';
 
 const fixture = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(fixture, '../../../../..');
@@ -40,17 +43,20 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
     ...(options.componentName ? { componentName: options.componentName } : {}),
   });
   if (!module.ok) throw new Error(`${name} emitter: ${JSON.stringify(module.diagnostics)}`);
+  return retainModule(name, source, parsed.value, module.value);
+}
+function retainModule(name, source, ir, module) {
   const directory = path.join(output, name);
   const artifacts = [
-    { path: 'Component.rs', contents: module.value.code },
-    ...(module.value.supportingFiles ?? []),
+    { path: 'Component.rs', contents: module.code },
+    ...(module.supportingFiles ?? []),
   ];
   for (const file of artifacts) {
     const target = path.join(directory, file.path);
     mkdirSync(path.dirname(target), { recursive: true });
     writeFileSync(target, file.contents);
   }
-  writeFileSync(path.join(directory, 'checked-ir.json'), JSON.stringify(parsed.value, null, 2));
+  writeFileSync(path.join(directory, 'checked-ir.json'), JSON.stringify(ir, null, 2));
   writeFileSync(path.join(directory, 'authored.proto.ts'), source);
   const manifest = readFileSync(path.join(directory, 'Cargo.toml'), 'utf8');
   const generatedPackageName = /^\s*name\s*=\s*"([^"]+)"/m.exec(manifest)?.[1];
@@ -72,7 +78,8 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
     packageName,
     generatedPackageName,
     sourceSha256: digest(source),
-    contextIds: parsed.value.contextKeys.map((key) => key.id),
+    contextIds: ir.contextKeys.map((key) => key.id),
+    inputs: ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 })),
     files: artifacts.map((file) => ({
       path: file.path,
       sha256: digest(file.contents),
@@ -83,6 +90,57 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
 }
 emit('transition', transition(false), sourceFiles);
 const dependencies = [];
+receipt.actualControlLabelConsumers = [];
+for (const [name, file] of [
+  ['base_button', 'button/button.proto.ts'],
+  ['base_toggle', 'toggle/toggle.proto.ts'],
+  ['base_label', 'label/root.proto.ts'],
+]) {
+  const entry = `packages/prototypes/base/src/${file}`;
+  const source = readFileSync(path.join(repository, entry), 'utf8');
+  const result = await compileFile(path.join(repository, entry), {
+    root: repository,
+    profile: 'gpui-source-v1',
+    nativeSdkPath: '../transition/.proto-ui/gpui-native',
+  });
+  if (!result.ok) throw new Error(`${name}: ${JSON.stringify(result.diagnostics)}`);
+  dependencies.push([name, retainModule(name, source, result.value.ir, result.value.output)]);
+  receipt.actualControlLabelConsumers.push({ name, entry, sha256: digest(source) });
+}
+const namedButtonEntry = path.join(fixture, 'control-label-name.proto.ts');
+const namedButton = await compileFile(namedButtonEntry, {
+  root: repository,
+  profile: 'gpui-source-v1',
+  nativeSdkPath: '../transition/.proto-ui/gpui-native',
+});
+if (!namedButton.ok) throw new Error(`named_button: ${JSON.stringify(namedButton.diagnostics)}`);
+dependencies.push([
+  'named_button',
+  retainModule(
+    'named_button',
+    readFileSync(namedButtonEntry, 'utf8'),
+    namedButton.value.ir,
+    namedButton.value.output
+  ),
+]);
+const genericEntry = path.join(fixture, 'control-label-generic.proto.ts');
+for (const [name, exportName] of [
+  ['generic_label', 'default'],
+  ['generic_setup_label', 'SetupLabel'],
+  ['generic_label_target', 'Target'],
+]) {
+  const result = await compileFile(genericEntry, {
+    root: repository,
+    profile: 'gpui-source-v1',
+    nativeSdkPath: '../transition/.proto-ui/gpui-native',
+    exportName,
+  });
+  if (!result.ok) throw new Error(`${name}: ${JSON.stringify(result.diagnostics)}`);
+  dependencies.push([
+    name,
+    retainModule(name, readFileSync(genericEntry, 'utf8'), result.value.ir, result.value.output),
+  ]);
+}
 for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
   dependencies.push([
     name,
@@ -202,7 +260,28 @@ writeFileSync(
 );
 mkdirSync(path.join(output, 'transition/tests'));
 copyFileSync(path.join(fixture, 'consumer.rs'), path.join(output, 'transition/tests/ordinary.rs'));
+copyFileSync(
+  path.join(fixture, 'control-label-consumer.rs'),
+  path.join(output, 'transition/tests/control_label.rs')
+);
+copyFileSync(
+  path.join(fixture, 'style-mapping-consumer.rs'),
+  path.join(output, 'transition/tests/style_mapping.rs')
+);
+copyFileSync(
+  path.join(fixture, 'a11y-activation-consumer.rs'),
+  path.join(output, 'transition/tests/a11y_activation.rs')
+);
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
+receipt.controlLabelConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'control-label-consumer.rs'))
+);
+receipt.styleMappingConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'style-mapping-consumer.rs'))
+);
+receipt.a11yActivationConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'a11y-activation-consumer.rs'))
+);
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.
 const scalarInputs = [
@@ -297,6 +376,54 @@ for (let index = 0; index < 512; index++) {
   seed = BigInt.asUintN(64, seed ^ (seed << 17n));
   addBitPattern(seed);
 }
+// Execute the unchanged pure fixture in JavaScript as an independent language
+// oracle. The stub records public methods only; it implements no compiler atoms.
+const scalarSource = readFileSync(path.join(fixture, 'scalars.proto.ts'), 'utf8');
+const scalarModule = { exports: {} };
+runInNewContext(
+  ts.transpileModule(scalarSource, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText,
+  {
+    module: scalarModule,
+    exports: scalarModule.exports,
+    require(id) {
+      if (id !== '@proto.ui/core') throw new Error(`Unexpected scalar oracle import ${id}`);
+      return { definePrototype: (definition) => definition };
+    },
+  },
+  { filename: 'scalars.proto.ts', timeout: 1000 }
+);
+const scalarMethods = new Map();
+scalarModule.exports.default.setup({
+  expose: { method: (name, callback) => scalarMethods.set(name, callback) },
+});
+function nativeNumberBits(value) {
+  if (typeof value === 'number') {
+    const bytes = new DataView(new ArrayBuffer(8));
+    bytes.setFloat64(0, value);
+    return bytes.getBigUint64(0).toString(16);
+  }
+  if (Array.isArray(value)) return value.map(nativeNumberBits);
+  if (value && typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, nativeNumberBits(item)])
+    );
+  return null;
+}
+const nativeCases = [
+  'typedCallable',
+  'typedCallable',
+  'typedDefaults',
+  'numericLiterals',
+  'membership',
+  'assignment',
+  'assignmentFailure',
+  'caughtUnits',
+].map((method) => {
+  const expected = scalarMethods.get(method)();
+  return { method, expected, numberBits: nativeNumberBits(expected) };
+});
 const scalarReference =
   JSON.stringify(
     {
@@ -327,6 +454,7 @@ const scalarReference =
         negativeInfinity: -1 / 0 + '',
         nan: 0 / 0 + '',
       },
+      nativeCases,
     },
     null,
     2
@@ -340,6 +468,28 @@ if (existsSync(lockfile)) {
   receipt.lockSha256 = digest(readFileSync(lockfile));
 }
 receipt.consumerManifestSha256 = digest(readFileSync(rootManifest));
+// The real Button above is now a positive, unchanged source consumer. Keep the
+// explicit native Anatomy limitation as a discriminating negative declaration.
+const unsupportedPath =
+  'packages/compiler/test/fixtures/gpui-ordinary-values/control-label-anatomy.proto.ts';
+const unsupportedResult = await compileFile(path.join(repository, unsupportedPath), {
+  root: repository,
+  profile: 'gpui-source-v1',
+});
+if (
+  unsupportedResult.ok ||
+  !unsupportedResult.diagnostics.some((entry) => entry.code === 'PUI_GPUI_CONTROL_LABEL_ANATOMY')
+)
+  throw new Error(
+    'Native ControlLabel Anatomy admission changed; update its acceptance matrix explicitly.'
+  );
+receipt.unsupportedConsumers = [
+  {
+    source: unsupportedPath,
+    sha256: digest(readFileSync(path.join(repository, unsupportedPath))),
+    diagnostics: unsupportedResult.diagnostics,
+  },
+];
 writeFileSync(path.join(output, 'source-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
 console.log(
   JSON.stringify({

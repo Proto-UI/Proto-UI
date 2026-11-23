@@ -60,6 +60,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   const inst = createRuntimeInstance(proto, {
     allowRunUpdate: true,
+    onSetupCleanupError: host.onSetupCleanupError,
     onModulesReady: (hub) => {
       host.onRuntimeReady?.(hub.getWiring());
     },

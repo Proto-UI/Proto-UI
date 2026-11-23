@@ -1,3 +1,4 @@
+import { ownerInitialDataGuard, ownerInitialPropsGuard } from './owner-initial-data';
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
@@ -888,7 +889,7 @@ ${
     if (!${n('Server')} && (${n('Session')}.hydrating && !${n('Record')} || ${n('Record')} && ${n('Record')}.source !== ${JSON.stringify(ir.source.sha256)})) throw new Error('[Vue SSR] missing or foreign owner handoff');
     let ${n('Started')} = false;
     let ${n('HydrationValidated')} = false;
-    const ${n('Release')} = () => ${n('DisposeOwner')}();
+    const ${n('Release')} = () => { try { ${n('DisposeOwner')}(); } catch (error) { ${n('Session')}.failure ??= { value: error }; throw error; } };
     ${n('Session')}.owners.add(${n('Release')});
     ${n('Vue')}.onScopeDispose(() => { if (${n('Server')} || !${n('Started')}) ${n('Release')}(); });`
     : ''
@@ -1416,7 +1417,7 @@ ${
       try {
         const renderer = (${fn(ir.setup, 3)})(${usesStyle ? n('DefValue') : 'undefined'});
 ${usesRoot ? `        ${n('Setup')} = false;` : ''}
-        ${n('RawProps')} = ${ssr ? `${n('Server')} || !${n('Record')} ? ${n('GetHostProps')}() : ${n('Decode')}(${n('Record')}.raw) as Record<string, unknown>` : `${n('GetHostProps')}()`};
+        ${n('RawProps')} = ${ssr ? `${n('Server')} || !${n('Record')} ? ${n('GetHostProps')}() : { ...${n('Decode')}(${n('Record')}.raw) as Record<string, unknown> }` : `${n('GetHostProps')}()`};
 ${
   ssr
     ? `        if (!${n('Server')} && ${n('Record')}) {
@@ -1434,7 +1435,11 @@ ${usesInteraction ? `        ${n('Interaction')}.refresh();` : ''}
         ${n('InvokeLife')}('created');
         return renderer;
       } catch (error) {
-        ${n('Disposing')} = true;
+${
+  ssr
+    ? `        ${n('Session')}.failure ??= { value: error };
+        try { ${n('DisposeOwner')}(true); } catch { /* Initiating setup/created failure wins. */ }`
+    : `        ${n('Disposing')} = true;
         try { ${usesInteraction ? `${n('Interaction')}.dispose();` : ''} }
         finally {
           try { ${usesStyle ? `${n('Style')}.dispose();` : ''} }
@@ -1446,7 +1451,8 @@ ${usesInteraction ? `        ${n('Interaction')}.refresh();` : ''}
               ${n('StateQueue')}.length = 0; ${n('Watchers')}.length = 0;${usesRawWatchers ? ` ${n('RawWatchers')}.length = 0;` : ''}
             }
           }
-        }
+        }`
+}
         throw error;
       }
     })();
@@ -1455,6 +1461,7 @@ ${
     ? `    }
     if (${n('Server')}) {
       ${n('StartOwner')}();
+      if (${n('Session')}.closed) throw ${n('Session')}.failure?.value;
       ${n('Session')}.data.records[${n('Tree')}.id] = { source: ${JSON.stringify(ir.source.sha256)}, raw: ${n('Encode')}(${n('RawProps')}), present: ${n('Present')}.value, tag: ${usesInteraction ? `${n('Interaction')}.rootTag() ?? 'div'` : "'div'"}, properties: {}, attrs: {}, children: [] };
     }
     else ${n('Vue')}.onMounted(() => ${n('Committed')}(${n('Session')}, ${n('Tree')}.id + ':owner', ${n('StartOwner')}));`
@@ -1602,30 +1609,46 @@ ${usesRoot ? `      if (${n('CurrentEpoch')}) ${n('UnbindRoot')}(${n('CurrentEpo
     });
 ${
   ssr
-    ? `    function ${n('DisposeOwner')}(): void {
-      if (${n('Disposed')}) return;
+    ? `    function ${n('DisposeOwner')}(exhaustive = false): void {
+      if (${n('Disposed')} || ${n('InternalTeardown')}) return;
       ${n('Session')}.owners.delete(${n('Release')});
       ${n('Disposing')} = true; ${n('QueueTicket')} += 1; ${n('Requested')} = false;
-      let failure: unknown;
+      let failure: { value: unknown } | undefined;
       if (${n('CurrentEpoch')}) {
         try { ${n('UnbindRoot')}(${n('CurrentEpoch')}); }
-        catch (error) { failure = error; }
+        catch (error) { failure = { value: error }; }
         finally { ${n('CurrentEpoch')}.active = false; }
       }`
     : `    ${n('Vue')}.onUnmounted(() => {`
 }
       ${n('InternalTeardown')} = true;
-      try { ${ssr ? `if (${n('Started')}) ` : ''}${n('InvokeLife')}('beforeDispose'); }
-${ssr ? `      catch (error) { failure ??= error; }` : ''}
+      try { ${
+        ssr
+          ? `if (${n('Started')}) {
+        if (exhaustive) { for (const callback of ${n('Life')}.beforeDispose) { try { callback(${n('RunValue')}); } catch (error) { failure ??= { value: error }; } } }
+        else ${n('InvokeLife')}('beforeDispose');
+      }`
+          : `${n('InvokeLife')}('beforeDispose');`
+      } }
+${ssr ? `      catch (error) { failure ??= { value: error }; }` : ''}
       finally {
         try { ${contextArtifacts ? `${n('Scope')}.dispose();` : ''} }
+${ssr ? `        catch (error) { failure ??= { value: error }; }` : ''}
         finally {
           try { ${usesInteraction ? `${n('Interaction')}.dispose();` : ''} }
+${ssr ? `        catch (error) { failure ??= { value: error }; }` : ''}
           finally {
             try { ${usesStyle ? `${n('Style')}.dispose();` : ''} }
+${ssr ? `        catch (error) { failure ??= { value: error }; }` : ''}
             finally {
-              ${n('InternalTeardown')} = false; ${n('Disposed')} = true; ${atoms.dispose}${hasAuthoredHooks ? `${n('Authored')}.dispose();` : ''}
-              for (const cleanup of ${n('StateCleanup')}) cleanup();
+              ${n('InternalTeardown')} = false; ${n('Disposed')} = true;
+${
+  ssr
+    ? `              try { ${atoms.dispose}${hasAuthoredHooks ? `${n('Authored')}.dispose();` : ''} } catch (error) { failure ??= { value: error }; }
+              for (const cleanup of ${n('StateCleanup')}) { try { cleanup(); } catch (error) { failure ??= { value: error }; } }`
+    : `              ${atoms.dispose}${hasAuthoredHooks ? `${n('Authored')}.dispose();` : ''}
+              for (const cleanup of ${n('StateCleanup')}) cleanup();`
+}
               ${n('StateQueue')}.length = 0; ${n('Watchers')}.length = 0;${usesRawWatchers ? ` ${n('RawWatchers')}.length = 0;` : ''}
             }
           }
@@ -1633,7 +1656,7 @@ ${ssr ? `      catch (error) { failure ??= error; }` : ''}
       }
 ${
   ssr
-    ? `      if (failure !== undefined) throw failure;
+    ? `      if (failure) throw failure.value;
     }
     ${n('Vue')}.onUnmounted(${n('DisposeOwner')});`
     : `    });`
@@ -1643,42 +1666,58 @@ ${
 });
 ${
   ssr
-    ? `export type GeneratedServerOptions = { signal?: AbortSignal; slots?: ${n('Vue')}.Slots; configureApp?: (app: ${n('Vue')}.App) => void };
+    ? `${ownerInitialDataGuard(n('InitialData'))}
+${ownerInitialPropsGuard(
+  n('InitialProps'),
+  n('InitialData'),
+  ir.props.map((prop) => prop.name)
+)}
+export type GeneratedServerOptions = { signal?: AbortSignal; slots?: ${n('Vue')}.Slots; configureApp?: (app: ${n('Vue')}.App) => void };
 export async function renderToString(props: GeneratedProps = {}, options: GeneratedServerOptions = {}): Promise<{ html: string; handoff: GeneratedHandoff }> {
+  options.signal?.throwIfAborted();
+  props = ${n('InitialProps')}(props) as GeneratedProps;
   const session = ${n('CreateSession')}(true, ${JSON.stringify(ir.source.sha256)});
   const app = ${n('Vue')}.createSSRApp({ render: () => ${n('Vue')}.h(${componentName}, props, options.slots) });
   app.provide(${n('SessionKey')}, session);
-  app.config.errorHandler = error => { session.failure ??= error; };
+  app.config.errorHandler = error => { session.failure ??= { value: error }; };
   let abort: (() => void) | undefined;
-  let failure: unknown;
+  let failure: { value: unknown } | undefined;
   try {
     options.configureApp?.(app);
     const consumerError = app.config.errorHandler;
-    app.config.errorHandler = (error, instance, info) => { session.failure ??= error; consumerError?.(error, instance, info); };
-    if (options.signal?.aborted) throw options.signal.reason ?? new DOMException('Aborted', 'AbortError');
-    const rendering = ${n('RenderToString')}(app).then(html => { if (session.failure !== undefined) throw session.failure; return html; });
+    app.config.errorHandler = (error, instance, info) => { session.failure ??= { value: error }; consumerError?.(error, instance, info); };
+    options.signal?.throwIfAborted();
     const aborted = new Promise<never>((_, reject) => {
       abort = () => {
-        const reason = options.signal?.reason ?? new DOMException('Aborted', 'AbortError');
+        const reason = options.signal!.reason;
+        failure ??= { value: reason }; session.failure ??= failure;
         try { ${n('Close')}(session); }
-        catch (error) { reject(new AggregateError([reason, error], '[Vue SSR] aborted request cleanup failed')); return; }
+        catch { /* Abort retains its initiating reason even if cleanup fails. */ }
         reject(reason);
       };
       options.signal?.addEventListener('abort', abort, { once: true });
       if (options.signal?.aborted) abort();
     });
+    void aborted.catch(() => {});
+    options.signal?.throwIfAborted();
+    const rendering = ${n('RenderToString')}(app).then(html => { if (session.failure) throw session.failure.value; return html; });
     const html = options.signal ? await Promise.race([rendering, aborted]) : await rendering;
     session.data.html = html;
-    return { html, handoff: JSON.parse(JSON.stringify(session.data)) as GeneratedHandoff };
-  } catch (error) { failure = error; throw error; }
+    // The receiver checks the expanded envelope, including HTML and every
+    // projection. Raw Props admission alone cannot establish transport bounds.
+    const handoff = ${n('CreateSession')}(false, ${JSON.stringify(ir.source.sha256)}, JSON.parse(JSON.stringify(session.data)) as GeneratedHandoff).data;
+    return { html, handoff };
+  } catch (error) { failure ??= { value: error }; throw failure.value; }
   finally {
     if (abort) options.signal?.removeEventListener('abort', abort);
     try { ${n('Close')}(session); }
-    catch (error) { if (failure !== undefined) throw new AggregateError([failure, error], '[Vue SSR] rendering and cleanup failed'); throw error; }
+    catch (error) { if (!failure) { options.signal?.throwIfAborted(); throw error; } }
+    if (!failure) options.signal?.throwIfAborted();
   }
 }
 export function hydrate(container: Element, handoff: GeneratedHandoff, options: { props?: GeneratedProps; slots?: ${n('Vue')}.Slots; configureApp?: (app: ${n('Vue')}.App) => void; onMismatch?: (message: string) => void } = {}): ${n('Vue')}.App {
   const session = ${n('CreateSession')}(false, ${JSON.stringify(ir.source.sha256)}, handoff);
+  handoff = session.data;
   const first = handoff.records['0'];
   if (!first) throw new TypeError('[Vue SSR] root handoff is missing');
   const parsed = container.ownerDocument.createElement('template'); parsed.innerHTML = handoff.html;
@@ -1692,19 +1731,19 @@ export function hydrate(container: Element, handoff: GeneratedHandoff, options: 
   try {
     options.configureApp?.(app);
     const consumerError = app.config.errorHandler;
-    app.config.errorHandler = (error, instance, info) => { session.failure ??= error; consumerError?.(error, instance, info); throw error; };
+    app.config.errorHandler = (error, instance, info) => { session.failure ??= { value: error }; consumerError?.(error, instance, info); throw error; };
     const consumerWarning = app.config.warnHandler;
     app.config.warnHandler = (message, instance, trace) => {
-      if (/hydration/i.test(message)) { session.failure ??= new Error('[Vue SSR] hydration mismatch: ' + message); options.onMismatch?.(message); console.warn('[Vue SSR] explicit hydration recovery: ' + message); }
+      if (/hydration/i.test(message)) { session.failure ??= { value: new Error('[Vue SSR] hydration mismatch: ' + message) }; options.onMismatch?.(message); console.warn('[Vue SSR] explicit hydration recovery: ' + message); }
       consumerWarning?.(message, instance, trace);
       if (!consumerWarning && !/hydration/i.test(message)) console.warn(message);
     };
     app.mount(container);
     for (const saved of controls) { saved.node.value = saved.value; if (saved.start !== null && saved.end !== null) saved.node.setSelectionRange(saved.start, saved.end, saved.direction ?? undefined); }
-    if (session.failure !== undefined) throw session.failure;
+    if (session.failure) throw session.failure.value;
     session.hydrating = false;
   }
-  catch (error) { try { ${n('Close')}(session); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Vue SSR] hydration and cleanup failed'); } throw error; }
+  catch (error) { try { ${n('Close')}(session); } catch { /* Preserve initial adoption failure. */ } throw error; }
   return app;
 }`
     : ''

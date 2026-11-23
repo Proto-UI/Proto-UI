@@ -1,0 +1,130 @@
+name: GPUI Adapter current-source acceptance
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpui-adapter-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  adapter-macos:
+    # The Adapter's first native profile is macOS. This is independent of the
+    # compiler's generated Rust consumers and does not admit GPUI-on-WASM.
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      CANDIDATE_SHA: ${{ github.sha }}
+      CARGO_BUILD_JOBS: '1'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      RUSTUP_TOOLCHAIN: 1.98.1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind source and toolchain
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/gpui-adapter-evidence"
+          mkdir -p "$EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE/source-tree.txt"
+          shasum -a 256 pnpm-lock.yaml native/gpui/Cargo.lock > "$EVIDENCE/dependency-locks.sha256"
+          sw_vers > "$EVIDENCE/platform.txt"
+          xcrun --sdk macosx --show-sdk-version >> "$EVIDENCE/platform.txt"
+          node --version > "$EVIDENCE/node.txt"
+          rustup toolchain install 1.98.1 --profile minimal
+          rustc --version --verbose > "$EVIDENCE/rustc.txt"
+      - name: Install frozen JavaScript dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            native/gpui/target
+          key: gpui-adapter-macos-15-rust-1.98.1-${{ hashFiles('native/gpui/Cargo.lock') }}
+          restore-keys: gpui-adapter-macos-15-rust-1.98.1-
+      - name: Check the peer and the shared source vectors
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/gpui-adapter-evidence"
+          corepack pnpm@10.32.1 exec vitest run packages/host-protocol packages/adapters/gpui-peer \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$EVIDENCE/peer-vitest.json" 2>&1 | tee "$EVIDENCE/peer.log"
+          corepack pnpm@10.32.1 check:gpui-message-fixture 2>&1 | tee "$EVIDENCE/message-fixtures.log"
+          corepack pnpm@10.32.1 check:gpui-session-fixtures 2>&1 | tee "$EVIDENCE/session-fixtures.log"
+      - name: Run every selected native and real-peer suite to a terminal result
+        if: ${{ !cancelled() }}
+        working-directory: native/gpui
+        env:
+          PROTO_GPUI_EVIDENCE_DIR: ${{ runner.temp }}/gpui-adapter-evidence/accesskit
+        run: |
+          set -uo pipefail
+          EVIDENCE="$RUNNER_TEMP/gpui-adapter-evidence"
+          mkdir -p "$EVIDENCE/accesskit"
+          failed=0
+          run_suite() {
+            local name="$1"
+            shift
+            cargo test --locked "$@" 2>&1 | tee "$EVIDENCE/$name.log"
+            local statuses=("${PIPESTATUS[@]}")
+            local result=${statuses[0]}
+            if [ "${statuses[1]}" -ne 0 ]; then result=1; fi
+            if [ "$result" -eq 0 ] && ! grep -Eq 'test result: ok\. [1-9][0-9]* passed' "$EVIDENCE/$name.log"; then
+              result=1
+            fi
+            printf '%s\t%s\n' "$name" "$result" >> "$EVIDENCE/suite-exits.tsv" || failed=1
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          }
+          run_suite workspace --workspace
+          run_suite t0_peer -p proto-ui-host-protocol --test t0_peer -- --ignored --test-threads=1
+          for suite in button_t0 toggle_t0 switch_t0 view_intent_t0 tabs_t0 transition_t0 checkbox_t0 control_label_t0; do
+            run_suite "$suite" -p proto-ui-gpui --test "$suite" -- --ignored --test-threads=1
+          done
+          run_suite accesskit_macos -p proto-ui-gpui --features macos-accessibility-test --test accesskit_macos
+          for capture in control-label-action-enabled.png control-label-action-disabled.png; do
+            if [ ! -s "$EVIDENCE/accesskit/$capture" ]; then
+              printf 'missing-capture:%s\t1\n' "$capture" >> "$EVIDENCE/suite-exits.tsv"
+              failed=1
+            fi
+            # File creation alone previously accepted all-black content.
+            # Require the native exact-window content gate's retained receipt.
+            if node -e '
+              const r = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+              if (r.rule !== "two-label-content-v1" || r.passed !== true || r.pixelGatePassed !== true ||
+                  !Number.isInteger(r.platformFrames?.callbacks) || r.platformFrames.callbacks < 2 ||
+                  r.platformFrames.visible !== true || r.platformFrames.error != null ||
+                  r.labels?.length !== 2 || r.labels[0].label !== "passive" || r.labels[1].label !== "actionable" ||
+                  !r.labels.every(label => label.passed === true)) process.exit(1);
+            ' "$EVIDENCE/accesskit/${capture%.png}.pixels.json"; then
+              printf 'pixel-content:%s\t0\n' "$capture" >> "$EVIDENCE/suite-exits.tsv"
+            else
+              printf 'pixel-content:%s\t1\n' "$capture" >> "$EVIDENCE/suite-exits.tsv"
+              failed=1
+            fi
+          done
+          if [ "$failed" -eq 0 ]; then
+            shasum -a 256 "$EVIDENCE"/accesskit/control-label-*.png > "$EVIDENCE/capture-sha256.txt"
+          fi
+          exit "$failed"
+      - name: Retain source-bound results, captures and original failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpui-adapter-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/gpui-adapter-evidence/
+          if-no-files-found: error
+          retention-days: 30

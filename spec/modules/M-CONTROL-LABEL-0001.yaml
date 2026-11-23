@@ -19,6 +19,9 @@ criteria:
   - id: M-CONTROL-LABEL-0001-INTEROP
     text:
       en: Compatible Module and native compiler implementations share the v1 same-realm pair service by exact admitted reference. Its participant record carries owner, kind, ref, semanticRef, view, options, name, activate and diagnostic; bind returns refresh, requestActivation and dispose. The name operation receives the opaque Label semantic identity and its current identity/scope view, leaving local semantic-source translation and physical projection to the target A11y owner. Pair currentness, duplicate arbitration, callback epochs and obsolete cleanup guards apply across implementation boundaries exactly as within one bundle.
+  - id: M-CONTROL-LABEL-0001-GPUI
+    text:
+      en: The private compiled GPUI slice keeps nominal references, weak participants and exact pair leases in one content-compatible shared native SDK. Typed instance associations never enter portable data. Every request enters the target-owned callback with an exact currentness capability; no registration-order winner or host-generated target operation substitutes for authored behavior. Detach retains association intent while retiring pending pointer work; disposal releases exact participant ownership without strong reference cycles. Derived naming remains independent of activation and consumer names. This Rust implementation does not implement the ECMAScript registry service or a mixed compiled/Adapter association ABI.
   - id: M-CONTROL-LABEL-0001-REQUEST
     text:
       en: A qualifying label request enters the target callback scope and shares its existing internal operation. Missing host or callback capability is diagnostic; the module never mutates a checked/editor value.
@@ -39,12 +42,16 @@ verifies:
   tests:
     - T-CONTROL-LABEL-0001
 sources:
+  - path: packages/compiler/src/gpui-native-control-label.ts
   - path: packages/modules/control-label/src/create.ts
   - path: packages/modules/control-label/src/registry.ts
   - path: packages/modules/control-label/src/caps.ts
   - path: packages/modules/control-label/src/web.ts
   - path: packages/modules/control-label/src/anatomy-pair.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Bounded the separate compiled GPUI ownership implementation to shared-SDK nominal references and exact weak participant leases; retained draft admission.
   - version: 0.3.0-alpha.2
     change: clarified
     summary: Shared nominal pairing across compatible runtime and native compiler copies while preserving target-owned A11y naming, callback routing and exact lease cleanup.

@@ -921,7 +921,7 @@ ${styled ? `  const ${prefix}Style = owner.style;\n  const ${prefix}OwnerProps =
     owner.hydrate(raw);
     owner.created();
     return owner;
-  } catch (error) { try { owner.dispose(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'Setup and cleanup failed'); } throw error; }
+  } catch (error) { try { owner.dispose(true); } catch { /* Preserve the initiating setup/created failure. */ } throw error; }
 }
 ${support.server}
 `;
@@ -1213,7 +1213,7 @@ ${context ? `  context: ${p}ContextDef;\n` : ''}  props: {define(input: Record<s
   expose: {value(key: string, value: unknown): void; state(key: string, handle: ${p}State${interacting ? ` | ${p}NativeObservedState<boolean | string | number>` : ''}): void; method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R): void; event(key: string, spec?: object): void};
   lifecycle: {onCreated(fn: Function): void; onMounted(fn: Function): void; onUpdated(fn: Function): void; onUnmounted(fn: Function): void; onBeforeDispose(fn: Function): void};
 };
-type ${p}Owner = {${atoms.shader ? `shader: ReturnType<typeof ${p}CreateShader>; ` : ''}${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
+type ${p}Owner = {${atoms.shader ? `shader: ReturnType<typeof ${p}CreateShader>; ` : ''}${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(${ssr ? 'exhaustive?: boolean' : ''}): void};
 function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}${controlLabel ? ', getAssociations: () => unknown' : ''}): ${p}Owner {
   let alive = true, disposing = false, setup = true, callbackDepth = 0;
 ${
@@ -1357,10 +1357,15 @@ ${ssr ? '  host.bindContext(context);\n' : ''}
     : ''
 }  function fire(name: string): void {
     if (name === 'unmounted') { ${atoms.detach} }
-    let error: unknown;
+${
+  ssr
+    ? `    try { for (const fn of lifecycle[name]) invoke(fn); }
+    finally { if (name === 'unmounted') { ${atoms.detach} } }`
+    : `    let error: unknown;
     try { for (const fn of lifecycle[name]) { try { invoke(fn); } catch (caught) { error ??= caught; } } }
     finally { if (name === 'unmounted') { ${atoms.detach} } }
-    if (error !== undefined) throw error;
+    if (error !== undefined) throw error;`
+}
   }
   function valid(spec: ${p}PropSpec, value: unknown): boolean {
     if (spec.schema === undefined) throw new Error('Missing checked Props schema');
@@ -1664,16 +1669,26 @@ ${styled ? `      host.attribute('data-pui-style', intent ? ${p}Style.serverToke
     : ''
 }
     created() { setup = false; fire('created'); },
-    dispose() {
+    dispose(${ssr ? 'exhaustive = false' : ''}) {
       if (!alive || disposing) return; disposing = true;
       ${hasAuthoredHooks ? `for (const off of ${p}AuthoredWatchCleanups.splice(0)) off();` : ''}
-      let error: unknown;
-      try { detach(); } catch (caught) { error = caught; }
-      try { fire('beforeDispose'); } catch (caught) { error ??= caught; }
+      let error: { value: unknown } | undefined;
+      try { detach(); } catch (caught) { error = { value: caught }; }
+      try {
+${
+  ssr
+    ? `        if (exhaustive) {
+          for (const callback of lifecycle.beforeDispose) {
+            try { invoke(callback); } catch (caught) { error ??= { value: caught }; }
+          }
+        } else `
+    : ''
+}        fire('beforeDispose');
+      } catch (caught) { error ??= { value: caught }; }
       finally {
 ${
   interacting
-    ? `        try { ${p}Interaction.dispose(); } catch (caught) { error ??= caught; }
+    ? `        try { ${p}Interaction.dispose(); } catch (caught) { error ??= { value: caught }; }
         for (const off of observedSubscriptions.splice(0)) off();
         for (const projection of observedProjections.values()) projection.subscribers.clear();
         observedProjections.clear();\n`
@@ -1694,7 +1709,7 @@ ${
         detachedDisplay = undefined;`
 }
       }
-      if (error !== undefined) throw error;
+      if (error) throw error.value;
     },
   };
   return owner;
