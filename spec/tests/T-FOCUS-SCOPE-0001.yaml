@@ -222,6 +222,15 @@ implementations:
     notes:
       - Seven Happy DOM controls cover merging pending DOM and stylesheet refreshes, stylesheet-only invalidation, later checkpoints, reentrant stylesheet writes, disable and target replacement. Explicit delivery of real pending MutationObserver records models the permitted checkpoint order; it is not native scheduling or timing-budget evidence.
       - The original paired cost cases distinguish two dependency graph rebuilds from one without caching current CSS or changing entry eligibility. A stylesheet notification with no pending entry sample adds one microtask before projection; direct focus resolution and synchronous role disable remain unchanged.
+  - id: wc-entry-form-origin
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/focus-entry-form-origin.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS]
+    notes:
+      - Seventeen Happy DOM controls distinguish trusted unrelated form notifications from internal events, external form and CSS state dependencies, escaped selectors, filtered positions, opaque stylesheets, synthetic notifications and assigned slot radio input. Slotted regions retain conservative notifications, including external same-group radio changes; all current qualification samples remain required when dependency independence is not established.
+      - Explicit isTrusted injection models the native-origin branch only. The synchronous multi-owner fixture does not establish native callback ownership or microtask batching, and these results do not certify the compiler preview's original 250 ms cleanup deadline.
   - id: wc-native-scope-order-browser
     kind: adapter-test
     status: passing

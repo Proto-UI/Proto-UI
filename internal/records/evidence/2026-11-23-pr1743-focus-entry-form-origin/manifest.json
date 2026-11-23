@@ -1,0 +1,30 @@
+{
+  "kind": "source-bound-focus-entry-repair-archives",
+  "archives": [
+    {
+      "path": "integration-supplement.tar.gz",
+      "bytes": 4424,
+      "sha256": "0b5c1e9de6941f403fd6b02921ae8ce5d152a3634695c48a852d66e2f6e9f1ea"
+    },
+    {
+      "path": "integration.tar.gz",
+      "bytes": 160119,
+      "sha256": "b41500c647e56429f998ebe1c5357dd76dc9fd17c4f0bf57cd28ead102ee2da9"
+    },
+    {
+      "path": "raw.tar.gz",
+      "bytes": 401169,
+      "sha256": "483d5b33d7d60562e6e9a9389043381603aebbbe69e77311c3bab61b3ad17565"
+    },
+    {
+      "path": "v3-review.tar.gz",
+      "bytes": 9517,
+      "sha256": "b19a9ffcdb2aa31f8c10816a12009d8bd93cf586cfa1ea19614321c8a0e291e3"
+    },
+    {
+      "path": "v3-supplement.tar.gz",
+      "bytes": 187475,
+      "sha256": "533dc02a81c404b6303b8752660a3e95760a698096f2dd9bdaa783ba0055f7cb"
+    }
+  ]
+}
