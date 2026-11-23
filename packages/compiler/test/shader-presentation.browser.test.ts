@@ -595,11 +595,40 @@ it('late decode and release from an overridden capability cannot affect its reac
 const sceneCases = (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
   (['runtime', 'compiled'] as const).map((execution) => ({ target, execution }))
 );
+async function captureScenePaint(
+  page: Page,
+  scenario: string,
+  checkpoint: 'initial-paint' | 'replacement-paint'
+) {
+  const observation = await page.evaluate(async () => ({
+    presentation: window.shaderNative.fixture.read(),
+    source: window.shaderNative.fixture.sceneState(),
+    pixels: await window.shaderNative.fixture.pixels(),
+    resources: window.shaderProbe.read(),
+  }));
+  const name = `${scenario}-${checkpoint}`;
+  await page.screenshot({ path: path.join(sceneFixture.evidenceDir, name + '.png') });
+  await writeFile(
+    path.join(sceneFixture.evidenceDir, name + '.json'),
+    JSON.stringify(
+      {
+        head: sceneFixture.head,
+        buildSha256: sceneFixture.buildSha256,
+        scenario,
+        checkpoint,
+        observation,
+      },
+      null,
+      2
+    ) + '\n'
+  );
+}
 it.each(sceneCases)(
   '$target $execution borrows an actual app scene across held decode, revoke, replacement and scope retirement',
   async (scenario) => {
+    const name = `scene-${scenario.target}-${scenario.execution}`;
     await run(
-      `scene-${scenario.target}-${scenario.execution}`,
+      name,
       async (page) => {
         await page.evaluate(async (value) => {
           window.shaderProbe.holdDecode = true;
@@ -621,6 +650,7 @@ it.each(sceneCases)(
           canvases: 0,
           childText: expect.stringContaining('slot child'),
         });
+        await captureScenePaint(page, name, 'initial-paint');
         // A second real source frame is held before decode. Revoke must synchronously
         // retire its GPU work; completing the old image cannot publish it afterwards.
         await page.evaluate(() => {
@@ -641,6 +671,7 @@ it.each(sceneCases)(
           await page.evaluate(() => window.shaderNative.fixture.pixels()),
           expectedShaderSceneImagePixels(true)
         );
+        await captureScenePaint(page, name, 'replacement-paint');
         await page.evaluate(() => window.shaderNative.fixture.sceneMove(true));
         await zero(page);
         expect(await page.evaluate(() => window.shaderNative.fixture.ready())).toBe(false);
