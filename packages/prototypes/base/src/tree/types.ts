@@ -17,6 +17,7 @@ export interface TreeRootProps {
   defaultExpandedKeys?: readonly string[];
   disabled?: boolean;
   readOnly?: boolean;
+  direction?: 'ltr' | 'rtl';
   a11yLabel?: string;
 }
 export interface TreeItemProps {
@@ -62,6 +63,7 @@ export type TreeRootAsHookContract = {
     value: State<string>;
     invalid: State<boolean>;
     a11yLabel: State<string>;
+    direction: State<string>;
   };
   event: { valueChange: { value: string }; expandedChange: { expandedKeys: string[] } };
 };
@@ -80,10 +82,13 @@ export type TreeItemContract = {
     setSize: State<number>;
     branch: State<boolean>;
     expandedText: State<string>;
+    relationshipKey: State<string>;
     focused: ObservedStateHandle<boolean, TreeItemProps>;
     focusVisible: ObservedStateHandle<boolean, TreeItemProps>;
   };
 };
-export type TreeGroupAsHookContract = {};
+export type TreeGroupAsHookContract = {
+  state: { hidden: State<boolean>; direction: State<string>; relationshipKey: State<string> };
+};
 /** Button is an authored child; its state is not flattened into this frame. */
 export type TreeToggleAsHookContract = { asHooks: { 'as-button': ReturnType<typeof asButton> } };

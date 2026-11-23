@@ -328,11 +328,36 @@ const relationSpecType: ValueType = {
     },
   ],
 };
+const textSelection: DataType = {
+  kind: 'union',
+  members: [
+    'null',
+    {
+      kind: 'record',
+      fields: [
+        { name: 'start', type: 'number' },
+        { name: 'end', type: 'number' },
+        {
+          name: 'direction',
+          type: {
+            kind: 'union',
+            members: [
+              { kind: 'literal', value: 'forward' },
+              { kind: 'literal', value: 'backward' },
+              { kind: 'literal', value: 'none' },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+};
 const textSnapshot: DataType = {
   kind: 'record',
   fields: [
     { name: 'value', type: 'string' },
     { name: 'composing', type: 'boolean' },
+    { name: 'selection', optional: true, type: textSelection },
   ],
 };
 const textEvent: DataType = {
@@ -343,6 +368,7 @@ const textEvent: DataType = {
     { name: 'composing', type: 'boolean' },
     { name: 'data', type: { kind: 'union', members: ['string', 'null'] } },
     { name: 'inputType', type: { kind: 'union', members: ['string', 'null'] } },
+    { name: 'selection', optional: true, type: textSelection },
   ],
 };
 const imageSnapshot: DataType = {

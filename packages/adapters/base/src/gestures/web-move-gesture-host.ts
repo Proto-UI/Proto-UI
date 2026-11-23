@@ -83,16 +83,32 @@ function inputOf(event: PointerEvent): MoveGestureInput {
   return 'unknown';
 }
 
-function sampleOf(event: PointerEvent, active?: ActiveMove): MoveGestureSample {
+function sampleOf(
+  event: PointerEvent,
+  active?: ActiveMove,
+  origins?: readonly unknown[]
+): MoveGestureSample {
   const position = point(event);
   const start = active?.start ?? position;
   const last = active?.last ?? position;
+  let originIndex = active?.startSample.originIndex;
+  if (!active && origins !== undefined) {
+    originIndex = null;
+    for (const target of event.composedPath()) {
+      const index = origins.indexOf(target);
+      if (index >= 0) {
+        originIndex = index;
+        break;
+      }
+    }
+  }
   return Object.freeze({
     input: active?.input ?? inputOf(event),
     position,
     delta: Object.freeze({ x: position.x - last.x, y: position.y - last.y }),
     totalDelta: Object.freeze({ x: position.x - start.x, y: position.y - start.y }),
     timestamp: Number.isFinite(event.timeStamp) ? event.timeStamp : 0,
+    ...(originIndex !== undefined ? { originIndex } : {}),
   });
 }
 
@@ -210,7 +226,7 @@ export function createWebMoveGestureHost(): MoveGestureHost {
           contacts(target).has(event.pointerId)
         )
           return;
-        const startSample = sampleOf(event);
+        const startSample = sampleOf(event, undefined, binding.originTargets);
         if (
           binding.activation === 'directional' &&
           ![event.clientX, event.clientY].every(Number.isFinite)
@@ -390,6 +406,12 @@ export function createWebMoveGestureHost(): MoveGestureHost {
           const currentRevision = ++revision;
           if (
             nextTarget === target &&
+            (nextBinding.originTargets?.length ?? 0) === (binding.originTargets?.length ?? 0) &&
+            !(
+              nextBinding.originTargets?.some(
+                (origin, i) => origin !== binding.originTargets?.[i]
+              ) ?? false
+            ) &&
             ((nextBinding.activation === 'immediate' && binding.activation === 'immediate') ||
               (nextBinding.axis === binding.axis && nextBinding.activation === binding.activation))
           ) {

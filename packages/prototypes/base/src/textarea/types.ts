@@ -50,6 +50,7 @@ export type TextareaRootExposes = {
   composing: ExposeState<boolean>;
   focusSelf: ExposeMethod<(options?: FocusRequestOptions) => void>;
   blurSelf: ExposeMethod<() => void>;
+  resetValue: ExposeMethod<() => boolean>;
   valueChange: ExposeEvent<TextareaValueChangeDetail>;
   change: ExposeEvent<TextareaChangeDetail>;
   compositionStart: ExposeEvent<TextareaCompositionDetail>;

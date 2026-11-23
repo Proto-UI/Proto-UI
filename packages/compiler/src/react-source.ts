@@ -209,7 +209,7 @@ export function emitReactSource(
   collect(ir);
   let p = '__pui';
   while ([...names].some((name) => name.startsWith(p))) p += '_';
-  const atoms = nativeHostAtomPlan(admitted.value.operations, p);
+  const atoms = nativeHostAtomPlan(admitted.value.operations, p, admitted.value.ruleMetaKeys);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -436,7 +436,7 @@ export function emitReactSource(
         const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
         switch (value.kind) {
           case 'const':
-            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
+            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(value.expression, depth)};\n`;
           case 'return':
@@ -804,6 +804,7 @@ ${
     ensureRuntime: () => ensurePhase('callback'),
     isAlive: () => lifetime !== 'disposed',
     project: projectStyle,
+    ${atoms.ruleMeta("root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)")}
   });
 `
     : ''
@@ -1131,7 +1132,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         if (!keys.length || keys.some(key => typeof key !== 'string' || !key.length)) throw new Error('[Props] raw watchers require nonempty keys.');
         const watcher: ${p}RawWatcher = { keys: [...keys], callback, active: true };
         rawWatchers.push(watcher);
-        return () => { ensurePhase('setup'); watcher.active = false; };
+        return () => { watcher.active = false; };
       },
       watchRawAll(callback: ${p}RawWatcher['callback']) {
         ensurePhase('setup');

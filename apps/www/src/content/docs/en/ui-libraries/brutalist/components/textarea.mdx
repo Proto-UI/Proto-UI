@@ -37,6 +37,10 @@ The entire delta is visual:
 
 These styles are applied directly to the Base-backed native textarea. They do not create another protocol layer or change the normalized event payloads.
 
+## Reset and Field composition
+
+The current 0.3 source exposes `resetValue()`: an uncontrolled editor restores its instance creation value; a controlled editor proposes that value and waits for its owner. Explicit reset remains available while readOnly or disabled and retires composition. Import `fieldTextarea` from `@proto.ui/prototypes-brutalist/field` for the same multiline editor with Field label, description, error and validation ownership. See the [versioned Form recipe](../../form/).
+
 ## API
 
 Textarea is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
@@ -62,7 +66,6 @@ Textarea is workspace source. There is no public `proto-ui add` target. Passing 
 />
 
 These props belong to Root.
-
 
 ## References
 

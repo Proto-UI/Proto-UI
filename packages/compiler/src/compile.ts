@@ -23,6 +23,7 @@ import { diagnosticInputOrigin, sourceName } from './source-resolution';
 import { FileSourceGraph, type FileSourceSnapshot } from './source-loader';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { attachEmitterMap, generatedSourcePath } from './emitter-map';
+import { compilerBuildIdentity } from './compiler-build';
 import type { CompileResult, GeneratedModule, ParseOptions, PrototypeIR, SourceSpan } from './ir';
 
 export type { ExclusiveOutputFile } from './artifact-output';
@@ -135,6 +136,7 @@ export function compilePrototype(
             ...emitted.value,
             provenance: {
               ...emitted.value.provenance,
+              ...(compilerBuildIdentity ? { compilerBuild: compilerBuildIdentity } : {}),
               observableSemantics: profile.value.observableSemantics,
             },
           },

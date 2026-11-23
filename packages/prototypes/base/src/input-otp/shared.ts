@@ -1,4 +1,9 @@
-import { createAnatomyFamily, createContextKey, type RunHandle } from '@proto.ui/core';
+import {
+  createAnatomyFamily,
+  createContextKey,
+  type RunHandle,
+  type TextControlSelection,
+} from '@proto.ui/core';
 export const INPUT_OTP_FAMILY = createAnatomyFamily('base-input-otp', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -24,6 +29,7 @@ export type InputOtpContext = {
   name: string;
   label: string;
   focused: boolean;
+  selection: TextControlSelection | null;
 };
 export const INPUT_OTP_CONTEXT = createContextKey<InputOtpContext>('base-input-otp');
 export function otpMethod(run: RunHandle<any>, key: string, ...args: unknown[]) {

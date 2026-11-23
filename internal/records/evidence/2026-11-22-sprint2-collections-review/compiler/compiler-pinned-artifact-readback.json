@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "revision": "3ea9e34545615ce4a981e2e19c3c3fcc9de3b0bb",
+  "inputsMatchedExactGitBlobs": 148,
+  "deliveredFilesMatchedAndReproduced": 9,
+  "files": [
+    "cli.js",
+    "index.js",
+    "index.js.map",
+    "LICENSE",
+    "package-lock.json",
+    "package.json",
+    "profiles.json",
+    "README.md",
+    "compiler-build.json"
+  ],
+  "lockAndProfilesMatched": true,
+  "compilerDependencies": {
+    "typescript": "5.9.3"
+  },
+  "externalImports": [
+    "node:crypto",
+    "node:fs",
+    "node:fs/promises",
+    "node:path",
+    "node:url",
+    "node:util",
+    "typescript"
+  ],
+  "sourceMapSources": 142,
+  "toolchain": {
+    "node": "24.22.3",
+    "typescript": "5.9.3",
+    "esbuild": "0.25.12"
+  },
+  "boundary": "Independent byte/readback check of existing artifacts; no build rerun or registry authenticity claim."
+}

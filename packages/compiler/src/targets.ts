@@ -1,4 +1,5 @@
 import { pruneDeadValues } from './demand-pruning';
+import type { RuleMetaKey } from './rule-declarations';
 import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
@@ -346,7 +347,6 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
 
 const VUE2_DEFERRED_OPERATIONS: ReadonlySet<Operation> = new Set([
   'props.watchAll',
-  'props.watchRaw',
   'props.watchRawAll',
 ] as Operation[]);
 
@@ -442,8 +442,8 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '2.6.14',
     mode: 'source',
     implemented: true,
-    // Vue2 keeps its explicit rejection control for all-key and raw props
-    // watchers (vue2-native-template.test.ts) until that target is accepted.
+    // Vue2 keeps its explicit rejection control for all-key props watchers.
+    // Keyed raw watch is accepted by the full Shadcn and raw-props consumers.
     operations: webOperations.filter((operation) => !VUE2_DEFERRED_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [{ name: 'vue', version: '2.6.14', role: 'target' }, ...floatingUiDependency],
@@ -658,6 +658,7 @@ export interface TargetOperationAnalysis {
   readonly sites: readonly { operation: Operation; span: SourceSpan }[];
   readonly authoredHooks: readonly string[];
   readonly functions: readonly FunctionIR[];
+  readonly ruleMetaKeys: readonly RuleMetaKey[];
 }
 /** Calls, host callbacks and outward callables are invocation roots. Creation alone is inert. */
 export function checkTargetOperations(
@@ -679,6 +680,7 @@ export function checkTargetOperations(
   const allowed = new Set(selected.operations);
   const capabilities = new Set(selected.hostCapabilities);
   const operations = new Set<Operation>();
+  const ruleMetaKeys = new Set<RuleMetaKey>();
   const sites: { operation: Operation; span: SourceSpan }[] = [];
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   const reachedHooks = new Set<string>(),
@@ -735,6 +737,24 @@ export function checkTargetOperations(
         break;
       case 'rule':
         operation('rule.declare', value.span);
+        for (const dependency of value.declaration.deps)
+          if (dependency.kind === 'meta') {
+            ruleMetaKeys.add(dependency.key);
+            if (
+              ![
+                'react-runtime-v1',
+                'react-dom-source-v1',
+                'vue-source-v1',
+                'vue2-source-v1',
+                'web-component-source-v1',
+              ].includes(selected.id)
+            )
+              diagnostic(
+                'PUI4003',
+                `Live Rule Meta ${dependency.key} is not implemented by ${selected.id}.`,
+                dependency.span
+              );
+          }
         break;
       case 'intrinsic':
         if (
@@ -870,6 +890,7 @@ export function checkTargetOperations(
           sites,
           authoredHooks: [...reachedHooks],
           functions: [...reachedFunctions],
+          ruleMetaKeys: [...ruleMetaKeys].sort(),
         },
       };
 }

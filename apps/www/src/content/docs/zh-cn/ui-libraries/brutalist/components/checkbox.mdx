@@ -29,6 +29,12 @@ Root 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` packag
 
 相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Checkbox guarantee。
 
+## 只读与显式 Form 组合
+
+Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。普通 Root 不会自动注册到 Field 或 Form。
+
+在显式 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 的 `fieldCheckbox`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+
 ## API
 
 Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 或 `indeterminate` 会使对应事实进入受控模式。
@@ -38,9 +44,9 @@ Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `ch
   rows={[
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />
 
 这些属性属于 Root。Indicator 没有属性。
-

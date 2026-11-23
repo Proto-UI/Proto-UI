@@ -12,6 +12,8 @@ export type AxisInputSample =
       /** Signed fractions of the start-time displacement basis (geometry span by default); intentionally not clamped. */
       delta: number;
       totalDelta: number;
+      /** Opt-in start origin in the declared role's public order; null means input background. */
+      originIndex?: number | null;
     }>
   | Readonly<{ phase: 'cancel'; reason: AxisInputCancelReason }>;
 
@@ -45,6 +47,8 @@ export type AxisInputBinding = Readonly<{
   travelRole?: string;
   /** Sum of same-owner parts' extents for delta normalization; position is unchanged. */
   deltaBasisRole?: string;
+  /** Same-owner role whose original input hit is observed without acquiring another contact. */
+  originRole?: string;
 }>;
 
 export type AxisInputHandle<P extends PropsBaseType = PropsBaseType> = Readonly<{
@@ -61,6 +65,8 @@ export type AxisInputHostBinding = Readonly<{
   travelTarget?: unknown;
   /** Host-private same-owner parts; zero-sized collapsed parts are allowed. */
   deltaBasisTargets?: readonly unknown[];
+  /** Privileged ordered targets for originRole; never exposed to a prototype. */
+  originTargets?: readonly unknown[];
   config: AxisInputConfig;
   onSample(sample: AxisInputSample): void;
 }>;

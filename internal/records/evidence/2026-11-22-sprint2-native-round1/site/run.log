@@ -1,0 +1,142 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/Proto-UI/Proto-UI[39m
+
+[2m1:52:36 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  // @vitest-environment node
+2  |  import { createHash } from 'node:crypto';
+3  |  import { execFileSync } from 'node:child_process';
+   |     ^
+4  |  import { mkdir, readFile, writeFile } from 'node:fs/promises';
+5  |  import path from 'node:path';
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts[39m
+[2m1:52:36 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  /** One app-owned storage identity shared by pre-upgrade and live controls. */
+   |                                                                           ^
+2  |  export const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
+3  |  
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/components/adapter-preference-key.ts[39m
+[2m1:52:36 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
+   |                                                                           ^
+2  |  // Shared server/browser plumbing for documentation browser regressions.
+3  |  // Extracted so a third suite does not need a third inline copy; the two existing
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts[39m
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:29.809Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=1 requestMs=7 totalMs=7 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:30.060Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=2 requestMs=1 totalMs=258 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:30.312Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=3 requestMs=2 totalMs=510 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:30.564Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=4 requestMs=2 totalMs=762 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:30.815Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=5 requestMs=1 totalMs=1013 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:31.068Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=6 requestMs=2 totalMs=1266 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:31.319Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=7 requestMs=1 totalMs=1517 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:31.570Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=8 requestMs=1 totalMs=1768 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:31.821Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=9 requestMs=1 totalMs=2019 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:32.073Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=10 requestMs=2 totalMs=2271 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:32.324Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=11 requestMs=1 totalMs=2522 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:32.576Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=12 requestMs=2 totalMs=2774 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:32.827Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=13 requestMs=1 totalMs=3025 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:33.079Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=14 requestMs=1 totalMs=3277 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:33.330Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=15 requestMs=1 totalMs=3528 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:33.581Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=16 requestMs=0 totalMs=3779 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:33439
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:53:39.410Z http://127.0.0.1:33439/en/ui-libraries/shadcn/tabs/ attempt=17 requestMs=5578 totalMs=9608 HTTP 200 OK
+
+ [32m✓[39m apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts [2m([22m[2m42 tests[22m[2m)[22m[33m 162295[2mms[22m[39m
+   [33m[2m✓[22m[39m B: en/wc switches one live Tabs owner through all three exhibition profiles [33m4371[2mms[22m[39m
+   [33m[2m✓[22m[39m B: en/react switches one live Tabs owner through all three exhibition profiles [33m2936[2mms[22m[39m
+   [33m[2m✓[22m[39m B: en/vue switches one live Tabs owner through all three exhibition profiles [33m3116[2mms[22m[39m
+   [33m[2m✓[22m[39m B: en/vue2 switches one live Tabs owner through all three exhibition profiles [33m3045[2mms[22m[39m
+   [33m[2m✓[22m[39m B: zh-cn/wc switches one live Tabs owner through all three exhibition profiles [33m3178[2mms[22m[39m
+   [33m[2m✓[22m[39m B: zh-cn/react switches one live Tabs owner through all three exhibition profiles [33m3077[2mms[22m[39m
+   [33m[2m✓[22m[39m B: zh-cn/vue switches one live Tabs owner through all three exhibition profiles [33m3033[2mms[22m[39m
+   [33m[2m✓[22m[39m B: zh-cn/vue2 switches one live Tabs owner through all three exhibition profiles [33m3039[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/light/shadcn/enhanced preserves group/leaf geometry and native disclosure [33m4012[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure [33m941[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/light/brutalist/enhanced preserves group/leaf geometry and native disclosure [33m4817[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure [33m776[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure [33m4031[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure [33m926[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure [33m4663[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure [33m729[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/light/shadcn/enhanced preserves group/leaf geometry and native disclosure [33m4006[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure [33m910[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/light/brutalist/enhanced preserves group/leaf geometry and native disclosure [33m4898[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure [33m696[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure [33m3932[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure [33m908[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure [33m4663[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure [33m746[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/shadcn/enhanced keeps full mobile navigation targets [33m2504[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/shadcn/no-js keeps full mobile navigation targets [33m749[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/brutalist/enhanced keeps full mobile navigation targets [33m2084[2mms[22m[39m
+   [33m[2m✓[22m[39m C: en/brutalist/no-js keeps full mobile navigation targets [33m516[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/shadcn/enhanced keeps full mobile navigation targets [33m2500[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/shadcn/no-js keeps full mobile navigation targets [33m732[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/brutalist/enhanced keeps full mobile navigation targets [33m2072[2mms[22m[39m
+   [33m[2m✓[22m[39m C: zh-cn/brutalist/no-js keeps full mobile navigation targets [33m561[2mms[22m[39m
+   [33m[2m✓[22m[39m D: en/light/enhanced preserves a native, focused Hero pill without prose underline [33m3772[2mms[22m[39m
+   [33m[2m✓[22m[39m D: en/light/failed-scripts preserves a native, focused Hero pill without prose underline [33m870[2mms[22m[39m
+   [33m[2m✓[22m[39m D: en/dark/enhanced preserves a native, focused Hero pill without prose underline [33m3255[2mms[22m[39m
+   [33m[2m✓[22m[39m D: en/dark/failed-scripts preserves a native, focused Hero pill without prose underline [33m750[2mms[22m[39m
+   [33m[2m✓[22m[39m D: zh-cn/light/enhanced preserves a native, focused Hero pill without prose underline [33m3376[2mms[22m[39m
+   [33m[2m✓[22m[39m D: zh-cn/light/failed-scripts preserves a native, focused Hero pill without prose underline [33m793[2mms[22m[39m
+   [33m[2m✓[22m[39m D: zh-cn/dark/enhanced preserves a native, focused Hero pill without prose underline [33m3292[2mms[22m[39m
+   [33m[2m✓[22m[39m D: zh-cn/dark/failed-scripts preserves a native, focused Hero pill without prose underline [33m808[2mms[22m[39m
+   [33m[2m✓[22m[39m #1154: en renders the current public Hook evidence without accepting the historical candidate [33m1757[2mms[22m[39m
+   [33m[2m✓[22m[39m #1154: zh-cn renders the current public Hook evidence without accepting the historical candidate [33m1822[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m42 passed[39m[22m[90m (42)[39m
+[2m   Start at [22m 13:52:36
+[2m   Duration [22m 162.81s[2m (transform 75ms, setup 0ms, collect 286ms, tests 162.30s, environment 0ms, prepare 40ms)[22m
+
+JSON report written to /home/runner/work/_temp/sprint2-consumers/site/report.json

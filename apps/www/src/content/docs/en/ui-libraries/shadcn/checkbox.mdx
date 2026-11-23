@@ -30,6 +30,12 @@ The demo below is one composition: unchecked, checked, mixed, disabled-and-check
 
 Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
 
+## Read-only and explicit Form composition
+
+Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. Ordinary Root does not automatically register with Field or Form.
+
+Use `fieldCheckbox` from `@proto.ui/prototypes-shadcn/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+
 ## API
 
 Omitted boolean props use the defaults below. Passing `checked` or `indeterminate` selects controlled mode for that fact; the other fact can stay uncontrolled.
@@ -42,6 +48,7 @@ Omitted boolean props use the defaults below. Passing `checked` or `indeterminat
     { name: 'indeterminate', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
   ]}
 />
 

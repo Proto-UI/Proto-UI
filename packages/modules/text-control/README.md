@@ -47,3 +47,9 @@ MIT
 ## Catalog boundary
 
 `M-TEXT-CONTROL-0001`, `HC-TEXT-CONTROL-0001`, and `T-TEXT-CONTROL-0001` remain draft. The Module retains declaration/value ownership across view leases and rejects stale lease input. Listener registration and returned cancellation are setup-only; runtime value synchronization requires callback scope. Portable selection requests and edit-menu customization remain separate future work.
+
+## Selection observations
+
+The draft `C-TEXT-CONTROL-SELECTION-0001` adds read-only selection facts to editing events and snapshots. `selection` is `{ start, end, direction }` in UTF-16 offsets into the accompanying canonical value. Missing, unsupported or invalid facts are `null`; older hosts may omit the field with the same unknown meaning. `selectionchange` observes caret or range changes without requesting a text value change. It uses the same mounted editor lease and does not expose the host target or admit selection-setting requests.
+
+Controlled snapshots retain the canonical owner value. If the physical editor currently holds an unaccepted candidate, snapshot selection is unknown until value reconciliation; event selection still refers to that event's candidate value. Base OTP consumes these facts to show the insertion slot or selected range, including caret movement through an already filled code. It does not infer a caret from text length.

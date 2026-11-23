@@ -318,7 +318,7 @@ export function emitVue2Source(
   const contextNames = new Map(
     ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`])
   );
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix, admitted.value.ruleMetaKeys);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -1136,6 +1136,7 @@ ${stateful ? '  let notifying = false;\n' : ''}${
 ${
   styled
     ? `  const style = PUICreateNativeStyle({
+    ${atoms.ruleMeta("activeRoot?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", false)}
     ensureSetup: setupOnly,
     ensureRuntime: callback,
     isAlive: () => !terminal && !disposed,
@@ -1242,7 +1243,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
     if (!hydrated) { hydrated = true; ${refresh} return; }
     const changedKeys = Object.keys(specs).filter((key) => !Object.is(previous[key], resolved[key]));
     const changedRawKeys = watchers.some((watch) => watch.active && (watch.kind === 'raw' || watch.kind === 'raw-all'))
-      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => PUIOwn(previousRaw, key) !== PUIOwn(raw, key) || !Object.is(previousRaw[key], raw[key])) : [];
+      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : [];
     ${refresh ? `if (changedKeys.length) { ${refresh} }` : ''}
     if ((changedKeys.length || changedRawKeys.length) && !dispatchingProps) {
       dispatchingProps = true;
@@ -1261,7 +1262,10 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
                 const info = { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] };
                 // The registration discriminant preserves the raw/resolved callback
                 // relation; the host group order and snapshot copies stay unchanged.
-                if (watch.kind === 'raw' || watch.kind === 'raw-all') watch.fn(run, nextRaw, previousRaw, info);
+                if (watch.kind === 'raw' || watch.kind === 'raw-all') {
+                  console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+                  watch.fn(run, nextRaw, previousRaw, info);
+                }
                 else watch.fn(run, next.snapshot, previous, info);
               }
             }

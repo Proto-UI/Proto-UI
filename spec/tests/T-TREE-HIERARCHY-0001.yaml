@@ -1,0 +1,79 @@
+id: T-TREE-HIERARCHY-0001
+type: test
+title: Authored Tree hierarchy and public directional recipes
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: The bounded deterministic and real-adapter public recipe suites are recorded independently of pending native browser execution, assistive technology and stable semantic admission.
+summary: Verifies portable ownership and actual authored public consumption without replacing independent host or compiler acceptance.
+cases:
+  - id: T-TREE-HIERARCHY-0001-CASE-IDENTITY
+    title: Dynamic hierarchy and nearest-root identity
+    covers: [C-TREE-HIERARCHY-0001-IDENTITY]
+    expectation: dynamic-hierarchy-and-nearest-root-identity
+  - id: T-TREE-HIERARCHY-0001-CASE-STATE
+    title: Controlled requests and committed focus restoration
+    covers: [C-TREE-HIERARCHY-0001-STATE]
+    expectation: controlled-requests-and-committed-focus-restoration
+  - id: T-TREE-HIERARCHY-0001-CASE-KEYBOARD
+    title: LTR and RTL navigation remain independent of selection
+    covers: [C-TREE-HIERARCHY-0001-KEYBOARD]
+    expectation: ltr-and-rtl-navigation-remain-independent-of-selection
+  - id: T-TREE-HIERARCHY-0001-CASE-RELATIONSHIPS
+    title: Keyed Group links withdraw missing and ambiguous targets
+    covers: [C-TREE-HIERARCHY-0001-RELATIONSHIPS]
+    expectation: keyed-group-links-withdraw-missing-and-ambiguous-targets
+  - id: T-TREE-HIERARCHY-0001-CASE-PRESENTATION
+    title: Public family Group presentation follows direction
+    covers: [C-TREE-HIERARCHY-0001-PRESENTATION]
+    expectation: public-family-group-presentation-follows-direction
+verifies:
+  contracts: [C-TREE-HIERARCHY-0001]
+exercises:
+  prototypes: [P-BASE-TREE]
+implementations:
+  - id: source-conformance
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/tree-hierarchy.test.ts
+    required: true
+    consumesCases:
+      [
+        T-TREE-HIERARCHY-0001-CASE-IDENTITY,
+        T-TREE-HIERARCHY-0001-CASE-STATE,
+        T-TREE-HIERARCHY-0001-CASE-KEYBOARD,
+        T-TREE-HIERARCHY-0001-CASE-RELATIONSHIPS,
+        T-TREE-HIERARCHY-0001-CASE-PRESENTATION,
+      ]
+  - id: public-web-adapter-recipes
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/collection-recipes.test.ts
+    required: true
+    consumesCases:
+      [
+        T-TREE-HIERARCHY-0001-CASE-IDENTITY,
+        T-TREE-HIERARCHY-0001-CASE-STATE,
+        T-TREE-HIERARCHY-0001-CASE-KEYBOARD,
+        T-TREE-HIERARCHY-0001-CASE-RELATIONSHIPS,
+        T-TREE-HIERARCHY-0001-CASE-PRESENTATION,
+      ]
+  - id: native-public-recipes
+    kind: runtime-test
+    status: active
+    path: scripts/analysis/collections-recipes-browser.mjs
+    required: true
+    consumesCases:
+      [
+        T-TREE-HIERARCHY-0001-CASE-IDENTITY,
+        T-TREE-HIERARCHY-0001-CASE-STATE,
+        T-TREE-HIERARCHY-0001-CASE-KEYBOARD,
+        T-TREE-HIERARCHY-0001-CASE-RELATIONSHIPS,
+        T-TREE-HIERARCHY-0001-CASE-PRESENTATION,
+      ]
+    notes:
+      - Runner is implemented; current-candidate browser report is required separately and no native pass is inferred from source or happy-dom.
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Map deterministic ownership and public recipe evidence while keeping native, assistive technology and stable admission separate.
+tags: [sprint2, collections, ownership, conformance]

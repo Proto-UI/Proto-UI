@@ -4,12 +4,11 @@ import type { DemoSpec } from '../../../../components/PrototypePreviewer/demo-ty
 /**
  * Builds the bounded Shadcn Tabs preset exhibition recipe for a supported
  * upstream profile. Children, refs, defaultValue, and the disabled trigger are
- * held identical across every preset so the only changing input is the
- * styleProfile on the wrapping style scope. Switching presets therefore cannot
- * reset value, focus, or children — Base remains the sole state owner.
+ * held identical across every preset. These are independent static comparisons;
+ * the separate profile-switch recipe exercises a live scope update.
  *
- * Supported presets come from internal/fixtures/shadcn-tabs-style/coverage.json
- * (`projected-bounded-text-default` entries): nova, rhea, new-york-v4.
+ * These three exhibition profiles preserve the original bounded comparison.
+ * The current Tabs visual definition separately lists all supported profiles.
  */
 export function createTabsPresetDemo(styleProfile: 'nova' | 'rhea' | 'new-york-v4'): DemoSpec {
   const recipe: DemoSpec = {
@@ -17,28 +16,33 @@ export function createTabsPresetDemo(styleProfile: 'nova' | 'rhea' | 'new-york-v
     root: {
       kind: 'proto',
       prototypeId: 'shadcn-tabs-root',
+      ref: 'tabs',
       className: 'w-[420px] max-w-full',
       props: { defaultValue: 'account' },
       children: [
         {
           kind: 'proto',
           prototypeId: 'shadcn-tabs-list',
+          ref: 'tabList',
           children: [
             {
               kind: 'proto',
               prototypeId: 'shadcn-tabs-trigger',
+              ref: 'accountTab',
               props: { value: 'account' },
               children: ['Account'],
             },
             {
               kind: 'proto',
               prototypeId: 'shadcn-tabs-trigger',
+              ref: 'passwordTab',
               props: { value: 'password' },
               children: ['Password'],
             },
             {
               kind: 'proto',
               prototypeId: 'shadcn-tabs-trigger',
+              ref: 'billingTab',
               props: { value: 'billing', disabled: true },
               children: ['Billing'],
             },
@@ -52,12 +56,14 @@ export function createTabsPresetDemo(styleProfile: 'nova' | 'rhea' | 'new-york-v
         {
           kind: 'proto',
           prototypeId: 'shadcn-tabs-content',
+          ref: 'accountContent',
           props: { value: 'account' },
           children: ['Make changes to your account here.'],
         },
         {
           kind: 'proto',
           prototypeId: 'shadcn-tabs-content',
+          ref: 'passwordContent',
           props: { value: 'password' },
           children: ['Change your password here.'],
         },
@@ -78,6 +84,7 @@ export function createTabsPresetDemo(styleProfile: 'nova' | 'rhea' | 'new-york-v
     ...wrapped,
     root: {
       ...wrapped.root,
+      ref: 'profileScope',
       props: { styleProfile },
     },
   };

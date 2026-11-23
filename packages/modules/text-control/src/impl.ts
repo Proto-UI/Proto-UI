@@ -11,7 +11,11 @@ import type {
   TextControlSnapshot,
   TextControlValueMode,
 } from '@proto.ui/core';
-import { canonicalizeTextControlValue, getModuleDeclaration } from '@proto.ui/core';
+import {
+  canonicalizeTextControlSelection,
+  canonicalizeTextControlValue,
+  getModuleDeclaration,
+} from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import type { PropsBaseType } from '@proto.ui/types';
 import {
@@ -41,6 +45,7 @@ export class TextControlModuleImpl extends ModuleBase {
   private value = '';
   private composing = false;
   private callbackPrelude: { epoch: number } | null = null;
+  private candidateObservation: { epoch: number; ownerValue: string } | null = null;
   private listeners: Listener[] = [];
   private host: TextControlHost | null = null;
   private lease: TextControlHostLease | null = null;
@@ -125,7 +130,14 @@ export class TextControlModuleImpl extends ModuleBase {
           ? this.canonicalize(next.defaultValue)
           : this.patch.defaultValue,
     });
-    if (this.valueMode === 'controlled') this.value = this.canonicalize(this.patch.value ?? '');
+    if (this.valueMode === 'controlled') {
+      const nextValue = this.canonicalize(this.patch.value ?? '');
+      // A real owner transition retires this observation permanently. Returning
+      // to the previous string later in the same callback is another owner
+      // transition, not a refresh of the original owner.
+      if (nextValue !== this.value) this.candidateObservation = null;
+      this.value = nextValue;
+    }
     this.syncLease();
   }
 
@@ -140,6 +152,7 @@ export class TextControlModuleImpl extends ModuleBase {
     // Retire composition, queued restoration and reentrant old callbacks before the new value.
     this.eventGeneration += 1;
     this.callbackPrelude = null;
+    this.candidateObservation = null;
     this.value = next;
     this.composing = false;
     this.attachLease();
@@ -147,7 +160,21 @@ export class TextControlModuleImpl extends ModuleBase {
   }
 
   snapshot(): TextControlSnapshot | null {
-    return this.declared ? Object.freeze({ value: this.value, composing: this.composing }) : null;
+    if (!this.declared) return null;
+    let selection = null;
+    try {
+      const host = this.lease?.snapshot();
+      if (host && this.canonicalize(host.value) === this.value) {
+        selection = canonicalizeTextControlSelection(
+          host.selection,
+          host.value,
+          this.declaration?.lineMode ?? 'multiline'
+        );
+      }
+    } catch {
+      // An unavailable selection observation does not invalidate canonical value ownership.
+    }
+    return Object.freeze({ value: this.value, composing: this.composing, selection });
   }
 
   protected override onCapsEpoch(): void {
@@ -198,8 +225,10 @@ export class TextControlModuleImpl extends ModuleBase {
   private effectivePatch(): TextControlPatch {
     const { value: _declaredValue, ...patchWithoutValue } = this.patch;
     const shouldProjectValue = !(
-      this.valueMode === 'controlled' &&
-      (this.composing || this.callbackPrelude?.epoch === this.leaseEpoch)
+      (this.valueMode === 'controlled' &&
+        (this.composing || this.callbackPrelude?.epoch === this.leaseEpoch)) ||
+      (this.candidateObservation?.epoch === this.leaseEpoch &&
+        this.candidateObservation.ownerValue === this.value)
     );
     return Object.freeze({
       ...patchWithoutValue,
@@ -215,11 +244,28 @@ export class TextControlModuleImpl extends ModuleBase {
   private receive(event: TextControlEvent): void {
     const epoch = this.leaseEpoch;
     const generation = ++this.eventGeneration;
+    const previousObservation = this.candidateObservation;
+    const controlledEdit =
+      this.valueMode === 'controlled' &&
+      (event.type === 'input' || event.type === 'change' || event.type === 'compositionend');
+    const observation =
+      (event.type === 'selectionchange' || controlledEdit) &&
+      this.canonicalize(event.value) !== this.value
+        ? { epoch, ownerValue: this.value }
+        : null;
+    if (observation) this.candidateObservation = observation;
     // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
     const canonicalEvent: TextControlEvent = Object.freeze({
-      ...event,
+      type: event.type,
       value: this.canonicalize(event.value),
+      composing: event.composing,
       data: typeof event.data === 'string' ? this.canonicalize(event.data) : event.data,
+      inputType: event.inputType,
+      selection: canonicalizeTextControlSelection(
+        event.selection,
+        event.value,
+        this.declaration?.lineMode ?? 'multiline'
+      ),
     });
     // CallbackScope may drain older props before it invokes our listener.
     // Protect both a starting composition and a finishing native candidate
@@ -296,6 +342,8 @@ export class TextControlModuleImpl extends ModuleBase {
         if (epoch === this.leaseEpoch) inCurrentCallback(() => this.syncLease());
       });
     } finally {
+      if (observation && this.candidateObservation === observation)
+        this.candidateObservation = previousObservation;
       // Native composition facts survive a failed callback prelude. An older
       // event must never settle over a newer event or a replacement lease.
       if (epoch === this.leaseEpoch && generation === this.eventGeneration) {

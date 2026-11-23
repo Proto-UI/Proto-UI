@@ -245,8 +245,11 @@ export function emitQtSource(
         const bound = new Map(node.states.map((state) => [state.id, state.value]));
         const condition = (value: RuleCondition): string => {
           if (value.type === 'true' || value.type === 'false') return value.type;
-          if (value.type === 'eq')
+          if (value.type === 'eq') {
+            if (value.left.type === 'meta')
+              throw new Error('Rule Meta must fail Qt target admission.');
             return `(${value.left.type === 'prop' ? `${p}Owner.getProps()[${JSON.stringify(value.left.key)}]` : `${expression(bound.get(value.left.id)!, depth)}.get()`} === ${JSON.stringify(value.right)})`;
+          }
           if (value.type === 'not') return `!(${condition(value.expr)})`;
           return `(${value.exprs.map(condition).join(value.type === 'all' ? ' && ' : ' || ') || (value.type === 'all' ? 'true' : 'false')})`;
         };

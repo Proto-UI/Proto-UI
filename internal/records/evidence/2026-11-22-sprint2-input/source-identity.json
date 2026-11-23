@@ -1,0 +1,1726 @@
+{
+  "schema": "proto-ui.sprint2-input-source.v1",
+  "base": {
+    "commit": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "tree": "513879bf79a93cc9325f5193fa0559e16ea57108"
+  },
+  "candidate": {
+    "commit": "095ecbdde4902941a13032386765dac59ebd7e6b",
+    "tree": "216ff7d5c1d639a70889d5f1ea930e1a87bef0fa",
+    "branch": "sprint2/shared-input-20261122"
+  },
+  "archiveCreatedAt": "2026-11-22T13:10:43.433489+00:00",
+  "purpose": "Reviewable source checkpoint and complete implementation patch history. This is not a claim that every historical run used this clean tree.",
+  "historicalRunBinding": "Unless a receipt explicitly states otherwise, the exact dirty worktree digest was not recorded at execution time. Related commit IDs identify the correction, not a retrospectively asserted tested tree.",
+  "toolchain": {
+    "node": "v24.22.3",
+    "packageManager": "pnpm@10.32.1",
+    "lockSha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8"
+  },
+  "commits": [
+    {
+      "commit": "e2ef558597da38cd6d6fa0ac00f27f1630e50d23",
+      "tree": "280164a90ab1cf12439046435a0dfcea149b62aa",
+      "parents": ["dc3b184ba10b0de53e40359c52d012b204b2cd01"],
+      "authorDate": "2026-11-22T10:32:53Z",
+      "committerDate": "2026-11-22T10:32:53Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "feat(text-control): expose portable selection facts for OTP activity",
+      "message": "feat(text-control): expose portable selection facts for OTP activity\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "bb1bb301408a5263b55f5e4a60c408cbd50efc2e",
+      "tree": "f0bdd2ff950eac3df2ee8d3b17db0a6d296c90d2",
+      "parents": ["e2ef558597da38cd6d6fa0ac00f27f1630e50d23"],
+      "authorDate": "2026-11-22T10:44:04Z",
+      "committerDate": "2026-11-22T10:44:04Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(text-control): preserve candidate during selection observations",
+      "message": "fix(text-control): preserve candidate during selection observations\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "8a4afaefc6133f63a8b5eab6c5290fd8c2a9d5a2",
+      "tree": "e4e92c1f51d542f310caf8544b4c3a73dcfad8bd",
+      "parents": ["bb1bb301408a5263b55f5e4a60c408cbd50efc2e"],
+      "authorDate": "2026-11-22T10:53:42Z",
+      "committerDate": "2026-11-22T10:53:42Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "feat(axis-input): expose leased authored origin facts",
+      "message": "feat(axis-input): expose leased authored origin facts\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "91ec7532e283dac6896db71b3e9b1a7175069e7a",
+      "tree": "3307e20e7641bec6dd702d9e00d0b9a1721bc061",
+      "parents": ["8a4afaefc6133f63a8b5eab6c5290fd8c2a9d5a2"],
+      "authorDate": "2026-11-22T11:00:44Z",
+      "committerDate": "2026-11-22T11:00:44Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "feat(slider): complete Values input and grouped Field consumption",
+      "message": "feat(slider): complete Values input and grouped Field consumption\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "e63d46993a49fcc989c6cc658c44fe763bf29d2a",
+      "tree": "133962f01ceb08c17ee8b31e4ddc3d1fdb68e468",
+      "parents": ["91ec7532e283dac6896db71b3e9b1a7175069e7a"],
+      "authorDate": "2026-11-22T11:01:43Z",
+      "committerDate": "2026-11-22T11:01:43Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "test(input): add four-host native OTP and Slider consumers",
+      "message": "test(input): add four-host native OTP and Slider consumers\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "92dbc8a0f0861ab2e63523da0420fa4aa32d8e3e",
+      "tree": "9250d8c1b273b75b8bab0a5508965ee31940a60d",
+      "parents": ["e63d46993a49fcc989c6cc658c44fe763bf29d2a"],
+      "authorDate": "2026-11-22T11:03:53Z",
+      "committerDate": "2026-11-22T11:03:53Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "test(field): retain the governed Bootstrap invalid ink oracle",
+      "message": "test(field): retain the governed Bootstrap invalid ink oracle\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "dcf20f55b7eeb30e97d1b8d92cd17fdc7eceda69",
+      "tree": "8eefdd4742211bb0916cb2f168a16b389fd9c98d",
+      "parents": ["92dbc8a0f0861ab2e63523da0420fa4aa32d8e3e"],
+      "authorDate": "2026-11-22T11:19:29Z",
+      "committerDate": "2026-11-22T11:19:29Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(input): retire queued validation and interrupted Slider owners",
+      "message": "fix(input): retire queued validation and interrupted Slider owners\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "6efeb9dd2220a43dedf42e6446ad303a97e43b34",
+      "tree": "cf6d34b1785b22b8976700e4235c0154fd949462",
+      "parents": ["dcf20f55b7eeb30e97d1b8d92cd17fdc7eceda69"],
+      "authorDate": "2026-11-22T11:32:42Z",
+      "committerDate": "2026-11-22T11:32:42Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(text-control): preserve non-null Web lease snapshot contract",
+      "message": "fix(text-control): preserve non-null Web lease snapshot contract\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "3bf60f1aade1ceaea417b39ba918c988640159a2",
+      "tree": "ba07e3a350b2d1124f13983b286877d8a64181ed",
+      "parents": ["6efeb9dd2220a43dedf42e6446ad303a97e43b34"],
+      "authorDate": "2026-11-22T11:37:12Z",
+      "committerDate": "2026-11-22T11:37:12Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "feat(form): deliver controlled validation and nested public consumers",
+      "message": "feat(form): deliver controlled validation and nested public consumers\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "b1033a4851fd13e4509b22145ba4e7d0bdaf8596",
+      "tree": "0f04054d12d3f2e7ca0218cc03c936a4ad613d6f",
+      "parents": ["3bf60f1aade1ceaea417b39ba918c988640159a2"],
+      "authorDate": "2026-11-22T11:54:03Z",
+      "committerDate": "2026-11-22T11:54:03Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(text-control): retain edit candidates through owner callbacks",
+      "message": "fix(text-control): retain edit candidates through owner callbacks\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "14c47f2a22ad3629ae88a5e6cce99b4098732b0e",
+      "tree": "af281990d2d043137dd1bba4735a765a291e126e",
+      "parents": ["b1033a4851fd13e4509b22145ba4e7d0bdaf8596"],
+      "authorDate": "2026-11-22T11:57:00Z",
+      "committerDate": "2026-11-22T11:57:00Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(text-control): retire candidate protection on owner changes",
+      "message": "fix(text-control): retire candidate protection on owner changes\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "3d5e5561d8c015bf1240caf1aaf602bcea50a049",
+      "tree": "c3b17e154867c1c74e04fa1c87b2596568a1b360",
+      "parents": ["14c47f2a22ad3629ae88a5e6cce99b4098732b0e"],
+      "authorDate": "2026-11-22T11:58:59Z",
+      "committerDate": "2026-11-22T11:58:59Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(forms): stop retired reset and edit continuations",
+      "message": "fix(forms): stop retired reset and edit continuations\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "abbc6a8a95d6827790e199df8d439fbf9997f7e7",
+      "tree": "38af3cdb4f3d9d53e5a87883c9322239786f7449",
+      "parents": ["3d5e5561d8c015bf1240caf1aaf602bcea50a049"],
+      "authorDate": "2026-11-22T12:01:39Z",
+      "committerDate": "2026-11-22T12:01:39Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "test(forms): add public Form and Select browser recipes",
+      "message": "test(forms): add public Form and Select browser recipes\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "e16e820afd4df769cee36ab132f79f754a8c23fc",
+      "tree": "9bbae029704e0306fd55071c2fd91824c70e31f7",
+      "parents": ["abbc6a8a95d6827790e199df8d439fbf9997f7e7"],
+      "authorDate": "2026-11-22T12:30:59Z",
+      "committerDate": "2026-11-22T12:30:59Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "feat(field): add explicit checkbox and radio form compositions",
+      "message": "feat(field): add explicit checkbox and radio form compositions\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "ebbfc57c0868c14318d0673266bc4e6d1db16604",
+      "tree": "21916f6926a9dc4e93c44025ac3ca78d8b3fe735",
+      "parents": ["e16e820afd4df769cee36ab132f79f754a8c23fc"],
+      "authorDate": "2026-11-22T12:42:51Z",
+      "committerDate": "2026-11-22T12:42:51Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(field): preserve reset and choice ownership across reentry",
+      "message": "fix(field): preserve reset and choice ownership across reentry\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "369362235af5028b1bff5e4355461dbaf4b1f930",
+      "tree": "63f9e62ee1494f141b42369cf8e2fac82b635ffc",
+      "parents": ["ebbfc57c0868c14318d0673266bc4e6d1db16604"],
+      "authorDate": "2026-11-22T12:46:17Z",
+      "committerDate": "2026-11-22T12:46:17Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(radio): retire coordination after focused owner reentry",
+      "message": "fix(radio): retire coordination after focused owner reentry\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "42ee3b9c35f227622e6f2914f83f7dcc55938700",
+      "tree": "f39f968e844c1022ec9d11d60b8b185a966a37dc",
+      "parents": ["369362235af5028b1bff5e4355461dbaf4b1f930"],
+      "authorDate": "2026-11-22T12:53:52Z",
+      "committerDate": "2026-11-22T12:53:52Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "fix(switch): retain reset lease before preview notifications",
+      "message": "fix(switch): retain reset lease before preview notifications\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    },
+    {
+      "commit": "095ecbdde4902941a13032386765dac59ebd7e6b",
+      "tree": "216ff7d5c1d639a70889d5f1ea930e1a87bef0fa",
+      "parents": ["42ee3b9c35f227622e6f2914f83f7dcc55938700"],
+      "authorDate": "2026-11-22T12:55:19Z",
+      "committerDate": "2026-11-22T12:55:19Z",
+      "authorName": "Codex",
+      "authorEmail": "codex@openai.com",
+      "subject": "test(forms): exercise public choice recipes across web hosts",
+      "message": "test(forms): exercise public choice recipes across web hosts\n\nSigned-off-by: Codex <codex@openai.com>\n\n"
+    }
+  ],
+  "changedFiles": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/field-choices-recipes.test.ts",
+      "status": "present",
+      "gitBlob": "ee33917989055379ccf324b34e7c466388101ef2",
+      "mode": "100644",
+      "bytes": 12173,
+      "sha256": "4406b786260fcdae17711b9f421089156ae28c136cc39568534b6311ebeea5bc"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts",
+      "status": "present",
+      "gitBlob": "6683d53b7b87b6c43631c2cfaa868de879199c7e",
+      "mode": "100644",
+      "bytes": 189856,
+      "sha256": "df133b1ddf6cb538ff4e602f7bcd68c7c24835e6bf19ac8e33339571057cae7a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/form-validation-recipes.test.ts",
+      "status": "present",
+      "gitBlob": "f0dca99cf84247e6594c9fb236cb83fc70051eaa",
+      "mode": "100644",
+      "bytes": 10897,
+      "sha256": "c3b6033722ddf38054098632fca21a3745c5e0ef1e21d74ae6a8939d2da2037a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/select-input-recipes.test.ts",
+      "status": "present",
+      "gitBlob": "0f2e88aa3a509df93a7c646a2f6de00446bd60e0",
+      "mode": "100644",
+      "bytes": 5699,
+      "sha256": "816407237af6bff3fc017a1b2cac1895047cbfc8a1075f4e9009ad3266920742"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-base-field-choices.demo.ts",
+      "status": "present",
+      "gitBlob": "196e4ab7ffec7214d5b13db819d2eb594dc63769",
+      "mode": "100644",
+      "bytes": 117,
+      "sha256": "7a0c249419cc12fa04d6e7f4f5bc4844493763391b591674abc4d9b1df061869"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-base-form-validation.demo.ts",
+      "status": "present",
+      "gitBlob": "244ce24f98d5d7632657f4efa9605f9b52803f8f",
+      "mode": "100644",
+      "bytes": 123,
+      "sha256": "8c991be2ca0fbddb676b21b50497e76728231fac2ce909d490c491acedad164a"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-base-select-input.demo.ts",
+      "status": "present",
+      "gitBlob": "a924ef71e71b42ae84cf48a352cb827a2cae79a5",
+      "mode": "100644",
+      "bytes": 114,
+      "sha256": "2f8947577f7ae0fbc0aa489d51e69c739f0d73bc6cd7f495d1fccbe880a3f85d"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-brutalist-field-choices.demo.ts",
+      "status": "present",
+      "gitBlob": "e2e4549c14956b583e1c7766530a99b34b69e461",
+      "mode": "100644",
+      "bytes": 122,
+      "sha256": "c98a3560800a4d65cb8978754d1458e9b02a41c8a837df17d963357c904efabd"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-brutalist-form-validation.demo.ts",
+      "status": "present",
+      "gitBlob": "9c8351b03c639236eb7e8ab748d7dc7f02846dd2",
+      "mode": "100644",
+      "bytes": 128,
+      "sha256": "0e784213eb4240063c5fa425d29439e82f265e601c9f6f0d3390f6ad7adcf91b"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-brutalist-select-input.demo.ts",
+      "status": "present",
+      "gitBlob": "0ee7392cd039fd562159e77ea745764ef24344b1",
+      "mode": "100644",
+      "bytes": 119,
+      "sha256": "7257ca390d8b95c682d167338d574d287f4b1e58f4bd09563fbab32bd5f67078"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-brutalist-slider-values.demo.ts",
+      "status": "present",
+      "gitBlob": "ca0601e66cc8987a0faa356d3e3f22245567eb45",
+      "mode": "100644",
+      "bytes": 123,
+      "sha256": "930c74cf8c7720a8c173563f8f8e91b443bdedaccbdb43a23dbd13082518078c"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-field-choices.demo.ts",
+      "status": "present",
+      "gitBlob": "ea0fc0443cbea78eeedb133bb4f0e12314b1feb0",
+      "mode": "100644",
+      "bytes": 197,
+      "sha256": "215edb0738d2db6c56f8b3fdd53dd6d665e2b1ab0b592c9a5f8089885e570511"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-form-validation.demo.ts",
+      "status": "present",
+      "gitBlob": "ccfdf0a5ab0a8e3106f4509d59eb9eccf3ccddd9",
+      "mode": "100644",
+      "bytes": 203,
+      "sha256": "fe83171bd628c8949e6cd84f555cd5090794385a294f1dc9419518894f905e16"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-select-input.demo.ts",
+      "status": "present",
+      "gitBlob": "d12d39d4e9e9fae7dc6e0effa10237aac14af768",
+      "mode": "100644",
+      "bytes": 194,
+      "sha256": "1976ffa38de8229af42f377870b02a082de906ba51e9cdfc30e542067897adb0"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-shadcn-slider-values.demo.ts",
+      "status": "present",
+      "gitBlob": "5cec64cc8dcf6049c161773a3a1277fc2f6d4cf5",
+      "mode": "100644",
+      "bytes": 198,
+      "sha256": "0efa2e273cd315c06fa8f1ab610044fdd4a53aec8efd54f8db8a8b22123aa460"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/checkbox.mdx",
+      "status": "present",
+      "gitBlob": "a32ba0cdc508557ba4a2025148d4149e1f66b964",
+      "mode": "100644",
+      "bytes": 3551,
+      "sha256": "0a586c2e3aef6d1b368b380c376744847c762cf421704df88a2379bd2abd8b1d"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/form.mdx",
+      "status": "present",
+      "gitBlob": "07e3de419761fd0b03316622a21c91eb325a666f",
+      "mode": "100644",
+      "bytes": 5425,
+      "sha256": "62eaf1f43ab9275422ed26e0521f85fac1ae6b6bc79af90fa1cbc8a524d73a05"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "78a5a03977493de6c551c9aebc3f1442b05ffecc",
+      "mode": "100644",
+      "bytes": 2940,
+      "sha256": "6e4255bd7008d93a79d09fe9ed3932ce28192dc931f2b8d6e61246b931b00acf"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/radio-group.mdx",
+      "status": "present",
+      "gitBlob": "eb64b1eeeb608274e09abd54f16ad0ef177d1dab",
+      "mode": "100644",
+      "bytes": 5761,
+      "sha256": "1021dfc0cb80737c5ec3942258f4babb236827bd2f9f4b67842e74e4e4df59f8"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/select.mdx",
+      "status": "present",
+      "gitBlob": "5352625863738738ab1bcdd130de8e390ab2d8c8",
+      "mode": "100644",
+      "bytes": 5486,
+      "sha256": "c404a4a78f685a3356064aabcddde273018335ba40396d98df0a4d7f4f4a3d90"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/slider.mdx",
+      "status": "present",
+      "gitBlob": "38afa9c07e1f7acd0e74c824c2e8c7d4c4d3e714",
+      "mode": "100644",
+      "bytes": 3664,
+      "sha256": "3ec7feca63ee888221098031ca2bb70809124f9e187e7cb131f7b659f67cafae"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/textarea.mdx",
+      "status": "present",
+      "gitBlob": "2a6c66a14f15863011f68f542d3a54aa65e0c43c",
+      "mode": "100644",
+      "bytes": 6004,
+      "sha256": "f4df84965f3ad4615f6036c03c06a16331b9bf3c9ddc723e4217b7400688015f"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "d1814ad96b2c3ac1d0dd6dec681261b184eb9045",
+      "mode": "100644",
+      "bytes": 1965,
+      "sha256": "49e437ea0d3c50001ffb0b4610ad11fb63d74b90cf88a102e511e4034193a6ee"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/checkbox.mdx",
+      "status": "present",
+      "gitBlob": "5fb36b69cbffeb42ad976fbd4030c4c7295ad452",
+      "mode": "100644",
+      "bytes": 3559,
+      "sha256": "83483f9da4c003edd57cad8bd2a0dc40f18608f1b14b0ae9202c1341af060b4f"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/radio-group.mdx",
+      "status": "present",
+      "gitBlob": "dcfd045ed105b5a248dec20e0dcba59618e011ac",
+      "mode": "100644",
+      "bytes": 3697,
+      "sha256": "4aecf0c16d24934780ac4983ec4399edd8c8577a745968a507e4374189811df3"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/select.mdx",
+      "status": "present",
+      "gitBlob": "b6f082845f3fbb7bd50c2c685b15f9d2a0360a2f",
+      "mode": "100644",
+      "bytes": 3185,
+      "sha256": "ebece99c9aa54e93ac7f61b33d7f819037be150898fbba5563acf0254d90f3b3"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/textarea.mdx",
+      "status": "present",
+      "gitBlob": "41025762285c04382b703c06132028aaa73710fe",
+      "mode": "100644",
+      "bytes": 4565,
+      "sha256": "b81730a96f201566fcd53051c6b3ad70d2ec4115462860160316aa6f13f7d0f0"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/form.mdx",
+      "status": "present",
+      "gitBlob": "f78b5f416fbbe530c0206a584eef4669d971a206",
+      "mode": "100644",
+      "bytes": 5460,
+      "sha256": "adfe4bc3c9321e77967eadc31e26ee96cec96ba866f30ef724df98fa7ccd825f"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "aaf756a638aab3edac29496c5f4c6ca4a45c0114",
+      "mode": "100644",
+      "bytes": 2955,
+      "sha256": "678b6e899e644c425104ec819664fa34f9ed74e2ebdbfe1a6f8f3dfe5538775f"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/slider.mdx",
+      "status": "present",
+      "gitBlob": "95a815085ad178ff9886ab27fa4ce6fcd6932799",
+      "mode": "100644",
+      "bytes": 3689,
+      "sha256": "026549d38ef3e246d4d6cc013501df09033e7e4cb1dcc12efa62040a350763f9"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/liquid-glass/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "794a92d600435371b0809bafdbf47f5d790c29cc",
+      "mode": "100644",
+      "bytes": 1959,
+      "sha256": "9400f266ca429c99e99ba777fd4057c1e7c0ca999d4f74165019fc2b5c981ce0"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/checkbox.mdx",
+      "status": "present",
+      "gitBlob": "e1443046c93df9ebad493e8abc6fda43ad6f3648",
+      "mode": "100644",
+      "bytes": 3609,
+      "sha256": "3853f254a56bc5c3ef8455bcb993329da0bbde3c00945e03136ad70efb978f53"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/form.mdx",
+      "status": "present",
+      "gitBlob": "6eb66a424b68a1245974d3df623fd6474022229d",
+      "mode": "100644",
+      "bytes": 5783,
+      "sha256": "4a271707ab1af2e9edbf3fbb4de277efc6a4f0fe215108b916191dcdd883f6a8"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "b695948f3868d15c4c73b39560c5463d5dcbe949",
+      "mode": "100644",
+      "bytes": 3299,
+      "sha256": "91761d7ea626b65f7a6df2e4c7ad80136726cf627fac2e96af4f690c18bd02de"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/radio-group.mdx",
+      "status": "present",
+      "gitBlob": "4fbde77ab178b69a56fbeefe2efba5c6a45a16e1",
+      "mode": "100644",
+      "bytes": 6717,
+      "sha256": "a679c6b676f30df6c663ea0872121ea1fa05ece23d9e461f89d8093e26cd2099"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/select.mdx",
+      "status": "present",
+      "gitBlob": "fdb9a097fcce254a7ab34b1362ab9f51194beb75",
+      "mode": "100644",
+      "bytes": 4697,
+      "sha256": "fdd01911f9c6dbd79cbfbabb1d122b6a7b8f5d9847c508781244b4187ea1abf1"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/slider.mdx",
+      "status": "present",
+      "gitBlob": "d066bc1c8c3a373611c939d05e064b2f760daf88",
+      "mode": "100644",
+      "bytes": 5053,
+      "sha256": "9e2b7366e5c501c37c0d8a5239933529d56abe621540aad95ec2372012f19c98"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/textarea.mdx",
+      "status": "present",
+      "gitBlob": "932aa6a278788f6b57ad13c12e7634d1b56befe4",
+      "mode": "100644",
+      "bytes": 3776,
+      "sha256": "5056af129b8d2ad586217cfa55efc5c7e16fb8af0ea8512f5ad2f76eeabb67bd"
+    },
+    {
+      "path": "apps/www/src/content/docs/field-choices-demo.shared.ts",
+      "status": "present",
+      "gitBlob": "9c171bd3f0961f51ecb88260603943ddfae21f9d",
+      "mode": "100644",
+      "bytes": 10345,
+      "sha256": "8e298d75babf379a4e71d5eff497bf780201522ca1be4ba05e7bc36c9fbaea10"
+    },
+    {
+      "path": "apps/www/src/content/docs/form-validation-demo.shared.ts",
+      "status": "present",
+      "gitBlob": "df9866bac6da41c1730e35b613c9dd7809cf79f8",
+      "mode": "100644",
+      "bytes": 9725,
+      "sha256": "f13bf429b2bafc2d798207fe63a932587707d18873bb60f27c43bfc6d090fde1"
+    },
+    {
+      "path": "apps/www/src/content/docs/numeric-input-demo.shared.ts",
+      "status": "present",
+      "gitBlob": "ac15f6c363290b5145df009c0c3e1b3373b4feb8",
+      "mode": "100644",
+      "bytes": 4244,
+      "sha256": "867641c2f6918dac6aec961eb231303abe19af6532e9b0d7aead1af1684680b0"
+    },
+    {
+      "path": "apps/www/src/content/docs/select-input-demo.shared.ts",
+      "status": "present",
+      "gitBlob": "4eb1d680f4e83b0d58c6294296425c65d4715f8a",
+      "mode": "100644",
+      "bytes": 4172,
+      "sha256": "af9106bcda695be4d78c5433701bd47dc82914c951f86ab6af111e99a80b7ca3"
+    },
+    {
+      "path": "apps/www/src/content/docs/slider-values-demo.shared.ts",
+      "status": "present",
+      "gitBlob": "5f6638ee18b8964112d02a38a06683253b211bd1",
+      "mode": "100644",
+      "bytes": 7730,
+      "sha256": "66d9da9da7423078341d5a4df5b7c7d199e59fb7ccfc27021e7a13672e91b53c"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/checkbox.mdx",
+      "status": "present",
+      "gitBlob": "587b1161b6e7e6ac847d0a1f39a112fe17d2f9b3",
+      "mode": "100644",
+      "bytes": 3430,
+      "sha256": "f8a5a36e413624b62635367a216f23613d9e50d57d595fa19bfbea25ca83a44e"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/form.mdx",
+      "status": "present",
+      "gitBlob": "6c1b3013bbdb3f44a56adca0e324b1d5dc757176",
+      "mode": "100644",
+      "bytes": 4767,
+      "sha256": "41676da6db7d679ef9942ffd8abaae2afd6a3ccf45ae7762f402f2e99acb93cc"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "8426b5bbd419121f9500413c0e5421dbe73c2c4b",
+      "mode": "100644",
+      "bytes": 2670,
+      "sha256": "2721fb651768479905f8818d6783edad52e33359df8d35069b5dc2bc51ded87f"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/radio-group.mdx",
+      "status": "present",
+      "gitBlob": "afb6de89229e62a24f324be2413362e7919d3734",
+      "mode": "100644",
+      "bytes": 5405,
+      "sha256": "77bbe527832ace9b90250e20a3e92475a2408666475da817e952f3e855759280"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/select.mdx",
+      "status": "present",
+      "gitBlob": "2b98fdaf20a6d8664968202c9fb940aef7fcf309",
+      "mode": "100644",
+      "bytes": 5159,
+      "sha256": "d4ef624edb3ce16b738d3088daca546331dc5b28aabb8b6b05260b5c2e944d78"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/slider.mdx",
+      "status": "present",
+      "gitBlob": "58d7e0444bd83b364cfa54217dbfd593922ae61c",
+      "mode": "100644",
+      "bytes": 3269,
+      "sha256": "18c3e37c12d161a339997dfc51a4bc7c5d272002977552d3e1db096ba54f5b3b"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/textarea.mdx",
+      "status": "present",
+      "gitBlob": "1bc5037366813548b5912d270f6e91a568134d29",
+      "mode": "100644",
+      "bytes": 5889,
+      "sha256": "a66459d570d8791fc6a35ca652934a987f47d1ae01331da18eebb22222ff556f"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "2936a63d45fb6da15adf392fe43bb1bc2c104dfe",
+      "mode": "100644",
+      "bytes": 1701,
+      "sha256": "54b58abcf11ea1b7cb3317d3e8d5c319b2b4041f9bd0ea5fa388107c754d4f78"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/checkbox.mdx",
+      "status": "present",
+      "gitBlob": "d799a826940f868c3409f2f08d13595293094479",
+      "mode": "100644",
+      "bytes": 3319,
+      "sha256": "8d44bc2fb6500ae61515124d27c323ff9324305838a0d9665785fac11898c58a"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/radio-group.mdx",
+      "status": "present",
+      "gitBlob": "057bdf2da21b8903266a0afd9362fd5f5c9c20cb",
+      "mode": "100644",
+      "bytes": 3382,
+      "sha256": "5e3573cdc3bae1ccef0e23b3b49704e313a56a138db19c81a1d61ed19f1cb4bd"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/select.mdx",
+      "status": "present",
+      "gitBlob": "d9ef823e77e098f717e63e455a32224ec3d25b8f",
+      "mode": "100644",
+      "bytes": 3062,
+      "sha256": "c72048d3e5cf2b05766f1f0172c091efcd774554e4d1223004df5ef7654babd8"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/textarea.mdx",
+      "status": "present",
+      "gitBlob": "f4de6d52a3d044ae8ef731aba153557a3dc69f6f",
+      "mode": "100644",
+      "bytes": 4298,
+      "sha256": "a6409c054e1a459c99cd3d5ea2952af0ea851a4a4f67b79a0e468145891887f7"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/form.mdx",
+      "status": "present",
+      "gitBlob": "34f32a2b7b2325ecadb9bc931e6b0829d6089744",
+      "mode": "100644",
+      "bytes": 4802,
+      "sha256": "43c7123a1e9b7b7080a67b98924d1de39f21ef8663a1b99eba6d06f71bd15f37"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "6dea037cad4f6e6d08dd0295f0286a659b65b83a",
+      "mode": "100644",
+      "bytes": 2685,
+      "sha256": "133fb617ec874c010db77b03232adbc29d4357c9083f2b33d461f411c2794902"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/slider.mdx",
+      "status": "present",
+      "gitBlob": "3118d0bc3e0c608a497e7387419db8560fd4c82e",
+      "mode": "100644",
+      "bytes": 3294,
+      "sha256": "fccc032bf03868cbdf25341c40f26eee641e8f4ffca545e549e2abfa6345a424"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "2d1336c3e3c389bf20dd5ce999958e2c7f5bf3e0",
+      "mode": "100644",
+      "bytes": 1695,
+      "sha256": "6fd074ef3ca2bd0ba846e67d90cb0d028c3fcb39edaf3747e1805b1824b42b79"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/checkbox.mdx",
+      "status": "present",
+      "gitBlob": "707abad41b942ce6e61f352e74a3dad8b31288a6",
+      "mode": "100644",
+      "bytes": 3426,
+      "sha256": "3a1dac0ad0ab96ea6c7b38a9ae1819badeb3b6fbf72b13ba1aff9247eabd53c3"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/form.mdx",
+      "status": "present",
+      "gitBlob": "e94600f216a18b8923ae70cb5ce0470606fa289e",
+      "mode": "100644",
+      "bytes": 5094,
+      "sha256": "8b39d07b928f8f06d4c37995f5d90edf64fc267c8fd50c865548b09a83a4e4da"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input-otp.mdx",
+      "status": "present",
+      "gitBlob": "61d51479924d9242b67ea549de0834522e2f6e46",
+      "mode": "100644",
+      "bytes": 2998,
+      "sha256": "657478cbb31d63b066695cfe9200af5bbae23d8f90fee0a3f63a4b6ea0a6e4b1"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx",
+      "status": "present",
+      "gitBlob": "bbf585a005d147cd7703b564df4ec927a40769e7",
+      "mode": "100644",
+      "bytes": 6154,
+      "sha256": "44808d256e63183900cc8cf79325ac54d8033cadf596bc43b77f28f78bf7a10e"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/select.mdx",
+      "status": "present",
+      "gitBlob": "3e41848cd10a22803327c1a8e7171bcac7baf4f7",
+      "mode": "100644",
+      "bytes": 4339,
+      "sha256": "27e89619f4f6e1e2c0455ac8cbffb68c8dca9c28287a317d1e4173b3baa73a25"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/slider.mdx",
+      "status": "present",
+      "gitBlob": "8433aac2cf769dfd12eb6822700a1d364e23e4f0",
+      "mode": "100644",
+      "bytes": 4509,
+      "sha256": "49c720fb57ab8b5d51d6cf6ddcb3e50865c06bd0c797cde39408401a27a4b345"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/textarea.mdx",
+      "status": "present",
+      "gitBlob": "9a0b3f114768243e78c11997082924fa6f29fe81",
+      "mode": "100644",
+      "bytes": 3643,
+      "sha256": "7739558bfdf4ce446d6c9a9339ca4c201053e080416a68e3ab472cc15a6ea571"
+    },
+    {
+      "path": "internal/contracts/prototype-base/form-input-applicability.v0.md",
+      "status": "present",
+      "gitBlob": "970ed0ef8caf66b85159096ad49c8f42ab81218e",
+      "mode": "100644",
+      "bytes": 4927,
+      "sha256": "c24022b2583d75a00d5a2a0101d4bc0197d1dcd513a89b554488ef37f8467e1d"
+    },
+    {
+      "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+      "status": "present",
+      "gitBlob": "8dc05f5f84612b56079e40f66c9fdbb4a3508f2c",
+      "mode": "100644",
+      "bytes": 18039,
+      "sha256": "eb83f2c9fdbdf4421f03e9484035576e1bdc0c4969346a76e6b708ffaca05fb0"
+    },
+    {
+      "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+      "status": "present",
+      "gitBlob": "c2bc7f4b12f6249307f6da733f872a76a2f9ed49",
+      "mode": "100644",
+      "bytes": 15558,
+      "sha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95"
+    },
+    {
+      "path": "packages/adapters/base/test/fixtures/axis-input-conformance.ts",
+      "status": "present",
+      "gitBlob": "5914a5003821d47fc16c1fbc13b1b4dea69c0d6f",
+      "mode": "100644",
+      "bytes": 10869,
+      "sha256": "1d8b943b992ad1704b96681d112fb165c5432df0b8b653d1d2a64da4950a8615"
+    },
+    {
+      "path": "packages/adapters/base/test/fixtures/text-control-selection-conformance.ts",
+      "status": "present",
+      "gitBlob": "6b8dda37201df74cf1b7ea606f90468ea791847a",
+      "mode": "100644",
+      "bytes": 5401,
+      "sha256": "0228661bec5a99cbec3c1b53e879d413eaebd33b77ce72ba0ceae393badd5376"
+    },
+    {
+      "path": "packages/adapters/react/test/text-control-selection.integration.test.ts",
+      "status": "present",
+      "gitBlob": "1be079f6b14131fd5550e0a6ab899f9dc761ab40",
+      "mode": "100644",
+      "bytes": 1291,
+      "sha256": "b6feb08a6def95a556412c03acb09802c011371f806a74439a6b702148f949dc"
+    },
+    {
+      "path": "packages/adapters/vue/test/text-control-selection.integration.test.ts",
+      "status": "present",
+      "gitBlob": "88240cf754f4fc2edf7b495f255d9301c604e3e3",
+      "mode": "100644",
+      "bytes": 903,
+      "sha256": "bccf9d7bb8815a16c226f6856d0205fea59bbbd1c1d9f5f4b109e4eb61a4fe80"
+    },
+    {
+      "path": "packages/adapters/vue2/test/text-control-selection.integration.test.ts",
+      "status": "present",
+      "gitBlob": "48089ace321c8f873ccd4a5e575a857e1e3ac7f9",
+      "mode": "100644",
+      "bytes": 883,
+      "sha256": "89d188a316a16710be8edf209b45360f519ea655d87ae09da69f60d914943895"
+    },
+    {
+      "path": "packages/adapters/web-component/test/text-control-selection.integration.test.ts",
+      "status": "present",
+      "gitBlob": "f8321e99fd7d78c47707f837593ca3453011495f",
+      "mode": "100644",
+      "bytes": 655,
+      "sha256": "c5ee216de150b97ac3e8751f4c23209f26c55056fba6feadc9f24df65a3559af"
+    },
+    {
+      "path": "packages/core/src/axis-input.ts",
+      "status": "present",
+      "gitBlob": "a89a5f054856ec63be88b818edf6806b3e1b8930",
+      "mode": "100644",
+      "bytes": 3248,
+      "sha256": "8b9bf9fa9963c71873c0e8c2552e98ebe0c588e056b53516be22ff8f90513093"
+    },
+    {
+      "path": "packages/core/src/move.ts",
+      "status": "present",
+      "gitBlob": "bc864e68154fc2ae0db66f2e769f2fe66a0e6df9",
+      "mode": "100644",
+      "bytes": 1873,
+      "sha256": "2400ddff0b68ffba57dce16f9984b998439b8cfe86d14f1aa84762a5fa79541f"
+    },
+    {
+      "path": "packages/core/src/text-control.ts",
+      "status": "present",
+      "gitBlob": "21ecea33f6f8c875020f5f40e125e6564695743a",
+      "mode": "100644",
+      "bytes": 5183,
+      "sha256": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1"
+    },
+    {
+      "path": "packages/modules/axis-input/README.md",
+      "status": "present",
+      "gitBlob": "c663feb0cdbd13166a4600865237c849fa0a861a",
+      "mode": "100644",
+      "bytes": 4003,
+      "sha256": "5724ae9a59689c43ae73a2b87b78527cb975c02328069e99f6dd687195ae25f6"
+    },
+    {
+      "path": "packages/modules/axis-input/src/create.ts",
+      "status": "present",
+      "gitBlob": "a35eaed35948b23d9cfe6556aa29ab404e55b17f",
+      "mode": "100644",
+      "bytes": 14750,
+      "sha256": "3e8fdfce353beaf25bbbdc8345365fddfe653cbca4267224966ad7bf7428d13b"
+    },
+    {
+      "path": "packages/modules/axis-input/test/axis-input.test.ts",
+      "status": "present",
+      "gitBlob": "f08f2dcc74ccb6e07d999c549ab181d182a14b49",
+      "mode": "100644",
+      "bytes": 15542,
+      "sha256": "a8ef87c78cfb5fddc188d273548a0ccada91f834461e7be25995a9e56ee13832"
+    },
+    {
+      "path": "packages/modules/text-control/README.md",
+      "status": "present",
+      "gitBlob": "ef4e1ac1f1f6ae3dbb37f1386a8e34a6e16bc768",
+      "mode": "100644",
+      "bytes": 3472,
+      "sha256": "f16ffb928dd25136b4ec94080ce00aa6fcffbf4257f29771a0d87e2ee803a9a0"
+    },
+    {
+      "path": "packages/modules/text-control/src/impl.ts",
+      "status": "present",
+      "gitBlob": "8d5c56cd1a3c1de0d489bb671e40627830386605",
+      "mode": "100644",
+      "bytes": 13126,
+      "sha256": "44afdbec10b397c833e735abd9aee7ffdbcdee21e20125f836cf5ba1bcb7e6aa"
+    },
+    {
+      "path": "packages/modules/text-control/src/web.ts",
+      "status": "present",
+      "gitBlob": "d265fae4b0dba77bc1d5e0ae1c564e843a000242",
+      "mode": "100644",
+      "bytes": 10285,
+      "sha256": "32d41628746add1a10e3ac4cfb0af64551f5b97b0511604baf4d9fb295020f59"
+    },
+    {
+      "path": "packages/modules/text-control/test/impl-spec.test.ts",
+      "status": "present",
+      "gitBlob": "6d2bcc0e73d4c6dedacdb8a4a4c78726cf2cd815",
+      "mode": "100644",
+      "bytes": 51160,
+      "sha256": "7c5ac0e7d185a8c8c557002af4b504121be29f5fb855f3f53b9c6c1344ea7ef5"
+    },
+    {
+      "path": "packages/modules/text-control/test/selection.test.ts",
+      "status": "present",
+      "gitBlob": "a70c506e21940d6b509f5e21ddf7b9c3bfe6da14",
+      "mode": "100644",
+      "bytes": 4930,
+      "sha256": "e42f534dd27808f130958e6e8ecf6983036a73ea1e93e1265355c7f21a40a26e"
+    },
+    {
+      "path": "packages/modules/text-control/test/web.test.ts",
+      "status": "present",
+      "gitBlob": "ece59cacc08631881ecf8d03e9fd36c508e665d9",
+      "mode": "100644",
+      "bytes": 21249,
+      "sha256": "cc6454f00f94a6c8229e9fba1a8cd0d06b45512b1e2fde095c52765c4cb5ef72"
+    },
+    {
+      "path": "packages/prototypes/base/package.json",
+      "status": "present",
+      "gitBlob": "45c61bba2101b28b949d6b36141a22c9f949e973",
+      "mode": "100644",
+      "bytes": 25351,
+      "sha256": "3e42bb8023144c92c4ae511eab7b04667b7833be1b70039360d2d5078c023fb5"
+    },
+    {
+      "path": "packages/prototypes/base/src/checkbox/root.proto.ts",
+      "status": "present",
+      "gitBlob": "201d8a541b47dcb65834166f9202e23468d6a367",
+      "mode": "100644",
+      "bytes": 12251,
+      "sha256": "3f87192f5d62c15c3c2b1c96e54fe9e48ddbe65a8f6a065fd50b3bdb292073f3"
+    },
+    {
+      "path": "packages/prototypes/base/src/checkbox/types.ts",
+      "status": "present",
+      "gitBlob": "3698d33f073b0b50bfe91d9280229b11e444cf2a",
+      "mode": "100644",
+      "bytes": 2005,
+      "sha256": "191a7bafd75c0e73466eaa8b866b69d5da54c47f3bec532bc32683cbc462320f"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/checkbox.proto.ts",
+      "status": "present",
+      "gitBlob": "7aa6ee77e207eb8b723ce3f25ffceda9c3590d10",
+      "mode": "100644",
+      "bytes": 1098,
+      "sha256": "724cb87838c5877d86483bbed39942b1b4c63f3dfdb9a5176a3409391eeab278"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/choice-report.ts",
+      "status": "present",
+      "gitBlob": "3a3a74c8907bd5ee37d5b702f9b71fccaff4cbf4",
+      "mode": "100644",
+      "bytes": 1059,
+      "sha256": "812d79ef0e0a3293ea8beb6455680f115145831d01cbff255d357874224dcbe0"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/control.proto.ts",
+      "status": "present",
+      "gitBlob": "ca3564fa4fc3435e413f19a226304441bf1a85a4",
+      "mode": "100644",
+      "bytes": 12417,
+      "sha256": "f50351505a46e04c7b529390ae82e273a26398770b27d8535135a6e0444aa50f"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/controlled-edit-report.ts",
+      "status": "present",
+      "gitBlob": "835ad0c92cbe0108b065cd9d16e03810fc2fe179",
+      "mode": "100644",
+      "bytes": 816,
+      "sha256": "7ea160f79683514ba51a56637e0292121ff3a1948ae595f90b1dfa7d28695261"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/index.ts",
+      "status": "present",
+      "gitBlob": "fcc84f7944097c21af48ce53e5964aba8ce69db4",
+      "mode": "100644",
+      "bytes": 1652,
+      "sha256": "0192c2ca092047476608c698dda1a505b29262f793457d0c3ea95947aefe22d9"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/radio-group.proto.ts",
+      "status": "present",
+      "gitBlob": "6fefb7866ff81d60ab1f81aaa1caae4ce5b6c482",
+      "mode": "100644",
+      "bytes": 1146,
+      "sha256": "6c2fe627d4f162c6519b1977c779e07f8bfaca32394650cd6b9a6217b643cf66"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/shared.ts",
+      "status": "present",
+      "gitBlob": "a08d7a5859fc88d7c0d7294e24123b4a7fd42c66",
+      "mode": "100644",
+      "bytes": 6790,
+      "sha256": "48009bc28cb4ab885b65b0daa8258ec0957d8badd1ed97cb85a89f20c42ed397"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/switch.proto.ts",
+      "status": "present",
+      "gitBlob": "0327395c26c017d38ee54a1cb623bcea3d7cad93",
+      "mode": "100644",
+      "bytes": 1320,
+      "sha256": "79c42562a2b3f3b39d10366f48ddb7782e081c9fab5b831b15ec08f3a5760421"
+    },
+    {
+      "path": "packages/prototypes/base/src/field/types.ts",
+      "status": "present",
+      "gitBlob": "069d25d2dae0ac3245b1fea330c8e69787f8e264",
+      "mode": "100644",
+      "bytes": 6724,
+      "sha256": "61d9874f7bd9ad38fa65f61eef5b657bcd672aefce8c41122f376ad0501d6524"
+    },
+    {
+      "path": "packages/prototypes/base/src/input-otp/input.proto.ts",
+      "status": "present",
+      "gitBlob": "f921dfd53c6aa7da8291df34424196199f598569",
+      "mode": "100644",
+      "bytes": 7016,
+      "sha256": "99a69eade357843c6cec4e9cf66f6523c62973f2052db37c4b69fdc76849fc56"
+    },
+    {
+      "path": "packages/prototypes/base/src/input-otp/root.proto.ts",
+      "status": "present",
+      "gitBlob": "e002dd151f1ebda0d4697a99019b3a8b3bd9ff00",
+      "mode": "100644",
+      "bytes": 7382,
+      "sha256": "fc146daa992934cde875d9208fb81dfda154e4643a57738dc97ea6c2579ab2a4"
+    },
+    {
+      "path": "packages/prototypes/base/src/input-otp/shared.ts",
+      "status": "present",
+      "gitBlob": "dcd6453ae16b4e056f83f07d4bc651697197f1b3",
+      "mode": "100644",
+      "bytes": 1393,
+      "sha256": "40e812be14e35170f8394f95b01a98de0014a05688e0c1e925ab6d36fc7803a7"
+    },
+    {
+      "path": "packages/prototypes/base/src/input-otp/slot.proto.ts",
+      "status": "present",
+      "gitBlob": "3d16b616bbcc1717aa386b8038026301cb266e5c",
+      "mode": "100644",
+      "bytes": 2146,
+      "sha256": "f5cca9cb514cd34c6a04b301c56a4dafc782431d879b28a73f0c458ae71bed9e"
+    },
+    {
+      "path": "packages/prototypes/base/src/input-otp/types.ts",
+      "status": "present",
+      "gitBlob": "26b87e51c07f44f7726cf6bf37229756a8a6a56c",
+      "mode": "100644",
+      "bytes": 1927,
+      "sha256": "a7d979f6c6bcb6c58c6f5453b846ef7a4421398d027e7a87d980adc88ab20e87"
+    },
+    {
+      "path": "packages/prototypes/base/src/radio-group/item.proto.ts",
+      "status": "present",
+      "gitBlob": "fd841a45c845a9f1d6c1aa3d7b2495084eb778b8",
+      "mode": "100644",
+      "bytes": 8243,
+      "sha256": "1ad5aa40e5f4d9d7d91bfe73c5746c35172bdf88cb24d4d608a38161bede8548"
+    },
+    {
+      "path": "packages/prototypes/base/src/radio-group/root.proto.ts",
+      "status": "present",
+      "gitBlob": "ff1158533be46b8e38004caad0daf29b7b1d582d",
+      "mode": "100644",
+      "bytes": 13276,
+      "sha256": "6afd98169ebd9a30ec8139cb5a25b9a16fbf5a8ce7e02f271232ad20b324756b"
+    },
+    {
+      "path": "packages/prototypes/base/src/radio-group/shared.ts",
+      "status": "present",
+      "gitBlob": "cafb65b7563c47f117d590bf6433074850aed8cb",
+      "mode": "100644",
+      "bytes": 4873,
+      "sha256": "17d9490369c86eb0efcca607446342da29efb25379ed05b497f4477cf05df1ac"
+    },
+    {
+      "path": "packages/prototypes/base/src/radio-group/types.ts",
+      "status": "present",
+      "gitBlob": "46419fb754a40df2b49d557863deb4eaf9542440",
+      "mode": "100644",
+      "bytes": 2777,
+      "sha256": "5cc38a83eae830eb6e1dcaa94a72ca5bb407463c68de5d88f3fec529f6388351"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/VALUES.md",
+      "status": "present",
+      "gitBlob": "88b761766b44c32894e586b6e9f5ad71f2987abd",
+      "mode": "100644",
+      "bytes": 11875,
+      "sha256": "3c1198afc8d28dc87cecc35a4a17ccb20bbfa5021b1cc383f9b2574e0da89aa3"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-numeric.ts",
+      "status": "present",
+      "gitBlob": "e17beadbb933d93a02f7259d9fb8c53c1c828407",
+      "mode": "100644",
+      "bytes": 13218,
+      "sha256": "b30b139bd8c1d50e1270b2182866d171d6669338694760dacd89fa03fd33f70e"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-part-setup.ts",
+      "status": "present",
+      "gitBlob": "231eae47439c007bb25b0847e2f47f37ae3a2138",
+      "mode": "100644",
+      "bytes": 11332,
+      "sha256": "175e6385774addd37becc170037385533e3d3c463b3a23f7c85ce8421e0e8673"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-root.proto.ts",
+      "status": "present",
+      "gitBlob": "21af904c11e1a6cda104f0a3501864b46a3bcc4a",
+      "mode": "100644",
+      "bytes": 26452,
+      "sha256": "025216eb2db021e162a0eeab77c3f12e3036c168a3338d2ba6260988226e1249"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-shared.ts",
+      "status": "present",
+      "gitBlob": "efe03691d1b4f4850776c1cda6df43b1f828ee39",
+      "mode": "100644",
+      "bytes": 1371,
+      "sha256": "eef5fe2cf04c7ebd7f004861e3ec3869273a99c145deed46f6d5c72509ac46e8"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-track.proto.ts",
+      "status": "present",
+      "gitBlob": "a30e28db90bc24f6a78d99d7a366e52db7426c11",
+      "mode": "100644",
+      "bytes": 6156,
+      "sha256": "9ac2f213f2f578fab4c8289f2f5be0ee95812213538f68f928312fc552913f2b"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-types.ts",
+      "status": "present",
+      "gitBlob": "cdbe942f1e8d0db97200f60e289d26e9218f9180",
+      "mode": "100644",
+      "bytes": 3996,
+      "sha256": "89c9f40e5b3947a7205c6a68f470c0c34c36173a0c9f11ab59c7fb7f08ac0717"
+    },
+    {
+      "path": "packages/prototypes/base/src/switch/root.proto.ts",
+      "status": "present",
+      "gitBlob": "b4628f4264c73e3f62d673ac3bd0593627d44286",
+      "mode": "100644",
+      "bytes": 17511,
+      "sha256": "79a9bf69adff37c77510511b5806156f0953b23df94a6d07f7b732654054fab4"
+    },
+    {
+      "path": "packages/prototypes/base/src/textarea/root.proto.ts",
+      "status": "present",
+      "gitBlob": "7c199c6d3392ed4bb669113123d71e6309d7dcf1",
+      "mode": "100644",
+      "bytes": 13069,
+      "sha256": "4debfbe3dea307423e5c87bc24071522bacd3d0de114bedef95d4026a9bbfbf6"
+    },
+    {
+      "path": "packages/prototypes/base/src/textarea/types.ts",
+      "status": "present",
+      "gitBlob": "6bc4916f4087d1ca50333a9e8958d0c70fb28d79",
+      "mode": "100644",
+      "bytes": 2094,
+      "sha256": "697fa7b1110f9812842860302c9b3ca3c4731a5c2cea3eddeb13a26b2c826833"
+    },
+    {
+      "path": "packages/prototypes/base/test/field-choices.test.ts",
+      "status": "present",
+      "gitBlob": "23a8d515fc10871025f0b8b847c2921d1aaa58fc",
+      "mode": "100644",
+      "bytes": 15010,
+      "sha256": "c3ff6f7cabc69fec676567d105ab9e6da102cc57a1271a3cc16d280ff437d322"
+    },
+    {
+      "path": "packages/prototypes/base/test/field-choices.types.ts",
+      "status": "present",
+      "gitBlob": "8b99451be037c81c800d2685a1dd7a8d4619318d",
+      "mode": "100644",
+      "bytes": 2265,
+      "sha256": "575cce9c561696204479531264371e78dd864d78e90b206b5c1ad05e2e74c10a"
+    },
+    {
+      "path": "packages/prototypes/base/test/field-nested-consumer.test.ts",
+      "status": "present",
+      "gitBlob": "22eda6f808e9227f1e3fcceccf692a3ff7a257a9",
+      "mode": "100644",
+      "bytes": 5290,
+      "sha256": "ee699e962faea5d1afaecdf48fcd496ac10a070b834959c4038d6ba6dddc6c34"
+    },
+    {
+      "path": "packages/prototypes/base/test/field-switch.test.ts",
+      "status": "present",
+      "gitBlob": "9ef73037f4e6e2a6ae94e31a510f225db1dc4fd4",
+      "mode": "100644",
+      "bytes": 10820,
+      "sha256": "26a2de8a6eaa953e626de892108288b6e41a3a5165dd066f6948d3ad971c9627"
+    },
+    {
+      "path": "packages/prototypes/base/test/field-textarea.test.ts",
+      "status": "present",
+      "gitBlob": "a76e3c11f8eab717a65e0e6d9fafb1b08c8cff4b",
+      "mode": "100644",
+      "bytes": 13292,
+      "sha256": "843e33e70a91c53cbcd9255b77f9e7e5f67144020c1d160575d8f0b54a5481bc"
+    },
+    {
+      "path": "packages/prototypes/base/test/field.test.ts",
+      "status": "present",
+      "gitBlob": "e4aa132c27b36b58807c6c1ea326d9e3faf02c04",
+      "mode": "100644",
+      "bytes": 17591,
+      "sha256": "105ed4812cc7a9865e384b4f5d1a116d94a197d59b9bdf8529252b7d31755fc9"
+    },
+    {
+      "path": "packages/prototypes/base/test/input-otp-selection.test.ts",
+      "status": "present",
+      "gitBlob": "9ccf20d6483fa38dd8d5b762a9e56c12de330244",
+      "mode": "100644",
+      "bytes": 10088,
+      "sha256": "d9e931ed2d1ebfcb9ca02dc5ede9dfcf34ed9f2c8870414e0295169025ba40d4"
+    },
+    {
+      "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+      "status": "present",
+      "gitBlob": "43cab9497144807135184c15bc79da8585472642",
+      "mode": "100644",
+      "bytes": 62802,
+      "sha256": "81d8be9696734b9bffdbdfeefca9c68df98461b0fda14c051581c7affecd37a1"
+    },
+    {
+      "path": "packages/prototypes/base/test/radio-group.test.ts",
+      "status": "present",
+      "gitBlob": "78f12012b317354f74869d67b5773201af120a17",
+      "mode": "100644",
+      "bytes": 24366,
+      "sha256": "524d6f05bf4387306f24998297d28edd0ad8a2b81e9795a222139878186ef34e"
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-input-retirement.test.ts",
+      "status": "present",
+      "gitBlob": "cf0684f425034a37a164caffbb8af88ae58b7ba0",
+      "mode": "100644",
+      "bytes": 6546,
+      "sha256": "50cbbffbd8905e19875a9b279b3912ae8b94c118d62d7aa00575dd89c6c0f877"
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-input.test.ts",
+      "status": "present",
+      "gitBlob": "39c90c460abf92b3dea62ac615b51f819ff5f6ff",
+      "mode": "100644",
+      "bytes": 11184,
+      "sha256": "a22d69444bdb428853ad0e6b12d525cc1d3008991a087c1b40e2961bbed3bf92"
+    },
+    {
+      "path": "packages/prototypes/base/test/tsconfig.field-choices.json",
+      "status": "present",
+      "gitBlob": "4f5168fe188a04ccf0f48dc28a3b262eb00dbf0e",
+      "mode": "100644",
+      "bytes": 113,
+      "sha256": "68ba326f42951a6bad61d68975b4f73e7e0f7540cc16b4e75ec8900d0ef975cc"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/checkbox/root-visual.ts",
+      "status": "present",
+      "gitBlob": "67fa49d54b002a2695cbd2800ea52c9400e6b565",
+      "mode": "100644",
+      "bytes": 2110,
+      "sha256": "c9abdea2abb140fad2e4021af8119e547d9a6dfe5b5c149c08159f269a5a75b0"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/checkbox/root.proto.ts",
+      "status": "present",
+      "gitBlob": "5c27a2a915dbd76a0bfc976e56b86b48517722d2",
+      "mode": "100644",
+      "bytes": 652,
+      "sha256": "baa16f1e62e27b0f84b1dbf9da6b3cf6abaa7c004f90c148b89aacfc739b7361"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/field/checkbox.proto.ts",
+      "status": "present",
+      "gitBlob": "af7f94d638f0d0e061152c86c5ad5bbbe16d5dda",
+      "mode": "100644",
+      "bytes": 1025,
+      "sha256": "625b3106dd90106cf79f0e2398140367bf2229b40c1464f327636afb1713826d"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/field/index.ts",
+      "status": "present",
+      "gitBlob": "4dc249aaf97817850d908faf98dc1666dc9cab4d",
+      "mode": "100644",
+      "bytes": 1617,
+      "sha256": "33429e7d68920c5eeb9df9d54d5aef1682eef865d063481df3ed9bcfcda10c25"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/field/radio-group.proto.ts",
+      "status": "present",
+      "gitBlob": "4e68e71e519b4df921ea85fca30e61bc27e93140",
+      "mode": "100644",
+      "bytes": 827,
+      "sha256": "ad5755829d869d606ca9eff3f10dd3f92182c9cc8f6ad8f7154a93df85e8f57c"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/field/switch.proto.ts",
+      "status": "present",
+      "gitBlob": "a86f9903e3a69b7541879ad3379cae5878dc0437",
+      "mode": "100644",
+      "bytes": 1019,
+      "sha256": "4f40fcc0993af42382c65a33d1b79e88a939fc7b53567aee75fae96f82c98715"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/field/textarea.proto.ts",
+      "status": "present",
+      "gitBlob": "9857442770b3f4ccc074c68a49ce0bc1777f225a",
+      "mode": "100644",
+      "bytes": 749,
+      "sha256": "f12063c6febd891c45673f6c8803959f8c3b52750adb060f04911f1041ecab96"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/radio-group/root-visual.ts",
+      "status": "present",
+      "gitBlob": "d3f1f3cfdeb313608194b0969087189e563f6102",
+      "mode": "100644",
+      "bytes": 341,
+      "sha256": "e7448e291890162e86550a5ed34f724ca91d9dba2027b125993e8ad6292f098c"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/radio-group/root.proto.ts",
+      "status": "present",
+      "gitBlob": "132626f20528890f2f498d338474c0caaea06a51",
+      "mode": "100644",
+      "bytes": 532,
+      "sha256": "3b788f189995202e39b8dfe793aa93dca75c2b760a421f945bad6029e66922a0"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/index.ts",
+      "status": "present",
+      "gitBlob": "b15343ebd917739cb7af13ee68c574211d1fac9a",
+      "mode": "100644",
+      "bytes": 884,
+      "sha256": "7e13042df25c0999b234324250c432be435c50859dc656b9b92e6434ed6c8fe3"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/values-indicator.proto.ts",
+      "status": "present",
+      "gitBlob": "82a9fa659fa44caf038b58f54b72f978f4d23844",
+      "mode": "100644",
+      "bytes": 1344,
+      "sha256": "802af26377d7ff05304c9746aa69c1d34263ab4b0399ccb12c7e9d6d54b10912"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/values-label.proto.ts",
+      "status": "present",
+      "gitBlob": "1898e05725b96befcda7769c06f85fd8a24e8b0e",
+      "mode": "100644",
+      "bytes": 572,
+      "sha256": "e97d00d4df7fe3fa47c9e6ec188e2eb1810636f9a5bd71adaf62d70316e77903"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/values-root.proto.ts",
+      "status": "present",
+      "gitBlob": "92f1f948b6d476dd92772405714262bbaf1bdeea",
+      "mode": "100644",
+      "bytes": 552,
+      "sha256": "05882e460086518a9aefd1f0e8420b8e687c25ca224f47db38b80de0dfd90902"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/values-thumb.proto.ts",
+      "status": "present",
+      "gitBlob": "15f22b058d0a2831e13e09420eb1038aeb70083c",
+      "mode": "100644",
+      "bytes": 1731,
+      "sha256": "95a4ef078b33160ddcabcde43ab4f71354f1789ec6e947462c26f531b1f2a60e"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/values-track.proto.ts",
+      "status": "present",
+      "gitBlob": "8fb4af841264c48bc506a7156df10fa60036b6ec",
+      "mode": "100644",
+      "bytes": 751,
+      "sha256": "2153ae209546f0efe8de1ecdcb8cb4457e14cd3a017d2fdcb6dd88d4cf996e33"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/slider/values-value.proto.ts",
+      "status": "present",
+      "gitBlob": "a07b063992f31440b306bbf19bcc745df76941f0",
+      "mode": "100644",
+      "bytes": 584,
+      "sha256": "cfe543838f26a7f656c2f00352e9d6906bea37e45696d6eb60e0a9eac64a3c38"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/switch/root-visual.ts",
+      "status": "present",
+      "gitBlob": "71c18cc2cdd6adb994f07aaef4a992319d559f48",
+      "mode": "100644",
+      "bytes": 2191,
+      "sha256": "b9906dd06e33287519e5adad4efb6af1a45597bbcae8f742245188480c2c5df0"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/switch/root.proto.ts",
+      "status": "present",
+      "gitBlob": "b815d56331aeb136371c274384cec77e08173df6",
+      "mode": "100644",
+      "bytes": 624,
+      "sha256": "06f7b7194ceb3be644ac40663d2b29e5225591377bb4c1ed1e5ee6be8e0e8fd8"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/textarea/root.proto.ts",
+      "status": "present",
+      "gitBlob": "ade96cfb11f3fcf4e53fb1ae81777ab2e7b85418",
+      "mode": "100644",
+      "bytes": 725,
+      "sha256": "4d4eced10c0025f7faca6f8fc530726d26a5ac70c04e1ff5ea860db3921335f6"
+    },
+    {
+      "path": "packages/prototypes/brutalist/src/textarea/visual.ts",
+      "status": "present",
+      "gitBlob": "e8d12c525252ad88193133d9b43d88c1d99478af",
+      "mode": "100644",
+      "bytes": 1249,
+      "sha256": "e9e9731b8bddb71f08dcaea85d23be3de7d162877a7d8e60fcc34b1acec2115c"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/checkbox/root-visual.ts",
+      "status": "present",
+      "gitBlob": "9100b8e9e88841174cfdc5d02cd5f080b4b601e0",
+      "mode": "100644",
+      "bytes": 4160,
+      "sha256": "01f7287aef92bb46e9e3e6250c515430ff6fa3ea659be921569e2e6f1f0c8268"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/checkbox/root.proto.ts",
+      "status": "present",
+      "gitBlob": "5ccb4b054148e28a01831aa8b56bc00380f740b9",
+      "mode": "100644",
+      "bytes": 634,
+      "sha256": "db50befa0ecd30d396aa7f13c75cc005d8d963d156b3c4d5a00f849ae2fc9341"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/field/checkbox.proto.ts",
+      "status": "present",
+      "gitBlob": "b44a41c707af1206e9ff1c8b51bd2dc990473bc0",
+      "mode": "100644",
+      "bytes": 995,
+      "sha256": "0a12e2efc49f7df7fbb871d254d3c5c29ee62f33629226ccf556b9245baa59d0"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/field/index.ts",
+      "status": "present",
+      "gitBlob": "8f41a2431997bb323fdf2dd5f6f9e009bbe21f49",
+      "mode": "100644",
+      "bytes": 2030,
+      "sha256": "8975def2ac5e430c470b9ef01f17627fd25467f23a59b11f95af92a08ed941bc"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/field/radio-group.proto.ts",
+      "status": "present",
+      "gitBlob": "a7bf8fcabcdef0d42cae4e786a5e3dc4d34c5368",
+      "mode": "100644",
+      "bytes": 793,
+      "sha256": "2c83b5300e5a72a9235cd4487ef6decb339333d74388b4a1574f2bd08c7280d5"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/radio-group/root-visual.ts",
+      "status": "present",
+      "gitBlob": "50fb3ca87e3305d72b72fb3cc741396152b74843",
+      "mode": "100644",
+      "bytes": 1464,
+      "sha256": "0240df89ccbc905b7801867f1d2be27f57468700c89754e84c64e05ab03e398d"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/radio-group/root.proto.ts",
+      "status": "present",
+      "gitBlob": "007d5ff80964a59a1a48037d823c06feb04586f7",
+      "mode": "100644",
+      "bytes": 517,
+      "sha256": "45f1e8ba67f8ec7a7db0aaba15a2671707b75e81cf2ca3178e40831e55d1a0c4"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/slider/values-thumb.proto.ts",
+      "status": "present",
+      "gitBlob": "68b73a9f70941419bae2e56671c7dfb097ce94cd",
+      "mode": "100644",
+      "bytes": 4094,
+      "sha256": "cd02740ec4fc0f64a14c48d0dd491e30e62bf7609730d370b82d7b971f626967"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/slider/values-track.proto.ts",
+      "status": "present",
+      "gitBlob": "9db57415615368492ec9be960e97c1691703fcd8",
+      "mode": "100644",
+      "bytes": 2041,
+      "sha256": "2e6c22ee7cb82af32be0c9f4614377ac72954a1866f874952453f0a366918486"
+    },
+    {
+      "path": "scripts/analysis/fixtures/component-capabilities-browser.ts",
+      "status": "present",
+      "gitBlob": "cd086f2904b4c85608c739b47a3ae3a66f799633",
+      "mode": "100644",
+      "bytes": 29932,
+      "sha256": "a0110f25079431e376360219313815bfb5e159b98df2ef06a8b1ffa5996be64b"
+    },
+    {
+      "path": "scripts/analysis/fixtures/form-select-recipes-browser.ts",
+      "status": "present",
+      "gitBlob": "c848276b6e91d70830229f7a4c46d698f5ac531c",
+      "mode": "100644",
+      "bytes": 8071,
+      "sha256": "6f111978c88e6de60efd5fab5704f04938fb93d63e28de13b9443dfda7327dc2"
+    },
+    {
+      "path": "scripts/analysis/form-select-recipe-css.mjs",
+      "status": "present",
+      "gitBlob": "5cb31671b82ca174802daa88cc0f76f4bd6228db",
+      "mode": "100644",
+      "bytes": 2995,
+      "sha256": "467ed3968b9fd05172cf7b65a51c4ad249675a9f26296d4e7c09d7154b322e88"
+    },
+    {
+      "path": "scripts/analysis/form-select-recipes-browser.mjs",
+      "status": "present",
+      "gitBlob": "db28678752c6c644b05f913d355440cebc6c648b",
+      "mode": "100644",
+      "bytes": 28385,
+      "sha256": "046980d3b4c26747968c9c03346bc834390ded83d01e1c2a3fa91ce6b410a4b3"
+    },
+    {
+      "path": "scripts/analysis/sprint2-input-browser.mjs",
+      "status": "present",
+      "gitBlob": "9773dd2c26469357d1616f9b91ea008d9112f230",
+      "mode": "100644",
+      "bytes": 20749,
+      "sha256": "aaabac3b2fee33c58899372d46a2c6783daf8ae531c36ceed13e457d56c687bf"
+    },
+    {
+      "path": "spec/contracts/C-AXIS-INPUT-ORIGIN-0001.yaml",
+      "status": "present",
+      "gitBlob": "738c1b4fb8509b2274102fa5acd785266167dee1",
+      "mode": "100644",
+      "bytes": 3514,
+      "sha256": "dd80a5cc7050ff64066f92e4a919d217e32aaa5cca6d4f003e2b0d11ccdc2c99"
+    },
+    {
+      "path": "spec/contracts/C-FIELD-0001.yaml",
+      "status": "present",
+      "gitBlob": "ac98c1416afc838bc7af77f521367d20c8f14678",
+      "mode": "100644",
+      "bytes": 15218,
+      "sha256": "439b6f58d9ccc200e4583ad8c8cc4084419d4654efe6cc9426079be68550a669"
+    },
+    {
+      "path": "spec/contracts/C-FIELD-SWITCH-0001.yaml",
+      "status": "present",
+      "gitBlob": "c2d8a2ac903fd7dd78640761018b51affbb65254",
+      "mode": "100644",
+      "bytes": 3952,
+      "sha256": "43645129dd215305e518158aa788b3bd6dc7fcfe721e88d7369e220243c5eba0"
+    },
+    {
+      "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+      "status": "present",
+      "gitBlob": "edae246bee2b2bbda46bc40192458bb0f01915c6",
+      "mode": "100644",
+      "bytes": 9045,
+      "sha256": "7f82b5d63356c7ff687ff22011c50472e999d9f8d956b6812e0728cbaa4f90a6"
+    },
+    {
+      "path": "spec/contracts/C-TEXT-CONTROL-SELECTION-0001.yaml",
+      "status": "present",
+      "gitBlob": "0038d9909a307f13a503a76e4854ce79f9f582f3",
+      "mode": "100644",
+      "bytes": 4842,
+      "sha256": "9c0583f621b72ac69053c14eedd0c085da7141e3da1b1474ef25d8657aeaa32b"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-CHECKBOX.yaml",
+      "status": "present",
+      "gitBlob": "dba23025482e35f0a6fb3d8a63b353f78bc08913",
+      "mode": "100644",
+      "bytes": 35968,
+      "sha256": "14ee2e9b3883f9412c7a0c2e8f4f51f5a4f16708c1a68cd4953b7c6c92ed1896"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-FIELD-CHOICES.yaml",
+      "status": "present",
+      "gitBlob": "701b0e5bb432cdea6aa82c99b5626e253a161b79",
+      "mode": "100644",
+      "bytes": 3668,
+      "sha256": "ff61c8205b93704316fb2f01c31ebc22c2e93a7fe6e283aabbdb2cd82bf6612b"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-FIELD-CONTROL.yaml",
+      "status": "present",
+      "gitBlob": "09e4c18539ef2156b65d5697cd054e6e0a1ab70c",
+      "mode": "100644",
+      "bytes": 3757,
+      "sha256": "18792ce3a293ea653a8a94c2797938294857e09dd6f154242532de6c559e95ea"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-INPUT-OTP.yaml",
+      "status": "present",
+      "gitBlob": "750c934e8c4962cd1826b40a626ffa9d304c7e8b",
+      "mode": "100644",
+      "bytes": 2565,
+      "sha256": "44e6ed0913defbcc05b8fdb380b25c7b00433d14187fa63ca52f5d5b2d5bc02e"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-RADIO-GROUP.yaml",
+      "status": "present",
+      "gitBlob": "8ed4a3733c69835d34aaed0861645d1651f46276",
+      "mode": "100644",
+      "bytes": 13991,
+      "sha256": "db2547a41d63db96088502da5ceef325cb3c6b54f12993f98b819fd0c77f51ba"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SLIDER-VALUES.yaml",
+      "status": "present",
+      "gitBlob": "85e0e0838925a91a662ecdd8f374458168915f69",
+      "mode": "100644",
+      "bytes": 8650,
+      "sha256": "40eb53eb28221c29c6726c2af8ede22cc0612aa9bb48caa45aaa52e723e8cae5"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TEXTAREA.yaml",
+      "status": "present",
+      "gitBlob": "7ecfc93db809881169c73c777a301b905886a813",
+      "mode": "100644",
+      "bytes": 10768,
+      "sha256": "91cd5e2c41e0aff1691160f63d31abd1538f4d75c2087999fabe3b3d09ddcfe7"
+    },
+    {
+      "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-SLIDER-VALUES.yaml",
+      "status": "present",
+      "gitBlob": "0d6d6412b81fc5d47b0ca8adf9b4d8ef2fa7e188",
+      "mode": "100644",
+      "bytes": 3613,
+      "sha256": "eb5cbb336a29074f8cf618fee58cf27c4fd0afe230bcad336751a5ce823c57ef"
+    },
+    {
+      "path": "spec/prototypes/P-BRUTALIST-FIELD-CHOICES.yaml",
+      "status": "present",
+      "gitBlob": "6d5b8adbfbaf099e7c8c3e18efe54447a37cbeef",
+      "mode": "100644",
+      "bytes": 2637,
+      "sha256": "c249b1df0a6769d3a267ee235d9af6191ca3da95357ea57be7754f34893cae9f"
+    },
+    {
+      "path": "spec/prototypes/P-BRUTALIST-FIELD.yaml",
+      "status": "present",
+      "gitBlob": "1e3817dda283fe7850ed96ba161ed758596e855e",
+      "mode": "100644",
+      "bytes": 3433,
+      "sha256": "904b60587c5e9c27c413ae0d309f4a9166484649fa20bbae512a513caac34382"
+    },
+    {
+      "path": "spec/prototypes/P-BRUTALIST-SLIDER-VALUES.yaml",
+      "status": "present",
+      "gitBlob": "432a6ef657d9a859f007555fef0b85998bdb5e4a",
+      "mode": "100644",
+      "bytes": 3545,
+      "sha256": "f52246e5062279bfa27569a31eff325e2058d12c32de893bda682f8b64550d1d"
+    },
+    {
+      "path": "spec/prototypes/P-LIQUID-GLASS-SLIDER-VALUES.yaml",
+      "status": "present",
+      "gitBlob": "9ef84a1e0e925b561cc9ebff0c821b34b9e6f2e2",
+      "mode": "100644",
+      "bytes": 4007,
+      "sha256": "cead78a333482c3b31eecc9b583807611396c5f4c777fc26fe1624c0cecb2156"
+    },
+    {
+      "path": "spec/prototypes/P-SHADCN-FIELD-CHOICES.yaml",
+      "status": "present",
+      "gitBlob": "9569de4057b1a1d4c4082cd069a1d07233e2cffb",
+      "mode": "100644",
+      "bytes": 2075,
+      "sha256": "3be559efc92b07f866b86d86f3162b886b50d8a0fc96b28f6e254f9c7b0464b9"
+    },
+    {
+      "path": "spec/prototypes/P-SHADCN-SLIDER-VALUES.yaml",
+      "status": "present",
+      "gitBlob": "9c23d9a7df2215372982ad8c98f4637aed72f1da",
+      "mode": "100644",
+      "bytes": 3800,
+      "sha256": "5cc58404e02759c7b67de46f3d6ac4944c3a35a1cee7a8d95b2b09e5547940d3"
+    },
+    {
+      "path": "spec/tests/T-AXIS-INPUT-ORIGIN-0001.yaml",
+      "status": "present",
+      "gitBlob": "0df48818ebb7f27c2a92d4d2eed23d085e4c2a93",
+      "mode": "100644",
+      "bytes": 2247,
+      "sha256": "02e01e87b00f364fa39cb3eff066fea0e44d3271192019e087cdb3229524ebb2"
+    },
+    {
+      "path": "spec/tests/T-BASE-FIELD-CHOICES-0001.yaml",
+      "status": "present",
+      "gitBlob": "fe0887bd2e0261a98f1c44cdea59b7034f596e34",
+      "mode": "100644",
+      "bytes": 4824,
+      "sha256": "c620b3d3dc30bd7bac55866a359c5cb497ea2e07c92ab767679d583b82d83524"
+    },
+    {
+      "path": "spec/tests/T-FIELD-SWITCH-0001.yaml",
+      "status": "present",
+      "gitBlob": "a6cd169fb7591173eb5531637ab162ea9508f4ad",
+      "mode": "100644",
+      "bytes": 2794,
+      "sha256": "7f859915409b4e7a996b345040f8edaa25c03b3a0676003c4378ac5905ff9e34"
+    },
+    {
+      "path": "spec/tests/T-SLIDER-VALUES-INPUT-0001.yaml",
+      "status": "present",
+      "gitBlob": "050e91bea4553377b6380eb97674bffd7c5fbad9",
+      "mode": "100644",
+      "bytes": 3428,
+      "sha256": "fa3eac5913e2968027bdf2732fd3701e9296dd49eaa6e8a0f56763c7b050b80b"
+    },
+    {
+      "path": "spec/tests/T-TEXT-CONTROL-SELECTION-0001.yaml",
+      "status": "present",
+      "gitBlob": "feef3c517a738163480c0fc0a14cb20fb194ffb9",
+      "mode": "100644",
+      "bytes": 3957,
+      "sha256": "1b8eef3c0a95c3973f63b81848b56d3ddae4285be6e27c28c9a1b3cd4cdfb9ec"
+    }
+  ]
+}

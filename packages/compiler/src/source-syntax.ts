@@ -57,6 +57,8 @@ export function scalarInitializer(node: ts.Expression): boolean {
 export function staticDataInitializer(node: ts.Expression): boolean {
   node = unwrapSourceExpression(node);
   if (scalarInitializer(node) || node.kind === ts.SyntaxKind.NullKeyword) return true;
+  if (ts.isTemplateExpression(node))
+    return node.templateSpans.every((span) => staticDataInitializer(span.expression));
   if (ts.isIdentifier(node)) return true;
   if (ts.isArrayLiteralExpression(node))
     return node.elements.every((element) =>

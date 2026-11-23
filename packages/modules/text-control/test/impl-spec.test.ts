@@ -12,6 +12,14 @@ import { createTextControlModule } from '../src/create';
 import { declareTextControl } from '../src/declaration';
 import { createWebTextControlHost } from '../src/web';
 
+// Retain exact assertions for the pre-existing value/composition surface while
+// the independently specified selection surface is checked in selection.test.ts.
+function withoutSelection<T extends { selection?: unknown } | null>(value: T) {
+  if (!value) return value;
+  const { selection: _selection, ...prior } = value;
+  return prior;
+}
+
 type TestSystemCaps = SystemCaps & {
   phase: 'setup' | 'callback';
   flushDeferred(): void;
@@ -152,7 +160,7 @@ describe('module-text-control', () => {
     control.on('input', (_run, next) => values.push(next.value));
     harness.sys.phase = 'callback';
     connection.onEvent(event('input', 'dirty'));
-    expect(control.snapshot()).toEqual({ value: 'dirty', composing: false });
+    expect(withoutSelection(control.snapshot())).toEqual({ value: 'dirty', composing: false });
     expect(values).toEqual(['dirty']);
 
     control.sync({ valueMode: 'uncontrolled', defaultValue: 'replacement' });
@@ -215,12 +223,12 @@ describe('module-text-control', () => {
     harness.sys.phase = 'callback';
     control.sync({ valueMode: 'uncontrolled', defaultValue: 'a\r\nb\nc' });
     expect(harness.getLatestPatch().defaultValue).toBe('abc');
-    expect(control.snapshot()).toEqual({ value: 'abc', composing: false });
+    expect(withoutSelection(control.snapshot())).toEqual({ value: 'abc', composing: false });
 
     const connection = harness.connectionBox.current;
     if (!connection) throw new Error('text-control host connection was not attached');
     connection.onEvent(event('input', 'x\r\ny\nz'));
-    expect(control.snapshot()).toEqual({ value: 'xyz', composing: false });
+    expect(withoutSelection(control.snapshot())).toEqual({ value: 'xyz', composing: false });
     expect(seen).toEqual(['xyz']);
   });
 
@@ -261,7 +269,7 @@ describe('module-text-control', () => {
       inputType: 'insertCompositionText',
     });
     expect(harness.getPatchValue()).toBe('編');
-    expect(control.snapshot()).toEqual({ value: 'fixed', composing: true });
+    expect(withoutSelection(control.snapshot())).toEqual({ value: 'fixed', composing: true });
     expect(harness.getUpdateCount()).toBe(beforeComposition);
 
     control.sync({ disabled: true });
@@ -350,7 +358,7 @@ describe.each(['single', 'multiline'] as const)('text-control %s composition lea
         control.sync({ value: 'latest\r\nowner' });
         const expected = valueMode === 'controlled' ? 'latest\nowner' : 'draft\nvalue';
         const value = lineMode === 'single' ? expected.replace('\n', '') : expected;
-        expect(control.snapshot()).toEqual({ value, composing: true });
+        expect(withoutSelection(control.snapshot())).toEqual({ value, composing: true });
         const old = target;
         const beforeRevocation = seen.slice();
 
@@ -372,7 +380,7 @@ describe.each(['single', 'multiline'] as const)('text-control %s composition lea
           ]);
         }
 
-        expect(control.snapshot()).toEqual({ value, composing: false });
+        expect(withoutSelection(control.snapshot())).toEqual({ value, composing: false });
         expect(target.value).toBe(value);
         expect(seen).toEqual(beforeRevocation);
         control.sync({ value: 'next owner', placeholder: 'new lease' });
@@ -415,7 +423,7 @@ it('keeps old composition callbacks and queued restoration out of a new lease', 
   old.onEvent(event('compositionend', 'stale'));
   old.onEvent(event('input', 'stale'));
   await Promise.resolve();
-  expect(control.snapshot()).toEqual({ value: 'owner', composing: true });
+  expect(withoutSelection(control.snapshot())).toEqual({ value: 'owner', composing: true });
   expect(h.getPatchValue()).toBe('new candidate');
   expect(h.getUpdateCount()).toBe(updates);
 });
@@ -439,7 +447,7 @@ it.each(['input', 'compositionend'] as const)(
     old.onEvent(event(type, 'old candidate'));
     const updates = h.getUpdateCount();
     await Promise.resolve();
-    expect(control.snapshot()).toEqual({ value: 'owner', composing: true });
+    expect(withoutSelection(control.snapshot())).toEqual({ value: 'owner', composing: true });
     expect(h.getPatchValue()).toBe('new candidate');
     expect(h.getUpdateCount()).toBe(updates);
   }
@@ -540,7 +548,7 @@ describe('TextControl composition across callback-scope entry', () => {
       old.onEvent(event(type, 'obsolete', type !== 'compositionend'));
       await Promise.resolve();
       expect(seen).toEqual([]);
-      expect(control.snapshot()).toEqual({ value: 'owner', composing: false });
+      expect(withoutSelection(control.snapshot())).toEqual({ value: 'owner', composing: false });
       expect(h.getPatchValue()).toBe('owner');
       h.module.hooks.onMountPhase?.('detached', 2);
     }
@@ -981,12 +989,12 @@ describe.each(['single', 'multiline'] as const)('Web %s change callback preludes
         pendingOwner = sameValue ? target.value : 'queued owner';
         target.dispatchEvent(new Event('change'));
         await Promise.resolve();
-        expect(control.snapshot()).toEqual({
+        expect(withoutSelection(control.snapshot())).toEqual({
           value: sameValue ? 'native candidate' : 'queued owner',
           composing: false,
         });
         expect(target.value).toBe(sameValue ? 'native candidate' : 'queued owner');
-        expect(seen).toEqual([event('change', 'native candidate')]);
+        expect(seen.map(withoutSelection)).toEqual([event('change', 'native candidate')]);
         if (sameValue) {
           expect(target.selectionStart).toBe(3);
           expect(target.selectionEnd).toBe(3);
@@ -1015,7 +1023,10 @@ describe.each(['single', 'multiline'] as const)('Web %s change callback preludes
     connection.onEvent(event('change', 'candidate', true));
     await Promise.resolve();
     expect(h.getPatchValue()).toBe('candidate');
-    expect(control.snapshot()).toEqual({ value: 'queued owner', composing: true });
+    expect(withoutSelection(control.snapshot())).toEqual({
+      value: 'queued owner',
+      composing: true,
+    });
     connection.onEvent(event('compositionend', 'candidate'));
     await Promise.resolve();
     expect(h.getPatchValue()).toBe('queued owner');
@@ -1090,7 +1101,7 @@ describe.each(['single', 'multiline'] as const)('Web %s change-only restoration'
         target.value = 'native candidate';
         target.setSelectionRange(3, 3);
         target.dispatchEvent(new Event('change'));
-        expect(seen).toEqual([event('change', 'native candidate')]);
+        expect(seen.map(withoutSelection)).toEqual([event('change', 'native candidate')]);
         expect(target.value).toBe('native candidate');
         await Promise.resolve();
         const expected =
@@ -1100,7 +1111,7 @@ describe.each(['single', 'multiline'] as const)('Web %s change-only restoration'
               ? 'native candidate'
               : 'replacement';
         expect(target.value).toBe(expected);
-        expect(control.snapshot()).toEqual({ value: expected, composing: false });
+        expect(withoutSelection(control.snapshot())).toEqual({ value: expected, composing: false });
         if (response === 'accept') {
           expect(target.selectionStart).toBe(3);
           expect(target.selectionEnd).toBe(3);
@@ -1131,11 +1142,14 @@ describe.each(['single', 'multiline'] as const)('Web %s change-only restoration'
       target.dispatchEvent(new Event('change'));
       control.sync({ value: 'next owner' });
       await Promise.resolve();
-      expect(seen).toEqual([event('change', 'composing candidate', true)]);
+      expect(seen.map(withoutSelection)).toEqual([event('change', 'composing candidate', true)]);
       expect(target.value).toBe('composing candidate');
       expect(target.selectionStart).toBe(3);
       expect(target.selectionEnd).toBe(3);
-      expect(control.snapshot()).toEqual({ value: 'next owner', composing: true });
+      expect(withoutSelection(control.snapshot())).toEqual({
+        value: 'next owner',
+        composing: true,
+      });
       target.dispatchEvent(new CompositionEvent('compositionend'));
       await Promise.resolve();
       expect(target.value).toBe('next owner');
@@ -1186,6 +1200,36 @@ describe.each(['single', 'multiline'] as const)('Web %s change-only restoration'
   );
 });
 
+describe.each(['single', 'multiline'] as const)('Web %s controlled owner changes', (lineMode) => {
+  it.each(['input', 'change', 'compositionend'] as const)(
+    'retires candidate protection when the %s callback changes owner and changes back',
+    (type) => {
+      const h = createHarness(false, lineMode);
+      const target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+      const control = h.module.facade.declare();
+      h.vault.attach([[TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)]]);
+      const observed: string[] = [];
+      control.on(type, () => {
+        control.sync({ value: 'accepted owner' });
+        observed.push(target.value);
+        control.sync({ value: 'original owner' });
+        observed.push(target.value);
+      });
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'original owner' });
+      try {
+        target.value = 'candidate';
+        target.dispatchEvent(new Event(type));
+        expect(observed).toEqual(['accepted owner', 'original owner']);
+        expect(control.snapshot()?.value).toBe('original owner');
+      } finally {
+        h.module.hooks.dispose?.();
+      }
+    }
+  );
+});
+
 describe('TextControl bounded reset', () => {
   it('resets uncontrolled canonical value, retires composition and rejects old events', () => {
     const h = createHarness(),
@@ -1196,7 +1240,10 @@ describe('TextControl bounded reset', () => {
     const old = h.connectionBox.current!;
     old.onEvent(event('compositionstart', 'dirty', true));
     expect(control.resetValue('restored\r\nvalue')).toBe(true);
-    expect(control.snapshot()).toEqual({ value: 'restored\nvalue', composing: false });
+    expect(withoutSelection(control.snapshot())).toEqual({
+      value: 'restored\nvalue',
+      composing: false,
+    });
     old.onEvent(event('input', 'stale'));
     expect(control.snapshot()?.value).toBe('restored\nvalue');
     expect(h.getPatchValue()).toBe('restored\nvalue');
@@ -1225,7 +1272,7 @@ describe('TextControl bounded reset', () => {
     const old = other.connectionBox.current!;
     old.onEvent(event('compositionstart', 'candidate', true));
     expect(controlled.resetValue('attempt')).toBe(false);
-    expect(controlled.snapshot()).toEqual({ value: 'owner', composing: false });
+    expect(withoutSelection(controlled.snapshot())).toEqual({ value: 'owner', composing: false });
     old.onEvent(event('compositionend', 'stale'));
     expect(controlled.snapshot()?.value).toBe('owner');
   });

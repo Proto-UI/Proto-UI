@@ -1,0 +1,50 @@
+{
+  "schema": "proto-ui.sprint2-input-native-status.v1",
+  "statusAsOfSource": "095ecbdde4902941a13032386765dac59ebd7e6b",
+  "observations": [
+    {
+      "runner": "scripts/analysis/sprint2-input-browser.mjs",
+      "source": "f5de205",
+      "sourceKind": "parent integration candidate, not local implementation branch",
+      "scope": "Base / Web Component diagnostic; six independently terminated cases",
+      "passed": 5,
+      "failed": 1,
+      "failure": "Controlled OTP ordinary accepting owner: expected 5678, observed 5786; pageErrors empty according to parent observation.",
+      "rawArtifact": "/home/ezra/proto-ui-sprint2-20261122/evidence/native-r2/input-diagnostic/report.json",
+      "screenshot": "base-wc-input-otp-controlled.png",
+      "observationSource": "Parent agent readback delivered in this session; this author did not receive or read the raw report.",
+      "rawHeldLocally": false,
+      "rawDigest": null,
+      "correctionReferences": ["b1033a4", "14c47f2"],
+      "replayAfterCorrection": "NOT_EXECUTED_IN_THIS_RECORD"
+    }
+  ],
+  "pending": [
+    {
+      "runner": "scripts/analysis/sprint2-input-browser.mjs",
+      "families": ["base", "shadcn", "brutalist"],
+      "runtimes": ["wc", "react", "vue", "vue2"],
+      "casesPerCell": 6,
+      "expected": 72,
+      "status": "UNTESTED_AT_ARCHIVED_FINAL_SOURCE"
+    },
+    {
+      "runner": "scripts/analysis/form-select-recipes-browser.mjs",
+      "families": ["base", "shadcn", "brutalist"],
+      "runtimes": ["wc", "react", "vue", "vue2"],
+      "kinds": ["form", "select", "choices"],
+      "expected": 36,
+      "status": "UNTESTED_AT_ARCHIVED_FINAL_SOURCE"
+    }
+  ],
+  "environment": "Local Chromium cannot start due to socket EPERM. Remote Desktop Commander reported exhausted monthly quota and was not retried or reconnected. Root uses the independent GitHub-hosted queue. No browser sandbox reduction was accepted.",
+  "requiredSandbox": {
+    "chromiumSandbox": true,
+    "args": ["--disable-dev-shm-usage"]
+  },
+  "nonClaims": [
+    "Source/HappyDOM success is not native browser success.",
+    "CDP composition/touch is not physical OS IME, physical touch hardware or assistive technology evidence.",
+    "Static fixture and actual stylesheet compilation do not prove native rendering/input outcomes."
+  ]
+}
