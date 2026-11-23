@@ -108,6 +108,7 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'data-[focus-visible]:outline-ring',
   'data-[focus-visible]:ring-2',
   'data-[focus-visible]:ring-3',
+  'data-[focus-visible]:ring-black',
   'data-[focus-visible]:ring-inset',
   'data-[focus-visible]:ring-offset-0',
   'data-[focus-visible]:ring-offset-2',
