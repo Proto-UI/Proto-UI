@@ -66,7 +66,9 @@ jobs:
             apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts \
             apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts \
             apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts \
-            --maxWorkers=1 --minWorkers=1
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json \
+            --outputFile="$PROTO_UI_BOOTSTRAP_EVIDENCE_DIR/vitest.json"
       - name: Collect Bootstrap navbar geometry, input and owner restoration evidence
         # The two selected suites leave independent terminal records even if
         # one fails. They run sequentially on this runner, without PR fanout.
@@ -114,6 +116,11 @@ jobs:
             status: previous.status === 'passed' && process.env.EVIDENCE_SUITE_STATUS === 'success' ? 'passed' : 'failed',
           }, null, 2));
           JS
+      - name: Require all fifteen original browser journeys and exact-source receipts
+        if: always()
+        env:
+          PROTO_UI_BOOTSTRAP_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-state-controls-evidence
+        run: node scripts/test/bootstrap-state-controls-receipt.mjs
       - name: Retain SHA-bound public fixture screenshots and failure manifest
         if: always()
         uses: actions/upload-artifact@v4

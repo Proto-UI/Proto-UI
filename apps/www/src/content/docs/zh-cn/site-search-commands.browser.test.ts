@@ -2184,7 +2184,7 @@ for (const width of [320, 390]) {
           // Click commits Root.open; cold Select preparation may still be
           // mounting/positioning the popup. Actual visibility is the boundary,
           // and a named geometry abort must still fail this bounded wait.
-          await popup.waitFor({ state: 'visible' });
+          await popup.waitFor({ state: 'visible', timeout: 1000 });
           expect(await popup.isVisible()).toBe(true);
           const popupGeometry = await popup.evaluate((node) => {
             const viewport = node.querySelector('wc-shadcn-select-viewport') ?? node;

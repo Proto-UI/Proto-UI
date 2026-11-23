@@ -13,7 +13,7 @@ function edge(node: Node | undefined, after: boolean): Node | null {
 }
 function capture(node: Node | null | undefined, offset: number): Boundary | null {
   if (!node) return null;
-  const children = sourceContainers.get(node) ?? Array.from(node.childNodes);
+  const children = sourceContainers.get(node) ?? node.childNodes;
   return {
     node,
     offset,
@@ -68,6 +68,10 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
       (sourceContainers.has(boundary.node) &&
         [boundary.previous, boundary.next].some((node) => !!node && scope.contains(node))));
   const ownedSelection = !!selection && (ownsBoundary(anchor) || ownsBoundary(extent));
+  if (!ownedFocus && !ownedSelection) {
+    move();
+    return;
+  }
   let focusRevoked = false;
   const removals = ownedFocus ? new MutationObserver(() => {}) : null;
   let blurPath: Set<EventTarget> | null = null;
@@ -115,18 +119,20 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
             input.selectionDirection ?? undefined,
           ] as const)
         : null;
-    const nextAnchor = resolve(anchor),
-      nextExtent = resolve(extent);
-    if (!focusRevoked && ownedSelection && nextAnchor && nextExtent) {
-      try {
-        selection!.setBaseAndExtent(
-          nextAnchor.node,
-          nextAnchor.offset,
-          nextExtent.node,
-          nextExtent.offset
-        );
-      } catch {
-        /* Connected callbacks may edit source lengths. Cleanup still completes. */
+    if (!focusRevoked && ownedSelection) {
+      const nextAnchor = resolve(anchor),
+        nextExtent = resolve(extent);
+      if (nextAnchor && nextExtent) {
+        try {
+          selection!.setBaseAndExtent(
+            nextAnchor.node,
+            nextAnchor.offset,
+            nextExtent.node,
+            nextExtent.offset
+          );
+        } catch {
+          /* Connected callbacks may edit source lengths. Cleanup still completes. */
+        }
       }
     }
     settleBlur();
