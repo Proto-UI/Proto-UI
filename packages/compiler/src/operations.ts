@@ -5,6 +5,7 @@ import type {
   ModuleCapabilityType,
   HookCaptureIR,
   ExpressionIR,
+  StatementIR,
 } from './ir';
 import { isCapabilityAssignable } from './ir';
 import { PRESENCE_PRESENTATION_DECLARATION } from './presentation-value-types';
@@ -17,6 +18,8 @@ import {
   serializableDataType,
   contextRuntimeValueType,
   objectFields,
+  spreadObjectFields,
+  iterableElementType,
   valueAlternatives,
 } from './value-types';
 export { isTemplateChildType } from './value-types';
@@ -36,6 +39,7 @@ import {
 } from './core-value-types';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
 import { SVG_ROOT_PROPS_TYPE, SVG_PATH_PROPS_TYPE } from './svg-templates';
+import { isEcmaIntrinsic } from './ecmascript-values';
 
 export type CallbackContext =
   | 'helper'
@@ -2370,6 +2374,7 @@ export interface OperationCallback {
   context?: FunctionContext;
   parameters: readonly { type: ValueType; optional?: boolean }[];
   returnType?: ValueType;
+  body?: readonly StatementIR[];
 }
 export function finiteStringKeys(argument: OperationArgument): string[] | undefined {
   if (argument.kind === 'literal' && typeof argument.value === 'string' && argument.value)
@@ -2943,6 +2948,177 @@ export function argumentValue(argument: OperationArgument): ValueType {
   return argument.type;
 }
 
+/** A fresh aggregate retains object identities. A later operand may mutate an
+ * earlier shared object, invalidating the type checked when it was captured.
+ * Unknown expressions count as effects; this is not a helper purity proof. */
+function orderedContextLiteral(argument: OperationArgument): boolean {
+  interface Evaluation {
+    ordered: boolean;
+    shared: boolean;
+    effects: boolean;
+  }
+  type EvaluatedArgument = OperationArgument & {
+    condition?: OperationArgument;
+    parts?: readonly { kind?: string; spread?: boolean; value: OperationArgument }[];
+    name?: string;
+    operator?: string;
+    callee?: OperationArgument;
+    receiver?: OperationArgument;
+    object?: OperationArgument;
+    index?: OperationArgument;
+    cell?: OperationArgument;
+    operand?: OperationArgument;
+    left?: OperationArgument;
+    right?: OperationArgument;
+    arguments?: readonly OperationArgument[];
+  };
+  const expression = (value: unknown): value is OperationArgument =>
+    !!value && typeof value === 'object' && 'kind' in value && 'type' in value;
+  const structured = (type: ValueType): boolean =>
+    typeof type !== 'string' &&
+    (type.kind === 'record' ||
+      type.kind === 'object' ||
+      type.kind === 'array' ||
+      type.kind === 'value-array' ||
+      ((type.kind === 'union' || type.kind === 'value-union') && type.members.some(structured)));
+  const scalar = (type: ValueType): boolean =>
+    valueAlternatives(type).every((member) =>
+      typeof member === 'string'
+        ? ['string', 'number', 'boolean', 'null', 'void'].includes(member)
+        : member.kind === 'literal'
+    );
+  const sequence = (values: readonly Evaluation[]): Evaluation => {
+    const result: Evaluation = { ordered: true, shared: false, effects: false };
+    for (const next of values) {
+      result.ordered &&= next.ordered && !(result.shared && next.effects);
+      result.shared ||= next.shared;
+      result.effects ||= next.effects;
+    }
+    return result;
+  };
+  const evaluate = (value: OperationArgument): Evaluation => {
+    if (value.kind === 'narrow') {
+      const inner = value.value;
+      if (!expression(inner)) return { ordered: false, shared: true, effects: true };
+      return evaluate(inner);
+    }
+    if (value.kind === 'record' && value.entries)
+      return sequence(value.entries.map((entry) => evaluate(entry.value)));
+    if (value.kind === 'array' && value.elements) return sequence(value.elements.map(evaluate));
+    const node = value as EvaluatedArgument;
+    if ((value.kind === 'object-spread' || value.kind === 'array-spread') && node.parts)
+      return sequence(
+        node.parts.map((part) => {
+          const next = evaluate(part.value);
+          if (part.kind !== 'spread' && !part.spread) return next;
+          // A shallow copy drops the source container's identity, but keeps any
+          // nested object identities. Only checked scalar fields/elements prove
+          // that no shared identity survives in the fresh result.
+          const fields =
+            value.kind === 'object-spread' ? spreadObjectFields(part.value.type) : undefined;
+          const element =
+            value.kind === 'array-spread' ? iterableElementType(part.value.type) : undefined;
+          const copiedScalars =
+            fields !== undefined
+              ? fields.every((field) => scalar(field.type))
+              : element !== undefined && scalar(element);
+          return { ...next, shared: next.shared && !copiedScalars };
+        })
+      );
+    if (
+      value.kind === 'binary' &&
+      ['??', '||', '&&'].includes(node.operator ?? '') &&
+      node.left &&
+      node.right
+    ) {
+      const left = evaluate(node.left),
+        right = evaluate(node.right);
+      // The left result is returned or discarded before the right executes;
+      // it is never a retained earlier sibling of the right result.
+      // Objects are truthy, so && can retain an object only from its right side.
+      return {
+        ordered: left.ordered && right.ordered,
+        shared: structured(value.type) && ((node.operator !== '&&' && left.shared) || right.shared),
+        effects: left.effects || right.effects,
+      };
+    }
+    if (value.kind === 'conditional' && value.then && value.otherwise) {
+      const yes = evaluate(value.then),
+        no = evaluate(value.otherwise),
+        condition = node.condition ? evaluate(node.condition) : undefined;
+      return {
+        ordered: (condition?.ordered ?? true) && yes.ordered && no.ordered,
+        shared: yes.shared || no.shared,
+        effects: (condition?.effects ?? true) || yes.effects || no.effects,
+      };
+    }
+    // Inspect eager operands, never a nested function's body. An intrinsic or
+    // ordinary call cannot hide an aggregate's own unsafe evaluation order.
+    const eager = sequence(
+      [
+        node.callee,
+        node.receiver,
+        node.object,
+        node.index,
+        node.cell,
+        node.operand,
+        node.left,
+        node.right,
+        ...(node.arguments ?? []),
+        node.value,
+      ]
+        .filter(expression)
+        .map(evaluate)
+    );
+    // These already checked numeric intrinsics accept no authored conversion
+    // callbacks. Their operands still contribute effects through `eager`.
+    const scalarIntrinsic =
+      value.kind === 'intrinsic' &&
+      node.name !== undefined &&
+      isEcmaIntrinsic(node.name) &&
+      (node.name === 'number' || node.name.startsWith('number.') || node.name.startsWith('math.'));
+    return {
+      ordered: eager.ordered,
+      shared: structured(value.type),
+      effects:
+        eager.effects ||
+        (!scalarIntrinsic &&
+          ![
+            'literal',
+            'undefined',
+            'reference',
+            'member',
+            'element',
+            'unary',
+            'binary',
+            'lexical-read',
+            'context-key',
+            'static-capability',
+            'style-handle',
+          ].includes(value.kind)),
+    };
+  };
+  return evaluate(argument).ordered;
+}
+
+function orderedContextReturns(body: readonly StatementIR[]): boolean {
+  return body.every((statement) => {
+    if (statement.kind === 'return')
+      return !statement.value || orderedContextLiteral(statement.value);
+    if (statement.kind === 'if')
+      return orderedContextReturns(statement.then) && orderedContextReturns(statement.otherwise);
+    if (statement.kind === 'while' || statement.kind === 'for-of')
+      return orderedContextReturns(statement.body);
+    if (statement.kind === 'try')
+      return (
+        orderedContextReturns(statement.body) &&
+        (!statement.catch || orderedContextReturns(statement.catch.body)) &&
+        (!statement.finally || orderedContextReturns(statement.finally))
+      );
+    return true;
+  });
+}
+
 /** Receiver, argument and callback validation shared by source admission and external IR.
  * Declaration/reference resolution (prop/expose/context ownership) remains caller-owned. */
 export function validateOperationArguments(
@@ -3223,7 +3399,19 @@ export function validateOperationArguments(
         break;
       case 'context-value':
       case 'context-next':
-        if (requirement.role === 'context-next' && argument.kind === 'function') break;
+        if (requirement.role === 'context-next' && argument.kind === 'function') {
+          if (argument.function?.body && !orderedContextReturns(argument.function.body))
+            reject(
+              'argument-type',
+              'Context updater literals cannot retain shared values before later potentially effectful expressions.'
+            );
+          break;
+        }
+        if (!orderedContextLiteral(argument))
+          reject(
+            'argument-type',
+            'Context literals cannot retain shared values before later potentially effectful expressions.'
+          );
         if (
           !bindings.contextValueType ||
           !assignable(

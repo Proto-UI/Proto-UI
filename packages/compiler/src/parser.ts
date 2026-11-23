@@ -5710,7 +5710,9 @@ function staticLoopValues(
         keys.push(property.name.text);
       else return undefined;
     }
-    return keys;
+    // Object.keys uses ECMAScript own-key ordering, not source declaration order.
+    if (keys.includes('__proto__')) return undefined;
+    return Object.keys(Object.fromEntries(keys.map((key) => [key, true])));
   }
   return undefined;
 }

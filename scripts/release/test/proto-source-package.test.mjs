@@ -252,6 +252,69 @@ test('the actual Transition package source export stages its machine and types u
     );
 });
 
+test('the actual Shadcn dialog, switch and tabs source closures survive packing', (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), 'shadcn-family-source-pack-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const pkg = getPublicPackages().find(
+    (candidate) => candidate.name === '@proto.ui/prototypes-shadcn'
+  );
+  assert.ok(pkg);
+  const manifest = createPublishManifest(pkg, { access: 'public' });
+  for (const family of ['dialog', 'switch', 'tabs'])
+    assert.deepEqual(manifest.exports[`./${family}`], {
+      proto: `./src/${family}/index.ts`,
+      types: `./dist/${family}/index.d.ts`,
+      import: `./dist/${family}/index.js`,
+      default: `./dist/${family}/index.js`,
+    });
+  const closure = protoSourceFiles(pkg);
+  for (const file of [
+    'src/dialog/index.ts',
+    'src/dialog/recipes.ts',
+    'src/dialog/close-icon.proto.ts',
+    'src/dialog/types.ts',
+    'src/switch/index.ts',
+    'src/switch/hit-lease.ts',
+    'src/switch/thumb.proto.ts',
+    'src/switch/types.ts',
+    'src/tabs/index.ts',
+    'src/tabs/indicator.proto.ts',
+    'src/tabs/visual.ts',
+    'src/tabs/types.ts',
+  ])
+    assert.ok(closure.includes(file), file);
+  const stage = path.join(root, 'stage');
+  mkdirSync(stage);
+  writeSupportingFiles(pkg, stage);
+  writeFileSync(
+    path.join(stage, 'package.json'),
+    JSON.stringify({ ...manifest, scripts: { prepack: 'exit 41' } })
+  );
+  const packed = spawnSync(
+    process.execPath,
+    [
+      path.join(ROOT_DIR, 'node_modules/npm/bin/npm-cli.js'),
+      'pack',
+      '--offline',
+      '--ignore-scripts',
+      '--json',
+      '--pack-destination',
+      root,
+    ],
+    { cwd: stage, encoding: 'utf8', timeout: 20_000 }
+  );
+  assert.equal(packed.status, 0, packed.stderr || packed.stdout);
+  const [result] = JSON.parse(packed.stdout);
+  assert.deepEqual(
+    result.files
+      .filter((file) => file.path.startsWith('src/'))
+      .map((file) => file.path)
+      .sort(),
+    closure
+  );
+  assert.ok(readFileSync(path.join(root, result.filename)).length > 0);
+});
+
 test('ordinary runtime exports never imply a source publication', (t) => {
   const { pkg } = fixture(t);
   delete pkg.manifest.exports['.'].proto;

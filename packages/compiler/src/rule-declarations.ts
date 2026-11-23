@@ -164,6 +164,7 @@ export function liftRuleDeclarationConditional(
     const collect = (part: ts.Node): void => {
       if ((ts.isParameter(part) || ts.isVariableDeclaration(part)) && ts.isIdentifier(part.name))
         locals.add(part.name.text);
+      if (ts.isFunctionExpression(part) && part.name) locals.add(part.name.text);
       ts.forEachChild(part, collect);
     };
     collect(value);
@@ -373,6 +374,43 @@ function addConstants<T>(
   }
 }
 
+/** Callback bindings shadow setup/module bindings for the whole lexical body. */
+function callbackBindings(node: Callback): ReadonlySet<string> {
+  const names = new Set<string>();
+  if (ts.isFunctionExpression(node) && node.name) names.add(node.name.text);
+  const binding = (name: ts.BindingName): void => {
+    if (ts.isIdentifier(name)) names.add(name.text);
+    else
+      for (const element of name.elements) if (ts.isBindingElement(element)) binding(element.name);
+  };
+  for (const parameter of node.parameters) binding(parameter.name);
+  if (node.body && ts.isBlock(node.body))
+    for (const statement of node.body.statements)
+      if (ts.isVariableStatement(statement))
+        for (const declaration of statement.declarationList.declarations) binding(declaration.name);
+  return names;
+}
+
+/** The outer resolver must never supply a callback-local name, including its TDZ. */
+function rejectCallbackCapture(expression: ts.Expression, bindings: ReadonlySet<string>): void {
+  const visit = (node: ts.Node): void => {
+    if (ts.isTypeNode(node)) return;
+    if (ts.isIdentifier(node) && bindings.has(node.text))
+      rejectNode(node, code, 'A callback-local rule binding cannot borrow an outer declaration.');
+    if (ts.isPropertyAccessExpression(node)) {
+      visit(node.expression);
+      return;
+    }
+    if (ts.isPropertyAssignment(node)) {
+      if (ts.isComputedPropertyName(node.name)) visit(node.name.expression);
+      visit(node.initializer);
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(expression);
+}
+
 /** Parse authoring syntax only. The admitted def.rule call and binding provenance remain the parser's responsibility. */
 export function extractRuleDeclaration(
   node: ts.ObjectLiteralExpression,
@@ -417,6 +455,7 @@ export function extractRuleDeclaration(
     );
   };
   const whenBuilder = (whenCallback.parameters[0].name as ts.Identifier).text;
+  const whenBindings = callbackBindings(whenCallback);
   const whenAliases = new Map<string, WhenPart>();
   const condition = (expression: ts.Expression): RuleCondition => {
     const part = parseWhen(expression);
@@ -434,17 +473,20 @@ export function extractRuleDeclaration(
     const span = sourceSpan(original);
     const value = literal(expression);
     if (value !== undefined) return { kind: 'literal', value };
-    const constant = context.resolveStatic?.(expression);
-    if (constant && constant.value !== undefined) return { kind: 'literal', value: constant.value };
-    if (ts.isConditionalExpression(expression)) {
-      const selected = context.resolveStatic?.(expression.condition);
-      if (selected) return parseWhen(selected.value ? expression.whenTrue : expression.whenFalse);
-    }
     if (ts.isIdentifier(expression)) {
       const alias = whenAliases.get(expression.text);
       if (alias) return alias;
-      rejectNode(original, code, 'Only callback-local static rule aliases may be read.');
+      rejectCallbackCapture(expression, whenBindings);
     }
+    const constant = context.resolveStatic?.(expression);
+    if (constant && constant.value !== undefined) return { kind: 'literal', value: constant.value };
+    if (ts.isConditionalExpression(expression)) {
+      rejectCallbackCapture(expression.condition, whenBindings);
+      const selected = context.resolveStatic?.(expression.condition);
+      if (selected) return parseWhen(selected.value ? expression.whenTrue : expression.whenFalse);
+    }
+    if (ts.isIdentifier(expression))
+      rejectNode(original, code, 'Only callback-local static rule aliases may be read.');
     if (!ts.isCallExpression(expression) || !ts.isPropertyAccessExpression(expression.expression))
       rejectNode(
         original,
@@ -525,6 +567,7 @@ export function extractRuleDeclaration(
     }
     if (operation === 'state') {
       arity(expression, 1);
+      rejectCallbackCapture(expression.arguments[0], whenBindings);
       const binding = context.resolveState(unwrap(expression.arguments[0]));
       if (!binding || typeof binding.id !== 'string' || !binding.id.length)
         rejectNode(
@@ -575,11 +618,13 @@ export function extractRuleDeclaration(
   } else when = condition(whenBody);
 
   const intentBuilder = (intentCallback.parameters[0].name as ts.Identifier).text;
+  const intentBindings = callbackBindings(intentCallback);
   const styleAliases = new Map<string, RuleStyleOperand>();
   const styleHandle = (expression: ts.Expression): RuleStyleOperand => {
     const input = unwrap(expression);
     if (ts.isIdentifier(input) && styleAliases.has(input.text))
       return styleAliases.get(input.text)!;
+    rejectCallbackCapture(input, intentBindings);
     const reference = context.resolveStyleReference?.(input);
     if (reference) return { kind: 'reference', id: reference.id };
     const handle = context.resolveStyle(input);
@@ -625,6 +670,7 @@ export function extractRuleDeclaration(
       ordinaryCall(receiver);
       if (receiver.arguments.length !== 1)
         rejectNode(receiver, code, 'A decoration style target requires one owned target.');
+      rejectCallbackCapture(receiver.arguments[0], intentBindings);
       target = context.resolveTarget?.(receiver.arguments[0]);
       if (!target)
         rejectNode(

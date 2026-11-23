@@ -69,8 +69,21 @@ const BRUTALIST_FAMILIES = new Set([
 ]);
 
 test('prototype packages expose side-effect-free family entry points', () => {
-  assertFamilyExports(BASE_ROOT, BASE_FAMILIES, { transition: './src/transition/index.ts' });
-  assertFamilyExports(SHADCN_ROOT, SHADCN_FAMILIES);
+  assertFamilyExports(
+    BASE_ROOT,
+    BASE_FAMILIES,
+    Object.fromEntries([...BASE_FAMILIES].map((family) => [family, `./src/${family}/index.ts`]))
+  );
+  assertFamilyExports(
+    SHADCN_ROOT,
+    SHADCN_FAMILIES,
+    Object.fromEntries(
+      ['button', 'dialog', 'scroll-area', 'select', 'switch', 'tabs', 'toggle'].map((family) => [
+        family,
+        `./src/${family}/index.ts`,
+      ])
+    )
+  );
   assertFamilyExports(BRUTALIST_ROOT, BRUTALIST_FAMILIES);
 });
 
