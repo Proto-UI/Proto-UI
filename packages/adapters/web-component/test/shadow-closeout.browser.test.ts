@@ -3336,6 +3336,78 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it.each(['input', 'textarea'] as const)(
+    'reprojects entry during native dir=auto %s input without an attribute change',
+    async (tag) => {
+      const page = await browser.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.addScriptTag({ content: script });
+        await page.addStyleTag({
+          content:
+            'body:has(#entry-direction-editor:dir(rtl)) #native-direction-entry button { visibility: hidden; }',
+        });
+        const initial = await page.evaluate(async (editorTag) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-input-direction-entry',
+              setup() {
+                p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                return (r: any) => r.slot();
+              },
+            })
+          );
+          const editor = document.createElement(editorTag);
+          editor.id = 'entry-direction-editor';
+          editor.dir = 'auto';
+          editor.value = 'Latin';
+          const host = new C();
+          host.id = 'native-direction-entry';
+          const button = document.createElement('button');
+          button.textContent = 'Direction-dependent entry target';
+          host.append(button);
+          document.body.append(editor, host);
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          const snapshot = () => ({
+            fallback: host.getAttribute('tabindex'),
+            direction: getComputedStyle(editor).direction,
+            visibility: getComputedStyle(button).visibility,
+            dir: editor.getAttribute('dir'),
+          });
+          (window as any).entryDirectionObservations = [];
+          document.addEventListener('input', (event) => {
+            if (event.target !== editor) return;
+            // The observer runs in the same native input dispatch, after the
+            // Adapter's capture listeners and before later microtask repairs.
+            (window as any).entryDirectionObservations.push({
+              trusted: event.isTrusted,
+              ...snapshot(),
+            });
+          });
+          return snapshot();
+        }, tag);
+        expect(initial).toEqual({
+          fallback: null,
+          direction: 'ltr',
+          visibility: 'visible',
+          dir: 'auto',
+        });
+
+        await page.locator('#entry-direction-editor').fill('עברית');
+        await page.locator('#entry-direction-editor').fill('Latin');
+        expect(await page.evaluate(() => (window as any).entryDirectionObservations)).toEqual([
+          { trusted: true, fallback: '0', direction: 'rtl', visibility: 'hidden', dir: 'auto' },
+          { trusted: true, fallback: null, direction: 'ltr', visibility: 'visible', dir: 'auto' },
+        ]);
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('reprojects descendant entry at a native visibility transition endpoint', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

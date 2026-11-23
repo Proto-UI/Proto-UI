@@ -237,6 +237,36 @@ describe('WC entry native input origin', () => {
     expect(fixture.target.hasAttribute('tabindex')).toBe(false);
   });
 
+  it.each(['input', 'textarea'] as const)(
+    'keeps native value-dependent :dir on an external %s with dir=auto',
+    async (tag) => {
+      const style = document.createElement('style');
+      style.textContent = `body:has(${tag}:dir(rtl)) .entry-direction button { visibility: hidden; }`;
+      const editor = document.createElement(tag);
+      editor.dir = 'auto';
+      editor.value = 'Latin';
+      document.body.append(style, editor);
+      const fixture = entry();
+      fixture.ancestor.className = 'entry-direction';
+      const button = document.createElement('button');
+      fixture.target.append(button);
+      // Model the two known directionality results; native :dir matching is
+      // separately covered in shadow-closeout.browser.test.ts.
+      visibleWhen(button, () => editor.value === 'Latin');
+      await settle();
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+
+      editor.value = 'עברית';
+      inputEvent(editor, 'input');
+      expect(fixture.target.tabIndex).toBe(0);
+
+      editor.value = 'Latin';
+      inputEvent(editor, 'input');
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+      expect(editor.dir).toBe('auto');
+    }
+  );
+
   it('keeps opaque stylesheet dependencies conservative', async () => {
     const opaque = new CSSStyleSheet();
     Object.defineProperty(opaque, 'cssRules', {

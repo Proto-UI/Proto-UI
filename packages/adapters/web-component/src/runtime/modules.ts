@@ -824,14 +824,15 @@ function selectorMayDependOnInputState(selector: string): boolean {
     const name = selector.slice(start, end).toLowerCase();
     // Attribute/tree changes, focus/modality and URL changes already have
     // their own observers. Native checkedness, validity, range, placeholder,
-    // autofill and unknown pseudo states may change without a DOM mutation.
+    // dir=auto direction, autofill and unknown pseudo states may change
+    // without a DOM mutation.
     // Keep those conservative across the stylesheet's whole scope, including
     // form-associated controls, sibling conditions and nested :has branches.
     const independent = pseudoElement
       ? /^(?:before|after|first-letter|first-line|marker|backdrop|selection|placeholder|part|slotted)$/.test(
           name
         )
-      : /^(?:is|where|not|has|nth(?:-last)?-(?:child|of-type)|(?:first|last|only)-(?:child|of-type)|root|scope|host|host-context|empty|defined|dir|lang|hover|active|focus(?:-within|-visible)?|link|any-link|visited|target(?:-within)?|enabled|disabled|required|optional|read-only|read-write|before|after|first-letter|first-line)$/.test(
+      : /^(?:is|where|not|has|nth(?:-last)?-(?:child|of-type)|(?:first|last|only)-(?:child|of-type)|root|scope|host|host-context|empty|defined|lang|hover|active|focus(?:-within|-visible)?|link|any-link|visited|target(?:-within)?|enabled|disabled|required|optional|read-only|read-write|before|after|first-letter|first-line)$/.test(
           name
         );
     if (!independent || selector[end] === '\\') return true;
