@@ -42,6 +42,9 @@ describe('prototypes/base: input', () => {
   it('preserves the public single-line state and event types', () => {
     expectTypeOf<StateValue<InputRootExposes['value']>>().toEqualTypeOf<string>();
     expectTypeOf<StateValue<InputRootStateHandles['composing']>>().toEqualTypeOf<boolean>();
+    expectTypeOf<ProtoAdapterExposes<typeof inputRoot>['resetValue']>().toEqualTypeOf<
+      (value?: string) => boolean
+    >();
     expectTypeOf<InputValueChangeDetail>().toEqualTypeOf<{
       readonly value: string;
       readonly composing: boolean;

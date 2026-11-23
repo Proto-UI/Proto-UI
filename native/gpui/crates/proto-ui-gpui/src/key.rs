@@ -70,6 +70,8 @@ pub const NAMED_KEYS: &[(&str, &str)] = &[
     ("backspace", "Backspace"),
     ("delete", "Delete"),
     ("insert", "Insert"),
+    // Windows VK_APPS and the native context-menu key use GPUI `menu`.
+    ("menu", "ContextMenu"),
     ("back", "BrowserBack"),
     ("forward", "BrowserForward"),
     // GPUI's keystroke parser accepts a bare modifier as the key itself
@@ -167,4 +169,19 @@ pub fn from_key_up(event: &KeyUpEvent) -> Option<PortableKeyFields> {
         modifiers: event.keystroke.modifiers.into(),
         repeat: false,
     })
+}
+
+#[cfg(test)]
+mod context_menu_tests {
+    use super::*;
+    #[test]
+    fn native_menu_key_beats_synthetic_text_and_keeps_modifiers() {
+        let keystroke = Keystroke {
+            key: "menu".into(), key_char: Some("menu".into()),
+            modifiers: Modifiers { shift: true, control: true, ..Default::default() },
+        };
+        assert_eq!(portable_key(&keystroke).as_deref(), Some("ContextMenu"));
+        let modifiers = PortableModifiers::from(keystroke.modifiers);
+        assert!(modifiers.shift && modifiers.ctrl);
+    }
 }

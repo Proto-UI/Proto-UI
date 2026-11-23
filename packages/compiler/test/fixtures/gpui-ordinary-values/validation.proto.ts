@@ -1,9 +1,15 @@
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, type RunHandle } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
 
 export default definePrototype({
   name: 'state-validation-boundary',
   setup(def) {
+    let current: RunHandle | null = null;
+    def.lifecycle.onCreated((run) => { current = run; });
+    def.expose.event('renderRequest', { payload: 'json' });
+    def.expose.method('emitOnly', (value: number) => {
+      if (current) current.expose.emit('renderRequest', { value });
+    });
     const scroll = asScrollSurface();
     scroll.configure({ axes: 'vertical', endFollow: { mode: 'while-at-end', axis: 'vertical' } });
     def.expose.method('scrollTo', () =>
@@ -26,6 +32,8 @@ export default definePrototype({
       () => scroll.request({ kind: 'control-drag', axis: 'vertical', position: 0.25 }).kind
     );
     def.expose.method('scrollEnd', () => scroll.request({ kind: 'to-end', axis: 'vertical' }).kind);
+    def.expose.method('scrollAxesHorizontal', () => scroll.sync({ axes: 'horizontal' }));
+    def.expose.method('scrollAxesVertical', () => scroll.sync({ axes: 'vertical' }));
     def.expose.method('scrollWrongAxis', () =>
       scroll.request({ kind: 'to', axis: 'horizontal', position: 0.5 })
     );

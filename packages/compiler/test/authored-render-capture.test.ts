@@ -18,3 +18,18 @@ it.each([
   if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
   expect(validateIR(JSON.parse(JSON.stringify(compiled.value.ir)))).toMatchObject({ ok: true });
 });
+
+it.each(['', 'return () => null;', 'return () => "caption";', 'return r => r.slot();'])(
+  'preserves the scalar or native renderer borrowed from authored capture: %s',
+  (body) => {
+    const source = `import {defineAsHook,definePrototype} from '@proto.ui/core';
+      const asContent=defineAsHook({name:'arbitrary-captured-content',setup(){${body}}});
+      export default definePrototype({name:'arbitrary-capture-recipient',setup(){
+        const content=asContent();return content.render;
+      }});`;
+    const compiled = compilePrototype(source, { profile: 'gpui-source-v1' });
+    expect(compiled.ok, JSON.stringify(compiled.ok ? null : compiled.diagnostics)).toBe(true);
+    if (compiled.ok)
+      expect(validateIR(JSON.parse(JSON.stringify(compiled.value.ir))).ok).toBe(true);
+  }
+);

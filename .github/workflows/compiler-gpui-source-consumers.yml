@@ -108,12 +108,19 @@ jobs:
             --output "$RUNNER_TEMP/gpui-evidence/numeric-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test a11y_value -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-consumer.log"
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test sequential_focus -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/sequential-focus-consumer.log"
       - name: Execute emitted SDK lifecycle and control regressions
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1 --nocapture \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-sdk-controls.log"
+      - name: Execute official Base Button and Label native consumers
+        run: |
+          set -euo pipefail
+          node --import tsx packages/compiler/test/fixtures/gpui-control-label/produce.mjs "$RUNNER_TEMP/gpui-evidence/control-label" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-producer.log"
+          cargo +1.98.1 metadata --offline --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/control-label/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/control-label-metadata.json"
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/control-label/Cargo.toml" --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
