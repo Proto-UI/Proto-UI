@@ -1,11 +1,13 @@
 import { definePrototype, type RunHandle } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
 
-export default definePrototype({
+type Props = { value: number };
+
+export default definePrototype<Props>({
   name: 'state-validation-boundary',
   setup(def) {
     def.props.define({ value: { type: 'number', default: 0 } });
-    let current: RunHandle | null = null;
+    let current: RunHandle<Props> | null = null;
     def.lifecycle.onCreated((run) => {
       current = run;
     });
