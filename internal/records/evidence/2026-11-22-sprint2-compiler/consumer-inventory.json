@@ -1,11 +1,6 @@
 {
   "schema": "proto-ui.sprint2.consumer-execution-inventory.v1",
-  "statusVocabulary": [
-    "PASS",
-    "FAIL",
-    "UNSUPPORTED",
-    "UNTESTED"
-  ],
+  "statusVocabulary": ["PASS", "FAIL", "UNSUPPORTED", "UNTESTED"],
   "scope": "Each row names its source, target, consumer and evidence surface; rows have different denominators and must not be summed into a completion percentage. Original source admission is retained separately. Pending CI results need an additive exact-source receipt.",
   "sourceAdmissionReceipt": "receipts/source-admission.json",
   "sourceAdmissionSummary": {
@@ -50,10 +45,7 @@
             "version": "19.2.6",
             "location": "node_modules/react",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react@19.2.6/node_modules/react",
-            "requiredBy": [
-              "<consumer-root>",
-              "react-dom@19.2.6"
-            ],
+            "requiredBy": ["<consumer-root>", "react-dom@19.2.6"],
             "files": 27,
             "bytes": 171604,
             "treeSha256": "db1ebaa19076d6021ff517e3e411f89c5b6d9a13b595b6da11cc243211b51a0b"
@@ -63,9 +55,7 @@
             "version": "19.2.6",
             "location": "node_modules/react-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 43,
             "bytes": 7319413,
             "treeSha256": "c3047cfe7bc9441e757e379eafff960f75c8e95792c24db48cb7f41ddd88d75d"
@@ -75,9 +65,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -87,9 +75,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -99,10 +85,7 @@
             "version": "19.2.14",
             "location": "node_modules/@types/react",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react",
-            "requiredBy": [
-              "<consumer-root>",
-              "@types/react-dom@19.2.3"
-            ],
+            "requiredBy": ["<consumer-root>", "@types/react-dom@19.2.3"],
             "files": 16,
             "bytes": 410399,
             "treeSha256": "7f7480284788df82d54ccbe7bca0ce306e16f344715793951c01d5d1f649c02d"
@@ -112,9 +95,7 @@
             "version": "19.2.3",
             "location": "node_modules/@types/react-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react-dom@19.2.3_@types+react@19.2.14/node_modules/@types/react-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 17,
             "bytes": 30063,
             "treeSha256": "e92f36efdbc4e014bf7dbebdd91d1a618a7338312c1a52bb468e09b4ca6f4114"
@@ -124,9 +105,7 @@
             "version": "0.27.0",
             "location": "node_modules/scheduler",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler",
-            "requiredBy": [
-              "react-dom@19.2.6"
-            ],
+            "requiredBy": ["react-dom@19.2.6"],
             "files": 15,
             "bytes": 82665,
             "treeSha256": "f71f4e7be5efc80ebdad148b62d55a9d3a81d245b93be93bc6d6c753580c55c9"
@@ -136,9 +115,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -148,9 +125,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -160,9 +135,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -172,9 +145,7 @@
             "version": "3.2.3",
             "location": "node_modules/csstype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-            "requiredBy": [
-              "@types/react@19.2.14"
-            ],
+            "requiredBy": ["@types/react@19.2.14"],
             "files": 5,
             "bytes": 1253449,
             "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"
@@ -260,10 +231,7 @@
             "version": "19.2.6",
             "location": "node_modules/react",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react@19.2.6/node_modules/react",
-            "requiredBy": [
-              "<consumer-root>",
-              "react-dom@19.2.6"
-            ],
+            "requiredBy": ["<consumer-root>", "react-dom@19.2.6"],
             "files": 27,
             "bytes": 171604,
             "treeSha256": "db1ebaa19076d6021ff517e3e411f89c5b6d9a13b595b6da11cc243211b51a0b"
@@ -273,9 +241,7 @@
             "version": "19.2.6",
             "location": "node_modules/react-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 43,
             "bytes": 7319413,
             "treeSha256": "c3047cfe7bc9441e757e379eafff960f75c8e95792c24db48cb7f41ddd88d75d"
@@ -285,9 +251,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -297,9 +261,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -309,10 +271,7 @@
             "version": "19.2.14",
             "location": "node_modules/@types/react",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react",
-            "requiredBy": [
-              "<consumer-root>",
-              "@types/react-dom@19.2.3"
-            ],
+            "requiredBy": ["<consumer-root>", "@types/react-dom@19.2.3"],
             "files": 16,
             "bytes": 410399,
             "treeSha256": "7f7480284788df82d54ccbe7bca0ce306e16f344715793951c01d5d1f649c02d"
@@ -322,9 +281,7 @@
             "version": "19.2.3",
             "location": "node_modules/@types/react-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react-dom@19.2.3_@types+react@19.2.14/node_modules/@types/react-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 17,
             "bytes": 30063,
             "treeSha256": "e92f36efdbc4e014bf7dbebdd91d1a618a7338312c1a52bb468e09b4ca6f4114"
@@ -334,9 +291,7 @@
             "version": "0.27.0",
             "location": "node_modules/scheduler",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler",
-            "requiredBy": [
-              "react-dom@19.2.6"
-            ],
+            "requiredBy": ["react-dom@19.2.6"],
             "files": 15,
             "bytes": 82665,
             "treeSha256": "f71f4e7be5efc80ebdad148b62d55a9d3a81d245b93be93bc6d6c753580c55c9"
@@ -346,9 +301,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -358,9 +311,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -370,9 +321,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -382,9 +331,7 @@
             "version": "3.2.3",
             "location": "node_modules/csstype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-            "requiredBy": [
-              "@types/react@19.2.14"
-            ],
+            "requiredBy": ["@types/react@19.2.14"],
             "files": 5,
             "bytes": 1253449,
             "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"
@@ -446,10 +393,7 @@
             "version": "19.2.6",
             "location": "node_modules/react",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react@19.2.6/node_modules/react",
-            "requiredBy": [
-              "<consumer-root>",
-              "react-dom@19.2.6"
-            ],
+            "requiredBy": ["<consumer-root>", "react-dom@19.2.6"],
             "files": 27,
             "bytes": 171604,
             "treeSha256": "db1ebaa19076d6021ff517e3e411f89c5b6d9a13b595b6da11cc243211b51a0b"
@@ -459,9 +403,7 @@
             "version": "19.2.6",
             "location": "node_modules/react-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 43,
             "bytes": 7319413,
             "treeSha256": "c3047cfe7bc9441e757e379eafff960f75c8e95792c24db48cb7f41ddd88d75d"
@@ -471,9 +413,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -483,9 +423,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -495,10 +433,7 @@
             "version": "19.2.14",
             "location": "node_modules/@types/react",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react",
-            "requiredBy": [
-              "<consumer-root>",
-              "@types/react-dom@19.2.3"
-            ],
+            "requiredBy": ["<consumer-root>", "@types/react-dom@19.2.3"],
             "files": 16,
             "bytes": 410399,
             "treeSha256": "7f7480284788df82d54ccbe7bca0ce306e16f344715793951c01d5d1f649c02d"
@@ -508,9 +443,7 @@
             "version": "19.2.3",
             "location": "node_modules/@types/react-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@types+react-dom@19.2.3_@types+react@19.2.14/node_modules/@types/react-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 17,
             "bytes": 30063,
             "treeSha256": "e92f36efdbc4e014bf7dbebdd91d1a618a7338312c1a52bb468e09b4ca6f4114"
@@ -520,9 +453,7 @@
             "version": "0.27.0",
             "location": "node_modules/scheduler",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler",
-            "requiredBy": [
-              "react-dom@19.2.6"
-            ],
+            "requiredBy": ["react-dom@19.2.6"],
             "files": 15,
             "bytes": 82665,
             "treeSha256": "f71f4e7be5efc80ebdad148b62d55a9d3a81d245b93be93bc6d6c753580c55c9"
@@ -532,9 +463,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -544,9 +473,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -556,9 +483,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -568,9 +493,7 @@
             "version": "3.2.3",
             "location": "node_modules/csstype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-            "requiredBy": [
-              "@types/react@19.2.14"
-            ],
+            "requiredBy": ["@types/react@19.2.14"],
             "files": 5,
             "bytes": 1253449,
             "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"
@@ -620,10 +543,7 @@
             "version": "3.5.31",
             "location": "node_modules/vue",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/vue@3.5.31_typescript@5.9.3/node_modules/vue",
-            "requiredBy": [
-              "<consumer-root>",
-              "@vue/server-renderer@3.5.31"
-            ],
+            "requiredBy": ["<consumer-root>", "@vue/server-renderer@3.5.31"],
             "files": 37,
             "bytes": 2478623,
             "treeSha256": "73251f5cb42381fb7806074e708a63290ed8cc8312671c1b4e209f977479b103"
@@ -633,10 +553,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>",
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["<consumer-root>", "vue@3.5.31"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -646,9 +563,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -678,9 +593,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-sfc",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-sfc@3.5.31/node_modules/@vue/compiler-sfc",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 6,
             "bytes": 2569179,
             "treeSha256": "b8edac1ebda47518e7d63d4fac1db504d6be00e2a9819d62aca3e9a107a4fd7f"
@@ -690,11 +603,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-dom@3.5.31/node_modules/@vue/compiler-dom",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31",
-              "@vue/compiler-ssr@3.5.31",
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31", "@vue/compiler-ssr@3.5.31", "vue@3.5.31"],
             "files": 12,
             "bytes": 647258,
             "treeSha256": "c7c714e5ad664e4073c1ae241bdb8cb66a2584cfe9c23a76105990cd58ad19df"
@@ -704,9 +613,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/runtime-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+runtime-dom@3.5.31/node_modules/@vue/runtime-dom",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 12,
             "bytes": 1233728,
             "treeSha256": "719266095aa2a727b3a7388814367458433d91ed53cede86fd0d16231f9b2c73"
@@ -716,9 +623,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/server-renderer",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+server-renderer@3.5.31_vue@3.5.31_typescript@5.9.3_/node_modules/@vue/server-renderer",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 10,
             "bytes": 425222,
             "treeSha256": "db7ad604987b5416736c98ca931a6e410800df6c8b0ed340a91ec7b2274b77eb"
@@ -728,9 +633,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -740,9 +643,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -752,9 +653,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -764,10 +663,7 @@
             "version": "7.29.2",
             "location": "node_modules/@babel/parser",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+parser@7.29.2/node_modules/@babel/parser",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 8,
             "bytes": 1995536,
             "treeSha256": "efe20df15a81ea380c53c489aa3767571e5e75ce152f40d70f844d5a19526485"
@@ -777,10 +673,7 @@
             "version": "2.0.2",
             "location": "node_modules/estree-walker",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/estree-walker@2.0.2/node_modules/estree-walker",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 17,
             "bytes": 50243,
             "treeSha256": "e3b5325bb1856cc07fef463f36c6fbe8e71f3d1db70b3f589f776bf53c525e9a"
@@ -790,9 +683,7 @@
             "version": "0.30.21",
             "location": "node_modules/magic-string",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/magic-string@0.30.21/node_modules/magic-string",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31"],
             "files": 11,
             "bytes": 459761,
             "treeSha256": "e6d008a11a507e62e764dc0158629aac4b079fca326ac73a640d33f05a450a37"
@@ -802,9 +693,7 @@
             "version": "8.5.8",
             "location": "node_modules/postcss",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/postcss@8.5.8/node_modules/postcss",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31"],
             "files": 55,
             "bytes": 203527,
             "treeSha256": "0bd4b5815812e0d9b91778f9c2ea8d9c2aab75f743a9c63d6e62b94e98ef6e87"
@@ -828,10 +717,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-core",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-core@3.5.31/node_modules/@vue/compiler-core",
-            "requiredBy": [
-              "@vue/compiler-dom@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-dom@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 8,
             "bytes": 630130,
             "treeSha256": "a88100f62ae63f532f1eff83ecefb0a1d9c9e4ee3c1815f1fc53c2ac80ad1ce1"
@@ -841,10 +727,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-ssr",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-ssr@3.5.31/node_modules/@vue/compiler-ssr",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31",
-              "@vue/server-renderer@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31", "@vue/server-renderer@3.5.31"],
             "files": 5,
             "bytes": 48503,
             "treeSha256": "5e12dee117b81082f0c93506a372fe3bff90382ddbe2878cd87e2f4f87bbc99c"
@@ -854,9 +737,7 @@
             "version": "3.2.3",
             "location": "node_modules/csstype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-            "requiredBy": [
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-dom@3.5.31"],
             "files": 5,
             "bytes": 1253449,
             "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"
@@ -866,9 +747,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/runtime-core",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+runtime-core@3.5.31/node_modules/@vue/runtime-core",
-            "requiredBy": [
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-dom@3.5.31"],
             "files": 8,
             "bytes": 831419,
             "treeSha256": "6d060a4b39b4078c367ca2aecde93ce066faca61004e4bfc874aaab77e95a88e"
@@ -878,10 +757,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/reactivity",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+reactivity@3.5.31/node_modules/@vue/reactivity",
-            "requiredBy": [
-              "@vue/runtime-core@3.5.31",
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-core@3.5.31", "@vue/runtime-dom@3.5.31"],
             "files": 12,
             "bytes": 339795,
             "treeSha256": "679173f4ce4193124efcce5ff540b63ca9a148d41b468d51c3c784518bfd847d"
@@ -891,9 +767,7 @@
             "version": "7.29.0",
             "location": "node_modules/@babel/types",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+types@7.29.0/node_modules/@babel/types",
-            "requiredBy": [
-              "@babel/parser@7.29.2"
-            ],
+            "requiredBy": ["@babel/parser@7.29.2"],
             "files": 178,
             "bytes": 2750097,
             "treeSha256": "44278b6d72b4b5cfa7365ea32b9404a40d47a9e40a161c43ef00bc38a38a3d94"
@@ -903,9 +777,7 @@
             "version": "1.5.5",
             "location": "node_modules/@jridgewell/sourcemap-codec",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@jridgewell+sourcemap-codec@1.5.5/node_modules/@jridgewell/sourcemap-codec",
-            "requiredBy": [
-              "magic-string@0.30.21"
-            ],
+            "requiredBy": ["magic-string@0.30.21"],
             "files": 27,
             "bytes": 87012,
             "treeSha256": "2ef13beedd81666bd0415e2dbdd6aeb3c35ee73876cde8f13034edcffff163e9"
@@ -915,9 +787,7 @@
             "version": "3.3.11",
             "location": "node_modules/nanoid",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/nanoid@3.3.11/node_modules/nanoid",
-            "requiredBy": [
-              "postcss@8.5.8"
-            ],
+            "requiredBy": ["postcss@8.5.8"],
             "files": 25,
             "bytes": 32583,
             "treeSha256": "431955ccf4a93773c9ca2786bb61f407e1749f64df67adeffc0c2d4428660fc2"
@@ -927,9 +797,7 @@
             "version": "1.1.1",
             "location": "node_modules/picocolors",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors",
-            "requiredBy": [
-              "postcss@8.5.8"
-            ],
+            "requiredBy": ["postcss@8.5.8"],
             "files": 7,
             "bytes": 6373,
             "treeSha256": "b46f226f1155fee6aedfa66b9010d393efa0f8a52c64c66f8461b3ca7adadb8d"
@@ -939,9 +807,7 @@
             "version": "7.0.1",
             "location": "node_modules/@vue/compiler-core/node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@7.0.1/node_modules/entities",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31"],
             "files": 109,
             "bytes": 392254,
             "treeSha256": "4e6276537ecf4ab0899b23f115d9dc3c59d6484307a284fc716d84970b5e1395"
@@ -951,9 +817,7 @@
             "version": "7.27.1",
             "location": "node_modules/@babel/helper-string-parser",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+helper-string-parser@7.27.1/node_modules/@babel/helper-string-parser",
-            "requiredBy": [
-              "@babel/types@7.29.0"
-            ],
+            "requiredBy": ["@babel/types@7.29.0"],
             "files": 5,
             "bytes": 31816,
             "treeSha256": "7362c5723e77e3a42568ec6a841735bf1ee7f45fecd60ab7dfbaeeb8d20fb6ed"
@@ -963,9 +827,7 @@
             "version": "7.28.5",
             "location": "node_modules/@babel/helper-validator-identifier",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+helper-validator-identifier@7.28.5/node_modules/@babel/helper-validator-identifier",
-            "requiredBy": [
-              "@babel/types@7.29.0"
-            ],
+            "requiredBy": ["@babel/types@7.29.0"],
             "files": 9,
             "bytes": 48813,
             "treeSha256": "8cccca648c9436f76f2909c5fc240f8414abb5129de89c45310d251fcc996deb"
@@ -1051,10 +913,7 @@
             "version": "3.5.31",
             "location": "node_modules/vue",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/vue@3.5.31_typescript@5.9.3/node_modules/vue",
-            "requiredBy": [
-              "<consumer-root>",
-              "@vue/server-renderer@3.5.31"
-            ],
+            "requiredBy": ["<consumer-root>", "@vue/server-renderer@3.5.31"],
             "files": 37,
             "bytes": 2478623,
             "treeSha256": "73251f5cb42381fb7806074e708a63290ed8cc8312671c1b4e209f977479b103"
@@ -1064,10 +923,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>",
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["<consumer-root>", "vue@3.5.31"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -1077,9 +933,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -1109,9 +963,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-sfc",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-sfc@3.5.31/node_modules/@vue/compiler-sfc",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 6,
             "bytes": 2569179,
             "treeSha256": "b8edac1ebda47518e7d63d4fac1db504d6be00e2a9819d62aca3e9a107a4fd7f"
@@ -1121,11 +973,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-dom@3.5.31/node_modules/@vue/compiler-dom",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31",
-              "@vue/compiler-ssr@3.5.31",
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31", "@vue/compiler-ssr@3.5.31", "vue@3.5.31"],
             "files": 12,
             "bytes": 647258,
             "treeSha256": "c7c714e5ad664e4073c1ae241bdb8cb66a2584cfe9c23a76105990cd58ad19df"
@@ -1135,9 +983,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/runtime-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+runtime-dom@3.5.31/node_modules/@vue/runtime-dom",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 12,
             "bytes": 1233728,
             "treeSha256": "719266095aa2a727b3a7388814367458433d91ed53cede86fd0d16231f9b2c73"
@@ -1147,9 +993,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/server-renderer",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+server-renderer@3.5.31_vue@3.5.31_typescript@5.9.3_/node_modules/@vue/server-renderer",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 10,
             "bytes": 425222,
             "treeSha256": "db7ad604987b5416736c98ca931a6e410800df6c8b0ed340a91ec7b2274b77eb"
@@ -1159,9 +1003,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -1171,9 +1013,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -1183,9 +1023,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -1195,10 +1033,7 @@
             "version": "7.29.2",
             "location": "node_modules/@babel/parser",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+parser@7.29.2/node_modules/@babel/parser",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 8,
             "bytes": 1995536,
             "treeSha256": "efe20df15a81ea380c53c489aa3767571e5e75ce152f40d70f844d5a19526485"
@@ -1208,10 +1043,7 @@
             "version": "2.0.2",
             "location": "node_modules/estree-walker",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/estree-walker@2.0.2/node_modules/estree-walker",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 17,
             "bytes": 50243,
             "treeSha256": "e3b5325bb1856cc07fef463f36c6fbe8e71f3d1db70b3f589f776bf53c525e9a"
@@ -1221,9 +1053,7 @@
             "version": "0.30.21",
             "location": "node_modules/magic-string",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/magic-string@0.30.21/node_modules/magic-string",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31"],
             "files": 11,
             "bytes": 459761,
             "treeSha256": "e6d008a11a507e62e764dc0158629aac4b079fca326ac73a640d33f05a450a37"
@@ -1233,9 +1063,7 @@
             "version": "8.5.8",
             "location": "node_modules/postcss",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/postcss@8.5.8/node_modules/postcss",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31"],
             "files": 55,
             "bytes": 203527,
             "treeSha256": "0bd4b5815812e0d9b91778f9c2ea8d9c2aab75f743a9c63d6e62b94e98ef6e87"
@@ -1259,10 +1087,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-core",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-core@3.5.31/node_modules/@vue/compiler-core",
-            "requiredBy": [
-              "@vue/compiler-dom@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-dom@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 8,
             "bytes": 630130,
             "treeSha256": "a88100f62ae63f532f1eff83ecefb0a1d9c9e4ee3c1815f1fc53c2ac80ad1ce1"
@@ -1272,10 +1097,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-ssr",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-ssr@3.5.31/node_modules/@vue/compiler-ssr",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31",
-              "@vue/server-renderer@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31", "@vue/server-renderer@3.5.31"],
             "files": 5,
             "bytes": 48503,
             "treeSha256": "5e12dee117b81082f0c93506a372fe3bff90382ddbe2878cd87e2f4f87bbc99c"
@@ -1285,9 +1107,7 @@
             "version": "3.2.3",
             "location": "node_modules/csstype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-            "requiredBy": [
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-dom@3.5.31"],
             "files": 5,
             "bytes": 1253449,
             "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"
@@ -1297,9 +1117,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/runtime-core",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+runtime-core@3.5.31/node_modules/@vue/runtime-core",
-            "requiredBy": [
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-dom@3.5.31"],
             "files": 8,
             "bytes": 831419,
             "treeSha256": "6d060a4b39b4078c367ca2aecde93ce066faca61004e4bfc874aaab77e95a88e"
@@ -1309,10 +1127,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/reactivity",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+reactivity@3.5.31/node_modules/@vue/reactivity",
-            "requiredBy": [
-              "@vue/runtime-core@3.5.31",
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-core@3.5.31", "@vue/runtime-dom@3.5.31"],
             "files": 12,
             "bytes": 339795,
             "treeSha256": "679173f4ce4193124efcce5ff540b63ca9a148d41b468d51c3c784518bfd847d"
@@ -1322,9 +1137,7 @@
             "version": "7.29.0",
             "location": "node_modules/@babel/types",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+types@7.29.0/node_modules/@babel/types",
-            "requiredBy": [
-              "@babel/parser@7.29.2"
-            ],
+            "requiredBy": ["@babel/parser@7.29.2"],
             "files": 178,
             "bytes": 2750097,
             "treeSha256": "44278b6d72b4b5cfa7365ea32b9404a40d47a9e40a161c43ef00bc38a38a3d94"
@@ -1334,9 +1147,7 @@
             "version": "1.5.5",
             "location": "node_modules/@jridgewell/sourcemap-codec",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@jridgewell+sourcemap-codec@1.5.5/node_modules/@jridgewell/sourcemap-codec",
-            "requiredBy": [
-              "magic-string@0.30.21"
-            ],
+            "requiredBy": ["magic-string@0.30.21"],
             "files": 27,
             "bytes": 87012,
             "treeSha256": "2ef13beedd81666bd0415e2dbdd6aeb3c35ee73876cde8f13034edcffff163e9"
@@ -1346,9 +1157,7 @@
             "version": "3.3.11",
             "location": "node_modules/nanoid",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/nanoid@3.3.11/node_modules/nanoid",
-            "requiredBy": [
-              "postcss@8.5.8"
-            ],
+            "requiredBy": ["postcss@8.5.8"],
             "files": 25,
             "bytes": 32583,
             "treeSha256": "431955ccf4a93773c9ca2786bb61f407e1749f64df67adeffc0c2d4428660fc2"
@@ -1358,9 +1167,7 @@
             "version": "1.1.1",
             "location": "node_modules/picocolors",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors",
-            "requiredBy": [
-              "postcss@8.5.8"
-            ],
+            "requiredBy": ["postcss@8.5.8"],
             "files": 7,
             "bytes": 6373,
             "treeSha256": "b46f226f1155fee6aedfa66b9010d393efa0f8a52c64c66f8461b3ca7adadb8d"
@@ -1370,9 +1177,7 @@
             "version": "7.0.1",
             "location": "node_modules/@vue/compiler-core/node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@7.0.1/node_modules/entities",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31"],
             "files": 109,
             "bytes": 392254,
             "treeSha256": "4e6276537ecf4ab0899b23f115d9dc3c59d6484307a284fc716d84970b5e1395"
@@ -1382,9 +1187,7 @@
             "version": "7.27.1",
             "location": "node_modules/@babel/helper-string-parser",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+helper-string-parser@7.27.1/node_modules/@babel/helper-string-parser",
-            "requiredBy": [
-              "@babel/types@7.29.0"
-            ],
+            "requiredBy": ["@babel/types@7.29.0"],
             "files": 5,
             "bytes": 31816,
             "treeSha256": "7362c5723e77e3a42568ec6a841735bf1ee7f45fecd60ab7dfbaeeb8d20fb6ed"
@@ -1394,9 +1197,7 @@
             "version": "7.28.5",
             "location": "node_modules/@babel/helper-validator-identifier",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+helper-validator-identifier@7.28.5/node_modules/@babel/helper-validator-identifier",
-            "requiredBy": [
-              "@babel/types@7.29.0"
-            ],
+            "requiredBy": ["@babel/types@7.29.0"],
             "files": 9,
             "bytes": 48813,
             "treeSha256": "8cccca648c9436f76f2909c5fc240f8414abb5129de89c45310d251fcc996deb"
@@ -1458,10 +1259,7 @@
             "version": "3.5.31",
             "location": "node_modules/vue",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/vue@3.5.31_typescript@5.9.3/node_modules/vue",
-            "requiredBy": [
-              "<consumer-root>",
-              "@vue/server-renderer@3.5.31"
-            ],
+            "requiredBy": ["<consumer-root>", "@vue/server-renderer@3.5.31"],
             "files": 37,
             "bytes": 2478623,
             "treeSha256": "73251f5cb42381fb7806074e708a63290ed8cc8312671c1b4e209f977479b103"
@@ -1471,10 +1269,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>",
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["<consumer-root>", "vue@3.5.31"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -1484,9 +1279,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -1516,9 +1309,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-sfc",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-sfc@3.5.31/node_modules/@vue/compiler-sfc",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 6,
             "bytes": 2569179,
             "treeSha256": "b8edac1ebda47518e7d63d4fac1db504d6be00e2a9819d62aca3e9a107a4fd7f"
@@ -1528,11 +1319,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-dom@3.5.31/node_modules/@vue/compiler-dom",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31",
-              "@vue/compiler-ssr@3.5.31",
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31", "@vue/compiler-ssr@3.5.31", "vue@3.5.31"],
             "files": 12,
             "bytes": 647258,
             "treeSha256": "c7c714e5ad664e4073c1ae241bdb8cb66a2584cfe9c23a76105990cd58ad19df"
@@ -1542,9 +1329,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/runtime-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+runtime-dom@3.5.31/node_modules/@vue/runtime-dom",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 12,
             "bytes": 1233728,
             "treeSha256": "719266095aa2a727b3a7388814367458433d91ed53cede86fd0d16231f9b2c73"
@@ -1554,9 +1339,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/server-renderer",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+server-renderer@3.5.31_vue@3.5.31_typescript@5.9.3_/node_modules/@vue/server-renderer",
-            "requiredBy": [
-              "vue@3.5.31"
-            ],
+            "requiredBy": ["vue@3.5.31"],
             "files": 10,
             "bytes": 425222,
             "treeSha256": "db7ad604987b5416736c98ca931a6e410800df6c8b0ed340a91ec7b2274b77eb"
@@ -1566,9 +1349,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -1578,9 +1359,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -1590,9 +1369,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -1602,10 +1379,7 @@
             "version": "7.29.2",
             "location": "node_modules/@babel/parser",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+parser@7.29.2/node_modules/@babel/parser",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 8,
             "bytes": 1995536,
             "treeSha256": "efe20df15a81ea380c53c489aa3767571e5e75ce152f40d70f844d5a19526485"
@@ -1615,10 +1389,7 @@
             "version": "2.0.2",
             "location": "node_modules/estree-walker",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/estree-walker@2.0.2/node_modules/estree-walker",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 17,
             "bytes": 50243,
             "treeSha256": "e3b5325bb1856cc07fef463f36c6fbe8e71f3d1db70b3f589f776bf53c525e9a"
@@ -1628,9 +1399,7 @@
             "version": "0.30.21",
             "location": "node_modules/magic-string",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/magic-string@0.30.21/node_modules/magic-string",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31"],
             "files": 11,
             "bytes": 459761,
             "treeSha256": "e6d008a11a507e62e764dc0158629aac4b079fca326ac73a640d33f05a450a37"
@@ -1640,9 +1409,7 @@
             "version": "8.5.8",
             "location": "node_modules/postcss",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/postcss@8.5.8/node_modules/postcss",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31"],
             "files": 55,
             "bytes": 203527,
             "treeSha256": "0bd4b5815812e0d9b91778f9c2ea8d9c2aab75f743a9c63d6e62b94e98ef6e87"
@@ -1666,10 +1433,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-core",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-core@3.5.31/node_modules/@vue/compiler-core",
-            "requiredBy": [
-              "@vue/compiler-dom@3.5.31",
-              "@vue/compiler-sfc@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-dom@3.5.31", "@vue/compiler-sfc@3.5.31"],
             "files": 8,
             "bytes": 630130,
             "treeSha256": "a88100f62ae63f532f1eff83ecefb0a1d9c9e4ee3c1815f1fc53c2ac80ad1ce1"
@@ -1679,10 +1443,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/compiler-ssr",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+compiler-ssr@3.5.31/node_modules/@vue/compiler-ssr",
-            "requiredBy": [
-              "@vue/compiler-sfc@3.5.31",
-              "@vue/server-renderer@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-sfc@3.5.31", "@vue/server-renderer@3.5.31"],
             "files": 5,
             "bytes": 48503,
             "treeSha256": "5e12dee117b81082f0c93506a372fe3bff90382ddbe2878cd87e2f4f87bbc99c"
@@ -1692,9 +1453,7 @@
             "version": "3.2.3",
             "location": "node_modules/csstype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype",
-            "requiredBy": [
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-dom@3.5.31"],
             "files": 5,
             "bytes": 1253449,
             "treeSha256": "891a6de47015c7a4862e630203e2df40bfb6f6b23eeb347fe8e56500579cfdc0"
@@ -1704,9 +1463,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/runtime-core",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+runtime-core@3.5.31/node_modules/@vue/runtime-core",
-            "requiredBy": [
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-dom@3.5.31"],
             "files": 8,
             "bytes": 831419,
             "treeSha256": "6d060a4b39b4078c367ca2aecde93ce066faca61004e4bfc874aaab77e95a88e"
@@ -1716,10 +1473,7 @@
             "version": "3.5.31",
             "location": "node_modules/@vue/reactivity",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@vue+reactivity@3.5.31/node_modules/@vue/reactivity",
-            "requiredBy": [
-              "@vue/runtime-core@3.5.31",
-              "@vue/runtime-dom@3.5.31"
-            ],
+            "requiredBy": ["@vue/runtime-core@3.5.31", "@vue/runtime-dom@3.5.31"],
             "files": 12,
             "bytes": 339795,
             "treeSha256": "679173f4ce4193124efcce5ff540b63ca9a148d41b468d51c3c784518bfd847d"
@@ -1729,9 +1483,7 @@
             "version": "7.29.0",
             "location": "node_modules/@babel/types",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+types@7.29.0/node_modules/@babel/types",
-            "requiredBy": [
-              "@babel/parser@7.29.2"
-            ],
+            "requiredBy": ["@babel/parser@7.29.2"],
             "files": 178,
             "bytes": 2750097,
             "treeSha256": "44278b6d72b4b5cfa7365ea32b9404a40d47a9e40a161c43ef00bc38a38a3d94"
@@ -1741,9 +1493,7 @@
             "version": "1.5.5",
             "location": "node_modules/@jridgewell/sourcemap-codec",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@jridgewell+sourcemap-codec@1.5.5/node_modules/@jridgewell/sourcemap-codec",
-            "requiredBy": [
-              "magic-string@0.30.21"
-            ],
+            "requiredBy": ["magic-string@0.30.21"],
             "files": 27,
             "bytes": 87012,
             "treeSha256": "2ef13beedd81666bd0415e2dbdd6aeb3c35ee73876cde8f13034edcffff163e9"
@@ -1753,9 +1503,7 @@
             "version": "3.3.11",
             "location": "node_modules/nanoid",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/nanoid@3.3.11/node_modules/nanoid",
-            "requiredBy": [
-              "postcss@8.5.8"
-            ],
+            "requiredBy": ["postcss@8.5.8"],
             "files": 25,
             "bytes": 32583,
             "treeSha256": "431955ccf4a93773c9ca2786bb61f407e1749f64df67adeffc0c2d4428660fc2"
@@ -1765,9 +1513,7 @@
             "version": "1.1.1",
             "location": "node_modules/picocolors",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors",
-            "requiredBy": [
-              "postcss@8.5.8"
-            ],
+            "requiredBy": ["postcss@8.5.8"],
             "files": 7,
             "bytes": 6373,
             "treeSha256": "b46f226f1155fee6aedfa66b9010d393efa0f8a52c64c66f8461b3ca7adadb8d"
@@ -1777,9 +1523,7 @@
             "version": "7.0.1",
             "location": "node_modules/@vue/compiler-core/node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@7.0.1/node_modules/entities",
-            "requiredBy": [
-              "@vue/compiler-core@3.5.31"
-            ],
+            "requiredBy": ["@vue/compiler-core@3.5.31"],
             "files": 109,
             "bytes": 392254,
             "treeSha256": "4e6276537ecf4ab0899b23f115d9dc3c59d6484307a284fc716d84970b5e1395"
@@ -1789,9 +1533,7 @@
             "version": "7.27.1",
             "location": "node_modules/@babel/helper-string-parser",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+helper-string-parser@7.27.1/node_modules/@babel/helper-string-parser",
-            "requiredBy": [
-              "@babel/types@7.29.0"
-            ],
+            "requiredBy": ["@babel/types@7.29.0"],
             "files": 5,
             "bytes": 31816,
             "treeSha256": "7362c5723e77e3a42568ec6a841735bf1ee7f45fecd60ab7dfbaeeb8d20fb6ed"
@@ -1801,9 +1543,7 @@
             "version": "7.28.5",
             "location": "node_modules/@babel/helper-validator-identifier",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/@babel+helper-validator-identifier@7.28.5/node_modules/@babel/helper-validator-identifier",
-            "requiredBy": [
-              "@babel/types@7.29.0"
-            ],
+            "requiredBy": ["@babel/types@7.29.0"],
             "files": 9,
             "bytes": 48813,
             "treeSha256": "8cccca648c9436f76f2909c5fc240f8414abb5129de89c45310d251fcc996deb"
@@ -1853,9 +1593,7 @@
             "version": "2.6.14",
             "location": "node_modules/vue",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/vue@2.6.14/node_modules/vue",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 218,
             "bytes": 2971462,
             "treeSha256": "67f7bf6962faf77193abbb8cff149991ffda0bcde714951b1b46bea3e9a8fab1"
@@ -1865,9 +1603,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -1877,9 +1613,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -1889,9 +1623,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -1901,9 +1633,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -1913,9 +1643,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -2001,9 +1729,7 @@
             "version": "2.6.14",
             "location": "node_modules/vue",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/vue@2.6.14/node_modules/vue",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 218,
             "bytes": 2971462,
             "treeSha256": "67f7bf6962faf77193abbb8cff149991ffda0bcde714951b1b46bea3e9a8fab1"
@@ -2013,9 +1739,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -2025,9 +1749,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -2037,9 +1759,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -2049,9 +1769,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -2061,9 +1779,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -2125,9 +1841,7 @@
             "version": "2.6.14",
             "location": "node_modules/vue",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/vue@2.6.14/node_modules/vue",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 218,
             "bytes": 2971462,
             "treeSha256": "67f7bf6962faf77193abbb8cff149991ffda0bcde714951b1b46bea3e9a8fab1"
@@ -2137,9 +1851,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -2149,9 +1861,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -2161,9 +1871,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -2173,9 +1881,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -2185,9 +1891,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -2237,9 +1941,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -2249,9 +1951,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -2261,9 +1961,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -2273,9 +1971,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -2285,9 +1981,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -2373,9 +2067,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -2385,9 +2077,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -2397,9 +2087,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -2409,9 +2097,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -2421,9 +2107,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -2485,9 +2169,7 @@
             "version": "5.9.3",
             "location": "node_modules/typescript",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 132,
             "bytes": 23625066,
             "treeSha256": "451dd0677157a602734fb30e2a0be507e3b4666f8adb5d5f1c7187d469563982"
@@ -2497,9 +2179,7 @@
             "version": "15.11.7",
             "location": "node_modules/happy-dom",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/happy-dom@15.11.7/node_modules/happy-dom",
-            "requiredBy": [
-              "<consumer-root>"
-            ],
+            "requiredBy": ["<consumer-root>"],
             "files": 4696,
             "bytes": 12229182,
             "treeSha256": "b51547a26ea361dd4efab5388e469a24172a983708b7f2adac84919addac9e63"
@@ -2509,9 +2189,7 @@
             "version": "4.5.0",
             "location": "node_modules/entities",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/entities@4.5.0/node_modules/entities",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 68,
             "bytes": 412892,
             "treeSha256": "b997a036b234a0537be6aaa6966cc1930bd0c96473bb704e8ce41c07559fa4a0"
@@ -2521,9 +2199,7 @@
             "version": "7.0.0",
             "location": "node_modules/webidl-conversions",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/webidl-conversions@7.0.0/node_modules/webidl-conversions",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 4,
             "bytes": 24242,
             "treeSha256": "5d5ba5c8003e2e43d0c5c359ef0c920a2b37ae9fc4cfa3ab771754c415d89c5d"
@@ -2533,9 +2209,7 @@
             "version": "3.0.0",
             "location": "node_modules/whatwg-mimetype",
             "copiedFrom": "/workspace/scratch/44c416809288/s2-compiler/node_modules/.pnpm/whatwg-mimetype@3.0.0/node_modules/whatwg-mimetype",
-            "requiredBy": [
-              "happy-dom@15.11.7"
-            ],
+            "requiredBy": ["happy-dom@15.11.7"],
             "files": 8,
             "bytes": 16809,
             "treeSha256": "e02e93061f5616954bffebe0334e0ad51410547c4770cb3abc8918b5351909a6"
@@ -2893,10 +2567,7 @@
       "firstDiagnostic": null,
       "scope": "unchanged actual producer publishes 20 artifacts and --check reads them back; consumer source unchanged",
       "receipt": "receipts/verdant-producer.json",
-      "logs": [
-        "logs/s2-verdant-producer.log.gz",
-        "logs/s2-verdant-current-check.log.gz"
-      ]
+      "logs": ["logs/s2-verdant-producer.log.gz", "logs/s2-verdant-current-check.log.gz"]
     },
     {
       "id": "verdant-rust-compilation",

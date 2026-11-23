@@ -1,1 +1,247 @@
-{"numTotalTestSuites":6,"numPassedTestSuites":6,"numFailedTestSuites":0,"numPendingTestSuites":0,"numTotalTests":22,"numPassedTests":22,"numFailedTests":0,"numPendingTests":0,"numTodoTests":0,"snapshot":{"added":0,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0,"didUpdate":false},"startTime":1795357169071,"success":true,"testResults":[{"assertionResults":[{"ancestorTitles":[],"fullName":"base/react-dom-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"base/react-dom-source-v1: consumes the full authored Button without rewriting its definition","duration":1108.41631,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"base/vue-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"base/vue-source-v1: consumes the full authored Button without rewriting its definition","duration":210.34791900000027,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"base/vue2-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"base/vue2-source-v1: consumes the full authored Button without rewriting its definition","duration":194.9707980000003,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"base/web-component-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"base/web-component-source-v1: consumes the full authored Button without rewriting its definition","duration":207.708623,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"shadcn/react-dom-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"shadcn/react-dom-source-v1: consumes the full authored Button without rewriting its definition","duration":866.8346229999997,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"shadcn/vue-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"shadcn/vue-source-v1: consumes the full authored Button without rewriting its definition","duration":654.0791380000001,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"shadcn/vue2-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"shadcn/vue2-source-v1: consumes the full authored Button without rewriting its definition","duration":778.8238179999998,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"shadcn/web-component-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"shadcn/web-component-source-v1: consumes the full authored Button without rewriting its definition","duration":511.31738700000005,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"brutalist/react-dom-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"brutalist/react-dom-source-v1: consumes the full authored Button without rewriting its definition","duration":261.7298469999996,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"brutalist/vue-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"brutalist/vue-source-v1: consumes the full authored Button without rewriting its definition","duration":260.18860999999924,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"brutalist/vue2-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"brutalist/vue2-source-v1: consumes the full authored Button without rewriting its definition","duration":226.402693,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"brutalist/web-component-source-v1: consumes the full authored Button without rewriting its definition","status":"passed","title":"brutalist/web-component-source-v1: consumes the full authored Button without rewriting its definition","duration":250.70105299999977,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"expands only proven static enumeration and rejects container mutation, escape and builtin shadowing","status":"passed","title":"expands only proven static enumeration and rejects container mutation, escape and builtin shadowing","duration":10.482641999999942,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"resolves module style data in its declaration scope while preserving local style tables","status":"passed","title":"resolves module style data in its declaration scope while preserving local style tables","duration":3.987304999999651,"failureMessages":[],"meta":{}}],"startTime":1795357177436,"endTime":1795357182982.9873,"status":"passed","message":"","name":"/workspace/scratch/44c416809288/s2-compiler/packages/compiler/test/release-family-consumer.test.ts"},{"assertionResults":[{"ancestorTitles":["react-dom-source-v1"],"fullName":"react-dom-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease","status":"passed","title":"refreshes only the style owner from live theme/preference facts and retires every lease","duration":203.0504179999998,"failureMessages":[],"meta":{}},{"ancestorTitles":["vue-source-v1"],"fullName":"vue-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease","status":"passed","title":"refreshes only the style owner from live theme/preference facts and retires every lease","duration":137.56653300000016,"failureMessages":[],"meta":{}},{"ancestorTitles":["vue2-source-v1"],"fullName":"vue2-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease","status":"passed","title":"refreshes only the style owner from live theme/preference facts and retires every lease","duration":127.19781500000045,"failureMessages":[],"meta":{}},{"ancestorTitles":["web-component-source-v1"],"fullName":"web-component-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease","status":"passed","title":"refreshes only the style owner from live theme/preference facts and retires every lease","duration":118.61529299999984,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"requires an active getter/source pair and shares only successfully acquired preference leases","status":"passed","title":"requires an active getter/source pair and shares only successfully acquired preference leases","duration":21.611493999999766,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"retains matched legacy pairs, attempts every teardown, and permits fresh leases during retirement","status":"passed","title":"retains matched legacy pairs, attempts every teardown, and permits fresh leases during retirement","duration":13.075251000000208,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"rolls back failed color registration and retires its document cache before throwing or reentry","status":"passed","title":"rolls back failed color registration and retires its document cache before throwing or reentry","duration":26.062740999999733,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"retains explicit unsupported keys/targets and omits all environment observers when not reached","status":"passed","title":"retains explicit unsupported keys/targets and omits all environment observers when not reached","duration":24.162824,"failureMessages":[],"meta":{}}],"startTime":1795357174492,"endTime":1795357175164.1628,"status":"passed","message":"","name":"/workspace/scratch/44c416809288/s2-compiler/packages/compiler/test/rule-meta-consumer.test.ts"}]}
+{
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 6,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 22,
+  "numPassedTests": 22,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795357169071,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "base/react-dom-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "base/react-dom-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 1108.41631,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "base/vue-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "base/vue-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 210.34791900000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "base/vue2-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "base/vue2-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 194.9707980000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "base/web-component-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "base/web-component-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 207.708623,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "shadcn/react-dom-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "shadcn/react-dom-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 866.8346229999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "shadcn/vue-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "shadcn/vue-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 654.0791380000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "shadcn/vue2-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "shadcn/vue2-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 778.8238179999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "shadcn/web-component-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "shadcn/web-component-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 511.31738700000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "brutalist/react-dom-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "brutalist/react-dom-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 261.7298469999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "brutalist/vue-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "brutalist/vue-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 260.18860999999924,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "brutalist/vue2-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "brutalist/vue2-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 226.402693,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "brutalist/web-component-source-v1: consumes the full authored Button without rewriting its definition",
+          "status": "passed",
+          "title": "brutalist/web-component-source-v1: consumes the full authored Button without rewriting its definition",
+          "duration": 250.70105299999977,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "expands only proven static enumeration and rejects container mutation, escape and builtin shadowing",
+          "status": "passed",
+          "title": "expands only proven static enumeration and rejects container mutation, escape and builtin shadowing",
+          "duration": 10.482641999999942,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "resolves module style data in its declaration scope while preserving local style tables",
+          "status": "passed",
+          "title": "resolves module style data in its declaration scope while preserving local style tables",
+          "duration": 3.987304999999651,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795357177436,
+      "endTime": 1795357182982.9873,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/44c416809288/s2-compiler/packages/compiler/test/release-family-consumer.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["react-dom-source-v1"],
+          "fullName": "react-dom-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease",
+          "status": "passed",
+          "title": "refreshes only the style owner from live theme/preference facts and retires every lease",
+          "duration": 203.0504179999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["vue-source-v1"],
+          "fullName": "vue-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease",
+          "status": "passed",
+          "title": "refreshes only the style owner from live theme/preference facts and retires every lease",
+          "duration": 137.56653300000016,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["vue2-source-v1"],
+          "fullName": "vue2-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease",
+          "status": "passed",
+          "title": "refreshes only the style owner from live theme/preference facts and retires every lease",
+          "duration": 127.19781500000045,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["web-component-source-v1"],
+          "fullName": "web-component-source-v1 refreshes only the style owner from live theme/preference facts and retires every lease",
+          "status": "passed",
+          "title": "refreshes only the style owner from live theme/preference facts and retires every lease",
+          "duration": 118.61529299999984,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "requires an active getter/source pair and shares only successfully acquired preference leases",
+          "status": "passed",
+          "title": "requires an active getter/source pair and shares only successfully acquired preference leases",
+          "duration": 21.611493999999766,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "retains matched legacy pairs, attempts every teardown, and permits fresh leases during retirement",
+          "status": "passed",
+          "title": "retains matched legacy pairs, attempts every teardown, and permits fresh leases during retirement",
+          "duration": 13.075251000000208,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "rolls back failed color registration and retires its document cache before throwing or reentry",
+          "status": "passed",
+          "title": "rolls back failed color registration and retires its document cache before throwing or reentry",
+          "duration": 26.062740999999733,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "retains explicit unsupported keys/targets and omits all environment observers when not reached",
+          "status": "passed",
+          "title": "retains explicit unsupported keys/targets and omits all environment observers when not reached",
+          "duration": 24.162824,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795357174492,
+      "endTime": 1795357175164.1628,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/44c416809288/s2-compiler/packages/compiler/test/rule-meta-consumer.test.ts"
+    }
+  ]
+}

@@ -89,6 +89,11 @@ async function capture(page: Page, id: string, observations: unknown) {
         route: new URL(page.url()).pathname,
         viewport: page.viewportSize(),
         theme: await page.locator('html').getAttribute('data-theme'),
+        // A no-script document can retain its SSR theme even when the browser
+        // preference is light. Preserve both facts instead of relabeling it.
+        preferredColorScheme: await page.evaluate(() =>
+          matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        ),
         observations,
       },
       null,
@@ -117,6 +122,7 @@ async function paint(owner: Locator) {
         style.borderBottomRightRadius,
         style.borderBottomLeftRadius,
       ],
+      brutalistRadius: getComputedStyle(node).getPropertyValue('--site-brutalist-radius').trim(),
       borders: [
         style.borderTopWidth,
         style.borderRightWidth,
@@ -134,6 +140,42 @@ async function paint(owner: Locator) {
       focused: document.activeElement === node,
     };
   });
+}
+
+async function settledRadius(owner: Locator) {
+  // Observe the authored transition to completion. Do not finish/cancel
+  // animations, disable motion, alter CSS or introduce a grace-period sleep.
+  await owner.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  );
+  await expect
+    .poll(() =>
+      owner.evaluate(
+        (node) =>
+          node
+            .getAnimations()
+            .filter((animation) => animation.pending || animation.playState === 'running').length
+      )
+    )
+    .toBe(0);
+  const observation = await owner.evaluate(async (node) => {
+    const read = () => getComputedStyle(node).borderTopLeftRadius;
+    const before = read();
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    );
+    return { before, after: read(), retainedAnimationFrames: 2 };
+  });
+  expect(observation.after).toBe(observation.before);
+  return observation;
+}
+
+function expectBrutalistRadius(observation: Awaited<ReturnType<typeof paint>>) {
+  // The public Brutalist Surface's default uses rounded-base and the same
+  // family radius bank as sidebar.css. Equality of two incorrect square rows
+  // must not satisfy family parity. Other site chrome has its own recipes.
+  expect(observation.brutalistRadius).toBe('5px');
+  expect(observation.radius).toEqual(Array(4).fill(observation.brutalistRadius));
 }
 
 let hitFailure = 0;
@@ -340,19 +382,19 @@ for (const locale of locales)
         const tabNode = await password.elementHandle(),
           contentNode = await content.elementHandle();
         const childNode = await password.evaluateHandle((node) => node.firstChild);
-        const initialRadius = await password.evaluate(
-          (node) => getComputedStyle(node).borderTopLeftRadius
-        );
-        await capture(page, `tabs-${locale}-${runtime}-rhea`, {
+        const initialSettled = await settledRadius(password);
+        const initialRadius = initialSettled.after;
+        await capture(page, `tabs-${locale}-${runtime}-0-rhea`, {
           selected: 'password',
           radius: initialRadius,
+          settled: initialSettled,
         });
-        for (const [key, profile] of [
+        for (const [step, [key, profile]] of [
           ['1', 'nova'],
           ['2', 'rhea'],
           ['3', 'new-york-v4'],
           ['1', 'nova'],
-        ]) {
+        ].entries()) {
           await page.keyboard.press(`Alt+${key}`);
           await expect
             .poll(() => preview.locator('[data-demo-ref="profileStatus"]').textContent())
@@ -377,12 +419,16 @@ for (const locale of locales)
             await expect
               .poll(() => password.evaluate((node) => getComputedStyle(node).borderTopLeftRadius))
               .not.toBe(initialRadius);
-          await capture(page, `tabs-${locale}-${runtime}-${profile}`, {
+          const settled = await settledRadius(password);
+          if (profile === 'rhea') expect(settled.after).toBe(initialRadius);
+          if (profile === 'nova') expect(settled.after).not.toBe(initialRadius);
+          await capture(page, `tabs-${locale}-${runtime}-${step + 1}-${profile}`, {
             profile,
             selected: 'password',
             focusRetained: true,
             tabAndPanelIdentityRetained: true,
-            radius: await password.evaluate((node) => getComputedStyle(node).borderTopLeftRadius),
+            radius: settled.after,
+            settled,
           });
         }
         await preview.getByRole('tab', { name: 'Account', exact: true }).click();
@@ -434,6 +480,10 @@ for (const locale of locales)
             const leafHover = await paint(leaf);
             expect(groupHover.radius).toEqual(leafHover.radius);
             if (family === 'shadcn') expect(parseFloat(groupHover.radius[0]!)).toBeGreaterThan(0);
+            else {
+              expectBrutalistRadius(groupHover);
+              expectBrutalistRadius(leafHover);
+            }
             expect(groupHover.height).toBeGreaterThanOrEqual(32);
             expect(leafHover.height).toBeGreaterThanOrEqual(32);
             expect(Math.abs(groupHover.width - groupHover.paintWidth)).toBeLessThanOrEqual(1);
@@ -493,9 +543,14 @@ for (const locale of locales)
           await leaf.hover();
           const leafPaint = await paint(leaf);
           expect(groupPaint.radius).toEqual(leafPaint.radius);
+          if (family === 'brutalist') {
+            expectBrutalistRadius(groupPaint);
+            expectBrutalistRadius(leafPaint);
+          }
           expect(groupPaint.height).toBeGreaterThanOrEqual(44);
           expect(leafPaint.height).toBeGreaterThanOrEqual(44);
           await capture(page, `sidebar-mobile-${locale}-${family}-${mode}`, {
+            scriptMode: mode,
             groupPaint,
             leafPaint,
             groupHit,

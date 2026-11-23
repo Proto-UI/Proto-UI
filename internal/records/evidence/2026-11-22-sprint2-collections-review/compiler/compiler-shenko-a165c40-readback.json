@@ -70,20 +70,14 @@
     {
       "name": "source-seam",
       "status": "PASS",
-      "compiled": [
-        "transport-badge",
-        "message-bubble"
-      ],
+      "compiled": ["transport-badge", "message-bubble"],
       "adapterFamilyCount": 9,
       "initialization": "UNTESTED"
     },
     {
       "name": "pinned-artifact",
       "status": "PASS",
-      "compiled": [
-        "transport-badge",
-        "message-bubble"
-      ],
+      "compiled": ["transport-badge", "message-bubble"],
       "adapterFamilyCount": 9,
       "initialization": "UNTESTED"
     }

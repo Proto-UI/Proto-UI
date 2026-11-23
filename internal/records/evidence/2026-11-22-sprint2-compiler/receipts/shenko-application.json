@@ -830,10 +830,7 @@
       "lane": "source-seam",
       "name": "generate",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "build.mjs",
-        "--prototypes-only"
-      ],
+      "args": ["build.mjs", "--prototypes-only"],
       "status": 0,
       "signal": null,
       "error": null,
@@ -843,10 +840,7 @@
       "lane": "source-seam",
       "name": "typecheck",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "node_modules/typescript/bin/tsc",
-        "--noEmit"
-      ],
+      "args": ["node_modules/typescript/bin/tsc", "--noEmit"],
       "status": 0,
       "signal": null,
       "error": null,
@@ -856,9 +850,7 @@
       "lane": "source-seam",
       "name": "build",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "build.mjs"
-      ],
+      "args": ["build.mjs"],
       "status": 0,
       "signal": null,
       "error": null,
@@ -888,10 +880,7 @@
       "lane": "pinned-artifact",
       "name": "generate",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "build.mjs",
-        "--prototypes-only"
-      ],
+      "args": ["build.mjs", "--prototypes-only"],
       "status": 0,
       "signal": null,
       "error": null,
@@ -901,10 +890,7 @@
       "lane": "pinned-artifact",
       "name": "typecheck",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "node_modules/typescript/bin/tsc",
-        "--noEmit"
-      ],
+      "args": ["node_modules/typescript/bin/tsc", "--noEmit"],
       "status": 0,
       "signal": null,
       "error": null,
@@ -914,9 +900,7 @@
       "lane": "pinned-artifact",
       "name": "build",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "build.mjs"
-      ],
+      "args": ["build.mjs"],
       "status": 0,
       "signal": null,
       "error": null,
@@ -926,10 +910,7 @@
       "lane": "pinned-artifact",
       "name": "legacy-identity-test",
       "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
-      "args": [
-        "--test",
-        "tests/prototypes.test.mjs"
-      ],
+      "args": ["--test", "tests/prototypes.test.mjs"],
       "status": 1,
       "signal": null,
       "error": null,
@@ -968,10 +949,7 @@
         "react_dom": "19.3.1"
       },
       "realisation": {
-        "compiled": [
-          "transport-badge",
-          "message-bubble"
-        ],
+        "compiled": ["transport-badge", "message-bubble"],
         "adapter": [
           {
             "family": "button",
@@ -1030,10 +1008,7 @@
           "output_directory": "generated/prototypes/transport-badge",
           "generated_source": "generated/prototypes/transport-badge/Component.tsx",
           "generated_sha256": "8ade72b5faae9544184780f89e3112fad37420f33dbacaf8286179cf9b1b5d6b",
-          "generated_imports": [
-            " + phase);\n    const previous = phase;\n    phase = ",
-            "react"
-          ],
+          "generated_imports": [" + phase);\n    const previous = phase;\n    phase = ", "react"],
           "provenance": "generated/prototypes/transport-badge/provenance.json",
           "provenance_sha256": "5ece4fe381049a38729cc2277c1a2c64db1b28a17c3630fd73aefc9c5d21173a",
           "compiler_ir_version": 7,
@@ -1049,10 +1024,7 @@
           "output_directory": "generated/prototypes/message-bubble",
           "generated_source": "generated/prototypes/message-bubble/Component.tsx",
           "generated_sha256": "c78fa61c2a8194eb26264db49243e31fdbfde5398dd930473ae50aea25b4bce7",
-          "generated_imports": [
-            " + phase);\n    const previous = phase;\n    phase = ",
-            "react"
-          ],
+          "generated_imports": [" + phase);\n    const previous = phase;\n    phase = ", "react"],
           "provenance": "generated/prototypes/message-bubble/provenance.json",
           "provenance_sha256": "1098033db1364e77eb57f7eb222ee9e615a8bcea6b4ac65ec894b2095c3ace64",
           "compiler_ir_version": 7,
@@ -3357,10 +3329,7 @@
         "react_dom": "19.3.1"
       },
       "realisation": {
-        "compiled": [
-          "transport-badge",
-          "message-bubble"
-        ],
+        "compiled": ["transport-badge", "message-bubble"],
         "adapter": [
           {
             "family": "button",
@@ -3419,10 +3388,7 @@
           "output_directory": "generated/prototypes/transport-badge",
           "generated_source": "generated/prototypes/transport-badge/Component.tsx",
           "generated_sha256": "8ade72b5faae9544184780f89e3112fad37420f33dbacaf8286179cf9b1b5d6b",
-          "generated_imports": [
-            " + phase);\n    const previous = phase;\n    phase = ",
-            "react"
-          ],
+          "generated_imports": [" + phase);\n    const previous = phase;\n    phase = ", "react"],
           "provenance": "generated/prototypes/transport-badge/provenance.json",
           "provenance_sha256": "8f47b49459dfd22f15e5ba2c80d6c53a090eaa3925e72d2887deed00fea25cee",
           "compiler_ir_version": 7,
@@ -3438,10 +3404,7 @@
           "output_directory": "generated/prototypes/message-bubble",
           "generated_source": "generated/prototypes/message-bubble/Component.tsx",
           "generated_sha256": "c78fa61c2a8194eb26264db49243e31fdbfde5398dd930473ae50aea25b4bce7",
-          "generated_imports": [
-            " + phase);\n    const previous = phase;\n    phase = ",
-            "react"
-          ],
+          "generated_imports": [" + phase);\n    const previous = phase;\n    phase = ", "react"],
           "provenance": "generated/prototypes/message-bubble/provenance.json",
           "provenance_sha256": "9e37e4ed8bdfd0b510418fbca8e33a733b89fe2ea6dc4a85dd5c60a549cf24f6",
           "compiler_ir_version": 7,

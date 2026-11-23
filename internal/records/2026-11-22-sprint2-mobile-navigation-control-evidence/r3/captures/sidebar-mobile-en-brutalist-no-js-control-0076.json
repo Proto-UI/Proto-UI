@@ -19,18 +19,8 @@
       "text": "Brutalist",
       "href": null,
       "current": null,
-      "radius": [
-        "0px",
-        "0px",
-        "0px",
-        "0px"
-      ],
-      "borders": [
-        "0px",
-        "0px",
-        "0px",
-        "0px"
-      ],
+      "radius": ["0px", "0px", "0px", "0px"],
+      "borders": ["0px", "0px", "0px", "0px"],
       "background": "rgb(64, 64, 64)",
       "outline": "none",
       "outlineWidth": "3px",
@@ -47,18 +37,8 @@
       "text": "Button",
       "href": "/en/ui-libraries/brutalist/components/button/",
       "current": "page",
-      "radius": [
-        "0px",
-        "0px",
-        "0px",
-        "0px"
-      ],
-      "borders": [
-        "0px",
-        "0px",
-        "0px",
-        "0px"
-      ],
+      "radius": ["0px", "0px", "0px", "0px"],
+      "borders": ["0px", "0px", "0px", "0px"],
       "background": "rgb(82, 148, 255)",
       "outline": "solid",
       "outlineWidth": "2px",

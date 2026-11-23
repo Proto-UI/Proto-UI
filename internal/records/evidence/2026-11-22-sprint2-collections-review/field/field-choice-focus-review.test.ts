@@ -136,26 +136,47 @@ function mount(
   };
 }
 
-for(const family of ['base','shadcn','brutalist'] as const) {
- it(`${family} reset retires the queued prior radio departure`,async()=>{
-   const f=mount(family,'radio',{defaultValue:'a'},{validationMode:'onBlur',externalValidation:true});
-   await flush();const validations:any[]=[];
-   f.field.addEventListener('validationRequest',(event:CustomEvent)=>validations.push(event.detail));
-   f.items[0].focus();await flush();
-   expect(f.x().focused.get()).toBe(true);
-   expect(f.field.getExposes().touched.get()).toBe(false);
-   f.outside.focus();
-   f.form.getExposes().requestReset();
-   expect(f.field.getExposes().touched.get()).toBe(false);
-   await flush();
-   expect(f.field.getExposes().touched.get()).toBe(false);
-   expect(validations).toEqual([]);
-   expect(f.values()).toEqual({choice:'a'});
- });
- it(`${family} initial true checkbox baseline is already clean`,async()=>{
-   const f=mount(family,'checkbox',{checked:true,indeterminate:true},{validationMode:'onChange',externalValidation:true});await flush();
-   expect(f.values()).toEqual({choice:true});expect(f.field.getExposes().dirty.get()).toBe(false);
-   patch(f.control,{checked:false,indeterminate:false});await flush();expect(f.field.getExposes().dirty.get()).toBe(true);
-   f.form.getExposes().requestReset();await flush();expect(f.values()).toEqual({choice:false});expect(f.field.getExposes().dirty.get()).toBe(true);
- });
+for (const family of ['base', 'shadcn', 'brutalist'] as const) {
+  it(`${family} reset retires the queued prior radio departure`, async () => {
+    const f = mount(
+      family,
+      'radio',
+      { defaultValue: 'a' },
+      { validationMode: 'onBlur', externalValidation: true }
+    );
+    await flush();
+    const validations: any[] = [];
+    f.field.addEventListener('validationRequest', (event: CustomEvent) =>
+      validations.push(event.detail)
+    );
+    f.items[0].focus();
+    await flush();
+    expect(f.x().focused.get()).toBe(true);
+    expect(f.field.getExposes().touched.get()).toBe(false);
+    f.outside.focus();
+    f.form.getExposes().requestReset();
+    expect(f.field.getExposes().touched.get()).toBe(false);
+    await flush();
+    expect(f.field.getExposes().touched.get()).toBe(false);
+    expect(validations).toEqual([]);
+    expect(f.values()).toEqual({ choice: 'a' });
+  });
+  it(`${family} initial true checkbox baseline is already clean`, async () => {
+    const f = mount(
+      family,
+      'checkbox',
+      { checked: true, indeterminate: true },
+      { validationMode: 'onChange', externalValidation: true }
+    );
+    await flush();
+    expect(f.values()).toEqual({ choice: true });
+    expect(f.field.getExposes().dirty.get()).toBe(false);
+    patch(f.control, { checked: false, indeterminate: false });
+    await flush();
+    expect(f.field.getExposes().dirty.get()).toBe(true);
+    f.form.getExposes().requestReset();
+    await flush();
+    expect(f.values()).toEqual({ choice: false });
+    expect(f.field.getExposes().dirty.get()).toBe(true);
+  });
 }

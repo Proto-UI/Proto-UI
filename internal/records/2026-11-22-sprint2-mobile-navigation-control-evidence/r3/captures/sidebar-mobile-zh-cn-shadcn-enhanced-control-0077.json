@@ -19,18 +19,8 @@
       "text": "Shadcn",
       "href": null,
       "current": null,
-      "radius": [
-        "8px",
-        "8px",
-        "8px",
-        "8px"
-      ],
-      "borders": [
-        "0px",
-        "0px",
-        "0px",
-        "0px"
-      ],
+      "radius": ["8px", "8px", "8px", "8px"],
+      "borders": ["0px", "0px", "0px", "0px"],
       "background": "lab(96.52 -0.0000298023 0.0000119209)",
       "outline": "none",
       "outlineWidth": "3px",
@@ -47,18 +37,8 @@
       "text": "Tabs",
       "href": "/zh-cn/ui-libraries/shadcn/tabs/",
       "current": "page",
-      "radius": [
-        "8px",
-        "8px",
-        "8px",
-        "8px"
-      ],
-      "borders": [
-        "0px",
-        "0px",
-        "0px",
-        "0px"
-      ],
+      "radius": ["8px", "8px", "8px", "8px"],
+      "borders": ["0px", "0px", "0px", "0px"],
       "background": "lab(96.52 -0.0000298023 0.0000119209)",
       "outline": "none",
       "outlineWidth": "3px",

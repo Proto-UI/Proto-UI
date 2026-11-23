@@ -21,9 +21,7 @@
     {
       "commit": "e2ef558597da38cd6d6fa0ac00f27f1630e50d23",
       "tree": "280164a90ab1cf12439046435a0dfcea149b62aa",
-      "parents": [
-        "dc3b184ba10b0de53e40359c52d012b204b2cd01"
-      ],
+      "parents": ["dc3b184ba10b0de53e40359c52d012b204b2cd01"],
       "authorDate": "2026-11-22T10:32:53Z",
       "committerDate": "2026-11-22T10:32:53Z",
       "authorName": "Codex",
@@ -34,9 +32,7 @@
     {
       "commit": "bb1bb301408a5263b55f5e4a60c408cbd50efc2e",
       "tree": "f0bdd2ff950eac3df2ee8d3b17db0a6d296c90d2",
-      "parents": [
-        "e2ef558597da38cd6d6fa0ac00f27f1630e50d23"
-      ],
+      "parents": ["e2ef558597da38cd6d6fa0ac00f27f1630e50d23"],
       "authorDate": "2026-11-22T10:44:04Z",
       "committerDate": "2026-11-22T10:44:04Z",
       "authorName": "Codex",
@@ -47,9 +43,7 @@
     {
       "commit": "8a4afaefc6133f63a8b5eab6c5290fd8c2a9d5a2",
       "tree": "e4e92c1f51d542f310caf8544b4c3a73dcfad8bd",
-      "parents": [
-        "bb1bb301408a5263b55f5e4a60c408cbd50efc2e"
-      ],
+      "parents": ["bb1bb301408a5263b55f5e4a60c408cbd50efc2e"],
       "authorDate": "2026-11-22T10:53:42Z",
       "committerDate": "2026-11-22T10:53:42Z",
       "authorName": "Codex",
@@ -60,9 +54,7 @@
     {
       "commit": "91ec7532e283dac6896db71b3e9b1a7175069e7a",
       "tree": "3307e20e7641bec6dd702d9e00d0b9a1721bc061",
-      "parents": [
-        "8a4afaefc6133f63a8b5eab6c5290fd8c2a9d5a2"
-      ],
+      "parents": ["8a4afaefc6133f63a8b5eab6c5290fd8c2a9d5a2"],
       "authorDate": "2026-11-22T11:00:44Z",
       "committerDate": "2026-11-22T11:00:44Z",
       "authorName": "Codex",
@@ -73,9 +65,7 @@
     {
       "commit": "e63d46993a49fcc989c6cc658c44fe763bf29d2a",
       "tree": "133962f01ceb08c17ee8b31e4ddc3d1fdb68e468",
-      "parents": [
-        "91ec7532e283dac6896db71b3e9b1a7175069e7a"
-      ],
+      "parents": ["91ec7532e283dac6896db71b3e9b1a7175069e7a"],
       "authorDate": "2026-11-22T11:01:43Z",
       "committerDate": "2026-11-22T11:01:43Z",
       "authorName": "Codex",
@@ -86,9 +76,7 @@
     {
       "commit": "92dbc8a0f0861ab2e63523da0420fa4aa32d8e3e",
       "tree": "9250d8c1b273b75b8bab0a5508965ee31940a60d",
-      "parents": [
-        "e63d46993a49fcc989c6cc658c44fe763bf29d2a"
-      ],
+      "parents": ["e63d46993a49fcc989c6cc658c44fe763bf29d2a"],
       "authorDate": "2026-11-22T11:03:53Z",
       "committerDate": "2026-11-22T11:03:53Z",
       "authorName": "Codex",
@@ -99,9 +87,7 @@
     {
       "commit": "dcf20f55b7eeb30e97d1b8d92cd17fdc7eceda69",
       "tree": "8eefdd4742211bb0916cb2f168a16b389fd9c98d",
-      "parents": [
-        "92dbc8a0f0861ab2e63523da0420fa4aa32d8e3e"
-      ],
+      "parents": ["92dbc8a0f0861ab2e63523da0420fa4aa32d8e3e"],
       "authorDate": "2026-11-22T11:19:29Z",
       "committerDate": "2026-11-22T11:19:29Z",
       "authorName": "Codex",
@@ -112,9 +98,7 @@
     {
       "commit": "6efeb9dd2220a43dedf42e6446ad303a97e43b34",
       "tree": "cf6d34b1785b22b8976700e4235c0154fd949462",
-      "parents": [
-        "dcf20f55b7eeb30e97d1b8d92cd17fdc7eceda69"
-      ],
+      "parents": ["dcf20f55b7eeb30e97d1b8d92cd17fdc7eceda69"],
       "authorDate": "2026-11-22T11:32:42Z",
       "committerDate": "2026-11-22T11:32:42Z",
       "authorName": "Codex",
@@ -125,9 +109,7 @@
     {
       "commit": "3bf60f1aade1ceaea417b39ba918c988640159a2",
       "tree": "ba07e3a350b2d1124f13983b286877d8a64181ed",
-      "parents": [
-        "6efeb9dd2220a43dedf42e6446ad303a97e43b34"
-      ],
+      "parents": ["6efeb9dd2220a43dedf42e6446ad303a97e43b34"],
       "authorDate": "2026-11-22T11:37:12Z",
       "committerDate": "2026-11-22T11:37:12Z",
       "authorName": "Codex",
@@ -138,9 +120,7 @@
     {
       "commit": "b1033a4851fd13e4509b22145ba4e7d0bdaf8596",
       "tree": "0f04054d12d3f2e7ca0218cc03c936a4ad613d6f",
-      "parents": [
-        "3bf60f1aade1ceaea417b39ba918c988640159a2"
-      ],
+      "parents": ["3bf60f1aade1ceaea417b39ba918c988640159a2"],
       "authorDate": "2026-11-22T11:54:03Z",
       "committerDate": "2026-11-22T11:54:03Z",
       "authorName": "Codex",
@@ -151,9 +131,7 @@
     {
       "commit": "14c47f2a22ad3629ae88a5e6cce99b4098732b0e",
       "tree": "af281990d2d043137dd1bba4735a765a291e126e",
-      "parents": [
-        "b1033a4851fd13e4509b22145ba4e7d0bdaf8596"
-      ],
+      "parents": ["b1033a4851fd13e4509b22145ba4e7d0bdaf8596"],
       "authorDate": "2026-11-22T11:57:00Z",
       "committerDate": "2026-11-22T11:57:00Z",
       "authorName": "Codex",
@@ -164,9 +142,7 @@
     {
       "commit": "3d5e5561d8c015bf1240caf1aaf602bcea50a049",
       "tree": "c3b17e154867c1c74e04fa1c87b2596568a1b360",
-      "parents": [
-        "14c47f2a22ad3629ae88a5e6cce99b4098732b0e"
-      ],
+      "parents": ["14c47f2a22ad3629ae88a5e6cce99b4098732b0e"],
       "authorDate": "2026-11-22T11:58:59Z",
       "committerDate": "2026-11-22T11:58:59Z",
       "authorName": "Codex",
@@ -177,9 +153,7 @@
     {
       "commit": "abbc6a8a95d6827790e199df8d439fbf9997f7e7",
       "tree": "38af3cdb4f3d9d53e5a87883c9322239786f7449",
-      "parents": [
-        "3d5e5561d8c015bf1240caf1aaf602bcea50a049"
-      ],
+      "parents": ["3d5e5561d8c015bf1240caf1aaf602bcea50a049"],
       "authorDate": "2026-11-22T12:01:39Z",
       "committerDate": "2026-11-22T12:01:39Z",
       "authorName": "Codex",
@@ -190,9 +164,7 @@
     {
       "commit": "e16e820afd4df769cee36ab132f79f754a8c23fc",
       "tree": "9bbae029704e0306fd55071c2fd91824c70e31f7",
-      "parents": [
-        "abbc6a8a95d6827790e199df8d439fbf9997f7e7"
-      ],
+      "parents": ["abbc6a8a95d6827790e199df8d439fbf9997f7e7"],
       "authorDate": "2026-11-22T12:30:59Z",
       "committerDate": "2026-11-22T12:30:59Z",
       "authorName": "Codex",
@@ -203,9 +175,7 @@
     {
       "commit": "ebbfc57c0868c14318d0673266bc4e6d1db16604",
       "tree": "21916f6926a9dc4e93c44025ac3ca78d8b3fe735",
-      "parents": [
-        "e16e820afd4df769cee36ab132f79f754a8c23fc"
-      ],
+      "parents": ["e16e820afd4df769cee36ab132f79f754a8c23fc"],
       "authorDate": "2026-11-22T12:42:51Z",
       "committerDate": "2026-11-22T12:42:51Z",
       "authorName": "Codex",
@@ -216,9 +186,7 @@
     {
       "commit": "369362235af5028b1bff5e4355461dbaf4b1f930",
       "tree": "63f9e62ee1494f141b42369cf8e2fac82b635ffc",
-      "parents": [
-        "ebbfc57c0868c14318d0673266bc4e6d1db16604"
-      ],
+      "parents": ["ebbfc57c0868c14318d0673266bc4e6d1db16604"],
       "authorDate": "2026-11-22T12:46:17Z",
       "committerDate": "2026-11-22T12:46:17Z",
       "authorName": "Codex",
@@ -229,9 +197,7 @@
     {
       "commit": "42ee3b9c35f227622e6f2914f83f7dcc55938700",
       "tree": "f39f968e844c1022ec9d11d60b8b185a966a37dc",
-      "parents": [
-        "369362235af5028b1bff5e4355461dbaf4b1f930"
-      ],
+      "parents": ["369362235af5028b1bff5e4355461dbaf4b1f930"],
       "authorDate": "2026-11-22T12:53:52Z",
       "committerDate": "2026-11-22T12:53:52Z",
       "authorName": "Codex",
@@ -242,9 +208,7 @@
     {
       "commit": "095ecbdde4902941a13032386765dac59ebd7e6b",
       "tree": "216ff7d5c1d639a70889d5f1ea930e1a87bef0fa",
-      "parents": [
-        "42ee3b9c35f227622e6f2914f83f7dcc55938700"
-      ],
+      "parents": ["42ee3b9c35f227622e6f2914f83f7dcc55938700"],
       "authorDate": "2026-11-22T12:55:19Z",
       "committerDate": "2026-11-22T12:55:19Z",
       "authorName": "Codex",

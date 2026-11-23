@@ -1,1 +1,1039 @@
-{"numTotalTestSuites":5,"numPassedTestSuites":5,"numFailedTestSuites":0,"numPendingTestSuites":0,"numTotalTests":110,"numPassedTests":110,"numFailedTests":0,"numPendingTests":0,"numTodoTests":0,"snapshot":{"added":0,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0,"didUpdate":false},"startTime":1795351657595,"success":true,"testResults":[{"assertionResults":[{"ancestorTitles":["Calendar multiple selection"],"fullName":"Calendar multiple selection grows from empty toward minSelected while guarding removals and complete replacements","status":"passed","title":"grows from empty toward minSelected while guarding removals and complete replacements","duration":219.67179999999985,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar multiple selection"],"fullName":"Calendar multiple selection keeps progressive minimum additions controlled until accepted and leaves the picker open","status":"passed","title":"keeps progressive minimum additions controlled until accepted and leaves the picker open","duration":101.51387300000033,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar multiple selection"],"fullName":"Calendar multiple selection toggles ordered unique dates, protects copies, and does not change legacy single value","status":"passed","title":"toggles ordered unique dates, protects copies, and does not change legacy single value","duration":55.65066399999978,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar multiple selection"],"fullName":"Calendar multiple selection enforces cardinality, dates and disabled/readOnly while preserving existing owner data","status":"passed","title":"enforces cardinality, dates and disabled/readOnly while preserving existing owner data","duration":56.87440099999958,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar multiple selection"],"fullName":"Calendar multiple selection keeps refusal canonical, handles synchronous and delayed owner acceptance, and ignores later defaults","status":"passed","title":"keeps refusal canonical, handles synchronous and delayed owner acceptance, and ignores later defaults","duration":103.477938,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar inclusive range selection"],"fullName":"Calendar inclusive range selection starts incomplete, normalizes reversed endpoints, marks middle days and restarts after completion","status":"passed","title":"starts incomplete, normalizes reversed endpoints, marks middle days and restarts after completion","duration":53.970597,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar inclusive range selection"],"fullName":"Calendar inclusive range selection rejects a blocked interior date, date bounds and too-short/long ranges without losing the anchor","status":"passed","title":"rejects a blocked interior date, date bounds and too-short/long ranges without losing the anchor","duration":101.41502499999979,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar inclusive range selection"],"fullName":"Calendar inclusive range selection copies programmatic ranges and uses civil-day arithmetic across DST, leap days and month boundaries","status":"passed","title":"copies programmatic ranges and uses civil-day arithmetic across DST, leap days and month boundaries","duration":74.00380700000005,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar inclusive range selection"],"fullName":"Calendar inclusive range selection preserves controlled rejection and switches modes without reinterpreting stored owners","status":"passed","title":"preserves controlled rejection and switches modes without reinterpreting stored owners","duration":95.58001599999989,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar inclusive range selection"],"fullName":"Calendar inclusive range selection selects range endpoints with actual Enter/Space keyboard activation under RTL","status":"passed","title":"selects range endpoints with actual Enter/Space keyboard activation under RTL","duration":78.09663499999988,"failureMessages":[],"meta":{}},{"ancestorTitles":["Calendar inclusive range selection"],"fullName":"Calendar inclusive range selection rejects malformed modes of direct input instead of coercing arbitrary records","status":"passed","title":"rejects malformed modes of direct input instead of coercing arbitrary records","duration":81.0295430000001,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion retains accepted completion through a synchronous selected-count subscriber update","status":"passed","title":"retains accepted completion through a synchronous selected-count subscriber update","duration":89.33551499999976,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion keeps incomplete ranges open, closes a complete range once and formats both endpoints","status":"passed","title":"keeps incomplete ranges open, closes a complete range once and formats both endpoints","duration":76.07606499999974,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion leaves multiple toggles open and uses empty placeholder after removing the final date","status":"passed","title":"leaves multiple toggles open and uses empty placeholder after removing the final date","duration":47.96041500000001,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion does not close controlled single proposals and closes matching delayed acceptance","status":"passed","title":"does not close controlled single proposals and closes matching delayed acceptance","duration":45.52332699999988,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion does not close controlled range proposals and closes matching delayed acceptance","status":"passed","title":"does not close controlled range proposals and closes matching delayed acceptance","duration":88.22992699999986,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion does not close for external replacement or after disabling invalidates a pending selection","status":"passed","title":"does not close for external replacement or after disabling invalidates a pending selection","duration":113.90165200000001,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion retires pending completion across unmount/reentry","status":"passed","title":"retires pending completion across unmount/reentry","duration":155.30003299999998,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion respects controlled open refusal after an accepted range","status":"passed","title":"respects controlled open refusal after an accepted range","duration":51.07380499999999,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion does not close a reopened popup for an earlier or closed-session controlled request","status":"passed","title":"does not close a reopened popup for an earlier or closed-session controlled request","duration":66.95360400000027,"failureMessages":[],"meta":{}},{"ancestorTitles":["Date Picker accepted completion"],"fullName":"Date Picker accepted completion retires superseded proposals and pending completion when readOnly or mode changes","status":"passed","title":"retires superseded proposals and pending completion when readOnly or mode changes","duration":47.599920999999995,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"shadcn Calendar and Date Picker inherit range facts and visibly distinguish middle segments","status":"passed","title":"shadcn Calendar and Date Picker inherit range facts and visibly distinguish middle segments","duration":155.19136799999978,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"brutalist Calendar and Date Picker inherit range facts and visibly distinguish middle segments","status":"passed","title":"brutalist Calendar and Date Picker inherit range facts and visibly distinguish middle segments","duration":92.22107599999981,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"bootstrap-2-3-2 Calendar and Date Picker inherit range facts and visibly distinguish middle segments","status":"passed","title":"bootstrap-2-3-2 Calendar and Date Picker inherit range facts and visibly distinguish middle segments","duration":108.38164000000006,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"liquid-glass Calendar and Date Picker inherit range facts and visibly distinguish middle segments","status":"passed","title":"liquid-glass Calendar and Date Picker inherit range facts and visibly distinguish middle segments","duration":110.71555199999966,"failureMessages":[],"meta":{}}],"startTime":1795351663090,"endTime":1795351665362.7156,"status":"passed","message":"","name":"/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/test/calendar-selection.test.ts"},{"assertionResults":[{"ancestorTitles":[],"fullName":"Date Picker host selection stops retired Day listeners after normal","status":"passed","title":"Date Picker host selection stops retired Day listeners after normal","duration":50.61727900000005,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker host selection stops retired Day listeners after unmount","status":"passed","title":"Date Picker host selection stops retired Day listeners after unmount","duration":11.234049000000141,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker host selection stops retired Day listeners after dispose","status":"passed","title":"Date Picker host selection stops retired Day listeners after dispose","duration":9.53181799999993,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker host selection stops retired Day listeners after remount","status":"passed","title":"Date Picker host selection stops retired Day listeners after remount","duration":15.297252000000299,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker single synchronous owner acceptance waits for the proposal callback after normal","status":"passed","title":"Date Picker single synchronous owner acceptance waits for the proposal callback after normal","duration":10.24668900000006,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker single synchronous owner acceptance waits for the proposal callback after unmount","status":"passed","title":"Date Picker single synchronous owner acceptance waits for the proposal callback after unmount","duration":6.502265999999963,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker single synchronous owner acceptance waits for the proposal callback after dispose","status":"passed","title":"Date Picker single synchronous owner acceptance waits for the proposal callback after dispose","duration":5.056622999999945,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker single synchronous owner acceptance waits for the proposal callback after remount","status":"passed","title":"Date Picker single synchronous owner acceptance waits for the proposal callback after remount","duration":5.263023999999859,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker range synchronous owner acceptance waits for the proposal callback after normal","status":"passed","title":"Date Picker range synchronous owner acceptance waits for the proposal callback after normal","duration":5.3462210000002415,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker range synchronous owner acceptance waits for the proposal callback after unmount","status":"passed","title":"Date Picker range synchronous owner acceptance waits for the proposal callback after unmount","duration":4.535395999999764,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker range synchronous owner acceptance waits for the proposal callback after dispose","status":"passed","title":"Date Picker range synchronous owner acceptance waits for the proposal callback after dispose","duration":4.608176000000185,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker range synchronous owner acceptance waits for the proposal callback after remount","status":"passed","title":"Date Picker range synchronous owner acceptance waits for the proposal callback after remount","duration":4.842568999999912,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker keeps the current completion when a nested proposal is accepted","status":"passed","title":"Date Picker keeps the current completion when a nested proposal is accepted","duration":13.442822999999862,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker keeps the current completion when a nested proposal is refused","status":"passed","title":"Date Picker keeps the current completion when a nested proposal is refused","duration":5.800786000000244,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker keeps the current completion when a nested proposal is invalid","status":"passed","title":"Date Picker keeps the current completion when a nested proposal is invalid","duration":4.56521100000009,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker does not close a popup first opened inside the proposal callback","status":"passed","title":"Date Picker does not close a popup first opened inside the proposal callback","duration":3.2949540000004163,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker single freezes the request session before public State observers (initial open: false)","status":"passed","title":"Date Picker single freezes the request session before public State observers (initial open: false)","duration":2.5798949999998513,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker single freezes the request session before public State observers (initial open: true)","status":"passed","title":"Date Picker single freezes the request session before public State observers (initial open: true)","duration":2.6986440000000584,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker range freezes the request session before public State observers (initial open: false)","status":"passed","title":"Date Picker range freezes the request session before public State observers (initial open: false)","duration":2.0489330000000336,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Date Picker range freezes the request session before public State observers (initial open: true)","status":"passed","title":"Date Picker range freezes the request session before public State observers (initial open: true)","duration":2.2018840000000637,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form reset ends its cached Field traversal after normal","status":"passed","title":"Form reset ends its cached Field traversal after normal","duration":4.240820999999869,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form reset ends its cached Field traversal after unmount","status":"passed","title":"Form reset ends its cached Field traversal after unmount","duration":3.092388000000028,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form reset ends its cached Field traversal after dispose","status":"passed","title":"Form reset ends its cached Field traversal after dispose","duration":3.4497479999999996,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form reset ends its cached Field traversal after remount","status":"passed","title":"Form reset ends its cached Field traversal after remount","duration":3.286552000000029,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: normal","status":"passed","title":"autocomplete Item honors its selection callback lifetime: normal","duration":7.627995000000283,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: unmount","status":"passed","title":"autocomplete Item honors its selection callback lifetime: unmount","duration":3.9962329999998474,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: dispose","status":"passed","title":"autocomplete Item honors its selection callback lifetime: dispose","duration":4.065527000000202,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: remount","status":"passed","title":"autocomplete Item honors its selection callback lifetime: remount","duration":5.347847999999885,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: item-unmount","status":"passed","title":"autocomplete Item honors its selection callback lifetime: item-unmount","duration":4.735818999999992,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: item-dispose","status":"passed","title":"autocomplete Item honors its selection callback lifetime: item-dispose","duration":11.733772000000044,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: item-remount","status":"passed","title":"autocomplete Item honors its selection callback lifetime: item-remount","duration":4.175282999999581,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: root-unmount","status":"passed","title":"autocomplete Item honors its selection callback lifetime: root-unmount","duration":3.6315519999998287,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: root-dispose","status":"passed","title":"autocomplete Item honors its selection callback lifetime: root-dispose","duration":3.607034999999996,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: root-remount","status":"passed","title":"autocomplete Item honors its selection callback lifetime: root-remount","duration":3.6705409999999574,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Item honors its selection callback lifetime: nested","status":"passed","title":"autocomplete Item honors its selection callback lifetime: nested","duration":2.876181000000088,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: normal","status":"passed","title":"combobox Item honors its selection callback lifetime: normal","duration":3.7873070000000553,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: unmount","status":"passed","title":"combobox Item honors its selection callback lifetime: unmount","duration":3.8472569999998996,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: dispose","status":"passed","title":"combobox Item honors its selection callback lifetime: dispose","duration":3.0301549999999224,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: remount","status":"passed","title":"combobox Item honors its selection callback lifetime: remount","duration":2.8723660000000564,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: item-unmount","status":"passed","title":"combobox Item honors its selection callback lifetime: item-unmount","duration":3.086989999999787,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: item-dispose","status":"passed","title":"combobox Item honors its selection callback lifetime: item-dispose","duration":3.1047770000000128,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: item-remount","status":"passed","title":"combobox Item honors its selection callback lifetime: item-remount","duration":4.6351660000000265,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: root-unmount","status":"passed","title":"combobox Item honors its selection callback lifetime: root-unmount","duration":3.1534200000000965,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: root-dispose","status":"passed","title":"combobox Item honors its selection callback lifetime: root-dispose","duration":15.324532999999974,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: root-remount","status":"passed","title":"combobox Item honors its selection callback lifetime: root-remount","duration":3.3185990000001766,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Item honors its selection callback lifetime: nested","status":"passed","title":"combobox Item honors its selection callback lifetime: nested","duration":2.4657819999997628,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: normal","status":"passed","title":"command Item honors its selection callback lifetime: normal","duration":3.2030249999997977,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: unmount","status":"passed","title":"command Item honors its selection callback lifetime: unmount","duration":2.79229499999974,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: dispose","status":"passed","title":"command Item honors its selection callback lifetime: dispose","duration":2.5013159999998607,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: remount","status":"passed","title":"command Item honors its selection callback lifetime: remount","duration":2.8504330000000664,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: item-unmount","status":"passed","title":"command Item honors its selection callback lifetime: item-unmount","duration":2.613574999999855,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: item-dispose","status":"passed","title":"command Item honors its selection callback lifetime: item-dispose","duration":2.546154000000115,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: item-remount","status":"passed","title":"command Item honors its selection callback lifetime: item-remount","duration":3.4986109999999826,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: root-unmount","status":"passed","title":"command Item honors its selection callback lifetime: root-unmount","duration":2.718492999999853,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: root-dispose","status":"passed","title":"command Item honors its selection callback lifetime: root-dispose","duration":3.559273000000303,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: root-remount","status":"passed","title":"command Item honors its selection callback lifetime: root-remount","duration":3.6586230000002615,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"command Item honors its selection callback lifetime: nested","status":"passed","title":"command Item honors its selection callback lifetime: nested","duration":2.858204999999998,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form reset remains valid before first mount, retired=false","status":"passed","title":"Form reset remains valid before first mount, retired=false","duration":1.8991370000003371,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form reset remains valid before first mount, retired=true","status":"passed","title":"Form reset remains valid before first mount, retired=true","duration":3.9825620000001436,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form requestSubmit stops the old Field traversal after normal","status":"passed","title":"Form requestSubmit stops the old Field traversal after normal","duration":5.430327000000034,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form requestSubmit stops the old Field traversal after unmount","status":"passed","title":"Form requestSubmit stops the old Field traversal after unmount","duration":3.1048570000002655,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form requestSubmit stops the old Field traversal after dispose","status":"passed","title":"Form requestSubmit stops the old Field traversal after dispose","duration":3.0953819999999723,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form requestSubmit stops the old Field traversal after remount","status":"passed","title":"Form requestSubmit stops the old Field traversal after remount","duration":4.378600000000006,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form resetValidation stops the old Field traversal after normal","status":"passed","title":"Form resetValidation stops the old Field traversal after normal","duration":6.266470000000027,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form resetValidation stops the old Field traversal after unmount","status":"passed","title":"Form resetValidation stops the old Field traversal after unmount","duration":5.674565000000257,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form resetValidation stops the old Field traversal after dispose","status":"passed","title":"Form resetValidation stops the old Field traversal after dispose","duration":5.4258709999999155,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form resetValidation stops the old Field traversal after remount","status":"passed","title":"Form resetValidation stops the old Field traversal after remount","duration":6.2728290000000015,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=false activation after normal","status":"passed","title":"autocomplete Trigger focus stops retired open=false activation after normal","duration":6.781466999999793,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=false activation after unmount","status":"passed","title":"autocomplete Trigger focus stops retired open=false activation after unmount","duration":5.752453999999943,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=false activation after dispose","status":"passed","title":"autocomplete Trigger focus stops retired open=false activation after dispose","duration":5.217745999999806,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=false activation after remount","status":"passed","title":"autocomplete Trigger focus stops retired open=false activation after remount","duration":3.7757900000001428,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=true activation after normal","status":"passed","title":"autocomplete Trigger focus stops retired open=true activation after normal","duration":5.760436000000027,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=true activation after unmount","status":"passed","title":"autocomplete Trigger focus stops retired open=true activation after unmount","duration":5.750680999999986,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=true activation after dispose","status":"passed","title":"autocomplete Trigger focus stops retired open=true activation after dispose","duration":6.391818999999941,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"autocomplete Trigger focus stops retired open=true activation after remount","status":"passed","title":"autocomplete Trigger focus stops retired open=true activation after remount","duration":6.213068999999905,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=false activation after normal","status":"passed","title":"combobox Trigger focus stops retired open=false activation after normal","duration":6.00291100000004,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=false activation after unmount","status":"passed","title":"combobox Trigger focus stops retired open=false activation after unmount","duration":8.060418000000027,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=false activation after dispose","status":"passed","title":"combobox Trigger focus stops retired open=false activation after dispose","duration":5.864724000000024,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=false activation after remount","status":"passed","title":"combobox Trigger focus stops retired open=false activation after remount","duration":2.7419890000001033,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=true activation after normal","status":"passed","title":"combobox Trigger focus stops retired open=true activation after normal","duration":2.7570019999998294,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=true activation after unmount","status":"passed","title":"combobox Trigger focus stops retired open=true activation after unmount","duration":2.3148340000002463,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=true activation after dispose","status":"passed","title":"combobox Trigger focus stops retired open=true activation after dispose","duration":2.4144639999999526,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"combobox Trigger focus stops retired open=true activation after remount","status":"passed","title":"combobox Trigger focus stops retired open=true activation after remount","duration":3.614245999999639,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form stops a superseded cancellation publication: remount","status":"passed","title":"Form stops a superseded cancellation publication: remount","duration":16.600598999999875,"failureMessages":[],"meta":{}},{"ancestorTitles":[],"fullName":"Form stops a superseded cancellation publication: nested","status":"passed","title":"Form stops a superseded cancellation publication: nested","duration":3.1132900000002337,"failureMessages":[],"meta":{}}],"startTime":1795351660699,"endTime":1795351661166.1133,"status":"passed","message":"","name":"/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/test/selection-reset-lifecycle.test.ts"}]}
+{
+  "numTotalTestSuites": 5,
+  "numPassedTestSuites": 5,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 110,
+  "numPassedTests": 110,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795351657595,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Calendar multiple selection"],
+          "fullName": "Calendar multiple selection grows from empty toward minSelected while guarding removals and complete replacements",
+          "status": "passed",
+          "title": "grows from empty toward minSelected while guarding removals and complete replacements",
+          "duration": 219.67179999999985,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar multiple selection"],
+          "fullName": "Calendar multiple selection keeps progressive minimum additions controlled until accepted and leaves the picker open",
+          "status": "passed",
+          "title": "keeps progressive minimum additions controlled until accepted and leaves the picker open",
+          "duration": 101.51387300000033,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar multiple selection"],
+          "fullName": "Calendar multiple selection toggles ordered unique dates, protects copies, and does not change legacy single value",
+          "status": "passed",
+          "title": "toggles ordered unique dates, protects copies, and does not change legacy single value",
+          "duration": 55.65066399999978,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar multiple selection"],
+          "fullName": "Calendar multiple selection enforces cardinality, dates and disabled/readOnly while preserving existing owner data",
+          "status": "passed",
+          "title": "enforces cardinality, dates and disabled/readOnly while preserving existing owner data",
+          "duration": 56.87440099999958,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar multiple selection"],
+          "fullName": "Calendar multiple selection keeps refusal canonical, handles synchronous and delayed owner acceptance, and ignores later defaults",
+          "status": "passed",
+          "title": "keeps refusal canonical, handles synchronous and delayed owner acceptance, and ignores later defaults",
+          "duration": 103.477938,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar inclusive range selection"],
+          "fullName": "Calendar inclusive range selection starts incomplete, normalizes reversed endpoints, marks middle days and restarts after completion",
+          "status": "passed",
+          "title": "starts incomplete, normalizes reversed endpoints, marks middle days and restarts after completion",
+          "duration": 53.970597,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar inclusive range selection"],
+          "fullName": "Calendar inclusive range selection rejects a blocked interior date, date bounds and too-short/long ranges without losing the anchor",
+          "status": "passed",
+          "title": "rejects a blocked interior date, date bounds and too-short/long ranges without losing the anchor",
+          "duration": 101.41502499999979,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar inclusive range selection"],
+          "fullName": "Calendar inclusive range selection copies programmatic ranges and uses civil-day arithmetic across DST, leap days and month boundaries",
+          "status": "passed",
+          "title": "copies programmatic ranges and uses civil-day arithmetic across DST, leap days and month boundaries",
+          "duration": 74.00380700000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar inclusive range selection"],
+          "fullName": "Calendar inclusive range selection preserves controlled rejection and switches modes without reinterpreting stored owners",
+          "status": "passed",
+          "title": "preserves controlled rejection and switches modes without reinterpreting stored owners",
+          "duration": 95.58001599999989,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar inclusive range selection"],
+          "fullName": "Calendar inclusive range selection selects range endpoints with actual Enter/Space keyboard activation under RTL",
+          "status": "passed",
+          "title": "selects range endpoints with actual Enter/Space keyboard activation under RTL",
+          "duration": 78.09663499999988,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Calendar inclusive range selection"],
+          "fullName": "Calendar inclusive range selection rejects malformed modes of direct input instead of coercing arbitrary records",
+          "status": "passed",
+          "title": "rejects malformed modes of direct input instead of coercing arbitrary records",
+          "duration": 81.0295430000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion retains accepted completion through a synchronous selected-count subscriber update",
+          "status": "passed",
+          "title": "retains accepted completion through a synchronous selected-count subscriber update",
+          "duration": 89.33551499999976,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion keeps incomplete ranges open, closes a complete range once and formats both endpoints",
+          "status": "passed",
+          "title": "keeps incomplete ranges open, closes a complete range once and formats both endpoints",
+          "duration": 76.07606499999974,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion leaves multiple toggles open and uses empty placeholder after removing the final date",
+          "status": "passed",
+          "title": "leaves multiple toggles open and uses empty placeholder after removing the final date",
+          "duration": 47.96041500000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion does not close controlled single proposals and closes matching delayed acceptance",
+          "status": "passed",
+          "title": "does not close controlled single proposals and closes matching delayed acceptance",
+          "duration": 45.52332699999988,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion does not close controlled range proposals and closes matching delayed acceptance",
+          "status": "passed",
+          "title": "does not close controlled range proposals and closes matching delayed acceptance",
+          "duration": 88.22992699999986,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion does not close for external replacement or after disabling invalidates a pending selection",
+          "status": "passed",
+          "title": "does not close for external replacement or after disabling invalidates a pending selection",
+          "duration": 113.90165200000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion retires pending completion across unmount/reentry",
+          "status": "passed",
+          "title": "retires pending completion across unmount/reentry",
+          "duration": 155.30003299999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion respects controlled open refusal after an accepted range",
+          "status": "passed",
+          "title": "respects controlled open refusal after an accepted range",
+          "duration": 51.07380499999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion does not close a reopened popup for an earlier or closed-session controlled request",
+          "status": "passed",
+          "title": "does not close a reopened popup for an earlier or closed-session controlled request",
+          "duration": 66.95360400000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Date Picker accepted completion"],
+          "fullName": "Date Picker accepted completion retires superseded proposals and pending completion when readOnly or mode changes",
+          "status": "passed",
+          "title": "retires superseded proposals and pending completion when readOnly or mode changes",
+          "duration": 47.599920999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "shadcn Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "status": "passed",
+          "title": "shadcn Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "duration": 155.19136799999978,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "brutalist Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "status": "passed",
+          "title": "brutalist Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "duration": 92.22107599999981,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bootstrap-2-3-2 Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "status": "passed",
+          "title": "bootstrap-2-3-2 Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "duration": 108.38164000000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "liquid-glass Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "status": "passed",
+          "title": "liquid-glass Calendar and Date Picker inherit range facts and visibly distinguish middle segments",
+          "duration": 110.71555199999966,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795351663090,
+      "endTime": 1795351665362.7156,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/test/calendar-selection.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker host selection stops retired Day listeners after normal",
+          "status": "passed",
+          "title": "Date Picker host selection stops retired Day listeners after normal",
+          "duration": 50.61727900000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker host selection stops retired Day listeners after unmount",
+          "status": "passed",
+          "title": "Date Picker host selection stops retired Day listeners after unmount",
+          "duration": 11.234049000000141,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker host selection stops retired Day listeners after dispose",
+          "status": "passed",
+          "title": "Date Picker host selection stops retired Day listeners after dispose",
+          "duration": 9.53181799999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker host selection stops retired Day listeners after remount",
+          "status": "passed",
+          "title": "Date Picker host selection stops retired Day listeners after remount",
+          "duration": 15.297252000000299,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker single synchronous owner acceptance waits for the proposal callback after normal",
+          "status": "passed",
+          "title": "Date Picker single synchronous owner acceptance waits for the proposal callback after normal",
+          "duration": 10.24668900000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker single synchronous owner acceptance waits for the proposal callback after unmount",
+          "status": "passed",
+          "title": "Date Picker single synchronous owner acceptance waits for the proposal callback after unmount",
+          "duration": 6.502265999999963,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker single synchronous owner acceptance waits for the proposal callback after dispose",
+          "status": "passed",
+          "title": "Date Picker single synchronous owner acceptance waits for the proposal callback after dispose",
+          "duration": 5.056622999999945,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker single synchronous owner acceptance waits for the proposal callback after remount",
+          "status": "passed",
+          "title": "Date Picker single synchronous owner acceptance waits for the proposal callback after remount",
+          "duration": 5.263023999999859,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker range synchronous owner acceptance waits for the proposal callback after normal",
+          "status": "passed",
+          "title": "Date Picker range synchronous owner acceptance waits for the proposal callback after normal",
+          "duration": 5.3462210000002415,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker range synchronous owner acceptance waits for the proposal callback after unmount",
+          "status": "passed",
+          "title": "Date Picker range synchronous owner acceptance waits for the proposal callback after unmount",
+          "duration": 4.535395999999764,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker range synchronous owner acceptance waits for the proposal callback after dispose",
+          "status": "passed",
+          "title": "Date Picker range synchronous owner acceptance waits for the proposal callback after dispose",
+          "duration": 4.608176000000185,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker range synchronous owner acceptance waits for the proposal callback after remount",
+          "status": "passed",
+          "title": "Date Picker range synchronous owner acceptance waits for the proposal callback after remount",
+          "duration": 4.842568999999912,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker keeps the current completion when a nested proposal is accepted",
+          "status": "passed",
+          "title": "Date Picker keeps the current completion when a nested proposal is accepted",
+          "duration": 13.442822999999862,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker keeps the current completion when a nested proposal is refused",
+          "status": "passed",
+          "title": "Date Picker keeps the current completion when a nested proposal is refused",
+          "duration": 5.800786000000244,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker keeps the current completion when a nested proposal is invalid",
+          "status": "passed",
+          "title": "Date Picker keeps the current completion when a nested proposal is invalid",
+          "duration": 4.56521100000009,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker does not close a popup first opened inside the proposal callback",
+          "status": "passed",
+          "title": "Date Picker does not close a popup first opened inside the proposal callback",
+          "duration": 3.2949540000004163,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker single freezes the request session before public State observers (initial open: false)",
+          "status": "passed",
+          "title": "Date Picker single freezes the request session before public State observers (initial open: false)",
+          "duration": 2.5798949999998513,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker single freezes the request session before public State observers (initial open: true)",
+          "status": "passed",
+          "title": "Date Picker single freezes the request session before public State observers (initial open: true)",
+          "duration": 2.6986440000000584,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker range freezes the request session before public State observers (initial open: false)",
+          "status": "passed",
+          "title": "Date Picker range freezes the request session before public State observers (initial open: false)",
+          "duration": 2.0489330000000336,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Date Picker range freezes the request session before public State observers (initial open: true)",
+          "status": "passed",
+          "title": "Date Picker range freezes the request session before public State observers (initial open: true)",
+          "duration": 2.2018840000000637,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form reset ends its cached Field traversal after normal",
+          "status": "passed",
+          "title": "Form reset ends its cached Field traversal after normal",
+          "duration": 4.240820999999869,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form reset ends its cached Field traversal after unmount",
+          "status": "passed",
+          "title": "Form reset ends its cached Field traversal after unmount",
+          "duration": 3.092388000000028,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form reset ends its cached Field traversal after dispose",
+          "status": "passed",
+          "title": "Form reset ends its cached Field traversal after dispose",
+          "duration": 3.4497479999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form reset ends its cached Field traversal after remount",
+          "status": "passed",
+          "title": "Form reset ends its cached Field traversal after remount",
+          "duration": 3.286552000000029,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: normal",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: normal",
+          "duration": 7.627995000000283,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: unmount",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: unmount",
+          "duration": 3.9962329999998474,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: dispose",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: dispose",
+          "duration": 4.065527000000202,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: remount",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: remount",
+          "duration": 5.347847999999885,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: item-unmount",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: item-unmount",
+          "duration": 4.735818999999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: item-dispose",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: item-dispose",
+          "duration": 11.733772000000044,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: item-remount",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: item-remount",
+          "duration": 4.175282999999581,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: root-unmount",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: root-unmount",
+          "duration": 3.6315519999998287,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: root-dispose",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: root-dispose",
+          "duration": 3.607034999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: root-remount",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: root-remount",
+          "duration": 3.6705409999999574,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Item honors its selection callback lifetime: nested",
+          "status": "passed",
+          "title": "autocomplete Item honors its selection callback lifetime: nested",
+          "duration": 2.876181000000088,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: normal",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: normal",
+          "duration": 3.7873070000000553,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: unmount",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: unmount",
+          "duration": 3.8472569999998996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: dispose",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: dispose",
+          "duration": 3.0301549999999224,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: remount",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: remount",
+          "duration": 2.8723660000000564,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: item-unmount",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: item-unmount",
+          "duration": 3.086989999999787,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: item-dispose",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: item-dispose",
+          "duration": 3.1047770000000128,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: item-remount",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: item-remount",
+          "duration": 4.6351660000000265,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: root-unmount",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: root-unmount",
+          "duration": 3.1534200000000965,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: root-dispose",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: root-dispose",
+          "duration": 15.324532999999974,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: root-remount",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: root-remount",
+          "duration": 3.3185990000001766,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Item honors its selection callback lifetime: nested",
+          "status": "passed",
+          "title": "combobox Item honors its selection callback lifetime: nested",
+          "duration": 2.4657819999997628,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: normal",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: normal",
+          "duration": 3.2030249999997977,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: unmount",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: unmount",
+          "duration": 2.79229499999974,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: dispose",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: dispose",
+          "duration": 2.5013159999998607,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: remount",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: remount",
+          "duration": 2.8504330000000664,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: item-unmount",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: item-unmount",
+          "duration": 2.613574999999855,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: item-dispose",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: item-dispose",
+          "duration": 2.546154000000115,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: item-remount",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: item-remount",
+          "duration": 3.4986109999999826,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: root-unmount",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: root-unmount",
+          "duration": 2.718492999999853,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: root-dispose",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: root-dispose",
+          "duration": 3.559273000000303,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: root-remount",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: root-remount",
+          "duration": 3.6586230000002615,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "command Item honors its selection callback lifetime: nested",
+          "status": "passed",
+          "title": "command Item honors its selection callback lifetime: nested",
+          "duration": 2.858204999999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form reset remains valid before first mount, retired=false",
+          "status": "passed",
+          "title": "Form reset remains valid before first mount, retired=false",
+          "duration": 1.8991370000003371,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form reset remains valid before first mount, retired=true",
+          "status": "passed",
+          "title": "Form reset remains valid before first mount, retired=true",
+          "duration": 3.9825620000001436,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form requestSubmit stops the old Field traversal after normal",
+          "status": "passed",
+          "title": "Form requestSubmit stops the old Field traversal after normal",
+          "duration": 5.430327000000034,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form requestSubmit stops the old Field traversal after unmount",
+          "status": "passed",
+          "title": "Form requestSubmit stops the old Field traversal after unmount",
+          "duration": 3.1048570000002655,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form requestSubmit stops the old Field traversal after dispose",
+          "status": "passed",
+          "title": "Form requestSubmit stops the old Field traversal after dispose",
+          "duration": 3.0953819999999723,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form requestSubmit stops the old Field traversal after remount",
+          "status": "passed",
+          "title": "Form requestSubmit stops the old Field traversal after remount",
+          "duration": 4.378600000000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form resetValidation stops the old Field traversal after normal",
+          "status": "passed",
+          "title": "Form resetValidation stops the old Field traversal after normal",
+          "duration": 6.266470000000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form resetValidation stops the old Field traversal after unmount",
+          "status": "passed",
+          "title": "Form resetValidation stops the old Field traversal after unmount",
+          "duration": 5.674565000000257,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form resetValidation stops the old Field traversal after dispose",
+          "status": "passed",
+          "title": "Form resetValidation stops the old Field traversal after dispose",
+          "duration": 5.4258709999999155,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form resetValidation stops the old Field traversal after remount",
+          "status": "passed",
+          "title": "Form resetValidation stops the old Field traversal after remount",
+          "duration": 6.2728290000000015,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=false activation after normal",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=false activation after normal",
+          "duration": 6.781466999999793,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=false activation after unmount",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=false activation after unmount",
+          "duration": 5.752453999999943,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=false activation after dispose",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=false activation after dispose",
+          "duration": 5.217745999999806,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=false activation after remount",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=false activation after remount",
+          "duration": 3.7757900000001428,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=true activation after normal",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=true activation after normal",
+          "duration": 5.760436000000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=true activation after unmount",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=true activation after unmount",
+          "duration": 5.750680999999986,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=true activation after dispose",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=true activation after dispose",
+          "duration": 6.391818999999941,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "autocomplete Trigger focus stops retired open=true activation after remount",
+          "status": "passed",
+          "title": "autocomplete Trigger focus stops retired open=true activation after remount",
+          "duration": 6.213068999999905,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=false activation after normal",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=false activation after normal",
+          "duration": 6.00291100000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=false activation after unmount",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=false activation after unmount",
+          "duration": 8.060418000000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=false activation after dispose",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=false activation after dispose",
+          "duration": 5.864724000000024,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=false activation after remount",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=false activation after remount",
+          "duration": 2.7419890000001033,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=true activation after normal",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=true activation after normal",
+          "duration": 2.7570019999998294,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=true activation after unmount",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=true activation after unmount",
+          "duration": 2.3148340000002463,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=true activation after dispose",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=true activation after dispose",
+          "duration": 2.4144639999999526,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "combobox Trigger focus stops retired open=true activation after remount",
+          "status": "passed",
+          "title": "combobox Trigger focus stops retired open=true activation after remount",
+          "duration": 3.614245999999639,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form stops a superseded cancellation publication: remount",
+          "status": "passed",
+          "title": "Form stops a superseded cancellation publication: remount",
+          "duration": 16.600598999999875,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Form stops a superseded cancellation publication: nested",
+          "status": "passed",
+          "title": "Form stops a superseded cancellation publication: nested",
+          "duration": 3.1132900000002337,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795351660699,
+      "endTime": 1795351661166.1133,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/test/selection-reset-lifecycle.test.ts"
+    }
+  ]
+}

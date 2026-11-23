@@ -55,6 +55,18 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'packages/prototypes/base/test/number-field-capabilities.test.ts',
   'packages/prototypes/base/test/number-field-format.test.ts',
 ]);
+// Additional controls for the Anatomy fix and main integration; keep the
+// original focused-unit selection and its resource budget unchanged.
+export const SPRINT1_INTEGRATION_UNIT_SUITES = Object.freeze([
+  'packages/modules/anatomy/test/subscriber-fanout.test.ts',
+  'packages/modules/anatomy/test/contract/anatomy-order.v0.contract.test.ts',
+  'packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts',
+  'packages/runtime/test/contract/anatomy.domain-fanout-cost.contract.test.ts',
+  'packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts',
+  'packages/compiler/test/pointer-facts-admission.test.ts',
+  'packages/compiler/test/gpui-a11y-value.test.ts',
+  'packages/compiler/test/numeric-a11y-emitter-admission.test.ts',
+]);
 export const SPRINT1_NODE_SUITES = Object.freeze([
   'scripts/analysis/test/number-field-ime-evidence.test.mjs',
   'scripts/test/search-props-ab.test.mjs',
@@ -145,6 +157,7 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
       report: { kind: 'tap', path: path.join(output, 'node-controls.log') },
     }),
     vitest('focused-unit', SPRINT1_UNIT_SUITES, 120),
+    vitest('integration-unit', SPRINT1_INTEGRATION_UNIT_SUITES, 90),
     {
       id: 'styles',
       executable: 'corepack',

@@ -5,7 +5,7 @@
 ## 已取得的实际结果
 
 | 执行 | 源码身份 | 实际终态 |
-|---|---|---|
+| --- | --- | --- |
 | [R2 45035380303](https://github.com/Proto-UI/Proto-UI/actions/runs/45035380303) | clean `4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d`，tree `daf0dc7e5c6d29f45372b7bc1796379a98dab7eb` | 304 selected：303 PASS / 1 FAIL / 0 未终态；292 browser + 12 Node/HappyDOM。site 41/42。 |
 | [诊断 45037951016](https://github.com/Proto-UI/Proto-UI/actions/runs/45037951016) | carrier `8da8222204d4101eb4334b1afc7f2bba096f2289`；执行候选仍为 4541，并保留明确的单文件 instrumentation patch | 61 selected：54 PASS / 7 FAIL / 0 未终态。原目标重复 20 次：13 PASS / 7 FAIL；不能当 clean 验收。 |
 

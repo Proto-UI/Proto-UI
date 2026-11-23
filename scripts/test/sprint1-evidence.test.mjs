@@ -14,6 +14,7 @@ import {
   sprint1Plan,
   SPRINT1_BROWSER_SUITES,
   SPRINT1_CLEANUP_MS,
+  SPRINT1_INTEGRATION_UNIT_SUITES,
   SPRINT1_MATRIX_CASE,
   SPRINT1_NODE_SUITES,
   SPRINT1_PRODUCTION_CAPTURES,
@@ -131,7 +132,23 @@ function writeSimulated(step, sha, repo) {
 
 test('the fixed serial selection preserves the full original criteria and bounded resource budget', () => {
   const steps = sprint1Plan('/tmp/simulated-sprint1', 'a'.repeat(40));
-  assert.equal(steps.length, 11);
+  assert.deepEqual(
+    steps.map((step) => step.id),
+    [
+      'node-controls',
+      'focused-unit',
+      'integration-unit',
+      'styles',
+      'number-field-0.3',
+      'number-field-experimental',
+      'dialog-observer-native',
+      'matrix-accessibility-consumer',
+      'search-native',
+      'ownership-native',
+      'search-props-ab',
+      'search-production',
+    ]
+  );
   assert.equal(new Set(steps.map((step) => step.id)).size, steps.length);
   assert.equal(SPRINT1_TOTAL_MS, 80 * 60_000);
   assert.ok(
@@ -167,6 +184,27 @@ test('the fixed serial selection preserves the full original criteria and bounde
   assert.equal(SPRINT1_UNIT_SUITES.length, 38);
   assert.equal(new Set(SPRINT1_UNIT_SUITES).size, 38);
   assert.equal(steps.find((step) => step.id === 'focused-unit').timeoutMs, 120_000);
+  assert.deepEqual(SPRINT1_INTEGRATION_UNIT_SUITES, [
+    'packages/modules/anatomy/test/subscriber-fanout.test.ts',
+    'packages/modules/anatomy/test/contract/anatomy-order.v0.contract.test.ts',
+    'packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts',
+    'packages/runtime/test/contract/anatomy.domain-fanout-cost.contract.test.ts',
+    'packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts',
+    'packages/compiler/test/pointer-facts-admission.test.ts',
+    'packages/compiler/test/gpui-a11y-value.test.ts',
+    'packages/compiler/test/numeric-a11y-emitter-admission.test.ts',
+  ]);
+  const integration = steps.find((step) => step.id === 'integration-unit');
+  assert.equal(integration.timeoutMs, 90_000);
+  assert.deepEqual(integration.suites, SPRINT1_INTEGRATION_UNIT_SUITES);
+  assert.deepEqual(integration.args.slice(-8), SPRINT1_INTEGRATION_UNIT_SUITES);
+  assert.ok(integration.suites.every((suite) => !SPRINT1_UNIT_SUITES.includes(suite)));
+  assert.ok(
+    integration.args.every(
+      (arg) => !/^--(?:testNamePattern|testTimeout|hookTimeout|bail)(?:=|$)/.test(arg)
+    ),
+    'Integration controls must run every selected case with its original limits'
+  );
   const search = steps.find((step) => step.id === 'search-native');
   assert.equal(search.timeoutMs, 1_200_000);
   assert.deepEqual(search.suites, [
@@ -323,20 +361,22 @@ test('strict producer validation rejects missing suites, skips, owner gaps and l
     writeSimulated(step, f.sha, f.repo);
     assert.doesNotThrow(() => assertSprint1StepEvidence(step, f.sha, f.repo));
   }
-  for (const mutate of [
-    (report) => report.testResults.pop(),
-    (report) => {
-      report.testResults[0].assertionResults[0].status = 'skipped';
-    },
-    (report) => {
-      report.numPassedTests = 0;
-    },
-  ]) {
-    const step = steps.find((entry) => entry.id === 'focused-unit');
-    const report = simulatedReport(step, f.sha, f.repo);
-    mutate(report);
-    writeFileSync(step.report.path, JSON.stringify(report));
-    assert.throws(() => assertSprint1StepEvidence(step, f.sha, f.repo));
+  for (const id of ['focused-unit', 'integration-unit']) {
+    const step = steps.find((entry) => entry.id === id);
+    for (const mutate of [
+      (report) => report.testResults.pop(),
+      (report) => {
+        report.testResults[0].assertionResults[0].status = 'skipped';
+      },
+      (report) => {
+        report.numPassedTests = 0;
+      },
+    ]) {
+      const report = simulatedReport(step, f.sha, f.repo);
+      mutate(report);
+      writeFileSync(step.report.path, JSON.stringify(report));
+      assert.throws(() => assertSprint1StepEvidence(step, f.sha, f.repo));
+    }
   }
   const matrix = steps.find((entry) => entry.id === 'matrix-accessibility-consumer');
   assert.deepEqual(matrix.includedTestNames, [SPRINT1_MATRIX_CASE]);
@@ -413,11 +453,12 @@ test('all selected steps receive terminal receipts after earlier errors without 
     called,
     result.steps.map((step) => step.id)
   );
-  assert.equal(result.results.length, 11);
+  assert.equal(result.results.length, 12);
   assert.equal(result.passed, false);
   assert.match(result.results[0].validationError, /original failing control/);
-  assert.equal(result.results[2].commandExitCode, 7);
-  assert.equal(result.results[2].passed, false);
+  const styles = result.results.find((step) => step.id === 'styles');
+  assert.equal(styles.commandExitCode, 7);
+  assert.equal(styles.passed, false);
   assert.equal(result.results.at(-1).passed, true);
   assert.equal(JSON.parse(readFileSync(path.join(f.output, 'progress.json'))).current, null);
 });
@@ -470,7 +511,7 @@ test('source drift and interrupted setup are explicit failures with every select
   prepareSprint1(f.output, f.repo, f.sha);
   const interrupted = finishSprint1(f.output, f.repo, 'setup failed before execution');
   assert.equal(interrupted.passed, false);
-  assert.equal(interrupted.results.length, 11);
+  assert.equal(interrupted.results.length, 12);
   assert.ok(interrupted.results.every((step) => step.terminal === 'not-completed' && !step.passed));
   writeFileSync(path.join(f.repo, 'control.txt'), 'changed source');
   const changed = finishSprint1(f.output, f.repo);

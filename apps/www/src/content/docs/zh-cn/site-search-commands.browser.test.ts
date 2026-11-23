@@ -338,6 +338,29 @@ async function capture(page: Page, id: string, state: string) {
       dialog: search.querySelector('dialog')?.getBoundingClientRect().toJSON(),
       frame: search.querySelector('.dialog-frame')?.getBoundingClientRect().toJSON(),
       activeElement: document.activeElement?.outerHTML.slice(0, 2000),
+      headerSelects: [
+        ...document.querySelectorAll<HTMLElement>(
+          '[data-docs-site-header] [data-site-select-trigger]'
+        ),
+      ].map((trigger) => {
+        const id = trigger.getAttribute('aria-controls');
+        const content = id ? document.getElementById(id) : null;
+        const exposes = (content as any)?.getExposes?.();
+        const css = content ? getComputedStyle(content) : null;
+        return {
+          id,
+          expanded: trigger.getAttribute('aria-expanded'),
+          connected: content?.isConnected ?? false,
+          phase: exposes?.transitionState?.get?.(),
+          alignmentDiagnostic: exposes?.alignmentDiagnostic?.get?.(),
+          open: exposes?.open?.get?.(),
+          isPresent: exposes?.isPresent?.get?.(),
+          box: content?.getBoundingClientRect().toJSON(),
+          display: css?.display,
+          visibility: css?.visibility,
+          viewDetached: content?.hasAttribute('data-pui-view-detached'),
+        };
+      }),
     },
     timeline: (window as any).__puiSearchTimeline ?? [],
     homepageRollback: {
@@ -2152,33 +2175,99 @@ for (const width of [320, 390]) {
         expect(geometry.select.height).toBeGreaterThanOrEqual(44);
         expect(geometry.search.height).toBeGreaterThanOrEqual(44);
         expect(geometry.search.width).toBeGreaterThanOrEqual(44);
+        const openRuntimeSelect = async (state: string) => {
+          stage(page, id, state);
+          await select.click();
+          const listboxId = await select.getAttribute('aria-controls');
+          expect(listboxId).toBeTruthy();
+          const popup = page.locator(`[id=${JSON.stringify(listboxId)}]`);
+          // Click commits Root.open; cold Select preparation may still be
+          // mounting/positioning the popup. Actual visibility is the boundary,
+          // and a named geometry abort must still fail this bounded wait.
+          await popup.waitFor({ state: 'visible' });
+          expect(await popup.isVisible()).toBe(true);
+          const popupGeometry = await popup.evaluate((node) => {
+            const viewport = node.querySelector('wc-shadcn-select-viewport') ?? node;
+            return {
+              panel: node.getBoundingClientRect().toJSON(),
+              viewport: viewport.getBoundingClientRect().toJSON(),
+              pageWidth: innerWidth,
+              pageHeight: innerHeight,
+              options: [...node.querySelectorAll<HTMLElement>('[role="option"]')].map((option) => {
+                const text = option.querySelector('wc-shadcn-select-item-text') ?? option;
+                const walker = document.createTreeWalker(text, NodeFilter.SHOW_TEXT);
+                const lines: ReturnType<DOMRect['toJSON']>[] = [];
+                for (let part = walker.nextNode(); part; part = walker.nextNode()) {
+                  if (!part.textContent?.trim()) continue;
+                  const range = document.createRange();
+                  range.selectNodeContents(part);
+                  lines.push(...[...range.getClientRects()].map((line) => line.toJSON()));
+                }
+                const box = option.getBoundingClientRect();
+                const center = document.elementFromPoint(
+                  box.x + box.width / 2,
+                  box.y + box.height / 2
+                );
+                return {
+                  text: text.textContent?.trim(),
+                  box: box.toJSON(),
+                  lines,
+                  ownsCenter: center === option || (!!center && option.contains(center)),
+                };
+              }),
+            };
+          });
+          await writeFile(
+            path.join(evidenceDirectory, `${id}-${state}-rects.json`),
+            JSON.stringify({ source, family, width, popupGeometry }, null, 2)
+          );
+          await capture(page, id, state);
+          expect(popupGeometry.options.map((option) => option.text)).toEqual([
+            'Web Components',
+            'React',
+            'Vue',
+            'Vue 2',
+          ]);
+          const panel = popupGeometry.panel;
+          expect(panel.width).toBeGreaterThan(0);
+          expect(panel.height).toBeGreaterThan(0);
+          expect(panel.left).toBeGreaterThanOrEqual(-1);
+          expect(panel.right).toBeLessThanOrEqual(popupGeometry.pageWidth + 1);
+          expect(panel.top).toBeGreaterThanOrEqual(-1);
+          expect(panel.bottom).toBeLessThanOrEqual(popupGeometry.pageHeight + 1);
+          for (const option of popupGeometry.options) {
+            expect(option.ownsCenter).toBe(true);
+            expect(option.lines.length).toBeGreaterThan(0);
+            for (const line of option.lines) {
+              for (const bounds of [option.box, popupGeometry.viewport, panel]) {
+                expect(line.left).toBeGreaterThanOrEqual(bounds.left - 1);
+                expect(line.right).toBeLessThanOrEqual(bounds.right + 1);
+                expect(line.top).toBeGreaterThanOrEqual(bounds.top - 1);
+                expect(line.bottom).toBeLessThanOrEqual(bounds.bottom + 1);
+              }
+            }
+          }
+          return popup;
+        };
         const beforePortal = await header.boundingBox();
-        await select.click();
-        const listboxId = await select.getAttribute('aria-controls');
-        // Complete item-aligned Select composition stays measurable but hidden
-        // until its current positioning request is applied. Observe that public
-        // presentation boundary within the existing 1000ms polling budget.
-        await expect
-          .poll(() => page.locator(`[id=${JSON.stringify(listboxId)}]`).isVisible(), {
-            timeout: 1000,
-          })
-          .toBe(true);
+        const initialPopup = await openRuntimeSelect('font-popup-open');
         expect((await header.boundingBox())!.height).toBe(beforePortal!.height);
         await page.keyboard.press('Escape');
+        await initialPopup.waitFor({ state: 'hidden' });
         // The root-font gate covers the actual public modal as well as its trigger.
         // A short viewport must not clip the editor/Close just because the result list shrinks.
         for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
           const modalId = `${id}-${runtime}`;
-          if ((await page.locator('site-search').getAttribute('data-search-runtime')) !== runtime) {
-            await revealHeaderPreferences(page);
-            await select.click();
-            const optionsId = await select.getAttribute('aria-controls');
-            expect(optionsId).toBeTruthy();
-            await page
-              .locator(`[id=${JSON.stringify(optionsId)}]`)
-              .getByRole('option', { name: runtimeLabels[runtime], exact: true })
-              .click();
-          }
+          await revealHeaderPreferences(page);
+          const popup = await openRuntimeSelect(`font-popup-select-${runtime}`);
+          await popup.getByRole('option', { name: runtimeLabels[runtime], exact: true }).click();
+          await popup.waitFor({ state: 'hidden' });
+          expect(
+            await select.evaluate((trigger) => {
+              const root = trigger.closest('[data-site-select-root]');
+              return (root as any)?.getExposes?.()?.value?.get?.();
+            })
+          ).toBe(runtime);
           await page.waitForFunction((runtime) => {
             const search = document.querySelector<HTMLElement>('site-search');
             return (

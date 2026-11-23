@@ -38,6 +38,33 @@ export default definePrototype({
     def.expose.method('first', () => scope.focusFirst());
     def.expose.method('next', () => roving.focusNext());
     def.expose.method('last', () => roving.focusLast());
+    // Observations for the real generated native subtree-lifetime regression.
+    const pressed = def.state.bool('pressed', false);
+    const starts = def.state.numberDiscrete('pressStarts', 0);
+    const commits = def.state.numberDiscrete('pressCommits', 0);
+    const cancels = def.state.numberDiscrete('pressCancels', 0);
+    const ends = def.state.numberDiscrete('pressEnds', 0);
+    const hostBlurs = def.state.numberDiscrete('hostBlurs', 0);
+    def.event.on('press.start', () => {
+      pressed.set(true);
+      starts.set(starts.get() + 1);
+    });
+    def.event.on('press.commit', () => commits.set(commits.get() + 1));
+    def.event.on('press.end', () => {
+      pressed.set(false);
+      ends.set(ends.get() + 1);
+    });
+    def.event.on('press.cancel', () => {
+      pressed.set(false);
+      cancels.set(cancels.get() + 1);
+    });
+    def.event.on('host:blur', () => hostBlurs.set(hostBlurs.get() + 1));
+    def.expose.state('pressed', pressed);
+    def.expose.state('pressStarts', starts);
+    def.expose.state('pressCommits', commits);
+    def.expose.state('pressCancels', cancels);
+    def.expose.state('pressEnds', ends);
+    def.expose.state('hostBlurs', hostBlurs);
     return (renderer) => renderer.el('section', renderer.slot());
   },
 });

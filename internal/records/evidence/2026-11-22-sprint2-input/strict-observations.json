@@ -27,10 +27,7 @@
       "sessionId": 15989,
       "toolObservedExitCode": 0,
       "candidateLaterCommittedAs": "ebbfc57",
-      "excludesLaterFixes": [
-        "3693622",
-        "42ee3b9"
-      ],
+      "excludesLaterFixes": ["3693622", "42ee3b9"],
       "emptyStdoutIsNotTheProof": true
     }
   ]

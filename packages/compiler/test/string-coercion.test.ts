@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { compilePrototype } from '../src/compile';
 import { emitFlutterSource } from '../src/flutter-source';
 import { emitQtSource } from '../src/qt-source';
+import { emitGpuiSource } from '../src/gpui-source';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import type { ExpressionIR, PrototypeIR, StatementIR } from '../src/ir';
@@ -167,6 +168,20 @@ describe('native String conversion', () => {
     ).toBe(false);
   });
 
+  it('admits a proven GPUI scalar and rejects an opaque object helper', () => {
+    const text = program('const value=String(1);');
+    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+    const unknown = compilePrototype(
+      program(
+        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
+      ),
+      { profile: 'gpui-source-v1' }
+    );
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok)
+      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
+  });
+
   it('admits bounded scalar conversion in GPUI', () => {
     const text = program(`
       def.expose.method('convert',(value:string|number|boolean|null)=>String(value));
@@ -193,19 +208,33 @@ describe('native String conversion', () => {
       ).toBe(true);
   });
 
-  it('admits only proven scalar GPUI coercion and keeps direct Qt/Flutter unsupported', () => {
+  it('GPUI admits checked scalar conversion through source and direct IR emission', () => {
+    for (const operand of ['', '1', 'undefined', 'null', 'true', "'text'"]) {
+      const text = program(`def.expose.value('converted',String(${operand}));`);
+      const ir = portable(text);
+      expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+      expect(emitGpuiSource(ir).ok).toBe(true);
+    }
+  });
+
+  it('GPUI continues to reject structured and opaque coercion', () => {
+    for (const body of [
+      "def.expose.value('converted',String({value:1}));",
+      "def.expose.value('converted',String([1]));",
+      "function convert(value:unknown){return String(value);}def.expose.value('converted',convert(1));",
+    ]) {
+      const result = emitGpuiSource(portable(program(body)));
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.diagnostics.some((diagnostic) => diagnostic.message.includes('String'))).toBe(
+          true
+        );
+    }
+  });
+
+  it('keeps direct Qt/Flutter conversion unsupported', () => {
     const text = program('const value=String(1);'),
       ir = portable(text);
-    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
-    const unknown = compilePrototype(
-      program(
-        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
-      ),
-      { profile: 'gpui-source-v1' }
-    );
-    expect(unknown.ok).toBe(false);
-    if (!unknown.ok)
-      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
     for (const result of [emitQtSource(ir), emitFlutterSource(ir)]) {
       expect(result.ok).toBe(false);
       if (!result.ok)

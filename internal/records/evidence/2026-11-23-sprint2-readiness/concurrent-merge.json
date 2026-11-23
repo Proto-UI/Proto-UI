@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint2-concurrent-source-preserving-merge",
+  "firstParent": "d9fb9eb0aa47b79cd886ae6c911d50edc4f73fec",
+  "concurrentParent": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+  "sourceCommitAuthorPreserved": true,
+  "fullMergeSource": {
+    "phase": "needs-review",
+    "pid": 1330487,
+    "exitCode": 1,
+    "head": "d9fb9eb0aa47b79cd886ae6c911d50edc4f73fec",
+    "mergeHead": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "conflicts": [
+      "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+      "packages/compiler/src/native-support/dom-modules.template.ts",
+      "packages/compiler/test/text-reset-native.test.ts"
+    ],
+    "sourceDiffBytes": 76239,
+    "files": "M\t.prettierignore\nM\tapps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts\nD\tinternal/records/2026-11-23-sprint2-ready-continuation.zh-CN.md\nA\tinternal/records/2026-11-23-sprint2-site-cascade-repair.md\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/cli-generated-build.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/commit-publisher.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/focused-status.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/formatter-recovery.json\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-before-repair.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-history-check.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-history-controls.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-history-ready-negative-control.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-main-byte-manifest.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-prettier-exact-probe.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-prettier-info.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/frozen-public-docs.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/full-staged-whitespace.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/manifest-current.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/manifest-generate.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/original-publisher-readback.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/package-manifests.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/post-format-history-controls.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/post-format-source-controls.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/presets-current.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/presets-generate.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/public-packages.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/publication-prep-launcher.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/queue-controls.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/repair-validation-status.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/site-source-controlled-rerun.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/site-source-controls.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/source-binding.json\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/staged-whitespace-except-frozen-stdout.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/style-presets.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/text-ownership.json.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/website-styles.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/workspace-types-current.log.gz\nD\tinternal/records/evidence/2026-11-23-sprint2-readiness/workspace-types.log.gz\nM\tpackages/cli/src/generated/brutalist-style-tokens.ts\nM\tpackages/cli/src/generated/draft-family-style-tokens.ts\nM\tpackages/cli/src/generated/shadcn-style-tokens.ts\nM\tpackages/compiler/src/diagnostic-registry.ts\nM\tpackages/compiler/src/flutter-source.ts\nM\tpackages/compiler/src/gpui-source.ts\nM\tpackages/compiler/src/ir-validation.ts\nM\tpackages/compiler/src/native-support/dom-modules.template.ts\nM\tpackages/compiler/src/parser.ts\nM\tpackages/compiler/src/qt-source.ts\nM\tpackages/compiler/src/react.ts\nM\tpackages/compiler/src/targets.ts\nM\tpackages/compiler/test/text-reset-native.test.ts\nM\tpackages/prototypes/base/package.json\nM\tscripts/analysis/invisible-consumption/produce-button.mjs\nM\tscripts/governance/history-audit.mjs\nM\tspec/contracts/C-COMPILER-GPUI-A11Y-VALUE-0001.yaml\n"
+  },
+  "reviewedConflicts": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+      "incomingSha256": "d1d3ee9f48a7d2ce991cb5f9fa5b98f1732b383b3a62a1d6d966e924394b05c2"
+    },
+    {
+      "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+      "incomingSha256": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a"
+    },
+    {
+      "path": "packages/compiler/test/text-reset-native.test.ts",
+      "incomingSha256": "b0bb4bdd23dbead2573e5f748796b539eb7059b782d9fed64a3797e520f2461b"
+    }
+  ],
+  "newTypeFix": "Mock add/removeEventListener options remains optional at the declared host API boundary; emitted JavaScript is identical.",
+  "siteAssertions": "Retain exact 5px family bank and all four corners, original hit/height/disclosure assertions, real settled CSS transitions and 5 unique profile captures.",
+  "expectedNativeCaseCount": 304,
+  "expectedSiteCaseCount": 42,
+  "expectedSuccessfulSitePngs": 100,
+  "originalNativeFailure": {
+    "run": 45175883003,
+    "job": 137696880795,
+    "artifact": 14819274257,
+    "zipSha256": "63ad30b629db85451d076d47f0aee094bd28535c5d7df2926dd277d3af5900ae",
+    "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "observedSelectedCasesPassed": 304,
+    "workspaceTypesFailed": true,
+    "currentCandidateAcceptance": false
+  },
+  "sourceControls": {
+    "passed": 86,
+    "original78Preserved": true,
+    "addedResetControls": 8,
+    "incomplete": 0,
+    "productTrees": {
+      "packages": "649cf4a33280bf5c77573c104fccd7013543096f",
+      "apps": "9c22497113bfb4c2240b13abdbf924c94768ddf9",
+      "scripts": "02b4c512e251f449b52dbcb284dd9c5c8befb70f",
+      "spec": "b7b239b1b032a7fcf1e448856c728f912d1710b4"
+    }
+  },
+  "frozenArchivedFilesStillMatchMain": 134,
+  "steps": [
+    {
+      "name": "concurrent-format-equivalence",
+      "args": [
+        "node",
+        "/tank/shared/projects/proto-ui-agent/sprint2-ready-control-cc618/concurrent-format-equivalence.mjs"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 5.79
+    },
+    {
+      "name": "concurrent-source-format",
+      "args": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--write",
+        "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+        "packages/compiler/src/native-support/dom-modules.template.ts",
+        "packages/compiler/test/text-reset-native.test.ts"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 1.167
+    },
+    {
+      "name": "concurrent-source-controls",
+      "args": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/compiler/test/text-reset-native.test.ts",
+        "packages/compiler/test/text-selection-consumer.test.ts",
+        "apps/www/src/styles/site-note-surface.test.ts",
+        "apps/www/test/shadcn-typography-theme.test.ts",
+        "apps/www/src/components/site-library-family.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/tank/shared/projects/proto-ui-agent/sprint2-ready-control-cc618/concurrent-source-controls.json"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 38.453
+    },
+    {
+      "name": "concurrent-workspace-types",
+      "args": ["corepack", "pnpm@10.32.1", "check:types:workspace"],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 254.019
+    },
+    {
+      "name": "concurrent-whitespace",
+      "args": ["git", "diff", "--cached", "--check"],
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "seconds": 0.916
+    }
+  ],
+  "finalNativeAcceptance": "pending"
+}

@@ -45,6 +45,15 @@ impl Value { pub fn error_message_value(&self)->Self{if matches!(self,Self::Unde
 pub fn number_is_finite(value:&Value)->Value { Value::boolean(match value {
     Value::Number(value)=>value.is_finite(),Value::Json(Json::Number(value))=>value.as_f64().is_some_and(f64::is_finite),_=>false,
 }) }
+// ECMAScript's nearest integer ties toward positive infinity. Rust round()
+// rounds ties away from zero; adding 0.5 first also loses adjacent-double cases.
+pub fn math_round(value:Value)->Value {
+    let value=value.num();
+    let result=if !value.is_finite()||value==0.{value}
+        else if value>=-0.5&&value<0.{-0.0}
+        else {let floor=value.floor();if value-floor<0.5{floor}else{floor+1.}};
+    Value::number(result)
+}
 pub fn has_own(value:&Value,key:&Value)->Value {
     let key=property_key(key);Value::boolean(match value {
         Value::Record(record)=>record.fields.borrow().contains_key(&key),

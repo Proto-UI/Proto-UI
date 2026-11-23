@@ -1,9 +1,15 @@
-import {asCalendarRoot,CALENDAR_CONTEXT} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/calendar/index.ts';
-import {asDatePickerRoot} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
+import {
+  asCalendarRoot,
+  CALENDAR_CONTEXT,
+} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/calendar/index.ts';
+import { asDatePickerRoot } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { definePrototype } from '@proto.ui/core';
-import { datePickerRoot, datePickerDay } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
+import {
+  datePickerRoot,
+  datePickerDay,
+} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -121,28 +127,56 @@ function runtimeHarness() {
   };
 }
 
-
-
-const results: unknown[]=[];
-for(const mode of ['single','range'] as const){
- const {make,actions}=runtimeHarness();let root:any;let observed=false;
- const proto=definePrototype({name:'review-context-picker-'+mode,setup(def){
-   asCalendarRoot();
-   def.context.subscribe(CALENDAR_CONTEXT,(_run,next)=>{
-     if(!next.selectionRequestId||observed)return;
-     observed=true;root.exposes.openPopover('context-subscriber');
-   });
-   asDatePickerRoot();
- }});
- const initial=mode==='single'?{defaultValue:'2026-10-10'}:{defaultRange:{from:'2026-10-10'}};
- root=make(proto,null,{...initial,mode,defaultMonth:'2026-10',defaultOpen:false});
- await root.session.mount();
- try{
-  const before=root.exposes.open.get();
-  const request=root.session.invokeInCallbackScope(()=>root.exposes.requestValue('2026-10-15'));
-  const after=root.exposes.open.get();
-  results.push({mode,before,request,after,observed,actions:[...actions],expectedOpenAfter:true,pass:after===true});
- }finally{await root.session.dispose();}
+const results: unknown[] = [];
+for (const mode of ['single', 'range'] as const) {
+  const { make, actions } = runtimeHarness();
+  let root: any;
+  let observed = false;
+  const proto = definePrototype({
+    name: 'review-context-picker-' + mode,
+    setup(def) {
+      asCalendarRoot();
+      def.context.subscribe(CALENDAR_CONTEXT, (_run, next) => {
+        if (!next.selectionRequestId || observed) return;
+        observed = true;
+        root.exposes.openPopover('context-subscriber');
+      });
+      asDatePickerRoot();
+    },
+  });
+  const initial =
+    mode === 'single' ? { defaultValue: '2026-10-10' } : { defaultRange: { from: '2026-10-10' } };
+  root = make(proto, null, { ...initial, mode, defaultMonth: '2026-10', defaultOpen: false });
+  await root.session.mount();
+  try {
+    const before = root.exposes.open.get();
+    const request = root.session.invokeInCallbackScope(() =>
+      root.exposes.requestValue('2026-10-15')
+    );
+    const after = root.exposes.open.get();
+    results.push({
+      mode,
+      before,
+      request,
+      after,
+      observed,
+      actions: [...actions],
+      expectedOpenAfter: true,
+      pass: after === true,
+    });
+  } finally {
+    await root.session.dispose();
+  }
 }
-const result={scope:'Independent public asCalendarRoot/asDatePickerRoot composition. A subscriber installed between the hooks opens a closed popup on the first request Context notification. No product source changed.',ok:results.every((r:any)=>r.pass),results};
-writeFileSync('/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-capture-green.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));if(!result.ok)process.exitCode=1;
+const result = {
+  scope:
+    'Independent public asCalendarRoot/asDatePickerRoot composition. A subscriber installed between the hooks opens a closed popup on the first request Context notification. No product source changed.',
+  ok: results.every((r: any) => r.pass),
+  results,
+};
+writeFileSync(
+  '/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-start-capture-green.json',
+  JSON.stringify(result, null, 2) + '\n'
+);
+console.log(JSON.stringify(result, null, 2));
+if (!result.ok) process.exitCode = 1;
