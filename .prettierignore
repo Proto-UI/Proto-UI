@@ -23,3 +23,10 @@ scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
 
 # Exact audited shader bytes and legal text are emitted by the checked generator.
 packages/adapters/base/src/material/liquidgl-kernel.generated.ts
+
+# Frozen source archives and historical evidence retain their original bytes and hashes.
+internal/records/2026-11-22-sprint-7-history-sources/
+internal/records/evidence/2026-11-22-sprint7-history-continuation/
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/

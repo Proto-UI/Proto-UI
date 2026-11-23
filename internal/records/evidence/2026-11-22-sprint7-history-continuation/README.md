@@ -20,17 +20,17 @@ The original snapshot generator also needs a source-binding check before reuse: 
 
 The actual Node.js `v24.22.1` runtime ran the original nine tests successfully and checked the complete restored archive. [commands.json](commands.json) binds the commands, return codes and log hashes. The check counted:
 
-| Observation                                          |         Count |
-| ---------------------------------------------------- | ------------: |
-| Objects in the frozen membership set                 |         1,697 |
-| Issues / pull requests                               |   467 / 1,230 |
-| Top-level comments / inline review comments          | 8,106 / 4,128 |
-| Objects reconciled to preserved sources              |         1,697 |
-| Original manual full-body/discussion reading records |            50 |
-| Decisions independently accepted                     |             0 |
-| Objects awaiting independent decision acceptance     |         1,697 |
-| Objects retaining conditions or source gaps          |         1,697 |
-| Later object excluded from the frozen denominator    |             1 |
+| Observation | Count |
+| --- | ---: |
+| Objects in the frozen membership set | 1,697 |
+| Issues / pull requests | 467 / 1,230 |
+| Top-level comments / inline review comments | 8,106 / 4,128 |
+| Objects reconciled to preserved sources | 1,697 |
+| Original manual full-body/discussion reading records | 50 |
+| Decisions independently accepted | 0 |
+| Objects awaiting independent decision acceptance | 1,697 |
+| Objects retaining conditions or source gaps | 1,697 |
+| Later object excluded from the frozen denominator | 1 |
 
 The `ready` command deliberately remains an actual exit-1 rejection: all 1,697 reconciled objects still await independent decision acceptance. Its original stderr is preserved in [ready.stderr.log](ready.stderr.log). Source reconciliation does not replace manual implementation review, original evidence recovery or technical acceptance.
 
