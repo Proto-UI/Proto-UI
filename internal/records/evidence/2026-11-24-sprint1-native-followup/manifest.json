@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "retention": "Selected original members, not complete native screenshot archives. Every member of both complete upstream ZIPs is indexed with its hash; omitted captures are not asserted to have independent visual acceptance. Original artifact IDs and ZIP hashes identify their downloadable full carriers.",
+  "sprint1": {
+    "runId": 45249497810,
+    "jobId": 137955073268,
+    "artifactId": 14858665505,
+    "source": {
+      "checkoutSha": "0b0b861bf18a18d20aa2f0e627ba477dbab463e5",
+      "treeSha": "bb80d1c48fe0f3725cfd84570df692080fe1c1c5",
+      "dirty": false,
+      "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sourceAfter": {
+      "checkoutSha": "0b0b861bf18a18d20aa2f0e627ba477dbab463e5",
+      "treeSha": "bb80d1c48fe0f3725cfd84570df692080fe1c1c5",
+      "dirty": false,
+      "worktreeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "workflowConclusion": "failure",
+    "all12StepsTerminal": true,
+    "tests": {
+      "ownership-native": {
+        "files": 1,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0,
+        "pending": 0
+      },
+      "dialog-observer-native": {
+        "files": 3,
+        "tests": 25,
+        "passed": 25,
+        "failed": 0,
+        "pending": 0
+      },
+      "focused-unit": {
+        "files": 44,
+        "tests": 678,
+        "passed": 678,
+        "failed": 0,
+        "pending": 0
+      },
+      "search-native": {
+        "files": 1,
+        "tests": 84,
+        "passed": 84,
+        "failed": 0,
+        "pending": 0
+      },
+      "search-production": {
+        "files": 1,
+        "tests": 4,
+        "passed": 3,
+        "failed": 1,
+        "pending": 0
+      },
+      "matrix-accessibility-consumer": {
+        "files": 1,
+        "tests": 4,
+        "passed": 0,
+        "failed": 1,
+        "pending": 3
+      },
+      "integration-unit": {
+        "files": 16,
+        "tests": 537,
+        "passed": 537,
+        "failed": 0,
+        "pending": 0
+      }
+    },
+    "nodeControls": 228,
+    "numberFieldJourneys": {
+      "release": 12,
+      "experimental": 8,
+      "nativeCDPCompositionOwners": 40,
+      "physicalIMEorAT": false
+    },
+    "searchAB": {
+      "samples": 80,
+      "pairs": 5,
+      "variants": ["current", "forced-write"]
+    },
+    "failedCriteria": [
+      "Original Matrix 60000ms all-adapter initialization",
+      "Shadcn production HEAD503 Retry focus in original 1000ms"
+    ]
+  },
+  "projection": {
+    "runId": 45254544690,
+    "jobId": 137972794970,
+    "artifactId": 14859121049,
+    "head": "f419483e78403817fbe5aa6146caec30ab90352a",
+    "workflowConclusion": "failure",
+    "capabilityCases": 100,
+    "allSelectedCasesPassed": true,
+    "byKind": {
+      "resizable": 20,
+      "carousel": 20,
+      "number-field": 20,
+      "calendar": 20,
+      "date-picker": 20
+    },
+    "subsequentFailure": "check:styles:preset: Draft family tokens are stale. Run pnpm styles:preset:generate.",
+    "followingBrowserSuites": "Not executed after stale-token failure; no pass inferred"
+  },
+  "files": [
+    {
+      "path": "projection-f419-index.json",
+      "bytes": 72987,
+      "sha256": "ff417cff625d1e3c2fb184f0afe3b5fe02b2c1e01c3689d9a3efabfe1e1a3a96"
+    },
+    {
+      "path": "projection-f419-job.log.gz",
+      "bytes": 8964,
+      "sha256": "45d9ea2793f51c38345d9e6835bb8eb3feacd45b03999c623a16aabe218b9161",
+      "uncompressedBytes": 34216,
+      "uncompressedSha256": "cb9d240e7cd58041f7aefe98e5975daa2bf6564c78aceee8c10a89ed676a14b6"
+    },
+    {
+      "path": "projection-f419-selected.zip",
+      "bytes": 14144,
+      "sha256": "18ea2ea989b8654b5f8a1a9a05542d9464a23c6c726ad5994f1797bc2266817f"
+    },
+    {
+      "path": "sprint1-0b0b861b-index.json",
+      "bytes": 350468,
+      "sha256": "bc57a7405e974f5055ccdf47d862e6ae8e045df1064b84e9ec3ef613e3f4ea3b"
+    },
+    {
+      "path": "sprint1-0b0b861b-selected.zip",
+      "bytes": 5681033,
+      "sha256": "96221ecda6398f439d1a99bcdec8e0aa41fee11f49d758a46bebf0f52083daac"
+    }
+  ]
+}
