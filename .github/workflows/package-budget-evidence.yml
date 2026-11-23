@@ -14,8 +14,12 @@ concurrency:
 jobs:
   whole-entry-budgets:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
+      - name: Prepare evidence before dependency or build failures
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/package-budgets"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
@@ -25,21 +29,90 @@ jobs:
         with:
           node-version: 24
       - name: Install the frozen public package graph
+        id: dependencies
+        timeout-minutes: 8
         run: |
-          corepack enable
-          corepack prepare pnpm@10.32.1 --activate
-          corepack pnpm@10.32.1 install --frozen-lockfile
+          set -euo pipefail
+          {
+            git rev-parse HEAD &&
+            test "$(git rev-parse HEAD)" = "$GITHUB_SHA" &&
+            sha256sum pnpm-lock.yaml &&
+            node --version &&
+            corepack enable &&
+            corepack prepare pnpm@10.32.1 --activate &&
+            corepack pnpm@10.32.1 --version &&
+            corepack pnpm@10.32.1 install --frozen-lockfile
+          } 2>&1 | tee "$RUNNER_TEMP/package-budgets/setup.log"
       - name: Build the complete publish graph
-        run: corepack pnpm@10.32.1 build:packages
+        id: build
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 build:packages 2>&1 | tee "$RUNNER_TEMP/package-budgets/build.log"
       - name: Check public manifests and measurement controls
+        id: controls
+        timeout-minutes: 5
         run: |
-          corepack pnpm@10.32.1 check:package-manifests
-          corepack pnpm@10.32.1 test:package-budget-policy
+          set -euo pipefail
+          {
+            corepack pnpm@10.32.1 check:package-manifests &&
+            corepack pnpm@10.32.1 test:package-budget-policy
+          } 2>&1 | tee "$RUNNER_TEMP/package-budgets/controls.log"
       - name: Enforce the unchanged strict whole-entry gate
+        id: gate
+        timeout-minutes: 5
         run: |
-          mkdir -p "$RUNNER_TEMP/package-budgets"
-          node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA" > "$RUNNER_TEMP/package-budgets/report.json"
-      - name: Preserve actual comparisons and the measured source closure
+          set -euo pipefail
+          {
+            node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA" > "$RUNNER_TEMP/package-budgets/report.json"
+          } 2>&1 | tee "$RUNNER_TEMP/package-budgets/gate.log"
+      - name: Retain setup failures and verify the original strict report
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const directory = path.join(process.env.RUNNER_TEMP, 'package-budgets');
+          const outcomes = JSON.parse(process.env.WORKFLOW_STEP_OUTCOMES);
+          const problems = [];
+          let report = null;
+          try {
+            report = JSON.parse(readFileSync(path.join(directory, 'report.json'), 'utf8'));
+          } catch (error) { problems.push('Original strict report unavailable: ' + String(error)); }
+          if (!report || typeof report !== 'object' || Array.isArray(report))
+            problems.push('Original strict report is not an object.');
+          for (const id of ['dependencies', 'build', 'controls', 'gate'])
+            if (outcomes[id]?.outcome !== 'success') problems.push(id + ' did not succeed.');
+          if (report && (report.exitCode !== 0 || report.source?.head !== process.env.GITHUB_SHA ||
+              report.source?.expectedSha !== process.env.GITHUB_SHA ||
+              report.source?.requireClean !== true || report.source?.workingTreeClean !== true ||
+              report.source?.measuredSourceMatchesHead !== true || report.source?.stableDuringMeasurement !== true))
+            problems.push('The original strict gate did not pass on the clean exact candidate.');
+          const terminal = {
+            candidate: process.env.GITHUB_SHA,
+            status: problems.length ? 'failed' : 'passed',
+            finishedAt: new Date().toISOString(),
+            workflowSteps: outcomes,
+            originalReportExitCode: report?.exitCode ?? null,
+            source: report?.source ?? null,
+            problems,
+          };
+          writeFileSync(path.join(directory, 'terminal.json'), JSON.stringify(terminal, null, 2) + '\n');
+          console.log(JSON.stringify(terminal, null, 2));
+          if (problems.length) process.exitCode = 1;
+          JS
+      - name: Preserve actual comparisons and every available failure log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-budgets-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}-logs
+          path: ${{ runner.temp }}/package-budgets
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preserve the original strict report artifact contract
         if: always()
         uses: actions/upload-artifact@v4
         with:

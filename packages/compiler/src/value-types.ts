@@ -87,6 +87,15 @@ export function valueTypeEqual(a: ValueType, b: ValueType): boolean {
     );
   if (a.kind === 'callable' && b.kind === 'callable')
     return (
+      (a.lookup === undefined
+        ? b.lookup === undefined
+        : b.lookup !== undefined &&
+          a.lookup.length === b.lookup.length &&
+          a.lookup.every((entry) =>
+            b.lookup!.some(
+              (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
+            )
+          )) &&
       a.parameters.length === b.parameters.length &&
       a.parameters.every(
         (parameter, index) =>
@@ -218,6 +227,21 @@ export function valueAssignable(actual: ValueType, expected: ValueType): boolean
     typeof expected !== 'string' &&
     expected.kind === 'callable'
   ) {
+    // A precise lookup result is authority supplied by the actual capture getter,
+    // never by an arbitrary function with a superficially compatible signature.
+    // The map is complete: checkedCall interprets an absent key as undefined.
+    // Dropping entries would therefore erase real return values and capabilities.
+    if (
+      expected.lookup !== undefined &&
+      (actual.lookup === undefined ||
+        actual.lookup.length !== expected.lookup.length ||
+        !expected.lookup.every((entry) =>
+          actual.lookup!.some(
+            (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
+          )
+        ))
+    )
+      return false;
     if (minimumArgumentCount(actual.parameters) > minimumArgumentCount(expected.parameters))
       return false;
     return (
@@ -272,23 +296,54 @@ export function spreadObjectField(
   return field;
 }
 
+/** Prove an outward JSON snapshot without erasing the expression's readonly view.
+ * Capabilities, callbacks, open dictionaries and nested undefined are never data. */
+export function dataBoundaryType(type: ValueType, top = true): DataType | undefined {
+  if (typeof type === 'string')
+    return ['boolean', 'number', 'string', 'null'].includes(type) || (top && type === 'void')
+      ? (type as DataType)
+      : undefined;
+  if (type.kind === 'literal') return type;
+  if (type.kind === 'array') {
+    const element = dataBoundaryType(type.element, false);
+    return element ? { kind: 'array', element } : undefined;
+  }
+  if (type.kind === 'union' || type.kind === 'value-union') {
+    const members = type.members.map((member) => dataBoundaryType(member, top));
+    return members.every((member): member is DataType => member !== undefined)
+      ? { kind: 'union', members }
+      : undefined;
+  }
+  if (
+    (type.kind === 'record' || type.kind === 'object') &&
+    !('index' in type && type.index !== undefined)
+  ) {
+    const fields: { name: string; type: DataType; optional?: boolean }[] = [];
+    for (const field of type.fields) {
+      const value = dataBoundaryType(field.type, false);
+      if (!value) return undefined;
+      fields.push({ name: field.name, type: value, ...(field.optional ? { optional: true } : {}) });
+    }
+    return { kind: 'record', fields };
+  }
+  return undefined;
+}
+
 /** JSON publication copies data; readonly source fields do not carry authority. */
 export function publishedDataType(type: ValueType): DataType | undefined {
+
   if (isDataValueType(type)) return type;
   if (typeof type === 'string') return undefined;
   if (type.kind === 'object' && type.index === undefined) {
     const fields: { name: string; type: DataType; optional?: boolean }[] = [];
     for (const field of type.fields) {
+      // A readonly data field is copyable; a getter still carries executable authority.
+      if (field.accessor) return undefined;
       const data = publishedDataType(field.type);
       if (!data) return undefined;
       fields.push({ name: field.name, type: data, ...(field.optional ? { optional: true } : {}) });
     }
     return { kind: 'record', fields };
-  }
-  if (type.kind === 'value-union') {
-    const members = type.members.map(publishedDataType);
-    if (members.every((member): member is DataType => member !== undefined))
-      return parseDataType({ kind: 'union', members });
   }
   return undefined;
 }
@@ -348,10 +403,26 @@ export function checkedCall(
     )
       throw new TypeError(`Callable argument ${index + 1} type mismatch.`);
   });
+  const keys = args[0] === undefined ? [] : valueAlternatives(args[0]);
+  const result =
+    fn.lookup &&
+    keys.length &&
+    keys.every(
+      (key) => typeof key !== 'string' && key.kind === 'literal' && typeof key.value === 'string'
+    )
+      ? joinValueTypes(
+          keys.map(
+            (key) =>
+              fn.lookup!.find(
+                (entry) => entry.key === (key as { kind: 'literal'; value: string }).value
+              )?.type ?? 'void'
+          )
+        )
+      : fn.returnType;
   return optional &&
     valueAlternatives(type).some((member) => member === 'null' || member === 'void')
-    ? joinValueTypes([fn.returnType, 'void'])
-    : fn.returnType;
+    ? joinValueTypes([result, 'void'])
+    : result;
 }
 
 /** Every supplies these three values even when the callback declares fewer formals. */

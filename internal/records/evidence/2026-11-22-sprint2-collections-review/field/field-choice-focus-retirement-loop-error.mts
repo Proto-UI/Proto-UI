@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { definePrototype } from '@proto.ui/core';
-import {checkboxRoot} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/checkbox/index.ts';
-import {radioGroupRoot} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/index.ts';
-import {fieldCheckbox,fieldRadioGroup} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/field/index.ts';
+import { checkboxRoot } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/checkbox/index.ts';
+import { radioGroupRoot } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/index.ts';
+import {
+  fieldCheckbox,
+  fieldRadioGroup,
+} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/field/index.ts';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -114,33 +117,65 @@ function runtimeHarness() {
   };
 }
 
+import { RADIO_GROUP_FAMILY } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/shared.ts';
 
-
-
-import {RADIO_GROUP_FAMILY} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/shared.ts';
-
-const results:any[]=[];
-for(const operation of ['unmount','dispose','remount'] as const) {
- const {make}=runtimeHarness();
- const root=make(radioGroupRoot,null,{value:'a'});
- const itemProto=definePrototype({name:'review-owned-radio-part',setup(def){
-  def.anatomy.claim(RADIO_GROUP_FAMILY,{role:'item'});const focus=def.state.bool('focused',false);
-  def.expose.state('focused',focus);def.expose.method('setFocused',()=>focus.set(true));
-  def.expose.method('__collectionItem',()=>({instanceId:'review-item',value:'a',disabled:false}));
- }});
- const item=make(itemProto,root.target);
- await root.session.mount();await item.session.mount();
- item.session.invokeInCallbackScope(()=>item.exposes.setFocused());
- const transition:Promise<unknown>[]=[];
- const off=root.exposes.focused.subscribe((event:any)=>{
-  if(event.next!==true)return;
-  transition.push(root.session[operation==='dispose'?'dispose':'unmount']());
-  if(operation==='remount')transition.push(root.session.mount());
- });
- let thrown:any,result:any;
- try {
-  try{result=root.session.invokeInCallbackScope(()=>root.exposes.requestValue('a'));}catch(error){thrown={message:String(error),code:(error as any).code};}
-  results.push({operation,expected:'old no-op focus continuation ends without accessing retired owner',result,thrown,passed:!thrown});
- }finally{off();await Promise.all(transition);await item.session.dispose();await root.session.dispose();}
+const results: any[] = [];
+for (const operation of ['unmount', 'dispose', 'remount'] as const) {
+  const { make } = runtimeHarness();
+  const root = make(radioGroupRoot, null, { value: 'a' });
+  const itemProto = definePrototype({
+    name: 'review-owned-radio-part',
+    setup(def) {
+      def.anatomy.claim(RADIO_GROUP_FAMILY, { role: 'item' });
+      const focus = def.state.bool('focused', false);
+      def.expose.state('focused', focus);
+      def.expose.method('setFocused', () => focus.set(true));
+      def.expose.method('__collectionItem', () => ({
+        instanceId: 'review-item',
+        value: 'a',
+        disabled: false,
+      }));
+    },
+  });
+  const item = make(itemProto, root.target);
+  await root.session.mount();
+  await item.session.mount();
+  item.session.invokeInCallbackScope(() => item.exposes.setFocused());
+  const transition: Promise<unknown>[] = [];
+  const off = root.exposes.focused.subscribe((event: any) => {
+    if (event.next !== true) return;
+    transition.push(root.session[operation === 'dispose' ? 'dispose' : 'unmount']());
+    if (operation === 'remount') transition.push(root.session.mount());
+  });
+  let thrown: any, result: any;
+  try {
+    try {
+      result = root.session.invokeInCallbackScope(() => root.exposes.requestValue('a'));
+    } catch (error) {
+      thrown = { message: String(error), code: (error as any).code };
+    }
+    results.push({
+      operation,
+      expected: 'old no-op focus continuation ends without accessing retired owner',
+      result,
+      thrown,
+      passed: !thrown,
+    });
+  } finally {
+    off();
+    await Promise.all(transition);
+    await item.session.dispose();
+    await root.session.dispose();
+  }
 }
-const out={ok:results.every(r=>r.passed),cases:results,boundary:'Independent actual Radio Root and Runtime, independently authored owned item fact, synthetic host not native focus.'};writeFileSync('/workspace/scratch/44c416809288/evidence/field-choice-focus-retirement-probe.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out));
+const out = {
+  ok: results.every((r) => r.passed),
+  cases: results,
+  boundary:
+    'Independent actual Radio Root and Runtime, independently authored owned item fact, synthetic host not native focus.',
+};
+writeFileSync(
+  '/workspace/scratch/44c416809288/evidence/field-choice-focus-retirement-probe.json',
+  JSON.stringify(out, null, 2) + '\n'
+);
+console.log(JSON.stringify(out));

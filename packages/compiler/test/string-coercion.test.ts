@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { compilePrototype } from '../src/compile';
 import { emitFlutterSource } from '../src/flutter-source';
 import { emitQtSource } from '../src/qt-source';
+import { emitGpuiSource } from '../src/gpui-source';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import type { ExpressionIR, PrototypeIR, StatementIR } from '../src/ir';
@@ -167,7 +168,7 @@ describe('native String conversion', () => {
     ).toBe(false);
   });
 
-  it('rejects an opaque GPUI helper even when its caller supplies a concrete record', () => {
+  it('admits a proven GPUI scalar and rejects an opaque object helper even when its caller supplies a concrete record', () => {
     const text = program('const value=String(1);');
     expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
     const unknown = compilePrototype(
@@ -205,6 +206,30 @@ describe('native String conversion', () => {
           (diagnostic) => diagnostic.code === 'PUI4003' && diagnostic.message.includes('String')
         )
       ).toBe(true);
+  });
+
+  it('GPUI admits checked scalar conversion through source and direct IR emission', () => {
+    for (const operand of ['', '1', 'undefined', 'null', 'true', "'text'"]) {
+      const text = program(`def.expose.value('converted',String(${operand}));`);
+      const ir = portable(text);
+      expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+      expect(emitGpuiSource(ir).ok).toBe(true);
+    }
+  });
+
+  it('GPUI continues to reject structured and opaque coercion', () => {
+    for (const body of [
+      "def.expose.value('converted',String({value:1}));",
+      "def.expose.value('converted',String([1]));",
+      "function convert(value:unknown){return String(value);}def.expose.value('converted',convert(1));",
+    ]) {
+      const result = emitGpuiSource(portable(program(body)));
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.diagnostics.some((diagnostic) => diagnostic.message.includes('String'))).toBe(
+          true
+        );
+    }
   });
 
   it('keeps direct Qt/Flutter conversion unsupported', () => {

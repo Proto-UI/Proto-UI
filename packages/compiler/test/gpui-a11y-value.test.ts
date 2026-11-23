@@ -309,6 +309,12 @@ describe('C-COMPILER-GPUI-A11Y-VALUE-0001 checked numeric host payload', () => {
     expect(owner).toContain(
       'element=element.on_a11y_action(native_action,move |data,window,cx|lease.request_data(data,window,cx));'
     );
+    const lease = owner.slice(
+      owner.indexOf('impl NativeAccessibleActionLease {'),
+      owner.indexOf('pub fn native_accessible_action_lease(')
+    );
+    expect(lease).toContain('if !current{return}');
+    expect(lease).toContain('dispatch_accessibility_action(&owner,&self.key,data)');
     expect(owner).toContain(
       'pub fn request_data(&self,data:Option<&gpui::accesskit::ActionData>,window:&mut Window,cx:&mut App)'
     );

@@ -38,7 +38,7 @@ pub fn attach_scroll_engine(target:OwnerWeak,handle:gpui::ScrollHandle)->Result<
     if !o.modules.hooks.contains("scroll"){return Err("scroll target did not declare ScrollSurface".into())}
     let epoch=o.epoch;
     let s=&mut o.modules.scroll;
-    if s.external_engine!=0{return Err("scroll target already has an external engine".into())}
+    if s.external_engine!=0||s.external_expected{return Err("scroll target already has an external engine or target".into())}
     let fallback=s.handle.as_ref().ok_or("scroll target has no initialized engine")?.clone();
     let id=s.next_engine.checked_add(1).ok_or("scroll engine generation exhausted")?;
     s.next_engine=id;s.external_engine=id;
@@ -58,9 +58,7 @@ impl ScrollEngineLease{
     pub fn notify_input(&self,window:&mut Window,cx:&mut App)->bool{
         let Some(owner)=self.owner.upgrade()else{return false};
         if !ready(&owner)||owner.borrow().modules.scroll.external_engine!=self.id||owner.borrow().window_id!=Some(window.window_handle().window_id()){return false}
-        let epoch=owner.borrow().epoch;
-        if !scroll_external_input(&owner,window,epoch){return false}
-        let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}window.refresh();true
+        if !scroll_external_input(&owner,window){return false}let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}window.refresh();true
     }
     pub fn dispose(&self){
         let Some(owner)=self.owner.upgrade()else{return};let mut o=owner.borrow_mut();
@@ -77,8 +75,16 @@ impl Drop for ScrollEngineLease{fn drop(&mut self){self.dispose()}}
 
 pub fn scroll_setup(owner:&OwnerWeak)->Value{let result=module_handle(owner,"scroll");setup(owner).borrow_mut().modules.scroll.handle.get_or_insert_with(gpui::ScrollHandle::default);result}
 pub fn scroll_configure(owner:&OwnerWeak,patch:Value)->Value{let owner=setup(owner);let required=patch.member("requireProjection",false);assert!(required.nullish()||required.text()=="system","GPUI system ScrollHandle has no composed-chrome projection");let end=patch.member("endFollow",false);let mut o=owner.borrow_mut();if !end.nullish(){o.modules.scroll.following=text_or(end.member("mode",false),"off")=="while-at-end";}merge_config(&mut o.modules.scroll.config,patch);Value::Undefined}
-fn scroll_axis(owner:&OwnerRef,horizontal:bool)->Value{let o=owner.borrow();let scroll=&o.modules.scroll;let offset=scroll.handle().offset();let max=scroll.handle().max_offset();let bounds=scroll.handle().bounds();let extent=f64::from(f32::from(if horizontal{max.x}else{max.y})).max(0.);let size=f64::from(f32::from(if horizontal{bounds.size.width}else{bounds.size.height}));let offset=-f64::from(f32::from(if horizontal{offset.x}else{offset.y}));record(vec![("position",Value::number(if extent>0.{(offset/extent).clamp(0.,1.)}else{0.})),("visibleRatio",Value::number(if size+extent>0.{(size/(size+extent)).clamp(0.,1.)}else{1.})),("canScrollBefore",Value::boolean(offset>0.5)),("canScrollAfter",Value::boolean(extent-offset>0.5)),("atEnd",Value::boolean(extent-offset<=1.))])}
-pub fn scroll_snapshot(owner:&OwnerWeak)->Value{let owner=ensure(owner);let (axes,scrolling,state,status)={let o=owner.borrow();let s=&o.modules.scroll;let follow=field(&s.config,"endFollow");let enabled=!follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end";(text_or(field(&s.config,"axes"),"both"),s.last_input.is_some_and(|time|time.elapsed()<std::time::Duration::from_millis(120)),if !enabled{"off"}else if !o.mounted{"pending"}else if s.following{"following"}else{"paused"},if s.request_status.is_empty(){"idle".into()}else{s.request_status.clone()})};record(vec![("axes",Value::string(&axes)),("horizontal",scroll_axis(&owner,true)),("vertical",scroll_axis(&owner,false)),("scrolling",Value::boolean(scrolling)),("projection",Value::string(if ready(&owner){"system"}else{"unresolved"})),("endFollow",record(vec![("state",Value::string(state)),("requestStatus",Value::string(&status))]))])}
+pub fn scroll_sync(owner:&OwnerWeak,patch:Value)->Value{
+    let owner=runtime(owner);let axes=patch.member("axes",true);if axes.nullish(){return Value::Undefined}
+    let axes=axes.text();assert!(matches!(axes.as_str(),"horizontal"|"vertical"|"both"),"invalid scroll axes");
+    let mut o=owner.borrow_mut();let s=&mut o.modules.scroll;if text_or(field(&s.config,"axes"),"both")==axes{return Value::Undefined}
+    s.config.insert("axes".into(),Value::string(&axes));
+    if s.pending_end.is_some_and(|(horizontal,_)|axes!="both"&&horizontal!=(axes=="horizontal")){s.pending_end=None;s.request_status="rejected".into();}
+    o.dirty=true;Value::Undefined
+}
+fn scroll_axis(owner:&OwnerRef,horizontal:bool)->Value{let o=owner.borrow();let scroll=&o.modules.scroll;let (offset,max,bounds)=scroll.current_handle().map(|handle|(handle.offset(),handle.max_offset(),handle.bounds())).unwrap_or_default();let extent=f64::from(f32::from(if horizontal{max.x}else{max.y})).max(0.);let size=f64::from(f32::from(if horizontal{bounds.size.width}else{bounds.size.height}));let offset=-f64::from(f32::from(if horizontal{offset.x}else{offset.y}));record(vec![("position",Value::number(if extent>0.{(offset/extent).clamp(0.,1.)}else{0.})),("visibleRatio",Value::number(if size+extent>0.{(size/(size+extent)).clamp(0.,1.)}else{1.})),("canScrollBefore",Value::boolean(offset>0.5)),("canScrollAfter",Value::boolean(extent-offset>0.5)),("atEnd",Value::boolean(extent-offset<=1.))])}
+pub fn scroll_snapshot(owner:&OwnerWeak)->Value{let owner=ensure(owner);let (axes,scrolling,state,status)={let o=owner.borrow();let s=&o.modules.scroll;let follow=field(&s.config,"endFollow");let enabled=!follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end";(text_or(field(&s.config,"axes"),"both"),s.last_input.is_some_and(|time|time.elapsed()<std::time::Duration::from_millis(120)),if !enabled{"off"}else if !o.mounted{"pending"}else if s.following{"following"}else{"paused"},if s.request_status.is_empty(){"idle".into()}else{s.request_status.clone()})};record(vec![("axes",Value::string(&axes)),("horizontal",scroll_axis(&owner,true)),("vertical",scroll_axis(&owner,false)),("scrolling",Value::boolean(scrolling)),("projection",Value::string(if scroll_ready(&owner){"system"}else{"unresolved"})),("endFollow",record(vec![("state",Value::string(state)),("requestStatus",Value::string(&status))]))])}
 fn scroll_rejected(reason:&str)->Value{record(vec![("kind",Value::string("rejected")),("reason",Value::string(reason))])}
 pub fn scroll_pause_following(owner:&OwnerWeak)->Value{
     let owner=runtime(owner);
@@ -120,7 +126,7 @@ pub fn scroll_request(owner:&OwnerWeak,request:Value)->Value{
             return scroll_rejected("not-mounted")
         }
     }
-    if !ready(&owner){
+    if !scroll_ready(&owner){
         if to_end{owner.borrow_mut().modules.scroll.request_status="rejected".into();}
         return scroll_rejected("unavailable")
     }
@@ -132,7 +138,7 @@ pub fn scroll_request(owner:&OwnerWeak,request:Value)->Value{
     let epoch=o.epoch;
     let s=&mut o.modules.scroll;
     let axes=text_or(field(&s.config,"axes"),"both");
-    if axes!="both"&&axes!=axis||s.handle.is_none(){
+    if axes!="both"&&axes!=axis||s.current_handle().is_none(){
         if kind=="to-end"{s.request_status="rejected".into();}
         return scroll_rejected("unavailable")
     }
@@ -175,6 +181,8 @@ pub fn scroll_request(owner:&OwnerWeak,request:Value)->Value{
 pub fn scroll_frame(owner:&OwnerRef,window:&mut Window){
     let enabled=owner.borrow().modules.hooks.contains("scroll");
     if !enabled{return}
+    if owner.borrow().modules.scroll.current_handle().is_none(){return}
+    {let o=owner.borrow();if o.modules.scroll.external.as_ref().is_some_and(|binding|binding.window!=window.window_handle().window_id()||Some(binding.window)!=o.window_id){return}}
     let mut o=owner.borrow_mut();
     if o.disposed||!o.present||o.window_id!=Some(window.window_handle().window_id()){return}
     let epoch=o.epoch;
@@ -210,11 +218,13 @@ pub fn scroll_frame(owner:&OwnerRef,window:&mut Window){
     let mut end=None;
     let mut retired_end=false;
     if let Some((horizontal,requested_epoch))=s.pending_end.take(){
-        if requested_epoch==epoch{end=Some(horizontal)}else{s.request_status="rejected".into();retired_end=true;}
+        if requested_epoch==epoch&&(axes=="both"||horizontal==(axes=="horizontal")){end=Some(horizontal)}else{s.request_status="rejected".into();retired_end=true;}
     }
     // Retirement discards this frame's growth observation; updating previous_max
     // below consumes it rather than deferring old-view movement to a later frame.
-    if !retired_end&&end.is_none()&&configured&&s.following&&max!=s.previous_max{end=Some(axis=="horizontal");}
+    // Axis sync suspends this projection without rewriting authored follow
+    // policy. Consume unavailable-axis growth so re-enabling cannot replay it.
+    if !retired_end&&end.is_none()&&configured&&(axes=="both"||axes==axis)&&s.following&&max!=s.previous_max{end=Some(axis=="horizontal");}
     if let Some(horizontal)=end{
         let mut offset=s.handle().offset();
         if horizontal{offset.x=-max.x}else{offset.y=-max.y}
@@ -230,6 +240,22 @@ pub fn scroll_frame(owner:&OwnerRef,window:&mut Window){
     s.previous_max=max;
     s.observation=Some(scroll_observation(s,epoch));
     if s.last_input.is_some_and(|time|time.elapsed()<std::time::Duration::from_millis(120)){window.request_animation_frame();}else{s.last_input=None;}
+}
+// A bound physical engine reports input after applying it. Preserve the
+// followed-axis displacement check instead of treating input alone as a pause.
+fn scroll_external_input(owner:&OwnerRef,window:&Window)->bool{
+    let mut o=owner.borrow_mut();
+    if o.disposed||!o.mounted||!o.present||o.bounds.is_none()||o.window_id!=Some(window.window_handle().window_id())||!o.modules.hooks.contains("scroll"){return false}
+    let epoch=o.epoch;
+    let s=&mut o.modules.scroll;
+    if s.handle.is_none()||s.external_engine==0{return false}
+    s.last_input=Some(std::time::Instant::now());
+    let follow=field(&s.config,"endFollow");
+    if !follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end"&&s.reader_input.is_none(){
+        s.reader_input=s.observation.filter(|before|before.epoch==epoch);
+    }
+    o.dirty=true;
+    true
 }
 pub fn scroll_input(owner:&OwnerRef,event:&gpui::ScrollWheelEvent,window:&Window,epoch:u64)->bool{
     let mut o=owner.borrow_mut();
@@ -255,19 +281,7 @@ pub fn scroll_input(owner:&OwnerRef,event:&gpui::ScrollWheelEvent,window:&Window
     o.dirty=true;
     true
 }
-// External engines report an actual host input after applying it. Preserve the
-// previous committed observation; scroll_frame still requires real movement
-// on the followed axis with unchanged geometry before changing follow state.
-fn scroll_external_input(owner:&OwnerRef,window:&Window,epoch:u64)->bool{
-    let mut o=owner.borrow_mut();
-    if o.disposed||!o.mounted||!o.present||o.bounds.is_none()||o.epoch!=epoch||o.window_id!=Some(window.window_handle().window_id())||!o.modules.hooks.contains("scroll"){return false}
-    let s=&mut o.modules.scroll;
-    if s.handle.is_none()||s.external_engine==0{return false}
-    s.last_input=Some(std::time::Instant::now());
-    if s.reader_input.is_none(){s.reader_input=s.observation.filter(|before|before.epoch==epoch);}
-    o.dirty=true;
-    true
-}
+
 #[cfg(all(test,feature="test-support"))]
 mod scroll_engine_tests {
     use super::*;
@@ -304,6 +318,29 @@ mod scroll_engine_tests {
         assert!(second.is_attached(),"retired lease cannot detach the new binding");drop(second);assert_eq!(owner.borrow().modules.scroll.external_engine,0);
         Owner::dispose(&owner);assert!(attach_scroll_engine(Rc::downgrade(&owner),gpui::ScrollHandle::new()).is_err());
     }
+    #[gpui::test]
+    fn legacy_engine_and_retained_target_keep_distinct_explicit_lease_policies(cx:&mut gpui::TestAppContext){
+        use gpui::AppContext;
+        let window=cx.update(|cx|cx.open_window(Default::default(),|_,cx|cx.new(|_|Empty)).unwrap());
+        window.update(cx,|_,window,_|{
+            let owner=owner();let weak=Rc::downgrade(&owner);scroll_setup(&weak);
+            let first=attach_scroll_engine(weak.clone(),gpui::ScrollHandle::new()).unwrap();
+            let target=NativeScrollTarget::new(gpui::ScrollHandle::new());
+            assert!(attach_scroll_surface(&weak,target.clone(),window).is_err());
+            assert!(use_builtin_scroll_surface(&weak).is_err());
+            assert!(first.is_attached());first.dispose();
+            let external=attach_scroll_surface(&weak,target,window).unwrap();
+            assert!(external.is_current());
+            assert!(attach_scroll_engine(weak.clone(),gpui::ScrollHandle::new()).is_err());
+            drop(external);
+            assert!(attach_scroll_engine(weak.clone(),gpui::ScrollHandle::new()).is_err(),"a retired target does not silently become a different viewport");
+            use_builtin_scroll_surface(&weak).unwrap();
+            let second=attach_scroll_engine(weak,gpui::ScrollHandle::new()).unwrap();drop(first);
+            assert!(second.is_attached(),"old compatibility lease cannot retire a successor");
+            drop(second);assert!(owner.borrow().modules.scroll.builtin_projection());Owner::dispose(&owner);
+        }).unwrap();
+    }
+
     #[test]
     fn missing_source_declaration_cannot_gain_scroll_semantics_from_binding(){
         let owner=owner();assert!(attach_scroll_engine(Rc::downgrade(&owner),gpui::ScrollHandle::new()).is_err());Owner::dispose(&owner);

@@ -489,6 +489,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
         'controlLabel.target',
         'controlLabel.sync',
         'controlLabelRequest.isCurrent',
+        'eventControl.requestDefaultActionPrevention',
       ] as Operation[]
     ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
@@ -744,6 +745,18 @@ export function checkTargetOperations(
       case 'operation':
         operation(value.operation, value.span);
         if (
+          selected.mode === 'source' &&
+          selected.id !== 'gpui-source-v1' &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          value.operation === 'accessible.state' &&
+          value.arguments.length > 2
+        )
+          diagnostic(
+            'PUI4003',
+            `Conditional accessibility State projection is not implemented by ${selected.id}.`,
+            value.span
+          );
+        if (
           selected.id === 'gpui-source-v1' &&
           value.operation === 'accessible.action' &&
           value.arguments[0]?.kind === 'literal' &&
@@ -771,6 +784,7 @@ export function checkTargetOperations(
             );
           }
         }
+
         break;
       case 'style-handle':
         operation('style.tw', value.span);
@@ -798,9 +812,19 @@ export function checkTargetOperations(
         break;
       case 'intrinsic':
         if (
+          selected.id === 'gpui-source-v1' &&
           value.name === 'string' &&
           !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
           !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
+        )
+          diagnostic(
+            'PUI4003',
+            'GPUI String conversion requires a checked scalar operand.',
+            value.span
+          );
+        if (
+          value.name === 'string' &&
+          !['react', 'vue', 'vue2', 'web-component', 'gpui'].includes(selected.framework)
         )
           diagnostic(
             'PUI4003',

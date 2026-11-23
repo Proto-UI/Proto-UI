@@ -12,9 +12,13 @@ const predicates: ts.Expression[] = [];
 const visit = (node: ts.Node) => {
   if (ts.isCallExpression(node) && node.expression.getText(ast) === 'page.waitForFunction') {
     const candidate = node.arguments[0];
+    // Later diagram journeys also wait for a family trigger. Bind the complete
+    // two-trigger admission predicate rather than whichever callback comes last.
+    const text = candidate?.getText(ast) ?? '';
     if (
-      candidate?.getText(ast).includes('docs-preview-${family}') &&
-      candidate.getText(ast).includes('triggers.length === 2')
+      candidate &&
+      text.includes('docs-preview-${family}') &&
+      text.includes('triggers.length === 2')
     )
       predicates.push(candidate);
   }

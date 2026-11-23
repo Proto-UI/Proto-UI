@@ -45,6 +45,9 @@ const environment = {
 // Sprint 4 owned-pixels shader declaration, sink and shared WebGL2 host closure:
 // internal/records/2026-11-23-sprint4-shader-package-budget.json
 // Only the five measured affected ceilings change; strict entry/measurement policy stays intact.
+// Sprint 3 integrated input, selection, pause and startup costs, including live Anatomy.
+// Four bounded numeric ceilings only; original red reports and exact closure attribution:
+// internal/records/2026-11-23-sprint3-package-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -86,7 +89,7 @@ const cases = [
   // internal/records/2026-10-07-finf-source-parity-budget.json
   // Integrated Portal/opt-in sink/review repair closure and bounded margin:
   // internal/records/2026-10-07-finf-web-optical-portal-budget.json
-  ['runtime root', 'packages/runtime/src/index.ts', 103_100],
+  ['runtime root', 'packages/runtime/src/index.ts', 104_000],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -107,8 +110,8 @@ const cases = [
   // Subsequent bounded request/owner-release repair measured as an actual union:
   // internal/records/2026-10-06-focus-request-release-budget.json
   // internal/records/2026-10-06-template-scroll-focus-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 170_600],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 169_400],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 172_200],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 171_000],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -116,7 +119,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 204_000],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 205_600],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];

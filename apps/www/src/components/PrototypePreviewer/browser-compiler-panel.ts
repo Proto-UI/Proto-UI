@@ -33,6 +33,7 @@ export class BrowserCompilerPanel extends HTMLElement {
   private generation = 0;
   private debounce?: ReturnType<typeof setTimeout>;
   private bound = false;
+  private retirement: Promise<void> = Promise.resolve();
   private targets = new Map<string, BrowserTargetAssets>();
   private eventCount = 0;
   private messages(en: string, zh: string) {
@@ -102,12 +103,17 @@ export class BrowserCompilerPanel extends HTMLElement {
   }
 
   private async open(): Promise<void> {
-    if (this.lifetime) return;
+    if (this.lifetime || !this.isConnected || !this.panel.open) return;
     const lifetime = (this.lifetime = new AbortController());
     const generation = ++this.generation;
+    this.renderState({ phase: 'idle', revision: String(this.revisionNumber) });
     this.status.textContent = this.messages('Loading browser compiler…', '正在加载浏览器编译器…');
     this.element<HTMLButtonElement>('[data-compiler-cancel]').disabled = false;
     try {
+      // Closing retires a session asynchronously. A new Worker/session must not
+      // bypass that retirement or silently recover from a failed cleanup.
+      await this.retirement;
+      if (generation !== this.generation || lifetime.signal.aborted) return;
       const [bundleResponse, build, source] = await Promise.all([
         fetch('/compiler-assets/compiler.js', { signal: lifetime.signal, credentials: 'omit' }),
         this.json<BrowserCompilerBuild>('/compiler-assets/build.json', lifetime.signal),
@@ -202,7 +208,6 @@ export class BrowserCompilerPanel extends HTMLElement {
       await this.run();
     } catch (error) {
       if (generation !== this.generation || lifetime.signal.aborted) return;
-      await this.close();
       this.renderState({
         phase: 'failed',
         revision: '',
@@ -282,14 +287,8 @@ export class BrowserCompilerPanel extends HTMLElement {
       // Transport/VM/mount failure gets a fresh Worker on the next attempt.
       // Ordinary compiler diagnostics keep the healthy VM and its bounded cache.
       if (!state.result || (!state.result.ok && state.result.phase === 'host')) {
-        const failed = this.session;
-        this.session = undefined;
         const failedGeneration = ++this.generation;
-        this.client?.dispose();
-        this.client = undefined;
-        this.lifetime?.abort();
-        this.lifetime = undefined;
-        void failed?.dispose().catch((error) => {
+        void this.retireSession().catch((error) => {
           if (failedGeneration === this.generation)
             diagnostics.textContent += `\n${this.messages('Preview retirement', '预览清理')}: ${String(error)}`;
         });
@@ -313,18 +312,33 @@ export class BrowserCompilerPanel extends HTMLElement {
     this.element('[data-generated-text]').textContent =
       this.generated[this.element<HTMLSelectElement>('[data-generated-file]').value] ?? '';
   }
-  private async close() {
-    clearTimeout(this.debounce);
+  private retireSession(): Promise<void> {
     const session = this.session;
     this.session = undefined;
     this.client?.dispose();
     this.client = undefined;
     this.lifetime?.abort();
     this.lifetime = undefined;
+    if (session) {
+      let retiring: Promise<void>;
+      try {
+        retiring = session.dispose();
+      } catch (error) {
+        retiring = Promise.reject(error);
+      }
+      this.retirement = Promise.all([this.retirement, retiring]).then(() => undefined);
+      // Retain the failure for every subsequent open/close even while no caller
+      // is awaiting it. A failed owner is never treated as successfully retired.
+      void this.retirement.catch(() => {});
+    }
+    return this.retirement;
+  }
+  private async close() {
+    clearTimeout(this.debounce);
     const generation = ++this.generation;
     this.element<HTMLButtonElement>('[data-compiler-cancel]').disabled = true;
     try {
-      await session?.dispose();
+      await this.retireSession();
     } catch (error) {
       if (generation === this.generation)
         this.renderState({

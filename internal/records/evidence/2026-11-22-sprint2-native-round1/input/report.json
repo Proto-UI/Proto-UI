@@ -15,21 +15,9 @@
       "width": 1100,
       "height": 850
     },
-    "families": [
-      "base",
-      "shadcn",
-      "brutalist"
-    ],
-    "runtimes": [
-      "wc",
-      "react",
-      "vue",
-      "vue2"
-    ],
-    "kinds": [
-      "input-otp",
-      "slider-values"
-    ],
+    "families": ["base", "shadcn", "brutalist"],
+    "runtimes": ["wc", "react", "vue", "vue2"],
+    "kinds": ["input-otp", "slider-values"],
     "browser": "157.0.8103.78"
   },
   "boundary": "Real public prototypes and four Web Adapters with repository-generated production CSS. Browser-generated trusted mouse and keyboard input; no fake geometry or component values. Physical OS IME, touch hardware, screen readers, non-Web hosts and Compiler admission remain independent.",
@@ -43,12 +31,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-1",
           "describedBy": "pui-a11y-2"
@@ -261,12 +244,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-3",
           "describedBy": "pui-a11y-4"
@@ -662,10 +640,7 @@
       "startedAt": "2026-11-22T13:47:10.336Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-5",
           "describedBy": "pui-a11y-7",
@@ -676,10 +651,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -689,10 +661,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-3-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -700,10 +669,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -713,10 +679,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-3-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -724,10 +687,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -737,10 +697,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-3-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -748,10 +705,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -760,10 +714,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -772,10 +723,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -785,10 +733,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-3-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -796,10 +741,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -808,10 +750,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -821,10 +760,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-3-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -832,10 +768,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -1021,10 +954,7 @@
       "startedAt": "2026-11-22T13:47:11.336Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-8",
           "describedBy": "pui-a11y-10",
@@ -1035,10 +965,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1047,10 +974,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1059,10 +983,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1071,10 +992,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1083,10 +1001,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1095,10 +1010,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1108,10 +1020,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-4-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -1119,10 +1028,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1132,10 +1038,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-4-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -1143,10 +1046,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1156,10 +1056,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-4-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -1167,10 +1064,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1179,10 +1073,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -1191,10 +1082,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -1204,10 +1092,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-4-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -1215,10 +1100,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -1227,10 +1109,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -1240,10 +1119,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-4-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -1251,10 +1127,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -1482,19 +1355,13 @@
       "startedAt": "2026-11-22T13:47:12.553Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1503,10 +1370,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1515,10 +1379,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1527,10 +1388,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -1553,19 +1411,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -1581,12 +1433,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-16",
           "describedBy": "pui-a11y-15"
@@ -1792,12 +1639,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-18",
           "describedBy": "pui-a11y-17"
@@ -2193,10 +2035,7 @@
       "startedAt": "2026-11-22T13:47:15.270Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-19",
           "describedBy": "pui-a11y-20",
@@ -2207,10 +2046,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2220,10 +2056,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-7-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -2231,10 +2064,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2244,10 +2074,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-7-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -2255,10 +2082,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2268,10 +2092,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-7-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -2279,10 +2100,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2291,10 +2109,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -2303,10 +2118,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -2316,10 +2128,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-7-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -2327,10 +2136,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -2339,10 +2145,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -2352,10 +2155,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-7-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -2363,10 +2163,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -2552,10 +2349,7 @@
       "startedAt": "2026-11-22T13:47:16.270Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-22",
           "describedBy": "pui-a11y-23",
@@ -2566,10 +2360,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2578,10 +2369,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2590,10 +2378,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2602,10 +2387,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2614,10 +2396,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2626,10 +2405,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2639,10 +2415,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-8-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -2650,10 +2423,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2663,10 +2433,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-8-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -2674,10 +2441,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2687,10 +2451,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-8-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -2698,10 +2459,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -2710,10 +2468,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -2722,10 +2477,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -2735,10 +2487,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-8-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -2746,10 +2495,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -2758,10 +2504,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -2771,10 +2514,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-8-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -2782,10 +2522,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -3013,19 +2750,13 @@
       "startedAt": "2026-11-22T13:47:17.487Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3034,10 +2765,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3046,10 +2774,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3058,10 +2783,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3084,19 +2806,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -3112,12 +2828,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-30",
           "describedBy": "pui-a11y-29"
@@ -3323,12 +3034,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-32",
           "describedBy": "pui-a11y-31"
@@ -3717,10 +3423,7 @@
       "startedAt": "2026-11-22T13:47:20.203Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-33",
           "describedBy": "pui-a11y-34",
@@ -3731,10 +3434,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3744,10 +3444,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-11-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -3755,10 +3452,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3768,10 +3462,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-11-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -3779,10 +3470,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3792,10 +3480,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-11-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -3803,10 +3488,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -3815,10 +3497,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -3827,10 +3506,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -3840,10 +3516,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-11-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -3851,10 +3524,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -3863,10 +3533,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -3876,10 +3543,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-11-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -3887,10 +3551,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -4076,10 +3737,7 @@
       "startedAt": "2026-11-22T13:47:21.203Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-36",
           "describedBy": "pui-a11y-37",
@@ -4090,10 +3748,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4102,10 +3757,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4114,10 +3766,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4126,10 +3775,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4138,10 +3784,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4150,10 +3793,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4163,10 +3803,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-12-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -4174,10 +3811,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4187,10 +3821,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-12-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -4198,10 +3829,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4211,10 +3839,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-12-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -4222,10 +3847,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4234,10 +3856,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -4246,10 +3865,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -4259,10 +3875,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-12-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -4270,10 +3883,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -4282,10 +3892,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -4295,10 +3902,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-12-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -4306,10 +3910,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -4537,19 +4138,13 @@
       "startedAt": "2026-11-22T13:47:22.436Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4558,10 +4153,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4570,10 +4162,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4582,10 +4171,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -4608,19 +4194,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -4636,12 +4216,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-44",
           "describedBy": "pui-a11y-43"
@@ -4847,12 +4422,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-46",
           "describedBy": "pui-a11y-45"
@@ -5241,10 +4811,7 @@
       "startedAt": "2026-11-22T13:47:25.169Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-47",
           "describedBy": "pui-a11y-48",
@@ -5255,10 +4822,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5268,10 +4832,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-15-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -5279,10 +4840,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5292,10 +4850,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-15-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -5303,10 +4858,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5316,10 +4868,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-15-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -5327,10 +4876,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5339,10 +4885,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -5351,10 +4894,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -5364,10 +4904,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-15-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -5375,10 +4912,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -5387,10 +4921,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -5400,10 +4931,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-15-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -5411,10 +4939,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -5600,10 +5125,7 @@
       "startedAt": "2026-11-22T13:47:26.169Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-50",
           "describedBy": "pui-a11y-51",
@@ -5614,10 +5136,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5626,10 +5145,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5638,10 +5154,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5650,10 +5163,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5662,10 +5172,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5674,10 +5181,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5687,10 +5191,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-16-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -5698,10 +5199,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5711,10 +5209,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-16-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -5722,10 +5217,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5735,10 +5227,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-16-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -5746,10 +5235,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -5758,10 +5244,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -5770,10 +5253,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -5783,10 +5263,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-16-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -5794,10 +5271,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -5806,10 +5280,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -5819,10 +5290,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-16-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -5830,10 +5298,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -6061,19 +5526,13 @@
       "startedAt": "2026-11-22T13:47:27.386Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6082,10 +5541,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6094,10 +5550,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6106,10 +5559,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6132,19 +5582,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -6160,12 +5604,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-57",
           "describedBy": "pui-a11y-58"
@@ -6371,12 +5810,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-59",
           "describedBy": "pui-a11y-60"
@@ -6772,10 +6206,7 @@
       "startedAt": "2026-11-22T13:47:30.219Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-61",
           "describedBy": "pui-a11y-63",
@@ -6786,10 +6217,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6799,10 +6227,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-19-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -6810,10 +6235,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6823,10 +6245,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-19-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -6834,10 +6253,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6847,10 +6263,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-19-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -6858,10 +6271,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -6870,10 +6280,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -6882,10 +6289,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -6895,10 +6299,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-19-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -6906,10 +6307,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -6918,10 +6316,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -6931,10 +6326,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-19-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -6942,10 +6334,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -7131,10 +6520,7 @@
       "startedAt": "2026-11-22T13:47:31.286Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-64",
           "describedBy": "pui-a11y-66",
@@ -7145,10 +6531,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7157,10 +6540,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7169,10 +6549,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7181,10 +6558,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7193,10 +6567,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7205,10 +6576,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7218,10 +6586,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-20-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -7229,10 +6594,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7242,10 +6604,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-20-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -7253,10 +6612,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7266,10 +6622,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-20-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -7277,10 +6630,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7289,10 +6639,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -7301,10 +6648,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -7314,10 +6658,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-20-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -7325,10 +6666,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -7337,10 +6675,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -7350,10 +6685,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-20-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -7361,10 +6693,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -7592,19 +6921,13 @@
       "startedAt": "2026-11-22T13:47:32.502Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7613,10 +6936,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7625,10 +6945,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7637,10 +6954,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -7663,19 +6977,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -7691,12 +6999,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-72",
           "describedBy": "pui-a11y-71"
@@ -7902,12 +7205,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-74",
           "describedBy": "pui-a11y-73"
@@ -8287,10 +7585,7 @@
       "startedAt": "2026-11-22T13:47:35.252Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-75",
           "describedBy": "pui-a11y-76",
@@ -8301,10 +7596,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8314,10 +7606,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-23-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -8325,10 +7614,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8338,10 +7624,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-23-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -8349,10 +7632,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8362,10 +7642,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-23-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -8373,10 +7650,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8385,10 +7659,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -8397,10 +7668,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -8410,10 +7678,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-23-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -8421,10 +7686,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -8433,10 +7695,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -8446,10 +7705,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-23-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -8457,10 +7713,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -8646,10 +7899,7 @@
       "startedAt": "2026-11-22T13:47:36.269Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-78",
           "describedBy": "pui-a11y-79",
@@ -8660,10 +7910,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8672,10 +7919,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8684,10 +7928,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8696,10 +7937,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8708,10 +7946,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8720,10 +7955,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8733,10 +7965,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-24-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -8744,10 +7973,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8757,10 +7983,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-24-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -8768,10 +7991,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8781,10 +8001,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-24-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -8792,10 +8009,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -8804,10 +8018,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -8816,10 +8027,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -8829,10 +8037,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-24-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -8840,10 +8045,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -8852,10 +8054,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -8865,10 +8064,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-24-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -8876,10 +8072,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -9107,19 +8300,13 @@
       "startedAt": "2026-11-22T13:47:37.502Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9128,10 +8315,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9140,10 +8324,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9152,10 +8333,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9178,19 +8356,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -9206,12 +8378,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-86",
           "describedBy": "pui-a11y-85"
@@ -9417,12 +8584,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-88",
           "describedBy": "pui-a11y-87"
@@ -9795,10 +8957,7 @@
       "startedAt": "2026-11-22T13:47:40.252Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-89",
           "describedBy": "pui-a11y-90",
@@ -9809,10 +8968,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9822,10 +8978,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-27-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -9833,10 +8986,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9846,10 +8996,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-27-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -9857,10 +9004,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9870,10 +9014,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-27-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -9881,10 +9022,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -9893,10 +9031,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -9905,10 +9040,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -9918,10 +9050,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-27-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -9929,10 +9058,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -9941,10 +9067,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -9954,10 +9077,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-27-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -9965,10 +9085,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -10154,10 +9271,7 @@
       "startedAt": "2026-11-22T13:47:41.269Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-92",
           "describedBy": "pui-a11y-93",
@@ -10168,10 +9282,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10180,10 +9291,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10192,10 +9300,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10204,10 +9309,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10216,10 +9318,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10228,10 +9327,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10241,10 +9337,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-28-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -10252,10 +9345,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10265,10 +9355,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-28-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -10276,10 +9363,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10289,10 +9373,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-28-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -10300,10 +9381,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10312,10 +9390,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -10324,10 +9399,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -10337,10 +9409,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-28-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -10348,10 +9417,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -10360,10 +9426,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -10373,10 +9436,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-28-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -10384,10 +9444,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -10615,19 +9672,13 @@
       "startedAt": "2026-11-22T13:47:42.502Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10636,10 +9687,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10648,10 +9696,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10660,10 +9705,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -10686,19 +9728,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -10714,12 +9750,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-100",
           "describedBy": "pui-a11y-99"
@@ -10925,12 +9956,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-102",
           "describedBy": "pui-a11y-101"
@@ -11303,10 +10329,7 @@
       "startedAt": "2026-11-22T13:47:45.285Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-103",
           "describedBy": "pui-a11y-104",
@@ -11317,10 +10340,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11330,10 +10350,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-31-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -11341,10 +10358,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11354,10 +10368,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-31-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -11365,10 +10376,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11378,10 +10386,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-31-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -11389,10 +10394,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11401,10 +10403,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -11413,10 +10412,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -11426,10 +10422,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-31-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -11437,10 +10430,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -11449,10 +10439,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -11462,10 +10449,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-31-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -11473,10 +10457,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -11662,10 +10643,7 @@
       "startedAt": "2026-11-22T13:47:46.302Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-106",
           "describedBy": "pui-a11y-107",
@@ -11676,10 +10654,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11688,10 +10663,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11700,10 +10672,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11712,10 +10681,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11724,10 +10690,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11736,10 +10699,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11749,10 +10709,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-32-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -11760,10 +10717,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11773,10 +10727,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-32-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -11784,10 +10735,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11797,10 +10745,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-32-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -11808,10 +10753,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -11820,10 +10762,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -11832,10 +10771,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -11845,10 +10781,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-32-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -11856,10 +10789,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -11868,10 +10798,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -11881,10 +10808,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-32-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -11892,10 +10816,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -12123,19 +11044,13 @@
       "startedAt": "2026-11-22T13:47:47.535Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12144,10 +11059,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12156,10 +11068,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12168,10 +11077,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12194,19 +11100,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -12222,12 +11122,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-113",
           "describedBy": "pui-a11y-114"
@@ -12433,12 +11328,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-115",
           "describedBy": "pui-a11y-116"
@@ -12818,10 +11708,7 @@
       "startedAt": "2026-11-22T13:47:50.285Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-117",
           "describedBy": "pui-a11y-119",
@@ -12832,10 +11719,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12845,10 +11729,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-35-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -12856,10 +11737,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12869,10 +11747,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-35-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -12880,10 +11755,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12893,10 +11765,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-35-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -12904,10 +11773,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -12916,10 +11782,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -12928,10 +11791,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -12941,10 +11801,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-35-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -12952,10 +11809,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -12964,10 +11818,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -12977,10 +11828,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-35-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -12988,10 +11836,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -13177,10 +12022,7 @@
       "startedAt": "2026-11-22T13:47:51.302Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-120",
           "describedBy": "pui-a11y-122",
@@ -13191,10 +12033,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13203,10 +12042,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13215,10 +12051,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13227,10 +12060,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13239,10 +12069,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13251,10 +12078,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13264,10 +12088,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-36-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -13275,10 +12096,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13288,10 +12106,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-36-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -13299,10 +12114,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13312,10 +12124,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-36-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -13323,10 +12132,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13335,10 +12141,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -13347,10 +12150,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -13360,10 +12160,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-36-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -13371,10 +12168,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -13383,10 +12177,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -13396,10 +12187,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-36-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -13407,10 +12195,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -13638,19 +12423,13 @@
       "startedAt": "2026-11-22T13:47:52.518Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13659,10 +12438,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13671,10 +12447,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13683,10 +12456,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -13709,19 +12479,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -13737,12 +12501,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-128",
           "describedBy": "pui-a11y-127"
@@ -13948,12 +12707,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-130",
           "describedBy": "pui-a11y-129"
@@ -14349,10 +13103,7 @@
       "startedAt": "2026-11-22T13:47:55.268Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-131",
           "describedBy": "pui-a11y-132",
@@ -14363,10 +13114,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14376,10 +13124,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-39-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -14387,10 +13132,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14400,10 +13142,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-39-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -14411,10 +13150,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14424,10 +13160,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-39-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -14435,10 +13168,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14447,10 +13177,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -14459,10 +13186,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -14472,10 +13196,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-39-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -14483,10 +13204,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -14495,10 +13213,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -14508,10 +13223,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-39-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -14519,10 +13231,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -14708,10 +13417,7 @@
       "startedAt": "2026-11-22T13:47:56.285Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-134",
           "describedBy": "pui-a11y-135",
@@ -14722,10 +13428,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14734,10 +13437,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14746,10 +13446,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14758,10 +13455,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14770,10 +13464,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14782,10 +13473,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14795,10 +13483,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-40-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -14806,10 +13491,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14819,10 +13501,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-40-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -14830,10 +13509,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14843,10 +13519,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-40-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -14854,10 +13527,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -14866,10 +13536,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -14878,10 +13545,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -14891,10 +13555,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-40-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -14902,10 +13563,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -14914,10 +13572,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -14927,10 +13582,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-40-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -14938,10 +13590,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -15169,19 +13818,13 @@
       "startedAt": "2026-11-22T13:47:57.518Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15190,10 +13833,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15202,10 +13842,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15214,10 +13851,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15240,19 +13874,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -15268,12 +13896,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-142",
           "describedBy": "pui-a11y-141"
@@ -15479,12 +14102,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-144",
           "describedBy": "pui-a11y-143"
@@ -15873,10 +14491,7 @@
       "startedAt": "2026-11-22T13:48:00.268Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-145",
           "describedBy": "pui-a11y-146",
@@ -15887,10 +14502,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15900,10 +14512,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-43-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -15911,10 +14520,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15924,10 +14530,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-43-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -15935,10 +14538,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15948,10 +14548,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-43-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -15959,10 +14556,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -15971,10 +14565,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -15983,10 +14574,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -15996,10 +14584,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-43-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -16007,10 +14592,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -16019,10 +14601,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -16032,10 +14611,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-43-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -16043,10 +14619,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -16232,10 +14805,7 @@
       "startedAt": "2026-11-22T13:48:01.285Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-148",
           "describedBy": "pui-a11y-149",
@@ -16246,10 +14816,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16258,10 +14825,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16270,10 +14834,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16282,10 +14843,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16294,10 +14852,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16306,10 +14861,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16319,10 +14871,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-44-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -16330,10 +14879,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16343,10 +14889,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-44-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -16354,10 +14897,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16367,10 +14907,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-44-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -16378,10 +14915,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16390,10 +14924,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -16402,10 +14933,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -16415,10 +14943,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-44-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -16426,10 +14951,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -16438,10 +14960,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -16451,10 +14970,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-44-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -16462,10 +14978,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -16693,19 +15206,13 @@
       "startedAt": "2026-11-22T13:48:02.501Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16714,10 +15221,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16726,10 +15230,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16738,10 +15239,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -16764,19 +15262,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },
@@ -16792,12 +15284,7 @@
       "status": "passed",
       "evidence": {
         "value": "194",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-156",
           "describedBy": "pui-a11y-155"
@@ -17003,12 +15490,7 @@
       "status": "passed",
       "evidence": {
         "value": "5678",
-        "active": [
-          false,
-          false,
-          false,
-          false
-        ],
+        "active": [false, false, false, false],
         "relations": {
           "labelledBy": "pui-a11y-158",
           "describedBy": "pui-a11y-157"
@@ -17397,10 +15879,7 @@
       "startedAt": "2026-11-22T13:48:05.251Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-159",
           "describedBy": "pui-a11y-160",
@@ -17411,10 +15890,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17424,10 +15900,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-47-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -17435,10 +15908,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17448,10 +15918,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-47-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -17459,10 +15926,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17472,10 +15936,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-47-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -17483,10 +15944,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17495,10 +15953,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -17507,10 +15962,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -17520,10 +15972,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-47-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -17531,10 +15980,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -17543,10 +15989,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -17556,10 +15999,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-47-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -17567,10 +16007,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -17756,10 +16193,7 @@
       "startedAt": "2026-11-22T13:48:06.268Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          80
-        ],
+        "value": [20, 80],
         "relations": {
           "labelledBy": "pui-a11y-162",
           "describedBy": "pui-a11y-163",
@@ -17770,10 +16204,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17782,10 +16213,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17794,10 +16222,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17806,10 +16231,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17818,10 +16240,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17830,10 +16249,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17843,10 +16259,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-48-3-1",
-              "value": [
-                23,
-                80
-              ],
+              "value": [23, 80],
               "reason": "change"
             }
           },
@@ -17854,10 +16267,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17867,10 +16277,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-48-5-2",
-              "value": [
-                27,
-                80
-              ],
+              "value": [27, 80],
               "reason": "change"
             }
           },
@@ -17878,10 +16285,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17891,10 +16295,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-48-7-3",
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "reason": "change"
             }
           },
@@ -17902,10 +16303,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                80
-              ],
+              "value": [30, 80],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -17914,10 +16312,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -17926,10 +16321,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "activeThumbIndex": 1,
               "reason": "interaction"
             }
@@ -17939,10 +16331,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-48-9-4",
-              "value": [
-                30,
-                70
-              ],
+              "value": [30, 70],
               "reason": "change"
             }
           },
@@ -17950,10 +16339,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -17962,10 +16348,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "activeThumbIndex": 1,
               "reason": "keyboard"
             }
@@ -17975,10 +16358,7 @@
             "type": "validationRequest",
             "detail": {
               "requestId": "field-48-11-5",
-              "value": [
-                30,
-                69
-              ],
+              "value": [30, 69],
               "reason": "change"
             }
           },
@@ -17986,10 +16366,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                80
-              ],
+              "value": [20, 80],
               "activeThumbIndex": -1,
               "reason": "reset"
             }
@@ -18217,19 +16594,13 @@
       "startedAt": "2026-11-22T13:48:07.484Z",
       "status": "passed",
       "evidence": {
-        "value": [
-          20,
-          60
-        ],
+        "value": [20, 60],
         "events": [
           {
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                13,
-                60
-              ],
+              "value": [13, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -18238,10 +16609,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                17,
-                60
-              ],
+              "value": [17, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -18250,10 +16618,7 @@
             "id": "root",
             "type": "valueChange",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -18262,10 +16627,7 @@
             "id": "root",
             "type": "valueCommit",
             "detail": {
-              "value": [
-                20,
-                60
-              ],
+              "value": [20, 60],
               "activeThumbIndex": 0,
               "reason": "interaction"
             }
@@ -18288,19 +16650,13 @@
             "props": {
               "direction": "rtl"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           },
           {
             "props": {
               "orientation": "vertical"
             },
-            "value": [
-              20,
-              70
-            ]
+            "value": [20, 70]
           }
         ]
       },

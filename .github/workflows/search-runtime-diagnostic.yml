@@ -1,0 +1,74 @@
+name: Search runtime diagnostic
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: search-runtime-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  ASTRO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  production-runtime-profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the locked toolchain and bind the diagnostic subject
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/homepage-evidence/search-production"
+          git rev-parse HEAD > "$RUNNER_TEMP/homepage-evidence/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/homepage-evidence/source-tree.txt"
+          node --version > "$RUNNER_TEMP/homepage-evidence/node-environment.txt"
+          "$CHROME" --version > "$RUNNER_TEMP/homepage-evidence/browser-environment.txt"
+          cat > "$RUNNER_TEMP/homepage-evidence/diagnostic-scope.json" <<'JSON'
+          {
+            "diagnosticOnly": true,
+            "suite": "apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts",
+            "selectedCases": 4,
+            "runtimePublicationBudgetMs": 1000,
+            "profileChangesMeasurementCost": true,
+            "establishesPerformanceAcceptance": false
+          }
+          JSON
+      - name: Verify the existing bounded production owner
+        run: node --test apps/www/scripts/run-search-production-evidence.test.mjs
+      - name: Profile the original production journeys without changing their assertions
+        timeout-minutes: 10
+        env:
+          PROTO_UI_SEARCH_RUNTIME_PROFILE: '1'
+          PROTO_UI_SEARCH_PRODUCTION_REPORT: ${{ runner.temp }}/homepage-evidence/search-production/vitest.json
+        run: |
+          set -euo pipefail
+          # Use the existing build/preview/browser owner and all four original
+          # cases. Its deadline and the browser's 1000ms publication oracle are
+          # unchanged. Profiler results are diagnostic, including a green run;
+          # ordinary Sprint 1 acceptance must still run without this flag.
+          node apps/www/scripts/run-search-production-evidence.mjs \
+            2>&1 | tee "$RUNNER_TEMP/homepage-evidence/search-production.log"
+      - name: Retain exact-source CPU, publication and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-runtime-diagnostic-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/homepage-evidence
+          if-no-files-found: error
+          retention-days: 14

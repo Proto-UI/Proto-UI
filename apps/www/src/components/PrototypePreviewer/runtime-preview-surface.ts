@@ -10,6 +10,7 @@ import {
   type DemoChild,
   type DemoNode,
   type DemoRuntimeApi,
+  type DemoSetupContext,
   type DemoSpec,
   type DemoSurfaceStyle,
 } from './demo-types';
@@ -108,6 +109,38 @@ function portalSurfaceStyle(
   return Object.fromEntries(declarations);
 }
 
+function hasInitialPortalStyle(
+  context: DemoSetupContext,
+  ref: string,
+  entries: readonly (readonly [string, string])[]
+): boolean {
+  const instance = context.api.getPublicInstance?.(ref);
+  const target = context.refs[ref];
+  // Only a live, direct normalized surface can prove an initial replay redundant.
+  // Missing/retired views and split Shadow surfaces retain the update channel.
+  if (
+    !instance ||
+    !target?.isConnected ||
+    target.ownerDocument !== context.host.ownerDocument ||
+    target.shadowRoot ||
+    !target.classList.contains('pui-runtime-preview-owned-surface')
+  )
+    return false;
+  const before = target.style.cssText;
+  const declaration = target.ownerDocument.createElement('span').style;
+  declaration.cssText = before;
+  // Test the entire ordered input on a detached declaration. This also detects
+  // changed priorities and shorthand/longhand edits without a layout read.
+  for (const [property, value] of entries) declaration.setProperty(property, value);
+  return (
+    declaration.cssText === before &&
+    context.api.getPublicInstance?.(ref) === instance &&
+    context.refs[ref] === target &&
+    target.isConnected &&
+    target.style.cssText === before
+  );
+}
+
 /** App composition, not Prototype template composition. The original recipe
  * remains the slot child, with its own refs, setup, state and cleanup. */
 export function createRuntimePreviewSurface(
@@ -123,6 +156,7 @@ export function createRuntimePreviewSurface(
     {
       node: Extract<DemoNode, { kind: 'proto' }> & { surfaceStyle: Record<string, string> };
       authored?: DemoSurfaceStyle;
+      initialStyle: readonly (readonly [string, string])[];
     }
   >();
   const refCounts = new Map<string, number>();
@@ -150,7 +184,11 @@ export function createRuntimePreviewSurface(
         className: [node.className, 'pui-runtime-preview-owned-surface'].filter(Boolean).join(' '),
         surfaceStyle: portalSurfaceStyle(theme, node.surfaceStyle),
       };
-      ownedSurfaces.set(node.ref!, { node: projected, authored: node.surfaceStyle });
+      ownedSurfaces.set(node.ref!, {
+        node: projected,
+        authored: node.surfaceStyle,
+        initialStyle: Object.entries(projected.surfaceStyle),
+      });
       return projected;
     }
     return changedChildren ? { ...node, children } : node;
@@ -166,6 +204,7 @@ export function createRuntimePreviewSurface(
   let currentFamily = family;
   let committedAppearance: PassiveShellAppearance | null = null;
   let currentTheme = theme;
+  let appearanceStagedBeforeSetup = false;
   let ready: Promise<unknown> = Promise.resolve();
   const demo: DemoSpec = {
     type: 'demo',
@@ -256,9 +295,25 @@ export function createRuntimePreviewSurface(
         throw new Error('[RuntimeBox] renderer lacks the normalized surface update channel.');
       }
       surfaceApi = context.api;
-      // Rendering may have awaited a framework while appearance changed.
-      // Replay the current declarations through the same owned channel.
+      // Initial nodes already carry their owned inputs. Skip only a proven
+      // duplicate; a preparation edit or changed live view still needs replay.
       for (const [ref, owned] of ownedSurfaces) {
+        if (
+          !appearanceStagedBeforeSetup &&
+          hasInitialPortalStyle(context, ref, owned.initialStyle)
+        ) {
+          const current = Object.entries(owned.node.surfaceStyle);
+          if (
+            !appearanceStagedBeforeSetup &&
+            current.length === owned.initialStyle.length &&
+            current.every(
+              ([property, value], index) =>
+                property === owned.initialStyle[index]![0] &&
+                value === owned.initialStyle[index]![1]
+            )
+          )
+            continue;
+        }
         surfaceApi.setSurfaceStyle!(ref, owned.node.surfaceStyle!);
       }
       const cleanup = child.setup?.({ ...context, refs });
@@ -369,6 +424,7 @@ export function createRuntimePreviewSurface(
       if (active) return active.update(nextFamily, nextTheme);
       // Before the shell exists, stage current inputs for the first renderer
       // and its late setup replay. Mounted updates belong to the shell commit.
+      appearanceStagedBeforeSetup = true;
       for (const owned of ownedSurfaces.values()) {
         owned.node.surfaceStyle = portalSurfaceStyle(nextTheme, owned.authored);
       }

@@ -1,3 +1,4 @@
+import { verifyProductionBrowserService } from './browser-production.mjs';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
@@ -73,6 +74,8 @@ export function childIsAlive(child) {
 
 /** Validate recorded process facts portably, without comparing machines' roots. */
 export function verifyOwnedBrowserService(service) {
+  if (service?.mode === 'runner-owned-production-static')
+    return verifyProductionBrowserService(service);
   const owner = service?.owner;
   if (service?.mode !== 'local-runner-service' || !owner || owner.status !== 'passed')
     throw new Error('Browser receipt requires a completed runner-owned local Astro service.');

@@ -38,6 +38,19 @@ function parse(source: string): PrototypeIR {
   if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
   return result.value;
 }
+function detachedHook(ir: PrototypeIR): PrototypeIR {
+  const cold = JSON.parse(JSON.stringify(ir)) as PrototypeIR;
+  const hooks = JSON.stringify(cold.hooks);
+  const before = cold.setup.body.length;
+  cold.setup.body = cold.setup.body.filter(
+    (statement) => !(statement.kind === 'effect' && statement.expression.kind === 'authored-hook')
+  );
+  expect(cold.setup.body).toHaveLength(before - 1);
+  expect(cold.hooks.length).toBeGreaterThan(0);
+  expect(JSON.stringify(cold.hooks)).toBe(hooks);
+  expect(validateIR(cold).ok).toBe(true);
+  return cold;
+}
 function listener(body: string): PrototypeIR {
   return parse(prototype(`${action}${state}def.event.on('host:numeric',(_run,event)=>{${body}});`));
 }
@@ -143,6 +156,47 @@ describe('numeric accessibility payload admission at public emitter entries', ()
         ],
       });
     });
+
+    it('omits a dormant Hook setup that source admission does not reach', () => {
+      const ir = parse(
+        prototype(
+          'const unused=()=>useNumeric();',
+          `const useNumeric=defineAsHook({name:'numeric-child',setup(def){
+            ${action}${state}def.event.on('host:numeric',(_run,event)=>{count.set(event.value);});
+          }});`
+        )
+      );
+      expect(ir.hooks).toEqual([]);
+      const result = emit(ir);
+      expect(result.ok, JSON.stringify(result.ok ? {} : result.diagnostics)).toBe(true);
+      if (result.ok) {
+        expect(result.value.code).not.toContain('numeric-child');
+        expect(result.value.code).not.toContain('host:numeric');
+      }
+    });
+
+    it.each(['reached', 'retained-cold-ir'] as const)(
+      'checks the %s Hook setup that the emitter still prints',
+      (mode) => {
+        const ir = parse(
+          prototype(
+            'useNumeric();',
+            `const useNumeric=defineAsHook({name:'numeric-child',setup(def){
+            ${action}${state}def.event.on('host:numeric',(_run,event)=>{count.set(event.value);});
+          }});`
+          )
+        );
+        expect(emit(mode === 'retained-cold-ir' ? detachedHook(ir) : ir)).toMatchObject({
+          ok: false,
+          diagnostics: [
+            {
+              code: 'PUI4003',
+              message: expect.stringContaining('Numeric accessibility action payloads'),
+            },
+          ],
+        });
+      }
+    );
   });
 
   it('checks an unreferenced Hook projection that React Runtime still emits', () => {
@@ -174,6 +228,50 @@ describe('numeric accessibility payload admission at public emitter entries', ()
         /numeric-projection|A11ySetValueEventPayload|event\.value/
       );
   });
+
+  it('omits a dormant Hook projection that source admission does not reach', () => {
+    const ir = parse(
+      prototype(
+        'const unused=()=>useNumeric();',
+        `import type {A11ySetValueEventPayload} from '@proto.ui/core';
+        const useNumeric=defineAsHook({name:'numeric-projection',setup(){},projectHandle(){
+          return (event:A11ySetValueEventPayload)=>event.value;
+        }});`
+      )
+    );
+    expect(ir.hooks).toEqual([]);
+    const result = emitReact(ir);
+    expect(result.ok, JSON.stringify(result.ok ? {} : result.diagnostics)).toBe(true);
+    if (result.ok) {
+      expect(result.value.code).not.toContain('numeric-projection');
+      expect(result.value.code).not.toContain('event.value');
+    }
+  });
+
+  it.each(['reached', 'retained-cold-ir'] as const)(
+    'checks the %s Hook projection that React Runtime still emits',
+    (mode) => {
+      const ir = parse(
+        prototype(
+          'useNumeric();',
+          `import type {A11ySetValueEventPayload} from '@proto.ui/core';
+        const useNumeric=defineAsHook({name:'numeric-projection',setup(){},projectHandle(){
+          return (event:A11ySetValueEventPayload)=>event.value;
+        }});`
+        )
+      );
+      expect(emitReact(mode === 'retained-cold-ir' ? detachedHook(ir) : ir)).toMatchObject({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'PUI4003',
+            message: expect.stringContaining('Numeric accessibility action payloads'),
+            span: expect.objectContaining({ file: fileName }),
+          },
+        ],
+      });
+    }
+  );
 
   it.each(['return;', "throw 'finished';"])(
     'follows actual emitted statements after %s',

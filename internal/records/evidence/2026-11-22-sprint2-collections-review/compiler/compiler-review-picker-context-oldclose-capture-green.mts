@@ -1,11 +1,17 @@
-import {asPopoverRoot} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/popover/index.ts';
-import {POPOVER_CONTEXT} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/popover/shared.ts';
-import {asCalendarRoot,CALENDAR_CONTEXT} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/calendar/index.ts';
-import {asDatePickerRoot} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
+import { asPopoverRoot } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/popover/index.ts';
+import { POPOVER_CONTEXT } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/popover/shared.ts';
+import {
+  asCalendarRoot,
+  CALENDAR_CONTEXT,
+} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/calendar/index.ts';
+import { asDatePickerRoot } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { definePrototype } from '@proto.ui/core';
-import { datePickerRoot, datePickerDay } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
+import {
+  datePickerRoot,
+  datePickerDay,
+} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -123,35 +129,85 @@ function runtimeHarness() {
   };
 }
 
-
-
-const results: unknown[]=[];
-for(const mode of ['single','range'] as const){
- const {make,actions}=runtimeHarness();let root:any;let armed=false;let observed=false;let nestedOpen:any;let nestedRequest:any;
- const proto=definePrototype({name:'review-context-picker-oldclose-'+mode,setup(def){
-   asCalendarRoot();asPopoverRoot();
-   def.context.subscribe(POPOVER_CONTEXT,(run,next)=>{
-     if(!armed||next.open||observed)return;
-     observed=true;
-     root.exposes.openPopover('context-reopen');
-     nestedOpen=run.context.read(POPOVER_CONTEXT).open;
-     nestedRequest=mode==='single'?root.exposes.requestValue('2026-10-16'):root.exposes.requestRange({from:'2026-10-10',to:'2026-10-16'});
-   });
-   asDatePickerRoot();
- }});
- const controlled=mode==='single'?{value:'2026-10-10'}:{range:{from:'2026-10-10'}};
- const initial={...controlled,mode,defaultMonth:'2026-10',defaultOpen:true};
- root=make(proto,null,initial);await root.session.mount();armed=true;
- try{
-  const before=root.exposes.open.get();
-  root.session.invokeInCallbackScope(()=>root.exposes.close('context-oldclose'));
-  const beforeAcceptance=root.exposes.open.get();
-  const pendingSelection=mode==='single'?root.exposes.value.get():root.exposes.getRange();
-  root.session.invokeInCallbackScope(()=>root.setProps({...initial,...(mode==='single'?{value:'2026-10-16'}:{range:{from:'2026-10-10',to:'2026-10-16'}})}));
-  const after=root.exposes.open.get();
-  const finalSelection=mode==='single'?root.exposes.value.get():root.exposes.getRange();
-  results.push({mode,before,beforeAcceptance,pendingSelection,nestedOpen,nestedRequest,after,observed,finalSelection,actions:[...actions],expectedOpenAfter:false,pass:before===true&&beforeAcceptance===true&&nestedOpen===true&&nestedRequest===true&&after===false});
- }finally{await root.session.dispose();}
+const results: unknown[] = [];
+for (const mode of ['single', 'range'] as const) {
+  const { make, actions } = runtimeHarness();
+  let root: any;
+  let armed = false;
+  let observed = false;
+  let nestedOpen: any;
+  let nestedRequest: any;
+  const proto = definePrototype({
+    name: 'review-context-picker-oldclose-' + mode,
+    setup(def) {
+      asCalendarRoot();
+      asPopoverRoot();
+      def.context.subscribe(POPOVER_CONTEXT, (run, next) => {
+        if (!armed || next.open || observed) return;
+        observed = true;
+        root.exposes.openPopover('context-reopen');
+        nestedOpen = run.context.read(POPOVER_CONTEXT).open;
+        nestedRequest =
+          mode === 'single'
+            ? root.exposes.requestValue('2026-10-16')
+            : root.exposes.requestRange({ from: '2026-10-10', to: '2026-10-16' });
+      });
+      asDatePickerRoot();
+    },
+  });
+  const controlled =
+    mode === 'single' ? { value: '2026-10-10' } : { range: { from: '2026-10-10' } };
+  const initial = { ...controlled, mode, defaultMonth: '2026-10', defaultOpen: true };
+  root = make(proto, null, initial);
+  await root.session.mount();
+  armed = true;
+  try {
+    const before = root.exposes.open.get();
+    root.session.invokeInCallbackScope(() => root.exposes.close('context-oldclose'));
+    const beforeAcceptance = root.exposes.open.get();
+    const pendingSelection = mode === 'single' ? root.exposes.value.get() : root.exposes.getRange();
+    root.session.invokeInCallbackScope(() =>
+      root.setProps({
+        ...initial,
+        ...(mode === 'single'
+          ? { value: '2026-10-16' }
+          : { range: { from: '2026-10-10', to: '2026-10-16' } }),
+      })
+    );
+    const after = root.exposes.open.get();
+    const finalSelection = mode === 'single' ? root.exposes.value.get() : root.exposes.getRange();
+    results.push({
+      mode,
+      before,
+      beforeAcceptance,
+      pendingSelection,
+      nestedOpen,
+      nestedRequest,
+      after,
+      observed,
+      finalSelection,
+      actions: [...actions],
+      expectedOpenAfter: false,
+      pass:
+        before === true &&
+        beforeAcceptance === true &&
+        nestedOpen === true &&
+        nestedRequest === true &&
+        after === false,
+    });
+  } finally {
+    await root.session.dispose();
+  }
 }
-const result={scope:'Independent public Context composition: an earlier old-close subscriber reopens and starts a new controlled selection while actual open=true. Later owner acceptance must complete that current request despite the stale old-close delivery.',ok:results.every((r:any)=>r.pass),results};
-writeFileSync('/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-oldclose-capture-green.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));if(!result.ok)process.exitCode=1;
+const result = {
+  scope:
+    'Independent public Context composition: an earlier old-close subscriber reopens and starts a new controlled selection while actual open=true. Later owner acceptance must complete that current request despite the stale old-close delivery.',
+  ok: results.every((r: any) => r.pass),
+  results,
+};
+writeFileSync(
+  '/workspace/scratch/44c416809288/evidence/compiler-review-picker-context-oldclose-capture-green.json',
+  JSON.stringify(result, null, 2) + '\n'
+);
+console.log(JSON.stringify(result, null, 2));
+if (!result.ok) process.exitCode = 1;

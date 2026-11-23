@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { definePrototype } from '@proto.ui/core';
-import { datePickerRoot, datePickerDay } from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
+import {
+  datePickerRoot,
+  datePickerDay,
+} from '/workspace/scratch/44c416809288/Proto-UI/packages/prototypes/base/src/date-picker/index.ts';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -119,29 +122,56 @@ function runtimeHarness() {
   };
 }
 
-
-
 const results: unknown[] = [];
-for (const mode of ['single','range'] as const) {
- const {make,actions}=runtimeHarness();
- const initial=mode==='single'?{defaultValue:'2026-10-10'}:{defaultRange:{from:'2026-10-10'}};
- const root=make(datePickerRoot,null,{...initial,mode,defaultMonth:'2026-10',defaultOpen:false});
- await root.session.mount();
- let observed=false;
- const state=mode==='single'?root.exposes.value:root.exposes.selectedCount;
- const off=state.subscribe((event:any)=>{
-  if(event.type!=='next'||observed)return;
-  observed=true;
-  root.exposes.openPopover('state-subscriber');
- });
- try {
-  const before=root.exposes.open.get();
-  const request=root.session.invokeInCallbackScope(()=>root.exposes.requestValue('2026-10-15'));
-  const after=root.exposes.open.get();
-  results.push({mode,request,before,after,observed,actions:[...actions],expectedOpenAfter:true,pass:after===true});
- } finally {off();await root.session.dispose();}
+for (const mode of ['single', 'range'] as const) {
+  const { make, actions } = runtimeHarness();
+  const initial =
+    mode === 'single' ? { defaultValue: '2026-10-10' } : { defaultRange: { from: '2026-10-10' } };
+  const root = make(datePickerRoot, null, {
+    ...initial,
+    mode,
+    defaultMonth: '2026-10',
+    defaultOpen: false,
+  });
+  await root.session.mount();
+  let observed = false;
+  const state = mode === 'single' ? root.exposes.value : root.exposes.selectedCount;
+  const off = state.subscribe((event: any) => {
+    if (event.type !== 'next' || observed) return;
+    observed = true;
+    root.exposes.openPopover('state-subscriber');
+  });
+  try {
+    const before = root.exposes.open.get();
+    const request = root.session.invokeInCallbackScope(() =>
+      root.exposes.requestValue('2026-10-15')
+    );
+    const after = root.exposes.open.get();
+    results.push({
+      mode,
+      request,
+      before,
+      after,
+      observed,
+      actions: [...actions],
+      expectedOpenAfter: true,
+      pass: after === true,
+    });
+  } finally {
+    off();
+    await root.session.dispose();
+  }
 }
-const result={reviewedCommit:'3bd5bcf363ab0de87b926ea25540fd87509cf05c',scope:'Independent real Runtime source probe; public exposed State subscription opens a previously closed Picker synchronously before first Calendar request Context publication. No browser or physical-input claim.',ok:results.every((r:any)=>r.pass),results};
-writeFileSync('/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-capture-green.json',JSON.stringify(result,null,2)+'\n');
-console.log(JSON.stringify(result,null,2));
-if(!result.ok)process.exitCode=1;
+const result = {
+  reviewedCommit: '3bd5bcf363ab0de87b926ea25540fd87509cf05c',
+  scope:
+    'Independent real Runtime source probe; public exposed State subscription opens a previously closed Picker synchronously before first Calendar request Context publication. No browser or physical-input claim.',
+  ok: results.every((r: any) => r.pass),
+  results,
+};
+writeFileSync(
+  '/workspace/scratch/44c416809288/evidence/compiler-review-picker-request-start-capture-green.json',
+  JSON.stringify(result, null, 2) + '\n'
+);
+console.log(JSON.stringify(result, null, 2));
+if (!result.ok) process.exitCode = 1;
