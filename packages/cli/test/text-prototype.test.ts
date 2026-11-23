@@ -65,6 +65,7 @@ describe('Text public compiler consumption', () => {
         familyRequired['leading-[2.5rem]'] = 'line-height: 2.5rem;';
         familyRequired['leading-[1.1]'] = 'line-height: 1.1;';
         familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
+        familyRequired['text-muted-foreground'] = 'color: var(--pui-muted-foreground);';
         familyRequired['leading-[1.4285714285714286]'] = 'line-height: 1.4285714285714286;';
       }
       for (const [token, declaration] of Object.entries(familyRequired)) {
@@ -88,7 +89,13 @@ describe('Text public compiler consumption', () => {
             ? 'data-pui-style~="leading-[2.5rem]"'
             : 'data-pui-style~="leading-normal"'
         )
-      ).toBeGreaterThan(css.indexOf('data-pui-style~="text-5xl"'));
+      ).toBeGreaterThan(
+        css.indexOf(
+          family === 'bootstrap-2-3-2'
+            ? 'data-pui-style~="text-[1.53125rem]"'
+            : 'data-pui-style~="text-5xl"'
+        )
+      );
       expect(css).not.toMatch(/(?:^|\n)\s*(?:body|h1|h2|p|label|a)\s*\{/);
     }
   );

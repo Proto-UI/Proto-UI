@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
+import { installRenderingOpportunities } from '../../test-utils/rendering-opportunities';
 import { selectContent, selectItem, selectRoot, selectTrigger, selectValue } from '../src/select';
 
 AdaptToWebComponent(selectRoot as any);
@@ -154,33 +155,44 @@ describe('prototypes/shadcn: select', () => {
     expect(root.getExposes().open.get()).toBe(false);
   });
 
-  it('accepts official size and position props and withdraws immediately on committed close', async () => {
+  it('accepts official size and position props and retires its closed portal after conceal', async () => {
     vi.useFakeTimers();
-    const { root, trigger, content, alpha } = createSelect({
-      trigger: { size: 'sm' },
-      content: { position: 'item-aligned' },
-    });
-    await settle();
-    expect(styleContains(trigger, 'h-8')).toBe(true);
+    const frame = installRenderingOpportunities();
+    try {
+      const { root, trigger, content, alpha } = createSelect({
+        trigger: { size: 'sm' },
+        content: { position: 'item-aligned' },
+      });
+      await settle();
+      expect(styleContains(trigger, 'h-8')).toBe(true);
 
-    trigger.click();
-    await settle();
-    expect(root.getExposes().open.get()).toBe(true);
-    expect(content.parentElement).toBe(document.body);
-    expect(styleContains(content, 'w-[var(--proto-ui-anchor-width)]')).toBe(true);
-    expect(content.getExposes().transitionState.get()).toBe('entering');
-    expect(styleContains(content, 'animate-in')).toBe(true);
-    content.getExposes().controls.complete();
-    await flush();
+      trigger.click();
+      await settle();
+      expect(root.getExposes().open.get()).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(styleContains(content, 'w-[var(--proto-ui-anchor-width)]')).toBe(true);
+      expect(content.getExposes().transitionState.get()).toBe('entering');
+      expect(styleContains(content, 'animate-in')).toBe(true);
+      content.getExposes().controls.complete();
+      await flush();
 
-    alpha.click();
-    await settle();
-    expect(content.getExposes().transitionState.get()).toBe('closed');
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-    expect(styleContains(content, 'animate-out')).toBe(true);
-    await vi.advanceTimersByTimeAsync(100);
-    await flush();
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      alpha.click();
+      await settle();
+      expect(content.getExposes().transitionState.get()).toBe('closed');
+      expect(styleContains(content, 'animate-out')).toBe(true);
+      // Semantic closure is immediate; the existing portaled host conceal
+      // barrier retires the physical view after two rendering opportunities.
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(styleContains(content, 'animate-out')).toBe(false);
+      await vi.advanceTimersByTimeAsync(100);
+      await flush();
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    } finally {
+      frame.restore();
+    }
   });
 });
 

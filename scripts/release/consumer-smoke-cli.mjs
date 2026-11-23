@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto';
 import {
   cpSync,
   existsSync,
-  mkdtempSync,
   mkdirSync,
   readFileSync,
   readdirSync,
@@ -10,7 +9,6 @@ import {
   renameSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
@@ -18,6 +16,7 @@ import { spawnSync } from 'node:child_process';
 import { getAllPackages, ROOT_DIR, selectPackages } from './lib.mjs';
 import { readVersion } from './version-utils.mjs';
 import { runNoStylesConsumer } from './consumer-smoke-no-styles.mjs';
+import { parseConsumerArtifactArgs, reserveConsumerArtifacts } from './consumer-artifacts.mjs';
 
 const RENDER_FIXTURE_DIR = join(ROOT_DIR, 'packages', 'cli', 'test', 'smoke-render');
 const CONSUMER_FIXTURE_DIR = join(ROOT_DIR, 'scripts', 'release', 'consumer-smoke');
@@ -41,7 +40,15 @@ const VUE2_RELEASE_ROOTS = [
   '@proto.ui/prototypes-shadcn',
 ];
 
-const workDir = mkdtempSync(join(tmpdir(), 'proto-ui-cli-consumer-'));
+const args = parseConsumerArtifactArgs(process.argv.slice(2), ROOT_DIR);
+if (args.help) {
+  console.log('Usage: node scripts/release/consumer-smoke-cli.mjs [--keep] [--work-dir <path>]');
+  process.exit(0);
+}
+const workDir = reserveConsumerArtifacts(args, {
+  rootDir: ROOT_DIR,
+  prefix: 'proto-ui-cli-consumer-',
+});
 const releaseDir = join(workDir, 'release');
 const consumerDir = join(workDir, 'consumer');
 const vue2ConsumerDir = join(workDir, 'vue2-consumer');
@@ -98,6 +105,7 @@ try {
           '@happy-dom/global-registrator': '15.11.7',
           'happy-dom': '15.11.7',
           '@types/react': '19.2.14',
+          '@types/react-dom': '19.2.3',
           react: '19.2.6',
           'react-dom': '19.2.6',
           tsx: '4.21.0',
@@ -126,6 +134,7 @@ try {
     ['react', 'base-image'],
     ['react', 'shadcn-switch'],
     ['react', 'shadcn-dialog'],
+    ['react', 'shadcn-tooltip'],
     ['vue', 'shadcn-button'],
     ['vue', 'base-image'],
     ['vue', 'shadcn-switch'],
@@ -233,11 +242,12 @@ try {
   console.log(
     `release consumer smoke: cli ok (${consumerPackageNames.length}/${expectedPackages.length} packed packages consumed)`
   );
+  if (args.keep) console.log(`artifacts kept at ${workDir}`);
 } catch (error) {
   console.error(`release consumer smoke failed; artifacts kept at ${workDir}`);
   throw error;
 } finally {
-  if (succeeded) rmSync(workDir, { recursive: true, force: true });
+  if (succeeded && !args.keep) rmSync(workDir, { recursive: true, force: true });
 }
 
 function runVue2Consumer({ consumerDir, expectedPackages, packageByName, releaseVersion }) {
@@ -421,7 +431,8 @@ function verifyGeneratedConsumer(root) {
     assert(tokensCss.includes(expected), `generated token CSS is missing ${expected}`);
   }
   for (const expected of [
-    'createReactAdapter(React)',
+    "import { createPortal } from 'react-dom'",
+    'createReactAdapter({ ...React, createPortal })',
     'export const ShadcnButton = adapt(shadcnButton)',
     'export const BaseButton = adapt(button)',
     'export const ShadcnSwitch = React.forwardRef',

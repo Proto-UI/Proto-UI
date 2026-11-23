@@ -35,6 +35,7 @@ type Targets = {
   geometry: unknown;
   travel?: unknown;
   deltaBasis?: readonly unknown[];
+  origins?: readonly unknown[];
   ownership?: {
     domain: unknown;
     input: unknown;
@@ -55,6 +56,7 @@ class AxisInputModuleImpl extends ModuleBase {
   private targets: Targets | null = null;
   private epoch = 0;
   private active = false;
+  private activeOrigin: number | null | undefined;
   private deliveryEpoch = 0;
   private disposed = false;
 
@@ -78,7 +80,8 @@ class AxisInputModuleImpl extends ModuleBase {
           !binding.anatomy.decl.roles[binding.geometryRole] ||
           (binding.travelRole !== undefined && !binding.anatomy.decl.roles[binding.travelRole]) ||
           (binding.deltaBasisRole !== undefined &&
-            !binding.anatomy.decl.roles[binding.deltaBasisRole])
+            !binding.anatomy.decl.roles[binding.deltaBasisRole]) ||
+          (binding.originRole !== undefined && !binding.anatomy.decl.roles[binding.originRole])
         ) {
           throw new Error(
             '[AxisInput] Input and geometry roles must belong to the anatomy family.'
@@ -187,11 +190,25 @@ class AxisInputModuleImpl extends ModuleBase {
     const deltaBasis = basisParts?.map((part) => this.anatomy.resolvePartTarget(part));
     if (deltaBasis && (deltaBasis.length === 0 || deltaBasis.some((target) => !target)))
       return null;
-    const targets: Targets = { input: inputTarget, geometry: geometryTarget, travel, deltaBasis };
+    const originParts =
+      binding.originRole === undefined
+        ? undefined
+        : this.anatomy.order.partsOf(binding.anatomy, binding.originRole, { missing: 'empty' });
+    const origins = originParts?.map((part) => this.anatomy.resolvePartTarget(part));
+    if (origins && (origins.some((target) => !target) || new Set(origins).size !== origins.length))
+      return null;
+    const targets: Targets = {
+      input: inputTarget,
+      geometry: geometryTarget,
+      travel,
+      deltaBasis,
+      origins,
+    };
     if (
       this.config.activation === 'directional' ||
       binding.travelRole !== undefined ||
-      binding.deltaBasisRole !== undefined
+      binding.deltaBasisRole !== undefined ||
+      binding.originRole !== undefined
     ) {
       const domain = this.anatomy.resolveDomainScope(binding.anatomy);
       if (domain === null) return null;
@@ -200,7 +217,13 @@ class AxisInputModuleImpl extends ModuleBase {
         input: self,
         geometry: geometryInstance,
         travel: travelPart ? this.anatomy.resolvePartInstance(travelPart) : undefined,
-        parts: [input, geometry, ...(travelPart ? [travelPart] : []), ...(basisParts ?? [])],
+        parts: [
+          input,
+          geometry,
+          ...(travelPart ? [travelPart] : []),
+          ...(basisParts ?? []),
+          ...(originParts ?? []),
+        ],
       };
     }
     return targets;
@@ -214,7 +237,9 @@ class AxisInputModuleImpl extends ModuleBase {
       next.geometry !== this.targets.geometry ||
       next.travel !== this.targets.travel ||
       (next.deltaBasis?.length ?? 0) !== (this.targets.deltaBasis?.length ?? 0) ||
-      (next.deltaBasis?.some((target, i) => target !== this.targets!.deltaBasis?.[i]) ?? false)
+      (next.deltaBasis?.some((target, i) => target !== this.targets!.deltaBasis?.[i]) ?? false) ||
+      (next.origins?.length ?? 0) !== (this.targets.origins?.length ?? 0) ||
+      (next.origins?.some((target, i) => target !== this.targets!.origins?.[i]) ?? false)
     )
       return false;
     return this.sameOwnership(next);
@@ -251,6 +276,7 @@ class AxisInputModuleImpl extends ModuleBase {
         geometryTarget: targets!.geometry,
         ...(targets!.travel ? { travelTarget: targets!.travel } : {}),
         ...(targets!.deltaBasis ? { deltaBasisTargets: targets!.deltaBasis } : {}),
+        ...(targets!.origins ? { originTargets: targets!.origins } : {}),
         config: this.config,
         onSample: this.receiver(this.epoch),
       });
@@ -268,6 +294,7 @@ class AxisInputModuleImpl extends ModuleBase {
       geometryTarget: targets.geometry,
       ...(targets.travel ? { travelTarget: targets.travel } : {}),
       ...(targets.deltaBasis ? { deltaBasisTargets: targets.deltaBasis } : {}),
+      ...(targets.origins ? { originTargets: targets.origins } : {}),
       config: this.config,
       onSample: this.receiver(epoch),
     });
@@ -287,12 +314,37 @@ class AxisInputModuleImpl extends ModuleBase {
         this.refresh();
         return;
       }
+      if (
+        sample.phase !== 'cancel' &&
+        this.binding?.originRole !== undefined &&
+        !(
+          sample.originIndex === null ||
+          (Number.isInteger(sample.originIndex) &&
+            sample.originIndex! >= 0 &&
+            sample.originIndex! < (this.targets?.origins?.length ?? 0))
+        )
+      ) {
+        this.disconnect('host-cancel');
+        return;
+      }
       if (sample.phase === 'start') {
         if (this.active || this.config.disabled || this.config.readOnly) return;
         this.active = true;
+        this.activeOrigin = sample.originIndex;
       } else {
         if (!this.active) return;
-        if (sample.phase === 'end' || sample.phase === 'cancel') this.active = false;
+        if (
+          sample.phase !== 'cancel' &&
+          this.binding?.originRole !== undefined &&
+          sample.originIndex !== this.activeOrigin
+        ) {
+          this.disconnect('host-cancel');
+          return;
+        }
+        if (sample.phase === 'end' || sample.phase === 'cancel') {
+          this.active = false;
+          this.activeOrigin = undefined;
+        }
       }
       this.dispatch(sample);
     };
@@ -323,6 +375,7 @@ class AxisInputModuleImpl extends ModuleBase {
     this.targets = null;
     const active = this.active;
     this.active = false;
+    this.activeOrigin = undefined;
     lease?.dispose();
     if (active) this.dispatch(Object.freeze({ phase: 'cancel', reason }));
     return epoch;

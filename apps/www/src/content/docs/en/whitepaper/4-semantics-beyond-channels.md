@@ -278,7 +278,10 @@ When the User activates an uncontrolled Switch, execution proceeds roughly as fo
 
 <figure class="whitepaper-figure">
   <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="Open full-size diagram">
-    <img src="/diagrams/whitepaper-switch-activation.en.svg" alt="An uncontrolled Switch activation stores Root state, emits Expose, updates Context and refreshes Feedback, followed by Thumb derived display state." width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-switch-activation.mobile.en.svg" width="500" height="1740" />
+      <img src="/diagrams/whitepaper-switch-activation.en.svg" alt="An uncontrolled Switch activation stores Root state, emits Expose, updates Context and refreshes Feedback, followed by Thumb derived display state." width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
   <figcaption>Open full-size diagram</figcaption>
 </figure>

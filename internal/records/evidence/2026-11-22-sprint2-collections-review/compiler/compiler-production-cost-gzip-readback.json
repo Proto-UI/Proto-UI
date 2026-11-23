@@ -1,0 +1,56 @@
+{
+  "ok": true,
+  "node": "v24.22.3",
+  "zlib": "1.3.2.1-motley-285e94b",
+  "rows": [
+    {
+      "profile": "react-dom-source-v1",
+      "modules": 1,
+      "bytes": 82452,
+      "gzipBytes": 27574
+    },
+    {
+      "profile": "react-dom-source-v1",
+      "modules": 3,
+      "bytes": 169598,
+      "gzipBytes": 44184
+    },
+    {
+      "profile": "vue-source-v1",
+      "modules": 1,
+      "bytes": 88633,
+      "gzipBytes": 30803
+    },
+    {
+      "profile": "vue-source-v1",
+      "modules": 3,
+      "bytes": 171517,
+      "gzipBytes": 47469
+    },
+    {
+      "profile": "vue2-source-v1",
+      "modules": 1,
+      "bytes": 68586,
+      "gzipBytes": 23141
+    },
+    {
+      "profile": "vue2-source-v1",
+      "modules": 3,
+      "bytes": 162527,
+      "gzipBytes": 40408
+    },
+    {
+      "profile": "web-component-source-v1",
+      "modules": 1,
+      "bytes": 71441,
+      "gzipBytes": 23870
+    },
+    {
+      "profile": "web-component-source-v1",
+      "modules": 3,
+      "bytes": 150659,
+      "gzipBytes": 38842
+    }
+  ],
+  "boundary": "Exact same declared Node zlib measurement; Python gzip has a different compression engine and is not used as a byte-count oracle."
+}

@@ -352,6 +352,8 @@ R2 已成功复制并读回真实 Git metadata。随后 Agent operations 检查�
 
 #### 实际有界 R3 结果
 
+[固定版本的准备与 R3 证据记录](https://github.com/Proto-UI/Proto-UI/blob/dc3b184ba10b0de53e40359c52d012b204b2cd01/internal/records/2026-11-11-issue-1154-container-preparation.json)保留了实际执行选择、源码／package 绑定、失败和未执行断言。此链接定位历史记录，不代表重跑或接受这些条件。
+
 Main 随后针对保留的已安装 package 实际执行了 fixture-only R3 运行。requested 与 executed 探测列表均严格为 `['static-module-declarations']`，没有 unmatched selector。探测在消费者第 324 行报错：`retained C-HOOK-0001-K target requires a Module declaration array`。容器命令 exit 1，没有 signal，也没有 timeout；原有 1200 秒容器 deadline 和 180000 ms 探测 deadline 均未改变。
 
 六个执行 phase 中有五个通过，包括源码与真实 Git metadata 准入、保留输入绑定，以及最终 package/index 读回。保留的 41 个 package 的 tarball、export、安装成员和 lockfile 绑定均保持不变，前后 semantic index 一致。静态探测在数组缺失处停止，后续顺序、declaration/token/config 精确 identity、必要字段和冻结断言尚未执行。这是历史 K 目标的真实失败；当前 legacy `HookCaller` 没有公开 `modules` 承诺，因此该结果不能证明当前 Core regression。R1 的空值比较通过仍按历史原样保留，不能提供静态声明验收。

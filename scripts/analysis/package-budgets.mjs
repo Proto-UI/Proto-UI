@@ -42,6 +42,15 @@ const environment = {
 // Separately reviewable restoration of integrated capability costs; preserves all
 // old ceilings and canonical red results in the source-bound transaction record.
 // internal/records/2026-11-22-package-budget-numeric-transaction.json
+// Sprint 4 owned-pixels shader declaration, sink and shared WebGL2 host closure:
+// internal/records/2026-11-23-sprint4-shader-package-budget.json
+// Only the five measured affected ceilings change; strict entry/measurement policy stays intact.
+// Sprint 3 integrated input, selection, pause and startup costs, including live Anatomy.
+// Four bounded numeric ceilings only; original red reports and exact closure attribution:
+// internal/records/2026-11-23-sprint3-package-budget.json
+// Merged 0.3 integration train (sprints 1-7, #1731, seven-sprint evidence corpus):
+// five bounded numeric ceilings measured by the gate on the integrated candidate:
+// internal/records/2026-11-23-train-package-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -49,7 +58,7 @@ const cases = [
   // #652 capability growth. The blocking whole-entry gate and measurement
   // shape remain unchanged; see the exact Linux CI comparison and attribution:
   // internal/records/2026-09-27-shadow-split-budget-proposal.zh-CN.md
-  ['core root', 'packages/core/src/index.ts', 11_500],
+  ['core root', 'packages/core/src/index.ts', 12_800],
   // The prior 64,000 ceiling covered #621 Table Checkpoint B registering
   // module-table-structure in the eager runtime closure: +3,294 gzip bytes
   // over main 9eb93e9b (63,294 at Table head 2d305208 vs 60,000 on main).
@@ -83,7 +92,7 @@ const cases = [
   // internal/records/2026-10-07-finf-source-parity-budget.json
   // Integrated Portal/opt-in sink/review repair closure and bounded margin:
   // internal/records/2026-10-07-finf-web-optical-portal-budget.json
-  ['runtime root', 'packages/runtime/src/index.ts', 101_500],
+  ['runtime root', 'packages/runtime/src/index.ts', 104_300],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -104,8 +113,8 @@ const cases = [
   // Subsequent bounded request/owner-release repair measured as an actual union:
   // internal/records/2026-10-06-focus-request-release-budget.json
   // internal/records/2026-10-06-template-scroll-focus-budget.json
- ['adapter-react root', 'packages/adapters/react/src/index.ts', 165_500],
- ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 164_300],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 172_600],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 171_400],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -113,7 +122,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
- ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 199_000],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 207_200],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];

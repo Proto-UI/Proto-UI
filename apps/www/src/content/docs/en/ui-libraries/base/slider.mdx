@@ -14,13 +14,26 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root owns value/defaultValue, min/max/step, disabled/readOnly, orientation and direction. Track uses shared normalized AxisInput for real pointer/touch drag. Thumb is one focusable slider: arrows, Shift×10, PageUp/PageDown, Home/End; horizontal RTL reverses lateral arrows. Values clamp and snap from min. Controlled requests emit valueChange while retaining owner values; valueCommit marks completion, cancel restores an uncontrolled drag start. Label names Thumb; Value and Indicator are passive. Single-thumb behavior is implemented; multi-thumb constraints remain open.
+Root owns value/defaultValue, min/max/step, disabled/readOnly, orientation and direction. Track uses shared normalized AxisInput for real pointer/touch drag. Thumb is one focusable slider: arrows, Shift×10, PageUp/PageDown, Home/End; horizontal RTL reverses lateral arrows. Values clamp and snap from min. Controlled requests emit valueChange while retaining owner values; valueCommit marks completion, cancel restores an uncontrolled drag start. Label names Thumb; Value and Indicator are passive. The scalar entry retains single-thumb behavior; the additive Values composition below supplies range and multiple-thumb ownership.
 
 Use FieldThumb instead of Thumb inside Field/FormField to bridge FieldLabel activation, canonical numeric validation, policy, Form serialization and reset. Standalone Thumb continues to use SliderLabel.
 
 Parts: root, label, track, indicator, thumb, field-thumb, value. All four styled families inherit Base behavior.
 
 Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+
+## Range and multiple values
+
+<PrototypePreviewer
+  demoId="demo-base-slider-values"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Import the six `sliderValues*` entries from `@proto.ui/prototypes-base/slider`. Use one Values Root with `defaultValue={[20, 80]}` and one indexed Thumb per value, nested inside Values Track. Track owns the shared input lease: a direct click seeks the nearest editable slot, and an off-center Thumb grab keeps its offset. `thumbCollisionBehavior` accepts `push`, `swap` or `none`; a swap moves active focus while capture stays on Track. Keyboard edits retain their existing same-slot limits.
+
+The complete Values Root is an optional grouped Field control. Inside Field/FormField it reports its canonical finite `number[]`, baseline, group focus and relations; FieldLabel focuses the first editable Thumb. Controlled refusal keeps owner values and does not validate the rejected candidate. Cancellation discards completion; reset retires the contact and requests the creation baseline, including from a disabled Form. The original scalar Slider parts retain their separate contract.
 
 ## API
 

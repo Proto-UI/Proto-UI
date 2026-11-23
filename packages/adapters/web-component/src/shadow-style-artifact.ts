@@ -22,6 +22,15 @@ export type ShadowStyleArtifactOwner = {
 
 const artifactOwners = new WeakMap<ShadowRoot, ShadowStyleArtifactOwner>();
 
+// Selector validation depends only on the exact immutable CSS string and the
+// fixed v1 ABI. Repeated owners may share that result, never the input artifact
+// or its accessor values. Bound both the entry count and retained UTF-16 units;
+// an oversized stylesheet is still validated without retaining it here.
+const VALIDATED_SELECTOR_LIMIT = 128;
+const VALIDATED_SELECTOR_CODE_UNITS = 1_048_576;
+const validatedSelectors = new Set<string>();
+let validatedSelectorCodeUnits = 0;
+
 /**
  * Validates the semantic artifact before any physical stylesheet mutation and
  * returns an immutable Adapter-owned copy.
@@ -54,7 +63,7 @@ export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtif
     throw invalidArtifact('environment');
   }
 
-  validateShadowSelectorAbi(cssText);
+  validateSharedShadowSelectorAbi(cssText);
 
   return Object.freeze({
     kind: SHADOW_STYLE_ARTIFACT_KIND,
@@ -103,6 +112,28 @@ export function createShadowStyleArtifactOwner(
 
   artifactOwners.set(shell.root, owner);
   return owner;
+}
+
+function validateSharedShadowSelectorAbi(cssText: string): void {
+  if (validatedSelectors.has(cssText)) {
+    validatedSelectors.delete(cssText);
+    validatedSelectors.add(cssText);
+    return;
+  }
+
+  validateShadowSelectorAbi(cssText);
+  if (cssText.length > VALIDATED_SELECTOR_CODE_UNITS) return;
+
+  while (
+    validatedSelectors.size >= VALIDATED_SELECTOR_LIMIT ||
+    validatedSelectorCodeUnits + cssText.length > VALIDATED_SELECTOR_CODE_UNITS
+  ) {
+    const oldest = validatedSelectors.values().next().value!;
+    validatedSelectors.delete(oldest);
+    validatedSelectorCodeUnits -= oldest.length;
+  }
+  validatedSelectors.add(cssText);
+  validatedSelectorCodeUnits += cssText.length;
 }
 
 function validateShadowSelectorAbi(cssText: string): void {

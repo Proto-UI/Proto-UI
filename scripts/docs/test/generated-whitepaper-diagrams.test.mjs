@@ -25,7 +25,7 @@ const desktopSha256 = {
   'switch-activation.zh-cn': '11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4',
 };
 
-test('the whitepaper generator reproduces exactly its ten owned bilingual assets', async () => {
+test('the whitepaper generator reproduces exactly its sixteen owned bilingual assets', async () => {
   const temporary = await mkdtemp(path.join(tmpdir(), 'pui-whitepaper-diagrams-'));
   try {
     await mkdir(path.join(temporary, 'scripts'));
@@ -44,6 +44,9 @@ test('the whitepaper generator reproduces exactly its ten owned bilingual assets
       names.sort(),
       [
         ...Object.keys(desktopSha256).map((name) => `whitepaper-${name}.svg`),
+        ...['component-anatomy', 'switch-activation', 'conditional-consistency'].flatMap((figure) =>
+          ['en', 'zh-cn'].map((locale) => `whitepaper-${figure}.mobile.${locale}.svg`)
+        ),
         'whitepaper-evolution-feedback.mobile.en.svg',
         'whitepaper-evolution-feedback.mobile.zh-cn.svg',
       ].sort()
@@ -188,28 +191,29 @@ test('handwritten font subsets cover visible labels and retain content hashes', 
     assert.equal(createHash('sha256').update(bytes).digest('hex'), font.sha256);
     assert.ok(font.sources.length > 0);
   }
-  for (const locale of ['en', 'zh-cn']) {
-    const svg = await readFile(
-      new URL(`whitepaper-switch-activation.${locale}.svg`, diagrams),
-      'utf8'
-    );
-    const usedFonts = fonts.filter((font) => locale === 'zh-cn' || font.family.endsWith('Latin'));
-    const covered = new Set(usedFonts.flatMap((font) => font.codepoints));
-    const labels = [...svg.matchAll(/<tspan[^>]*>([^<]*)<\/tspan>/g)]
-      .map((m) =>
-        m[1]
-          .replaceAll('&amp;', '&')
-          .replaceAll('&lt;', '<')
-          .replaceAll('&gt;', '>')
-          .replaceAll('&quot;', '"')
-      )
-      .join('');
-    for (const c of labels)
-      assert.ok(covered.has(c.codePointAt(0)) || c === '←', `Uncovered ${locale} glyph: ${c}`);
-    for (const font of usedFonts) assert.ok(svg.includes(font.woff2), font.family);
-    if (locale === 'en')
-      assert.ok(!svg.includes(fonts.find((font) => font.family.endsWith('CJK')).woff2));
-  }
+  for (const locale of ['en', 'zh-cn'])
+    for (const variant of ['', '.mobile']) {
+      const svg = await readFile(
+        new URL(`whitepaper-switch-activation${variant}.${locale}.svg`, diagrams),
+        'utf8'
+      );
+      const usedFonts = fonts.filter((font) => locale === 'zh-cn' || font.family.endsWith('Latin'));
+      const covered = new Set(usedFonts.flatMap((font) => font.codepoints));
+      const labels = [...svg.matchAll(/<tspan[^>]*>([^<]*)<\/tspan>/g)]
+        .map((m) =>
+          m[1]
+            .replaceAll('&amp;', '&')
+            .replaceAll('&lt;', '<')
+            .replaceAll('&gt;', '>')
+            .replaceAll('&quot;', '"')
+        )
+        .join('');
+      for (const c of labels)
+        assert.ok(covered.has(c.codePointAt(0)) || c === '←', `Uncovered ${locale} glyph: ${c}`);
+      for (const font of usedFonts) assert.ok(svg.includes(font.woff2), font.family);
+      if (locale === 'en')
+        assert.ok(!svg.includes(fonts.find((font) => font.family.endsWith('CJK')).woff2));
+    }
 });
 
 // Proposed visual-label guard. Real article/Dialog renders still decide readability.
@@ -366,4 +370,197 @@ for (const locale of ['en', 'zh-cn']) {
       /@font-face|<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=/i
     );
   });
+}
+
+// Responsive presentation must retain independent ownership and timing claims.
+for (const locale of ['en', 'zh-cn']) {
+  for (const [figure, height] of [
+    ['component-anatomy', 1740],
+    ['switch-activation', 1740],
+    ['conditional-consistency', 1920],
+  ]) {
+    test(figure + ' mobile preserves the complete semantic ledger (' + locale + ')', async () => {
+      const svg = await readFile(
+        new URL('whitepaper-' + figure + '.mobile.' + locale + '.svg', diagrams),
+        'utf8'
+      );
+      const desktop = await readFile(
+        new URL('whitepaper-' + figure + '.' + locale + '.svg', diagrams),
+        'utf8'
+      );
+      assert.ok(
+        svg.includes('width="500" height="' + height + '" viewBox="0 0 500 ' + height + '"')
+      );
+      assert.match(svg, /data-layout="mobile"/);
+      assert.match(svg, /aria-labelledby="title" aria-describedby="description"/);
+      assert.equal(
+        svg.match(/<desc id="description">[\s\S]*?<\/desc>/)[0],
+        desktop.match(/<desc id="description">[\s\S]*?<\/desc>/)[0],
+        'Responsive presentation must not drop any ownership, timing or evidence qualification'
+      );
+      const sizes = [...svg.matchAll(/<text\b[^>]*font-size="([0-9.]+)"/g)].map((m) =>
+        Number(m[1])
+      );
+      assert.ok(sizes.length > 0 && sizes.every((size) => size >= 26));
+      assert.doesNotMatch(svg, /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=/i);
+      const visible = [...svg.matchAll(/<tspan[^>]*>([^<]*)<\/tspan>/g)]
+        .map((m) =>
+          m[1]
+            .replaceAll('&amp;', '&')
+            .replaceAll('&lt;', '<')
+            .replaceAll('&gt;', '>')
+            .replaceAll('&quot;', '"')
+        )
+        .join(' ')
+        .replace(/\s+/g, ' ');
+      if (figure === 'component-anatomy') {
+        assert.deepEqual(
+          [...svg.matchAll(/data-part="([^"]+)"/g)].map((m) => m[1]),
+          ['switch-root', 'switch-thumb', 'select-root', 'trigger', 'value', 'content', 'item']
+        );
+        assert.match(svg, /data-relation="context" data-from="switch-root" data-to="switch-thumb"/);
+        assert.equal([...svg.matchAll(/data-example="fixed-caret"/g)].length, 1);
+        assert.doesNotMatch(
+          svg,
+          /data-part="[^"]*caret[^"]*"/i,
+          'A boundary example must not become a new Base Select part'
+        );
+        for (const label of locale === 'en'
+          ? [
+              'Root: sole owner of checked',
+              'Root handles activation',
+              'Thumb: derived display state',
+              'Two Components, one Switch',
+              'Each has independent relations',
+              'Fixed Caret: Feedback only',
+              'May remain inside Trigger',
+              'Own Event / Props / Expose or Context: a separate Component.',
+              'not a new Base Select part.',
+              'This does not prescribe a Host tree.',
+            ]
+          : [
+              'Root：checked 的唯一 owner',
+              '由 Root 处理 activation',
+              'Thumb：派生展示状态',
+              '两个 Component，一个 Switch',
+              '各自承担独立交互关系',
+              '固定 Caret：只有 Feedback',
+              '可以附属于 Trigger',
+              '独立的 Event / Props / Expose 或 Context： 需要独立 Component。',
+              '不是新增的 Base Select part；',
+              '结构示意不规定实际 Host tree。',
+            ])
+          assert.ok(visible.includes(label), label);
+        assert.equal([...svg.matchAll(/data-node="/g)].length, 2);
+      } else if (figure === 'switch-activation') {
+        assert.deepEqual(
+          [...svg.matchAll(/data-owner="([^"]+)"/g)].map((m) => m[1]),
+          ['root', 'maker', 'thumb']
+        );
+        assert.equal(
+          [...svg.matchAll(/<rect\b/g)].length,
+          0,
+          'Keep the existing hand-drawn owner treatment'
+        );
+        assert.deepEqual(
+          [...svg.matchAll(/data-edge="([^"]+)"[^>]*marker-end="url\(#hand-arrow\)"/g)].map(
+            (m) => m[1]
+          ),
+          [
+            'event-to-root',
+            'root-step-1-to-2',
+            'root-step-2-to-3',
+            'root-step-3-to-4',
+            'expose-to-maker',
+            'context-to-thumb',
+          ]
+        );
+        for (const label of [
+          'Event · activate',
+          'nextChecked = !checked',
+          'checked ← nextChecked',
+          'checked / disabled',
+          ...(locale === 'en'
+            ? [
+                'Uncontrolled and enabled',
+                'The sole owner of checked',
+                'Emit checkedChange',
+                'Request Root’s Feedback refresh',
+                'Receive Context',
+                'Store derived state',
+                'Request its own Feedback refresh',
+                'Root and Thumb request their effects explicitly.',
+                'Cross-component arrows show channels, not synchronous callback timing.',
+              ]
+            : [
+                '非受控、未禁用',
+                'checked 的唯一 owner',
+                '发出 checkedChange',
+                '请求 Root 的 Feedback 重新求值',
+                '接收 Context',
+                '保存派生展示状态',
+                '请求自己的 Feedback 重新求值',
+                '对外效果由 Root 与 Thumb 分别显式发起。',
+                '跨组件箭头表示信息通路， 不规定 callback 的同步时序。',
+              ]),
+        ])
+          assert.ok(visible.includes(label), label);
+        assert.equal([...svg.matchAll(/data-node="/g)].length, 0);
+      } else {
+        assert.deepEqual(
+          [...svg.matchAll(/data-comparison="([^"]+)"/g)].map((m) => m[1]),
+          ['input-feedback', 'normalized-dom', 'pixels']
+        );
+        assert.deepEqual(
+          [...svg.matchAll(/data-relation="([^"]+)" data-from="([^"]+)" data-to="([^"]+)"/g)].map(
+            (m) => m.slice(1)
+          ),
+          ['input-feedback', 'normalized-dom', 'pixels'].map((id) => [
+            'permits-comparison',
+            id + '-conditions',
+            id + '-result',
+          ])
+        );
+        assert.equal(
+          [...svg.matchAll(/<path\b[^>]*class="line/g)].length,
+          3,
+          'No path must imply promotion between comparison rows'
+        );
+        for (const label of [
+          'Prototype / applicable profile',
+          'Normalized DOM',
+          'tolerance / exclusion',
+          ...(locale === 'en'
+            ? [
+                'Identity · channels',
+                'State transitions · lifecycle order',
+                'required Feedback',
+                'Input behavior and Feedback',
+                'Same Web family; governed',
+                'and projection policy',
+                'unit scale, font shaping,',
+                'color, rasterization',
+                'Pixel output',
+                'reasons and scope in advance.',
+                'These are conditions, not tiers.',
+                'They do not imply complete evidence across Hosts.',
+              ]
+            : [
+                '身份 · 通路 · State transition',
+                'Lifecycle order · 必需 Feedback',
+                '输入行为与 Feedback',
+                '同属 Web family；共享受治理的',
+                '与 projection policy',
+                '单位比例、字体 shaping、',
+                '像素表现',
+                '需预先约定。',
+                '这些条件不是自动晋级的等级。',
+                '本图不代表已有完整跨 Host 证据。',
+              ]),
+        ])
+          assert.ok(visible.includes(label), label);
+        assert.equal([...svg.matchAll(/data-node="/g)].length, 4);
+      }
+    });
+  }
 }

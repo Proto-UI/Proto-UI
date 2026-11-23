@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { compilePrototype } from '../src/compile';
 import { emitFlutterSource } from '../src/flutter-source';
 import { emitQtSource } from '../src/qt-source';
+import { emitGpuiSource } from '../src/gpui-source';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import type { ExpressionIR, PrototypeIR, StatementIR } from '../src/ir';
@@ -124,15 +125,32 @@ describe('native String conversion', () => {
     expect(validateIR(wrongResult).ok).toBe(false);
   });
 
+  it('retains the original source while omitting a wholly uncalled callback', () => {
+    const text = program('const callback=()=>1;const value=String(1);');
+    const ir = portable(text);
+    expect(ir.sourceFiles[0].content).toBe(text);
+    expect(
+      ir.setup.body.some((statement) => statement.kind === 'const' && statement.name === 'callback')
+    ).toBe(false);
+    expect(conversions(ir)).toHaveLength(1);
+  });
+
   it('rejects a coherent callable operand in serialized IR', () => {
-    const ir = portable(program('const callback=()=>1;const value=String(1);'));
+    const ir = portable(program('const callback=()=>1;callback();const value=String(1);'));
     const callback = ir.setup.body.find(
       (statement): statement is Extract<StatementIR, { kind: 'const' }> =>
         statement.kind === 'const' && statement.name === 'callback'
     );
     if (!callback) throw new Error('Missing callable control.');
+    expect(callback.value.kind).toBe('function');
+    expect(validateIR(ir).ok).toBe(true);
     conversions(ir)[0].arguments[0] = callback.value;
-    expect(validateIR(ir).ok).toBe(false);
+    const checked = validateIR(ir);
+    expect(checked.ok).toBe(false);
+    if (!checked.ok)
+      expect(checked.diagnostics.some((diagnostic) => diagnostic.message.includes('String'))).toBe(
+        true
+      );
   });
 
   it('invalidates saved mutable observations across opaque coercion', () => {
@@ -148,6 +166,20 @@ describe('native String conversion', () => {
     `)
       ).ok
     ).toBe(false);
+  });
+
+  it('admits a proven GPUI scalar and rejects an opaque object helper even when its caller supplies a concrete record', () => {
+    const text = program('const value=String(1);');
+    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+    const unknown = compilePrototype(
+      program(
+        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
+      ),
+      { profile: 'gpui-source-v1' }
+    );
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok)
+      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
   });
 
   it('admits bounded scalar conversion in GPUI', () => {
@@ -174,6 +206,30 @@ describe('native String conversion', () => {
           (diagnostic) => diagnostic.code === 'PUI4003' && diagnostic.message.includes('String')
         )
       ).toBe(true);
+  });
+
+  it('GPUI admits checked scalar conversion through source and direct IR emission', () => {
+    for (const operand of ['', '1', 'undefined', 'null', 'true', "'text'"]) {
+      const text = program(`def.expose.value('converted',String(${operand}));`);
+      const ir = portable(text);
+      expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+      expect(emitGpuiSource(ir).ok).toBe(true);
+    }
+  });
+
+  it('GPUI continues to reject structured and opaque coercion', () => {
+    for (const body of [
+      "def.expose.value('converted',String({value:1}));",
+      "def.expose.value('converted',String([1]));",
+      "function convert(value:unknown){return String(value);}def.expose.value('converted',convert(1));",
+    ]) {
+      const result = emitGpuiSource(portable(program(body)));
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.diagnostics.some((diagnostic) => diagnostic.message.includes('String'))).toBe(
+          true
+        );
+    }
   });
 
   it('keeps direct Qt/Flutter conversion unsupported', () => {

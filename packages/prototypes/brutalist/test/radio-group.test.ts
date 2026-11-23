@@ -85,14 +85,17 @@ function prototypeName(value: unknown): string | null {
 }
 
 // Keep the package-wide set exact instead of filtering to already-known keys,
-// which could hide new accidental radio exports.
+// which could hide new accidental radio exports. P-BASE-FIELD-CHOICES owns
+// the separate FieldRadioGroup composition, outside ./radio-group anatomy.
 const EXPECTED_RADIO_GROUP_EXPORTS = {
   BrutalistRadioGroupIndicator: 'brutalist-radio-group-indicator',
   BrutalistRadioGroupItem: 'brutalist-radio-group-item',
   BrutalistRadioGroupRoot: 'brutalist-radio-group-root',
+  brutalistFieldRadioGroup: 'brutalist-field-radio-group',
   brutalistRadioGroupIndicator: 'brutalist-radio-group-indicator',
   brutalistRadioGroupItem: 'brutalist-radio-group-item',
   brutalistRadioGroupRoot: 'brutalist-radio-group-root',
+  fieldRadioGroup: 'brutalist-field-radio-group',
 };
 
 function radioGroupExports(entry: Record<string, unknown>) {

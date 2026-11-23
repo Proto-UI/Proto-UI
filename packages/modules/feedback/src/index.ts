@@ -15,3 +15,4 @@ export * from './motion/projector';
 
 export * from './presence/sink';
 export * from './presence/projector';
+export * from './shader/sink';

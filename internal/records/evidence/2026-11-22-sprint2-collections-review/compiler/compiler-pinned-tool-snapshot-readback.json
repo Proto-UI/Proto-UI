@@ -1,0 +1,49 @@
+{
+  "ok": true,
+  "buildProgramUnchangedBetweenPinnedRunAndFinalRunner": true,
+  "tools": [
+    {
+      "path": "scripts/compiler/pinned-cli-smoke.mjs",
+      "snapshot": "executed-pinned-cli-smoke.mjs",
+      "sourceRevision": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "sameAsCommit": true
+    },
+    {
+      "path": "scripts/compiler/shenko-consumer-smoke.mjs",
+      "snapshot": "executed-shenko-consumer-smoke.mjs",
+      "sourceRevision": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "sameAsCommit": false
+    },
+    {
+      "path": "scripts/compiler/release-family-costs.mjs",
+      "snapshot": "executed-release-family-costs.mjs",
+      "sourceRevision": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "sameAsCommit": true
+    },
+    {
+      "path": "scripts/compiler/native-consumer-smoke.mjs",
+      "snapshot": "executed-native-consumer-smoke.mjs",
+      "sourceRevision": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "sameAsCommit": true
+    },
+    {
+      "path": "scripts/compiler/release-family-smoke.mjs",
+      "snapshot": "executed-release-family-smoke.mjs",
+      "sourceRevision": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "sameAsCommit": true
+    },
+    {
+      "path": "scripts/compiler/release-family-runtime.mjs",
+      "snapshot": "executed-release-family-runtime.mjs",
+      "sourceRevision": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+      "sameAsCommit": true
+    },
+    {
+      "path": "scripts/compiler/native-consumer-smoke.mjs",
+      "snapshot": "original-native-consumer-smoke-3ea9e34.mjs",
+      "sourceRevision": "3ea9e34545615ce4a981e2e19c3c3fcc9de3b0bb",
+      "sameAsCommit": true
+    }
+  ],
+  "boundary": "Shenko-only guard delta is outside this pinned/ordinary-family scoped review."
+}

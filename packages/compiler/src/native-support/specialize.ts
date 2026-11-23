@@ -180,10 +180,23 @@ function prune(source: string, factoryName: string, publicFunctions: readonly st
     noLib: true,
     noResolve: true,
   };
-  const host = ts.createCompilerHost(options);
-  host.getSourceFile = (filename) => (filename === path ? sourceFile : undefined);
-  host.fileExists = (filename) => filename === path;
-  host.readFile = (filename) => (filename === path ? source : undefined);
+  // This analysis has exactly one compiler-owned virtual file. Constructing a
+  // filesystem-backed host first needlessly reads ts.sys (absent in a browser
+  // VM) and gives an in-memory operation a latent ambient I/O dependency.
+  const host: ts.CompilerHost = {
+    getSourceFile: (filename) => (filename === path ? sourceFile : undefined),
+    fileExists: (filename) => filename === path,
+    readFile: (filename) => (filename === path ? source : undefined),
+    getDefaultLibFileName: () => '/lib.d.ts',
+    getCurrentDirectory: () => '/',
+    getDirectories: () => [],
+    getCanonicalFileName: (filename) => filename,
+    useCaseSensitiveFileNames: () => true,
+    getNewLine: () => '\n',
+    writeFile: () => {
+      throw new Error('Native support analysis never emits host files.');
+    },
+  };
   const program = ts.createProgram([path], options, host),
     checker = program.getTypeChecker();
   const symbolOf = (node: ts.Node) =>

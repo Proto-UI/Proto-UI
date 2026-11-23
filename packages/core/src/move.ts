@@ -18,6 +18,8 @@ export type MoveGestureSample = Readonly<{
   delta: MoveGesturePoint;
   totalDelta: MoveGesturePoint;
   timestamp: number;
+  /** Optional finite association into the privileged binding's ordered origin targets. */
+  originIndex?: number | null;
 }>;
 
 export type MoveGestureCancelReason =
@@ -36,6 +38,8 @@ export type MoveGestureHostBinding = Readonly<{
   target: unknown;
   axis: MoveGestureAxis;
   activation: MoveGestureActivation;
+  /** Privileged hit-test targets; original contact association survives capture. */
+  originTargets?: readonly unknown[];
   shouldStart?(sample: MoveGestureSample): boolean;
   onStart(sample: MoveGestureSample): void;
   onMove(sample: MoveGestureSample): void;

@@ -1,0 +1,15 @@
+{
+  "kind": "diagnostic-artifact-download-integrity",
+  "runId": 45037951016,
+  "artifactId": 14760836024,
+  "carrierHead": "8da8222204d4101eb4334b1afc7f2bba096f2289",
+  "candidateHead": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "downloadedAt": "2026-11-22T15:30:57.361081+00:00",
+  "zipSha256": "463e074d2a79c1d4a6d0c4249775d65275ce67a49a9bf01dc4da89f3bf5226a5",
+  "apiDigest": "sha256:463e074d2a79c1d4a6d0c4249775d65275ce67a49a9bf01dc4da89f3bf5226a5",
+  "zipBytes": 15724975,
+  "entries": 319,
+  "uncompressedBytes": 18301982,
+  "safePathsAndNoSymlinks": true,
+  "rawUnmodified": true
+}

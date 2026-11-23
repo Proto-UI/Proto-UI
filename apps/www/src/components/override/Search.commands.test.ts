@@ -811,8 +811,15 @@ it('retains the Bootstrap documentation family through opener, lazy Dialog and r
   click(f.trigger);
   await vi.waitFor(() => expect(f.open).toBe(true));
   await vi.waitFor(() => expect(f.input).toBeDefined());
+  await vi.waitFor(() => expect(document.activeElement).toBe(f.input));
   for (const runtime of ['react', 'vue', 'vue2', 'wc']) {
     await f.runtime(runtime);
+    // A committed generation can still be presenting its Dialog content.
+    // Observe its real focus entry before the next switch or synthetic close;
+    // dispatchEvent does not supply a pointer click's native focus transition.
+    await vi.waitFor(() =>
+      expect(document.activeElement, `query focus after switching to ${runtime}`).toBe(f.input)
+    );
     expect(f.root.dataset.searchFamily).toBe('bootstrap-2-3-2');
     expect(f.trigger.dataset.siteControlFamily).toBe('bootstrap-2-3-2');
     const scopes = [...(runtimeScopes.roots.get(f.root) ?? [])].filter(

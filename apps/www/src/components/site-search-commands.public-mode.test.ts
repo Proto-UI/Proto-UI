@@ -188,6 +188,74 @@ async function prepare(
   };
 }
 
+async function openDocumentationWithoutTriggerFocus() {
+  const { root, owner } = mount('shadcn');
+  const previousRuntime = localStorage.getItem(PREFERRED_ADAPTER_KEY);
+  localStorage.setItem(PREFERRED_ADAPTER_KEY, 'wc');
+  const controller = initDocumentationSearchCommands(owner);
+  documentationScopes.push({ controller, previousRuntime });
+  await controller.ready;
+  const opener = root.querySelector<HTMLElement>('[data-open-modal]')!;
+  expect(opener).toBeTruthy();
+  expect(document.activeElement).toBe(document.body);
+
+  // This is the same participant request used by the global shortcut, without
+  // first focusing its Button. Native keyboard delivery remains browser evidence.
+  owner.toggle();
+  await vi.waitFor(() => {
+    expect(surface(1, 'panel').getAttribute('data-transition-state')).toBe('entered');
+    expect(document.activeElement).toBe(editor(1));
+  });
+  return { owner, controller, opener };
+}
+
+it('returns focus to the current Docs opener after a first opening without prior trigger focus', async () => {
+  const { owner, opener } = await openDocumentationWithoutTriggerFocus();
+  owner.toggle();
+  expect(owner.isOpen()).toBe(false);
+  await vi.waitFor(() => expectClosed(1));
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+
+  // A second shortcut opening must own a fresh handback in the same generation.
+  opener.blur();
+  expect(document.activeElement).toBe(document.body);
+  owner.toggle();
+  await vi.waitFor(() => {
+    expect(surface(1, 'panel').getAttribute('data-transition-state')).toBe('entered');
+    expect(document.activeElement).toBe(editor(1));
+  });
+  owner.toggle();
+  await vi.waitFor(() => expectClosed(1));
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+});
+
+it('initial Docs handback preserves newer focus even after it returns to body', async () => {
+  const { owner, opener } = await openDocumentationWithoutTriggerFocus();
+  const outside = document.createElement('button');
+  document.body.append(outside);
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  owner.toggle();
+  expect(surface(1, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
+  outside.focus();
+  expect(document.activeElement).toBe(outside);
+  outside.blur();
+  await vi.waitFor(() => expectClosed(1));
+  expect(document.activeElement).toBe(document.body);
+  expect(returned).not.toHaveBeenCalled();
+});
+
+it('initial Docs handback is revoked when the closing owner is disposed', async () => {
+  const { owner, controller, opener } = await openDocumentationWithoutTriggerFocus();
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  owner.toggle();
+  expect(surface(1, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
+  await controller.destroy();
+  expectClosed(1);
+  expect(returned).not.toHaveBeenCalled();
+});
+
 async function openHomepageReplacement() {
   const { owner } = mount('shadcn', true);
   const first = await prepare(owner, 'shadcn', 'wc', 1);
@@ -295,17 +363,22 @@ it('Docs replacement handback is revoked when the closing owner is disposed', as
   expect(returned).not.toHaveBeenCalled();
 });
 
-it('Docs replacement handback does not survive an interrupted close', async () => {
+it('Docs replacement cancels interrupted handback and returns once for a later accepted close', async () => {
   const { owner, opener, close } = await openDocumentationReplacement('brutalist', 'wc');
   const returned = vi.fn();
   opener.addEventListener('focus', returned);
   close.click();
   expect(owner.isOpen()).toBe(false);
   owner.open();
-  await vi.waitFor(() => expect(document.activeElement).toBe(editor(2)));
+  await vi.waitFor(() => {
+    expect(surface(2, 'panel').getAttribute('data-transition-state')).toBe('entered');
+    expect(document.activeElement).toBe(editor(2));
+  });
+  expect(returned).not.toHaveBeenCalled();
   surface(2, 'close').click();
   await vi.waitFor(() => expectClosed(2));
-  expect(returned).not.toHaveBeenCalled();
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+  expect(returned).toHaveBeenCalledTimes(1);
 });
 
 it('returns focus to the current Homepage opener after dismissing a replacement Dialog', async () => {
@@ -566,7 +639,7 @@ it.each(['query', 'close', 'newer focus'] as const)(
   }
 );
 
-it('does not return focus from an interrupted replacement Dialog close', async () => {
+it('Homepage replacement cancels interrupted handback and returns once for a later accepted close', async () => {
   const { owner, opener, close } = await openHomepageReplacement();
   const returned = vi.fn();
   opener.addEventListener('focus', returned);
@@ -574,10 +647,15 @@ it('does not return focus from an interrupted replacement Dialog close', async (
   expect(owner.isOpen()).toBe(false);
   expect(surface(2, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
   owner.open();
-  await vi.waitFor(() => expect(editor(2)).toBe(document.activeElement));
+  await vi.waitFor(() => {
+    expect(surface(2, 'panel').getAttribute('data-transition-state')).toBe('entered');
+    expect(document.activeElement).toBe(editor(2));
+  });
+  expect(returned).not.toHaveBeenCalled();
   surface(2, 'close').click();
   await vi.waitFor(() => expectClosed(2));
-  expect(returned).not.toHaveBeenCalled();
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+  expect(returned).toHaveBeenCalledTimes(1);
 });
 
 it('revokes pending opener focus when a closing replacement Dialog is disposed', async () => {

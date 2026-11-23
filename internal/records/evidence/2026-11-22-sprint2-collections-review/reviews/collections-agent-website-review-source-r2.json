@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-11-22T11:14:58.098336+00:00",
+  "head": "1746acca3fd5068afcf7e702536640a32fa437d2",
+  "files": {
+    "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts": "d136ab1d0ba1d878fe24294f8949b509706c355ab41d198a366e959a39b6fc0e",
+    "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts": "ee6253632531012527cf41ecb9927fd38d1d926005007dcf06f52c2d9d6af55a",
+    "apps/www/src/components/override/Hero.astro": "a6cfef0ae0c377fd0d02e2d288cc0ec09636575c646dcdbc57ab65ce78dfca9b",
+    "apps/www/src/components/site-link-recipes.ts": "0d36edf5f41c5907498c971fd6ad0d97df182855232a4622ad611beb3954d110",
+    "apps/www/src/components/site-native-controls.test.ts": "c06dfa3973e959d7bee6c360794108e99ca65e6bfc251c809a832cc9666339f3",
+    "apps/www/src/components/site-native-controls.ts": "d08e3a0913eb690dbf933e9bcc66c6fe4ed49f233672c3633410f20f97368bfe",
+    "apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset.shared.ts": "ce454c55797e45d702b7aec045b9feef021e56502a3c50816a1c33344382b514",
+    "apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts": "5fcc777f315f41748b13965613c3ee24bdea052ed4b181e6042d58156e629ad8",
+    "apps/www/src/content/docs/demo_components/tabs/tabs-profile-switch-code.ts": "c8067550afac62ea812cb8fb5bd0bc2440cf42a11b95081a4fc76ffac4a61c8f",
+    "apps/www/src/content/docs/en/specifications/as-hook.mdx": "d502d2bc483b83fe3a403258bffe73a093d88f71b97d3e3ea45863aa20abec72",
+    "apps/www/src/content/docs/en/ui-libraries/shadcn/tabs.mdx": "b538b27eb64c150c7327db9914b26df8826f523e7def4802e873b6e7f9531fd2",
+    "apps/www/src/content/docs/zh-cn/demo-shadcn-calendar-selection.demo.ts": "beaf85be542620238ba2cda026087b33c567a1b502d6214968a4f0084064db62",
+    "apps/www/src/content/docs/zh-cn/demo-shadcn-date-picker-selection.demo.ts": "b5bdbdeeb8944639a8ffd773635a5be8cd53eb9aa216e846040c6022a54d36df",
+    "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx": "e5f76d757625dca4dacb36050414bcc1bda5df985d48bc49980c3aa733d4b803",
+    "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts": "76b99d8fafe32e271a3f5b3169993a6c8e3507073057376f70ae673f127e8dd0",
+    "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/tabs.mdx": "ec33fd6138dbc6af534e86f8cd7fb49951cce831e78411e959d4894f8cb2e156",
+    "apps/www/src/styles/sidebar.css": "b0d69b1f7e3f437c0ff63f38e917ce86f8ad36acb11881efc382da9199acc093",
+    "apps/www/test/shadcn-rhea-demo-policy.test.ts": "09b320161ded167a048a21118959e0c3278b56abb7367f6cf9f91c807d97fde1",
+    "package.json": "042d077f231871e8a1eb3bed2328b81ac6360d7d0e175ba85f11d70b1f77775e",
+    "pnpm-lock.yaml": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+  }
+}

@@ -90,9 +90,15 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
         family === 'liquid-glass'
           ? 'border-foreground'
           : family === 'bootstrap-2-3-2'
-            ? 'data-[invalid]:border-destructive'
+            ? 'data-[invalid]:border-[#953b39]'
             : 'data-[invalid]:border-foreground'
       );
+    }
+    if (family === 'bootstrap-2-3-2') {
+      // The governed light-editor recipe uses the historical error ink, not
+      // the theme's low-contrast generic destructive token (2026-11-09 repair).
+      expect(tokens).toContain('data-[invalid]:text-[#953b39]');
+      expect(tokens).not.toContain('data-[invalid]:border-destructive');
     }
     setElementProps(root, { invalid: false });
     await flush();

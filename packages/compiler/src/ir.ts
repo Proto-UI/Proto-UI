@@ -6,6 +6,7 @@ import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
 import type { ObservableSemantics } from './observable-semantics';
 import type { GpuiNativeSdkIdentity } from './gpui-native-sdk';
+import type { CompilerBuildIdentity } from './compiler-build';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
 export const IR_VERSION = 7 as const;
@@ -115,10 +116,23 @@ export const MODULE_CAPABILITY_TYPES = [
 export type ModuleCapabilityType = (typeof MODULE_CAPABILITY_TYPES)[number];
 /** Ordinary lexical values retain structure without becoming public JSON data. */
 export type StructuredValueType =
-  | { kind: 'callable'; parameters: ParameterIR[]; returnType: ValueType }
+  | {
+      kind: 'callable';
+      parameters: ParameterIR[];
+      returnType: ValueType;
+      /** Checked finite-key return signatures on synthesized capture getters. */
+      lookup?: { key: string; type: ValueType }[];
+    }
   | {
       kind: 'object';
-      fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[];
+      fields: {
+        name: string;
+        type: ValueType;
+        optional?: boolean;
+        readonly?: boolean;
+        /** Reading invokes the stored zero-argument callable, never object creation. */
+        accessor?: 'get';
+      }[];
       index?: ValueType;
     }
   | { kind: 'value-union'; members: ValueType[] }
@@ -212,12 +226,14 @@ export function isPublicValueType(type: ValueType): boolean {
   if (typeof type !== 'string') {
     if (type.kind === 'object')
       return (
-        type.index === undefined && type.fields.every((field) => isPublicValueType(field.type))
+        type.index === undefined &&
+        type.fields.every((field) => !field.accessor && isPublicValueType(field.type))
       );
     if (type.kind === 'callable')
       return (
-        type.parameters.every((parameter) => isPublicValueType(parameter.type)) &&
-        isPublicValueType(type.returnType)
+        type.parameters.every(
+          (parameter) => !hasCaptureLookup(parameter.type) && isPublicValueType(parameter.type)
+        ) && isPublicValueType(type.returnType)
       );
     if (type.kind === 'value-union') return type.members.every(isPublicValueType);
     return false;
@@ -238,6 +254,25 @@ export function isPublicValueType(type: ValueType): boolean {
     'collection-snapshot-list',
     'presentation-owner-ref',
   ].includes(name);
+}
+
+/** Key-dependent getter results require a captured callable, not a host input promise. */
+export function hasCaptureLookup(type: ValueType): boolean {
+  if (typeof type === 'string') return false;
+  if (type.kind === 'callable')
+    return (
+      type.lookup !== undefined ||
+      type.parameters.some((parameter) => hasCaptureLookup(parameter.type)) ||
+      hasCaptureLookup(type.returnType)
+    );
+  if (type.kind === 'object')
+    return (
+      type.fields.some((field) => hasCaptureLookup(field.type)) ||
+      (type.index !== undefined && hasCaptureLookup(type.index))
+    );
+  if (type.kind === 'value-union') return type.members.some(hasCaptureLookup);
+  if (type.kind === 'cell') return hasCaptureLookup(type.value);
+  return false;
 }
 
 export function isCapabilityAssignable(actual: ValueType, expected: ValueType): boolean {
@@ -318,7 +353,7 @@ export type ExpressionIR = ExpressionBase &
         kind: 'object-spread';
         parts: (
           | { kind: 'spread'; value: ExpressionIR }
-          | { kind: 'entry'; key: string; value: ExpressionIR }
+          | { kind: 'entry'; key: string; value: ExpressionIR; accessor?: 'get' }
         )[];
       }
     | { kind: 'unary'; operator: '!' | '-' | '+'; operand: ExpressionIR }
@@ -343,7 +378,7 @@ export type ExpressionIR = ExpressionBase &
         right: ExpressionIR;
       }
     | { kind: 'array'; elements: ExpressionIR[] }
-    | { kind: 'record'; entries: { key: string; value: ExpressionIR }[] }
+    | { kind: 'record'; entries: { key: string; value: ExpressionIR; accessor?: 'get' }[] }
     | {
         kind: 'operation';
         operation: Operation;
@@ -437,6 +472,7 @@ export interface HookCaptureIR {
   states: { name: string; type: ValueType; valueType?: DataType; definite?: boolean }[];
   methods: { name: string; type: Extract<ValueType, { kind: 'callable' }> }[];
   children: { id: string; name: string }[];
+  events?: string[];
 }
 
 export interface PrototypeIR {
@@ -498,6 +534,7 @@ export interface GeneratedModule {
   }[];
   provenance: {
     source: PrototypeIR['source'];
+    compilerBuild?: CompilerBuildIdentity;
     irVersion: typeof IR_VERSION;
     backend: CompilerProfile;
     /** Reconstructable compile-time support selection, checked against emitted file bytes. */

@@ -1,0 +1,47 @@
+{
+  "sourceRevision": "5da7a4d254544543040c209fad7c9d63f85fda80",
+  "source": "extra-target-admission.proto.ts",
+  "sourceText": "import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'extra-target-admission',setup(){return r=>r.el('div','native');}});",
+  "results": [
+    {
+      "profile": "qt-source-v1",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI4001",
+          "category": "unsupported-input",
+          "message": "Target profile qt-source-v1 identifies qt, but no working emitter is implemented. Choose an implemented profile explicitly.",
+          "span": {
+            "file": "<target>",
+            "start": 0,
+            "end": 0,
+            "line": 1,
+            "column": 1,
+            "endLine": 1,
+            "endColumn": 1
+          }
+        }
+      ]
+    },
+    {
+      "profile": "flutter-source-v1",
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI4001",
+          "category": "unsupported-input",
+          "message": "Target profile flutter-source-v1 identifies flutter, but no working emitter is implemented. Choose an implemented profile explicitly.",
+          "span": {
+            "file": "<target>",
+            "start": 0,
+            "end": 0,
+            "line": 1,
+            "column": 1,
+            "endLine": 1,
+            "endColumn": 1
+          }
+        }
+      ]
+    }
+  ]
+}

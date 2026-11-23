@@ -1,0 +1,161 @@
+{
+  "actualPriorCommit": "5f9e9dd5c6967d47ec7299c34669b7081ceac7d0",
+  "actualPriorTree": "50850f29fe97b2588ad89fcd397129dbc9535af5",
+  "originalAuthorizedTree": "4877b33dcdc135549259627223bae75474dfd759",
+  "validatedSourceTree": "a71804100995c7fec7a27b30bf7120deb10ce70a",
+  "priorCommitPreservedAsParent": true,
+  "frozenRestoration": {
+    "internal/records/evidence/2026-11-23-s7-declarative-types/summary.json": {
+      "authorized": {
+        "sha256": "7d2af341ed885570d36b2470ef342c8bb54e098fe8cc3202f117df9bba35ca15",
+        "bytes": 3656
+      },
+      "commit": {
+        "sha256": "97314e7fc5903621dfb9d580eb3ad77fa31858c54b32eb617cf3336fbd5c4489",
+        "bytes": 3448
+      },
+      "index": {
+        "sha256": "7d2af341ed885570d36b2470ef342c8bb54e098fe8cc3202f117df9bba35ca15",
+        "bytes": 3656
+      },
+      "worktree": {
+        "sha256": "97314e7fc5903621dfb9d580eb3ad77fa31858c54b32eb617cf3336fbd5c4489",
+        "bytes": 3448
+      },
+      "worktreeEqualsAuthorized": false,
+      "indexEqualsAuthorized": true,
+      "jsonValueEqual": true
+    },
+    "internal/records/evidence/2026-11-23-s7-tabs-calibration/reports.json": {
+      "authorized": {
+        "sha256": "1fad64672fc6dfba9ed484ee1b058be460616a65bd321640074a37dceda664bb",
+        "bytes": 157807
+      },
+      "commit": {
+        "sha256": "2ab822b694458f1700ad240b6676c74f4b50b1588292abcf494bcd3346aa6df3",
+        "bytes": 157107
+      },
+      "index": {
+        "sha256": "1fad64672fc6dfba9ed484ee1b058be460616a65bd321640074a37dceda664bb",
+        "bytes": 157807
+      },
+      "worktree": {
+        "sha256": "2ab822b694458f1700ad240b6676c74f4b50b1588292abcf494bcd3346aa6df3",
+        "bytes": 157107
+      },
+      "worktreeEqualsAuthorized": false,
+      "indexEqualsAuthorized": true,
+      "jsonValueEqual": true
+    }
+  },
+  "ordinaryJsFormatterProof": {
+    "equivalentByExactFormatterOutput": true,
+    "authorizedSha256": "76526bb90881a620321816540440e09fe6e49921ceb1b0bd1c73ba72eb728df0",
+    "committedSha256": "6bb704e3eba61822d899d261d7fffd58e30c03ec7219a95537ee617d078387cf",
+    "formatterVersion": "3.8.1"
+  },
+  "browserProbe": {
+    "kind": "serialized-actual-probe-regression",
+    "scope": "Actual source callback transformed with keepNames and serialized into a separate JavaScript realm; not native-browser or full WASM acceptance.",
+    "sourceBeforeSha256": "e8372515a83bc2384c0b48da18bed6b23ade9c5628b2bba5e9e51f5a1584589d",
+    "sourceAfterSha256": "81c264aada7399a13373aa763da419a52b562a5cf9917582ecdb2b582a716c50",
+    "oldFailure": "ReferenceError: __name is not defined",
+    "controls": [
+      {
+        "mask": 0,
+        "actual": {
+          "parent": false,
+          "storage": false,
+          "cookie": false
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 1,
+        "actual": {
+          "parent": true,
+          "storage": false,
+          "cookie": false
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 2,
+        "actual": {
+          "parent": false,
+          "storage": true,
+          "cookie": false
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 3,
+        "actual": {
+          "parent": true,
+          "storage": true,
+          "cookie": false
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 4,
+        "actual": {
+          "parent": false,
+          "storage": false,
+          "cookie": true
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 5,
+        "actual": {
+          "parent": true,
+          "storage": false,
+          "cookie": true
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 6,
+        "actual": {
+          "parent": false,
+          "storage": true,
+          "cookie": true
+        },
+        "status": "passed"
+      },
+      {
+        "mask": 7,
+        "actual": {
+          "parent": true,
+          "storage": true,
+          "cookie": true
+        },
+        "status": "passed"
+      }
+    ],
+    "oldSerialized": "() => {\n  const rejected = /* @__PURE__ */ __name((read) => {\n    try {\n      read();\n      return false;\n    } catch {\n      return true;\n    }\n  }, \"rejected\");\n  return {\n    parent: rejected(() => parent.document),\n    storage: rejected(() => localStorage.getItem(\"probe\")),\n    cookie: rejected(() => document.cookie)\n  };\n}",
+    "newSerialized": "() => {\n  let parentBlocked = false;\n  let storageBlocked = false;\n  let cookieBlocked = false;\n  try {\n    void parent.document;\n  } catch {\n    parentBlocked = true;\n  }\n  try {\n    localStorage.getItem(\"probe\");\n  } catch {\n    storageBlocked = true;\n  }\n  try {\n    void document.cookie;\n  } catch {\n    cookieBlocked = true;\n  }\n  return { parent: parentBlocked, storage: storageBlocked, cookie: cookieBlocked };\n}",
+    "transform": {
+      "loader": "ts",
+      "target": "es2022",
+      "format": "cjs",
+      "keepNames": true
+    }
+  },
+  "sourceControls": {
+    "passed": 81,
+    "failed": 0,
+    "skipped": 0,
+    "supervisorSeconds": 180
+  },
+  "compilerPackageEqualTo": "7a64255233be57a65f725604dc4f9c14017b5dfd",
+  "archiveSha256": "388235f75fdcd1562e3a049053f808fa5643f3fd1f6c104d6c931002077ddad2",
+  "archiveBytes": 78929,
+  "limits": [
+    "New source acceptance submission is distinct from a pass.",
+    "No full native browser/production WASM journey has passed on this exact new source.",
+    "This Sprint 3 sandbox predates Sprint 5 strict acknowledgement handling; its separate full retirement/propagation acceptance remains open and is not claimed through the probe-only adaptation.",
+    "The observed two missing generated stylesheet type declarations remain recorded, not relabeled as full type success."
+  ]
+}

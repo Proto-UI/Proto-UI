@@ -8,7 +8,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Checkbox 基础原型在 Toggle 语义之上提供 checked、unchecked、disabled 和 indeterminate 交互能力。
+Checkbox 基础原型以单一 canonical 值所有者提供 checked、unchecked、disabled、readOnly 和 indeterminate 交互能力。
 
 <div>
   <PrototypePreviewer
@@ -23,7 +23,7 @@ Checkbox 基础原型在 Toggle 语义之上提供 checked、unchecked、disable
 
 Checkbox 通过 anatomy 系统拆分为 root 和 indicator 两个部分。
 
-- **Root** (`base-checkbox-root`) 管理 Toggle 状态（`checked`、`checkedChange`）、disabled 行为以及额外的 `indeterminate` 状态。
+- **Root** (`base-checkbox-root`) 拥有 canonical `checked`、发送 `checkedChange`，并管理 disabled/readOnly 策略与独立的 `indeterminate` 状态。
 - **Indicator** (`base-checkbox-indicator`) 通过 anatomy 运行时访问读取 root 的 `checked` 和 `indeterminate` 状态，并将这些状态反映给渲染层。它不独立拥有 checkbox 状态。
 
 `base-checkbox` anatomy family 使用 root 到 indicator 的 `contains` 关系。Checkbox 预期至少有一个 indicator；当多个视觉区域需要表达同一份 indicator 语义时，也允许存在多个 indicator。
@@ -34,14 +34,15 @@ Checkbox 通过 anatomy 系统拆分为 root 和 indicator 两个部分。
 
 `indeterminate` 可以通过 `defaultIndeterminate` 作为非受控状态使用，也可以通过 `indeterminate` 作为受控状态使用。
 
-当启用状态下的 indeterminate checkbox 被按下时：
+当可编辑的 indeterminate checkbox 成功激活时，Root 先清除或请求清除 `indeterminate`，并发送 `indeterminateChange`。非受控 mixed 状态会直接清除；受控 owner 通过回写 `indeterminate={false}` 接受该请求。
 
-1. `checked` 遵循正常的 `asToggle()` checked 行为，并发出 `checkedChange`。
-2. Root 通过 `indeterminateChange` 请求将 `indeterminate` 清为 `false`。
-3. 如果 `indeterminate` 是非受控状态，root 会同时清除内部 indeterminate 状态。
-4. 如果 `indeterminate` 是受控状态，外部 owner 需要处理 `indeterminateChange`，并重新传入 `indeterminate={false}`。
+接着，Root 根据激活开始时的 canonical `checked` 请求相反值，发送 `checkedChange`。如果清除 mixed 的回调已经提交了新的 checked 值，这个旧 checked 阶段会退休，不会把新 owner 值反向切回。只接受 mixed=false、checked 没有改变时，原 checked 请求仍会继续。Disabled 或 readOnly 会阻止这两个值提案。
 
-Disabled checkbox 在按下时不会改变 checked 或 indeterminate 状态。
+## 只读与显式 Form 组合
+
+Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。普通 Root 不会自动注册到 Field 或 Form。
+
+在显式 `FormField` 中使用 `@proto.ui/prototypes-base/field` 的 `fieldCheckbox`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
 
 ## API
 
@@ -52,6 +53,7 @@ Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `ch
   rows={[
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />

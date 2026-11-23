@@ -96,7 +96,12 @@ export function initPreviewer(options: PreviewerOptions) {
   const selectRoot = root.querySelector<SiteSelectRoot>(
     '[data-adapter-select-root], wc-shadcn-select-root'
   );
-  const nativeSelect = root.querySelector<HTMLSelectElement>('select');
+  // Legacy embeds may provide a native runtime selector. Controls owned by a
+  // mounted demo or the optional compiler panel are independent consumers.
+  const nativeSelect =
+    [...root.querySelectorAll<HTMLSelectElement>('select')].find(
+      (select) => !select.closest('pui-browser-compiler, .host')
+    ) ?? null;
 
   const readSelectValue = () =>
     selectRoot ? selectValue(selectRoot) : (nativeSelect?.value ?? initialRuntime);

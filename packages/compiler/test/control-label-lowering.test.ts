@@ -200,8 +200,16 @@ describe('checked callable and conditional IR boundaries', () => {
     expect(validateIR(ir).ok).toBe(false);
   });
 
+  it('admits the GPUI explicit target slice with its real native declaration', () => {
+    const result = compilePrototype(source, { profile: 'gpui-source-v1' });
+    expect(result.ok, JSON.stringify(result.ok ? {} : result.diagnostics)).toBe(true);
+    if (!result.ok) throw new Error('Expected the checked explicit ControlLabel target');
+    expect(validateIR(JSON.parse(JSON.stringify(result.value.ir))).ok).toBe(true);
+    expect(result.value.output.code).toContain('control_label_declare(');
+    expect(result.value.output.code).toContain('control_label_request_current(');
+  });
+
   it.each([
-    'gpui-source-v1',
     'qt-source-v1',
     'flutter-source-v1',
     'react-dom-ssr-v1',
@@ -397,7 +405,7 @@ describe('direct emitters preserve unsupported feature boundaries', () => {
         ).toBe(true);
     }
   );
-  it.each([emitQtSource, emitFlutterSource, emitGpuiSource])(
+  it.each([emitQtSource, emitFlutterSource])(
     '%s rejects ControlLabel at the native emitter entry',
     (emit) => {
       const result = emit(compilation().ir);
@@ -406,6 +414,29 @@ describe('direct emitters preserve unsupported feature boundaries', () => {
         expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'PUI4003')).toBe(true);
     }
   );
+  it('GPUI direct emission retains the explicit ControlLabel callback implementation', () => {
+    const result = emitGpuiSource(compilation().ir);
+    expect(result.ok, JSON.stringify(result.ok ? {} : result.diagnostics)).toBe(true);
+    if (!result.ok) throw new Error('Expected the checked native target declaration');
+    expect(result.value.code).toContain('control_label_declare(');
+    expect(result.value.code).toContain('control_label_request_current(');
+  });
+
+  it('GPUI lowers the direct ControlLabel target from independently validated IR', () => {
+    const ir = JSON.parse(JSON.stringify(compilation().ir));
+    expect(validateIR(ir).ok).toBe(true);
+    const result = emitGpuiSource(ir);
+    expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.code).toContain('control_label_declare');
+    expect(result.value.code).toContain('control_label_request_current');
+    expect(
+      result.value.supportingFiles?.find((file) => file.path.endsWith('gpui-native-owner.rs'))
+        ?.contents
+    ).toContain('pub struct ControlLabelRef');
+    const compiled = compilePrototype(source, { profile: 'gpui-source-v1' });
+    expect(compiled.ok, JSON.stringify(compiled.ok ? null : compiled.diagnostics)).toBe(true);
+  });
   it.each([
     'const read=(flag:boolean=true)=>flag; def.expose.value("observed",read());',
     'const read=(call:()=>boolean)=>call();def.expose.value("observed",read(()=>true));',
@@ -528,6 +559,43 @@ it.each(profiles)('%s reaches host support used only by a checked per-call defau
 });
 
 describe('resolved prop presence stays separate from non-null defaults', () => {
+  it.each([
+    { setup: 'install();', required: true, nonNull: true },
+    {
+      setup: "def.props.define({flag:{type:'boolean',default:false}});install();",
+      required: true,
+      nonNull: true,
+    },
+    {
+      setup: "def.props.define({flag:{type:'boolean',default:null}});install();",
+      required: true,
+      nonNull: false,
+    },
+    {
+      setup: "const active=def.state.bool('active',false);if(active.get())install();",
+      required: false,
+      nonNull: false,
+    },
+    {
+      setup: "const active=def.state.bool('active',false);if(active.get())return;install();",
+      required: false,
+      nonNull: false,
+    },
+    {
+      setup: "const active=def.state.bool('active',false);active.get()&&install();",
+      required: false,
+      nonNull: false,
+    },
+  ])('proves only unconditional authored Hook defaults: $setup', ({ setup, required, nonNull }) => {
+    const parsed = parsePrototype(`import {definePrototype,defineAsHook} from '@proto.ui/core';
+      const install=defineAsHook({name:'generic-defaults',setup(def){def.props.define({flag:{type:'boolean',default:false}});}});
+      export default definePrototype({name:'hook-prop-proof',setup(def){${setup}}});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const facts = resolvedPropFacts(parsed.value);
+    expect(facts.required.has('flag')).toBe(required);
+    expect(facts.nonNull.has('flag')).toBe(nonNull);
+  });
+
   it.each([
     "def.props.define({flag:{type:'boolean',default:null}});def.props.define({flag:{type:'boolean',default:true}});",
     "const choose=def.state.bool('choose',false);if(choose.get()){def.props.define({flag:{type:'boolean',default:null}});}def.props.define({flag:{type:'boolean',default:true}});",

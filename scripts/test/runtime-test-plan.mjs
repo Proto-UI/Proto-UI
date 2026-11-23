@@ -6,12 +6,15 @@ export const READY_ROUTES = Object.freeze([
   '/en/ui-libraries/shadcn/menubar/',
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
-  '/en/test/bootstrap-state-controls/',
   '/en/test/liquid-glass-state-controls/',
   '/en/ui-libraries/bootstrap-2-3-2/button/',
   '/en/test/liquid-glass-material/',
   '/en/test/liquid-glass-portal/',
   '/en/ui-libraries/base/image/',
+  '/en/ui-libraries/base/tooltip/',
+  '/zh-cn/ui-libraries/base/tooltip/',
+  '/en/ui-libraries/base/select/',
+  '/zh-cn/ui-libraries/base/select/',
   '/en/ui-libraries/base/collapsible/',
   '/en/ui-libraries/shadcn/collapsible/',
   '/zh-cn/ui-libraries/shadcn/collapsible/',
@@ -49,6 +52,7 @@ export const READY_ROUTES = Object.freeze([
   '/en/ui-libraries/shadcn/card/',
   '/en/ui-libraries/shadcn/input/',
   '/en/ui-libraries/shadcn/select/',
+  '/en/ui-libraries/shadcn/tabs/',
   '/en/ui-libraries/base/scroll-area/',
   '/en/ui-libraries/base/textarea/',
   '/en/ui-libraries/brutalist/components/badge/',
@@ -81,10 +85,21 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
+  'packages/compiler/test/sprint1-ownership.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts',
+  'packages/compiler/test/sprint2-native.browser.test.ts',
+  'apps/www/test/release-docs-reading.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts',
   'packages/compiler/test/control-label-native.browser.test.ts',
+  'packages/compiler/test/transition-native.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',
   'packages/compiler/test/focus-scope-native.browser.test.ts',
+  'packages/compiler/test/shader-presentation.browser.test.ts',
+  'packages/compiler/test/presence-presentation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
   'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
@@ -451,17 +466,18 @@ export function validateBrowserCostEvidence(evidence) {
   return evidence;
 }
 
-const costEvidence = validateBrowserCostEvidence(
-  JSON.parse(
-    readFileSync(
-      new URL('./fixtures/browser-suite-costs-44876125495.json', import.meta.url),
-      'utf8'
-    )
-  )
-);
-const observedCosts = Object.fromEntries(
-  costEvidence.observations.map(({ suite, durationMs }) => [suite, Math.ceil(durationMs / 1000)])
-);
+const observedCosts = {};
+for (const file of [
+  './fixtures/browser-suite-costs-44876125495.json',
+  './fixtures/browser-suite-costs-45029016292.json',
+]) {
+  const evidence = validateBrowserCostEvidence(
+    JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  );
+  for (const { suite, durationMs } of evidence.observations) {
+    observedCosts[suite] = Math.max(observedCosts[suite] ?? 0, Math.ceil(durationMs / 1000));
+  }
+}
 // The passive-atoms file was still running when the old shard was killed. Its
 // 600s reserve is explicitly an estimate, not an invented completion sample.
 const interruptedSuiteReserves = {

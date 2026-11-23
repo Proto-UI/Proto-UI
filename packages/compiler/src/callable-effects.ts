@@ -19,7 +19,7 @@ import {
   type CallbackContext,
 } from './operations';
 import { isDataValueType, lexicalStoredType } from './ir';
-import { arrayEveryCallbackParameters, valueAlternatives } from './value-types';
+import { arrayEveryCallbackParameters, objectFields, valueAlternatives } from './value-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 
 type Known = readonly Atom[];
@@ -34,6 +34,7 @@ type Atom =
   | { kind: 'named-state'; state: CapturedState }
   | { kind: 'cell'; initial: Known; tracked: boolean }
   | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean }
+  | { kind: 'getter'; callable: Known }
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
@@ -484,6 +485,8 @@ function analyzeCallableFlow(
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([name, field]) => [name, field.map((child) => visit(child, depth + 1))]),
           ];
+        case 'getter':
+          return ['get', value.callable.map((child) => visit(child, depth + 1))];
         case 'capture':
           return [
             'capture',
@@ -510,7 +513,7 @@ function analyzeCallableFlow(
     if (type.kind === 'callable' || type.kind === 'capture') return true;
     if (type.kind === 'object')
       return (
-        type.fields.some((field) => carriesCallable(field.type)) ||
+        type.fields.some((field) => !!field.accessor || carriesCallable(field.type)) ||
         (type.index !== undefined && carriesCallable(type.index))
       );
     if (type.kind === 'value-union') return type.members.some(carriesCallable);
@@ -763,6 +766,8 @@ function analyzeCallableFlow(
         continue;
       }
       if (value.kind === 'closure') callbacks.push({ closure: value, execution, outward: true });
+      else if (value.kind === 'getter')
+        pending.push(...value.callable.map((value) => ({ value, type: undefined })));
       else if (value.kind === 'record')
         for (const [name, field] of fields(value))
           pending.push(...field.map((value) => ({ value, type: fieldType(type, name) })));
@@ -822,13 +827,77 @@ function analyzeCallableFlow(
     }
   }
 
-  function property(values: Known, name: string): Known {
-    return values.flatMap((value) =>
-      value.kind === 'record'
-        ? (fields(value).get(name) ?? UNDEFINED)
-        : value.kind === 'capture' && name === 'render'
-          ? (captureContents(value).render ?? UNDEFINED)
-          : UNKNOWN
+  function property(values: Known, name: string, execution: Execution, span: SourceSpan): Known {
+    if (!reachable) return [];
+    return branches(
+      values.map((value) => () => {
+        if (value.kind === 'record') {
+          const field = fields(value).get(name) ?? UNDEFINED;
+          return branches(
+            field.map(
+              (part) => () =>
+                part.kind === 'getter' ? calls(part.callable, [], execution, span) : [part]
+            )
+          );
+        }
+        if (value.kind === 'capture' && name === 'render')
+          return captureContents(value).render ?? UNDEFINED;
+        if (value.kind === 'undefined' || (value.kind === 'literal' && value.value === null))
+          return UNDEFINED;
+        return UNKNOWN;
+      })
+    );
+  }
+
+  // Own enumerable keys visit integer indices first, then the remaining names
+  // in creation order. Reading each getter is a real sequential invocation.
+  function ownKeys(record: RecordValue): string[] {
+    const keys = [...fields(record).keys()];
+    const index = (key: string) => /^(0|[1-9][0-9]*)$/.test(key) && Number(key) < 0xffff_ffff;
+    return [
+      ...keys.filter(index).sort((a, b) => Number(a) - Number(b)),
+      ...keys.filter((key) => !index(key)),
+    ];
+  }
+
+  function copyProperties(
+    values: Known,
+    execution: Execution,
+    span: SourceSpan,
+    previous = new Map<string, Known>(),
+    type?: ValueType
+  ): Map<string, Known> {
+    const copies: Map<string, Known>[] = [];
+    branches(
+      values.map((value) => () => {
+        const copy = new Map(previous);
+        if (value.kind === 'record')
+          for (const name of ownKeys(value)) {
+            copy.set(name, property([value], name, execution, span));
+            if (!reachable) return [];
+          }
+        else if (type)
+          for (const field of objectFields(type) ?? []) {
+            if (field.accessor) {
+              opaque(span);
+              copy.set(field.name, UNKNOWN);
+            } else {
+              const next = hostValue(field.type);
+              copy.set(
+                field.name,
+                field.optional
+                  ? merge([previous.get(field.name) ?? UNDEFINED, next, UNDEFINED])
+                  : next
+              );
+            }
+          }
+        copies.push(copy);
+        return UNDEFINED;
+      })
+    );
+    const names = new Set(copies.flatMap((copy) => [...copy.keys()]));
+    return new Map(
+      [...names].map((name) => [name, merge(copies.map((copy) => copy.get(name) ?? UNDEFINED))])
     );
   }
 
@@ -891,21 +960,47 @@ function analyzeCallableFlow(
           value.arguments
         );
       case 'member':
-        return property(expression(value.object, scope, execution), value.property);
-      case 'element': {
-        const owner = expression(value.object, scope, execution),
-          keys = expression(value.index, scope, execution);
-        return merge(
-          keys.map((key) =>
-            key.kind === 'literal'
-              ? property(owner, String(key.value))
-              : merge(
-                  owner.map((item) =>
-                    item.kind === 'record' ? merge([...fields(item).values()]) : UNKNOWN
-                  )
-                )
-          )
+        return property(
+          expression(value.object, scope, execution),
+          value.property,
+          execution,
+          value.span
         );
+      case 'element': {
+        const owner = expression(value.object, scope, execution);
+        if (!reachable) return [];
+        const absent = (item: Atom) =>
+          item.kind === 'undefined' || (item.kind === 'literal' && item.value === null);
+        const present = value.optional ? owner.filter((item) => !absent(item)) : owner;
+        return branches([
+          ...(value.optional && owner.some((item) => absent(item) || item.kind === 'unknown')
+            ? [() => UNDEFINED]
+            : []),
+          ...(present.length
+            ? [
+                () => {
+                  const keys = expression(value.index, scope, execution);
+                  return branches(
+                    keys.map(
+                      (key) => () =>
+                        key.kind === 'literal'
+                          ? property(present, String(key.value), execution, value.span)
+                          : branches([
+                              () => UNKNOWN,
+                              ...present.flatMap((item) =>
+                                item.kind === 'record'
+                                  ? ownKeys(item).map(
+                                      (name) => () => property([item], name, execution, value.span)
+                                    )
+                                  : []
+                              ),
+                            ])
+                    )
+                  );
+                },
+              ]
+            : []),
+        ]);
       }
       case 'record': {
         if (!carriesCallable(value.type)) {
@@ -923,38 +1018,34 @@ function analyzeCallableFlow(
           recordSites.set(value, record);
           allocationSerial++;
         }
-        for (const entry of value.entries)
-          writeField(record, entry.key, expression(entry.value, scope, execution), repeated);
+        for (const entry of value.entries) {
+          const field = expression(entry.value, scope, execution);
+          writeField(
+            record,
+            entry.key,
+            entry.accessor ? [{ kind: 'getter', callable: field }] : field,
+            repeated
+          );
+        }
         return [record];
       }
       case 'object-spread': {
-        if (!carriesCallable(value.type)) {
-          value.parts.forEach((part) => expression(part.value, scope, execution));
-          return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
-        }
-        const nextFields = new Map<string, Known>();
+        let nextFields = new Map<string, Known>();
         for (const part of value.parts) {
           const result = expression(part.value, scope, execution);
-          if (part.kind === 'entry') nextFields.set(part.key, result);
-          else {
-            const names = new Set(
-              result.flatMap((object) =>
-                object.kind === 'record' ? [...fields(object).keys()] : []
-              )
+          if (!reachable) return [];
+          if (part.kind === 'entry') {
+            nextFields.set(
+              part.key,
+              part.accessor ? [{ kind: 'getter', callable: result }] : result
             );
-            for (const name of names)
-              nextFields.set(
-                name,
-                merge(
-                  result.map((object) =>
-                    object.kind === 'record'
-                      ? (fields(object).get(name) ?? nextFields.get(name) ?? UNDEFINED)
-                      : UNKNOWN
-                  )
-                )
-              );
+          } else {
+            nextFields = copyProperties(result, execution, value.span, nextFields, part.value.type);
+            if (!reachable) return [];
           }
         }
+        if (!carriesCallable(value.type))
+          return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         let record = recordSites.get(value) as RecordValue | undefined;
         const repeated = !!record;
         if (!record) {
@@ -1013,8 +1104,22 @@ function analyzeCallableFlow(
             parameters
           );
         }
-        if (value.name === 'object.assign')
+        if (value.name === 'object.assign') {
+          for (const [index, source] of args.slice(1).entries()) {
+            const copied = copyProperties(
+              source,
+              execution,
+              value.span,
+              undefined,
+              value.arguments[index + 1].type
+            );
+            if (!reachable) return [];
+            for (const target of args[0])
+              if (target.kind === 'record')
+                for (const [name, field] of copied) writeField(target, name, field);
+          }
           return isDataValueType(value.type) ? dataFact(value.type) : args[0];
+        }
         return value.name === 'object.freeze' ? args[0] : UNKNOWN;
       }
       case 'lexical-cell': {

@@ -7,9 +7,14 @@ import test from 'node:test';
 import { runInNewContext } from 'node:vm';
 import { parse } from 'yaml';
 import {
+  isRetainedClosedPortal,
+  isPhysicallyRetiredPortal,
+} from './bootstrap-modal-observation.ts';
+import {
   BOOTSTRAP_MOTION_SUITES,
   MODAL_CASES,
   PROGRESS_CASES,
+  PORTAL_REENTRY_TITLE,
   SPLIT_REJECTION_REASON,
   SPLIT_REJECTION_TITLE,
   assertBootstrapMotionSource,
@@ -24,8 +29,8 @@ const writeJson = (file, value) => writeFileSync(file, JSON.stringify(value));
 function reportFixture() {
   return {
     success: true,
-    numTotalTests: 129,
-    numPassedTests: 129,
+    numTotalTests: 130,
+    numPassedTests: 130,
     numFailedTests: 0,
     // Vitest's describe/suite count is not its physical test-file count.
     numTotalTestSuites: 29,
@@ -41,7 +46,9 @@ function reportFixture() {
         title:
           file.endsWith('progress-width-motion.browser.test.ts') && index === cases - 1
             ? SPLIT_REJECTION_TITLE
-            : `synthetic case ${index}`,
+            : file.endsWith('portal-conceal.test.ts') && index === cases - 1
+              ? PORTAL_REENTRY_TITLE
+              : `synthetic case ${index}`,
         fullName: `${file} synthetic case ${index}`,
         status: 'passed',
       })),
@@ -51,11 +58,12 @@ function reportFixture() {
 const check = (report, stepOutcome = 'success') =>
   inspectBootstrapMotionReport(report, { root, stepOutcome });
 
-test('requires eleven exact files and 129 executed cases while separating positive and rejected profiles', async () => {
+test('requires eleven exact files and 130 executed cases while separating positive and rejected profiles', async () => {
   const result = await check(reportFixture());
   assert.equal(result.passed, true, result.failures.join('\n'));
   assert.equal(result.requiredFiles, 11);
-  assert.equal(result.requiredAssertions, 129);
+  assert.equal(result.requiredAssertions, 130);
+  assert.deepEqual(result.hostRegressionCases, { portalAttributeReentry: 1 });
   assert.deepEqual(result.nativePositiveCases, {
     modalDocument: 6,
     progressDocument: 3,
@@ -95,11 +103,27 @@ for (const [name, mutate] of [
   ],
   ['missing Progress rejection', (report) => report.testResults.at(-1).assertionResults.pop()],
   [
-    'only twenty-nine Portal cases',
+    'only thirty Portal cases',
     (report) =>
       report.testResults
         .find((file) => file.name.endsWith('portal-conceal.test.ts'))
         .assertionResults.pop(),
+  ],
+  [
+    'green extra case replacing the Portal reentry',
+    (report) => {
+      report.testResults
+        .find((file) => file.name.endsWith('portal-conceal.test.ts'))
+        .assertionResults.at(-1).title = 'unrelated green test';
+    },
+  ],
+  [
+    'duplicate Portal reentry with distinct generic identities',
+    (report) => {
+      report.testResults.find((file) =>
+        file.name.endsWith('portal-conceal.test.ts')
+      ).assertionResults[0].title = PORTAL_REENTRY_TITLE;
+    },
   ],
   [
     'duplicate case identity',
@@ -140,7 +164,7 @@ for (const [name, mutate] of [
   [
     'false assertion total',
     (report) => {
-      report.numTotalTests = 130;
+      report.numTotalTests = 131;
     },
   ],
   [
@@ -596,3 +620,96 @@ for (const [name, mutate] of [
     assert.ok(result.receipt.failures.length > 0);
   });
 }
+test('Modal observation waits for physical withdrawal and acknowledged unmount', () => {
+  // Captured-fact controls only, using the predicates called inside page.evaluate.
+  const entered = {
+    phase: 'entered',
+    present: true,
+    connected: true,
+    portaled: true,
+    detached: false,
+    owner: 7,
+    viewEpoch: 3,
+    created: 1,
+    mounted: 3,
+    unmounted: 2,
+    concealed: false,
+    inert: false,
+  };
+  const barrier = {
+    ...entered,
+    phase: 'closed',
+    present: false,
+    detached: true,
+    concealed: true,
+    inert: true,
+  };
+  assert.equal(isRetainedClosedPortal(barrier, entered), true);
+  assert.equal(isPhysicallyRetiredPortal(barrier, entered), false);
+  for (const premature of [
+    { ...barrier, portaled: false },
+    { ...barrier, unmounted: 3 },
+  ]) {
+    assert.equal(isRetainedClosedPortal(premature, entered), false);
+    assert.equal(isPhysicallyRetiredPortal(premature, entered), false);
+  }
+  const retired = { ...barrier, portaled: false, unmounted: 3 };
+  assert.equal(isRetainedClosedPortal(retired, entered), false);
+  assert.equal(isPhysicallyRetiredPortal(retired, entered), true);
+});
+
+test('Modal observation rejects replaced lifetimes and missing conceal ownership', () => {
+  const entered = {
+    phase: 'entered',
+    present: true,
+    connected: true,
+    portaled: true,
+    detached: false,
+    owner: 7,
+    viewEpoch: 3,
+    created: 1,
+    mounted: 3,
+    unmounted: 2,
+    concealed: false,
+    inert: false,
+  };
+  const barrier = {
+    ...entered,
+    phase: 'closed',
+    present: false,
+    detached: true,
+    concealed: true,
+    inert: true,
+  };
+  for (const changes of [
+    { owner: 8 },
+    { viewEpoch: 4 },
+    { created: 2 },
+    { mounted: 4, unmounted: 3 },
+    { unmounted: 3 },
+    { connected: false },
+    { detached: false },
+    { present: true },
+    { concealed: false },
+    { inert: false },
+    { phase: 'leaving' },
+  ])
+    assert.equal(isRetainedClosedPortal({ ...barrier, ...changes }, entered), false);
+  const retired = { ...barrier, portaled: false, unmounted: 3 };
+  for (const changes of [
+    { owner: 8 },
+    { viewEpoch: 4 },
+    { created: 2 },
+    { mounted: 4, unmounted: 4 },
+    { unmounted: 2 },
+    { connected: false },
+    { detached: false },
+    { present: true },
+    { concealed: false },
+  ])
+    assert.equal(
+      isPhysicallyRetiredPortal({ ...retired, ...changes }, entered),
+      false,
+      JSON.stringify(changes)
+    );
+});

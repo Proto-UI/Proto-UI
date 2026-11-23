@@ -1,0 +1,8 @@
+
+> apps-www@0.0.1 generate:proto-ui-style /home/runner/work/Proto-UI/Proto-UI/apps/www
+> node ./scripts/generate-cli-init-docs.mjs && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ./scripts/generate-website-prototype-tokens.mjs && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css
+
+[docs] extracted real @proto.ui/cli@0.3.0-alpha.2 init: 4 files
+[proto-ui] theme(shadcn): wrote src/styles/shadcn-theme.css
+[website-prototypes] generated one style sheet and its Shadow companion from 1453 package + website tokens
+[proto-ui] style: wrote src/styles/proto-ui-style.css

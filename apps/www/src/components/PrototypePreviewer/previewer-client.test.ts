@@ -122,6 +122,31 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     document.body.innerHTML = '';
   });
 
+  it('does not adopt or rewrite a compiled target selector as the legacy runtime selector', async () => {
+    const root = createPreviewerRoot();
+    root.innerHTML =
+      '<pui-browser-compiler><select data-compiler-target><option value="web-component-source-v1">Web Components</option><option value="react-dom-source-v1">React 19</option></select></pui-browser-compiler><div class="host"></div>';
+    const target = root.querySelector<HTMLSelectElement>('[data-compiler-target]')!;
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'react'],
+    });
+    await vi.waitFor(() => expect(runtimeSpies.mount).toHaveBeenCalledTimes(1));
+    expect([...target.options].map((option) => option.value)).toEqual([
+      'web-component-source-v1',
+      'react-dom-source-v1',
+    ]);
+    target.value = 'react-dom-source-v1';
+    target.dispatchEvent(new Event('change', { bubbles: true }));
+    await Promise.resolve();
+    expect(runtimeSpies.mount).toHaveBeenCalledTimes(1);
+    await (root as any).__previewer__?.destroy();
+    root.remove();
+  });
+
   it('shares body removal observation and retires only the detached preview', async () => {
     const first = createPreviewerRoot();
     const second = createPreviewerRoot();

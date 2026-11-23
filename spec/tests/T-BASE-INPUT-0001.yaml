@@ -12,14 +12,10 @@ cases:
         P-BASE-INPUT-EDITOR-HOOK,
         P-BASE-INPUT-PHYSICAL-TARGET,
         P-BASE-INPUT-VALUE-OWNERSHIP,
-        P-BASE-INPUT-EDITING-RESET,
+        P-BASE-INPUT-RESET,
         P-BASE-INPUT-A11Y-AND-FOCUS,
       ]
     expectation: An actual asInputEditor consumer publishes value and composition handles and external focus/reset methods, materializes one editor, preserves direct naming and controlled ownership, and rejects independent Label association. An asInputRoot control in the same test retains the real paired Label protocol.
-  - id: T-BASE-INPUT-0001-CASE-RESET
-    title: Explicit reset replaces the editing lease without synthesizing user input
-    covers: [P-BASE-INPUT-EDITING-RESET, P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME]
-    expectation: Uncontrolled reset canonicalizes supplied or default text; controlled reset retires composition while retaining owner value and returning false. No editing event is synthesized, retired editors and detached calls cannot write, and synchronous reset reentry keeps the newer state.
   - id: T-BASE-INPUT-0001-CASE-SURFACE
     title: Root materializes one contentless native input with the accepted property surface
     covers:
@@ -31,8 +27,22 @@ cases:
     expectation: base-input-is-one-contentless-native-target-with-exact-props
   - id: T-BASE-INPUT-0001-CASE-TYPES
     title: State and event types preserve the single-line protocol boundary
-    covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME]
+    covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME, P-BASE-INPUT-RESET]
     expectation: input-state-and-event-types-are-normalized
+  - id: T-BASE-INPUT-0001-CASE-RESET
+    title: Complete Input roots inherit an explicit editing reset while preserving owner truth
+    covers:
+      [
+        P-BASE-INPUT-AUTHORING-ENTRIES,
+        P-BASE-INPUT-PHYSICAL-TARGET,
+        P-BASE-INPUT-RESET,
+        C-TEXT-CONTROL-0001-RESET,
+      ]
+    expectation: Actual Base, Shadcn and Brutalist Input instances reset dirty uncontrolled text to an explicit or latest default single-line value. Controlled resets return false and keep owner truth. Both modes retire active composition without synthesizing editing events, keep one physical editor, and accept fresh input. Invalid arguments and detached calls leave editing state unchanged.
+  - id: T-BASE-INPUT-0001-CASE-RESET-REENTRY
+    title: Reset state publication cannot resume after synchronous editing-view replacement
+    covers: [P-BASE-INPUT-RESET, P-BASE-INPUT-EVENTS-AND-IME, C-TEXT-CONTROL-0001-RESET]
+    expectation: Synchronous composing/value observers may reset again or detach and rejoin. Only the current reset and mounted view may publish its remaining facts, and stale callback delivery from the retired Text Control lease cannot edit the new target.
   - id: T-BASE-INPUT-0001-CASE-VIEW-COMPOSITION
     title: Retired editing views cannot retain or resume composition
     covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME, C-TEXT-CONTROL-0001-F]
@@ -52,10 +62,26 @@ implementations:
     status: passing
     path: packages/prototypes/base/test/input-reset.test.ts
     required: true
-    consumesCases: [T-BASE-INPUT-0001-CASE-RESET]
+    consumesCases: [T-BASE-INPUT-0001-CASE-RESET, T-BASE-INPUT-0001-CASE-RESET-REENTRY]
     exercises: [P-BASE-INPUT]
     notes:
-      - Actual Input prototype and Web TextControl host Runtime tests; this is separate from native GPUI and OS IME evidence.
+      - Uses actual complete Input prototypes, RuntimeSession and the Web Text Control host in happy-dom. Injected events and retained callbacks prove the protocol and lifecycle boundary, not native IME or assistive-technology acceptance.
+  - id: prototypes-base-input-reset-lease
+    kind: runtime-test
+    status: needs-review
+    path: packages/prototypes/base/test/input-reset-lease.test.ts
+    required: true
+    consumesCases: [T-BASE-INPUT-0001-CASE-RESET, T-BASE-INPUT-0001-CASE-RESET-REENTRY]
+    exercises: [P-BASE-INPUT]
+    notes:
+      - Retains the earlier actual-DOM replacement, detached lease and synchronous newer-reset regressions alongside the complete family suite.
+  - id: prototypes-base-input-reset-types
+    kind: workspace-check
+    status: passing
+    path: internal/contracts/types/input-reset.type-test.ts
+    required: true
+    consumesCases: [T-BASE-INPUT-0001-CASE-TYPES]
+    exercises: [P-BASE-INPUT]
   - id: prototypes-base-input-composition-lifetime
     kind: runtime-test
     status: passing
@@ -82,10 +108,12 @@ sources:
   - path: packages/prototypes/base/test/input.test.ts
   - path: packages/prototypes/base/test/input-editor.test.ts
   - path: packages/prototypes/base/test/input-reset.test.ts
+  - path: packages/prototypes/base/test/input-reset-lease.test.ts
+  - path: internal/contracts/types/input-reset.type-test.ts
 revisions:
   - version: 0.3.0-alpha.2
     change: revised
-    summary: Added explicit reset and directly named standalone editor cases while keeping paired ControlLabel participation on the full InputRoot entry.
+    summary: Added standalone editor and complete inherited Input reset evidence, current owner authority, composition retirement and synchronous mounted-view reentry.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Added source-bound editing-view retirement and synchronous reentry coverage across Base, Shadcn and Brutalist Input.

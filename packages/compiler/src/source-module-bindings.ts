@@ -15,7 +15,6 @@ export function partitionModuleBindings(
   const owned = new Set<string>();
   const dependencies = new Map<string, Set<string>>();
   for (const binding of bindings) {
-    if (binding.value.kind !== 'function') continue;
     const calls = new Set<string>();
     function visit(value: unknown): void {
       if (!value || typeof value !== 'object') return;
@@ -39,8 +38,10 @@ export function partitionModuleBindings(
         if (key !== 'type' && key !== 'span') visit(child);
     }
     // Defaults execute on invocation and may close over this owner or another owned helper.
-    for (const parameter of binding.value.function.parameters) visit(parameter.default);
-    visit(binding.value.function.body);
+    if (binding.value.kind === 'function') {
+      for (const parameter of binding.value.function.parameters) visit(parameter.default);
+      visit(binding.value.function.body);
+    } else visit(binding.value);
     dependencies.set(binding.name, calls);
   }
   let changed: boolean;

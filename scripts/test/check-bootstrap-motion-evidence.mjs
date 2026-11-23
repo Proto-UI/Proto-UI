@@ -13,7 +13,7 @@ export const BOOTSTRAP_MOTION_SUITES = Object.freeze([
     file: 'packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts',
     cases: 18,
   },
-  { file: 'packages/adapters/web-component/test/portal-conceal.test.ts', cases: 30 },
+  { file: 'packages/adapters/web-component/test/portal-conceal.test.ts', cases: 31 },
   { file: 'packages/modules/feedback/test/resident-width.test.ts', cases: 6 },
   { file: 'packages/adapters/base/test/web-resident-width.test.ts', cases: 7 },
   { file: 'packages/adapters/base/test/web-resident-width-adoption.test.ts', cases: 13 },
@@ -38,6 +38,8 @@ export const PROGRESS_CASES = ['document', 'direct-shadow'].flatMap((scope) =>
     file: `${scope}-${name}`,
   }))
 );
+export const PORTAL_REENTRY_TITLE =
+  'retains the reopened event gate after native detached attribute reentry';
 export const SPLIT_REJECTION_TITLE =
   'rejects unresolved Track clipping atomically without claiming split visual support';
 export const SPLIT_REJECTION_REASON =
@@ -114,6 +116,21 @@ export async function inspectBootstrapMotionReport(
     );
     return { ...required, occurrences: matches.length, actualCases: assertions.length };
   });
+  const portal = files.filter(
+    (file) =>
+      typeof file.name === 'string' &&
+      path.relative(root, file.name).replaceAll('\\', '/') ===
+        'packages/adapters/web-component/test/portal-conceal.test.ts'
+  );
+  check(() =>
+    assert.equal(
+      portal
+        .flatMap((file) => file.assertionResults ?? [])
+        .filter((test) => test.title === PORTAL_REENTRY_TITLE && test.status === 'passed').length,
+      1,
+      'The Happy-DOM native-attribute reentry control must execute exactly once'
+    )
+  );
   const progress = files.filter(
     (file) =>
       typeof file.name === 'string' &&
@@ -134,6 +151,7 @@ export async function inspectBootstrapMotionReport(
     suites,
     requiredFiles: 11,
     requiredAssertions: totalCases,
+    hostRegressionCases: { portalAttributeReentry: 1 },
     nativePositiveCases: { modalDocument: 6, progressDocument: 3, progressDirectShadow: 3 },
     negativeAdmissionCases: { progressExperimentalSplit: 1 },
   };
@@ -350,7 +368,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       process.exitCode = 1;
     } else
       console.log(
-        'Bootstrap motion: 11 files / 129 assertions executed; native artifacts verified.'
+        `Bootstrap motion: 11 files / ${totalCases} assertions executed; native artifacts verified.`
       );
   }
 }

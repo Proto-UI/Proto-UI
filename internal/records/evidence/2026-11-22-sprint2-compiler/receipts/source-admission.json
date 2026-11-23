@@ -1,0 +1,1411 @@
+{
+  "schema": "proto-ui.sprint2.consumer-inventory.v1",
+  "statusVocabulary": ["PASS", "FAIL", "UNSUPPORTED", "UNTESTED"],
+  "scope": "Frozen actual source × declared target × observed consumer mode. Source-admission rows do not certify ordinary installation, browser execution, platform execution or all original Issue conditions. Separate execution receipts remain source-bound.",
+  "candidate": {
+    "head": "ee943e59d6f6bd9a418c2ba6f11487e349d5ccc1",
+    "compilerBuild": {
+      "schema": "proto-ui.compiler-build.v1",
+      "revision": "a165c4058188aa802b475d1d50ce46ab0d574320",
+      "lockSha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+      "profilesSha256": "c50ae94bd3a7aa5f8852ce4b9216c72fc45773774a688659605c908992f7f212",
+      "node": "24.22.3",
+      "typescript": "5.9.3",
+      "esbuild": "0.25.12"
+    },
+    "compilerInputsMatchBuild": true,
+    "scriptSha256": "0999125a8ffb36cadd1a514fda72788504a278e21f312af532a27e157780b97e"
+  },
+  "tools": {
+    "node": "v24.22.3",
+    "typescript": "5.9.3",
+    "esbuild": "0.25.12",
+    "packageManager": "pnpm@10.32.1",
+    "lockSha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "profilesSha256": "c50ae94bd3a7aa5f8852ce4b9216c72fc45773774a688659605c908992f7f212"
+  },
+  "consumers": [
+    {
+      "name": "Shenko",
+      "repository": "https://github.com/cyjin-yl/shenko",
+      "revision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "target": "React 19.3.1 (consumer); admitted compiler React 19.2.6 independently checked",
+      "compiledPrototypes": ["transport-badge", "message-bubble"],
+      "adapterFamilies": [
+        "button",
+        "textarea",
+        "scroll-area",
+        "collapsible",
+        "drawer",
+        "toggle-group",
+        "input",
+        "separator",
+        "toggle"
+      ]
+    },
+    {
+      "name": "Verdant",
+      "repository": "https://github.com/OpenGreendam/verdant",
+      "revision": "91a775546ebd21a87d76d76568195a6513437719",
+      "target": "gpui-source-v1; inherits actual workspace GPUI e5f2f9db75e97613232b5c1946333e61fa3828ab",
+      "compiledPrototypes": ["pitch-gesture-surface"]
+    }
+  ],
+  "sourceAdmission": [
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "entrySha256": "a9b302e572108d42888d360b3c1fee699be0cf1b5b15f02da8b787bbb84299ab",
+      "exportName": "shadcnButton",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "0b44eb79bebcf8523fea268e6ca99562b61e7cb9fc7d5d2e3503c4366723fe61",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sha256": "209134c984c54e56b4de343c2349e209a4441ca1ee37a607b9d32525a2ead34e",
+          "bytes": 14921
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/index.ts",
+          "sha256": "a9b302e572108d42888d360b3c1fee699be0cf1b5b15f02da8b787bbb84299ab",
+          "bytes": 276
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/new-york.ts",
+          "sha256": "aae953b100cfe8ac1f536a6cfa4c0255bfa022e40df4953a28936babfb3cc7ee",
+          "bytes": 1443
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/paint.ts",
+          "sha256": "466dfd46c086cfa432423b21d419618e8605a77e894e82df426d2498137cb8c4",
+          "bytes": 1430
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/profiles.ts",
+          "sha256": "b44c4ea2ae124a7f1fadc15e3e12299a4b601284fa70aeacae6a5aeccd5fb689",
+          "bytes": 8939
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "26e0643ee6e4f618322f4b5a47b2426d6223c1d636ea4ae2aa28d307cee2175d",
+      "generatedSourceBytes": 123355,
+      "supportingSourceBytes": 191546
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/textarea/index.ts",
+      "entrySha256": "2d7c268ca82ba4ed9cbd1273d7129209e791ba0de6acbd7f9fdc6658a9bf79a5",
+      "exportName": "shadcnTextareaRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1004",
+        "category": "unsupported-input",
+        "message": "Top-level runtime bindings must be admitted static core declarations.",
+        "span": {
+          "file": "packages/prototypes/base/src/field/shared.ts",
+          "start": 6128,
+          "end": 6217,
+          "line": 167,
+          "column": 33,
+          "endLine": 171,
+          "endColumn": 3
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1004",
+          "category": "unsupported-input",
+          "message": "Top-level runtime bindings must be admitted static core declarations.",
+          "span": {
+            "file": "packages/prototypes/base/src/field/shared.ts",
+            "start": 6128,
+            "end": 6217,
+            "line": 167,
+            "column": 33,
+            "endLine": 171,
+            "endColumn": 3
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/scroll-area/index.ts",
+      "entrySha256": "7b0cc4cabd0b03ae861ba541a42ea421b5b8451f9e3974fb71a8706f38905542",
+      "exportName": "shadcnScrollAreaRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1006",
+        "category": "unsupported-input",
+        "message": "Context value does not match its declared key type.",
+        "span": {
+          "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+          "start": 401,
+          "end": 431,
+          "line": 10,
+          "column": 44,
+          "endLine": 10,
+          "endColumn": 74
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Context value does not match its declared key type.",
+          "span": {
+            "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+            "start": 401,
+            "end": 431,
+            "line": 10,
+            "column": 44,
+            "endLine": 10,
+            "endColumn": 74
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/scroll-area/index.ts",
+      "entrySha256": "7b0cc4cabd0b03ae861ba541a42ea421b5b8451f9e3974fb71a8706f38905542",
+      "exportName": "shadcnScrollAreaViewport",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1006",
+        "category": "unsupported-input",
+        "message": "Arrays cannot leak semantic handles into data.",
+        "span": {
+          "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+          "start": 1220,
+          "end": 1375,
+          "line": 31,
+          "column": 32,
+          "endLine": 36,
+          "endColumn": 4
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Arrays cannot leak semantic handles into data.",
+          "span": {
+            "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+            "start": 1220,
+            "end": 1375,
+            "line": 31,
+            "column": 32,
+            "endLine": 36,
+            "endColumn": 4
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/scroll-area/index.ts",
+      "entrySha256": "7b0cc4cabd0b03ae861ba541a42ea421b5b8451f9e3974fb71a8706f38905542",
+      "exportName": "shadcnScrollAreaScrollbar",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1024",
+        "category": "unsupported-input",
+        "message": "Rule states must resolve to declared portable state identities, not live handles.",
+        "span": {
+          "file": "packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts",
+          "start": 1007,
+          "end": 1024,
+          "line": 26,
+          "column": 34,
+          "endLine": 26,
+          "endColumn": 51
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1024",
+          "category": "unsupported-input",
+          "message": "Rule states must resolve to declared portable state identities, not live handles.",
+          "span": {
+            "file": "packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts",
+            "start": 1007,
+            "end": 1024,
+            "line": 26,
+            "column": 34,
+            "endLine": 26,
+            "endColumn": 51
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/scroll-area/index.ts",
+      "entrySha256": "7b0cc4cabd0b03ae861ba541a42ea421b5b8451f9e3974fb71a8706f38905542",
+      "exportName": "shadcnScrollAreaThumb",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "6786098cc3ee15e379867579f27122c3aee75615e2f2bad1247d584ceb27e4af",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/scroll-area/index.ts",
+          "sha256": "5835af356f21896f1fb85101ef38ed1d2cbcfea79e1e16a676dc5ba6eccef006",
+          "bytes": 970
+        },
+        {
+          "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+          "sha256": "5afd5f3183173e0afee9bc7e1c201c0a85aeea22efbc92e4aeb527ac3d87be00",
+          "bytes": 944
+        },
+        {
+          "file": "packages/prototypes/base/src/scroll-area/scrollbar.proto.ts",
+          "sha256": "4b137b5d5b29aa4b0d585dc4a72de04ca72a37a3645c1c88967c4960bc835486",
+          "bytes": 1469
+        },
+        {
+          "file": "packages/prototypes/base/src/scroll-area/shared.ts",
+          "sha256": "5d43a8ec1203b12d7ec42a7113851fa8b658e36d37ae77f8be84813b8ced0030",
+          "bytes": 744
+        },
+        {
+          "file": "packages/prototypes/base/src/scroll-area/thumb.proto.ts",
+          "sha256": "9b1d821b02d07245d52dfd86de9923e1fc9dd90415a2614bd0d87949c40bf8a5",
+          "bytes": 865
+        },
+        {
+          "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+          "sha256": "dffdd42415e2adc09b22bb248038b45dbd947cf1ac2bd8ee4a8c5d8c839723e6",
+          "bytes": 3260
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/scroll-area/index.ts",
+          "sha256": "7b0cc4cabd0b03ae861ba541a42ea421b5b8451f9e3974fb71a8706f38905542",
+          "bytes": 1036
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/scroll-area/root.proto.ts",
+          "sha256": "93ca6c9a0d87bd0e3655cfcef5c4726cf8bea1ac43b4b72dc446ea16d0e76b63",
+          "bytes": 660
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts",
+          "sha256": "b74951b4288a01309ea9e4796e74b5f56bbc187ff7e33a555708b73b5a424b26",
+          "bytes": 1831
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts",
+          "sha256": "c172cdba68e589464bd0b9f43a10aaba9dff00a5209680b5e6438ad9bf45820e",
+          "bytes": 1220
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/scroll-area/viewport.proto.ts",
+          "sha256": "f7a0e57aefc329b6113e54e029ff5f5975a460c56bdb506ce51b53b209f4af05",
+          "bytes": 1307
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "3f42308dfe80e6ff60ef22a8930d1fe3c61a2c0938881b3be708869f9a664329",
+      "generatedSourceBytes": 56333,
+      "supportingSourceBytes": 83521
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/collapsible/index.ts",
+      "entrySha256": "f74c60c73a6ac6e309ddcc69d7ba0f7df100580cb9eb0d9abad751795b2a8c07",
+      "exportName": "shadcnCollapsibleRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1020",
+        "category": "unsupported-input",
+        "message": "Unsupported ordinary value type TypeReference.",
+        "span": {
+          "file": "packages/prototypes/base/src/collapsible/root.proto.ts",
+          "start": 1699,
+          "end": 1710,
+          "line": 48,
+          "column": 22,
+          "endLine": 48,
+          "endColumn": 33
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type TypeReference.",
+          "span": {
+            "file": "packages/prototypes/base/src/collapsible/root.proto.ts",
+            "start": 1699,
+            "end": 1710,
+            "line": 48,
+            "column": 22,
+            "endLine": 48,
+            "endColumn": 33
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/collapsible/index.ts",
+      "entrySha256": "f74c60c73a6ac6e309ddcc69d7ba0f7df100580cb9eb0d9abad751795b2a8c07",
+      "exportName": "shadcnCollapsibleTrigger",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "e31c0ea636609a9fc0daf88de33dafa6b434c036f7cf6ebb205084b0bf14d7dd",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/collapsible/content.proto.ts",
+          "sha256": "a24c33ab7e7314976503185aa906ed307f275a8d9fcd5b3a5f9220e0a56bbc98",
+          "bytes": 2423
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/index.ts",
+          "sha256": "107807b07afd148191e49d303dbb5001760e58b84b14207bae8a189f25642605",
+          "bytes": 798
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/root.proto.ts",
+          "sha256": "25228470f66a41f7aa3e3886d36c8c85a85084f9cc25c60f9ff7c20e52b937f9",
+          "bytes": 4946
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/shared.ts",
+          "sha256": "4df04acf2748eb9b9a3ac5c10eb20e79874f4b7d0782f216931b180027870c91",
+          "bytes": 1894
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/trigger.proto.ts",
+          "sha256": "58b796dbcf0367cfd23129c8a33c6b0f122a4ef9d20bf2cc92f1f3f1e8fa3af9",
+          "bytes": 4816
+        },
+        {
+          "file": "packages/prototypes/base/src/tools/index.ts",
+          "sha256": "4fa7c07b47c1a30806ba8008f080960e715994ace9ac93435b153a83821c02c3",
+          "bytes": 505
+        },
+        {
+          "file": "packages/prototypes/base/src/tools/use-escape-key.ts",
+          "sha256": "79aab292364faa4e38ca3022d1fc6a4287a4f2eb0c5138682f0ecaa244dae661",
+          "bytes": 1075
+        },
+        {
+          "file": "packages/prototypes/base/src/tools/use-open-state.ts",
+          "sha256": "ceb420a55e8493faaa02d38f8391125a1ebff4158ac5811ff2605d8ce9ab606c",
+          "bytes": 4486
+        },
+        {
+          "file": "packages/prototypes/base/src/transition/as-transition.proto.ts",
+          "sha256": "614da28fe4d3f796d814c4d7032ba529f39964d9d940832d643c8594cc79fe9d",
+          "bytes": 13530
+        },
+        {
+          "file": "packages/prototypes/base/src/transition/machine.ts",
+          "sha256": "d766e4a44e021ac4a19fbfefac1b611a9b2066991cc64558f3ede9ce90a320e6",
+          "bytes": 16976
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+          "sha256": "ff6b2bec65e860a91727edd63245f18c574c533f2a16690e1f46874318c835e4",
+          "bytes": 1113
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/index.ts",
+          "sha256": "f74c60c73a6ac6e309ddcc69d7ba0f7df100580cb9eb0d9abad751795b2a8c07",
+          "bytes": 660
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/root.proto.ts",
+          "sha256": "d869e465dd6a596024d2503ca329a343c0add968a8831b7f0fb79dd713f83ae6",
+          "bytes": 1184
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/trigger.proto.ts",
+          "sha256": "20383b3cfd4a23c24694e879f38165af8bfab8f8dd5624d862498d03aa0bfec8",
+          "bytes": 2169
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "1f75799cae6693384f5eddf9fe7953a6e5d9058b5bd76ce65eae8e64df352e01",
+      "generatedSourceBytes": 71027,
+      "supportingSourceBytes": 142673
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/collapsible/index.ts",
+      "entrySha256": "f74c60c73a6ac6e309ddcc69d7ba0f7df100580cb9eb0d9abad751795b2a8c07",
+      "exportName": "shadcnCollapsibleContent",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "e31c0ea636609a9fc0daf88de33dafa6b434c036f7cf6ebb205084b0bf14d7dd",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/collapsible/content.proto.ts",
+          "sha256": "a24c33ab7e7314976503185aa906ed307f275a8d9fcd5b3a5f9220e0a56bbc98",
+          "bytes": 2423
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/index.ts",
+          "sha256": "107807b07afd148191e49d303dbb5001760e58b84b14207bae8a189f25642605",
+          "bytes": 798
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/root.proto.ts",
+          "sha256": "25228470f66a41f7aa3e3886d36c8c85a85084f9cc25c60f9ff7c20e52b937f9",
+          "bytes": 4946
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/shared.ts",
+          "sha256": "4df04acf2748eb9b9a3ac5c10eb20e79874f4b7d0782f216931b180027870c91",
+          "bytes": 1894
+        },
+        {
+          "file": "packages/prototypes/base/src/collapsible/trigger.proto.ts",
+          "sha256": "58b796dbcf0367cfd23129c8a33c6b0f122a4ef9d20bf2cc92f1f3f1e8fa3af9",
+          "bytes": 4816
+        },
+        {
+          "file": "packages/prototypes/base/src/tools/index.ts",
+          "sha256": "4fa7c07b47c1a30806ba8008f080960e715994ace9ac93435b153a83821c02c3",
+          "bytes": 505
+        },
+        {
+          "file": "packages/prototypes/base/src/tools/use-escape-key.ts",
+          "sha256": "79aab292364faa4e38ca3022d1fc6a4287a4f2eb0c5138682f0ecaa244dae661",
+          "bytes": 1075
+        },
+        {
+          "file": "packages/prototypes/base/src/tools/use-open-state.ts",
+          "sha256": "ceb420a55e8493faaa02d38f8391125a1ebff4158ac5811ff2605d8ce9ab606c",
+          "bytes": 4486
+        },
+        {
+          "file": "packages/prototypes/base/src/transition/as-transition.proto.ts",
+          "sha256": "614da28fe4d3f796d814c4d7032ba529f39964d9d940832d643c8594cc79fe9d",
+          "bytes": 13530
+        },
+        {
+          "file": "packages/prototypes/base/src/transition/machine.ts",
+          "sha256": "d766e4a44e021ac4a19fbfefac1b611a9b2066991cc64558f3ede9ce90a320e6",
+          "bytes": 16976
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+          "sha256": "ff6b2bec65e860a91727edd63245f18c574c533f2a16690e1f46874318c835e4",
+          "bytes": 1113
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/index.ts",
+          "sha256": "f74c60c73a6ac6e309ddcc69d7ba0f7df100580cb9eb0d9abad751795b2a8c07",
+          "bytes": 660
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/root.proto.ts",
+          "sha256": "d869e465dd6a596024d2503ca329a343c0add968a8831b7f0fb79dd713f83ae6",
+          "bytes": 1184
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/collapsible/trigger.proto.ts",
+          "sha256": "20383b3cfd4a23c24694e879f38165af8bfab8f8dd5624d862498d03aa0bfec8",
+          "bytes": 2169
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "d4f46cfaf34ae2662ccb056e9ffe885e914f61f86e71738e747ba2b741ee6ca5",
+      "generatedSourceBytes": 58942,
+      "supportingSourceBytes": 106429
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/drawer/index.ts",
+      "entrySha256": "3940f5909a5a9d245bcd108e6436ca5dc394835d992af637bacef33575ddc7a4",
+      "exportName": "drawerRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1003",
+        "category": "unsupported-input",
+        "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+        "span": {
+          "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+          "start": 123,
+          "end": 134,
+          "line": 2,
+          "column": 24,
+          "endLine": 2,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+          "span": {
+            "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+            "start": 123,
+            "end": 134,
+            "line": 2,
+            "column": 24,
+            "endLine": 2,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/drawer/index.ts",
+      "entrySha256": "3940f5909a5a9d245bcd108e6436ca5dc394835d992af637bacef33575ddc7a4",
+      "exportName": "drawerContent",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1003",
+        "category": "unsupported-input",
+        "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+        "span": {
+          "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+          "start": 123,
+          "end": 134,
+          "line": 2,
+          "column": 24,
+          "endLine": 2,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+          "span": {
+            "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+            "start": 123,
+            "end": 134,
+            "line": 2,
+            "column": 24,
+            "endLine": 2,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/drawer/index.ts",
+      "entrySha256": "3940f5909a5a9d245bcd108e6436ca5dc394835d992af637bacef33575ddc7a4",
+      "exportName": "drawerMask",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1003",
+        "category": "unsupported-input",
+        "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+        "span": {
+          "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+          "start": 123,
+          "end": 134,
+          "line": 2,
+          "column": 24,
+          "endLine": 2,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+          "span": {
+            "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+            "start": 123,
+            "end": 134,
+            "line": 2,
+            "column": 24,
+            "endLine": 2,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/drawer/index.ts",
+      "entrySha256": "3940f5909a5a9d245bcd108e6436ca5dc394835d992af637bacef33575ddc7a4",
+      "exportName": "drawerHeader",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1003",
+        "category": "unsupported-input",
+        "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+        "span": {
+          "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+          "start": 123,
+          "end": 134,
+          "line": 2,
+          "column": 24,
+          "endLine": 2,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+          "span": {
+            "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+            "start": 123,
+            "end": 134,
+            "line": 2,
+            "column": 24,
+            "endLine": 2,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/drawer/index.ts",
+      "entrySha256": "3940f5909a5a9d245bcd108e6436ca5dc394835d992af637bacef33575ddc7a4",
+      "exportName": "drawerTitle",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1003",
+        "category": "unsupported-input",
+        "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+        "span": {
+          "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+          "start": 123,
+          "end": 134,
+          "line": 2,
+          "column": 24,
+          "endLine": 2,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+          "span": {
+            "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+            "start": 123,
+            "end": 134,
+            "line": 2,
+            "column": 24,
+            "endLine": 2,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/drawer/index.ts",
+      "entrySha256": "3940f5909a5a9d245bcd108e6436ca5dc394835d992af637bacef33575ddc7a4",
+      "exportName": "drawerDescription",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1003",
+        "category": "unsupported-input",
+        "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+        "span": {
+          "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+          "start": 123,
+          "end": 134,
+          "line": 2,
+          "column": 24,
+          "endLine": 2,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import asAxisInput from @proto.ui/hooks: Axis Input capability lowering is not implemented.",
+          "span": {
+            "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+            "start": 123,
+            "end": 134,
+            "line": 2,
+            "column": 24,
+            "endLine": 2,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/toggle-group/index.ts",
+      "entrySha256": "82aa70ac25f16af19ce39a0371fbd4bc1d85d4167515d9886bc7312c95fe3d57",
+      "exportName": "shadcnToggleGroupRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1020",
+        "category": "unsupported-input",
+        "message": "Array elements must be data values.",
+        "span": {
+          "file": "packages/prototypes/base/src/toggle-group/root.proto.ts",
+          "start": 2192,
+          "end": 2209,
+          "line": 56,
+          "column": 25,
+          "endLine": 56,
+          "endColumn": 42
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Array elements must be data values.",
+          "span": {
+            "file": "packages/prototypes/base/src/toggle-group/root.proto.ts",
+            "start": 2192,
+            "end": 2209,
+            "line": 56,
+            "column": 25,
+            "endLine": 56,
+            "endColumn": 42
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/toggle-group/index.ts",
+      "entrySha256": "82aa70ac25f16af19ce39a0371fbd4bc1d85d4167515d9886bc7312c95fe3d57",
+      "exportName": "shadcnToggleGroupItem",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1006",
+        "category": "unsupported-input",
+        "message": "Read of undeclared prop value.",
+        "span": {
+          "file": "packages/prototypes/base/src/toggle-group/item.proto.ts",
+          "start": 724,
+          "end": 745,
+          "line": 28,
+          "column": 14,
+          "endLine": 28,
+          "endColumn": 35
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Read of undeclared prop value.",
+          "span": {
+            "file": "packages/prototypes/base/src/toggle-group/item.proto.ts",
+            "start": 724,
+            "end": 745,
+            "line": 28,
+            "column": 14,
+            "endLine": 28,
+            "endColumn": 35
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/input/index.ts",
+      "entrySha256": "9037a761fd4330103679420e92e2e2a9deaa17724317067b4b60da741f9e9a24",
+      "exportName": "shadcnInputRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "UNSUPPORTED",
+      "firstDiagnostic": {
+        "code": "PUI1006",
+        "category": "unsupported-input",
+        "message": "Outward payload does not match its declared data boundary.",
+        "span": {
+          "file": "packages/prototypes/base/src/input/root.proto.ts",
+          "start": 6492,
+          "end": 6530,
+          "line": 180,
+          "column": 5,
+          "endLine": 180,
+          "endColumn": 43
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Outward payload does not match its declared data boundary.",
+          "span": {
+            "file": "packages/prototypes/base/src/input/root.proto.ts",
+            "start": 6492,
+            "end": 6530,
+            "line": 180,
+            "column": 5,
+            "endLine": 180,
+            "endColumn": 43
+          }
+        }
+      ]
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/separator/index.ts",
+      "entrySha256": "2697f7c79e6ab1875f030109bcd708dd5990eeae13590f753487544bf38ccbc5",
+      "exportName": "shadcnSeparatorRoot",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "e9202713f0d2773412b776d211de4318ea5fe43c364b6a02c1125137249fb75b",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/separator/index.ts",
+          "sha256": "1d2d17ce17ff89704bf80b4ac182def33342563f9952313c50d7dec617ff5b66",
+          "bytes": 281
+        },
+        {
+          "file": "packages/prototypes/base/src/separator/root.proto.ts",
+          "sha256": "4e8c5bcab788ea8d618a4c2a39269baad4220b968d0d69dcbfd33812c9330c3d",
+          "bytes": 2786
+        },
+        {
+          "file": "packages/prototypes/base/src/separator/types.ts",
+          "sha256": "6c1036bdee8bea59a3b29af42f2619892a6bb3e2d712f26020d3ead7ba1fed6b",
+          "bytes": 552
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/separator/index.ts",
+          "sha256": "2697f7c79e6ab1875f030109bcd708dd5990eeae13590f753487544bf38ccbc5",
+          "bytes": 239
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/separator/root.proto.ts",
+          "sha256": "6bf356b670e54fb1949d1151d3a38bf1be398b25979310ab57dfaf476b50eade",
+          "bytes": 2321
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "afebb76d72ed4903d5543d0f3c74f1281326120938378afcecda94ddef1d0a83",
+      "generatedSourceBytes": 60177,
+      "supportingSourceBytes": 82246
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "consumerSource": "crates/shenko-ui/web/src/ui-kit.tsx",
+      "consumerSourceSha256": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "observedMode": "adapter",
+      "scope": "Compiler migration feasibility only; the frozen application uses this entry through createReactAdapter",
+      "entry": "packages/prototypes/shadcn/src/toggle/index.ts",
+      "entrySha256": "d422c9a5da0cc5c30eef79fc2ba02def0b39604edc64e29af42591ebf2a40065",
+      "exportName": "shadcnToggle",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "3339f6dfc5e6d7120b4ffdbd81b32a19bb8e81c980af36aab1b78d65b113389a",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/toggle/index.ts",
+          "sha256": "0e583ba0defec1bc49b23e915d821c5e62f771605b4a91a4c6b223a95f5eea16",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/base/src/toggle/toggle.proto.ts",
+          "sha256": "8b04a35d1e0e61899eb4956bd1e117a8b63b2e369a5314d8cf30ca46fdcb033f",
+          "bytes": 7589
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/toggle/index.ts",
+          "sha256": "d422c9a5da0cc5c30eef79fc2ba02def0b39604edc64e29af42591ebf2a40065",
+          "bytes": 208
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/toggle/profiles.ts",
+          "sha256": "b867954b1033c3c62e23a06def3dfe7e543eb0f03dfa709bffe4ecdf2962f1ee",
+          "bytes": 3857
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/toggle/toggle.proto.ts",
+          "sha256": "0ff35cdb8228ead7c2e43845016c49fe94682d816ea87324d0ec530586fbf87f",
+          "bytes": 4480
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "eae0b92e1c181d18f240e93437967972211abf2ae23866088cd14f3dd52f3365",
+      "generatedSourceBytes": 88378,
+      "supportingSourceBytes": 185927
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "observedMode": "compiled",
+      "entry": "crates/shenko-ui/web/prototypes/transport-badge.proto.ts",
+      "entrySha256": "2ee02ccc9ca4fdd8bb4d031d4d390ba4fe78113d290cd9f011735f77c1d272ae",
+      "exportName": "default",
+      "componentName": "CompiledTransportBadge",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "actualApplicationVersion": "19.3.1",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "d96e8c6034df472d348a6be97a150505405bd933c075230e31bf5b8d9b527009",
+      "sourceFiles": [
+        {
+          "file": "transport-badge.proto.ts",
+          "sha256": "2ee02ccc9ca4fdd8bb4d031d4d390ba4fe78113d290cd9f011735f77c1d272ae",
+          "bytes": 1995
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "fbb916b4a810b4daf8453acf36c02497f46e3b40bc273ef764139b8c70ddebc3",
+      "generatedSourceBytes": 41092,
+      "supportingSourceBytes": 15069
+    },
+    {
+      "consumer": "Shenko",
+      "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "observedMode": "compiled",
+      "entry": "crates/shenko-ui/web/prototypes/message-bubble.proto.ts",
+      "entrySha256": "50915675a5fb64b14bf4784594819ea64a76ceb2234e15f7db3321be03f61e8d",
+      "exportName": "default",
+      "componentName": "CompiledMessageBubble",
+      "profile": "react-dom-source-v1",
+      "admittedTargetVersion": "19.2.6",
+      "actualApplicationVersion": "19.3.1",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "276686d95d44f9191bef18c29327a20e2b6aa9ec65ac3c61ec7a2c9941f40180",
+      "sourceFiles": [
+        {
+          "file": "message-bubble.proto.ts",
+          "sha256": "50915675a5fb64b14bf4784594819ea64a76ceb2234e15f7db3321be03f61e8d",
+          "bytes": 1553
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "6b9aeaad52c5c13b42df9dfd6168b4090b4c6342f22b28c26fa9338915c243e6",
+      "generatedSourceBytes": 40822,
+      "supportingSourceBytes": 15069
+    },
+    {
+      "consumer": "Verdant",
+      "consumerRevision": "91a775546ebd21a87d76d76568195a6513437719",
+      "observedMode": "compiled",
+      "entry": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
+      "entrySha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78",
+      "exportName": "default",
+      "componentName": "PitchGestureSurface",
+      "profile": "gpui-source-v1",
+      "gpuiDependency": "workspace",
+      "status": "PASS",
+      "firstDiagnostic": null,
+      "sourceGraphSha256": "5a3a0f8a41876b1c5bfff90116767a7c9c2e330bbf48c07205d9ac5fb27e2806",
+      "sourceFiles": [
+        {
+          "file": "pitch-gesture-surface.proto.ts",
+          "sha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78",
+          "bytes": 8119
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "gpui",
+          "version": "workspace",
+          "role": "target"
+        },
+        {
+          "name": "serde",
+          "version": "1.0",
+          "role": "target"
+        },
+        {
+          "name": "serde_json",
+          "version": "1.0",
+          "role": "target"
+        },
+        {
+          "name": "proto-ui-gpui-native",
+          "version": "0.2.0",
+          "role": "host-bridge"
+        },
+        {
+          "name": "unicode-segmentation",
+          "version": "=1.13.3",
+          "role": "target"
+        },
+        {
+          "name": "data-url",
+          "version": "=0.3.2",
+          "role": "target"
+        },
+        {
+          "name": "image",
+          "version": "=0.25.10",
+          "role": "target"
+        }
+      ],
+      "generatedSourceSha256": "905a0a79e2e47ab4dd822599bd64981133217c90590f932969fa60c46c454d7c",
+      "generatedSourceBytes": 55501,
+      "supportingSourceBytes": 466376
+    }
+  ],
+  "absentUsage": {
+    "scope": "Authored public entry imports in the frozen consumer sources; aggregate bundled library definitions are not application usage evidence.",
+    "entries": ["Tree", "DataTable", "VirtualList", "Resizable", "Carousel"],
+    "Shenko": "No direct authored consumer usage found in the frozen source inventory",
+    "Verdant": "No direct authored consumer usage found in the frozen source inventory"
+  }
+}

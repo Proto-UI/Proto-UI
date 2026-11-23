@@ -10,6 +10,10 @@ import { launchBrowser } from '../../../../apps/www/src/content/docs/zh-cn/brows
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prototype-style-tokens';
 import { renderThemeCss } from '../src/theme';
+import {
+  isRetainedClosedPortal,
+  isPhysicallyRetiredPortal,
+} from '../../../../scripts/test/bootstrap-modal-observation';
 
 type Family = 'dialog' | 'alert-dialog';
 type Part = 'content' | 'mask';
@@ -24,6 +28,7 @@ type PartSample = {
   owner: number;
   viewEpoch: number | null;
   created: number;
+  mounted: number;
   unmounted: number;
   top: number;
   opacity: number;
@@ -95,6 +100,7 @@ beforeAll(async () => {
           "export {AdaptToWebComponent as adapt} from './packages/adapters/web-component/src/adapt';",
           "export {setElementProps} from './packages/adapters/web-component/src/props';",
           "export {isWebComponentPortaled} from './packages/adapters/web-component/src/portal-mount';",
+          "export {isRetainedClosedPortal,isPhysicallyRetiredPortal} from './scripts/test/bootstrap-modal-observation.ts';",
         ].join('\n'),
         resolveDir: repositoryRoot,
         loader: 'ts',
@@ -195,8 +201,8 @@ async function createPage(family: Family, errors: string[], allocated: (page: Pa
     const lifecycle: { time: number; part: string; event: Record<string, unknown> }[] = [];
     const phaseEvents: { time: number; part: Part; phase: Phase }[] = [];
     const facts = {
-      content: { viewEpoch: null as number | null, created: 0, unmounted: 0 },
-      mask: { viewEpoch: null as number | null, created: 0, unmounted: 0 },
+      content: { viewEpoch: null as number | null, created: 0, mounted: 0, unmounted: 0 },
+      mask: { viewEpoch: null as number | null, created: 0, mounted: 0, unmounted: 0 },
     };
     const make = (part: string) => {
       const Constructor = p.adapt(source[prefix + part], {
@@ -206,7 +212,10 @@ async function createPage(family: Family, errors: string[], allocated: (page: Pa
             const count = part === 'Content' ? facts.content : part === 'Mask' ? facts.mask : null;
             if (!count) return;
             if (event.type === 'instance.created') count.created++;
-            if (event.type === 'mount.mounted') count.viewEpoch = event.epoch as number;
+            if (event.type === 'mount.mounted') {
+              count.viewEpoch = event.epoch as number;
+              count.mounted++;
+            }
             if (event.type === 'unmount.done') count.unmounted++;
           },
         },
@@ -346,13 +355,11 @@ async function createPage(family: Family, errors: string[], allocated: (page: Pa
         take(null);
         if (!complete) ticket = requestAnimationFrame(frame);
       });
-    const settled = (open: boolean) => (value: Sample) =>
+    const settled = (open: boolean, reference: Sample) => (value: Sample) =>
       open
         ? value.content.phase === 'entered' && value.mask.phase === 'entered'
-        : value.content.phase === 'closed' &&
-          value.mask.phase === 'closed' &&
-          value.content.detached &&
-          value.mask.detached;
+        : p.isPhysicallyRetiredPortal(value.content, reference.content) &&
+          p.isPhysicallyRetiredPortal(value.mask, reference.mask);
     const subject = {
       sample,
       async ready() {
@@ -375,7 +382,8 @@ async function createPage(family: Family, errors: string[], allocated: (page: Pa
       },
       begin(open: boolean, name: string) {
         stage = name;
-        pending = (async () => observe(await update(open), name, settled(open)))();
+        const reference = sample();
+        pending = (async () => observe(await update(open), name, settled(open, reference)))();
       },
       reverse(kind: 'leaving' | 'barrier', label: string = kind) {
         pending = (async () => {
@@ -385,14 +393,16 @@ async function createPage(family: Family, errors: string[], allocated: (page: Pa
             await update(false),
             stage,
             (value, elapsed) =>
-              kind === 'barrier' ? value.content.phase === 'closed' : elapsed >= 75,
+              kind === 'barrier'
+                ? p.isRetainedClosedPortal(value.content, entered.content)
+                : elapsed >= 75,
             0
           );
           const before = sample();
           stage = label + '-reopen';
           const started = await update(true),
             after = sample();
-          const returning = await observe(started, stage, settled(true));
+          const returning = await observe(started, stage, settled(true, entered));
           return { entered, closing, before, after, returning };
         })();
       },
@@ -610,7 +620,10 @@ function assertRetained(trace: Trace, expected: Sample) {
     expect(sample.open).toBe(true);
     expect(sample.content.owner).toBe(expected.content.owner);
     expect(sample.content.viewEpoch).toBe(expected.content.viewEpoch);
+    expect(sample.content.created).toBe(expected.content.created);
+    expect(sample.content.mounted).toBe(expected.content.mounted);
     expect(sample.content.unmounted).toBe(expected.content.unmounted);
+    expect(sample.content.portaled).toBe(true);
     expect(sample.content.detached).toBe(false);
     expect(sample.content.inert).toBe(false);
   }
@@ -661,8 +674,8 @@ describe.each(['dialog', 'alert-dialog'] as const)(
         for (const value of leaving.samples.filter((value) => value.content.phase === 'leaving'))
           expect(Math.abs(value.content.top - value.referenceLeaveTop)).toBeLessThan(1);
         for (const part of ['content', 'mask'] as const) {
-          const barrier = leaving.samples.filter(
-            (value) => value[part].phase === 'closed' && !value[part].detached
+          const barrier = leaving.samples.filter((value) =>
+            isRetainedClosedPortal(value[part], entered[part])
           );
           expect(barrier.length, `${part}: observe the retained Portal barrier`).toBeGreaterThan(0);
           for (const value of barrier) {
@@ -675,7 +688,11 @@ describe.each(['dialog', 'alert-dialog'] as const)(
             expect(value[part].concealed, `${part}: closed must not recover visible paint`).toBe(
               true
             );
-          expect(leaving.samples.at(-1)![part].detached).toBe(true);
+          const retired = leaving.samples.at(-1)![part];
+          expect(isPhysicallyRetiredPortal(retired, entered[part])).toBe(true);
+          expect(retired.portaled).toBe(false);
+          expect(retired.mounted).toBe(entered[part].mounted);
+          expect(retired.unmounted).toBe(entered[part].unmounted + 1);
         }
         await captureVisualJourney(page, family, 'enter-close', evidence, images);
       });
@@ -697,8 +714,12 @@ describe.each(['dialog', 'alert-dialog'] as const)(
           )) as Reversal;
           evidence.reversal = reversal;
           expect(reversal.closing.reason).toBe('condition');
-          expect(reversal.before.content.detached).toBe(false);
           expect(reversal.before.content.portaled).toBe(true);
+          expect(reversal.before.content.owner).toBe(reversal.entered.content.owner);
+          expect(reversal.before.content.viewEpoch).toBe(reversal.entered.content.viewEpoch);
+          expect(reversal.before.content.created).toBe(reversal.entered.content.created);
+          expect(reversal.before.content.mounted).toBe(reversal.entered.content.mounted);
+          expect(reversal.before.content.unmounted).toBe(reversal.entered.content.unmounted);
           expect(reversal.after.content.phase).toBe('entering');
           expect(reversal.after.content.opacity).toBeCloseTo(
             kind === 'barrier' ? 0 : reversal.before.content.opacity,
@@ -709,11 +730,16 @@ describe.each(['dialog', 'alert-dialog'] as const)(
             1
           );
           if (kind === 'barrier') {
+            expect(isRetainedClosedPortal(reversal.before.content, reversal.entered.content)).toBe(
+              true
+            );
+            expect(reversal.before.content.detached).toBe(true);
             expect(reversal.before.content.phase).toBe('closed');
             expect(reversal.before.content.present).toBe(false);
             expect(reversal.before.content.concealed).toBe(true);
             expect(reversal.before.content.inert).toBe(true);
           } else {
+            expect(reversal.before.content.detached).toBe(false);
             expect(reversal.before.content.phase).toBe('leaving');
             expect(reversal.before.content.opacity).toBeGreaterThan(0);
             expect(reversal.before.content.opacity).toBeLessThan(1);

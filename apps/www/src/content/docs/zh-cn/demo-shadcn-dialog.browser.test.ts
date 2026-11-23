@@ -108,7 +108,10 @@ async function captureNativeState(
 }
 
 type PointerSample = { trusted: boolean; partial: boolean };
-type PointerSampleWindow = Window & { __nextPointerSample?: Promise<PointerSample> };
+type PointerSampleWindow = Window & {
+  __nextPointerSample?: Promise<PointerSample>;
+  __cancelPointerSample?: () => void;
+};
 
 let browser: Browser;
 let baseUrl = '';
@@ -122,7 +125,9 @@ describe('Shadcn Dialog native lifecycle', () => {
         files: await Promise.all(
           sourcePaths.map(async (file) => ({
             path: file,
-            sha256: createHash('sha256').update(await readFile(file)).digest('hex'),
+            sha256: createHash('sha256')
+              .update(await readFile(file))
+              .digest('hex'),
           }))
         ),
         qualification:
@@ -254,9 +259,7 @@ describe('Shadcn Dialog native lifecycle', () => {
               projectionCoordinates
             );
             await expect
-              .poll(() =>
-                content.evaluate((element) => element.contains(document.activeElement))
-              )
+              .poll(() => content.evaluate((element) => element.contains(document.activeElement)))
               .toBe(true);
             const relations = await content.evaluate((element) =>
               ['aria-labelledby', 'aria-describedby'].map((attribute) => {
@@ -438,6 +441,33 @@ describe('Shadcn Dialog native lifecycle', () => {
         );
         await page.mouse.click(5, 5);
 
+        // Arm the passive native-input observer before waiting for the 50ms
+        // partial-detachment window. Installing it inside that window adds a
+        // protocol round trip before the actual click and can miss the subject.
+        await page.evaluate(() => {
+          const probe = window as PointerSampleWindow;
+          const controller = new AbortController();
+          probe.__cancelPointerSample = () => controller.abort();
+          probe.__nextPointerSample = new Promise((resolve) => {
+            document.addEventListener(
+              'pointerdown',
+              (event) => {
+                const mask = document.querySelector('wc-shadcn-dialog-mask');
+                const content = document.querySelector('wc-shadcn-dialog-content');
+                resolve({
+                  trusted: event.isTrusted,
+                  partial: Boolean(
+                    mask?.hasAttribute('data-pui-view-detached') &&
+                    content &&
+                    !content.hasAttribute('data-pui-view-detached') &&
+                    content.getAttribute('data-transition-state') === 'leaving'
+                  ),
+                });
+              },
+              { once: true, capture: true, passive: true, signal: controller.signal }
+            );
+          });
+        });
         // The normal 150ms/200ms leave clocks stay intact. A missed window is
         // not evidence of repair: observe the actual next native pointer sample.
         try {
@@ -455,6 +485,12 @@ describe('Shadcn Dialog native lifecycle', () => {
             { polling: 1, timeout: 1000 }
           );
         } catch {
+          await page.evaluate(() => {
+            const probe = window as PointerSampleWindow;
+            probe.__cancelPointerSample?.();
+            delete probe.__cancelPointerSample;
+            delete probe.__nextPointerSample;
+          });
           await page.waitForFunction(() =>
             document
               .querySelector('wc-shadcn-dialog-content')
@@ -462,34 +498,15 @@ describe('Shadcn Dialog native lifecycle', () => {
           );
           continue;
         }
-        // Install the observer before the click, not alongside it. Sent together,
-        // the click could reach the page first; a `once` listener installed
-        // after it would then wait for a pointer sample that never comes.
-        await page.evaluate(() => {
-          (window as PointerSampleWindow).__nextPointerSample = new Promise((resolve) => {
-            document.addEventListener(
-              'pointerdown',
-              (event) => {
-                const mask = document.querySelector('wc-shadcn-dialog-mask');
-                const content = document.querySelector('wc-shadcn-dialog-content');
-                resolve({
-                  trusted: event.isTrusted,
-                  partial: Boolean(
-                    mask?.hasAttribute('data-pui-view-detached') &&
-                    content &&
-                    !content.hasAttribute('data-pui-view-detached') &&
-                    content.getAttribute('data-transition-state') === 'leaving'
-                  ),
-                });
-              },
-              { once: true, capture: true }
-            );
-          });
-        });
         await page.mouse.click(point.x, point.y);
-        const sample = await page.evaluate(
-          () => (window as PointerSampleWindow).__nextPointerSample!
-        );
+        const sample = await page.evaluate(async () => {
+          const probe = window as PointerSampleWindow;
+          const sample = await probe.__nextPointerSample!;
+          probe.__cancelPointerSample?.();
+          delete probe.__cancelPointerSample;
+          delete probe.__nextPointerSample;
+          return sample;
+        });
         expect(sample.trusted).toBe(true);
         hitPartialWindow = sample.partial;
         await page.waitForFunction(

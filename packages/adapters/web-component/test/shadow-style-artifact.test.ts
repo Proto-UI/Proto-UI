@@ -64,6 +64,90 @@ describe('adapter-web-component Shadow style artifact', () => {
     );
   });
 
+  it('reads and copies every artifact independently after its CSS was accepted', () => {
+    const first = validateShadowStyleArtifact(artifact());
+    let reads = 0;
+    const input = artifact();
+    Object.defineProperty(input, 'cssText', {
+      enumerable: true,
+      get: () => {
+        reads += 1;
+        return SHADOW_CSS;
+      },
+    });
+
+    const second = validateShadowStyleArtifact(input);
+    const third = validateShadowStyleArtifact(input);
+
+    expect(reads).toBe(2);
+    expect(second).toEqual(first);
+    expect(third).toEqual(first);
+    expect(second).not.toBe(first);
+    expect(third).not.toBe(second);
+    expect(Object.isFrozen(second)).toBe(true);
+    expect(Object.isFrozen(third)).toBe(true);
+  });
+
+  it('rejects changed CSS and schema fields after the same input was accepted', () => {
+    const input = artifact();
+    const first = validateShadowStyleArtifact(input);
+    input.cssText += `\n[data-pui-style~='dark:bg-primary'] { color: red; }`;
+
+    expect(() => validateShadowStyleArtifact(input)).toThrow('invalid shadow-style:dark');
+    expect(first.cssText).toBe(SHADOW_CSS);
+
+    input.cssText = SHADOW_CSS;
+    Object.defineProperty(input, Symbol('unrecognized'), { value: true, configurable: true });
+    expect(() => validateShadowStyleArtifact(input)).toThrow('invalid shadow-style:fields');
+
+    const failure = new Error('current artifact accessor');
+    const accessorInput = artifact();
+    Object.defineProperty(accessorInput, 'environment', {
+      get: () => {
+        throw failure;
+      },
+    });
+    expect(() => validateShadowStyleArtifact(accessorInput)).toThrow(failure);
+  });
+
+  it('validates the outer CSS after a getter reenters with an accepted artifact', () => {
+    let nested: ReturnType<typeof validateShadowStyleArtifact> | undefined;
+    const input = artifact();
+    Object.defineProperty(input, 'cssText', {
+      enumerable: true,
+      get: () => {
+        nested = validateShadowStyleArtifact(artifact());
+        return `${SHADOW_CSS}\n[data-pui-style~='dark:bg-primary'] { color: red; }`;
+      },
+    });
+
+    expect(() => validateShadowStyleArtifact(input)).toThrow('invalid shadow-style:dark');
+    expect(nested?.cssText).toBe(SHADOW_CSS);
+    expect(Object.isFrozen(nested)).toBe(true);
+  });
+
+  it('keeps identical-CSS owners independent through rejected updates and disposal', () => {
+    const first = createShadowStyleArtifactOwner(createShell(), artifact());
+    const second = createShadowStyleArtifactOwner(createShell(), artifact());
+    const secondArtifact = second.artifact;
+    const secondElement = second.stylesheet.element;
+
+    expect(first.artifact).toEqual(second.artifact);
+    expect(first.artifact).not.toBe(second.artifact);
+    expect(first.stylesheet.element).not.toBe(secondElement);
+    expect(() => first.update(artifact(`${SHADOW_CSS}\n:root { color: red; }`))).toThrow(
+      'invalid shadow-style:'
+    );
+    first.dispose();
+
+    expect(second.artifact).toBe(secondArtifact);
+    expect(second.stylesheet.element).toBe(secondElement);
+    expect(secondElement.isConnected).toBe(false);
+    expect(secondElement.parentNode).not.toBeNull();
+    expect(second.stylesheet.cssText).toBe(SHADOW_CSS);
+    second.dispose();
+  });
+
   it('accepts equivalent quoted dark token selectors under the positive host scope', () => {
     expect(() =>
       validateShadowStyleArtifact(

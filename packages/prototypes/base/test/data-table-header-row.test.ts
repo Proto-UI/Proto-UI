@@ -6,9 +6,12 @@ import * as shadcn from '../../shadcn/src/data-table';
 import * as brutalist from '../../brutalist/src/data-table';
 import * as bootstrap from '../../bootstrap-2-3-2/src/data-table';
 import * as liquid from '../../liquid-glass/src/data-table';
+import { styleScope } from '../../shadcn/src/style-scope';
 const families = { base, shadcn, brutalist, bootstrap, liquid };
 const tags = new Map<object, string>();
 let disposed = 0;
+tags.set(styleScope, 'header-row-test-shadcn-style-scope');
+AdaptToWebComponent(styleScope, { registerAs: tags.get(styleScope)! });
 for (const family of Object.values(families)) {
   for (const proto of [
     family.dataTableRoot,
@@ -95,7 +98,12 @@ for (const [name, family] of Object.entries(families))
         .split(/\s+/)
         .filter((token) => !/^data-\[(focus-visible|selected)\]:/.test(token))
         .filter(Boolean);
-      expect((staticRecipe ?? '').split(/\s+/).filter(Boolean)).toEqual(bodyStaticTokens);
+      // Independent owners can first record the display group at different
+      // positions. Compare the complete static recipe, retaining extra or
+      // duplicate-token failures, rather than incidental group insertion order.
+      expect((staticRecipe ?? '').split(/\s+/).filter(Boolean).sort()).toEqual(
+        bodyStaticTokens.sort()
+      );
       expect(staticRecipe ?? '').not.toMatch(/data-\[(focus-visible|selected)\]:/);
       expect(structure.rows[1].cells[0].columnHeaders).toEqual([structure.rows[0].cells[0].ref]);
       expect(structure.rows[1].cells[1].columnHeaders).toEqual([structure.rows[0].cells[1].ref]);
@@ -259,6 +267,7 @@ for (const [index, family] of Object.values(families).entries())
         family.dataTableHeader,
         family.dataTableCell,
         family.dataTableCaption,
+        styleScope,
       ].map((proto) => [proto.name, proto])
     );
     // This checks authored source/local exports; shared Previewer/CLI registration
@@ -271,8 +280,13 @@ for (const [index, family] of Object.values(families).entries())
       for (const child of spec.children ?? []) element.append(render(child));
       return element;
     };
-    const root = render(demos[index]!.root) as HTMLElement & { getExposes(): any };
-    document.body.append(root);
+    const rendered = render(demos[index]!.root) as HTMLElement;
+    document.body.append(rendered);
+    const root = (
+      rendered.matches(tags.get(family.dataTableRoot)!)
+        ? rendered
+        : rendered.querySelector(tags.get(family.dataTableRoot)!)!
+    ) as HTMLElement & { getExposes(): any };
     await flush();
     expect(root.getExposes().getStructure()).toMatchObject({
       valid: true,

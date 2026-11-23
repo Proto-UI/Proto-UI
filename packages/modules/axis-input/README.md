@@ -17,3 +17,9 @@ The Web host reuses Move Gesture, validates nonzero finite geometry, observes ge
 The host checks at active-contact rendering cadence and before every move/end. Translation with unchanged span stays live; scale and layout changes that alter span cancel with `basis-changed`. Missing frame observation refuses the opt-in contact before start. End, cancellation, replacement and disposal release frame work and capture; no idle sampling remains. The prototype owns any preview rollback, controlled-state refusal and commit policy.
 
 This bounded extension does not expose geometry or implement auto-sized Drawer behavior. Root-text metrics and safe-region changes that leave the physical span unchanged have no dependency signal here. Compiler and non-Web realization remain separately unverified; four Web-runtime tests use synthetic geometry, not native layout evidence. See `C-AXIS-INPUT-CONTACT-BASIS-0001` and `T-AXIS-INPUT-CONTACT-BASIS-0001`.
+
+## Authored part origin
+
+`configure({ anatomy, inputRole, geometryRole, originRole })` opts into the draft `C-AXIS-INPUT-ORIGIN-0001` observation. One input/capture owner receives `originIndex` on start/move/end: an index into that role's current public Anatomy order, or `null` for a direct background hit. The closest matching part on the original input path wins. Capture retargeting never changes that origin. Membership, order, target or logical-owner changes retire the contact; absent or invalid opted-in facts fail closed. No raw target or pointer ID reaches a consumer.
+
+Slider Values uses this generic fact to distinguish direct Track seek from an off-center Thumb grab. Slot mapping, numeric rounding, collision, focus, controlled acceptance and completion remain prototype behavior. This does not imply Compiler or non-Web support.

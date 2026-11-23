@@ -1,6 +1,7 @@
 import type { ExpressionIR, FunctionIR } from './ir';
 import { objectFields, valueAlternatives } from './value-types';
 import { OPERATION_RULES, type SemanticOperation } from './operations';
+import { expressionReadsAccessor } from './record-accessors';
 
 export interface FlowMark {
   calls: number;
@@ -51,6 +52,7 @@ export function functionCanMutateFlow(
     if (Array.isArray(value)) return value.some(inspect);
     const node = value as Record<string, unknown>;
     if (node.kind === 'function') return false;
+    if (expressionReadsAccessor(node as unknown as ExpressionIR)) return true;
     if (
       [
         'call',
@@ -164,6 +166,10 @@ export class FlowProof {
     if (mark) this.observations.set(to, mark);
   }
   current = (value: ExpressionIR): boolean => {
+    // Repeating a getter expression invokes it again, even on a readonly field.
+    // A separately captured scalar result remains a normal stable reference.
+    if (expressionReadsAccessor(value)) return false;
+    if (value.kind === 'member' && !this.current(value.object)) return false;
     const subject = this.subject(value),
       mark = this.observations.get(value);
     return (

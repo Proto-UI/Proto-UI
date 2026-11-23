@@ -103,6 +103,7 @@ function facts() {
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
     this: HTMLElement
   ) {
+    if (this === document.documentElement) return box(0, 0, window.innerWidth, window.innerHeight);
     if (this.tagName === 'BASE-SELECT-TRIGGER') return box(180, 240, 180, 36);
     if (this.tagName === 'BASE-SELECT-VALUE') return box(193, 248, 50, 20);
     if (this.tagName === 'BASE-SELECT-SURFACE') return box(0, 0, 180, 106);
@@ -151,6 +152,7 @@ function facts() {
   vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
+    if (this === document.documentElement) return window.innerWidth;
     return this.offsetWidth - (this.tagName === 'BASE-SELECT-SURFACE' ? 2 : 0);
   });
   vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
@@ -172,6 +174,7 @@ function facts() {
   vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
+    if (this === document.documentElement) return window.innerHeight;
     return this.tagName === 'BASE-SELECT-ITEM' ? this.offsetHeight : 108;
   });
   vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (

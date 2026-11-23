@@ -1,0 +1,287 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 28,
+  "numPassedTests": 23,
+  "numFailedTests": 0,
+  "numPendingTests": 5,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795355926594,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers base wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "base wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 5516.335287999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers base react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "base react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4793.422746000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers base vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "base vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4728.621929000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers base vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "base vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4530.416885999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "shadcn wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4631.485694999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "shadcn react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4855.234029000014,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "shadcn vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4925.008608999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "shadcn vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4846.109677999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers brutalist wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "brutalist wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4657.768452000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers brutalist react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "brutalist react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4929.525522999989,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers brutalist vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "brutalist vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4854.549636000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers brutalist vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "passed",
+          "title": "brutalist vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "duration": 4811.999253000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "skipped",
+          "title": "bootstrap-2-3-2 wc preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "skipped",
+          "title": "bootstrap-2-3-2 react preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "skipped",
+          "title": "bootstrap-2-3-2 vue preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "status": "skipped",
+          "title": "bootstrap-2-3-2 vue2 preserves activation, natural Tab, ownership, relationships and repeatable lifetime",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers base Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "status": "passed",
+          "title": "base Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "duration": 3174.016915,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "status": "passed",
+          "title": "shadcn Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "duration": 3450.448491999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers brutalist Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "status": "passed",
+          "title": "brutalist Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "duration": 3509.641604000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers bootstrap-2-3-2 Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "status": "skipped",
+          "title": "bootstrap-2-3-2 Chinese 320px / 200% text keeps long labels and overflow inside the page",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "status": "passed",
+          "title": "shadcn wc Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "duration": 3040.5869759999914,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn wc Rhea homepage block child respects profile padding at 390px / 200% text",
+          "status": "passed",
+          "title": "shadcn wc Rhea homepage block child respects profile padding at 390px / 200% text",
+          "duration": 2897.8538579999877,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "status": "passed",
+          "title": "shadcn react Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "duration": 4554.097458000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn react Rhea homepage block child respects profile padding at 390px / 200% text",
+          "status": "passed",
+          "title": "shadcn react Rhea homepage block child respects profile padding at 390px / 200% text",
+          "duration": 4802.449458999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "status": "passed",
+          "title": "shadcn vue Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "duration": 4264.316231000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn vue Rhea homepage block child respects profile padding at 390px / 200% text",
+          "status": "passed",
+          "title": "shadcn vue Rhea homepage block child respects profile padding at 390px / 200% text",
+          "duration": 4401.920607000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "status": "passed",
+          "title": "shadcn vue2 Rhea homepage block child respects profile padding at 1180px / 100% text",
+          "duration": 4196.38291700001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Accordion five families / four native Web consumers"],
+          "fullName": "Accordion five families / four native Web consumers shadcn vue2 Rhea homepage block child respects profile padding at 390px / 200% text",
+          "status": "passed",
+          "title": "shadcn vue2 Rhea homepage block child respects profile padding at 390px / 200% text",
+          "duration": 4337.972991999995,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795355986114,
+      "endTime": 1795356086824.973,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts"
+    }
+  ]
+}

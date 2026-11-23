@@ -37,6 +37,17 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
 
+## 鼠标、键盘与触摸所有权
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+这个可滚动的公开配方区分焦点与已提交选择。已知、无按住按钮的鼠标移动可导航；触摸、笔与拖动不借用该 hover 路径。受控拒绝开关显示提案，同时由 owner 保留当前值。弹层采用公开 popper 定位，触摸滚动与捕获由浏览器负责。
+
 ## API
 
 传入 `open` 或 `value` 会使对应事实进入受控模式。

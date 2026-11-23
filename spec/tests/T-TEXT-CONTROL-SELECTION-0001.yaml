@@ -1,0 +1,75 @@
+id: T-TEXT-CONTROL-SELECTION-0001
+type: test
+title: Host-owned TextControl selection and OTP activity conformance
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: The executable module and real Adapter cases are bounded to the simulated Web DOM; source-bound native browser and independent acceptance remain required.
+summary: Separates finite selection facts, canonical value ownership, lease cleanup and OTP slot consumption from physical OS input acceptance.
+cases:
+  - id: T-TEXT-CONTROL-SELECTION-0001-CASE-FACTS
+    title: Canonical UTF-16 selection facts reject unknown or invalid offsets
+    covers: [C-TEXT-CONTROL-SELECTION-0001-FACTS]
+    expectation: Canonicalize line endings with offsets, retain direction, freeze facts and return null for unavailable or invalid host selection.
+  - id: T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP
+    title: Four real Web Adapters distinguish selection observation from controlled value acceptance
+    covers: [C-TEXT-CONTROL-SELECTION-0001-OBSERVATION, C-TEXT-CONTROL-SELECTION-0001-LIFETIME]
+    expectation: A selection event cannot edit a value; rejected controlled candidates expose null canonical snapshot selection until restoration, and disposed callbacks are inert.
+  - id: T-TEXT-CONTROL-SELECTION-0001-CASE-OTP
+    title: Three 0.3 OTP families project actual caret and range activity
+    covers: [C-TEXT-CONTROL-SELECTION-0001-OTP, C-TEXT-CONTROL-SELECTION-0001-LIFETIME]
+    expectation: Middle carets and ranges distinguish the former value-length implementation; controlled rejection, blur, readOnly, detach and reconnect keep one editor owner without extra value or completion events.
+implementations:
+  - id: module-selection
+    kind: module-test
+    status: passing
+    path: packages/modules/text-control/test/selection.test.ts
+    required: true
+    consumesCases:
+      [T-TEXT-CONTROL-SELECTION-0001-CASE-FACTS, T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP]
+  - id: adapter-selection
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/fixtures/text-control-selection-conformance.ts
+    required: true
+    consumesCases: [T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP]
+    notes:
+      - Real Web Component, React, Vue 3 and Vue 2 mount paths share the public author callback oracle in their text-control-selection.integration.test.ts entrypoints.
+  - id: otp-selection
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/input-otp-selection.test.ts
+    required: true
+    consumesCases: [T-TEXT-CONTROL-SELECTION-0001-CASE-OTP]
+  - id: otp-native-selection
+    kind: adapter-test
+    status: planned
+    path: scripts/analysis/sprint2-input-browser.mjs
+    required: true
+    consumesCases:
+      [T-TEXT-CONTROL-SELECTION-0001-CASE-OWNERSHIP, T-TEXT-CONTROL-SELECTION-0001-CASE-OTP]
+    notes:
+      - Independently terminal controlled and uncontrolled cases run real browser mouse and keyboard input through the four public Adapters; physical OS IME, assistive technology and Compiler evidence remain separate.
+verifies:
+  contracts:
+    - id: C-TEXT-CONTROL-SELECTION-0001
+      anchors:
+        [
+          C-TEXT-CONTROL-SELECTION-0001-FACTS,
+          C-TEXT-CONTROL-SELECTION-0001-OBSERVATION,
+          C-TEXT-CONTROL-SELECTION-0001-LIFETIME,
+          C-TEXT-CONTROL-SELECTION-0001-OTP,
+        ]
+exercises:
+  modules: [M-TEXT-CONTROL-0001]
+  hostCaps: [HC-TEXT-CONTROL-0001]
+  prototypes: [P-BASE-INPUT-OTP, P-SHADCN-INPUT-OTP, P-BRUTALIST-INPUT-OTP]
+sources:
+  - path: packages/modules/text-control/test/selection.test.ts
+  - path: packages/adapters/base/test/fixtures/text-control-selection-conformance.ts
+  - path: packages/prototypes/base/test/input-otp-selection.test.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Added portable selection and OTP consumer oracles without replacing physical IME or browser acceptance.
+tags: [text-control, selection, input-otp, test]

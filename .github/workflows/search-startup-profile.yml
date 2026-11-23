@@ -2,13 +2,23 @@ name: Bounded Search startup profile
 
 on:
   workflow_dispatch:
+    inputs:
+      runtime_only:
+        description: Profile current production runtime swaps instead of historical cold startup
+        type: boolean
+        default: false
   workflow_call:
+    inputs:
+      runtime_only:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   diagnose:
+    if: ${{ !inputs.runtime_only }}
     # This diagnostic is scoped to the current repair, not a new repository gate.
     # Its exit status requires complete capture, including cleanup/source checks.
     # Historical readiness misses remain FAIL in artifacts and the step summary;
@@ -85,3 +95,7 @@ jobs:
           path: ${{ runner.temp }}/search-profile/${{ matrix.scenario.id }}/${{ matrix.mode }}
           if-no-files-found: error
           retention-days: 7
+
+  production-runtime:
+    if: ${{ inputs.runtime_only }}
+    uses: ./.github/workflows/search-runtime-diagnostic.yml

@@ -1,0 +1,1160 @@
+{
+  "schemaVersion": 1,
+  "kind": "current-source-obligations; no product acceptance is earned by this ledger",
+  "observedCheckout": {
+    "revision": "4518981d4876bd8d244f5f204a427dda6fe9ed18",
+    "dirty": false
+  },
+  "source": {
+    "inputDigest": "7efaf09e80362f451be0bedc86b80843b155fa7ac1eff5c43b942282bd94c7d7",
+    "inventoryInputDigest": "e9d52fc7068dade2d1eb5fee05cbae2f09b5f0d34a0631d00ac8ea35873885b0",
+    "inputFiles": 370,
+    "inputResolution": "Re-run with --details to recover every route source path and its exact input SHA-256; inputs include all MDX pages, package exports, policy, runtime list, Code modules, registry and inspected producers.",
+    "supportingInputs": [
+      {
+        "path": "apps/www/scripts/example_code_generation/cli.ts",
+        "sha256": "0aa6e5560024be15df8ce34ed6fb34a44bd9c69139e8306f239393726537f3ad"
+      },
+      {
+        "path": "apps/www/scripts/example_code_generation/generate-code.ts",
+        "sha256": "b970cfaa5e5d13e820b424ded76398e46123265c1b993938da4b107a5a833ce4"
+      },
+      {
+        "path": "apps/www/scripts/example_code_generation/prototype-config.ts",
+        "sha256": "fd4d30b24b2fc35a0ac92d36aa84dfd02f456fbb944f80f5863bb87a82f7afe7"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+        "sha256": "09e2046f94faf337ab37360e6c6239264fa1190415af578d561e92f3f4f3df65"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
+        "sha256": "b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b"
+      },
+      {
+        "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+        "sha256": "008827e9e757d342728638b51f0b62fdc753c70479f6a6c4324c6fdbaedae286"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/base-checkbox/baseCheckboxCode.ts",
+        "sha256": "231153b8f626eaf955cc61fcff840452a0a6a8d3d0bfad6c485af15a2bc8b548"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/base-dialog/baseDialogCode.ts",
+        "sha256": "f5154e7ab32b7f5d2e9422c049f2d13441a3c3056196c6d1e4977e82448c7454"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/base-hover-card/baseHoverCardCode.ts",
+        "sha256": "67b4ce3985967efa7db9b8089b02137f4807b7fb26a451ac5ff09fdefa7eaeb6"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/base-select/baseSelectCode.ts",
+        "sha256": "7bfaba678e96697725772fe0a518d5f84df797eda434fc6fcc3e3b25017d8ae4"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/base-tooltip/baseTooltipCode.ts",
+        "sha256": "0ce0ab2c52e4fe7bcb83036eaaf565e1c428021f32607da55124ff998318b8ad"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/base-transition/baseTransitionCode.ts",
+        "sha256": "bbfa4916d6715c0070750d7638e71cf69254727f8b078a5b941bc2f288e7abd5"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/button/baseButtonCode.ts",
+        "sha256": "106cfc9298259b0aa927b428c4042348b0b2bcac3ad30f36d78d93e69871001a"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/button/buttonCode.ts",
+        "sha256": "6450f95db2c6373faa6ec98def3463dc1a11646371efa7d818d5c418705dd798"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/lucideIconCode.ts",
+        "sha256": "89d83659bfdd4e97470f8cbdc3474049cdebb63d3d17f3602ae5a3f4796dd979"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
+        "sha256": "57975c6ead3d8d850ccedbe47192a7f8914beea23f626de60169162ca5e32375"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode.ts",
+        "sha256": "b8c5a40bdc767c3f47a62a3022c1854adef6b936bbbc280838108c8bbad61b4c"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/tabs/tabsCode.ts",
+        "sha256": "ecfdd61484406d21479e317ce26158e44f18eda1e5674e090329a1a7d3497e45"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo_components/tooltip-usage.ts",
+        "sha256": "b60ea17d1823dc56df5e798503f4a0a41c5ccaa04c6ecfdf32eb57bfad954540"
+      },
+      {
+        "path": "packages/cli/src/registry/components.ts",
+        "sha256": "0f27aec3862ce804763d2ff14b048bddbee2fb7b97a47aa4bd4dbc0f6711fd95"
+      },
+      {
+        "path": "packages/cli/src/registry/finf-components.ts",
+        "sha256": "2bd51d547771b03253f88f51356d8d02dcc50735098fbee7e8d7ec10619b8856"
+      },
+      {
+        "path": "packages/cli/src/registry/shadcn-component-presets.generated.ts",
+        "sha256": "c7f2ae53c9323ce19b28d244245ff718150ee865b0e569f75014ef550181505f"
+      },
+      {
+        "path": "scripts/docs/release-website-inventory.mjs",
+        "sha256": "b72c74b0d6a878eb4963c23249a9a7d56d7ce81d82ed4a55f85b4fd809f73522"
+      },
+      {
+        "path": "scripts/docs/release-website-readiness.mjs",
+        "sha256": "6bfaf428ce36f48b063a75876307a8d048296d1f531746d1e432191b8d9ee2bf"
+      }
+    ]
+  },
+  "locales": [
+    "en",
+    "zh-cn"
+  ],
+  "familyKeyExpansion": "A family key expands to <family>:<locale> for every locale above; localeRows are additional exact inventory row IDs. Row.source in the existing inventory identifies the actual MD/MDX path, including policy aliases.",
+  "summary": {
+    "routes": 340,
+    "families": 170,
+    "previews": 488,
+    "previewHostCells": 1712,
+    "codeMapFiles": 10,
+    "codeMapDemoIds": 24,
+    "codeMapHostEntries": 91,
+    "disabledWithoutCodeExampleRoutes": 172,
+    "disabledWithoutCodeExampleOrFenceRoutes": 164,
+    "missingPreviewSourceHostCells": 1592,
+    "omittedHostRoutes": 24,
+    "fullMatrixAcceptance": "not-established"
+  },
+  "historicalCounts": {
+    "original1042": {
+      "routes": 518,
+      "cells": 5784,
+      "status": "original row matrix and runner not recovered; no replacement or acceptance"
+    },
+    "priorCurrentInventory": {
+      "revision": "4e3406b9c8f594875fe5f272caa56501c2e2a226",
+      "integrationMapping": {
+        "originalSourceCommit": "4e3406b9c8f594875fe5f272caa56501c2e2a226",
+        "publishedIntegrationCommit": "fbf691e1067ec90d0eea0548fe1db3205c475fc1",
+        "reachableFromPublishedSource": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+        "scope": "Changed source paths are byte-equal except the shared suite plan; these are mapped source slices, not identical complete checkouts or interchangeable native receipts.",
+        "identicalPaths": [
+          {
+            "path": "apps/www/src/components/CodeExample.astro",
+            "sha256": "ee411c8095f9be0dc5bc9877e10496b907b5d219286aba21b9190e979d23463a"
+          },
+          {
+            "path": "apps/www/src/components/InstallCommandCard.astro",
+            "sha256": "638663a321bab63f998a4a6255f66c626c1de89b39047999593c8ea0f4c55f0c"
+          },
+          {
+            "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
+            "sha256": "f25f1b0ccd7faf348e2b32d8a3230d60c07c773ad981882c158ab8bb590edb30"
+          },
+          {
+            "path": "apps/www/src/components/code-example-nojs.test.ts",
+            "sha256": "58e812cbc3ec64c32943f6b59e88e77b409286b42adb4cd1b16be132d45a93f5"
+          },
+          {
+            "path": "apps/www/src/components/install-command-card-client.test.ts",
+            "sha256": "b17ff99c16796e43cd0c119d63d954e56827f3a6cee170dc038bb8f80432c933"
+          },
+          {
+            "path": "apps/www/src/components/install-command-card-client.ts",
+            "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
+          },
+          {
+            "path": "apps/www/src/content/docs/en/ui-libraries/base/button.mdx",
+            "sha256": "8be38da7de1a2a1dac3cecdf80df737fb43c3bcb85c334d591ae2b40b871535b"
+          },
+          {
+            "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/button.mdx",
+            "sha256": "db6cdd111a3b2bfc69c4e42889daee6adee4b25ba48f9b1ef112c25591f0bed1"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/button.mdx",
+            "sha256": "bf936616c66d0d2b9fbb5352579949c2ce469e9e2a622985da70f3136b25c676"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
+            "sha256": "d22631b1ce4efd6aedaa8ea03de1e8507ff5ce3b76d5e4dc04d8b9337a5ff54f"
+          },
+          {
+            "path": "apps/www/test/release-docs-reading.browser.test.ts",
+            "sha256": "6be1ed3cc2df60e00e74d63271f72bb9af75191df7c83b6a6fc7beb4b0dae72d"
+          },
+          {
+            "path": "internal/records/2026-11-22-sprint3-website-current-source.md",
+            "sha256": "abebe24d39df1092fcaaf2f189cf81b3dc74e078cea374e2a1607a92e69c90ef"
+          },
+          {
+            "path": "scripts/docs/README.md",
+            "sha256": "c559850bba738ff301d79f5605ee63bc4604723a5de0f0383bc43789a6d0023b"
+          },
+          {
+            "path": "scripts/docs/release-website-inventory.mjs",
+            "sha256": "b72c74b0d6a878eb4963c23249a9a7d56d7ce81d82ed4a55f85b4fd809f73522"
+          },
+          {
+            "path": "scripts/docs/test/release-website-inventory.test.mjs",
+            "sha256": "5d2cd7e5c454f78566162079adf5560a96e5114079a7a296ee1e2033d5f70a6c"
+          }
+        ],
+        "sharedSuitePlan": {
+          "path": "scripts/test/runtime-test-plan.mjs",
+          "originalSha256": "099a7fa5b2b9b5322d1513420ed97b72a81d201fe32824d9717fb2730442b051",
+          "integratedSha256": "7b48a411ade56ed4c94ce4b7897865c81bf4150fd57dcb7a074252602257bbcf",
+          "retainedAdditionalSuite": "packages/compiler/test/transition-native.browser.test.ts"
+        }
+      },
+      "routes": 340,
+      "previews": 450,
+      "previewHostCells": 1578,
+      "status": "source enumeration only"
+    },
+    "initialIncreaseTo1582": {
+      "sourceCommit": "5b8685717153c0b21ce15f220bd75f1e3f2e01ef",
+      "integrationMapping": {
+        "originalSourceCommit": "5b8685717153c0b21ce15f220bd75f1e3f2e01ef",
+        "publishedIntegrationCommit": "9c3a4d789e0144f98ac53bb73cd3a72907e2f6d8",
+        "reachableFromPublishedSource": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+        "scope": "Changed source paths are byte-equal except the shared suite plan; these are mapped source slices, not identical complete checkouts or interchangeable native receipts.",
+        "identicalPaths": [
+          {
+            "path": "apps/www/src/components/PrototypePreviewer/tooltip-registration.test.ts",
+            "sha256": "4678fcc68c326f6a31123b4f183cc439b7ffc08ab4f1ec9616886286fccf57cd"
+          },
+          {
+            "path": "apps/www/src/content/docs/en/ui-libraries/base/tooltip.mdx",
+            "sha256": "644983422d7b587825ccf6d17e94e3fbc37e46e825a6b73b61ec6722937c0a00"
+          },
+          {
+            "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/tooltip.mdx",
+            "sha256": "76c1aed32d70530b6c3f394713fe860560b090f9a1866f91be69956dc9a23e02"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/contrast-tooltip-warm-handoff.browser.test.ts",
+            "sha256": "9fb113affb53f45b0745eea52197be167fb8ab6d7a64fe018cc99cc34053256a"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts",
+            "sha256": "92dd23b8f542950974772152fcf51fc8d77e663e91e7cb966a830fb24a6ed917"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-base-tooltip.test.ts",
+            "sha256": "2492c890767ff237729f05e53b420422335354bc9cd123ec03224f1cf16d1179"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts",
+            "sha256": "f330d37988a3f7e508f696c245aa0917478fc3649451c0dc9bbef6cbf49f3655"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/tooltip.mdx",
+            "sha256": "7cfad0c25c1832cec957ad1b7b8eaed9bd4a6b0d0402c077c5f74a6d1b5f7bf3"
+          },
+          {
+            "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/tooltip.mdx",
+            "sha256": "da8449a4e358b058eabebffae625691131771d717bc8dd64575f47112ec1a3e9"
+          },
+          {
+            "path": "apps/www/test/contrast-popup-escape.test.ts",
+            "sha256": "d3662b552c5031a0fc5505e4467e1466986119578b07044413cafa479e54478d"
+          }
+        ],
+        "sharedSuitePlan": {
+          "path": "scripts/test/runtime-test-plan.mjs",
+          "originalSha256": "bf0f5e4beb3050c3630dde5542b128d7ee4e9dec221c1828a7b97a6231e89655",
+          "integratedSha256": "d3c9803e333533fbc11bd0885577db20d5b0d99f65bcf37de5e80b86e0c37538",
+          "retainedAdditionalSuite": "apps/www/test/release-docs-reading.browser.test.ts"
+        }
+      },
+      "reason": "Base and Brutalist Tooltip each added the Vue 2 declaration in en and zh-cn: four new declared cells. This does not prove their Usage.",
+      "addedHost": "vue2",
+      "addedCells": 4,
+      "pages": [
+        "apps/www/src/content/docs/en/ui-libraries/base/tooltip.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/tooltip.mdx",
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/tooltip.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/tooltip.mdx"
+      ]
+    }
+  },
+  "children": [
+    {
+      "id": "s3.www.usage.disabled-without-code",
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
+      "owner": "Sprint 3 website / original documentation and family source owners",
+      "state": "open",
+      "action": "Supply matching public Usage; no CodeExample or fenced code exists.",
+      "routeCount": 164,
+      "families": [
+        "base:accordion",
+        "base:alert-dialog",
+        "base:autocomplete",
+        "base:checkbox-group",
+        "base:combobox",
+        "base:command",
+        "base:context-menu",
+        "base:drawer",
+        "base:dropdown-menu",
+        "base:field",
+        "base:fieldset",
+        "base:form",
+        "base:input-otp",
+        "base:menubar",
+        "base:meter",
+        "base:navigation-menu",
+        "base:number-field",
+        "base:popover",
+        "base:progress",
+        "base:scroll-area",
+        "base:separator",
+        "base:slider",
+        "base:switch",
+        "base:tabs",
+        "base:toast",
+        "base:toggle",
+        "base:toggle-group",
+        "base:toolbar",
+        "brutalist:accordion",
+        "brutalist:alert-dialog",
+        "brutalist:autocomplete",
+        "brutalist:checkbox-group",
+        "brutalist:combobox",
+        "brutalist:command",
+        "brutalist:context-menu",
+        "brutalist:drawer",
+        "brutalist:field",
+        "brutalist:fieldset",
+        "brutalist:form",
+        "brutalist:input-otp",
+        "brutalist:menubar",
+        "brutalist:meter",
+        "brutalist:navigation-menu",
+        "brutalist:number-field",
+        "brutalist:popover",
+        "brutalist:progress",
+        "brutalist:slider",
+        "brutalist:toast",
+        "brutalist:toggle-group",
+        "brutalist:toolbar",
+        "shadcn:accordion",
+        "shadcn:alert-dialog",
+        "shadcn:async-region",
+        "shadcn:autocomplete",
+        "shadcn:checkbox",
+        "shadcn:checkbox-group",
+        "shadcn:combobox",
+        "shadcn:command",
+        "shadcn:context-menu",
+        "shadcn:drawer",
+        "shadcn:field",
+        "shadcn:fieldset",
+        "shadcn:form",
+        "shadcn:hover-card",
+        "shadcn:image",
+        "shadcn:input-otp",
+        "shadcn:live-region",
+        "shadcn:menubar",
+        "shadcn:meter",
+        "shadcn:navigation-menu",
+        "shadcn:number-field",
+        "shadcn:popover",
+        "shadcn:progress",
+        "shadcn:separator",
+        "shadcn:slider",
+        "shadcn:table",
+        "shadcn:textarea",
+        "shadcn:toast",
+        "shadcn:toggle",
+        "shadcn:toggle-group",
+        "shadcn:toolbar",
+        "shadcn:transition"
+      ],
+      "localeRows": []
+    },
+    {
+      "id": "s3.www.usage.disabled-with-fenced-code",
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
+      "owner": "Sprint 3 website / original documentation and family source owners",
+      "state": "open",
+      "action": "Reuse the authored code and complete missing host/setup/preview correspondence.",
+      "routeCount": 8,
+      "families": [
+        "base:collapsible",
+        "brutalist:collapsible",
+        "shadcn:collapsible",
+        "shadcn:input-shell"
+      ],
+      "localeRows": []
+    },
+    {
+      "id": "s3.www.usage.enabled-without-source",
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
+      "owner": "Sprint 3 website / original documentation and family source owners",
+      "state": "open",
+      "action": "Supply matching source; enabling codePanel alone does not produce Code.",
+      "routeCount": 140,
+      "families": [
+        "base:async-region",
+        "base:calendar",
+        "base:carousel",
+        "base:data-table",
+        "base:date-picker",
+        "base:image",
+        "base:input",
+        "base:label",
+        "base:live-region",
+        "base:message-scroller",
+        "base:radio-group",
+        "base:resizable",
+        "base:surface",
+        "base:table",
+        "base:text",
+        "base:textarea",
+        "base:tree",
+        "base:virtual-list",
+        "brutalist:async-region",
+        "brutalist:badge",
+        "brutalist:calendar",
+        "brutalist:card",
+        "brutalist:carousel",
+        "brutalist:checkbox",
+        "brutalist:data-table",
+        "brutalist:date-picker",
+        "brutalist:dialog",
+        "brutalist:dropdown-menu",
+        "brutalist:hover-card",
+        "brutalist:image",
+        "brutalist:input",
+        "brutalist:label",
+        "brutalist:live-region",
+        "brutalist:message-scroller",
+        "brutalist:radio-group",
+        "brutalist:resizable",
+        "brutalist:scroll-area",
+        "brutalist:select",
+        "brutalist:separator",
+        "brutalist:skeleton",
+        "brutalist:spinner",
+        "brutalist:surface",
+        "brutalist:switch",
+        "brutalist:table",
+        "brutalist:tabs",
+        "brutalist:text",
+        "brutalist:textarea",
+        "brutalist:toggle",
+        "brutalist:transition",
+        "brutalist:tree",
+        "brutalist:virtual-list",
+        "shadcn:calendar",
+        "shadcn:card",
+        "shadcn:carousel",
+        "shadcn:data-table",
+        "shadcn:date-picker",
+        "shadcn:dropdown-menu",
+        "shadcn:input",
+        "shadcn:label",
+        "shadcn:message-scroller",
+        "shadcn:radio-group",
+        "shadcn:resizable",
+        "shadcn:scroll-area",
+        "shadcn:select",
+        "shadcn:style-scope",
+        "shadcn:surface",
+        "shadcn:switch",
+        "shadcn:text",
+        "shadcn:tree",
+        "shadcn:virtual-list"
+      ],
+      "localeRows": []
+    },
+    {
+      "id": "s3.www.usage.preview-source-unverified",
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
+      "owner": "Sprint 3 website / original documentation and family source owners",
+      "state": "open",
+      "action": "Review and execute the existing source for every declared host; presence is not acceptance.",
+      "routeCount": 16,
+      "families": [
+        "base:checkbox",
+        "base:dialog",
+        "base:hover-card",
+        "base:select",
+        "base:transition",
+        "brutalist:button",
+        "shadcn:dialog",
+        "shadcn:tabs"
+      ],
+      "localeRows": []
+    },
+    {
+      "id": "s3.www.usage.code-example-unverified",
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1042.acceptance.2",
+        "1042.acceptance.3"
+      ],
+      "owner": "Sprint 3 website / original documentation and family source owners",
+      "state": "open",
+      "action": "Execute the displayed complete files against the declared installed version and real Preview.",
+      "routeCount": 12,
+      "families": [
+        "base:button",
+        "base:tooltip",
+        "brutalist:tooltip",
+        "lucide:icon",
+        "shadcn:button",
+        "shadcn:tooltip"
+      ],
+      "localeRows": []
+    }
+  ],
+  "deliveryPrerequisites": [
+    {
+      "id": "s3.www.delivery.public-target",
+      "owner": "Sprint 2 reproducible delivery owner; Sprint 3 installed-consumer acceptance owner",
+      "producerIssues": [
+        1458,
+        1154
+      ],
+      "acceptanceIssues": [
+        1042,
+        1175,
+        1673
+      ],
+      "state": "open",
+      "action": "Bind the declared fixed version, actual public target and npm/pnpm/npx/dlx results in a clean consumer.",
+      "routeCount": 138,
+      "families": [
+        "base:accordion",
+        "base:async-region",
+        "base:button",
+        "base:collapsible",
+        "base:dialog",
+        "base:dropdown-menu",
+        "base:hover-card",
+        "base:image",
+        "base:label",
+        "base:live-region",
+        "base:radio-group",
+        "base:select",
+        "base:separator",
+        "base:surface",
+        "base:switch",
+        "base:table",
+        "base:tabs",
+        "base:text",
+        "base:textarea",
+        "base:toggle",
+        "base:transition",
+        "brutalist:accordion",
+        "brutalist:async-region",
+        "brutalist:badge",
+        "brutalist:button",
+        "brutalist:card",
+        "brutalist:collapsible",
+        "brutalist:dialog",
+        "brutalist:dropdown-menu",
+        "brutalist:hover-card",
+        "brutalist:image",
+        "brutalist:input",
+        "brutalist:label",
+        "brutalist:live-region",
+        "brutalist:radio-group",
+        "brutalist:scroll-area",
+        "brutalist:select",
+        "brutalist:separator",
+        "brutalist:skeleton",
+        "brutalist:spinner",
+        "brutalist:surface",
+        "brutalist:switch",
+        "brutalist:table",
+        "brutalist:tabs",
+        "brutalist:text",
+        "brutalist:textarea",
+        "brutalist:toggle",
+        "brutalist:transition",
+        "shadcn:accordion",
+        "shadcn:button",
+        "shadcn:card",
+        "shadcn:checkbox",
+        "shadcn:collapsible",
+        "shadcn:dialog",
+        "shadcn:dropdown-menu",
+        "shadcn:hover-card",
+        "shadcn:input",
+        "shadcn:label",
+        "shadcn:radio-group",
+        "shadcn:scroll-area",
+        "shadcn:select",
+        "shadcn:separator",
+        "shadcn:surface",
+        "shadcn:switch",
+        "shadcn:tabs",
+        "shadcn:text",
+        "shadcn:textarea",
+        "shadcn:toggle",
+        "shadcn:tooltip"
+      ],
+      "localeRows": []
+    },
+    {
+      "id": "s3.www.delivery.workspace-source-only",
+      "owner": "Sprint 2 reproducible delivery owner; Sprint 3 installed-consumer acceptance owner",
+      "producerIssues": [
+        1458
+      ],
+      "acceptanceIssues": [
+        1042,
+        1175,
+        1673
+      ],
+      "state": "open",
+      "action": "Use the supported pinned-source delivery from #1458; public add rejects these targets. Do not relabel the workspace registry as installed admission.",
+      "routeCount": 186,
+      "families": [
+        "base:alert-dialog",
+        "base:autocomplete",
+        "base:calendar",
+        "base:carousel",
+        "base:checkbox-group",
+        "base:combobox",
+        "base:command",
+        "base:context-menu",
+        "base:data-table",
+        "base:date-picker",
+        "base:drawer",
+        "base:field",
+        "base:fieldset",
+        "base:form",
+        "base:input-otp",
+        "base:menubar",
+        "base:message-scroller",
+        "base:meter",
+        "base:navigation-menu",
+        "base:number-field",
+        "base:popover",
+        "base:progress",
+        "base:resizable",
+        "base:slider",
+        "base:toast",
+        "base:toggle-group",
+        "base:toolbar",
+        "base:tree",
+        "base:virtual-list",
+        "brutalist:alert-dialog",
+        "brutalist:autocomplete",
+        "brutalist:calendar",
+        "brutalist:carousel",
+        "brutalist:checkbox-group",
+        "brutalist:combobox",
+        "brutalist:command",
+        "brutalist:context-menu",
+        "brutalist:data-table",
+        "brutalist:date-picker",
+        "brutalist:drawer",
+        "brutalist:field",
+        "brutalist:fieldset",
+        "brutalist:form",
+        "brutalist:input-otp",
+        "brutalist:menubar",
+        "brutalist:message-scroller",
+        "brutalist:meter",
+        "brutalist:navigation-menu",
+        "brutalist:number-field",
+        "brutalist:popover",
+        "brutalist:progress",
+        "brutalist:resizable",
+        "brutalist:slider",
+        "brutalist:toast",
+        "brutalist:toggle-group",
+        "brutalist:toolbar",
+        "brutalist:tree",
+        "brutalist:virtual-list",
+        "shadcn:alert-dialog",
+        "shadcn:async-region",
+        "shadcn:autocomplete",
+        "shadcn:calendar",
+        "shadcn:carousel",
+        "shadcn:checkbox-group",
+        "shadcn:combobox",
+        "shadcn:command",
+        "shadcn:context-menu",
+        "shadcn:data-table",
+        "shadcn:date-picker",
+        "shadcn:drawer",
+        "shadcn:field",
+        "shadcn:fieldset",
+        "shadcn:form",
+        "shadcn:image",
+        "shadcn:input-otp",
+        "shadcn:input-shell",
+        "shadcn:live-region",
+        "shadcn:menubar",
+        "shadcn:message-scroller",
+        "shadcn:meter",
+        "shadcn:navigation-menu",
+        "shadcn:number-field",
+        "shadcn:popover",
+        "shadcn:progress",
+        "shadcn:resizable",
+        "shadcn:slider",
+        "shadcn:table",
+        "shadcn:toast",
+        "shadcn:toggle-group",
+        "shadcn:toolbar",
+        "shadcn:transition",
+        "shadcn:tree",
+        "shadcn:virtual-list"
+      ],
+      "localeRows": []
+    },
+    {
+      "id": "s3.www.delivery.no-component-target",
+      "owner": "Sprint 2 reproducible delivery owner; Sprint 3 installed-consumer acceptance owner",
+      "producerIssues": [
+        1458
+      ],
+      "acceptanceIssues": [
+        1042,
+        1175,
+        1673
+      ],
+      "state": "open",
+      "action": "Use and verify the actual exported package subpath and public Adapter. A missing component facade is not a missing package export, and no add command may be invented.",
+      "routeCount": 16,
+      "families": [
+        "base:checkbox",
+        "base:input",
+        "base:scroll-area",
+        "base:tooltip",
+        "brutalist:checkbox",
+        "brutalist:tooltip",
+        "lucide:icon",
+        "shadcn:style-scope"
+      ],
+      "localeRows": []
+    }
+  ],
+  "omittedHosts": {
+    "id": "s3.www.host-declarations",
+    "owner": "Sprint 3 website with original runtime/Adapter owner #568",
+    "originalConditions": [
+      "1042.acceptance.3",
+      "1042.acceptance.5"
+    ],
+    "state": "open",
+    "action": "Verify the existing real demo through the omitted host before exposing it publicly; preserve unsupported or failing outcomes.",
+    "rows": [
+      {
+        "row": "base:checkbox:en",
+        "missing": [
+          "react",
+          "vue",
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:checkbox:zh-cn",
+        "missing": [
+          "react",
+          "vue",
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:dialog:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:dialog:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:dropdown-menu:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:dropdown-menu:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:hover-card:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:hover-card:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:radio-group:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:radio-group:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:scroll-area:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:scroll-area:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:separator:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:separator:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:switch:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:switch:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:tabs:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:tabs:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:textarea:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:textarea:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:toggle:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:toggle:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:transition:en",
+        "missing": [
+          "vue2"
+        ]
+      },
+      {
+        "row": "base:transition:zh-cn",
+        "missing": [
+          "vue2"
+        ]
+      }
+    ],
+    "routeCount": 24,
+    "families": [
+      "base:checkbox",
+      "base:dialog",
+      "base:dropdown-menu",
+      "base:hover-card",
+      "base:radio-group",
+      "base:scroll-area",
+      "base:separator",
+      "base:switch",
+      "base:tabs",
+      "base:textarea",
+      "base:toggle",
+      "base:transition"
+    ],
+    "localeRows": []
+  },
+  "otherRequiredChildren": [
+    {
+      "id": "s3.www.generated-consumers",
+      "originalConditions": [
+        "1042.acceptance.3"
+      ],
+      "owner": "Sprint 2 compiler/real-consumer owner",
+      "producerIssues": [
+        732,
+        733,
+        1055,
+        1061,
+        1145
+      ],
+      "state": "open",
+      "action": "Preserve source x target x actual consumer identity. Public Adapter source examples cannot stand in for compiled consumers; authoring can proceed independently of this producer acceptance."
+    },
+    {
+      "id": "s3.www.button-runtime-navigation",
+      "originalConditions": [
+        "1042.acceptance.4",
+        "1042.acceptance.5",
+        "1042.acceptance.6"
+      ],
+      "owner": "Sprint 3 website with #420/#568 and original #1438/#1435 owners",
+      "state": "open",
+      "action": "Complete supported Button compositions, runtime state/focus, cold/failure/no-JS, native previous/next links, keyboard, themes, 320/390/desktop and enlarged-text journeys on the combined candidate."
+    },
+    {
+      "id": "s3.www.catalog-78",
+      "originalConditions": [
+        "1141:Repair public docs 78 family catalog drift"
+      ],
+      "owner": "Current 0.3 execution owner with original #1090 source keys",
+      "state": "open",
+      "action": "Reconcile all original 78 family catalog/availability/route/nav rows and original receipts. This 170-family export inventory does not replace them."
+    },
+    {
+      "id": "s3.www.dropdown-anatomy",
+      "originalConditions": [
+        "1141:Repair Dropdown anatomy replay model"
+      ],
+      "owner": "Original Dropdown anatomy replay owner",
+      "state": "open",
+      "action": "Retain the production retained-shell/readContrastAuditSubject 24-frame oracle, probe-only negative control, owner/generation/physical portal/currentLease, extras==0 and independent paint assertions."
+    },
+    {
+      "id": "s3.www.mobile-m4-m5",
+      "originalConditions": [
+        "1175:M4/M5 mobile journeys and forced boundaries",
+        "1042.acceptance.6"
+      ],
+      "owner": "Sprint 3 website/acceptance coordinator with real device and AT operators",
+      "state": "open",
+      "action": "Reconcile every original matrix row, forced-colors and boundary. Chromium CSS viewports/text scaling and AX queries do not replace physical mobile, real zoom or OS AT."
+    },
+    {
+      "id": "s3.www.historical-source",
+      "originalConditions": [
+        "1042.acceptance.1",
+        "1175:original R5 execution/source"
+      ],
+      "owner": "Original evidence/archive owners with Sprint 3 history coordinator",
+      "state": "blocked-on-original-material",
+      "action": "Recover the original #1042 518-row/5784-cell matrix and #1175 fixed Camoufox driver/archive. Keep R5 76 phases=0 pass/76 fail and 155 subjects=5 pass/145 fail/5 unknown; current runs cannot rewrite them."
+    },
+    {
+      "id": "s3.www.independent-acceptance",
+      "originalConditions": [
+        "1042.acceptance.7",
+        "1141:CI/DCO/native evidence",
+        "1175:CI/DCO/independent review"
+      ],
+      "owner": "Sprint 3 integration owner and eligible independent reviewers",
+      "state": "open",
+      "action": "Bind implementation, full selected native/installed results, screenshots, DCO and actual review to the final candidate. The 24 reading cells and 364 bounded dispatch cases do not close this ledger."
+    }
+  ],
+  "producerReuse": {
+    "path": "apps/www/scripts/example_code_generation/cli.ts",
+    "authored": "Existing --folder plus authored-code.ts verifies every demo ID and all four hosts; complete public source must be authored first.",
+    "legacy": "Static DemoSpec emission covers WC/React/Vue only; setup/ref callbacks and Vue 2 are not translated. Its folder scan excludes the top-level Finf .demo.ts wrappers. Do not generate inert lookalikes to satisfy Usage.",
+    "files": [
+      {
+        "file": "apps/www/src/content/docs/demo_components/base-checkbox/baseCheckboxCode.ts",
+        "demoIds": [
+          "demo-base-checkbox"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
+        "containsWebsiteAlias": false
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/base-dialog/baseDialogCode.ts",
+        "demoIds": [
+          "demo-base-dialog"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
+        "containsWebsiteAlias": true
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/base-hover-card/baseHoverCardCode.ts",
+        "demoIds": [
+          "demo-base-hover-card"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
+        "containsWebsiteAlias": true
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/base-select/baseSelectCode.ts",
+        "demoIds": [
+          "demo-base-select"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
+        "containsWebsiteAlias": false
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/base-tooltip/baseTooltipCode.ts",
+        "demoIds": [
+          "demo-base-tooltip"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
+        "containsWebsiteAlias": false
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/base-transition/baseTransitionCode.ts",
+        "demoIds": [
+          "demo-base-transition-command",
+          "demo-base-transition-controlled"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "wc"
+        ],
+        "containsWebsiteAlias": true
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/button/buttonCode.ts",
+        "demoIds": [
+          "demo-button",
+          "demo-button-default",
+          "demo-button-destructive",
+          "demo-button-disabled",
+          "demo-button-ghost",
+          "demo-button-outline",
+          "demo-button-secondary",
+          "demo-button-secondary-example",
+          "demo-button-sizes",
+          "demo-button-states",
+          "demo-button-variants"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
+        "containsWebsiteAlias": false
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
+        "demoIds": [
+          "demo-shadcn-dialog"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
+        "containsWebsiteAlias": true
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode.ts",
+        "demoIds": [
+          "demo-shadcn-hover-card"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
+        "containsWebsiteAlias": true
+      },
+      {
+        "file": "apps/www/src/content/docs/demo_components/tabs/tabsCode.ts",
+        "demoIds": [
+          "demo-shadcn-tabs",
+          "demo-shadcn-tabs-preset-new-york-v4",
+          "demo-shadcn-tabs-preset-nova",
+          "demo-shadcn-tabs-preset-rhea"
+        ],
+        "hosts": [
+          "react",
+          "vue",
+          "vue2",
+          "wc"
+        ],
+        "containsWebsiteAlias": false
+      }
+    ]
+  }
+}

@@ -30,6 +30,19 @@ Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Tra
 
 本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
 
+## 范围与多值
+
+<PrototypePreviewer
+  demoId="demo-shadcn-slider-values"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+从 `@proto.ui/prototypes-shadcn/slider` 导入六个 `sliderValues*` 入口。Values Root 设置 `defaultValue={[20, 80]}`，每个值配一个带 index 的 Thumb，并将 Thumb 放入 Values Track。Track 独占共享输入 lease：点击轨道选择最近的可编辑槽，偏离中心抓取 Thumb 保留偏移。`thumbCollisionBehavior` 支持 `push`、`swap`、`none`；swap 转移活动焦点而 capture 始终属于 Track。键盘编辑保留原逐槽限制。
+
+完整 Values Root 可作为 Field/FormField 的一个组合控件，报告 canonical 有限 `number[]`、初始基线、组焦点和关系，FieldLabel 聚焦首个可编辑 Thumb。受控拒绝保持 owner 值，不校验被拒绝的 candidate。取消只撤销提交；reset 撤销当前接触并请求初始基线，也适用于 disabled Form。原标量 Slider 部件保留独立契约。
+
 ## API
 
 传入 `value` 进入受控模式。

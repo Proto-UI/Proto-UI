@@ -1,3 +1,4 @@
+import { emitCapturedWebOperation } from './capture-effects';
 import { pruneDeadValues } from './demand-pruning';
 import { ordinaryValueChildren } from './value-children';
 import { nativeVue2AssociationsArtifact } from './native-vue2-associations';
@@ -20,6 +21,7 @@ import {
   createJavaScriptValueReader,
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
+  emitJavaScriptRecord,
   emitJavaScriptValue,
   emitJavaScriptParameters,
   emitUninvokedJavaScriptFunction,
@@ -318,7 +320,12 @@ export function emitVue2Source(
   const contextNames = new Map(
     ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`])
   );
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(
+    admitted.value.operations,
+    prefix,
+    admitted.value.ruleMetaKeys,
+    admitted.value.shaderKernels
+  );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -430,7 +437,32 @@ export function emitVue2Source(
     }
   }
 
-  function expression(value: ExpressionIR, depth: number): string {
+  function expression(value: ExpressionIR, depth: number, captureEffects = true): string {
+    if (hasAuthoredHooks && captureEffects) {
+      if (value.kind === 'operation') {
+        const captured = emitCapturedWebOperation({
+          value: value,
+          prefix: prefix,
+          manager: `${prefix}Authored`,
+          interaction: `${prefix}Owner.interaction`,
+          emit: (item, capture = true) => expression(item, depth, capture),
+          declaration: (item, name, initializer, argumentIndex) => {
+            // Hoisting a props map must retain the original call's contextual
+            // type: its checked literal discriminants otherwise widen to string.
+            const type =
+              value.operation === 'props.define' && argumentIndex === 0
+                ? `Parameters<typeof ${prefix}CaptureReceiver.props.define>[0]`
+                : ['lexical-cell', 'record', 'object-spread'].includes(item.kind)
+                  ? typeName(item.type)
+                  : undefined;
+            return `${type ? `/** @type {${type}} */ ` : ''}const ${name} = ${initializer};`;
+          },
+        });
+        if (captured !== undefined) return captured;
+      }
+      if (value.kind === 'rule')
+        return `${prefix}Authored.rule(${expression(value, depth, false)})`;
+    }
     switch (value.kind) {
       case 'narrow':
       case 'member-write':
@@ -489,7 +521,7 @@ export function emitVue2Source(
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${value.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expression(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(value, (item) => expression(item, depth), typeName, false);
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
@@ -767,7 +799,7 @@ ${helpers}
 function ${prefix}Setup(${prefix}Owner) {
 ${publicCalls ? `  const ${prefix}WrapPublic = ${prefix}Owner.wrapPublic;` : ''}
 ${hasAuthoredHooks ? `  const ${prefix}Authored = ${prefix}Owner.authored;` : ''}
-${atoms.delay ? `  const ${prefix}Delay = ${prefix}Owner.delay;` : ''}${atoms.presence ? `  const ${prefix}Presence = ${prefix}Owner.presence;` : ''}${atoms.meta ? `  const ${prefix}Meta = ${prefix}Owner.meta;` : ''}
+${atoms.shader ? `  const ${prefix}Shader = ${prefix}Owner.shader;` : ''}${atoms.delay ? `  const ${prefix}Delay = ${prefix}Owner.delay;` : ''}${atoms.presence ? `  const ${prefix}Presence = ${prefix}Owner.presence;` : ''}${atoms.meta ? `  const ${prefix}Meta = ${prefix}Owner.meta;` : ''}
 ${hooks}
   ${
     ir.setup.returnType === 'void'
@@ -907,7 +939,7 @@ function nativeHelpers(
   publicCalls: boolean,
   controlLabel: boolean
 ): string {
-  const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
+  const refresh = `${styled ? 'style.refresh();' : ''}${atoms.refresh}${interactive ? ' interaction.refresh();' : ''}`;
   // Derive the generated finite registry and its key enumeration from the same
   // canonical operation metadata; no independent callback-shape analysis.
   const lifecycleKeys = Object.values(OPERATION_RULES)
@@ -1136,6 +1168,7 @@ ${stateful ? '  let notifying = false;\n' : ''}${
 ${
   styled
     ? `  const style = PUICreateNativeStyle({
+    ${atoms.ruleMeta("activeRoot?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", false)}
     ensureSetup: setupOnly,
     ensureRuntime: callback,
     isAlive: () => !terminal && !disposed,
@@ -1242,7 +1275,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
     if (!hydrated) { hydrated = true; ${refresh} return; }
     const changedKeys = Object.keys(specs).filter((key) => !Object.is(previous[key], resolved[key]));
     const changedRawKeys = watchers.some((watch) => watch.active && (watch.kind === 'raw' || watch.kind === 'raw-all'))
-      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => PUIOwn(previousRaw, key) !== PUIOwn(raw, key) || !Object.is(previousRaw[key], raw[key])) : [];
+      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : [];
     ${refresh ? `if (changedKeys.length) { ${refresh} }` : ''}
     if ((changedKeys.length || changedRawKeys.length) && !dispatchingProps) {
       dispatchingProps = true;
@@ -1261,7 +1294,10 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
                 const info = { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] };
                 // The registration discriminant preserves the raw/resolved callback
                 // relation; the host group order and snapshot copies stay unchanged.
-                if (watch.kind === 'raw' || watch.kind === 'raw-all') watch.fn(run, nextRaw, previousRaw, info);
+                if (watch.kind === 'raw' || watch.kind === 'raw-all') {
+                  console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+                  watch.fn(run, nextRaw, previousRaw, info);
+                }
                 else watch.fn(run, next.snapshot, previous, info);
               }
             }
@@ -1312,7 +1348,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
       : new AggregateError(failures, '[Vue2 native] presence withdrawal failed.');
   };
 ${context.owner}
-  ${atoms.owner({ setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', typed: false })}
+  ${atoms.owner({ setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', root: 'activeRoot && activeRoot.ownerDocument.defaultView && activeRoot instanceof activeRoot.ownerDocument.defaultView.HTMLElement ? activeRoot : null', prepare: styled ? 'style.refresh();' : '', typed: false })}
 ${
   hasAuthoredHooks
     ? `  /** @type {(() => void)[]} */ const PUIAuthoredWatchCleanups = [];
@@ -1321,7 +1357,9 @@ ${
       stateful
         ? `
     const state = /** @type {PUIOwnedState<unknown>} */ (value);
-    return Object.freeze({get: () => state.get(), setDefault: (/** @type {unknown} */ value) => state.setDefault(value), set: (/** @param {unknown} value @param {unknown} [reason] */ (value, reason) => state.set(value, reason)), watch: (/** @type {(run: PUIRun, event: PUIStateEvent<unknown>) => void} */ fn) => { setupOnly(); const off = state.external.subscribe(event => invoke(() => fn(run, event), false)); PUIAuthoredWatchCleanups.push(off); return off; }});
+    const borrowed = Object.freeze({get: () => state.get(), setDefault: (/** @type {unknown} */ value) => state.setDefault(value), set: (/** @param {unknown} value @param {unknown} [reason] */ (value, reason) => state.set(value, reason)), watch: (/** @type {(run: PUIRun, event: PUIStateEvent<unknown>) => void} */ fn) => { setupOnly(); const off = state.external.subscribe(event => invoke(() => fn(run, event), false)); PUIAuthoredWatchCleanups.push(off); return off; }});
+    ${atoms.registerSource('borrowed')}
+    return borrowed;
     `
         : 'return value;'
     }
@@ -1405,6 +1443,7 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
         spec: Object.freeze({ kind: typeof handle.get() === 'boolean' ? 'bool' : typeof handle.get() === 'number' ? 'number.discrete' : 'string', observed: true }),
       });
       observedExternals.set(handle, external);
+      ${atoms.registerSource('handle')}
       states.push({ dispose: () => {
         off();
         try { for (const fn of Array.from(subscribers)) fn({ type: 'disconnect', reason: 'unmount' }); }
@@ -1467,6 +1506,7 @@ ${
     };
     ${interactive ? 'observedExternals.set(handle, handle.external);' : ''}
     states.push(handle);
+    ${atoms.registerSource('handle')}
     return handle;
   };
   /** @template {boolean | string | number} T @param {PUIStateKind} kind @param {string} key @param {T} initial @param {PUIStateConfiguration} [configuration] @returns {PUIOwnedState<T>} */
@@ -1569,7 +1609,7 @@ ${
       /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
       state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
       /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn @param {(value: Result) => Result} [project] */
-      method: (key, fn, project) => { setupOnly(); ${hasAuthoredHooks ? 'PUIAuthored.method(key, fn);' : ''} exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
+      method: (key, fn, project) => { setupOnly();  exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
       /** @param {string} key @param {unknown} [spec] */
       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
     },
@@ -1627,9 +1667,11 @@ ${
         }
         ${interactive ? 'if (terminal || commit.epoch !== epoch || !present || !hostActive) return;' : ''}
         ${styled ? 'style.mount();' : ''}
+        ${atoms.mount}
         fire('mounted');
         ${ssr ? `if (firstContinuation) { firstContinuation = false; syncHost(true); }` : ''}
       } else if (viewActive) {
+        ${atoms.physicalPresentation ? `if (activeRoot !== target) { ${atoms.detach} activeRoot = target; ${atoms.mount} }` : ''}
         ${
           interactive
             ? `if (activeRoot !== target || activeEpoch !== epoch) {
@@ -1650,7 +1692,7 @@ ${
   const owner = {
     ${publicCalls ? 'wrapPublic: PUIWrapPublic,' : ''}
     ${hasAuthoredHooks ? 'authored: PUIAuthored,' : ''}
-    ${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
+    ${atoms.shader ? 'shader: PUIShader,' : ''}${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
     ${context.handle}
     host() { return viewActive && present && hostActive && !terminal ? vm.$el : null; },
     ${interactive ? 'interaction,' : ''}
@@ -1713,8 +1755,8 @@ ${
       } catch (error) {
         ${
           ssr
-            ? `try { owner.dispose(); }
-        catch (cleanupError) { throw new AggregateError([error, cleanupError], '[Vue2 SSR] initialization and cleanup failed.'); }
+            ? `if (session) session.failure ??= { value: error };
+        try { owner.dispose(true); } catch { /* Preserve the first setup/created error. */ }
         throw error;`
             : `
         terminal = true;
@@ -1786,14 +1828,21 @@ ${
       hostActive = true; ++epoch; pending = null; renderedCommit = null;
       vm.$forceUpdate();
     },
-    dispose() {
+    dispose(${ssr ? 'exhaustive = false' : ''}) {
       if (terminal) return;
       terminal = true; ++epoch; renderedCommit = null; pending = null; queued = false;
       ${hasAuthoredHooks ? 'for (const off of PUIAuthoredWatchCleanups.splice(0)) off();' : ''}
       unwatch?.(); unwatch = undefined;
       /** @type {{ error: unknown } | undefined} */ let failure;
       try { detach(); } catch (error) { failure = { error }; }
-      ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= { error }; }
+      ${ssr ? 'if (initialized)' : ''} try {
+${
+  ssr
+    ? `        if (exhaustive) { for (const callback of lifecycle.beforeDispose) { try { invoke(() => callback(run), false); } catch (error) { failure ??= { error }; } } }
+        else `
+    : ''
+}        fire('beforeDispose');
+      } catch (error) { failure ??= { error }; }
 ${
   stateful
     ? String.raw`      for (const state of states) {

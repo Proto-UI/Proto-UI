@@ -1,0 +1,29 @@
+id: C-TREE-HIERARCHY-0001
+type: contract
+title: Authored Tree hierarchy, keyed groups and directional navigation
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: The Sprint 2 request fixes the authored non-lazy Tree scope. This draft supplies reviewable ownership and transition rules before implementation; independent browser and assistive-technology admission remains separate.
+summary: Logical item identity, committed expansion and selection remain Root-owned; each optional Group relates only to its matching materialized Item.
+criteria:
+  - id: C-TREE-HIERARCHY-0001-IDENTITY
+    text: Items have non-empty unique nodeKey values and optional parentKey values in the same nearest Root. Missing parents, cycles and duplicate keys invalidate the graph and suppress interaction. Anatomy order determines sibling order; insertion, removal, reorder and reparenting recompute preorder and level/position/setSize without emitting user requests. Collection owns membership, Focus owns physical focus, and application data, labels and actions stay application-owned. This is an authored non-lazy hierarchy, not a virtualizer or domain execution graph.
+  - id: C-TREE-HIERARCHY-0001-STATE
+    text: Supplied value and expandedKeys remain authoritative. Uncontrolled requests update committed state; controlled requests only emit the proposed value or complete expanded-key set. Unknown controlled values are retained without inventing a materialized selected item. ReadOnly prevents selection changes but preserves navigation and disclosure inspection; disabled suppresses selection, expansion and focus. Structural changes emit no valueChange or expandedChange. Retired owners cannot service retained request methods.
+  - id: C-TREE-HIERARCHY-0001-KEYBOARD
+    text: Up/Down, Home/End and bounded single-character typeahead traverse visible enabled preorder independently of selection. Direction defaults to ltr; forward is Right in ltr and Left in rtl, backward is the reverse. Forward expands a closed branch or moves to its first enabled direct child; backward collapses an open branch or moves to its enabled direct parent, never skipping a disabled parent. Enter/Space activates selection once. A committed collapse hiding a physically focused descendant restores focus to its closest visible enabled ancestor; a rejected controlled collapse leaves focus and visibility unchanged. Reconciliation never steals focus from another control.
+  - id: C-TREE-HIERARCHY-0001-RELATIONSHIPS
+    text: Each optional Group declares its owning item's nodeKey. Item controls Group and Group is labelled by Item through scoped keyed A11y part references, never public DOM IDs or a root-wide first match. Missing or ambiguous materialized targets yield no relationship. Group visibility follows the matching branch's committed visibility and expansion without removing logical Item membership. Detach, rematerialize, key changes and nested Roots re-resolve only current targets; generated host identity is host-owned.
+  - id: C-TREE-HIERARCHY-0001-PRESENTATION
+    text: Root direction reaches presentation as well as keyboard policy. Family Group indentation uses logical inline-start spacing. No family owns a second hierarchy, expansion or selection state machine.
+dependsOn:
+  contracts:
+    [C-PROPS-0001, C-LIFECYCLE-0008, C-ANATOMY-SCOPED-QUERY-0001, C-A11Y-PART-RELATIONSHIP-0001]
+sources:
+  - path: packages/prototypes/base/src/tree/
+  - path: packages/prototypes/base/test/tree-hierarchy.test.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define direction, keyed per-item relationships and committed-visibility focus repair for the authored Tree slice.
+tags: [tree, hierarchy, direction, a11y, controlled]

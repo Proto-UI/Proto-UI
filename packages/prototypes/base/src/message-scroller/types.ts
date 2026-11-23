@@ -4,6 +4,7 @@ import type {
   ExposeState,
   ScrollEndFollowState,
   ScrollEndFollowRequestStatus,
+  ScrollSurfaceRequestOutcome,
   State,
 } from '@proto.ui/core';
 import type { asButton, ButtonExposes, ButtonProps } from '../button';
@@ -25,6 +26,7 @@ export type MessageScrollerViewportExposes = ScrollAreaViewportExposes & {
   following: ExposeState<ScrollEndFollowState>;
   requestStatus: ExposeState<ScrollEndFollowRequestStatus>;
   jumpToEnd: ExposeMethod<() => void>;
+  pauseFollowing: ExposeMethod<() => ScrollSurfaceRequestOutcome>;
 };
 export type MessageScrollerJumpExposes = ButtonExposes & {
   atEnd: ExposeState<boolean>;

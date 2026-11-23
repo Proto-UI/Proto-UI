@@ -14,9 +14,9 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanumeric 过滤、disabled/readOnly、name、ariaLabel。唯一真实 Input 由 TextControl 处理选择、粘贴、删除与组合输入，并声明 one-time-code 自动填充；组合结束后过滤和限长。Slot 是按索引被动显示且对辅助技术隐藏，不制造额外编辑器或 Tab 停靠点；active 只表示尾部插入提示，不声称等于原生选区位置。valueChange 为提案；每个接受的完整代码发一次 completed，不执行验证或获取短信。
+Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanumeric 过滤、disabled/readOnly、name、ariaLabel。唯一真实 Input 由 TextControl 处理选择、粘贴、删除与组合输入，并声明 one-time-code 自动填充；组合结束后过滤和限长。Slot 是按索引被动显示且对辅助技术隐藏，不制造额外编辑器或 Tab 停靠点；可编辑 Input 聚焦时，active 由 TextControl 的真实插入点或选区决定；未知选区、失焦、disabled 和 readOnly 不显示活动槽，不能用值长度代替光标。valueChange 为提案；每个接受的完整代码发一次 completed，不执行验证或获取短信。
 
-在 Field/FormField 内用 Control 替代 Input，桥接 FieldLabel、规范字符串校验、IME 取消、Form 序列化及复位。独立 Input 保留原有命名。
+在 Field/FormField 内用 Control 替代 Input，桥接 FieldLabel、规范字符串校验、IME 取消、Form 序列化及复位。独立 Input 保留原有命名。OTP Control 在所有者回调结束后为已接受的规范值变化启动校验；受控拒绝或过滤后无变化不触发自动 change 校验，manual 与配置的 blur 校验仍可使用。同一回调批次只校验最新快照，reset、策略中断和卸载会取消排队工作。
 
 部件: root, input, control, slot, separator. 四个视觉家族继承同一 Base 行为。
 

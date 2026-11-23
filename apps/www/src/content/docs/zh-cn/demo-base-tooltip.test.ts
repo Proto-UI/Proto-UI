@@ -32,14 +32,14 @@ describe('Base Tooltip documentation registration', () => {
     expect(getPrototype('base-tooltip-content')).toBe(tooltipContent);
   });
   it.each(['en', 'zh-cn'])(
-    'registers the tooltip demo on the %s page with the three-runtime scope',
+    'registers the tooltip demo on the %s page with the four-runtime scope',
     (locale) => {
       const path = docs(locale);
       expect(existsSync(path)).toBe(true);
       const text = readFileSync(path, 'utf8');
       expect(text).toContain('demo-base-tooltip');
       expect(text).toContain('initialRuntime="wc"');
-      expect(text).toContain("runtimes={['wc', 'react', 'vue']}");
+      expect(text).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
     }
   );
   it('makes Base Tooltip discoverable in the sidebar', () => {

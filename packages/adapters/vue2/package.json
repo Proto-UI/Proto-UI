@@ -34,7 +34,8 @@
   },
   "devDependencies": {
     "@proto.ui/prototypes-base": "workspace:*",
-    "vue": "2.6.14"
+    "vue": "2.6.14",
+    "vue-server-renderer": "2.6.14"
   },
   "peerDependencies": {
     "vue": ">=2.6.0 <2.7"

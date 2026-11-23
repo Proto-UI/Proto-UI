@@ -1,0 +1,188 @@
+{
+  "kind": "original-to-retained-evidence-map",
+  "originalManifestSha256": "af1930f3a239b55d31b66cd6140e08827158b4c0b1901e57ced014269e461114",
+  "files": [
+    {
+      "originalPath": "final-browser-gates/browser-client.test.log",
+      "retainedPath": "browser-final/browser-client.test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 2124,
+      "sha256": "ec299937dfa48c0db18700a560b231f40414d1f601a1681ca266a14934fa0148"
+    },
+    {
+      "originalPath": "final-browser-gates/browser-revision-session.test.log",
+      "retainedPath": "browser-final/browser-revision-session.test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 1675,
+      "sha256": "a235116396134d24cc69235d71907b5c039d0512c79454e202b760554720458d"
+    },
+    {
+      "originalPath": "final-browser-gates/browser-target-consumer.test.log",
+      "retainedPath": "browser-final/browser-target-consumer.test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 60747,
+      "sha256": "514baa9fbfb1c7ba920180fd32f7b09d7926662cbf09c40a310f122bee6913b9"
+    },
+    {
+      "originalPath": "final-browser-gates/browser-wasm.test.log",
+      "retainedPath": "browser-final/browser-wasm.test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 61123,
+      "sha256": "226cceb0725e690a070b7a19eaf4b95c443c09617e7439f4e3c20729dfb57871"
+    },
+    {
+      "originalPath": "final-browser-gates/native-support-plan.recheck.json",
+      "retainedPath": "browser-final/native-support-plan.recheck.json.gz",
+      "newGzipWrapper": true,
+      "bytes": 993,
+      "sha256": "c3a5de4794285212f1353a52a9566a6d0c9721befd5c9474d8a87bb1b036e84c"
+    },
+    {
+      "originalPath": "final-browser-gates/native-support-plan.recheck.log",
+      "retainedPath": "browser-final/native-support-plan.recheck.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 50646,
+      "sha256": "5268cc30e3a5eab65ab2e1e963f105d7cfb20b3848d369992ac16c9bd260ccbc"
+    },
+    {
+      "originalPath": "final-browser-gates/native-support-plan.test.log",
+      "retainedPath": "browser-final/native-support-plan.test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 50239,
+      "sha256": "86be78b541e1973f3afa1d497e2cb1387f1a195bdeb884acf85c829cf71b45e6"
+    },
+    {
+      "originalPath": "final-browser-gates/source-files.json.gz",
+      "retainedPath": "browser-final/source-files.json.gz",
+      "newGzipWrapper": false,
+      "bytes": 578633,
+      "sha256": "f6150a64b6c33f0deb38ac8e6ea396750adf7e51bfa81a0a54a7dabc99882623"
+    },
+    {
+      "originalPath": "final-browser-gates/validation.json",
+      "retainedPath": "browser-final/validation.json.gz",
+      "newGzipWrapper": true,
+      "bytes": 3981,
+      "sha256": "89a84f2e5acec1e4e9babc39ca3cba1ad8c99d7739dd60cd5b5b1d0e49e7e3c1"
+    },
+    {
+      "originalPath": "final-browser-gates/vue-source.test.log",
+      "retainedPath": "browser-final/vue-source.test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 44953,
+      "sha256": "18c4d941104d69d560d12def3c5b304b3b912e407d2197ac18251683bab23f6b"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/diagnostic.py",
+      "retainedPath": "native-support-plan-diagnostic/diagnostic.py.gz",
+      "newGzipWrapper": true,
+      "bytes": 5863,
+      "sha256": "5ee27227f1b7dad235701d7b9b40feb420df9a6d0259cfae51630a4499a7d42c"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/files.json",
+      "retainedPath": "native-support-plan-diagnostic/files.json.gz",
+      "newGzipWrapper": true,
+      "bytes": 1049,
+      "sha256": "bbfa5e372c131c091ea44523f9a4f5247c3a0c5b500fe5f9d26cf1ef34979840"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/memory-samples.jsonl",
+      "retainedPath": "native-support-plan-diagnostic/memory-samples.jsonl.gz",
+      "newGzipWrapper": true,
+      "bytes": 118619,
+      "sha256": "916171f4f894025fb74f8e6c3cfd0dbe93e8cbe35a50055e5c6a53a673c9caaa"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/observe-child-exits.cjs",
+      "retainedPath": "native-support-plan-diagnostic/observe-child-exits.cjs.gz",
+      "newGzipWrapper": true,
+      "bytes": 1338,
+      "sha256": "c9fa8d77edeb418a974b29e20aaff164885c66e1263de6f9d262872575513180"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/process-events.jsonl",
+      "retainedPath": "native-support-plan-diagnostic/process-events.jsonl.gz",
+      "newGzipWrapper": true,
+      "bytes": 1480,
+      "sha256": "ef2ed8ecc301b6b9d9bc65de248fe1222a80ad18716aeecda4eb31ac66c6f48c"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/result.json",
+      "retainedPath": "native-support-plan-diagnostic/result.json.gz",
+      "newGzipWrapper": true,
+      "bytes": 3145,
+      "sha256": "95a617ab2930b9a8b7ec267a2b6f19302e4e427affda042eafd3fdd2cbc5fd26"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/review-diagnosis.md",
+      "retainedPath": "native-support-plan-diagnostic/review-diagnosis.md.gz",
+      "newGzipWrapper": true,
+      "bytes": 5709,
+      "sha256": "c5c8394154401e1433f9208c7f5c6efdd478b0ee2e893726a97809c34de49b2a"
+    },
+    {
+      "originalPath": "native-support-plan-diagnostic/test.log",
+      "retainedPath": "native-support-plan-diagnostic/test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 49991,
+      "sha256": "aa9744b42e93e0190dd6aa913a82d64762ab922e98229cd34ea770101a8524f0"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/case-results.json",
+      "retainedPath": "native-support-plan-low-heap/case-results.json.gz",
+      "newGzipWrapper": true,
+      "bytes": 3236,
+      "sha256": "7424dd9869d8e5d4ef376946713a621269081e8efe8ba83034c4001304aba27f"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/diagnostic.py",
+      "retainedPath": "native-support-plan-low-heap/diagnostic.py.gz",
+      "newGzipWrapper": true,
+      "bytes": 5860,
+      "sha256": "1ad831e9f53d5d98ff56bd5b75a98b4ba04b3f05cb0d21804f3437960abe2e9a"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/memory-samples.jsonl",
+      "retainedPath": "native-support-plan-low-heap/memory-samples.jsonl.gz",
+      "newGzipWrapper": true,
+      "bytes": 216957,
+      "sha256": "9f2abd3dd6f33585de433fb53f1d1dd9185e39a74232b07955db8b352de7488d"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/observe-child-exits.cjs",
+      "retainedPath": "native-support-plan-low-heap/observe-child-exits.cjs.gz",
+      "newGzipWrapper": true,
+      "bytes": 1336,
+      "sha256": "ef792400dfd919860584b2c09c1a2759b3b48fab89ad3f7fd94839d3a19e4409"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/process-events.jsonl",
+      "retainedPath": "native-support-plan-low-heap/process-events.jsonl.gz",
+      "newGzipWrapper": true,
+      "bytes": 1443,
+      "sha256": "89551aa2ea3ddab44d075b8ba29567a2f0472297d4a31f103fc138d0b9cbb43e"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/result.json",
+      "retainedPath": "native-support-plan-low-heap/result.json.gz",
+      "newGzipWrapper": true,
+      "bytes": 3415,
+      "sha256": "7e49ffbb6dc320390f6a819381e9f44bd8b2fc5a6f7bf522f3d13446dca3cd3c"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/review-outcome.md",
+      "retainedPath": "native-support-plan-low-heap/review-outcome.md.gz",
+      "newGzipWrapper": true,
+      "bytes": 4409,
+      "sha256": "faee31608534d05ea8b4e24101a842208817d8d883c16453685649e25b3b205c"
+    },
+    {
+      "originalPath": "native-support-plan-low-heap/test.log",
+      "retainedPath": "native-support-plan-low-heap/test.log.gz",
+      "newGzipWrapper": true,
+      "bytes": 57956,
+      "sha256": "f0ca285f5b3c9c1a341c8d0cf293489e5aef08e71bd7c82a4b3e443d82055c2f"
+    }
+  ]
+}

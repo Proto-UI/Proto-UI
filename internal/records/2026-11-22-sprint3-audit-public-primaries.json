@@ -1,0 +1,207 @@
+{
+  "kind": "serialized-host-selected-actual-producer-checks",
+  "worktreeBase": "975286f9c9b4107c0f7bbf114b89c55365c8dfe8",
+  "sourceFiles": {
+    "apps/www/scripts/audit-brutalist-contrast.mts": "7c46a2861132819d6404eeff806ce7a5ad5c0f964d5c15daa252feab2df17c2f",
+    "apps/www/scripts/contrast-probe.browser.ts": "9f5b0591c3d6bd14d25cc9eca997521760e07383a5f12458f6bf4eb1b1a17890",
+    "apps/www/scripts/contrast-probe-serialization.test.mjs": "2d706149536d4cd23a3eabfb3e9978b67679fa9305dc8ed0ffd64dc57d04056e",
+    "apps/www/test/contrast-projection-identity.test.ts": "85ad3ca405e2f22c3477a32f26b0876152b9358ea15ea10b8eb338e96a40d303"
+  },
+  "sourceStable": true,
+  "status": "passed",
+  "aggregateExitCode": 0,
+  "originalSerialReceiptSHA256": "71d7e26f070e7e08bc3e7714208c8d78cab151964fb78be026c927df017e227d",
+  "rows": [
+    {
+      "runtime": "wc",
+      "expectedSelected": 8,
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/test/contrast-projection-identity.test.ts",
+        "-t",
+        "auxiliary primary/(live-region|async-region)/wc:|input primary/wc:|preserves every declared primary recipe|Image audit prerequisite",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tmp/s3-strict-primary-hosts-round1/wc.json"
+      ],
+      "exitCode": 0,
+      "stopReason": "process-terminal",
+      "elapsedSeconds": 9.014,
+      "log": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/wc.log",
+        "sha256": "5bbee218c4fe10f3a59ae13430dae84d076952d40368fbb68dcb14826dca1449"
+      },
+      "status": "passed",
+      "passed": 8,
+      "failed": 0,
+      "report": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/wc.json",
+        "sha256": "5f47e52f1f58006c5e8209fbc2142627eb67cf81e8c033fabe4591ff8662bebf"
+      }
+    },
+    {
+      "runtime": "react",
+      "expectedSelected": 6,
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/test/contrast-projection-identity.test.ts",
+        "-t",
+        "auxiliary primary/(live-region|async-region)/react:|input primary/react:",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tmp/s3-strict-primary-hosts-round1/react.json"
+      ],
+      "exitCode": 0,
+      "stopReason": "process-terminal",
+      "elapsedSeconds": 9.362,
+      "log": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/react.log",
+        "sha256": "6f7ba767f01600af68d22dc92e7d874fb2c323093c2811fbd0c0d75aa2266d48"
+      },
+      "status": "passed",
+      "passed": 6,
+      "failed": 0,
+      "report": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/react.json",
+        "sha256": "8bc46df564ba52c9acfb3c8cea482076e1862c0cf81426f448048b169462ba12"
+      }
+    },
+    {
+      "runtime": "vue",
+      "expectedSelected": 6,
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/test/contrast-projection-identity.test.ts",
+        "-t",
+        "auxiliary primary/(live-region|async-region)/vue:|input primary/vue:",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tmp/s3-strict-primary-hosts-round1/vue.json"
+      ],
+      "exitCode": 0,
+      "stopReason": "process-terminal",
+      "elapsedSeconds": 8.587,
+      "log": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/vue.log",
+        "sha256": "ba129dfdf40db80bf7eda0e16708ac1d6f2c4cb25725ad9059c4424c8e23163c"
+      },
+      "status": "passed",
+      "passed": 6,
+      "failed": 0,
+      "report": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/vue.json",
+        "sha256": "ae5c72a00e4939f819b5a810bd11d84e2807958fba4d9a5735bb19d459720c98"
+      }
+    },
+    {
+      "runtime": "vue2",
+      "expectedSelected": 6,
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/test/contrast-projection-identity.test.ts",
+        "-t",
+        "auxiliary primary/(live-region|async-region)/vue2:|input primary/vue2:",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tmp/s3-strict-primary-hosts-round1/vue2.json"
+      ],
+      "exitCode": 0,
+      "stopReason": "process-terminal",
+      "elapsedSeconds": 7.767,
+      "log": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/vue2.log",
+        "sha256": "570b210f9db5334365171a7bf6cd45f127853ca850047e9efc4d4a9262011ebe"
+      },
+      "status": "passed",
+      "passed": 6,
+      "failed": 0,
+      "report": {
+        "path": "/tmp/s3-strict-primary-hosts-round1/vue2.json",
+        "sha256": "0244df32c8df70dc370d43613a31a488965d6b5ca7eb031de8124ed960116b13"
+      }
+    }
+  ],
+  "boundary": "Same source and assertions, four isolated host processes run serially; earlier whole-selection SIGKILL retained separately. Controlled DOM/CSSOM checks are not native browser acceptance.",
+  "priorLocalRuns": [
+    {
+      "name": "old",
+      "passed": 0,
+      "failed": 33,
+      "exitCode": 1,
+      "log": {
+        "name": "s3-strict-primary-old.log",
+        "sha256": "512713c14935f1fb3851c9e9ac9a75a9fba0079a31add4057d53d805ce241fe5"
+      },
+      "json": {
+        "name": "s3-strict-primary-old.json",
+        "sha256": "3900d88ea3da7031d5229e7f4b0392600f8237da4342afc910dccd1e2970dae1"
+      },
+      "boundary": "Earlier development outcome retained; see dated record for exact source/fixture diagnosis."
+    },
+    {
+      "name": "fixed",
+      "passed": 21,
+      "failed": 12,
+      "exitCode": 1,
+      "log": {
+        "name": "s3-strict-primary-fixed.log",
+        "sha256": "9a25e22af8b8117c94fb044ca167db90d114fb975c81d8593e6ac28d62c5b8e9"
+      },
+      "json": {
+        "name": "s3-strict-primary-fixed.json",
+        "sha256": "3f026515c8b861c018cb51948bfbd2112568b3e59de968bda955197a69bfec6f"
+      },
+      "boundary": "Earlier development outcome retained; see dated record for exact source/fixture diagnosis."
+    },
+    {
+      "name": "final",
+      "passed": 22,
+      "failed": 4,
+      "exitCode": 1,
+      "log": {
+        "name": "s3-strict-primary-final.log",
+        "sha256": "28f2d62919548b9f0824ed49d94ca920d20d1fbe06c3cc870fe9ba9174f1980f"
+      },
+      "json": {
+        "name": "s3-strict-primary-final.json",
+        "sha256": "e3e529bd71f7b76334b359310d2ed6d7c9f16f9b3ad1e06f96ab88fecd1f52a3"
+      },
+      "boundary": "Earlier development outcome retained; see dated record for exact source/fixture diagnosis."
+    },
+    {
+      "name": "current",
+      "passed": null,
+      "failed": null,
+      "exitCode": 1,
+      "log": {
+        "name": "s3-strict-primary-current.log",
+        "sha256": "c1b03bcb8eb95b313201946bf084ba8fdee276324fced283005be5fb4dd394af"
+      },
+      "boundary": "SIGKILL during module loading; no JSON terminal; cause unknown"
+    }
+  ]
+}

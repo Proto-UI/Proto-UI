@@ -17,6 +17,12 @@ Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 ove
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 物化宿主的所有权与退休
+
+每个逻辑集合只接受一个物化宿主租约。`attachWebVirtualList` 在添加占位、行视图或监听之前取得租约；第二个宿主的挂载会失败，且不干扰当前宿主。替换宿主前先 dispose 旧宿主。可移植模型向其他宿主实现提供 `acquireMaterializer(onRetired)`；调用 Web 入口时无需在外层再取得一次租约。
+
+Root 卸载或销毁时会让物化宿主退休：在途 generation 失效，已持有视图与观察器被清理；旧宿主晚到的 refresh、滚动、测量或重复 dispose 不能撤销替代宿主。首次渲染或观察器安装失败也释放租约，同一逻辑集合可以重试。这些所有权规则补充 generation 绑定的 request／commit 协议，不代表非 Web 物化器或原生辅助技术已验收。
+
 ## API
 
 Virtual List 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 与 Content 没有属性。

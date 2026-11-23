@@ -31,13 +31,18 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
           expect(shell.getAttribute('data-pui-style'), `${record.kind}/${record.type}`).toContain(
             style === 'new-york-v4' && record.type === 'command' ? 'rounded-none' : radius
           );
-          const legacy = record.host.querySelector(
-            '[data-pui-style~="transition-[color,box-shadow]"]'
+          // Read the exact whitespace-delimited token. happy-dom's ~= selector
+          // implementation interpolates this valid token into an unescaped
+          // RegExp character class; the native CSS selector is not the defect.
+          const legacy = [...record.host.querySelectorAll('[data-pui-style]')].filter((node: any) =>
+            (node.getAttribute('data-pui-style') ?? '')
+              .split(/\s+/)
+              .includes('transition-[color,box-shadow]')
           );
           // A real, ready New York Command is the original selector's
           // negative control. Ordinary Input and Rhea retain its positive.
-          expect(legacy, `${record.kind}/${record.type}/${style}`).toBe(
-            style === 'new-york-v4' && record.type === 'command' ? null : shell
+          expect(legacy, `${record.kind}/${record.type}/${style}`).toEqual(
+            style === 'new-york-v4' && record.type === 'command' ? [] : [shell]
           );
           expect(record.editor()).toBe(editors[i]);
           expect(record.editor().getAttribute('data-pui-style')).toContain('border-0');
@@ -116,6 +121,6 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
     document.body.replaceChildren();
     delete document.documentElement.dataset.ready;
   }
-// Four adapter runtimes mounting two live consumers each can exceed the 5s
-// default when the suite host is loaded; it measures real mounts, not a stub.
+  // Four adapter runtimes mounting two live consumers each can exceed the 5s
+  // default when the suite host is loaded; it measures real mounts, not a stub.
 }, 30_000);

@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "4d9a621618a63bace047776fbdf9eb7a20685cbc",
-  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners plus the Button example producer. Transitive/runtime and served-source proof remain unobserved.",
+  "revision": "28c1a8e62d0d9f013efe5700ed6b70e4cc5a0329",
+  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately.",
   "sourceAdmission": "unverified",
   "sources": [
     {
       "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
-      "sha256": "2611501cb59055d0bf428559f0e86be6050bdc09ac1255d84d967e4f11e4428a"
+      "sha256": "008827e9e757d342728638b51f0b62fdc753c70479f6a6c4324c6fdbaedae286"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "1f3da9d3b811eaeeef624541cec3523827b2265bb2d30a175e0d1e9a57f70497"
+      "sha256": "38afd6e5c7fd509682bbb4211fc4c0f637b49d7d6f7134afb04ff6dc1e518403"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
@@ -23,7 +23,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "512567c5f376fbc5a55448aae4589fc2d56814c78216d930ea069e5a63149219"
+      "sha256": "09e2046f94faf337ab37360e6c6239264fa1190415af578d561e92f3f4f3df65"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -39,7 +39,7 @@
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
-      "sha256": "549885c121d579a41e0a5d28aa3a6bfc9032f73f004fc94d7431648e96f3e23d"
+      "sha256": "05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7"
     },
     {
       "path": "apps/www/src/components/SiteCopyBootstrap.astro",
@@ -71,15 +71,15 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
-      "sha256": "0974f64b4854fe51bb9b4e8c1c575a995d597d76b4d925a154ee280e685b2364"
+      "sha256": "9ce21e5ae6885a62ffc038fc363a330e8411b7242fbbaf139d402d942a3b06db"
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "5b1ab89970f5a4aed6880f1c8fea6ad853521041058b00fd506c1db18755875a"
+      "sha256": "d22631b1ce4efd6aedaa8ea03de1e8507ff5ce3b76d5e4dc04d8b9337a5ff54f"
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7"
+      "sha256": "ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae"
     },
     {
       "path": "apps/www/package.json",
@@ -87,7 +87,7 @@
     },
     {
       "path": "pnpm-lock.yaml",
-      "sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8"
+      "sha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8"
     },
     {
       "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
@@ -116,6 +116,18 @@
     {
       "path": "apps/www/src/content/docs/demo_components/button/button-usage.ts",
       "sha256": "4330b1d2095ef54e848c4521f53a0722baebba56edf59650e3e81602de3a2d40"
+    },
+    {
+      "path": "apps/www/src/components/install-command-card-client.ts",
+      "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro",
+      "sha256": "f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+      "sha256": "c16bd248d5b532017ca0ba2400f78ca04344f136c6d2f85723e744660d84db7a"
     }
   ]
 }

@@ -10,9 +10,10 @@
 //! the host sends the peer.
 //!
 //! The calls go to this process's own window, so no accessibility permission
-//! is involved. Frames are drawn by hand: macOS does not draw a window nobody
-//! can see, and the display of a CI runner, or of a locked machine, may be
-//! asleep.
+//! is involved. Accessibility-only checks explicitly build GPUI scenes. Pixel
+//! evidence separately activates this window, waits across normal platform
+//! frame callbacks, and checks the actual ScreenCaptureKit content pixels.
+//! An occluded/asleep window is an evidence failure, never a black-PNG pass.
 //!
 //! Off by default, because it needs a window server:
 //!
@@ -34,7 +35,7 @@ mod native_capture;
 
 #[cfg(target_os = "macos")]
 mod macos {
-    use std::cell::RefCell;
+    use std::cell::{Cell, RefCell};
     use std::collections::HashMap;
     use std::ffi::CStr;
     use std::fs;
@@ -43,11 +44,12 @@ mod macos {
     use std::process;
     use std::rc::Rc;
     use std::thread;
-    use std::time::Duration;
+    use std::time::{Duration, Instant};
 
     use gpui::{
-        px, size, AnyWindowHandle, App, AppContext, AsyncApp, Bounds, KeyDownEvent, KeyUpEvent,
-        Keystroke, PlatformInput, StyleRefinement, WindowBounds, WindowHandle, WindowOptions,
+        div, px, rgb, size, AnyWindowHandle, App, AppContext, AsyncApp, Bounds, KeyDownEvent,
+        KeyUpEvent, Keystroke, PlatformInput, StyleRefinement, Styled, WindowBounds, WindowHandle,
+        WindowOptions,
     };
     use objc2::msg_send;
     use objc2::runtime::AnyObject;
@@ -220,6 +222,29 @@ mod macos {
         )
     }
 
+    /// Host-app fixture styling, independent of the Label's semantics and peer
+    /// projection. Each caption has a known content box and readable contrast.
+    fn capture_label_config(session: &str, label: &str, index: usize) -> SessionConfig {
+        use super::native_capture::capture_pixels::{
+            LABEL_FONT_SIZE, LABEL_HEIGHT, LABEL_PADDING, LABEL_WIDTH,
+        };
+        let mut config = config(session, "base-label-root", label);
+        let mut subject = div()
+            .absolute()
+            .left(px(0.0))
+            .top(px((index as f64 * LABEL_HEIGHT) as f32))
+            .w(px(LABEL_WIDTH as f32))
+            .h(px(LABEL_HEIGHT as f32))
+            .px(px(LABEL_PADDING as f32))
+            .py(px(LABEL_PADDING as f32))
+            .text_size(px(LABEL_FONT_SIZE as f32))
+            .line_height(px(24.0))
+            .bg(rgb(0xf4f7fa))
+            .text_color(rgb(0x142237));
+        config.root_style = subject.style().clone();
+        config
+    }
+
     /// An instance whose default slot holds `content`, opened inside `parent`.
     fn composed(
         session: &str,
@@ -289,16 +314,21 @@ mod macos {
 
     // --- NSAccessibility, as a screen reader asks it ------------------------
 
-    /// The window's content view. AccessKit's adapter subclasses it; GPUI's own
-    /// view is a subview of it.
-    fn content_view(window: &gpui::Window) -> *mut AnyObject {
-        let view: *mut AnyObject = match HasWindowHandle::window_handle(window)
+    /// GPUI's actual drawing view; its measured rect determines image ROIs.
+    fn native_view(window: &gpui::Window) -> *mut AnyObject {
+        match HasWindowHandle::window_handle(window)
             .expect("a window handle")
             .as_raw()
         {
             RawWindowHandle::AppKit(handle) => handle.ns_view.as_ptr().cast(),
             other => panic!("not an AppKit window: {other:?}"),
-        };
+        }
+    }
+
+    /// The window's content view. AccessKit's adapter subclasses it; GPUI's own
+    /// drawing view is a subview of it. Keep this path for the AX tree.
+    fn content_view(window: &gpui::Window) -> *mut AnyObject {
+        let view = native_view(window);
         // SAFETY: `view` is GPUI's live `NSView`; both messages are plain
         // AppKit accessors on the main thread.
         unsafe {
@@ -392,6 +422,15 @@ mod macos {
         capture_failures: Vec<String>,
     }
 
+    /// Retire queued frame callbacks even if the async waiter is cancelled.
+    struct RetireFrameCallbacks(Rc<Cell<bool>>);
+
+    impl Drop for RetireFrameCallbacks {
+        fn drop(&mut self) {
+            self.0.set(true);
+        }
+    }
+
     impl Run {
         fn any(&self) -> AnyWindowHandle {
             self.window.into()
@@ -404,9 +443,61 @@ mod macos {
                 .expect("the window draws");
         }
 
+        /// The second normal frame callback follows the first platform
+        /// draw/present invocation. This is not a GPU fence: the subsequent
+        /// ScreenCaptureKit pixel gate is the final evidence of visible text.
+        async fn capture_frames(&self, cx: &mut AsyncApp) -> super::native_capture::FrameWitness {
+            let callbacks = Rc::new(Cell::new(0usize));
+            let retired = Rc::new(Cell::new(false));
+            let _retire_on_drop = RetireFrameCallbacks(retired.clone());
+            let observed = callbacks.clone();
+            let terminal = retired.clone();
+            let scheduled = cx.update_window(self.any(), move |_, window, cx| {
+                cx.activate(true);
+                window.activate_window();
+                window.refresh();
+                window.on_next_frame(move |window, _| {
+                    if terminal.get() {
+                        return;
+                    }
+                    observed.set(1);
+                    window.on_next_frame(move |_, _| {
+                        if !terminal.get() {
+                            observed.set(2);
+                        }
+                    });
+                });
+            });
+            let mut error = scheduled.err().map(|error| error.to_string());
+            let deadline = Instant::now() + Duration::from_secs(5);
+            while error.is_none() && callbacks.get() < 2 {
+                if Instant::now() >= deadline {
+                    error = Some("normal platform frame callbacks timed out after 5 s".into());
+                    break;
+                }
+                cx.background_executor()
+                    .timer(Duration::from_millis(20))
+                    .await;
+            }
+            retired.set(true);
+            let visible = cx.update_window(self.any(), |_, window, _| window.is_visible());
+            let visible = match visible {
+                Ok(visible) => visible,
+                Err(failure) => {
+                    error.get_or_insert_with(|| failure.to_string());
+                    false
+                }
+            };
+            super::native_capture::FrameWitness {
+                callbacks: callbacks.get(),
+                visible,
+                error,
+            }
+        }
+
         /// Capture only this test's own window, at the named current phase.
-        /// Node presence alone is not evidence that text is inside the frame;
-        /// the resulting PNG still requires pixel inspection.
+        /// Node presence, a drawn Scene and PNG file creation are insufficient:
+        /// both actual caption ROIs must contain ink on the fixture background.
         async fn capture(&mut self, phase: &str, cx: &mut AsyncApp) {
             let Ok(directory) = std::env::var("PROTO_GPUI_EVIDENCE_DIR") else {
                 return;
@@ -414,15 +505,20 @@ mod macos {
             let path = Path::new(&directory).join(format!("control-label-{phase}.png"));
             let result = async {
                 fs::create_dir_all(&directory).map_err(|error| error.to_string())?;
+                let frames = self.capture_frames(cx).await;
+                println!("native capture platform frames: {frames:?}");
                 let target = cx
                     .update_window(self.any(), |_, window, _| {
                         // SAFETY: this is the main-thread, live view of our own
                         // test window. No external window identifier is accepted.
-                        unsafe { super::native_capture::Target::from_view(content_view(window)) }
+                        unsafe { super::native_capture::Target::from_view(native_view(window)) }
                     })
                     .map_err(|error| error.to_string())??;
-                super::native_capture::capture(target, &path, cx).await?;
                 println!("native capture target: {target:?}");
+                // Still try to retain real pixels on a frame timeout. Neither
+                // a timed-out wait nor a blank image can become a passing gate.
+                let pixels = super::native_capture::capture(target, &path, frames, cx).await?;
+                println!("native capture content pixels: {pixels:?}");
                 Ok::<(), String>(())
             }
             .await;
@@ -984,8 +1080,8 @@ mod macos {
                     for session_id in view.rendered_sessions() {
                         view.receive(PeerToHostMessage::SessionDisposed(proto_ui_host_protocol::messages::SessionDisposed { session_id }), window, cx);
                     }
-                    view.open_session("label-passive", config("label-passive", "base-label-root", "Native passive label"), cx);
-                    view.open_session("label-actionable", config("label-actionable", "base-label-root", "Native actionable label"), cx);
+                    view.open_session("label-passive", capture_label_config("label-passive", "Native passive label", 0), cx);
+                    view.open_session("label-actionable", capture_label_config("label-actionable", "Native actionable label", 1), cx);
                     for message in passive.into_iter().chain(actionable) { view.receive(message, window, cx); }
                     view.take_outbox();
                 }).expect("real Label projections replay");

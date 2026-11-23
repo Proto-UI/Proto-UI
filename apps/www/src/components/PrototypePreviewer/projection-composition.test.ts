@@ -497,7 +497,8 @@ describe('Website projection composition', () => {
           composition.demo,
           (node) => node.kind === 'proto' && node.ref === 'inner'
         );
-        if (outer.kind !== 'proto' || inner.kind !== 'proto') throw new Error('Expected Proto nodes');
+        if (outer.kind !== 'proto' || inner.kind !== 'proto')
+          throw new Error('Expected Proto nodes');
         const owned = outer.surfaceStyle;
         const authored = inner.surfaceStyle;
         composition.setThemeSurfaceStyle({ '--pui-foreground': '#eeeeee' });

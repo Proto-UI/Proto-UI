@@ -457,6 +457,109 @@ describe('WC portal conceal rendering barrier', () => {
     await flush();
   });
 
+  it('retains the reopened event gate after native detached attribute reentry', async () => {
+    let presses = 0;
+    let armed = false;
+    let reentries = 0;
+    const calls = { mounted: 0, unmounted: 0, disposed: 0 };
+    const Root = AdaptToWebComponent(dialogRoot, {
+      registerAs: 'conceal-native-reentry-dialog-root',
+      schedule: (task) => task(),
+    });
+    const root = new Root();
+    const Content = AdaptToWebComponent(
+      {
+        name: 'conceal-native-reentry-dialog-content',
+        modules: asDialogContent.modules,
+        setup(def) {
+          asDialogContent();
+          def.event.on('press.commit', () => {
+            presses++;
+          });
+        },
+      },
+      {
+        register: false,
+        shadow: false,
+        schedule: (task) => task(),
+        diagnostics: {
+          onLifecycleEvent(event) {
+            if (event.type === 'mount.mounted') calls.mounted++;
+            if (event.type === 'unmount.done') calls.unmounted++;
+            if (event.type === 'instance.dispose.done') calls.disposed++;
+          },
+        },
+      }
+    );
+    const observed: unknown = Reflect.get(Content, 'observedAttributes');
+    const onAdapterAttribute: unknown = Reflect.get(Content.prototype, 'attributeChangedCallback');
+    if (
+      !Array.isArray(observed) ||
+      !observed.every((name): name is string => typeof name === 'string') ||
+      typeof onAdapterAttribute !== 'function'
+    )
+      throw new TypeError('The actual Custom Element attribute contract is required.');
+    const adapterObservedAttributes = observed;
+    const adapterAttributeChanged = onAdapterAttribute;
+    class ReentrantContent extends Content {
+      static get observedAttributes() {
+        return [...adapterObservedAttributes, 'data-pui-view-detached'];
+      }
+      attributeChangedCallback(name: string, previous: string | null, next: string | null) {
+        if (name !== 'data-pui-view-detached') {
+          adapterAttributeChanged.call(this, name, previous, next);
+          return;
+        }
+        if (!armed || next === null) return;
+        armed = false;
+        reentries++;
+        // An actual Custom Element reaction drives the real public Props path.
+        // Runtime view intent and the synchronous configured host scheduler
+        // reopen the retained epoch before the older attribute call returns.
+        setElementProps(root, { open: true, a11yLabel: 'Native attribute reentry' });
+      }
+    }
+    customElements.define('conceal-native-reentry-dialog-content', ReentrantContent);
+    const content = new ReentrantContent();
+    root.append(content);
+    setElementProps(root, { open: true, a11yLabel: 'Native attribute reentry' });
+    document.body.append(root);
+    const flush = async () => {
+      for (let i = 0; i < 20; i++) await Promise.resolve();
+    };
+    await flush();
+    const controls = content.getExposes().controls as TransitionControls;
+    controls.complete();
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(isWebComponentPortaled(content)).toBe(true);
+    const press = () => content.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    press();
+    expect(presses).toBe(1);
+    armed = true;
+    setElementProps(root, { open: false, a11yLabel: 'Native attribute reentry' });
+    await flush();
+    controls.complete();
+    expect(reentries).toBe(1);
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(content.hasAttribute('inert')).toBe(false);
+    expect(content.style.visibility).toBe('');
+    expect(content.style.opacity).toBe('');
+    expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
+    press();
+    expect(presses).toBe(2);
+    root.remove();
+    // Portal origin removal is observed through actual MutationObserver delivery.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(calls).toEqual({ mounted: 1, unmounted: 1, disposed: 1 });
+  });
+
   it('revokes a projection when renderer replacement removes its origin marker', async () => {
     const origin = host.parentElement!;
     portal.mount(host);
@@ -640,7 +743,17 @@ describe('WC portal conceal rendering barrier', () => {
     setElementProps(root, { open: false });
     (content.getExposes().controls as TransitionControls).complete();
     await flush();
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    const transitionState = content.getExposes().transitionState;
+    if (
+      typeof transitionState !== 'object' ||
+      transitionState === null ||
+      !('get' in transitionState) ||
+      typeof transitionState.get !== 'function'
+    )
+      throw new TypeError('Dialog Content must expose a readable transitionState.');
+    expect(transitionState.get()).toBe('closed');
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(getComputedStyle(content).display).toBe('none');
     expect(getComputedStyle(content).visibility).toBe('hidden');
     expect(getComputedStyle(content).opacity).toBe('0');
     expect(content.hasAttribute('inert')).toBe(true);

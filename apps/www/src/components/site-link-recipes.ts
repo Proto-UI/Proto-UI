@@ -11,6 +11,7 @@ export type SiteLinkAppearance =
   | 'icon'
   | 'nav'
   | 'text'
+  | 'pill'
   | 'brand'
   | 'nav-group'
   | 'sidebar'
@@ -124,6 +125,9 @@ export function linkSurfaceProps(
       styleProfile: 'rhea',
       emphasis: 'minimal',
       ...facts,
+      // Ordinary navigation retains its native text-selection and stationary
+      // press policy; the shared Rhea recipe still owns hover/current/focus.
+      pressed: false,
       hovered: facts.hovered || facts.current,
     }).surface;
   if (appearance === 'action') return linkActionAppearance(family, emphasis, facts).surface;
@@ -154,7 +158,7 @@ export function linkSurfaceProps(
       ? family === 'brutalist'
         ? 'default'
         : 'lg'
-      : row
+      : row || group
         ? family === 'brutalist'
           ? 'default'
           : 'md'
@@ -166,7 +170,9 @@ export function linkSurfaceProps(
           ? 'bottom'
           : 'none',
     elevation: framed && family === 'brutalist' ? 'raised' : 'none',
-    focusVisible: facts.focusVisible,
+    // The Hero's native anchor owns its outer pill ring, including the
+    // fallback. Its inner passive Surface must not paint a second rectangle.
+    focusVisible: appearance === 'pill' ? false : facts.focusVisible,
     hovered: framed || row || group ? facts.hovered : false,
     pressed: facts.pressed,
     current: row && facts.current,
@@ -205,7 +211,12 @@ export function linkTextProps(
     return shadcnActionAppearance({ styleProfile: 'rhea', ...facts }).text;
   const quietNavigation = family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc');
   return {
-    size: appearance === 'brand' ? 'base' : appearance === 'nav-group' ? 'xs' : 'sm',
+    size:
+      appearance === 'brand'
+        ? 'base'
+        : appearance === 'nav-group' || appearance === 'pill'
+          ? 'xs'
+          : 'sm',
     tone:
       appearance === 'nav-group' &&
       sidebarRole !== 'nested-group' &&
@@ -261,12 +272,18 @@ export function linkSurfaceLayout(
       marginBottom: '0',
       padding: appearance === 'brand' ? '10px 0' : '10px 15px',
     };
-  if (family === 'shadcn' && appearance === 'nav')
+  if (family === 'shadcn' && appearance === 'nav') {
+    const {
+      userSelect: _userSelect,
+      WebkitUserSelect: _WebkitUserSelect,
+      ...layout
+    } = shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout;
     return {
-      ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout,
+      ...layout,
       minHeight: 'var(--site-control-height, 2.75rem)',
       pointerEvents: 'none',
     };
+  }
   if (appearance === 'action') {
     return { ...linkActionAppearance(family, emphasis, facts).layout, pointerEvents: 'none' };
   }
@@ -326,9 +343,9 @@ export function linkSurfaceLayout(
               gap: '0.5rem',
             }
           : {
-              minHeight: appearance === 'text' ? '1.5rem' : '2.75rem',
+              minHeight: appearance === 'text' || appearance === 'pill' ? '1.5rem' : '2.75rem',
               padding:
-                appearance === 'text'
+                appearance === 'text' || appearance === 'pill'
                   ? '0'
                   : family === 'brutalist'
                     ? '0.5rem 0.75rem'

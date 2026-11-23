@@ -287,7 +287,17 @@ describe('private client-only ControlLabel hydration', () => {
 
   it('refuses a real opaque reference nested inside arbitrary initial data', () => {
     const ref = createControlLabelRef();
-    expect(() => fixture.render({ metadata: { nested: [ref] } })).toThrow(/portable|Capabilities/);
+    // Owner initialization validates nested data before the SSR tuple encoder.
+    let failure: unknown;
+    try {
+      fixture.render({ metadata: { nested: [ref] } });
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(TypeError);
+    expect((failure as TypeError).message).toBe(
+      '[Owner initialization] live capabilities are not data'
+    );
   });
 
   it.each(['carrier', 'raw', 'attributes', 'baselines'] as const)(

@@ -29,10 +29,9 @@ describe('shadcn Dropdown Item evidence text', () => {
     const testEntity = workspace.entities.find(
       (candidate) => candidate.id === 'T-SHADCN-DROPDOWN-MENU-ITEM-0001'
     );
-    const implementation = testEntity?.implementations?.find(
-      (candidate) => candidate.id === 'prototypes-shadcn-dropdown-item-contract'
-    );
-    const note = implementation?.notes?.[0];
+    const note = testEntity?.implementations?.find(
+      (implementation) => implementation.id === 'prototypes-shadcn-dropdown-item-contract'
+    )?.notes?.[0];
     expect(note).toContain('Button #454 is only a related component observation');
     expect(note).toContain('not measured evidence for Dropdown Item');
   });

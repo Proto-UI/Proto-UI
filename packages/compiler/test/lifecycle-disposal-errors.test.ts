@@ -243,7 +243,7 @@ for (const profile of ['react-dom-source-v1', 'vue2-source-v1'] as const) {
 }
 
 describe('existing direct React SSR owner disposal', () => {
-  it.each(cases)('preserves $name inside the established request aggregate', async (testCase) => {
+  it.each(cases)('preserves the sole $name failure at the request boundary', async (testCase) => {
     const privateCleanup = watchPrivateCleanup();
     const generated = await loadReact(source(testCase), true);
     const errors: unknown[] = [];
@@ -259,10 +259,9 @@ describe('existing direct React SSR owner disposal', () => {
       expect(result?.html).toContain('<output');
       return;
     }
-    expect(errors).toHaveLength(1);
-    expect(errors[0]).toBeInstanceOf(AggregateError);
-    const aggregate = errors[0] as AggregateError;
-    expect(aggregate.message).toBe('[SSR] request cleanup failed.');
-    expectFailure(aggregate.errors, testCase);
+    // C-LIFECYCLE-REQUEST-0001-E now explicitly preserves one cleanup failure
+    // by identity. The earlier private SSR entry wrapped even a sole failure;
+    // its November 17 receipt remains historical evidence of that old policy.
+    expectFailure(errors, testCase);
   });
 });

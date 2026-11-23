@@ -1,0 +1,36 @@
+id: C-DATA-TABLE-RECIPES-0001
+type: contract
+title: Data Table column filtering, visibility, page selection and authored cells
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Sprint 2 requires complete public recipes. These bounded data and presentation rules precede their implementation; native assistive-technology acceptance and stable admission are not implied.
+summary: Root owns the data view and selection; typed public inputs and requests compose with ordinary Input, Button and authored cell children on every Web Adapter.
+criteria:
+  - id: C-DATA-TABLE-RECIPES-0001-FILTER
+    text: The existing global substring filter and each supplied columnFilters entry are combined with AND. Each column query matches that column's stringified non-null value case-insensitively after trimming; an empty query is inactive. Filtering precedes stable sort and pagination. Filter values are App-owned props; the composition does not own fetching, debouncing or domain predicates.
+  - id: C-DATA-TABLE-RECIPES-0001-VISIBILITY
+    text: columnVisibility is an App-owned boolean map; absent columns are visible, false hides the matching Header.headerKey and Cell.columnKey through display and accessibility hidden facts and removes Header focus eligibility. Hiding retains the authored parts and children, including custom-cell owners, rather than unmounting them. C-TABLE-STRUCTURE-0001 remains the same logical authored topology; hiding does not renumber or erase its columns, data, sort, filter or selection. Empty body row slots likewise remain logically complete but hidden and unselectable. Row, Cell and Header authored hooks provide their Base-owned hidden state for family projection; a family may project its visible display mode only while that state is false and must not override hidden with an unconditional table-row or table-cell display. The owner supplies matching header/body column keys; no CSS-only visual reorder substitutes for Table structure.
+  - id: C-DATA-TABLE-RECIPES-0001-SELECTION
+    text: requestPageSelection(boolean) selects or deselects the current filtered page in one selectionChange request, preserving off-page selected keys. An omitted boolean toggles the whole page to selected unless every nonempty page row is already selected. Empty pages and unchanged proposals are no-ops. Supplied selectedKeys remains authoritative; rejection leaves row state and pageSelection unchanged. Disabled/readOnly or retired owners reject selection. pageSelection is none, some or all over the current page only.
+  - id: C-DATA-TABLE-RECIPES-0001-SELECTED-KEYS
+    text: getSelectedKeys() exposes the current selected row keys as a string array. It is a read of the authoritative selection, including keys selected on other pages, and it returns a new array rather than the live selection. It does not change selection, request a page selection, or own fetching. The Base Data Table prototype exposes it for every family projection that keeps the shared recipes.
+  - id: C-DATA-TABLE-RECIPES-0001-CUSTOM-CELL
+    text: Cell defaults to its column's formatted text. Setting renderValue to false retains passive Table semantics and displayValue while rendering ordinary authored slot children; domain formatting, badges and content remain App-owned. Sorting, filtering, record replacement and page changes update exposed displayValue even when the logical row key is unchanged. No component business protocol is copied into a host or compiler.
+  - id: C-DATA-TABLE-RECIPES-0001-ACTIVATION
+    text: Row selection and Header sorting use portable Trigger activation with an accessibility activate action. Enter/Space and pointer activation each request exactly once. Eligible focused Space activation prevents page scrolling; disabled, hidden, non-sortable and unrelated controls do not acquire that prevention. ReadOnly protects selection while preserving sorting and pagination inspection. Mount, detach, reconnect and final disposal retain the normal owner boundaries.
+dependsOn:
+  contracts: [C-PROPS-0001, C-LIFECYCLE-0008, C-TABLE-STRUCTURE-0001]
+sources:
+  - path: packages/prototypes/base/src/data-table/
+  - path: packages/prototypes/base/test/data-table-recipes.test.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Record the exposed getSelectedKeys() read of the authoritative selection so the catalog matches the implemented prototype method and its public consumer.
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Make the shared hidden projection fact explicit for authored family hooks; preserve the existing display, focus and retained-child requirements.
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define the missing finite public Data Table recipe operations and their controlled and lifecycle boundaries.
+tags: [data-table, table, filtering, selection, recipes]

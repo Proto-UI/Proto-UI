@@ -1,0 +1,230 @@
+name: Website shader ownership evidence
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  source-governance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      EXPECTED_HEAD: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Bind the complete source check to the selected clean revision
+        id: bind-source
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-source
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          git rev-parse HEAD > "$EVIDENCE_DIR/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$EVIDENCE_DIR/source-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/source-status-before.txt"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test ! -s "$EVIDENCE_DIR/source-status-before.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the original frozen dependency graph
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-source
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$EVIDENCE_DIR/dependencies.log"
+          node -p 'JSON.stringify(process.versions, null, 2)' > "$EVIDENCE_DIR/node-versions.json"
+          corepack pnpm@10.32.1 --version > "$EVIDENCE_DIR/pnpm-version.txt"
+          cat /etc/os-release > "$EVIDENCE_DIR/runner-os.txt"
+      - name: Run the complete original Website governance scan
+        id: run-source-scan
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/source-status-before-run.txt"
+          test ! -s "$EVIDENCE_DIR/source-status-before-run.txt"
+          date -u +%FT%TZ > "$EVIDENCE_DIR/started-at.txt"
+          set +e
+          node scripts/coverage-matrices/check-coverage-matrices.mjs 2>&1 | tee "$EVIDENCE_DIR/source-scan.log"
+          evidence_pipeline_statuses=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${evidence_pipeline_statuses[0]}" > "$EVIDENCE_DIR/command-exit-code.txt"
+          printf '%s\n' "${evidence_pipeline_statuses[1]}" > "$EVIDENCE_DIR/log-exit-code.txt"
+          date -u +%FT%TZ > "$EVIDENCE_DIR/completed-at.txt"
+          if (( evidence_pipeline_statuses[0] != 0 )); then
+            exit "${evidence_pipeline_statuses[0]}"
+          fi
+          exit "${evidence_pipeline_statuses[1]}"
+      - name: Record terminal source identity and actual job outcome
+        id: record-terminal
+        if: always()
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-source
+          EVIDENCE_JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          printf '%s\n' "$EVIDENCE_JOB_STATUS" > "$EVIDENCE_DIR/job-status.txt"
+          git rev-parse HEAD > "$EVIDENCE_DIR/source-sha-after.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/source-status-after.txt"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test ! -s "$EVIDENCE_DIR/source-status-after.txt"
+      - name: Preserve full diagnostics even when the original scan fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-shader-source-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/website-shader-source
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  docs-columns:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      EXPECTED_HEAD: ${{ github.sha }}
+      PROTO_UI_EXPECTED_HEAD: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Bind original Docs evidence to the selected clean revision
+        id: bind-source
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          git rev-parse HEAD > "$EVIDENCE_DIR/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$EVIDENCE_DIR/source-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/source-status-before.txt"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test ! -s "$EVIDENCE_DIR/source-status-before.txt"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the original frozen browser dependency graph
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$EVIDENCE_DIR/dependencies.log"
+          node -p 'JSON.stringify(process.versions, null, 2)' > "$EVIDENCE_DIR/node-versions.json"
+          corepack pnpm@10.32.1 --version > "$EVIDENCE_DIR/pnpm-version.txt"
+          cat /etc/os-release > "$EVIDENCE_DIR/runner-os.txt"
+      - name: Restore only the exact original CJK font package
+        timeout-minutes: 1
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
+      - name: Install the same verified CJK fonts within the original preparation deadline
+        id: prepare-browser-fonts
+        timeout-minutes: 3
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs/font-preparation
+        run: bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+      - name: Record real Chromium and disable only the supported development toolbar
+        id: configure-browser
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          printf '%s\n' "$CHROME" > "$EVIDENCE_DIR/browser-executable.txt"
+          "$CHROME" --version > "$EVIDENCE_DIR/browser-version.txt"
+          sha256sum "$CHROME" apps/www/node_modules/playwright-core/package.json > "$EVIDENCE_DIR/browser-inputs.sha256"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar 2>&1 | tee "$EVIDENCE_DIR/astro-toolbar-disable.log"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled 2>&1 | tee "$EVIDENCE_DIR/astro-toolbar-preference.txt"
+      - name: Execute all ten original Docs cases without filters or retries
+        id: run-docs-columns
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs
+        run: |
+          set -euo pipefail
+          EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/source-status-before-run.txt"
+          test ! -s "$EVIDENCE_DIR/source-status-before-run.txt"
+          date -u +%FT%TZ > "$EVIDENCE_DIR/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s \
+            corepack pnpm@10.32.1 exec vitest run \
+              apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts \
+              --no-file-parallelism --maxWorkers=1 --minWorkers=1 \
+              --reporter=default --reporter=json \
+              --outputFile="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json" \
+              2>&1 | tee "$EVIDENCE_DIR/browser.log"
+          evidence_pipeline_statuses=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${evidence_pipeline_statuses[0]}" > "$EVIDENCE_DIR/command-exit-code.txt"
+          printf '%s\n' "${evidence_pipeline_statuses[1]}" > "$EVIDENCE_DIR/log-exit-code.txt"
+          date -u +%FT%TZ > "$EVIDENCE_DIR/completed-at.txt"
+          if (( evidence_pipeline_statuses[0] != 0 )); then
+            exit "${evidence_pipeline_statuses[0]}"
+          fi
+          exit "${evidence_pipeline_statuses[1]}"
+      - name: Require the complete original ten-case terminal inventory
+        id: verify-complete-docs
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const evidence = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+          const report = JSON.parse(readFileSync(path.join(evidence, 'vitest.json'), 'utf8'));
+          assert.equal(report.success, true);
+          assert.equal(report.numTotalTests, 10);
+          assert.equal(report.numPassedTests, 10);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.numPendingTests, 0);
+          assert.equal(report.numTodoTests, 0);
+          assert.equal(report.testResults.length, 1);
+          const suite = report.testResults[0];
+          assert.equal(path.resolve(suite.name), path.resolve('apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts'));
+          assert.equal(suite.assertionResults.length, 10);
+          assert.equal(new Set(suite.assertionResults.map(test => test.fullName)).size, 10);
+          assert.ok(suite.assertionResults.every(test => test.status === 'passed'));
+          writeFileSync(path.join(evidence, 'docs-case-inventory.json'), JSON.stringify({
+            file: suite.name,
+            tests: suite.assertionResults.map(({ fullName, status }) => ({ fullName, status })),
+          }, null, 2) + '\n');
+          JS
+      - name: Record terminal source identity and actual Docs outcome
+        id: record-terminal
+        if: always()
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/website-shader-docs
+          EVIDENCE_JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          printf '%s\n' "$EVIDENCE_JOB_STATUS" > "$EVIDENCE_DIR/job-status.txt"
+          git rev-parse HEAD > "$EVIDENCE_DIR/source-sha-after.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE_DIR/source-status-after.txt"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test ! -s "$EVIDENCE_DIR/source-status-after.txt"
+      - name: Preserve original observations, full JSON, environment and failure output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-shader-docs-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/website-shader-docs
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

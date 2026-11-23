@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { isWebComponentPortaled } from '../../../adapters/web-component/src/portal-mount';
 import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prototype-style-tokens';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import { dialogRoot, dialogContent, dialogMask } from '../src/dialog';
@@ -128,6 +129,20 @@ async function fixture(
     maskPhase: () => mask.getExposes().transitionState.get(),
   };
 }
+function expectRetainedClosedView(element: Host, owner: unknown) {
+  expect(element.getExposes().transitionState.get()).toBe('closed');
+  expect(element.getExposes().isPresent.get()).toBe(false);
+  expect(element.getExposes().getPresentationOwner()).toBe(owner);
+  expect(element.hasAttribute('data-pui-view-detached')).toBe(true);
+  expect(element.isConnected).toBe(true);
+  expect(isWebComponentPortaled(element)).toBe(true);
+  expect(element.hasAttribute('inert')).toBe(true);
+  expect(element.style.getPropertyValue('visibility')).toBe('hidden');
+  expect(element.style.getPropertyPriority('visibility')).toBe('important');
+  expect(element.style.getPropertyValue('opacity')).toBe('0');
+  expect(element.style.getPropertyPriority('opacity')).toBe('important');
+  expect(getComputedStyle(element).display).toBe('none');
+}
 describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) => {
   // Fixed upstream b4c4072679943773a7582daa63f545ba818fa627:
   // less/modals.less top -.25 -> .10 of containing block, .3s ease-out;
@@ -155,6 +170,7 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
       await step(316);
       expect(f.phase()).toBe('entered');
       expect(f.content.style.top).not.toBe('-250px');
+      const owner = f.content.getExposes().getPresentationOwner();
       await f.target(false);
       expect(f.phase()).toBe('leaving');
       expect(f.maskPhase()).toBe('leaving');
@@ -165,14 +181,16 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
       expect(f.phase()).toBe('leaving');
       await step(616);
       expect(f.phase()).toBe('closed');
-      // The WC portal provider retains its existing two-frame conceal barrier
-      // after the semantic phase closes; it is not extra animation duration.
-      expect(f.content.hasAttribute('data-pui-view-detached')).toBe(false);
+      // Not-present intent hides paint immediately. The original two-frame
+      // barrier retains the owned DOM projection, not a visible layout surface.
+      expectRetainedClosedView(f.content, owner);
       await step(632);
-      expect(f.content.hasAttribute('data-pui-view-detached')).toBe(false);
+      expectRetainedClosedView(f.content, owner);
       await step(648);
       expect(f.content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(f.mask.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(isWebComponentPortaled(f.content)).toBe(false);
+      expect(isWebComponentPortaled(f.mask)).toBe(false);
     }
   );
   it('reopens during the closed portal barrier without losing its presence lease', async () => {
@@ -180,12 +198,15 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
     await f.target(true);
     await step(16);
     await step(316);
+    const owner = f.content.getExposes().getPresentationOwner();
     await f.target(false);
     await step(616);
-    expect(f.phase()).toBe('closed');
-    expect(f.content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expectRetainedClosedView(f.content, owner);
     await f.target(true);
     expect(f.phase()).toBe('entering');
+    expect(f.content.getExposes().getPresentationOwner()).toBe(owner);
+    expect(isWebComponentPortaled(f.content)).toBe(true);
+    expect(f.content.hasAttribute('data-pui-view-detached')).toBe(false);
     expect(f.content.style.opacity).toBe('0');
     expect(f.content.hasAttribute('inert')).toBe(false);
     // This retained view has already presented: the new attempt starts at 616,

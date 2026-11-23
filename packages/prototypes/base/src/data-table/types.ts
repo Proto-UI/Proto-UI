@@ -23,6 +23,8 @@ export interface DataTableRootProps {
   sortDirection?: SortDirection;
   defaultSortDirection?: SortDirection;
   filter?: string;
+  columnFilters?: Readonly<Record<string, string>>;
+  columnVisibility?: Readonly<Record<string, boolean>>;
   page?: number;
   defaultPage?: number;
   pageSize?: number;
@@ -35,7 +37,7 @@ export interface DataTableRowProps {
   index?: number;
   header?: boolean;
 }
-export type DataTableCellProps = TableCellProps & { columnKey?: string };
+export type DataTableCellProps = TableCellProps & { columnKey?: string; renderValue?: boolean };
 export type DataTableHeaderProps = TableHeaderCellProps & { sortable?: boolean };
 export type DataTableCaptionProps = TableCaptionProps;
 export type DataTablePreviousProps = ButtonProps;
@@ -43,14 +45,17 @@ export type DataTableNextProps = ButtonProps;
 export type DataTableRootExposes = TableRootExposes &
   CollectionExposes & {
     filteredCount: ExposeState<number>;
+    pageSelection: ExposeState<string>;
     sortChange: ExposeEvent<{ sortKey: string; sortDirection: SortDirection }>;
     pageChange: ExposeEvent<{ page: number }>;
     selectionChange: ExposeEvent<{ selectedKeys: string[] }>;
     getRows: ExposeMethod<() => DataRecord[]>;
     getRecord: ExposeMethod<(id: string) => DataRecord | null>;
+    getSelectedKeys: ExposeMethod<() => string[]>;
     requestSort: ExposeMethod<(key: string) => boolean>;
     requestPage: ExposeMethod<(next: number) => boolean>;
     requestSelection: ExposeMethod<(id: string) => boolean>;
+    requestPageSelection: ExposeMethod<(selected?: boolean) => boolean>;
   };
 export type DataTableRowExposes = CollectionItemExposes & {
   rowKey: ExposeState<string>;
@@ -64,7 +69,11 @@ export type DataTableCaptionExposes = TableCaptionExposes;
 export type DataTablePreviousExposes = ButtonExposes;
 export type DataTableNextExposes = ButtonExposes;
 export type DataTableRootAsHookContract = {
-  state: { collectionCount: State<number>; filteredCount: State<number> };
+  state: {
+    collectionCount: State<number>;
+    filteredCount: State<number>;
+    pageSelection: State<string>;
+  };
   event: {
     sortChange: { sortKey: string; sortDirection: SortDirection };
     pageChange: { page: number };
@@ -84,8 +93,12 @@ export type DataTableRowAsHookContract = {
     focusVisible: ObservedStateHandle<boolean, DataTableRowProps>;
   };
 };
-export type DataTableCellAsHookContract = { state: { displayValue: State<string> } };
-export type DataTableHeaderAsHookContract = { state: { sort: State<string> } };
+export type DataTableCellAsHookContract = {
+  state: { displayValue: State<string>; hidden: State<boolean> };
+};
+export type DataTableHeaderAsHookContract = {
+  state: { sort: State<string>; hidden: State<boolean> };
+};
 export type DataTableCaptionAsHookContract = {};
 export type DataTablePreviousAsHookContract = {
   asHooks: { 'as-button': ReturnType<typeof asButton> };

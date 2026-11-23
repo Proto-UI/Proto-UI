@@ -21,6 +21,7 @@ export interface SliderValuesRootProps {
   thumbCollisionBehavior?: SliderValuesCollisionBehavior;
   disabled?: boolean;
   readOnly?: boolean;
+  required?: boolean;
   orientation?: 'horizontal' | 'vertical';
   direction?: 'ltr' | 'rtl';
   ariaLabel?: string;
@@ -53,8 +54,12 @@ export type SliderValuesRootExposes = {
   cancelValueChange: ExposeMethod<() => boolean>;
   resetValue: ExposeMethod<() => boolean>;
   invalidateParts: ExposeMethod<() => void>;
+  focusSelf: ExposeMethod<() => void>;
+  __focus: ExposeMethod<() => void>;
   valueChange: ExposeEvent<SliderValuesEvent>;
   valueCommit: ExposeEvent<SliderValuesEvent>;
+} & {
+  [K in keyof import('../field').FieldControlBindingStates]: ExposeState<boolean>;
 };
 export type SliderValuesRootAsHookContract = {
   state: {
@@ -68,6 +73,7 @@ export type SliderValuesRootAsHookContract = {
     activeIndex: State<number>;
     interacting: State<boolean>;
   };
+  asHooks: { 'as-optional-field-control': import('../field').FieldControlBindingHandles };
 };
 export interface SliderValuesPartProps {
   index?: number;
@@ -96,6 +102,8 @@ export type SliderValuesPartExposes = {
     : never;
 };
 export type SliderValuesThumbExposes = SliderValuesPartExposes & {
+  focused: ExposeState<boolean>;
+  dragging: ExposeState<boolean>;
   focusVisible: ExposeState<boolean>;
   hovered: ExposeState<boolean>;
   focusSelf: ExposeMethod<() => void>;
@@ -104,6 +112,8 @@ export type SliderValuesThumbExposes = SliderValuesPartExposes & {
 export type SliderValuesThumbAsHookContract = {
   state: SliderValuesPartStates & {
     focusVisible: ObservedStateHandle<boolean, SliderValuesPartProps>;
+    focused: ObservedStateHandle<boolean, SliderValuesPartProps>;
+    dragging: State<boolean>;
     hovered: State<boolean>;
   };
 };

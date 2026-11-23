@@ -9,6 +9,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
+import { tabsProfileSwitchCode } from '@/content/docs/demo_components/tabs/tabs-profile-switch-code';
 import { getCode } from '@/utils/conversionUtils';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
@@ -62,9 +63,57 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
 
 ## Style Profile preset exhibition
 
-The upstream Shadcn Registry defines multiple style profiles for Tabs (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, `new-york-v4`). Only `nova`, `rhea`, and `new-york-v4` currently have bounded text-default projection (see `internal/fixtures/shadcn-tabs-style/coverage.json`); unsupported profiles are rejected at runtime.
+The current authored Tabs recipes cover the eight modern profile IDs (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`) and the independent `new-york-v4`. This is source coverage, not full visual or accessibility acceptance. Unknown IDs reject instead of borrowing another recipe.
 
-The three examples below use **identical children, defaultValue, and disabled state**, changing only `styleProfile`, to demonstrate that preset switching does not reset value, focus, or children. Each example renders independently and does not share runtime instances.
+### Change the profile on one live Tabs instance
+
+Select Password, then choose Nova, Rhea, or New York v4 below. Only the surrounding style scope changes; the same Tabs owner retains its selected value and child nodes. To change the profile while a tab keeps keyboard focus, press **Alt+1**, **Alt+2**, or **Alt+3** inside this example. Clicking a profile button follows normal browser focus behavior.
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.wc}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.react}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.vue}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.vue2}
+  />
+</div>
+
+The three independent examples below compare the same content and default state. They are static appearance comparisons; the live example above demonstrates profile updates.
 
 ### Nova
 
@@ -237,7 +286,4 @@ These props belong to Root. List defaults `orientation` to `horizontal`, `loop` 
 
 ## References
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']} />

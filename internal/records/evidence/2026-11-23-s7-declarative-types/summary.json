@@ -1,0 +1,126 @@
+{
+  "startedAt": "2026-11-23T09:42:32Z",
+  "checks": [
+    {
+      "label": "strict-baseline",
+      "args": [
+        "npm",
+        "run",
+        "check:types",
+        "--prefix",
+        "scripts/analysis/declarative-agent-ui"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.365292910995777,
+      "log": "strict-baseline.log"
+    },
+    {
+      "label": "reject-app-tsx",
+      "args": [
+        "npm",
+        "run",
+        "check:types",
+        "--prefix",
+        "scripts/analysis/declarative-agent-ui"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.417795426998055,
+      "log": "reject-app-tsx.log"
+    },
+    {
+      "label": "reject-mapping-mjs",
+      "args": [
+        "npm",
+        "run",
+        "check:types",
+        "--prefix",
+        "scripts/analysis/declarative-agent-ui"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.4642854609992355,
+      "log": "reject-mapping-mjs.log"
+    },
+    {
+      "label": "schema-tests",
+      "args": [
+        "node",
+        "--test",
+        "scripts/analysis/declarative-agent-ui/schema.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.32827621899195947,
+      "log": "schema-tests.log"
+    },
+    {
+      "label": "whitespace",
+      "args": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.015359509008703753,
+      "log": "whitespace.log"
+    }
+  ],
+  "existingDependencyVersionChanges": [],
+  "addedCompileTimePackages": [
+    "node_modules/@types/prop-types",
+    "node_modules/@types/react",
+    "node_modules/@types/react-dom",
+    "node_modules/csstype",
+    "node_modules/typescript"
+  ],
+  "source": [
+    {
+      "path": "scripts/analysis/declarative-agent-ui/build.mjs",
+      "sha256": "32f8468bcc148e6989a8ba54407e9a57995a9d6d1515fcb55ff0ee4336697d52"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/check-types.mjs",
+      "sha256": "bc3164a05571155ac7b319265e4a35f78ecc2f73aa2667fbef3a7d83cba4e82d"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/mapping.mjs",
+      "sha256": "503dafe6391df0df9ac4c95ae860236d2d94507fca84b901dcbb0e4ea9ff167f"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/run.mjs",
+      "sha256": "6f7b6d1ff18401e125eaa1150ca989c29201f55d6edef3250090e003927433e7"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/schema.mjs",
+      "sha256": "aef96ff45896f59a49cea7ffd8dfb2292c03b548db25331d16d08196b884f344"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/schema.test.mjs",
+      "sha256": "14c8ac9cc8e31447e135216c6178a5c3fb229dac5bc3d68f980b213dd9ea0513"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/app.tsx",
+      "sha256": "85c4dc086ba3912a454548fee09b53222897301fd5f9c246a4696b043884d2ff"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/tsconfig.json",
+      "sha256": "83445b7282dd6d6df38a44c6e1101eefde1cf7c3163adda6b4ed2e86f44f5c01"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/package.json",
+      "sha256": "391402d3c0b8aa20c428cebc0698042788a639e5c831105203aff9731009f0f3"
+    },
+    {
+      "path": "scripts/analysis/declarative-agent-ui/package-lock.json",
+      "sha256": "e3ac4bae86285279d3beb617799199d23cdff610b5a710b27f1116ae31ab37cf"
+    },
+    {
+      "path": "tsconfig.workspace.json",
+      "sha256": "89aa5cb93171876735a070608cc140b7697432a6767b69010311423cd0beddb3"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "08ed3b91546d16be1e581647afa1991ec3ec2c74e8d278d80324b4248724dd67"
+    }
+  ],
+  "finishedAt": "2026-11-23T09:42:47Z",
+  "outcome": "passed"
+}

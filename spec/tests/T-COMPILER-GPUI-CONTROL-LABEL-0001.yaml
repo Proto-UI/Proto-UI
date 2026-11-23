@@ -1,0 +1,67 @@
+id: T-COMPILER-GPUI-CONTROL-LABEL-0001
+type: test
+title: Actual Base Button and Label execute compiled native association ownership
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Source and generated native consumer gates are executable; operating-system accessibility delivery and independent platform review remain separate evidence requirements.
+cases:
+  - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-SOURCE
+    title: Complete official prototypes compile through generic atoms
+    covers: [C-CONTROL-LABEL-0001-LOWERING, C-CONTROL-LABEL-0001-GPUI-DIRECT]
+    expectation: Complete official Button, Label and Input source compiles; anatomy descriptors report an explicit unsupported diagnostic.
+  - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW
+    title: Current native pairing owns only its naming and action contribution
+    covers:
+      [
+        C-CONTROL-LABEL-0001-NAME,
+        C-CONTROL-LABEL-0001-UNIQUENESS,
+        C-CONTROL-LABEL-0001-DOMAIN,
+        C-CONTROL-LABEL-0001-ACTIVATION,
+      ]
+    expectation: AccessKit labelled_by names the actual visible Label node and yields to explicit name sources; disabled policy, naming-only mode, duplicate bindings, foreign windows, detach and remount preserve exact ownership.
+  - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT
+    title: Native label input cannot acquire an unrelated action or stale callback turn
+    covers: [C-CONTROL-LABEL-0001-INPUT, C-CONTROL-LABEL-0001-FOCUS, HC-CONTROL-LABEL-0001-GPUI]
+    expectation: Primary unmodified native mouse input invokes the target once; modified, dragged, cancelled and unknown native descendant turns cannot invoke it. Reentrant rebinding and view retirement invalidate old requests even when the same reference is restored. Native window deactivation retires an actionable Label's pending pointer request without making the Label focusable or a Tab stop; reactivation cannot revive it.
+  - id: T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL
+    title: One logical participant cannot authorize multiple physical bindings
+    covers: [C-CONTROL-LABEL-0001-UNIQUENESS, C-CONTROL-LABEL-0001-GPUI-DIRECT]
+    expectation: Rendering the same Label or target Entity under two distinct native parents withdraws naming, pointer activation and direct assistive activation. Restoring one view does not revive a previous pointer request. Replacing the unique native node invalidates borrowed requests even when the logical owner and window remain the same, while a stable ambiguous frame does not repeatedly notify observers.
+implementations:
+  - id: checked-native-label-source
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/gpui-control-label.test.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-SOURCE]
+  - id: generated-official-native-controls
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-control-label/consumer.rs
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL,
+      ]
+  - id: native-label-request-leases
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/src/gpui-native-control-label.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-VIEW,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-INPUT,
+        T-COMPILER-GPUI-CONTROL-LABEL-0001-CASE-PHYSICAL,
+      ]
+verifies:
+  contracts:
+    - C-CONTROL-LABEL-0001
+  hostCaps:
+    - HC-CONTROL-LABEL-0001
+sources:
+  - path: packages/compiler/test/fixtures/gpui-control-label/produce.mjs
+  - path: internal/compiler/gpui-control-label.md
+tags: [compiler, gpui, label, native-input, accessibility, lifecycle]

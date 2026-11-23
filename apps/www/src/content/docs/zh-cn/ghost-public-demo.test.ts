@@ -90,8 +90,15 @@ it('keeps four public code projections aligned with the enabled and disabled dem
     (match) => match[1]
   );
   expect(blocks).toHaveLength(4);
-  for (const code of blocks) {
-    expect(code).toContain('variant="ghost"');
+  for (const [index, code] of blocks.entries()) {
+    if (index === 0) {
+      // WC receives real public props through its adapter; arbitrary HTML
+      // attributes are not the authored prop channel used by this example.
+      expect(code).toContain(
+        "setElementProps(button, { styleProfile: 'rhea', variant: 'ghost', disabled: index === 1 })"
+      );
+      expect(code).not.toContain('variant="ghost"');
+    } else expect(code).toContain('variant="ghost"');
     expect(code).toContain('disabled');
     expect(code).toContain('Disabled ghost');
     expect(code).toContain('Enabled activations:');

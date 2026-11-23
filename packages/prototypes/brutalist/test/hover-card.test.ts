@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
+import { afterTwoHostFrames } from '../../test-utils/host-rendering';
 import { hoverCardContent, hoverCardRoot, hoverCardTrigger } from '../src/hover-card';
 
 type HoverRootElement = WebComponentAdapterElement<typeof hoverCardRoot>;
@@ -182,6 +183,8 @@ describe('prototypes/brutalist: hover-card', () => {
     await advance(1);
     expect(content.getExposes().transitionState.get()).toBe('closed');
     expect(content.getExposes().isPresent.get()).toBe(false);
+    await afterTwoHostFrames();
+    await flush();
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
   });
 });

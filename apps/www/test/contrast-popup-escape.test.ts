@@ -157,8 +157,7 @@ async function preview(family: Family, runtime: Runtime = 'wc') {
   const root = document.createElement('section');
   root.dataset.previewerId = `escape-${++fixtureId}`;
   root.dataset.demoId = `demo-brutalist-${family}`;
-  const runtimes: Runtime[] =
-    family === 'tooltip' ? ['wc', 'react', 'vue'] : ['wc', 'react', 'vue', 'vue2'];
+  const runtimes: Runtime[] = ['wc', 'react', 'vue', 'vue2'];
   root.dataset.runtimes = JSON.stringify(runtimes);
   root.innerHTML = '<div class="host"></div>';
   document.body.append(root);
@@ -279,8 +278,7 @@ async function preview(family: Family, runtime: Runtime = 'wc') {
 }
 
 for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
-  const runtimes: Runtime[] =
-    family === 'tooltip' ? ['wc', 'react', 'vue'] : ['wc', 'react', 'vue', 'vue2'];
+  const runtimes: Runtime[] = ['wc', 'react', 'vue', 'vue2'];
   for (const runtime of runtimes)
     it(`${family}/${runtime}: verifies the actual opened popup before any pointer/focus reset`, async () => {
       const restore = measurements();
@@ -615,21 +613,29 @@ for (const mutation of [
             replacement.append(...root.childNodes);
             root.replaceWith(replacement);
           } else if (mutation === 'toolbar') {
-            const toolbarRoot = [
-              ...document.querySelectorAll(
-                '[data-pui-root][data-projection-prototype="brutalist-select-root"]'
-              ),
-            ].find(
-              (element) =>
-                element !== root &&
-                element.getAttribute('data-projection-owner') === mounted.baseline.observation.owner
-            )!;
-            expect(toolbarRoot).toBeTruthy();
+            // Runtime selection now uses Tabs, so its former toolbar Select
+            // no longer exists. Preserve the original wrong-physical-Root
+            // attack explicitly: a separate DOM witness copies the current
+            // live Root's public state/lease but does not own this Trigger.
+            const toolbarRoot = root.cloneNode(false) as HTMLElement;
+            replacement = toolbarRoot;
+            document.body.append(toolbarRoot);
+            expect(toolbarRoot.isConnected).toBe(true);
+            expect(toolbarRoot).not.toBe(root);
+            expect(toolbarRoot.getAttribute('data-projection-owner')).toBe(
+              mounted.baseline.observation.owner
+            );
+            expect(toolbarRoot.getAttribute('data-projection-generation')).toBe(
+              mounted.baseline.observation.generation
+            );
             expect(toolbarRoot.contains(mounted.trigger)).toBe(false);
             // Matching labels/lease cannot authorize a different physical Root.
             toolbarRoot.setAttribute('data-value', 'paper');
             toolbarRoot.setAttribute('data-text-value', 'Paper');
             toolbarRoot.removeAttribute('data-open');
+            expect(toolbarRoot.getAttribute('data-value')).toBe('paper');
+            expect(toolbarRoot.getAttribute('data-text-value')).toBe('Paper');
+            expect(toolbarRoot.hasAttribute('data-open')).toBe(false);
             mounted.baseline.selectRoot = toolbarRoot;
           } else if (mutation === 'missing-value') root.removeAttribute('data-value');
           else if (mutation === 'missing-text-value') root.removeAttribute('data-text-value');

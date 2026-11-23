@@ -120,6 +120,64 @@ describe('Positioning lease generation', () => {
     lease.dispose();
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
+
+  it('restores pending preparation to authored values and preserves newer author writes', () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    floating.style.setProperty('position', 'relative', 'important');
+    floating.style.top = '7px';
+    const lease = createFloatingUiAnchoredPositionHost().attach({ anchor, floating, config });
+    expect(floating.style.position).toBe('fixed');
+    expect(floating.style.top).toBe('7px');
+    expect(floating.style.left).toBe('0px');
+    floating.style.setProperty('left', '19px', 'important');
+    lease.dispose();
+    expect(floating.style.position).toBe('relative');
+    expect(floating.style.getPropertyPriority('position')).toBe('important');
+    expect(floating.style.top).toBe('7px');
+    expect(floating.style.left).toBe('19px');
+    expect(floating.style.getPropertyPriority('left')).toBe('important');
+  });
+
+  it('a newer equal pending pin survives retirement of the previous owner', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const host = createFloatingUiAnchoredPositionHost();
+    const first = host.attach({ anchor, floating, config });
+    const second = host.attach({ anchor, floating, config });
+    first.dispose();
+    expect(floating.style.position).toBe('fixed');
+    expect(floating.style.top).toBe('0px');
+    expect(floating.style.left).toBe('0px');
+    pending[1].finish(23);
+    await Promise.resolve();
+    pending[0].finish(99);
+    await Promise.resolve();
+    expect(floating.style.left).toBe('23px');
+    expect(floating.style.top).toBe('23px');
+    second.dispose();
+    // Preparation retirement does not remove an already resolved placement.
+    expect(floating.style.left).toBe('23px');
+  });
+
+  it('a replaced pending pin cannot publish before its former owner is disposed', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const firstResolved = vi.fn();
+    const host = createFloatingUiAnchoredPositionHost();
+    const first = host.attach({ anchor, floating, config, onResolved: firstResolved });
+    const second = host.attach({ anchor, floating, config });
+    pending[0].applySize();
+    pending[0].finish(99);
+    await Promise.resolve();
+    expect(firstResolved).not.toHaveBeenCalled();
+    expect(floating.style.left).toBe('0px');
+    expect(floating.style.getPropertyValue('--proto-ui-anchor-width')).toBe('');
+    first.dispose();
+    expect(floating.style.left).toBe('0px');
+    second.dispose();
+    expect(floating.style.cssText).toBe('');
+  });
 });
 
 it('revoked input anchors cancel observation and cannot publish delayed geometry or size', async () => {

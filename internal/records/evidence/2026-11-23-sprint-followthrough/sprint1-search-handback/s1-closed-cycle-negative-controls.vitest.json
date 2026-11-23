@@ -1,0 +1,553 @@
+{
+  "numTotalTestSuites": 6,
+  "numPassedTestSuites": 6,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 55,
+  "numPassedTests": 55,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795375971843,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "status": "passed",
+          "title": "'unstarted Dialog, opener failure'",
+          "duration": 148.9880099999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+          "status": "passed",
+          "title": "'unstarted Dialog, successful cleanup'",
+          "duration": 53.65748099999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "status": "passed",
+          "title": "'active Dialog, opener failure'",
+          "duration": 323.288227,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "status": "passed",
+          "title": "'active Dialog, undefined opener rejec…'",
+          "duration": 255.2077089999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "status": "passed",
+          "title": "'active Dialog, both disposers fail'",
+          "duration": 249.32824199999982,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "status": "passed",
+          "title": "'active Dialog, only Dialog fails'",
+          "duration": 242.24818499999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+          "status": "passed",
+          "title": "'active Dialog, successful cleanup'",
+          "duration": 242.32245799999964,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "status": "passed",
+          "title": "awaits pending Dialog and repeated destroy after 'opener failure'",
+          "duration": 77.44004200000018,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "status": "passed",
+          "title": "awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "duration": 80.11656300000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search exhaustive owned-controller disposal"],
+          "fullName": "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry",
+          "status": "passed",
+          "title": "shares pending teardown and its first error with synchronous disposer reentry",
+          "duration": 73.23377299999993,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795375999056,
+      "endTime": 1795376000802.234,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/9c42f522da14/Proto-UI-sprint1-followthrough/apps/www/src/components/site-search-commands.disposal.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "returns focus to the current Docs opener after a first opening without prior trigger focus",
+          "status": "passed",
+          "title": "returns focus to the current Docs opener after a first opening without prior trigger focus",
+          "duration": 1069.354492,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "initial Docs handback preserves newer focus even after it returns to body",
+          "status": "passed",
+          "title": "initial Docs handback preserves newer focus even after it returns to body",
+          "duration": 459.7719529999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "initial Docs handback is revoked when the closing owner is disposed",
+          "status": "passed",
+          "title": "initial Docs handback is revoked when the closing owner is disposed",
+          "duration": 239.4548560000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs shadcn/wc returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs shadcn/wc returns focus to the current opener after a runtime replacement",
+          "duration": 808.3727099999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs shadcn/react returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs shadcn/react returns focus to the current opener after a runtime replacement",
+          "duration": 700.558798,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs shadcn/vue returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs shadcn/vue returns focus to the current opener after a runtime replacement",
+          "duration": 553.9082790000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+          "duration": 653.5753009999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs brutalist/wc returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs brutalist/wc returns focus to the current opener after a runtime replacement",
+          "duration": 777.1935849999991,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs brutalist/react returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs brutalist/react returns focus to the current opener after a runtime replacement",
+          "duration": 717.3839430000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs brutalist/vue returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs brutalist/vue returns focus to the current opener after a runtime replacement",
+          "duration": 696.4632030000012,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs brutalist/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "title": "Docs brutalist/vue2 returns focus to the current opener after a runtime replacement",
+          "duration": 685.4844409999987,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs replacement handback preserves newer focus during the closing transition",
+          "status": "passed",
+          "title": "Docs replacement handback preserves newer focus during the closing transition",
+          "duration": 711.6999350000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs replacement handback is revoked when the closing owner is disposed",
+          "status": "passed",
+          "title": "Docs replacement handback is revoked when the closing owner is disposed",
+          "duration": 500.00247800000034,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Docs replacement cancels interrupted handback and returns once for a later accepted close",
+          "status": "passed",
+          "title": "Docs replacement cancels interrupted handback and returns once for a later accepted close",
+          "duration": 912.3647880000008,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "returns focus to the current Homepage opener after dismissing a replacement Dialog",
+          "status": "passed",
+          "title": "returns focus to the current Homepage opener after dismissing a replacement Dialog",
+          "duration": 435.0319010000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "keeps Bootstrap Homepage Search materializable with the registered Dialog and Command",
+          "status": "passed",
+          "title": "keeps Bootstrap Homepage Search materializable with the registered Dialog and Command",
+          "duration": 335.714978,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "returns focus to the current Homepage opener when the shortcut closes a replacement Dialog",
+          "status": "passed",
+          "title": "returns focus to the current Homepage opener when the shortcut closes a replacement Dialog",
+          "duration": 396.4857639999991,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "carries the focused 'Close' control through a Homepage Dialog replacement",
+          "status": "passed",
+          "title": "carries the focused 'Close' control through a Homepage Dialog replacement",
+          "duration": 459.2129420000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "carries the focused 'Retry' control through a Homepage Dialog replacement",
+          "status": "passed",
+          "title": "carries the focused 'Retry' control through a Homepage Dialog replacement",
+          "duration": 532.1278870000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores retained Homepage Search focus only when eligible after 'cancellation'",
+          "status": "passed",
+          "title": "restores retained Homepage Search focus only when eligible after 'cancellation'",
+          "duration": 298.70281499999874,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores retained Homepage Search focus only when eligible after 'preparation failure'",
+          "status": "passed",
+          "title": "restores retained Homepage Search focus only when eligible after 'preparation failure'",
+          "duration": 322.9979060000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores retained Homepage Search focus only when eligible after 'newer focus'",
+          "status": "passed",
+          "title": "restores retained Homepage Search focus only when eligible after 'newer focus'",
+          "duration": 328.8648480000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores retained Homepage Search focus only when eligible after 'session close'",
+          "status": "passed",
+          "title": "restores retained Homepage Search focus only when eligible after 'session close'",
+          "duration": 444.12418199999956,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "keeps newer focus when a replacement Dialog finishes leaving",
+          "status": "passed",
+          "title": "keeps newer focus when a replacement Dialog finishes leaving",
+          "duration": 683.9718649999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores the retained Homepage Search after a late publication failure with query focus",
+          "status": "passed",
+          "title": "restores the retained Homepage Search after a late publication failure with query focus",
+          "duration": 800.0207840000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores the retained Homepage Search after a late publication failure with close focus",
+          "status": "passed",
+          "title": "restores the retained Homepage Search after a late publication failure with close focus",
+          "duration": 630.8145920000024,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "restores the retained Homepage Search after a late publication failure with newer focus focus",
+          "status": "passed",
+          "title": "restores the retained Homepage Search after a late publication failure with newer focus focus",
+          "duration": 614.7492210000019,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Homepage replacement cancels interrupted handback and returns once for a later accepted close",
+          "status": "passed",
+          "title": "Homepage replacement cancels interrupted handback and returns once for a later accepted close",
+          "duration": 478.7105730000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "revokes pending opener focus when a closing replacement Dialog is disposed",
+          "status": "passed",
+          "title": "revokes pending opener focus when a closing replacement Dialog is disposed",
+          "duration": 357.33922600000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer wc/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "wc/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 575.9688500000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer wc/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "wc/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 629.517705000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer react/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "react/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 808.2104880000006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer react/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "react/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 708.5328210000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer vue/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "vue/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 692.8132440000009,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer vue/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "vue/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 860.5687340000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 597.8828110000031,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["public-mode Search through the actual projection materializer"],
+          "fullName": "public-mode Search through the actual projection materializer vue2/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "title": "vue2/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "duration": 563.5315640000008,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795375975786,
+      "endTime": 1795375997829.5315,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/9c42f522da14/Proto-UI-sprint1-followthrough/apps/www/src/components/site-search-commands.public-mode.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery reopens a usable shadcn Dialog on the same owner",
+          "status": "passed",
+          "title": "reopens a usable shadcn Dialog on the same owner",
+          "duration": 624.43921,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery reopens a usable brutalist Dialog on the same owner",
+          "status": "passed",
+          "title": "reopens a usable brutalist Dialog on the same owner",
+          "duration": 356.63985100000014,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery recovers the settled failure on wc preference without replacing its data owner",
+          "status": "passed",
+          "title": "recovers the settled failure on wc preference without replacing its data owner",
+          "duration": 382.14101900000014,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery recovers the settled failure on react preference without replacing its data owner",
+          "status": "passed",
+          "title": "recovers the settled failure on react preference without replacing its data owner",
+          "duration": 617.2803530000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery recovers the settled failure on vue preference without replacing its data owner",
+          "status": "passed",
+          "title": "recovers the settled failure on vue preference without replacing its data owner",
+          "duration": 430.5997419999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery recovers the settled failure on vue2 preference without replacing its data owner",
+          "status": "passed",
+          "title": "recovers the settled failure on vue2 preference without replacing its data owner",
+          "duration": 424.5033460000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery coalesces repeated opens while recovering and retires the pending candidate on disposal",
+          "status": "passed",
+          "title": "coalesces repeated opens while recovering and retires the pending candidate on disposal",
+          "duration": 183.04413600000044,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Docs Search first Dialog materialization recovery"],
+          "fullName": "Docs Search first Dialog materialization recovery cannot publish a stale recovery candidate after a newer runtime commits",
+          "status": "passed",
+          "title": "cannot publish a stale recovery candidate after a newer runtime commits",
+          "duration": 794.3760259999999,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795376002167,
+      "endTime": 1795376005980.376,
+      "status": "passed",
+      "message": "",
+      "name": "/workspace/scratch/9c42f522da14/Proto-UI-sprint1-followthrough/apps/www/src/components/site-search-commands.recovery.test.ts"
+    }
+  ]
+}

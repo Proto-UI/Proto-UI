@@ -1,0 +1,103 @@
+{
+  "ok": true,
+  "consumerRevision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+  "authoredSourcesMatchedExactGit": 39,
+  "commandStatusesMatched": 9,
+  "shenkoLanes": [
+    {
+      "name": "source-seam",
+      "productionBytes": 1231311,
+      "productionGzipBytes": 351937,
+      "generatedInputSourceBytes": 112132,
+      "retainedGeneratedBytes": 43850,
+      "reactVersion": "19.3.1",
+      "initialization": "UNTESTED"
+    },
+    {
+      "name": "pinned-artifact",
+      "productionBytes": 1231311,
+      "productionGzipBytes": 351937,
+      "generatedInputSourceBytes": 112132,
+      "retainedGeneratedBytes": 43850,
+      "reactVersion": "19.3.1",
+      "initialization": "UNTESTED"
+    }
+  ],
+  "costRows": [
+    {
+      "profile": "react-dom-source-v1",
+      "modules": 1,
+      "generatedInputSourceBytes": 234575,
+      "supportInputSourceBytes": 177474,
+      "retainedProductionBytes": 82452,
+      "retainedGzipBytes": 27574,
+      "retainedSupportingBytes": 50137
+    },
+    {
+      "profile": "react-dom-source-v1",
+      "modules": 3,
+      "generatedInputSourceBytes": 446031,
+      "supportInputSourceBytes": 194327,
+      "retainedProductionBytes": 169598,
+      "retainedGzipBytes": 44184,
+      "retainedSupportingBytes": 57336
+    },
+    {
+      "profile": "vue-source-v1",
+      "modules": 1,
+      "generatedInputSourceBytes": 232627,
+      "supportInputSourceBytes": 177313,
+      "retainedProductionBytes": 88633,
+      "retainedGzipBytes": 30803,
+      "retainedSupportingBytes": 48980
+    },
+    {
+      "profile": "vue-source-v1",
+      "modules": 3,
+      "generatedInputSourceBytes": 444613,
+      "supportInputSourceBytes": 194166,
+      "retainedProductionBytes": 171517,
+      "retainedGzipBytes": 47469,
+      "retainedSupportingBytes": 57548
+    },
+    {
+      "profile": "vue2-source-v1",
+      "modules": 1,
+      "generatedInputSourceBytes": 238982,
+      "supportInputSourceBytes": 179669,
+      "retainedProductionBytes": 68586,
+      "retainedGzipBytes": 23141,
+      "retainedSupportingBytes": 49569
+    },
+    {
+      "profile": "vue2-source-v1",
+      "modules": 3,
+      "generatedInputSourceBytes": 461019,
+      "supportInputSourceBytes": 196522,
+      "retainedProductionBytes": 162527,
+      "retainedGzipBytes": 40408,
+      "retainedSupportingBytes": 57908
+    },
+    {
+      "profile": "web-component-source-v1",
+      "modules": 1,
+      "generatedInputSourceBytes": 236531,
+      "supportInputSourceBytes": 190097,
+      "retainedProductionBytes": 71441,
+      "retainedGzipBytes": 23870,
+      "retainedSupportingBytes": 55689
+    },
+    {
+      "profile": "web-component-source-v1",
+      "modules": 3,
+      "generatedInputSourceBytes": 428735,
+      "supportInputSourceBytes": 206950,
+      "retainedProductionBytes": 150659,
+      "retainedGzipBytes": 38842,
+      "retainedSupportingBytes": 62713
+    }
+  ],
+  "gzipVerification": "compiler-production-cost-gzip-readback.json independently recomputes the declared Node zlib level-9 scope",
+  "initializationBoundary": "Single observations of already-imported bundled production React owner mounts in Happy DOM, including native framework flush. Not browser layout latency, a performance budget, allocation accounting or a comparison with Adapter.",
+  "boundary": "Independent retained artifact/source/meta/bytes readback, not a new application/native-browser execution."
+}

@@ -42,6 +42,100 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
 }
 
 describe('Anatomy family subscriber notification', () => {
+  it('observes comparator replacement during repeated host reads for a later recipient', () => {
+    type Target = { rank: number; compareDocumentPosition(other: unknown): number };
+    const forward = function (this: Target, other: unknown) {
+      return this.rank < (other as Target).rank ? 4 : 2;
+    };
+    const reverse = function (this: Target, other: unknown) {
+      return this.rank < (other as Target).rank ? 2 : 4;
+    };
+    const targets = new Map<unknown, Target>();
+    let armed = false;
+    let repeatedReads = 0;
+    let repeatedInstance: unknown;
+    const f = fixture((instance) => {
+      if (armed && instance === repeatedInstance && ++repeatedReads === 5)
+        for (const target of targets.values()) target.compareDocumentPosition = reverse;
+      return targets.get(instance) ?? null;
+    });
+    const claims = [f.root, f.make('item'), f.make('item'), f.make('item')];
+    for (const [index, rank] of [0, 3, 1, 2].entries()) {
+      const instance = claims[index]!.port.resolveSelfInstance();
+      targets.set(instance, { rank, compareDocumentPosition: forward });
+      if (index === 1) repeatedInstance = instance;
+    }
+    const firstOrder = vi.fn();
+    const secondOrder = vi.fn();
+    f.make().port.subscribeOrder(f.family, firstOrder);
+    f.make().port.subscribeOrder(f.family, secondOrder);
+    // Controlled host reentry: the first recipient reads this claim three
+    // times, then its second read for the later recipient replaces the method.
+    // A once-per-claim validation would miss that live host change.
+    armed = true;
+    f.notify();
+    expect(firstOrder).not.toHaveBeenCalled();
+    expect(secondOrder).toHaveBeenCalledOnce();
+  });
+
+  it('keeps registration order when targets compare equal or are unavailable', () => {
+    const targets = new Map<
+      unknown,
+      { rank: number; compareDocumentPosition(other: unknown): number }
+    >();
+    let unavailable = false;
+    const f = fixture((instance) => (unavailable ? null : (targets.get(instance) ?? null)));
+    const items = Array.from({ length: 4 }, () => f.make('item'));
+    const instances = items.map((owner) => owner.port.resolveSelfInstance());
+    for (const [index, instance] of instances.entries())
+      targets.set(instance, {
+        rank: instances.length - index,
+        compareDocumentPosition(other) {
+          const rank = (other as { rank: number }).rank;
+          return this.rank < rank ? 4 : this.rank > rank ? 2 : 0;
+        },
+      });
+    const ordered = () =>
+      f.root.tryOrderedPartsOf(f.family, 'item')!.map(f.root.port.resolvePartInstance);
+    expect(ordered()).toEqual([...instances].reverse());
+
+    for (const target of targets.values()) target.rank = 0;
+    expect(ordered()).toEqual(instances);
+    unavailable = true;
+    expect(ordered()).toEqual(instances);
+  });
+
+  it('uses a replacement target acquired by a later recipient with the same comparator', () => {
+    const compareDocumentPosition = function (this: { position: number }, other: unknown) {
+      return this.position < (other as { position: number }).position ? 4 : 2;
+    };
+    const rootTarget = { position: 0, compareDocumentPosition };
+    const originalItemTarget = { position: 1, compareDocumentPosition };
+    const replacementItemTarget = { position: -1, compareDocumentPosition };
+    let itemReads = 0;
+    let replaceTarget = false;
+    let rootInstance: unknown;
+    const f = fixture((instance) => {
+      if (instance === rootInstance) {
+        return rootTarget;
+      }
+      return replaceTarget && ++itemReads >= 2 ? replacementItemTarget : originalItemTarget;
+    });
+    rootInstance = f.root.port.resolveSelfInstance();
+    f.make('item');
+    const first = f.make();
+    const second = f.make();
+    const firstOrder = vi.fn();
+    const secondOrder = vi.fn();
+    first.port.subscribeOrder(f.family, firstOrder);
+    second.port.subscribeOrder(f.family, secondOrder);
+
+    replaceTarget = true;
+    f.notify();
+    expect(firstOrder).not.toHaveBeenCalled();
+    expect(secondOrder).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the current host comparator when the target identity is unchanged', () => {
     const itemTarget = { compareDocumentPosition: () => 2 };
     const rootTarget = { compareDocumentPosition: () => 4 };

@@ -1,0 +1,37 @@
+{
+  "scope": "Independent public Context composition: request 1 opens a closed popup; an earlier Popover subscriber issues request 2 after actual open=true. Request 2 is current, accepted and must complete normally. No product source changed.",
+  "ok": true,
+  "results": [
+    {
+      "mode": "single",
+      "before": false,
+      "request": true,
+      "after": false,
+      "opened": true,
+      "nested": true,
+      "nestedOpen": true,
+      "nestedRequest": true,
+      "finalSelection": "2026-10-16",
+      "actions": ["openChange", "valueChange", "openChange"],
+      "expectedOpenAfter": false,
+      "pass": true
+    },
+    {
+      "mode": "range",
+      "before": false,
+      "request": true,
+      "after": false,
+      "opened": true,
+      "nested": true,
+      "nestedOpen": true,
+      "nestedRequest": true,
+      "finalSelection": {
+        "from": "2026-10-10",
+        "to": "2026-10-16"
+      },
+      "actions": ["openChange", "rangeChange", "openChange"],
+      "expectedOpenAfter": false,
+      "pass": true
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { chromium, type Browser, type Locator, type Page } from 'playwright-core
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { chromeExecutable, RUNTIMES, startServer, stopServer } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
+import { selectFailureDiagnostic } from './select-failure-diagnostic';
 
 // Controlled layout conditions around actual public Select/Dialog consumers.
 // Select uses the Homepage Brutalist popper profile, not Shadcn item alignment.
@@ -97,10 +98,23 @@ async function selectBrutalist(page: Page, runtime: string) {
   await trigger.click();
   const id = await trigger.getAttribute('aria-controls');
   expect(id).toBeTruthy();
-  await page
-    .locator(`[id=${JSON.stringify(id)}]`)
-    .getByRole('option', { name: 'Brutalist', exact: true })
-    .click();
+  try {
+    await page
+      .locator(`[id=${JSON.stringify(id)}]`)
+      .getByRole('option', { name: 'Brutalist', exact: true })
+      .click();
+  } catch (error) {
+    observations.push({
+      id: `${runtime}-family-selection-failure`,
+      error: String(error),
+      diagnostic: await selectFailureDiagnostic(page, {
+        control: 'family',
+        popupId: id,
+        option: 'Brutalist',
+      }),
+    });
+    throw error;
+  }
   await page.waitForFunction(
     (runtime) => {
       const root = document.querySelector<HTMLElement>('[data-homepage-runtime]');

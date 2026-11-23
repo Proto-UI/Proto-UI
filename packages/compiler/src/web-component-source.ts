@@ -1,3 +1,4 @@
+import { emitCapturedWebOperation } from './capture-effects';
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
@@ -16,6 +17,7 @@ import {
   createJavaScriptValueReader,
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
+  emitJavaScriptRecord,
   emitJavaScriptValue,
   emitJavaScriptParameters,
   emitUninvokedJavaScriptFunction,
@@ -308,7 +310,9 @@ export function emitWebComponentSource(
     if (
       node.kind === 'style-handle' ||
       node.kind === 'rule' ||
-      (node.kind === 'operation' && String(node.operation).startsWith('feedback.style.'))
+      (node.kind === 'operation' &&
+        (String(node.operation).startsWith('feedback.style.') ||
+          node.operation === 'feedback.material.shader'))
     )
       styled = true;
     if (node.kind === 'operation' && node.operation === 'render.el') {
@@ -386,7 +390,12 @@ export function emitWebComponentSource(
   const contextValidation = context
     ? emitNativeContextValidation(ir, keyNames, `${prefix}Accepts`)
     : '';
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(
+    admitted.value.operations,
+    prefix,
+    admitted.value.ruleMetaKeys,
+    admitted.value.shaderKernels
+  );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -404,7 +413,7 @@ export function emitWebComponentSource(
       return formatJavaScriptValueType(type, typeName);
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
-    if (type === 'exception') return 'unknown';
+    if (type === 'exception' || type === 'unknown') return 'unknown';
     if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (isDataValueType(type))
       return interacting && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
@@ -560,9 +569,20 @@ export function emitWebComponentSource(
         span: node.span,
       });
     try {
+      // Render-context callbacks may omit their unused renderer. Explicitly
+      // typed renderer helpers also retain their native TemplateChildren path.
+      const implicitRenderer =
+        !options.ssr && node.context === 'render' && node.parameters.length === 0
+          ? `${prefix}RendererArgument${nativeSequence++}`
+          : undefined;
       const renderer =
-        !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      const callable = `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+        !options.ssr && (node.context === 'render' || node.parameters[0]?.type === 'render')
+          ? (node.parameters[0]?.name ?? implicitRenderer)
+          : undefined;
+      const nativeParameters = implicitRenderer
+        ? `${implicitRenderer}: ${prefix}Renderer`
+        : emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName);
+      const callable = `(${nativeParameters})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${renderer ? `${'  '.repeat(depth + 1)}return ${renderer}.nativeFrame.document.createDocumentFragment();\n` : ''}${'  '.repeat(depth)}}`;
       return callBoundaries.authored.has(node)
         ? `${prefix}MarkAuthoredCallable(${callable})`
         : callable;
@@ -571,7 +591,27 @@ export function emitWebComponentSource(
     }
   }
 
-  function expr(node: ExpressionIR, depth: number): string {
+  function expr(node: ExpressionIR, depth: number, captureEffects = true): string {
+    if (hasAuthoredHooks && captureEffects) {
+      if (node.kind === 'operation') {
+        const captured = emitCapturedWebOperation({
+          value: node,
+          prefix: prefix,
+          manager: `${prefix}Authored`,
+          interaction: `${prefix}Interaction`,
+          emit: (item, capture = true) => expr(item, depth, capture),
+          declaration: (_item, name, initializer, argumentIndex) => {
+            const type =
+              node.operation === 'props.define' && argumentIndex === 0
+                ? `Parameters<typeof ${prefix}CaptureReceiver.props.define>[0]`
+                : undefined;
+            return `const ${name}${type ? `: ${type}` : ''} = ${initializer};`;
+          },
+        });
+        if (captured !== undefined) return captured;
+      }
+      if (node.kind === 'rule') return `${prefix}Authored.rule(${expr(node, depth, false)})`;
+    }
     switch (node.kind) {
       case 'narrow':
       case 'member-write':
@@ -623,7 +663,7 @@ export function emitWebComponentSource(
       case 'array':
         return `[${node.elements.map((value) => expr(value, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${node.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expr(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(node, (item) => expr(item, depth), typeName);
       case 'function':
         return fn(node.function, depth);
       case 'helper-call':
@@ -707,7 +747,7 @@ export function emitWebComponentSource(
         switch (statement.kind) {
           case 'const':
             nativeScope = nativeScope.bind(statement.name, statement.value);
-            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
           case 'return':
@@ -715,7 +755,7 @@ export function emitWebComponentSource(
               const output = `${prefix}Output${nativeSequence++}`,
                 fragment = `${prefix}Fragment${nativeSequence++}`;
               const frame = `${nativeRenderer}.nativeFrame`;
-              return `${origin}${indent}const ${output}=${statement.value ? expr(statement.value, depth) : 'undefined'};\n${indent}const ${fragment}=${frame}.document.createDocumentFragment();\n${nativeAppend(statement.value, output, fragment, frame)}\n${indent}return ${fragment};\n`;
+              return `${origin}${indent}const ${output}=${statement.value ? expr(statement.value, depth) : 'undefined'};\n${indent}const ${fragment}=${frame}.document.createDocumentFragment();\nif(${output}!==undefined){${nativeAppend(statement.value, output, fragment, frame)}}\n${indent}return ${fragment};\n`;
             }
             return `${origin}${indent}return${statement.value ? ` ${expr(statement.value, depth)}` : ''};\n`;
           case 'throw':
@@ -895,14 +935,14 @@ ${controlLabel ? "  if (port.server && getAssociations !== undefined) throw new 
   const ${prefix}Def = owner.def;
 ${publicCalls ? `    const ${prefix}WrapPublic = owner.wrapPublic;` : ''}
 ${hasAuthoredHooks ? `    const ${prefix}Authored = owner.authored;` : ''}
-${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
+${atoms.shader ? `    const ${prefix}Shader = owner.shader;` : ''}${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
 ${styled ? `  const ${prefix}Style = owner.style;\n  const ${prefix}OwnerProps = owner.props;\n` : ''}${interacting ? `  const ${prefix}Interaction = owner.interaction;\n` : ''}${hookCode}
   try {
     owner.render = (${fn(ir.setup, 2)})(${ir.setup.parameters.length === 0 ? '' : `${prefix}Def`});
     owner.hydrate(raw);
     owner.created();
     return owner;
-  } catch (error) { try { owner.dispose(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'Setup and cleanup failed'); } throw error; }
+  } catch (error) { try { owner.dispose(true); } catch { /* Preserve the initiating setup/created failure. */ } throw error; }
 }
 ${support.server}
 `;
@@ -1043,7 +1083,7 @@ ${controlLabel ? `    this.${prefix}Owner?.interaction.refresh();` : ''}
     const ${prefix}Def = owner.def;
 ${publicCalls ? `    const ${prefix}WrapPublic = owner.wrapPublic;` : ''}
 ${hasAuthoredHooks ? `    const ${prefix}Authored = owner.authored;` : ''}
-${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
+${atoms.shader ? `    const ${prefix}Shader = owner.shader;` : ''}${atoms.delay ? `    const ${prefix}Delay = owner.delay;` : ''}${atoms.presence ? `    const ${prefix}Presence = owner.presence;` : ''}${atoms.meta ? `    const ${prefix}Meta = owner.meta;` : ''}
 ${styled ? `    const ${prefix}Style = owner.style;\n    const ${prefix}OwnerProps = owner.props;\n` : ''}
 ${interacting ? `    const ${prefix}Interaction = owner.interaction;\n` : ''}
 ${hookCode}    try {
@@ -1072,7 +1112,11 @@ ${hookCode}    try {
 ${options.propsUpdatePolicy === 'host' ? `    const changed = Object.keys({ ...this.${prefix}Raw, ...next }).some(key => Object.hasOwn(this.${prefix}Raw, key) !== Object.hasOwn(next, key) || !Object.is(this.${prefix}Raw[key], next[key]));` : ''}
     if (Object.prototype.hasOwnProperty.call(next, 'instanceAssociations')) throw new TypeError('[InstanceAssociations] use the instanceAssociations property, outside Props');
     this.${prefix}Raw = { ...next };
-    if (this.${prefix}Owner) { this.${prefix}Owner.hydrate(this.${prefix}Raw); ${options.propsUpdatePolicy === 'host' ? `if (changed) this.${prefix}Owner.update();` : ''} }
+    const owner = this.${prefix}Owner;
+    if (owner) {
+      owner.hydrate(this.${prefix}Raw);
+${options.propsUpdatePolicy === 'host' ? `      if (changed && !this.${prefix}Closed && this.${prefix}Owner === owner) owner.update();` : ''}
+    }
   }
   update(): void {
     if (this.${prefix}Closed) throw new Error('Custom element is disposed');
@@ -1194,7 +1238,7 @@ ${context ? `  context: ${p}ContextDef;\n` : ''}  props: {define(input: Record<s
   expose: {value(key: string, value: unknown): void; state(key: string, handle: ${p}State${interacting ? ` | ${p}NativeObservedState<boolean | string | number>` : ''}): void; method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R): void; event(key: string, spec?: object): void};
   lifecycle: {onCreated(fn: Function): void; onMounted(fn: Function): void; onUpdated(fn: Function): void; onUnmounted(fn: Function): void; onBeforeDispose(fn: Function): void};
 };
-type ${p}Owner = {${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
+type ${p}Owner = {${atoms.shader ? `shader: ReturnType<typeof ${p}CreateShader>; ` : ''}${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(${ssr ? 'exhaustive?: boolean' : ''}): void};
 function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}${controlLabel ? ', getAssociations: () => unknown' : ''}): ${p}Owner {
   let alive = true, disposing = false, setup = true, callbackDepth = 0;
 ${
@@ -1218,13 +1262,15 @@ ${ssr ? '' : '  let detachedDisplay: {value: string; priority: string} | undefin
   const ensureExternal = () => { ensure(); if (disposing) throw new Error('Logical owner is disposing'); };
   const ensureSetup = () => { ensure(); if (!setup) throw new Error('Setup capability is closed'); };
   const runtime = () => { ensure(); if (setup || !callbackDepth) throw new Error('State writes require a live callback scope'); };
-  ${atoms.owner({ setup: 'ensureSetup()', runtime: 'runtime()', alive: 'alive', invoke: 'invoke(callback, [], false)', invokeRun: 'invoke(callback)', document: ssr ? "host.root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)" : 'host.ownerDocument', run: `${p}Run` })}
+  ${atoms.owner({ setup: 'ensureSetup()', runtime: 'runtime()', alive: 'alive', invoke: 'invoke(callback, [], false)', invokeRun: 'invoke(callback)', document: ssr ? "host.root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)" : 'host.ownerDocument', run: `${p}Run`, root: ssr ? 'host.root' : 'host', prepare: styled ? `${p}Style.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `  const ${p}AuthoredWatchCleanups: (() => void)[] = [];
   const ${p}Authored = ${p}CreateAuthored({setup: ensureSetup, borrow(value) {
     const state = value as ${p}State<${p}Scalar>;
-    return Object.freeze({get: () => state.get(), setDefault: (value: ${p}Scalar) => state.setDefault(value), set: (value: ${p}Scalar, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: unknown) => void) { ensureSetup(); const off = state.external.subscribe(event => { invoke(callback, [event]); }); ${p}AuthoredWatchCleanups.push(off); return off; }});
+    const borrowed = Object.freeze({get: () => state.get(), setDefault: (value: ${p}Scalar) => state.setDefault(value), set: (value: ${p}Scalar, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: unknown) => void) { ensureSetup(); const off = state.external.subscribe(event => { invoke(callback, [event]); }); ${p}AuthoredWatchCleanups.push(off); return off; }});
+    ${atoms.registerSource('borrowed')}
+    return borrowed;
   }});`
     : ''
 }
@@ -1238,6 +1284,7 @@ ${
 ${
   styled
     ? `  const ${p}Style = ${p}CreateNativeStyle({ensureSetup, ensureRuntime: runtime, isAlive: () => alive,
+    ${atoms.ruleMeta(ssr ? 'host.document' : 'host.ownerDocument')}
     project(tokens) { ${ssr ? "host.attribute('data-pui-style', tokens.length ? tokens.join(' ') : null);" : "if (tokens.length) host.setAttribute('data-pui-style', tokens.join(' ')); else host.removeAttribute('data-pui-style');"} }});\n`
     : ''
 }
@@ -1287,8 +1334,10 @@ ${controlLabel ? '    getAssociations,\n' : ''}
         unsubscribe(off: () => void) { ensureExternal(); off(); },
       });
       observedProjections.set(handle, {external, subscribers});
+      ${atoms.registerSource('handle')}
       observedSubscriptions.push(handle.subscribe((event) => {
-${styled ? `        ${p}Style.refresh();\n` : ''}        ${p}Interaction.refresh();
+${styled ? `        ${p}Style.refresh();\n` : ''}${atoms.refresh}
+        ${p}Interaction.refresh();
         ${emitRecordedNotification({ queue: 'emissions', draining: 'emitting', subscribers: 'subscribers', deliver: 'invoke(subscriber, [event], false)', alive: 'alive && !disposing', drain: false })}
         drainEmissions();
       }));
@@ -1333,10 +1382,15 @@ ${ssr ? '  host.bindContext(context);\n' : ''}
     : ''
 }  function fire(name: string): void {
     if (name === 'unmounted') { ${atoms.detach} }
-    let error: unknown;
+${
+  ssr
+    ? `    try { for (const fn of lifecycle[name]) invoke(fn); }
+    finally { if (name === 'unmounted') { ${atoms.detach} } }`
+    : `    let error: unknown;
     try { for (const fn of lifecycle[name]) { try { invoke(fn); } catch (caught) { error ??= caught; } } }
     finally { if (name === 'unmounted') { ${atoms.detach} } }
-    if (error !== undefined) throw error;
+    if (error !== undefined) throw error;`
+}
   }
   function valid(spec: ${p}PropSpec, value: unknown): boolean {
     if (spec.schema === undefined) throw new Error('Missing checked Props schema');
@@ -1379,13 +1433,17 @@ ${styled ? `    ${p}Style.refresh();\n` : ''}
 ${interacting ? `    ${p}Interaction.refresh();\n` : ''}
     if (!hydrated) { hydrated = true; return; }
     const changed = Object.keys(specs).filter((key) => !Object.is(prev[key], resolved[key]));
-    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => own(previousRaw, key) !== own(raw, key) || !Object.is(previousRaw[key], raw[key])) : changed;
+    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : changed;
     const next = resolved, nextRaw = raw;
     const previousWindow = propsWindow; propsWindow = {raw: nextRaw, resolved: next};
-    try { for (const watcher of [...watchers]) {
+    try { for (let group = 0; group < 3; ++group) for (const watcher of [...watchers]) {
+      if ((watcher.raw ? watcher.keys === null ? 0 : 1 : 2) !== group) continue;
       const all = watcher.raw ? rawChanged : changed;
       const matched = watcher.keys === null ? all : all.filter((key) => watcher.keys!.includes(key));
-      if (watcher.active && matched.length) invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      if (watcher.active && matched.length) {
+        if (watcher.raw) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+        invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      }
     } } finally { propsWindow = previousWindow; }
   }
   function drainEmissions(): void {
@@ -1421,13 +1479,14 @@ ${hasAuthoredHooks ? `    ${p}Authored.claimState(semantic);` : ''}
       set(next: T, reason?: unknown) {
         runtime(); validate(next); if (Object.is(value, next)) return;
         const prev = value; value = next;
-${styled ? `        ${p}Style.refresh();\n` : ''}
+${styled ? `        ${p}Style.refresh();\n` : ''}${atoms.refresh}
+
 ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
         ${emitRecordedNotification({ queue: 'emissions', draining: 'emitting', subscribers: 'subscribers', deliver: "invoke(subscriber, [{type: 'next', prev, next, reason}], false)", alive: 'alive && !disposing', drain: false })}
         drainEmissions();
       },
     };
-    states.push(handle); ${hasAuthoredHooks ? `${p}Authored.state(semantic, handle);` : ''} return handle;
+    states.push(handle); ${hasAuthoredHooks ? `${p}Authored.state(semantic, handle);` : ''} ${atoms.registerSource('handle')} return handle;
   }
 ${
   ssr
@@ -1479,15 +1538,16 @@ ${interacting ? `    try { ${p}Interaction.unmount(); } catch (caught) { error =
     host.visible(true);
     if (!view) {
       ++epoch; render(); view = true; dirty = false;
-${styled ? `      ${p}Style.mount();\n` : ''}${
-        interacting
-          ? `      if (!interactionAdopted && host.hydrationAttributes) {
+${styled ? `      ${p}Style.mount();\n` : ''}      ${atoms.mount}
+${
+  interacting
+    ? `      if (!interactionAdopted && host.hydrationAttributes) {
         ${p}Interaction.adoptAttributes(host.hydrationAttributes, host.hydrationBaselines);
         interactionAdopted = true;
       }
       ${p}Interaction.mount();\n`
-          : ''
-      }      fire('mounted');
+    : ''
+}      fire('mounted');
     } else if (dirty) { dirty = false; render(); fire('updated'); }
   }
   function schedule(update: boolean): void {
@@ -1550,7 +1610,7 @@ ${styled ? `    try { ${p}Style.unmount(); host.removeAttribute('data-pui-style'
       }
       detachedDisplay = undefined;
     }
-    if (!view) { ++epoch; render(); view = true; ${styled ? `${p}Style.mount(); ` : ''}${interacting ? `${p}Interaction.mount(); ` : ''}fire('mounted'); }
+    if (!view) { ++epoch; render(); view = true; ${styled ? `${p}Style.mount(); ` : ''}${atoms.mount}${interacting ? `${p}Interaction.mount(); ` : ''}fire('mounted'); }
     else if (dirty) { render(); fire('updated'); }
   }
   function schedule(update: boolean): void {
@@ -1605,7 +1665,7 @@ ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
     expose: {
       value: expose,
       state(key: string, handle: ${p}State${interacting ? ` | ${p}NativeObservedState<boolean | string | number>` : ''}) { ${interacting ? `const external = observedProjections.get(handle as ${p}NativeObservedState<boolean | string | number>)?.external ?? ('external' in handle ? handle.external : undefined); if (!external) throw new Error('Unknown external state projection'); expose(key, external);` : 'expose(key, handle.external);'} ${hasAuthoredHooks ? `${p}Authored.introduceObserved(handle);` : ''} },
-      method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R) { ${hasAuthoredHooks ? `${p}Authored.method(key, fn);` : ''} expose(key, (...args: unknown[]) => { ensureExternal(); const result = invoke(fn, args, false) as R; return project ? project(result) : result; }); },
+      method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R) {  expose(key, (...args: unknown[]) => { ensureExternal(); const result = invoke(fn, args, false) as R; return project ? project(result) : result; }); },
       event(key: string) { ensureSetup(); if (own(exposes, key) || events.has(key)) throw new Error('Duplicate expose: ' + key); events.add(key); },
     },
     lifecycle: {onCreated(fn) { ensureSetup(); lifecycle.created.push(fn); }, onMounted(fn) { ensureSetup(); lifecycle.mounted.push(fn); }, onUpdated(fn) { ensureSetup(); lifecycle.updated.push(fn); }, onUnmounted(fn) { ensureSetup(); lifecycle.unmounted.push(fn); }, onBeforeDispose(fn) { ensureSetup(); lifecycle.beforeDispose.push(fn); }},
@@ -1613,7 +1673,7 @@ ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
   const owner: ${p}Owner = {
     ${publicCalls ? `wrapPublic: ${p}WrapPublic,` : ''}
     ${hasAuthoredHooks ? `authored: ${p}Authored,` : ''}
-    ${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
+    ${atoms.shader ? `shader: ${p}Shader,` : ''}${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
     identity: Symbol('compiled-logical-owner'), def, exposes, render: undefined,
 ${interacting ? `    interaction: ${p}Interaction,\n` : ''}
 ${styled ? `    style: ${p}Style, props: () => resolved as ${p}PropsSnapshot,\n` : ''}
@@ -1634,16 +1694,26 @@ ${styled ? `      host.attribute('data-pui-style', intent ? ${p}Style.serverToke
     : ''
 }
     created() { setup = false; fire('created'); },
-    dispose() {
+    dispose(${ssr ? 'exhaustive = false' : ''}) {
       if (!alive || disposing) return; disposing = true;
       ${hasAuthoredHooks ? `for (const off of ${p}AuthoredWatchCleanups.splice(0)) off();` : ''}
-      let error: unknown;
-      try { detach(); } catch (caught) { error = caught; }
-      try { fire('beforeDispose'); } catch (caught) { error ??= caught; }
+      let error: { value: unknown } | undefined;
+      try { detach(); } catch (caught) { error = { value: caught }; }
+      try {
+${
+  ssr
+    ? `        if (exhaustive) {
+          for (const callback of lifecycle.beforeDispose) {
+            try { invoke(callback); } catch (caught) { error ??= { value: caught }; }
+          }
+        } else `
+    : ''
+}        fire('beforeDispose');
+      } catch (caught) { error ??= { value: caught }; }
       finally {
 ${
   interacting
-    ? `        try { ${p}Interaction.dispose(); } catch (caught) { error ??= caught; }
+    ? `        try { ${p}Interaction.dispose(); } catch (caught) { error ??= { value: caught }; }
         for (const off of observedSubscriptions.splice(0)) off();
         for (const projection of observedProjections.values()) projection.subscribers.clear();
         observedProjections.clear();\n`
@@ -1664,7 +1734,7 @@ ${
         detachedDisplay = undefined;`
 }
       }
-      if (error !== undefined) throw error;
+      if (error) throw error.value;
     },
   };
   return owner;
