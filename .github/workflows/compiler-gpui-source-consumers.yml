@@ -99,7 +99,7 @@ jobs:
         run: |
           set -euo pipefail
           node --import tsx packages/compiler/test/fixtures/gpui-a11y-value/produce.mjs "$RUNNER_TEMP/gpui-evidence/numeric-action" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-producer.log"
-          cargo +1.98.1 metadata --offline --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/numeric-metadata.json"
+          cargo +1.98.1 metadata --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/numeric-metadata.json"
           node scripts/gpui/check-cargo-graph.mjs \
             --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             --git https://github.com/zed-industries/zed \
