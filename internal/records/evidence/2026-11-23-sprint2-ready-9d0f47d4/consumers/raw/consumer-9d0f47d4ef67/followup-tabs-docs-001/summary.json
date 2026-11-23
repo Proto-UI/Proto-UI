@@ -1,0 +1,202 @@
+{
+  "schema": "proto-ui.sprint2.tabs-docs-followup.v1",
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+  "source": "$PRODUCT_9D",
+  "startedAt": "2026-11-23T14:59:02.783352+00:00",
+  "pid": 1728990,
+  "pgid": 1728990,
+  "status": "PASS",
+  "commands": [
+    {
+      "name": "tabs-worker-diagnostic",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=$CONTROL/consumer-9d0f47d4ef67/followup-tabs-docs-001/receipts/tabs-diagnostic.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": null,
+      "timeoutSeconds": 1200,
+      "stdout": "logs/tabs-worker-diagnostic.stdout.log",
+      "stderr": "logs/tabs-worker-diagnostic.stderr.log",
+      "pid": 1729278,
+      "exitCode": 1,
+      "timedOut": false,
+      "wallSeconds": 4.343,
+      "stdoutSha256": "cfcb7556970ddf68c47e352f0bb7751ccfc133f55c7489cf89c64bb03b233688",
+      "stderrSha256": "83be7fee6312fca521ff70b451c546e10e0a38340fdbe29aa12880b01fddc2d6"
+    },
+    {
+      "name": "tabs-original-13-with-bounded-workers",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=$CONTROL/consumer-9d0f47d4ef67/followup-tabs-docs-001/receipts/tabs-13.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "timeoutSeconds": 1200,
+      "stdout": "logs/tabs-original-13-with-bounded-workers.stdout.log",
+      "stderr": "logs/tabs-original-13-with-bounded-workers.stderr.log",
+      "pid": 1729592,
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 56.012,
+      "stdoutSha256": "131f2d0284557359255af0b30e832f88ab97f0c5e3dfd3788f552084b0495990",
+      "stderrSha256": "66b18b63fdfe1604c74123627b8eb5419996f187779084342c9e7eae95b04de3"
+    },
+    {
+      "name": "docs-generate-proto-ui-style",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "--filter",
+        "apps-www",
+        "generate:proto-ui-style"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "timeoutSeconds": 1200,
+      "stdout": "logs/docs-generate-proto-ui-style.stdout.log",
+      "stderr": "logs/docs-generate-proto-ui-style.stderr.log",
+      "pid": 1732567,
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 135.453,
+      "stdoutSha256": "772f7a5570ee07fde42a63c401c21b7fe4b9bc1a96c72aeba7d62ef2687e61bb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "docs-types",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:types:docs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "timeoutSeconds": 1200,
+      "stdout": "logs/docs-types.stdout.log",
+      "stderr": "logs/docs-types.stderr.log",
+      "pid": 1739555,
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 477.341,
+      "stdoutSha256": "b569c6579c4752a0abbdf7c76784f6514567681d256085e28b2ff0a0dc20ad83",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sourceChecks": [
+    {
+      "where": "start",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "tabs-worker-diagnostic:before",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "tabs-worker-diagnostic:after",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "tabs-original-13-with-bounded-workers:before",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "tabs-original-13-with-bounded-workers:after",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "docs-generate-proto-ui-style:before",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "docs-generate-proto-ui-style:after",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "docs-types:before",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "docs-types:after",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    },
+    {
+      "where": "finish",
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+      "clean": true,
+      "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+    }
+  ],
+  "originalReplayStatus": "FAIL",
+  "originalReplaySha256": "cff996a44c584d3a4f4ba141e7cc8b2a13f6f2457ebaff70f4fde7b5be4d0392",
+  "recoveryScriptSha256": "7e3c9cc3f97292e405fda0c702328c455ca6abed04d8f6e151eaec4e454fa62d",
+  "scope": "Only the original two Tabs files (13 tests), docs style generation, and docs typecheck. No product/test assertion change; no repeat of passed compiler/CLI/apps/public builds.",
+  "aggregateAcceptanceClaim": false,
+  "diagnosis": {
+    "kind": "Vitest/Tinypool worker initialization conflict",
+    "actualExit": 1,
+    "actualErrorConfirmed": true,
+    "onlyExecutionFix": "Add --minWorkers=1 while preserving --maxWorkers=1 and both original files.",
+    "originalProductAndTestsChanged": false
+  },
+  "tabs": {
+    "numTotalTests": 13,
+    "numPassedTests": 13,
+    "numFailedTests": 0,
+    "numTotalTestSuites": 2,
+    "success": true
+  },
+  "supplementScopeAccepted": true,
+  "finishedAt": "2026-11-23T15:10:27.207682+00:00",
+  "originalReplayStillUnchanged": true
+}

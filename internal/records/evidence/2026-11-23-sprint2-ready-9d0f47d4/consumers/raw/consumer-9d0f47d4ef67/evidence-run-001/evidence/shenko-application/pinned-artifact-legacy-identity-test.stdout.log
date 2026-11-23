@@ -1,0 +1,37 @@
+✔ every declared Shenko prototype was compiled from the authored source bytes (3.41749ms)
+✔ generated code is native React DOM source, not a Proto-UI runtime or adapter import (1.987021ms)
+✔ compiler provenance binds the generation to the parsed source graph and artifacts (1.469102ms)
+✖ the recorded compiler identity is the audited source package, bundled for the build only (1.79925ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 96.711201
+
+✖ failing tests:
+
+test at tests/prototypes.test.mjs:81:1
+✖ the recorded compiler identity is the audited source package, bundled for the build only (1.79925ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '@proto.ui/compiler-pinned'
+  - 'packages/compiler'
+  
+      at TestContext.<anonymous> (file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko/crates/shenko-ui/web/tests/prototypes.test.mjs:85:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '@proto.ui/compiler-pinned',
+    expected: 'packages/compiler',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

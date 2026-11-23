@@ -1,0 +1,226 @@
+{
+  "kind": "sprint2-platform-observation",
+  "observedAt": "2026-11-23 14:56:42 UTC",
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 1716,
+  "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "base": "b715b8a6d08c2c79417272c8d4ca9254984feadb",
+  "draft": false,
+  "merged": false,
+  "mergeable": true,
+  "mergeableState": "blocked",
+  "reviews": [],
+  "unresolvedReviewThreads": 0,
+  "reviewThreadsObservation": "GitHub list_pull_request_review_threads returned an empty list after this status read.",
+  "checks": [
+    {
+      "name": "cycle-report",
+      "id": 137742560633,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137742560633"
+    },
+    {
+      "name": "test",
+      "id": 137742267466,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137742267466"
+    },
+    {
+      "name": "test-browser",
+      "id": 137742266591,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137742266591"
+    },
+    {
+      "name": "test-general",
+      "id": 137742266031,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137742266031"
+    },
+    {
+      "name": "release-consumer-react",
+      "id": 137741679548,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137741679548"
+    },
+    {
+      "name": "release-stage",
+      "id": 137741679502,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137741679502"
+    },
+    {
+      "name": "cli-smoke",
+      "id": 137741678663,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137741678663"
+    },
+    {
+      "name": "public_package_build",
+      "id": 137741678350,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137741678350"
+    },
+    {
+      "name": "coverage-governance",
+      "id": 137740657553,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740657553"
+    },
+    {
+      "name": "release-scan",
+      "id": 137740642646,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740642646"
+    },
+    {
+      "name": "browser-evidence",
+      "id": 137740610930,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188583301/job/137740610930"
+    },
+    {
+      "name": "sprint2-consumers",
+      "id": 137740608739,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188583301/job/137740608739"
+    },
+    {
+      "name": "compiler-gpui-consumers",
+      "id": 137740568279,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740568279"
+    },
+    {
+      "name": "rust-interop",
+      "id": 137740568157,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740568157"
+    },
+    {
+      "name": "production-suites",
+      "id": 137740568133,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740568133"
+    },
+    {
+      "name": "cycle-plan",
+      "id": 137740568102,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740568102"
+    },
+    {
+      "name": "agent-operations-fixtures",
+      "id": 137740568075,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740568075"
+    },
+    {
+      "name": "rust",
+      "id": 137740567945,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740567945"
+    },
+    {
+      "name": "rust-macos",
+      "id": 137740567787,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740567787"
+    },
+    {
+      "name": "type-check",
+      "id": 137740567641,
+      "status": "completed",
+      "conclusion": "skipped",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740567641"
+    },
+    {
+      "name": "ci-config-audit",
+      "id": 137740566550,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740566550"
+    },
+    {
+      "name": "test-plan",
+      "id": 137740566124,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740566124"
+    },
+    {
+      "name": "public_package_plan",
+      "id": 137740566111,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740566111"
+    },
+    {
+      "name": "lockstep-check",
+      "id": 137740565437,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188574821/job/137740565437"
+    },
+    {
+      "name": "DCO",
+      "id": 137740539629,
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "detailsUrl": "https://probot.github.io/apps/dco/"
+    }
+  ],
+  "commitStatuses": [
+    {
+      "context": "Vercel",
+      "state": "failure",
+      "description": "Deployment rate limited — retry in 24 hours.",
+      "targetUrl": "https://vercel.com/2606298246qqcoms-projects?upgradeToPro=build-rate-limit"
+    }
+  ],
+  "scope": "Observed platform state only. Six completed check-runs succeeded; nineteen were skipped. Vercel commit status failed with a rate-limit message. This record grants no approval and does not merge the PR."
+}

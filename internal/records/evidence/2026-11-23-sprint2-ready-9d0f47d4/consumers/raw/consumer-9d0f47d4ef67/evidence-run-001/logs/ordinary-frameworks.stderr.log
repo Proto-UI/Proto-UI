@@ -1,0 +1,60 @@
+file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/consumer/build.mjs:12
+if(typeErrors.length)throw new Error(ts.formatDiagnosticsWithColorAndContext(typeErrors,{getCurrentDirectory:()=>process.cwd(),getCanonicalFileName:file=>file,getNewLine:()=> '\n'}));
+                           ^
+
+Error: [96mgenerated/Component.tsx[0m:[93m861[0m:[93m7[0m - [91merror[0m[90m TS1134: [0mVariable declaration expected.
+
+[7m861[0m const = ;
+[7m   [0m [91m      ~[0m
+
+    at file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/consumer/build.mjs:12:28
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.3
+file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/consumer/build.mjs:12
+if(typeErrors.length)throw new Error(ts.formatDiagnosticsWithColorAndContext(typeErrors,{getCurrentDirectory:()=>process.cwd(),getCanonicalFileName:file=>file,getNewLine:()=> '\n'}));
+                           ^
+
+Error: [96mgenerated/Component.ts[0m:[93m719[0m:[93m7[0m - [91merror[0m[90m TS1134: [0mVariable declaration expected.
+
+[7m719[0m const = ;
+[7m   [0m [91m      ~[0m
+
+    at file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/consumer/build.mjs:12:28
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.3
+file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/consumer/build.mjs:12
+if(typeErrors.length)throw new Error(ts.formatDiagnosticsWithColorAndContext(typeErrors,{getCurrentDirectory:()=>process.cwd(),getCanonicalFileName:file=>file,getNewLine:()=> '\n'}));
+                           ^
+
+Error: [96mgenerated/Component.js[0m:[93m856[0m:[93m7[0m - [91merror[0m[90m TS1134: [0mVariable declaration expected.
+
+[7m856[0m const = ;
+[7m   [0m [91m      ~[0m
+
+    at file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/consumer/build.mjs:12:28
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.3
+file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/consumer/build.mjs:12
+if(typeErrors.length)throw new Error(ts.formatDiagnosticsWithColorAndContext(typeErrors,{getCurrentDirectory:()=>process.cwd(),getCanonicalFileName:file=>file,getNewLine:()=> '\n'}));
+                           ^
+
+Error: [96mgenerated/Component.ts[0m:[93m587[0m:[93m7[0m - [91merror[0m[90m TS1134: [0mVariable declaration expected.
+
+[7m587[0m const = ;
+[7m   [0m [91m      ~[0m
+
+    at file://$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/consumer/build.mjs:12:28
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.3

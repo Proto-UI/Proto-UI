@@ -1,0 +1,11 @@
+--- 1450ffd5/apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
++++ 9d0f47d4/apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts
+@@ -174,7 +174,7 @@
+   // The public Brutalist Surface's default uses rounded-base and the same
+   // family radius bank as sidebar.css. Equality of two incorrect square rows
+   // must not satisfy family parity. Other site chrome has its own recipes.
+-  expect(observation.brutalistRadius).not.toBe('');
++  expect(observation.brutalistRadius).toBe('5px');
+   expect(observation.radius).toEqual(Array(4).fill(observation.brutalistRadius));
+ }
+ 

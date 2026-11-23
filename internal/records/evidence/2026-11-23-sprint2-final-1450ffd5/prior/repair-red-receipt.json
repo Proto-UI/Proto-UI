@@ -1,0 +1,108 @@
+{
+  "phase": "red",
+  "status": "expected-regression-demonstrated",
+  "runs": [
+    {
+      "name": "format",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--write",
+        "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+        "packages/compiler/test/text-reset-native.test.ts"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 5.793125618016347,
+      "log_sha256": "f878dfc17e4ab1e381d65093409de5a7f3fc643e3f408b5fa2c908f0c1eab8ac"
+    },
+    {
+      "name": "r5",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "<REVIEW_EVIDENCE_DIR>/checkbox-repair/red-r5.mts"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 28.08824316004757,
+      "log_sha256": "c981d8e99525d40efc6d3e1b53f3fc99e856de52563394501481b139fb6a19e6"
+    },
+    {
+      "name": "vitest",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--pool=forks",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=<REVIEW_EVIDENCE_DIR>/checkbox-repair/red-vitest.json",
+        "--testNamePattern=reset mixed callback|reset entry checked owner"
+      ],
+      "exit_code": 1,
+      "duration_seconds": 16.54813797096722,
+      "log_sha256": "54ee50ce243cf307b437a0254b414fde23b1bb10c75f38129a3801ba46e9921a"
+    }
+  ],
+  "before": {
+    "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "status": " M packages/compiler/test/text-reset-native.test.ts\n M packages/prototypes/base/test/notification-retirement-lifecycle.test.ts\n",
+    "files": {
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "3f87192f5d62c15c3c2b1c96e54fe9e48ddbe65a8f6a065fd50b3bdb292073f3",
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/compiler/test/text-reset-native.test.ts": "f7e36874a9dc5d1351ce4b2434ab9fa7905a43c6780704ce0b9450e86769c9e6"
+    },
+    "tracked_patch_sha256": "83cb0e77d7d05228e62f0e91d17b81e97c23de30b0775b0fc4ae71d483070f50"
+  },
+  "before_execution": {
+    "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "status": " M packages/compiler/test/text-reset-native.test.ts\n M packages/prototypes/base/test/notification-retirement-lifecycle.test.ts\n",
+    "files": {
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "3f87192f5d62c15c3c2b1c96e54fe9e48ddbe65a8f6a065fd50b3bdb292073f3",
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+    },
+    "tracked_patch_sha256": "8d66d3a0ac2c4e356560b38db9d9ed7e99853816b8d1835f569a6b2abc993e3c"
+  },
+  "r5_original_sha256": "6812599c7dbbfa79963f3039e404ba1c51d99e1f4f105697cf4fcc5978a37222",
+  "r5_adapted_sha256": "d06538f60ef990ac5993c8fa97c6fd507b557ff8836be66d8e08bc7b1c642d20",
+  "r5_summary": {
+    "ok": false,
+    "passed": 4,
+    "failed": 4,
+    "cases": 8
+  },
+  "vitest_results": [
+    {
+      "name": "<S2_REPAIR_CHECKOUT>/packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+      "status_counts": {
+        "skipped": 146,
+        "passed": 4,
+        "failed": 8
+      }
+    }
+  ],
+  "vitest_status_counts": {
+    "skipped": 146,
+    "passed": 4,
+    "failed": 8
+  },
+  "after": {
+    "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "status": " M packages/compiler/test/text-reset-native.test.ts\n M packages/prototypes/base/test/notification-retirement-lifecycle.test.ts\n",
+    "files": {
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "3f87192f5d62c15c3c2b1c96e54fe9e48ddbe65a8f6a065fd50b3bdb292073f3",
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+    },
+    "tracked_patch_sha256": "8d66d3a0ac2c4e356560b38db9d9ed7e99853816b8d1835f569a6b2abc993e3c"
+  },
+  "source_unchanged_during_execution": true
+}

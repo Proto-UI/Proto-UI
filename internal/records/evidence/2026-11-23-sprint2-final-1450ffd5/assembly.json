@@ -1,0 +1,98 @@
+{
+  "status": "in-progress",
+  "sourceHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "purpose": "Evidence-only branch; never merge into product PR. Hosted/consumer/visual completion still pending.",
+  "files": [
+    {
+      "path": "focused/manifest.json",
+      "sourceRelativePath": "final-validation-1450ffd5-20261123/manifest.json",
+      "sha256": "8625744debde13a7b5955677bac791de4690f3c88e3917290294d6e06f2c978a",
+      "bytes": 5242,
+      "modified": false
+    },
+    {
+      "path": "focused/vitest.json",
+      "sourceRelativePath": "final-validation-1450ffd5-20261123/vitest.json",
+      "sha256": "c78d7a2110b66a2040bf6d8f7f001e39ef44cf90027a3c98677cf1c4e3d23dec",
+      "bytes": 81260,
+      "modified": false
+    },
+    {
+      "path": "focused/vitest.log",
+      "sourceRelativePath": "final-validation-1450ffd5-20261123/vitest.log",
+      "sha256": "71835fd332b2dd0a6ab3144351a903e7d51e40cfbc2925b19f1fc9c22137f67f",
+      "bytes": 506081,
+      "modified": false
+    },
+    {
+      "path": "prior/16be-workspace-types.log",
+      "sourceRelativePath": "hosted-16be2a37-45175883003/extracted/workspace-types/run.log",
+      "sha256": "43c44a8f5989d5280d342cb66be41a2c846ceed838b1acf14984f48be6fb6a15",
+      "bytes": 2907,
+      "modified": false
+    },
+    {
+      "path": "prior/16be-review.md",
+      "sourceRelativePath": "independent-final-review-16be-r1.md",
+      "sha256": "be477e00b452fa4dc9b932b5da28ec0c4be97fcc9f0c6aeb6bb1b97ffcaf0197",
+      "bytes": 11920,
+      "modified": false
+    },
+    {
+      "path": "prior/16be-r5.mts",
+      "sourceRelativePath": "independent-checkbox-reset-16be-r5.mts",
+      "sha256": "6812599c7dbbfa79963f3039e404ba1c51d99e1f4f105697cf4fcc5978a37222",
+      "bytes": 6482,
+      "modified": false
+    },
+    {
+      "path": "prior/16be-r5.json",
+      "sourceRelativePath": "independent-checkbox-reset-16be-r5.json",
+      "sha256": "848d1a14274644332390d2dc8726a382ebec3071008ca59a2d1a69d98de99778",
+      "bytes": 5186,
+      "modified": false
+    },
+    {
+      "path": "prior/repair-red-receipt.json",
+      "sourceRelativePath": "checkbox-repair/red-receipt.json",
+      "sha256": "52d6444a20aff4f334cefb1de5ceba5046fab64cfa2e6e65b248da79383ea84f",
+      "bytes": 4561,
+      "modified": false
+    },
+    {
+      "path": "prior/repair-red-vitest.json",
+      "sourceRelativePath": "checkbox-repair/red-vitest.json",
+      "sha256": "6aa6ab1dec80c0960c55eb3676249106c476f9550887da4ad829da8fdd4707cd",
+      "bytes": 52696,
+      "modified": false
+    },
+    {
+      "path": "prior/repair-workspace-types.json",
+      "sourceRelativePath": "checkbox-repair/workspace-types-receipt.json",
+      "sha256": "aae680f3bf21678550626db1a98048fc2f31504b2c4100ac8709adae2f7e073d",
+      "bytes": 1656,
+      "modified": false
+    },
+    {
+      "path": "prior/repair-workspace-types.log",
+      "sourceRelativePath": "checkbox-repair/workspace-types.log",
+      "sha256": "adb427539ae46bb90197eeb8cb437f27777fa8f9cafd0f70c35c14355ba301d0",
+      "bytes": 589,
+      "modified": false
+    },
+    {
+      "path": "independent/1450-r5.mts",
+      "sourceRelativePath": "independent-checkbox-reset-1450ffd5-r5.mts",
+      "sha256": "fb4842aa23b2b1369b95a658ee3e194a244b8213df9fa1bda4dd89529a9a1925",
+      "bytes": 8408,
+      "modified": false
+    },
+    {
+      "path": "independent/1450-r5.json",
+      "sourceRelativePath": "independent-checkbox-reset-1450ffd5-r5.json",
+      "sha256": "bdc22803025d8ff38e8c856fa0174d0609fcd9765857168d429c029555c2ebef",
+      "bytes": 5175,
+      "modified": false
+    }
+  ]
+}

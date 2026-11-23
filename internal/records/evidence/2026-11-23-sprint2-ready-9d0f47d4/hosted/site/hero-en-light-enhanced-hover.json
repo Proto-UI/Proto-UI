@@ -1,0 +1,24 @@
+{
+  "source": {
+    "sha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked": []
+  },
+  "capturedAt": "2026-11-23T14:10:27.500Z",
+  "browser": "157.0.8103.78",
+  "route": "/en/",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "theme": "light",
+  "preferredColorScheme": "light",
+  "observations": {
+    "expectedName": "How many more times must we reinvent the Button?",
+    "decorations": [
+      "none",
+      "none",
+      "none"
+    ]
+  }
+}

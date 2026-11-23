@@ -1,0 +1,78 @@
+{
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "initialReplayStatus": "FAIL",
+  "originalReplaySha256": "cff996a44c584d3a4f4ba141e7cc8b2a13f6f2457ebaff70f4fde7b5be4d0392",
+  "lastOriginalCommand": {
+    "name": "tabs-profile-switch-separate-13",
+    "argv": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+      "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+      "--maxWorkers=1",
+      "--reporter=json",
+      "--outputFile=$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/tabs-profile-switch.json"
+    ],
+    "cwd": "$PRODUCT_9D",
+    "expectedExit": 0,
+    "stdout": "logs/tabs-profile-switch-separate-13.stdout.log",
+    "stderr": "logs/tabs-profile-switch-separate-13.stderr.log",
+    "exitCode": 1,
+    "wallSeconds": 7.088,
+    "stdoutSha256": "170d266da65c58ef330564982009d168c88c5accec3094d069cc116842626d1f",
+    "stderrSha256": "1c32066e9790af82666b64346700aced4ad969da35f42e2b4e93ac7d7d2ad801"
+  },
+  "originalTabsReporter": {
+    "numTotalTests": 0,
+    "numPassedTests": 0,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "diagnosis": {
+    "kind": "Vitest/Tinypool worker initialization conflict",
+    "actualExit": 1,
+    "actualErrorConfirmed": true,
+    "onlyExecutionFix": "Add --minWorkers=1 while preserving --maxWorkers=1 and both original files.",
+    "originalProductAndTestsChanged": false
+  },
+  "actualDiagnosticCommand": {
+    "name": "tabs-worker-diagnostic",
+    "argv": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+      "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=$CONTROL/consumer-9d0f47d4ef67/followup-tabs-docs-001/receipts/tabs-diagnostic.json"
+    ],
+    "cwd": "$PRODUCT_9D",
+    "expectedExit": null,
+    "timeoutSeconds": 1200,
+    "stdout": "logs/tabs-worker-diagnostic.stdout.log",
+    "stderr": "logs/tabs-worker-diagnostic.stderr.log",
+    "pid": 1729278,
+    "exitCode": 1,
+    "timedOut": false,
+    "wallSeconds": 4.343,
+    "stdoutSha256": "cfcb7556970ddf68c47e352f0bb7751ccfc133f55c7489cf89c64bb03b233688",
+    "stderrSha256": "83be7fee6312fca521ff70b451c546e10e0a38340fdbe29aa12880b01fddc2d6"
+  },
+  "recoveryStatus": "PASS",
+  "recoveredTabs13": {
+    "numTotalTests": 13,
+    "numPassedTests": 13,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "note": "The initial process exit 1 and zero collected tests remain failures despite the JSON reporter success:true. The independent follow-up reproduced the Tinypool min/max conflict, then only bounded the missing minimum worker count; product and test assertions did not change."
+}

@@ -1,0 +1,99 @@
+{
+  "evidence": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O",
+  "node": "v24.22.3",
+  "compilerBuild": {
+    "schema": "proto-ui.compiler-build.v1",
+    "revision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "profilesSha256": "112b14d8e28db9d802d97438dee8bc4636c5a20c156a5bf55bc266a94156e1d6",
+    "node": "24.22.3",
+    "typescript": "5.9.3",
+    "esbuild": "0.25.12"
+  },
+  "dependencyMode": "copy",
+  "oneSided": true,
+  "surface": "Happy DOM real framework mounts; no native-browser/layout evidence",
+  "results": [
+    {
+      "profile": "react-dom-source-v1",
+      "ok": true,
+      "targetVersion": "19.2.6",
+      "consumer": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/consumer",
+      "ownership": {
+        "source": "Component.tsx",
+        "edit": "Consumer-owned generated template element changed from section to article without invoking compiler",
+        "beforeSha256": "30cc53c7f4fa1bced90cfe9376027e15d682b363eb048857c938c9731c0c172e",
+        "afterSha256": "a283ac380854bb68f44b812f1ed350153c7fe533852056cd288fea16be739553",
+        "beforeBytes": 44129,
+        "afterBytes": 44129,
+        "maps": "Compiler portable-to-generated map/provenance remain immutable historical evidence and are stale after this local edit. Rebuild creates current executable-to-edited-generated-source maps with embedded sources."
+      },
+      "costs": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/costs.json",
+      "compilerTiming": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/timing.json",
+      "originalRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/runtime-original.json",
+      "editedRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/runtime-edited.json",
+      "installedTreeIntegrity": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/react-dom-source-v1/installed-tree-integrity.json"
+    },
+    {
+      "profile": "vue-source-v1",
+      "ok": true,
+      "targetVersion": "3.5.31",
+      "consumer": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/consumer",
+      "ownership": {
+        "source": "Component.ts",
+        "edit": "Consumer-owned generated template element changed from section to article without invoking compiler",
+        "beforeSha256": "13b99946f47c29b050aeab000e096288351a97906c9a408efc3bfca0020d386f",
+        "afterSha256": "d8574ed225c990cc736b32d4597a4da25ae8a7c3c7e6f3eb0c27bbe0b9b8b16f",
+        "beforeBytes": 41893,
+        "afterBytes": 41893,
+        "maps": "Compiler portable-to-generated map/provenance remain immutable historical evidence and are stale after this local edit. Rebuild creates current executable-to-edited-generated-source maps with embedded sources."
+      },
+      "costs": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/costs.json",
+      "compilerTiming": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/timing.json",
+      "originalRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/runtime-original.json",
+      "editedRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/runtime-edited.json",
+      "installedTreeIntegrity": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue-source-v1/installed-tree-integrity.json"
+    },
+    {
+      "profile": "vue2-source-v1",
+      "ok": true,
+      "targetVersion": "2.6.14",
+      "consumer": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/consumer",
+      "ownership": {
+        "source": "Component.js",
+        "edit": "Consumer-owned generated template element changed from section to article without invoking compiler",
+        "beforeSha256": "65e141048ae26aa63c6e154c19d3b335313f6866cb9f462fe8879e4e37df563b",
+        "afterSha256": "91bf831e7bca6fcce4ffc44cb9ac985ceca3d6aed47f9c2680a557ecd253424a",
+        "beforeBytes": 46554,
+        "afterBytes": 46554,
+        "maps": "Compiler portable-to-generated map/provenance remain immutable historical evidence and are stale after this local edit. Rebuild creates current executable-to-edited-generated-source maps with embedded sources."
+      },
+      "costs": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/costs.json",
+      "compilerTiming": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/timing.json",
+      "originalRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/runtime-original.json",
+      "editedRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/runtime-edited.json",
+      "installedTreeIntegrity": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/vue2-source-v1/installed-tree-integrity.json"
+    },
+    {
+      "profile": "web-component-source-v1",
+      "ok": true,
+      "targetVersion": "custom-elements-v1",
+      "consumer": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/consumer",
+      "ownership": {
+        "source": "Component.ts",
+        "edit": "Consumer-owned generated template element changed from section to article without invoking compiler",
+        "beforeSha256": "04f50efc749cf81a9289729b58492b3cfbac9457e16ed27e48be2159ef512059",
+        "afterSha256": "59d1420fc195e64ebe46efc5d25927fea19e86b0bf877e82f580341dbed9f147",
+        "beforeBytes": 34404,
+        "afterBytes": 34404,
+        "maps": "Compiler portable-to-generated map/provenance remain immutable historical evidence and are stale after this local edit. Rebuild creates current executable-to-edited-generated-source maps with embedded sources."
+      },
+      "costs": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/costs.json",
+      "compilerTiming": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/timing.json",
+      "originalRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/runtime-original.json",
+      "editedRuntime": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/runtime-edited.json",
+      "installedTreeIntegrity": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O/web-component-source-v1/installed-tree-integrity.json"
+    }
+  ],
+  "ok": true
+}

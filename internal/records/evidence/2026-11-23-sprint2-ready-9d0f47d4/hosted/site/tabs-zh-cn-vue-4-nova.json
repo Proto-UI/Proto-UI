@@ -1,0 +1,28 @@
+{
+  "source": {
+    "sha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked": []
+  },
+  "capturedAt": "2026-11-23T14:08:51.929Z",
+  "browser": "157.0.8103.78",
+  "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "theme": "light",
+  "preferredColorScheme": "light",
+  "observations": {
+    "profile": "nova",
+    "selected": "password",
+    "focusRetained": true,
+    "tabAndPanelIdentityRetained": true,
+    "radius": "8px",
+    "settled": {
+      "before": "8px",
+      "after": "8px",
+      "retainedAnimationFrames": 2
+    }
+  }
+}

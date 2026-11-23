@@ -1,0 +1,135 @@
+diff --git a/crates/shenko-ui/web/build.mjs b/crates/shenko-ui/web/build.mjs
+index ea897365e..abaed10c1 100644
+--- a/crates/shenko-ui/web/build.mjs
++++ b/crates/shenko-ui/web/build.mjs
+@@ -158,6 +158,7 @@ const bundle = await build({
+   define: { 'process.env.NODE_ENV': '"production"' },
+   logLevel: 'warning',
+ });
++writeFileSync(join(webRoot, 'generated/application-metafile.json'), JSON.stringify(bundle.metafile, null, 2));
+ const modules = Object.keys(bundle.metafile.outputs)
+   .map((path) => relative(staticDir, resolve(webRoot, path)).split(sep).join('/'))
+   .sort();
+@@ -266,6 +267,7 @@ const manifest = {
+     status: compilerRecord.status,
+     runtime_imported: compilerRecord.runtime_imported,
+     profile: compilerRecord.profile,
++    compilerBuild: compilerRecord.compilerBuild,
+     package: compilerRecord.package,
+     package_sha256: compilerRecord.package_sha256,
+     entry: compilerRecord.entry,
+@@ -278,7 +280,7 @@ const manifest = {
+       script: 'scripts/build/public-packages.mjs',
+       selected_package_count: upstreamBuild?.selected_package_count ?? null,
+       includes_compiler: pin.compiler.public_package_selection === true,
+-      note: 'The compiler exports TypeScript source only and is private, so it is never one of the built public packages; Shenko compiles it at build time instead.',
++      note: 'The compiler is a separately built private source-pinned artifact; public packages are only the actual Adapter-family dependencies.',
+     },
+     prototypes: compilerRecord.prototypes,
+   },
+diff --git a/crates/shenko-ui/web/compiler.mjs b/crates/shenko-ui/web/compiler.mjs
+index 663fd3174..210708a7e 100644
+--- a/crates/shenko-ui/web/compiler.mjs
++++ b/crates/shenko-ui/web/compiler.mjs
+@@ -176,26 +176,17 @@ export async function writeCompilerBundle({ sourceRoot, webRoot }) {
+ }
+ 
+ export async function loadCompiler({ sourceRoot, webRoot }) {
+-  const inputs = auditCompilerInputs(sourceRoot);
+-  const bundle = await writeCompilerBundle({ sourceRoot, webRoot });
+-  const loaded = await import(pathToFileURL(join(webRoot, COMPILER_BUNDLE_RELATIVE)).href);
+-  for (const name of ['compileFile', 'writeCompilation', 'formatCompilerDiagnostics']) {
+-    if (typeof loaded[name] !== 'function') {
+-      throw new Error(`Bundled compiler does not expose ${name}()`);
+-    }
+-  }
+-  const typescriptPath = join(webRoot, 'node_modules', 'typescript', 'package.json');
+-  if (!existsSync(typescriptPath)) {
+-    throw new Error('web/node_modules/typescript is required by the externalized compiler dependency');
+-  }
+-  return {
+-    compiler: loaded,
+-    facts: {
+-      ...inputs,
+-      typescript: readJson(typescriptPath).version,
+-      bundle,
+-    },
+-  };
++  const entry = process.env.NATIVE_CONSUMER_COMPILER;
++  if (!entry) throw new Error('NATIVE_CONSUMER_COMPILER must select the supported pinned artifact');
++  const directory = dirname(entry);
++  const identity = readJson(join(directory, 'compiler-build.json'));
++  const pin = readJson(join(webRoot, 'upstream-pin.json'));
++  if (identity.revision !== pin.commit || identity.lockSha256 !== pin.lock_sha256) throw new Error('Pinned compiler identity mismatch');
++  const manifest = readJson(join(directory, 'package.json'));
++  if (JSON.stringify(manifest.dependencies) !== JSON.stringify({typescript:identity.typescript})) throw new Error('Unexpected compiler install closure');
++  const loaded = await import(pathToFileURL(entry).href);
++  if (JSON.stringify(loaded.compilerBuildIdentity) !== JSON.stringify(Object.fromEntries(['schema','revision','lockSha256','profilesSha256','node','typescript','esbuild'].map(key=>[key,identity[key]])))) throw new Error('Executable compiler identity mismatch');
++  return {compiler:loaded,facts:{package:manifest.name,package_sha256:sha256File(join(directory,'package.json')),entry:'index.js',entry_sha256:sha256File(entry),source_tree_sha256:sha256Tree(join(sourceRoot,'packages/compiler/src')),resolutions:[],typescript:readJson(join(directory,'node_modules/typescript/package.json')).version,compilerBuild:loaded.compilerBuildIdentity,bundle:{path:entry,sha256:sha256File(entry),bytes:statSync(entry).size,format:'esm',entry:'index.js',external:['typescript']}}};
+ }
+ 
+ function bareSpecifiersIn(source) {
+diff --git a/crates/shenko-ui/web/tests/prototypes.test.mjs b/crates/shenko-ui/web/tests/prototypes.test.mjs
+index 268693a1f..5e2f7e0f0 100644
+--- a/crates/shenko-ui/web/tests/prototypes.test.mjs
++++ b/crates/shenko-ui/web/tests/prototypes.test.mjs
+@@ -78,13 +78,18 @@ test('compiler provenance binds the generation to the parsed source graph and ar
+   }
+ });
+ 
+-test('the recorded compiler identity is the audited source package, bundled for the build only', () => {
++test('the recorded compiler identity is the supported private source-pinned build', () => {
+   const manifest = generation();
+   assert.match(manifest.bundle.sha256, /^[0-9a-f]{64}$/);
+   assert.deepEqual(manifest.bundle.external, ['typescript']);
+-  assert.equal(manifest.package, 'packages/compiler');
+-  assert.equal(manifest.entry, 'packages/compiler/src/index.ts');
++  assert.equal(manifest.package, '@proto.ui/compiler-pinned');
++  assert.equal(manifest.entry, 'index.js');
+   assert.match(manifest.source_tree_sha256, /^[0-9a-f]{64}$/);
+   assert.ok(manifest.typescript.length > 0);
+-  assert.ok(manifest.resolutions.some((resolution) => resolution.specifier === '@floating-ui/dom'));
++  assert.deepEqual(manifest.resolutions, []);
++  assert.match(manifest.compilerBuild.revision, /^[0-9a-f]{40}$/);
++  for (const prototype of manifest.prototypes) {
++    const provenance = JSON.parse(readFileSync(join(webRoot, prototype.provenance), 'utf8'));
++    assert.deepEqual(provenance.compilerBuild, manifest.compilerBuild);
++  }
+ });
+diff --git a/crates/shenko-ui/web/upstream-pin.json b/crates/shenko-ui/web/upstream-pin.json
+index 57b28202d..7a0944994 100644
+--- a/crates/shenko-ui/web/upstream-pin.json
++++ b/crates/shenko-ui/web/upstream-pin.json
+@@ -1,8 +1,8 @@
+ {
+   "repository": "https://github.com/Proto-UI/Proto-UI.git",
+-  "commit": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
++  "commit": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+   "migrated_from": "7521cd501f454b4e013ec6e9656fb4b6e4951514",
+-  "lock_sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
++  "lock_sha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+   "packages": [
+     "@proto.ui/adapter-react@0.3.0-alpha.2",
+     "@proto.ui/prototypes-shadcn@0.3.0-alpha.2",
+@@ -23,15 +23,16 @@
+     "status": "build_time_compiled",
+     "runtime_imported": false,
+     "profile": "react-dom-source-v1",
+-    "package": "packages/compiler/package.json",
+-    "entry": "packages/compiler/src/index.ts",
+-    "exports_source_only": true,
++    "package": "@proto.ui/compiler-pinned",
++    "entry": "index.js",
++    "exports_source_only": false,
+     "public_package_selection": false,
+-    "upstream_visibility": "private source package; exports ./src/index.ts only; no dist, no published compiler profile, and outside scripts/build/public-packages.mjs",
++    "upstream_visibility": "private source-pinned build with exact revision, lock and profile identity; no registry publication",
+     "prototypes": [
+       "transport-badge",
+       "message-bubble"
+     ],
+-    "note": "Shenko compiles its own Prototypes with this reviewed compiler at build time (web/compiler.mjs) and ships the generated React DOM source. The browser bundle never imports the compiler, so runtime_imported stays false."
++    "note": "Shenko compiles its own Prototypes with this reviewed compiler at build time (web/compiler.mjs) and ships the generated React DOM source. The browser bundle never imports the compiler, so runtime_imported stays false.",
++    "delivery": "source-pinned-build"
+   }
+ }

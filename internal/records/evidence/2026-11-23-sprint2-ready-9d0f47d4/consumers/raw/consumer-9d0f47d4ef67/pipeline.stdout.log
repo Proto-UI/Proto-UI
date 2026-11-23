@@ -1,0 +1,49 @@
+{"stage": "node-version", "state": "START"}
+{"stage": "node-version", "state": "END", "exitCode": 0, "wallSeconds": 0.068}
+{"stage": "pnpm-version", "state": "START"}
+{"stage": "pnpm-version", "state": "END", "exitCode": 0, "wallSeconds": 2.12}
+{"stage": "shenko-clone", "state": "START"}
+{"stage": "shenko-clone", "state": "END", "exitCode": 0, "wallSeconds": 53.975}
+{"stage": "shenko-sparse", "state": "START"}
+{"stage": "shenko-sparse", "state": "END", "exitCode": 0, "wallSeconds": 0.066}
+{"stage": "shenko-checkout", "state": "START"}
+{"stage": "shenko-checkout", "state": "END", "exitCode": 0, "wallSeconds": 72.677}
+{"stage": "verdant-clone", "state": "START"}
+{"stage": "verdant-clone", "state": "END", "exitCode": 0, "wallSeconds": 0.918}
+{"stage": "verdant-sparse", "state": "START"}
+{"stage": "verdant-sparse", "state": "END", "exitCode": 0, "wallSeconds": 0.008}
+{"stage": "verdant-checkout", "state": "START"}
+{"stage": "verdant-checkout", "state": "END", "exitCode": 0, "wallSeconds": 0.033}
+{"stage": "pinned-build-a", "state": "START"}
+{"stage": "pinned-build-a", "state": "END", "exitCode": 0, "wallSeconds": 18.057}
+{"stage": "pinned-build-b", "state": "START"}
+{"stage": "pinned-build-b", "state": "END", "exitCode": 0, "wallSeconds": 6.038}
+{"stage": "pinned-artifact-install", "state": "START"}
+{"stage": "pinned-artifact-install", "state": "END", "exitCode": 0, "wallSeconds": 1.121}
+{"stage": "pinned-cli", "state": "START"}
+{"stage": "pinned-cli", "state": "END", "exitCode": 0, "wallSeconds": 238.55}
+{"stage": "ordinary-frameworks", "state": "START"}
+{"stage": "ordinary-frameworks", "state": "END", "exitCode": 0, "wallSeconds": 357.988}
+{"stage": "ordinary-families", "state": "START"}
+{"stage": "ordinary-families", "state": "END", "exitCode": 0, "wallSeconds": 67.404}
+{"stage": "family-production-costs", "state": "START"}
+{"stage": "family-production-costs", "state": "END", "exitCode": 0, "wallSeconds": 2.176}
+{"stage": "frozen-source-inventory", "state": "START"}
+{"stage": "frozen-source-inventory", "state": "END", "exitCode": 0, "wallSeconds": 24.583}
+{"stage": "public-shenko-closure", "state": "START"}
+{"stage": "public-shenko-closure", "state": "END", "exitCode": 0, "wallSeconds": 151.659}
+{"stage": "shenko-frozen-install", "state": "START"}
+{"stage": "shenko-frozen-install", "state": "END", "exitCode": 0, "wallSeconds": 18.678}
+{"stage": "shenko-application", "state": "START"}
+{"stage": "shenko-application", "state": "END", "exitCode": 0, "wallSeconds": 33.257}
+{"stage": "verdant-original-pin-rejection", "state": "START"}
+{"stage": "verdant-original-pin-rejection", "state": "END", "exitCode": 2, "wallSeconds": 0.566}
+{"stage": "verdant-producer", "state": "START"}
+{"stage": "verdant-producer", "state": "END", "exitCode": 0, "wallSeconds": 4.779}
+{"stage": "verdant-producer-check", "state": "START"}
+{"stage": "verdant-producer-check", "state": "END", "exitCode": 0, "wallSeconds": 2.883}
+{"stage": "public-all-47-before-tabs", "state": "START"}
+{"stage": "public-all-47-before-tabs", "state": "END", "exitCode": 0, "wallSeconds": 420.551}
+{"stage": "tabs-profile-switch-separate-13", "state": "START"}
+{"stage": "tabs-profile-switch-separate-13", "state": "END", "exitCode": 1, "wallSeconds": 7.088}
+{"status": "FAIL", "summary": "$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/summary.json"}

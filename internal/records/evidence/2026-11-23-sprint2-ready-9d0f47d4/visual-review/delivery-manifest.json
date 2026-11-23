@@ -1,0 +1,48 @@
+{
+  "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "currentPrVisualAcceptance": true,
+  "scope": "The recorded 100-image website matrix at 9d0f47d4 only. No blanket closure of original B/C/D, historical C23/C24, or Hook conditions; no platform approval.",
+  "archiveRoot": "visual-review/",
+  "files": [
+    {
+      "path": "visual-review/9d-hero-detail-zh-cn-light.png",
+      "bytes": 79422,
+      "sha256": "68943e3f6720a6a7505c94835a881e88b37e50a4f9fb0d2316205f9939732742"
+    },
+    {
+      "path": "visual-review/9d-sidebar-detail-zh-cn-light-brutalist.png",
+      "bytes": 113611,
+      "sha256": "7c97dc2dc35aed9b4b90d5b68c9140612847457baa32bebfd5b41513ab26183a"
+    },
+    {
+      "path": "visual-review/README.md",
+      "bytes": 12854,
+      "sha256": "13212fd39277ecd72eb6fa1913f038b4d1d807e1a81fb72b6ea38ba13280c50c"
+    },
+    {
+      "path": "visual-review/fixture-source.diff",
+      "bytes": 593,
+      "sha256": "126ecdaf0847e3662b84996c403100d1765323149422450c0e00faf73ebe4e71"
+    },
+    {
+      "path": "visual-review/index.json",
+      "bytes": 191629,
+      "sha256": "d9a673952425c5520786aab517995fa7727c8b53331d043dfdb4837e6fe33904"
+    },
+    {
+      "path": "visual-review/measurement-audit.json",
+      "bytes": 33826,
+      "sha256": "e8b4ec568b54e849a9e337cfc1f75b8919b9cfbba64dac4ce63d1a9428eff348"
+    },
+    {
+      "path": "visual-review/pixel-comparison.json",
+      "bytes": 83848,
+      "sha256": "e03db37548444cad508908be05f79d4581fa1f5e400927dfb913040e2d5a4fdb"
+    },
+    {
+      "path": "visual-review/review-process.json",
+      "bytes": 92601,
+      "sha256": "a9a397475b773d181fa5f23da719a117f523f1b0490166eec740de437356aa4b"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "historicalOnly": true,
+  "head": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+  "artifactId": 14805214684,
+  "zipSha256": "0ccd23e09406b369d3225015b599aacee721d8c15e0f5ff7ca1c30ee3c975eed",
+  "zipBytes": 62036828,
+  "captures": [
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-group-hover",
+      "png": {
+        "path": "site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+        "sha256": "3a7f9602749abc835dbf1e02be4b303e974793b84e20f1e769959443cad939f6",
+        "member": "site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png"
+      },
+      "json": {
+        "path": "site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.json",
+        "sha256": "3c33132e2b89328b6110ca83ddd7a6aff981e9bcabc4d8199a9c2501593c446e",
+        "member": "site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.json"
+      },
+      "source": {
+        "sha": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "theme": "light"
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-group-hover",
+      "png": {
+        "path": "site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+        "sha256": "57ac2180099d9ef6a61dc4fff6cd145da135a24be920dde2f4b6a13e222d756e",
+        "member": "site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png"
+      },
+      "json": {
+        "path": "site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.json",
+        "sha256": "d627348c82e082860ca64109a65a1366303a5a4625eae26c76408556dcc98ba0",
+        "member": "site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.json"
+      },
+      "source": {
+        "sha": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+        "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked": []
+      },
+      "radius": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "theme": "light"
+    }
+  ],
+  "historicalCssBindings": {
+    "d0392fb31513b12f55b9e99b1fcf26a6338569c9": "026931d8c7f34acdbd1529038406966488a1507c",
+    "4a11517171aa0a019c4bcbd2314c779e25f21de5": "026931d8c7f34acdbd1529038406966488a1507c"
+  },
+  "historicalCssPath": "apps/www/src/styles/site-library-family.css",
+  "historicalCssBindingMethod": "Independent GitHub fetch_file read of both immutable commits during this review."
+}

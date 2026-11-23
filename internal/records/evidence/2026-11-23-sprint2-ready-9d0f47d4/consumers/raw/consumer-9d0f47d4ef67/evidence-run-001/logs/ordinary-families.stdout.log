@@ -1,0 +1,5 @@
+RELEASE_FAMILY_EVIDENCE $CONTROL/consumer-9d0f47d4ef67/runtime/proto-release-families-7GRQgm
+RELEASE_FAMILY_PASS react-dom-source-v1 3
+RELEASE_FAMILY_PASS vue-source-v1 3
+RELEASE_FAMILY_PASS vue2-source-v1 3
+RELEASE_FAMILY_PASS web-component-source-v1 3

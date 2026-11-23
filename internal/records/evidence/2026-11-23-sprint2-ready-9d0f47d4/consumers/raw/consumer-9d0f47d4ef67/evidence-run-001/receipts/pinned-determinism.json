@@ -1,0 +1,52 @@
+{
+  "ok": true,
+  "revision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "method": "Two separately produced complete artifact sets; all paths and bytes equal before installation",
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 1078,
+      "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1037,
+      "sha256": "4a4a0935d7acc09c7452855c2ab776cba3e7ecfc6201a40ff0ecc3b0687b5bc7"
+    },
+    {
+      "path": "cli.js",
+      "bytes": 287,
+      "sha256": "f464769067a25b4e8631413042710cc5ad2de7efe904c1eb3abc18bc79e321aa"
+    },
+    {
+      "path": "compiler-build.json",
+      "bytes": 29039,
+      "sha256": "21b6aa542c14e4cbd9ae7b0f228365317ac73d873396fe6182989f2da1a3e5db"
+    },
+    {
+      "path": "index.js",
+      "bytes": 3119978,
+      "sha256": "c17c54964f3de016107fd5ba7086acdae22280138e5d7cb4525e7e016c1499ab"
+    },
+    {
+      "path": "index.js.map",
+      "bytes": 4597755,
+      "sha256": "5807982d29249f5117ee4ed8b463fceac8d05c99215b7dbd15cac2339d3e474f"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 926,
+      "sha256": "9bc8b429fbcf1d2f2e9d009f78eba4d4e5728474dde0042ed50f697c26f9aade"
+    },
+    {
+      "path": "package.json",
+      "bytes": 542,
+      "sha256": "18de5b215af6149bef36a3a2fdbc18aca75b36446a9707c7bef68b1565f5bd34"
+    },
+    {
+      "path": "profiles.json",
+      "bytes": 85347,
+      "sha256": "112b14d8e28db9d802d97438dee8bc4636c5a20c156a5bf55bc266a94156e1d6"
+    }
+  ]
+}

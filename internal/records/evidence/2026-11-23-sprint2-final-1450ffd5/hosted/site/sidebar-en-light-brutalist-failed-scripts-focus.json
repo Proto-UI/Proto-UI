@@ -1,0 +1,105 @@
+{
+  "source": {
+    "sha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked": []
+  },
+  "capturedAt": "2026-11-23T13:36:43.172Z",
+  "browser": "157.0.8103.78",
+  "route": "/en/ui-libraries/brutalist/components/button/",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "theme": "light",
+  "preferredColorScheme": "light",
+  "observations": {
+    "groupHover": {
+      "nativeTag": "summary",
+      "enhanced": null,
+      "text": "Brutalist",
+      "href": null,
+      "current": null,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "brutalistRadius": "5px",
+      "borders": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "background": "rgb(229, 229, 229)",
+      "outline": "none",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "width": 224,
+      "height": 32,
+      "paintWidth": 224,
+      "paintHeight": 32,
+      "focused": false
+    },
+    "leafHover": {
+      "nativeTag": "a",
+      "enhanced": null,
+      "text": "Button",
+      "href": "/en/ui-libraries/brutalist/components/button/",
+      "current": "page",
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "brutalistRadius": "5px",
+      "borders": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "background": "rgb(82, 148, 255)",
+      "outline": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "rgb(0, 0, 0) 2px 2px 0px 0px",
+      "width": 203,
+      "height": 32,
+      "paintWidth": 203,
+      "paintHeight": 32,
+      "focused": false
+    },
+    "focused": {
+      "nativeTag": "summary",
+      "enhanced": null,
+      "text": "Brutalist",
+      "href": null,
+      "current": null,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "brutalistRadius": "5px",
+      "borders": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "background": "rgb(229, 229, 229)",
+      "outline": "solid",
+      "outlineWidth": "2px",
+      "boxShadow": "none",
+      "width": 224,
+      "height": 32,
+      "paintWidth": 224,
+      "paintHeight": 32,
+      "focused": true
+    }
+  }
+}

@@ -1,0 +1,402 @@
+{
+  "kind": "independent-reconciliation-of-hosted-receipts",
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "runId": 45188583301,
+  "artifactId": 14826253625,
+  "zipSha256": "48ffcfc5a814d129d1cefa8faed91b4dc5529b5a1677c7d752faa12210519781",
+  "receiptSha256": "b169a04ad9004030ee79d4194e638acd182376fc6e50941615e0285b5bf184c1",
+  "previousHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "previousRunId": 45183604935,
+  "previousReceiptSha256": "447048497f3d8b0793a939dfca0b350522b6de3ca760717ef2c326e482ccdd9f",
+  "functionalPassed": 304,
+  "nativeBrowserPassed": 292,
+  "nodeHappyDomPassed": 12,
+  "suites": [
+    {
+      "id": "input",
+      "status": "passed",
+      "expected": 72,
+      "observed": 72,
+      "passed": 72,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "collections",
+      "status": "passed",
+      "expected": 36,
+      "observed": 36,
+      "passed": 36,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "geometry",
+      "status": "passed",
+      "expected": 36,
+      "observed": 36,
+      "passed": 36,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "form-select",
+      "status": "passed",
+      "expected": 36,
+      "observed": 36,
+      "passed": 36,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "ordinary-linked-consumers",
+      "status": "passed",
+      "expected": 12,
+      "observed": 12,
+      "passed": 12,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "compiled-consumers",
+      "status": "passed",
+      "expected": 20,
+      "observed": 20,
+      "passed": 20,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "site",
+      "status": "passed",
+      "expected": 42,
+      "observed": 42,
+      "passed": 42,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "preferences",
+      "status": "passed",
+      "expected": 4,
+      "observed": 4,
+      "passed": 4,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "collapsible",
+      "status": "passed",
+      "expected": 23,
+      "observed": 23,
+      "passed": 23,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 18,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "accordion",
+      "status": "passed",
+      "expected": 23,
+      "observed": 23,
+      "passed": 23,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 5,
+      "caseInventoryMatchesPrevious304": true
+    }
+  ],
+  "phases": [
+    {
+      "id": "public-packages",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "styles",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "workspace-types",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "input",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "collections",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "geometry",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "form-select",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "ordinary-linked-consumers",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "compiled-consumers",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "site",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "preferences",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "collapsible",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "accordion",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact source head",
+      "passed": true
+    },
+    {
+      "name": "exact source tree",
+      "passed": true
+    },
+    {
+      "name": "clean source at receipt collection",
+      "passed": true
+    },
+    {
+      "name": "13 original phases",
+      "passed": true
+    },
+    {
+      "name": "input original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "input all selected passed",
+      "passed": true
+    },
+    {
+      "name": "collections original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "collections all selected passed",
+      "passed": true
+    },
+    {
+      "name": "geometry original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "geometry all selected passed",
+      "passed": true
+    },
+    {
+      "name": "form-select original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "form-select all selected passed",
+      "passed": true
+    },
+    {
+      "name": "ordinary-linked-consumers original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "ordinary-linked-consumers all selected passed",
+      "passed": true
+    },
+    {
+      "name": "compiled-consumers original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled-consumers all selected passed",
+      "passed": true
+    },
+    {
+      "name": "site original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "site all selected passed",
+      "passed": true
+    },
+    {
+      "name": "preferences original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "preferences all selected passed",
+      "passed": true
+    },
+    {
+      "name": "collapsible original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "collapsible all selected passed",
+      "passed": true
+    },
+    {
+      "name": "accordion original distinct case IDs",
+      "passed": true
+    },
+    {
+      "name": "accordion all selected passed",
+      "passed": true
+    },
+    {
+      "name": "public-packages terminal exit",
+      "passed": true
+    },
+    {
+      "name": "styles terminal exit",
+      "passed": true
+    },
+    {
+      "name": "workspace-types terminal exit",
+      "passed": true
+    },
+    {
+      "name": "input terminal exit",
+      "passed": true
+    },
+    {
+      "name": "collections terminal exit",
+      "passed": true
+    },
+    {
+      "name": "geometry terminal exit",
+      "passed": true
+    },
+    {
+      "name": "form-select terminal exit",
+      "passed": true
+    },
+    {
+      "name": "ordinary-linked-consumers terminal exit",
+      "passed": true
+    },
+    {
+      "name": "compiled-consumers terminal exit",
+      "passed": true
+    },
+    {
+      "name": "site terminal exit",
+      "passed": true
+    },
+    {
+      "name": "preferences terminal exit",
+      "passed": true
+    },
+    {
+      "name": "collapsible terminal exit",
+      "passed": true
+    },
+    {
+      "name": "accordion terminal exit",
+      "passed": true
+    },
+    {
+      "name": "overall passed",
+      "passed": true
+    }
+  ],
+  "allChecksPassed": true,
+  "scope": "Same original selected 304 case IDs and three separate preparation phases on clean 9d. Does not substitute visual review, docs type check, real App/CLI replay, GitHub approval, physical IME/AT or the full scheduled cycle."
+}

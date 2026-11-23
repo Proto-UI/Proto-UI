@@ -1,0 +1,30 @@
+{
+  "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+  "runStatus": "FAIL",
+  "acceptanceClaim": false,
+  "startedAt": "2026-11-23T12:42:40.182743+00:00",
+  "finishedAt": "2026-11-23T13:08:42.232709+00:00",
+  "lastActualCommand": {
+    "name": "workspace-types",
+    "argv": [
+      "corepack",
+      "pnpm@10.32.1",
+      "check:types"
+    ],
+    "cwd": "$PRODUCT_16BE",
+    "expectedExit": 0,
+    "stdout": "logs/workspace-types.stdout.log",
+    "stderr": "logs/workspace-types.stderr.log",
+    "exitCode": 2,
+    "wallSeconds": 995.499,
+    "stdoutSha256": "72b8300dff801e5f7a203359460a80faf5a238ec2d88565aabc5c0214a239816",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "failure": {
+    "message": "workspace-types: expected exit 0, observed 2; see $CONTROL/consumer-16be/evidence-run-001/logs/workspace-types.stderr.log",
+    "traceback": "Traceback (most recent call last):\n  File \"$CONTROL/consumer-16be/run-final-consumers.py\", line 333, in main\n    replay.execute()\n    ~~~~~~~~~~~~~~^^\n  File \"$CONTROL/consumer-16be/run-final-consumers.py\", line 277, in execute\n    self.run('workspace-types', ['corepack', 'pnpm@10.32.1', 'check:types'])\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"$CONTROL/consumer-16be/run-final-consumers.py\", line 131, in run\n    raise RuntimeError(f'{name}: expected exit {expected}, observed {record[\"exitCode\"]}; see {stderr}')\nRuntimeError: workspace-types: expected exit 0, observed 2; see $CONTROL/consumer-16be/evidence-run-001/logs/workspace-types.stderr.log\n"
+  },
+  "explanation": "Historical source-bound failure; no result is relabelled as a current-head pass.",
+  "originalRecord": "consumer-16be/evidence-run-001/summary.json",
+  "originalRecordSha256": "d7f280719d46274861d43c684c60905a73a0e36991898c92d4fc1525fe07aa73"
+}

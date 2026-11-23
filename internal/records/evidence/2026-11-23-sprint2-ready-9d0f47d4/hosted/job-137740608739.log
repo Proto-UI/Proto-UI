@@ -1,0 +1,533 @@
+﻿2026-11-23T13:55:50.6343615Z Current runner version: '2.338.2'
+2026-11-23T13:55:50.6378900Z ##[group]Runner Image Provisioner
+2026-11-23T13:55:50.6380143Z Hosted Compute Agent
+2026-11-23T13:55:50.6381300Z Version: 20261111.635
+2026-11-23T13:55:50.6382421Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-23T13:55:50.6383704Z Build Date: 2026-11-11T01:49:01Z
+2026-11-23T13:55:50.6385136Z Worker ID: {99b6c04d-3790-431e-81f3-ce3d009edc9b}
+2026-11-23T13:55:50.6386571Z Region: eastus
+2026-11-23T13:55:50.6387658Z Cloud: Azure
+2026-11-23T13:55:50.6388577Z ##[endgroup]
+2026-11-23T13:55:50.6391373Z ##[group]Operating System
+2026-11-23T13:55:50.6392441Z Ubuntu
+2026-11-23T13:55:50.6393278Z 24.04.5
+2026-11-23T13:55:50.6394247Z LTS
+2026-11-23T13:55:50.6395179Z ##[endgroup]
+2026-11-23T13:55:50.6396465Z ##[group]Runner Image
+2026-11-23T13:55:50.6397508Z Image: ubuntu-24.04
+2026-11-23T13:55:50.6398586Z Version: 20261116.376.1
+2026-11-23T13:55:50.6400700Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261116.376/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-23T13:55:50.6403510Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261116.376
+2026-11-23T13:55:50.6405195Z ##[endgroup]
+2026-11-23T13:55:50.6407553Z ##[group]GITHUB_TOKEN Permissions
+2026-11-23T13:55:50.6410687Z Contents: read
+2026-11-23T13:55:50.6411769Z Metadata: read
+2026-11-23T13:55:50.6412782Z ##[endgroup]
+2026-11-23T13:55:50.6415932Z Secret source: Actions
+2026-11-23T13:55:50.6417570Z Cache mode: write
+2026-11-23T13:55:50.6419030Z Prepare workflow directory
+2026-11-23T13:55:50.6903239Z Prepare all required actions
+2026-11-23T13:55:50.6976623Z Getting action download info
+2026-11-23T13:55:50.9296409Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-23T13:55:51.1247293Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-23T13:55:51.2531773Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-23T13:55:51.8020174Z Complete job name: sprint2-consumers
+2026-11-23T13:55:51.9109661Z ##[group]Run actions/checkout@v4
+2026-11-23T13:55:51.9111119Z with:
+2026-11-23T13:55:51.9112099Z   ref: 9d0f47d4ef67bbc3676e4db24c7906f8721e5b42
+2026-11-23T13:55:51.9113402Z   persist-credentials: false
+2026-11-23T13:55:51.9114516Z   repository: Proto-UI/Proto-UI
+2026-11-23T13:55:51.9124007Z   token: ***
+2026-11-23T13:55:51.9124927Z   ssh-strict: true
+2026-11-23T13:55:51.9125997Z   ssh-user: git
+2026-11-23T13:55:51.9126891Z   clean: true
+2026-11-23T13:55:51.9127828Z   sparse-checkout-cone-mode: true
+2026-11-23T13:55:51.9128939Z   fetch-depth: 1
+2026-11-23T13:55:51.9129845Z   fetch-tags: false
+2026-11-23T13:55:51.9130801Z   show-progress: true
+2026-11-23T13:55:51.9131750Z   lfs: false
+2026-11-23T13:55:51.9132619Z   submodules: false
+2026-11-23T13:55:51.9133577Z   set-safe-directory: true
+2026-11-23T13:55:51.9134652Z   allow-unsafe-pr-checkout: false
+2026-11-23T13:55:51.9136420Z ##[endgroup]
+2026-11-23T13:55:52.3640508Z Syncing repository: Proto-UI/Proto-UI
+2026-11-23T13:55:52.3644167Z ##[group]Getting Git version info
+2026-11-23T13:55:52.3645940Z Working directory is '/home/runner/work/Proto-UI/Proto-UI'
+2026-11-23T13:55:52.3649291Z [command]/usr/bin/git version
+2026-11-23T13:55:52.3710986Z git version 2.56.1
+2026-11-23T13:55:52.3738597Z ##[endgroup]
+2026-11-23T13:55:52.3754075Z Temporarily overriding HOME='/home/runner/work/_temp/95280de5-a756-47e6-848e-4fc49ccbc693' before making global git config changes
+2026-11-23T13:55:52.3759244Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-23T13:55:52.3763143Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Proto-UI/Proto-UI
+2026-11-23T13:55:52.3811392Z Deleting the contents of '/home/runner/work/Proto-UI/Proto-UI'
+2026-11-23T13:55:52.3818318Z ##[group]Initializing the repository
+2026-11-23T13:55:52.3823210Z [command]/usr/bin/git init /home/runner/work/Proto-UI/Proto-UI
+2026-11-23T13:55:52.3939825Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-23T13:55:52.3942435Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-23T13:55:52.3944701Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-23T13:55:52.3947441Z hint: call:
+2026-11-23T13:55:52.3949009Z hint:
+2026-11-23T13:55:52.3951010Z hint: 	git config --global init.defaultBranch <name>
+2026-11-23T13:55:52.3953344Z hint:
+2026-11-23T13:55:52.3955531Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-23T13:55:52.3959273Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-23T13:55:52.3961104Z hint:
+2026-11-23T13:55:52.3961985Z hint: 	git branch -m <name>
+2026-11-23T13:55:52.3962981Z hint:
+2026-11-23T13:55:52.3964293Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-23T13:55:52.3967973Z Initialized empty Git repository in /home/runner/work/Proto-UI/Proto-UI/.git/
+2026-11-23T13:55:52.3977287Z [command]/usr/bin/git remote add origin https://github.com/Proto-UI/Proto-UI
+2026-11-23T13:55:52.4035120Z ##[endgroup]
+2026-11-23T13:55:52.4038255Z ##[group]Disabling automatic garbage collection
+2026-11-23T13:55:52.4040625Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-23T13:55:52.4077227Z ##[endgroup]
+2026-11-23T13:55:52.4079731Z ##[group]Setting up auth
+2026-11-23T13:55:52.4084833Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-23T13:55:52.4128008Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-23T13:55:52.4546440Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-23T13:55:52.4598589Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-23T13:55:52.4847781Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-23T13:55:52.4897051Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-23T13:55:52.5147271Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-23T13:55:52.5198626Z ##[endgroup]
+2026-11-23T13:55:52.5200653Z ##[group]Fetching the repository
+2026-11-23T13:55:52.5213558Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 9d0f47d4ef67bbc3676e4db24c7906f8721e5b42
+2026-11-23T13:55:56.5126742Z From https://github.com/Proto-UI/Proto-UI
+2026-11-23T13:55:56.5132456Z  * branch            9d0f47d4ef67bbc3676e4db24c7906f8721e5b42 -> FETCH_HEAD
+2026-11-23T13:55:56.5134866Z ##[endgroup]
+2026-11-23T13:55:56.5135975Z ##[group]Determining the checkout info
+2026-11-23T13:55:56.5136632Z ##[endgroup]
+2026-11-23T13:55:56.5142382Z [command]/usr/bin/git sparse-checkout disable
+2026-11-23T13:55:56.5218125Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-23T13:55:56.5262130Z ##[group]Checking out the ref
+2026-11-23T13:55:56.5268854Z [command]/usr/bin/git checkout --progress --force 9d0f47d4ef67bbc3676e4db24c7906f8721e5b42
+2026-11-23T13:55:57.5551723Z Updating files:  86% (13031/15122)
+2026-11-23T13:55:57.5664991Z Updating files:  87% (13157/15122)
+2026-11-23T13:55:57.5782760Z Updating files:  88% (13308/15122)
+2026-11-23T13:55:57.5946229Z Updating files:  89% (13459/15122)
+2026-11-23T13:55:57.6049421Z Updating files:  90% (13610/15122)
+2026-11-23T13:55:57.6154355Z Updating files:  91% (13762/15122)
+2026-11-23T13:55:57.6240311Z Updating files:  92% (13913/15122)
+2026-11-23T13:55:57.6325771Z Updating files:  93% (14064/15122)
+2026-11-23T13:55:57.6412583Z Updating files:  94% (14215/15122)
+2026-11-23T13:55:57.6489477Z Updating files:  95% (14366/15122)
+2026-11-23T13:55:57.6554334Z Updating files:  96% (14518/15122)
+2026-11-23T13:55:57.6636307Z Updating files:  97% (14669/15122)
+2026-11-23T13:55:57.6722774Z Updating files:  98% (14820/15122)
+2026-11-23T13:55:57.6805897Z Updating files:  99% (14971/15122)
+2026-11-23T13:55:57.6806920Z Updating files: 100% (15122/15122)
+2026-11-23T13:55:57.6807525Z Updating files: 100% (15122/15122), done.
+2026-11-23T13:55:57.6954108Z Note: switching to '9d0f47d4ef67bbc3676e4db24c7906f8721e5b42'.
+2026-11-23T13:55:57.6954704Z 
+2026-11-23T13:55:57.6955068Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-23T13:55:57.6956467Z changes and commit them, and you can discard any commits you make in this
+2026-11-23T13:55:57.6957877Z state without impacting any branches by switching back to a branch.
+2026-11-23T13:55:57.6958760Z 
+2026-11-23T13:55:57.6959288Z If you want to create a new branch to retain commits you create, you may
+2026-11-23T13:55:57.6960224Z do so (now or later) by using -c with the switch command. Example:
+2026-11-23T13:55:57.6960745Z 
+2026-11-23T13:55:57.6960939Z   git switch -c <new-branch-name>
+2026-11-23T13:55:57.6961258Z 
+2026-11-23T13:55:57.6961436Z Or undo this operation with:
+2026-11-23T13:55:57.6961722Z 
+2026-11-23T13:55:57.6961871Z   git switch -
+2026-11-23T13:55:57.6962086Z 
+2026-11-23T13:55:57.6962459Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-23T13:55:57.6963035Z 
+2026-11-23T13:55:57.6963547Z HEAD is now at 9d0f47d fix(sprint2): preserve concurrent checked-owner reset retirement
+2026-11-23T13:55:57.7001784Z ##[endgroup]
+2026-11-23T13:55:57.7063792Z [command]/usr/bin/git log -1 --format=%H
+2026-11-23T13:55:57.7104519Z 9d0f47d4ef67bbc3676e4db24c7906f8721e5b42
+2026-11-23T13:55:57.7114465Z ##[group]Removing auth
+2026-11-23T13:55:57.7118226Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-23T13:55:57.7161705Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-23T13:55:57.7449684Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-23T13:55:57.7492553Z http.https://github.com/.extraheader
+2026-11-23T13:55:57.7503882Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-23T13:55:57.7558442Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-23T13:55:57.7850336Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-23T13:55:57.7916987Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-23T13:55:57.8173703Z ##[endgroup]
+2026-11-23T13:55:57.8535024Z ##[group]Run actions/setup-node@v4
+2026-11-23T13:55:57.8535304Z with:
+2026-11-23T13:55:57.8535488Z   node-version: 24
+2026-11-23T13:55:57.8535894Z   always-auth: false
+2026-11-23T13:55:57.8536109Z   check-latest: false
+2026-11-23T13:55:57.8538686Z   token: ***
+2026-11-23T13:55:57.8538883Z ##[endgroup]
+2026-11-23T13:55:58.0113718Z (node:2373) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-23T13:55:58.0114803Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-23T13:55:58.0116465Z Found in cache @ /opt/hostedtoolcache/node/24.22.3/x64
+2026-11-23T13:55:58.0117535Z ##[group]Environment details
+2026-11-23T13:55:58.4227528Z node: v24.22.3
+2026-11-23T13:55:58.4227972Z npm: 11.19.1
+2026-11-23T13:55:58.4228239Z yarn: 1.22.22
+2026-11-23T13:55:58.4228941Z ##[endgroup]
+2026-11-23T13:55:58.4379696Z ##[group]Run corepack enable
+2026-11-23T13:55:58.4380066Z [36;1mcorepack enable[0m
+2026-11-23T13:55:58.4380609Z [36;1mcorepack pnpm@10.32.1 install --frozen-lockfile[0m
+2026-11-23T13:55:58.4381191Z [36;1mCHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)[0m
+2026-11-23T13:55:58.4381741Z [36;1mecho "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"[0m
+2026-11-23T13:55:58.4382258Z [36;1mcorepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar[0m
+2026-11-23T13:55:58.4413439Z shell: /usr/bin/bash -e {0}
+2026-11-23T13:55:58.4413727Z ##[endgroup]
+2026-11-23T13:55:59.9503500Z Scope: all 62 workspace projects
+2026-11-23T13:56:00.0487917Z Lockfile is up to date, resolution step is skipped
+2026-11-23T13:56:00.0959226Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-11-23T13:56:00.1623668Z Packages: +557
+2026-11-23T13:56:00.1624460Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2026-11-23T13:56:01.0987980Z Progress: resolved 557, reused 0, downloaded 173, added 112
+2026-11-23T13:56:02.0981275Z Progress: resolved 557, reused 0, downloaded 426, added 275
+2026-11-23T13:56:03.0993587Z Progress: resolved 557, reused 0, downloaded 513, added 314
+2026-11-23T13:56:03.7215012Z Progress: resolved 557, reused 0, downloaded 557, added 557, done
+2026-11-23T13:56:04.0326241Z .../sharp@0.34.5/node_modules/sharp install$ node install/check.js || npm run build
+2026-11-23T13:56:04.0575790Z .../esbuild@0.25.12/node_modules/esbuild postinstall$ node install.js
+2026-11-23T13:56:04.0583374Z .../esbuild@0.27.4/node_modules/esbuild postinstall$ node install.js
+2026-11-23T13:56:04.0590596Z .../esbuild@0.21.5/node_modules/esbuild postinstall$ node install.js
+2026-11-23T13:56:04.1561913Z .../sharp@0.34.5/node_modules/sharp install: Done
+2026-11-23T13:56:04.1677439Z .../esbuild@0.25.12/node_modules/esbuild postinstall: Done
+2026-11-23T13:56:04.1787536Z .../esbuild@0.27.4/node_modules/esbuild postinstall: Done
+2026-11-23T13:56:04.2037294Z .../esbuild@0.21.5/node_modules/esbuild postinstall: Done
+2026-11-23T13:56:04.5069085Z 
+2026-11-23T13:56:04.5069866Z devDependencies:
+2026-11-23T13:56:04.5070623Z + @astrojs/compiler 2.13.1
+2026-11-23T13:56:04.5071347Z + @mdx-js/mdx 3.1.1
+2026-11-23T13:56:04.5072091Z + @proto.ui/spec-schema 0.1.0 <- packages/spec/schema
+2026-11-23T13:56:04.5073086Z + @proto.ui/types 0.3.0-alpha.2 <- packages/types
+2026-11-23T13:56:04.5073835Z + @types/node 25.6.2
+2026-11-23T13:56:04.5074360Z + @vue/compiler-dom 3.5.31
+2026-11-23T13:56:04.5074850Z + @vue/compiler-sfc 3.5.31
+2026-11-23T13:56:04.5075381Z + ajv 8.18.0
+2026-11-23T13:56:04.5076417Z + esbuild 0.25.12
+2026-11-23T13:56:04.5076915Z + happy-dom 15.11.7
+2026-11-23T13:56:04.5077366Z + hast-util-from-html 2.0.3
+2026-11-23T13:56:04.5077919Z + hast-util-to-html 9.0.5
+2026-11-23T13:56:04.5078413Z + husky 9.1.7
+2026-11-23T13:56:04.5078904Z + import-meta-resolve 4.2.0
+2026-11-23T13:56:04.5079385Z + lint-staged 16.4.0
+2026-11-23T13:56:04.5079775Z + mdast-util-from-markdown 2.0.3
+2026-11-23T13:56:04.5080132Z + mdast-util-gfm 3.1.0
+2026-11-23T13:56:04.5080450Z + mdast-util-to-hast 13.2.1
+2026-11-23T13:56:04.5080841Z + micromark-extension-gfm 3.0.0
+2026-11-23T13:56:04.5081157Z + npm 11.14.1
+2026-11-23T13:56:04.5081377Z + parse5 7.3.0
+2026-11-23T13:56:04.5081577Z + prettier 3.8.1
+2026-11-23T13:56:04.5081834Z + prettier-plugin-astro 0.14.1
+2026-11-23T13:56:04.5082089Z + tsx 4.21.0
+2026-11-23T13:56:04.5082345Z + typescript 5.9.3
+2026-11-23T13:56:04.5082553Z + vitest 2.1.9
+2026-11-23T13:56:04.5082748Z + yaml 2.8.3
+2026-11-23T13:56:04.5082865Z 
+2026-11-23T13:56:04.6061153Z . prepare$ husky install
+2026-11-23T13:56:04.6632618Z . prepare: husky - install command is DEPRECATED
+2026-11-23T13:56:04.6739443Z . prepare: Done
+2026-11-23T13:56:04.7647674Z Done in 5.2s using pnpm v10.32.1
+2026-11-23T13:56:06.7439685Z [33m◯[39m devToolbar is now [43m[30m disabled [39m[49m
+2026-11-23T13:56:06.7440031Z 
+2026-11-23T13:56:06.7869308Z ##[group]Run sudo apt-get update
+2026-11-23T13:56:06.7869684Z [36;1msudo apt-get update[0m
+2026-11-23T13:56:06.7870110Z [36;1msudo apt-get install --no-install-recommends -y fonts-noto-cjk[0m
+2026-11-23T13:56:06.7870885Z [36;1mmkdir -p "$RUNNER_TEMP/sprint2-consumers"[0m
+2026-11-23T13:56:06.7871404Z [36;1mdpkg-query -W fonts-noto-cjk > "$RUNNER_TEMP/sprint2-consumers/fonts.txt"[0m
+2026-11-23T13:56:06.7872124Z [36;1mfc-match -f '%{family}\n' 'sans-serif:lang=zh-cn' >> "$RUNNER_TEMP/sprint2-consumers/fonts.txt"[0m
+2026-11-23T13:56:06.7872728Z [36;1mcat "$RUNNER_TEMP/sprint2-consumers/fonts.txt"[0m
+2026-11-23T13:56:06.7893698Z shell: /usr/bin/bash -e {0}
+2026-11-23T13:56:06.7893967Z env:
+2026-11-23T13:56:06.7894192Z   CHROME_PATH: /usr/bin/google-chrome
+2026-11-23T13:56:06.7894485Z ##[endgroup]
+2026-11-23T13:56:06.8657648Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-23T13:56:06.9040491Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-11-23T13:56:06.9054412Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-11-23T13:56:06.9057916Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-11-23T13:56:06.9113066Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-11-23T13:56:06.9126787Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-11-23T13:56:07.0470260Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [762 kB]
+2026-11-23T13:56:07.0703517Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [832 kB]
+2026-11-23T13:56:07.1067802Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1475 kB]
+2026-11-23T13:56:07.1145925Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [319 kB]
+2026-11-23T13:56:07.1167319Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1716 kB]
+2026-11-23T13:56:07.1264087Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [346 kB]
+2026-11-23T13:56:07.1286988Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1922 kB]
+2026-11-23T13:56:07.1392088Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [443 kB]
+2026-11-23T13:56:07.2314182Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1198 kB]
+2026-11-23T13:56:07.2372693Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [239 kB]
+2026-11-23T13:56:07.2417520Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1230 kB]
+2026-11-23T13:56:07.2451005Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1792 kB]
+2026-11-23T13:56:07.3017820Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [414 kB]
+2026-11-23T13:56:11.1635417Z Fetched 13.1 MB in 1s (9876 kB/s)
+2026-11-23T13:56:12.4991616Z Reading package lists...
+2026-11-23T13:56:12.5427297Z Reading package lists...
+2026-11-23T13:56:12.8379840Z Building dependency tree...
+2026-11-23T13:56:12.8387262Z Reading state information...
+2026-11-23T13:56:12.9912234Z Suggested packages:
+2026-11-23T13:56:12.9912818Z   fonts-noto-cjk-extra
+2026-11-23T13:56:13.0127734Z The following NEW packages will be installed:
+2026-11-23T13:56:13.0134634Z   fonts-noto-cjk
+2026-11-23T13:56:13.0338027Z 0 upgraded, 1 newly installed, 0 to remove and 68 not upgraded.
+2026-11-23T13:56:13.0338929Z Need to get 61.2 MB of archives.
+2026-11-23T13:56:13.0339799Z After this operation, 93.2 MB of additional disk space will be used.
+2026-11-23T13:56:13.0340905Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-23T13:56:13.0591175Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-noto-cjk all 1:20230817+repack1-3 [61.2 MB]
+2026-11-23T13:56:17.2684287Z Fetched 61.2 MB in 4s (15.4 MB/s)
+2026-11-23T13:56:17.2987700Z Selecting previously unselected package fonts-noto-cjk.
+2026-11-23T13:56:17.3257901Z (Reading database ... 
+2026-11-23T13:56:17.3258662Z (Reading database ... 5%
+2026-11-23T13:56:17.3259733Z (Reading database ... 10%
+2026-11-23T13:56:17.3260189Z (Reading database ... 15%
+2026-11-23T13:56:17.3260663Z (Reading database ... 20%
+2026-11-23T13:56:17.3261123Z (Reading database ... 25%
+2026-11-23T13:56:17.3261522Z (Reading database ... 30%
+2026-11-23T13:56:17.3261906Z (Reading database ... 35%
+2026-11-23T13:56:17.3262289Z (Reading database ... 40%
+2026-11-23T13:56:17.3262669Z (Reading database ... 45%
+2026-11-23T13:56:17.3263052Z (Reading database ... 50%
+2026-11-23T13:56:17.3309202Z (Reading database ... 55%
+2026-11-23T13:56:17.4991450Z (Reading database ... 60%
+2026-11-23T13:56:17.6887440Z (Reading database ... 65%
+2026-11-23T13:56:17.8467127Z (Reading database ... 70%
+2026-11-23T13:56:18.0399771Z (Reading database ... 75%
+2026-11-23T13:56:18.1966033Z (Reading database ... 80%
+2026-11-23T13:56:18.4453083Z (Reading database ... 85%
+2026-11-23T13:56:18.6393282Z (Reading database ... 90%
+2026-11-23T13:56:18.8518294Z (Reading database ... 95%
+2026-11-23T13:56:18.8519092Z (Reading database ... 100%
+2026-11-23T13:56:18.8520152Z (Reading database ... 217092 files and directories currently installed.)
+2026-11-23T13:56:18.8569543Z Preparing to unpack .../fonts-noto-cjk_1%3a20230817+repack1-3_all.deb ...
+2026-11-23T13:56:18.8680047Z Unpacking fonts-noto-cjk (1:20230817+repack1-3) ...
+2026-11-23T13:56:19.3203591Z Setting up fonts-noto-cjk (1:20230817+repack1-3) ...
+2026-11-23T13:56:19.3271924Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+2026-11-23T13:56:20.1838189Z 
+2026-11-23T13:56:20.1838893Z Running kernel seems to be up-to-date.
+2026-11-23T13:56:20.1839354Z 
+2026-11-23T13:56:20.1839729Z No services need to be restarted.
+2026-11-23T13:56:20.1840198Z 
+2026-11-23T13:56:20.1840555Z No containers need to be restarted.
+2026-11-23T13:56:20.1841031Z 
+2026-11-23T13:56:20.1841526Z No user sessions are running outdated binaries.
+2026-11-23T13:56:20.1842082Z 
+2026-11-23T13:56:20.1842836Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-23T13:56:21.3977638Z fonts-noto-cjk	1:20230817+repack1-3
+2026-11-23T13:56:21.3978265Z Noto Sans CJK SC
+2026-11-23T13:56:21.4039865Z ##[group]Run node scripts/analysis/run-sprint2-consumers.mjs
+2026-11-23T13:56:21.4040364Z [36;1mnode scripts/analysis/run-sprint2-consumers.mjs[0m
+2026-11-23T13:56:21.4060883Z shell: /usr/bin/bash -e {0}
+2026-11-23T13:56:21.4061156Z env:
+2026-11-23T13:56:21.4061380Z   CHROME_PATH: /usr/bin/google-chrome
+2026-11-23T13:56:21.4061789Z   PUI_SPRINT2_EVIDENCE_DIR: /home/runner/work/_temp/sprint2-consumers
+2026-11-23T13:56:21.4062186Z ##[endgroup]
+2026-11-23T13:56:21.9607627Z [sprint2] public-packages: /opt/hostedtoolcache/node/24.22.3/x64/bin/node scripts/build/public-packages.mjs
+2026-11-23T13:58:03.4371669Z [sprint2] public-packages: passed
+2026-11-23T13:58:03.4389230Z [sprint2] styles: corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
+2026-11-23T13:59:33.9880474Z [sprint2] styles: passed
+2026-11-23T13:59:33.9893073Z [sprint2] workspace-types: corepack pnpm@10.32.1 check:types:workspace
+2026-11-23T14:00:21.1991298Z [sprint2] workspace-types: passed
+2026-11-23T14:00:21.2004442Z [sprint2] input: /opt/hostedtoolcache/node/24.22.3/x64/bin/node --import tsx scripts/analysis/sprint2-input-browser.mjs
+2026-11-23T14:01:35.3624177Z [sprint2] input: passed
+2026-11-23T14:01:35.3640085Z [sprint2] collections: /opt/hostedtoolcache/node/24.22.3/x64/bin/node --import tsx scripts/analysis/collections-recipes-browser.mjs
+2026-11-23T14:02:05.0037652Z [sprint2] collections: passed
+2026-11-23T14:02:05.0052390Z [sprint2] geometry: /opt/hostedtoolcache/node/24.22.3/x64/bin/node --import tsx scripts/analysis/component-capabilities-browser.mjs
+2026-11-23T14:03:56.1099378Z [sprint2] geometry: passed
+2026-11-23T14:03:56.1111761Z [sprint2] form-select: /opt/hostedtoolcache/node/24.22.3/x64/bin/node --import tsx scripts/analysis/form-select-recipes-browser.mjs
+2026-11-23T14:05:41.3243964Z [sprint2] form-select: passed
+2026-11-23T14:05:41.3304780Z [sprint2] ordinary-linked-consumers: corepack pnpm@10.32.1 exec vitest run packages/compiler/test/artifact-linking-consumer.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile=/home/runner/work/_temp/sprint2-consumers/ordinary-linked-consumers/report.json
+2026-11-23T14:05:56.4148588Z [sprint2] ordinary-linked-consumers: passed
+2026-11-23T14:05:56.4162533Z [sprint2] compiled-consumers: corepack pnpm@10.32.1 exec vitest run packages/compiler/test/sprint2-native.browser.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile=/home/runner/work/_temp/sprint2-consumers/compiled-consumers/report.json
+2026-11-23T14:06:26.4927902Z [sprint2] compiled-consumers: passed
+2026-11-23T14:06:26.4943307Z [sprint2] site: corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile=/home/runner/work/_temp/sprint2-consumers/site/report.json
+2026-11-23T14:10:55.7660600Z [sprint2] site: passed
+2026-11-23T14:10:55.7678141Z [sprint2] preferences: corepack pnpm@10.32.1 exec vitest run apps/www/test/preferences.browser.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile=/home/runner/work/_temp/sprint2-consumers/preferences/report.json
+2026-11-23T14:11:07.6857258Z [sprint2] preferences: passed
+2026-11-23T14:11:07.6876242Z [sprint2] collapsible: corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile=/home/runner/work/_temp/sprint2-consumers/collapsible/report.json --testNamePattern ^(?:Base|shadcn|brutalist) Collapsible public browser evidence 
+2026-11-23T14:16:25.4252729Z [sprint2] collapsible: passed
+2026-11-23T14:16:25.4273061Z [sprint2] accordion: corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile=/home/runner/work/_temp/sprint2-consumers/accordion/report.json --testNamePattern ^Accordion five families / four native Web consumers (?:base|shadcn|brutalist) 
+2026-11-23T14:20:30.0870149Z [sprint2] accordion: passed
+2026-11-23T14:20:30.0896839Z {
+2026-11-23T14:20:30.0897556Z   "output": "/home/runner/work/_temp/sprint2-consumers",
+2026-11-23T14:20:30.0898279Z   "status": "passed",
+2026-11-23T14:20:30.0898816Z   "steps": [
+2026-11-23T14:20:30.0899278Z     {
+2026-11-23T14:20:30.0899776Z       "id": "public-packages",
+2026-11-23T14:20:30.0900334Z       "status": "passed"
+2026-11-23T14:20:30.0900809Z     },
+2026-11-23T14:20:30.0901167Z     {
+2026-11-23T14:20:30.0901619Z       "id": "styles",
+2026-11-23T14:20:30.0902095Z       "status": "passed"
+2026-11-23T14:20:30.0902594Z     },
+2026-11-23T14:20:30.0902959Z     {
+2026-11-23T14:20:30.0903417Z       "id": "workspace-types",
+2026-11-23T14:20:30.0903940Z       "status": "passed"
+2026-11-23T14:20:30.0904470Z     },
+2026-11-23T14:20:30.0904977Z     {
+2026-11-23T14:20:30.0905928Z       "id": "input",
+2026-11-23T14:20:30.0906477Z       "status": "passed",
+2026-11-23T14:20:30.0906963Z       "summary": {
+2026-11-23T14:20:30.0907446Z         "expected": 72,
+2026-11-23T14:20:30.0907981Z         "observed": 72,
+2026-11-23T14:20:30.0908473Z         "passed": 72,
+2026-11-23T14:20:30.0908913Z         "failed": 0,
+2026-11-23T14:20:30.0909355Z         "incomplete": 0,
+2026-11-23T14:20:30.0909861Z         "notSelected": 0
+2026-11-23T14:20:30.0910260Z       }
+2026-11-23T14:20:30.0910653Z     },
+2026-11-23T14:20:30.0911080Z     {
+2026-11-23T14:20:30.0911504Z       "id": "collections",
+2026-11-23T14:20:30.0911999Z       "status": "passed",
+2026-11-23T14:20:30.0912487Z       "summary": {
+2026-11-23T14:20:30.0912879Z         "expected": 36,
+2026-11-23T14:20:30.0913328Z         "observed": 36,
+2026-11-23T14:20:30.0913755Z         "passed": 36,
+2026-11-23T14:20:30.0914163Z         "failed": 0,
+2026-11-23T14:20:30.0914590Z         "incomplete": 0,
+2026-11-23T14:20:30.0915403Z         "notSelected": 0
+2026-11-23T14:20:30.0916047Z       }
+2026-11-23T14:20:30.0916346Z     },
+2026-11-23T14:20:30.0916688Z     {
+2026-11-23T14:20:30.0917010Z       "id": "geometry",
+2026-11-23T14:20:30.0917393Z       "status": "passed",
+2026-11-23T14:20:30.0917794Z       "summary": {
+2026-11-23T14:20:30.0918170Z         "expected": 36,
+2026-11-23T14:20:30.0918582Z         "observed": 36,
+2026-11-23T14:20:30.0918971Z         "passed": 36,
+2026-11-23T14:20:30.0919373Z         "failed": 0,
+2026-11-23T14:20:30.0919715Z         "incomplete": 0,
+2026-11-23T14:20:30.0920116Z         "notSelected": 0
+2026-11-23T14:20:30.0920517Z       }
+2026-11-23T14:20:30.0920796Z     },
+2026-11-23T14:20:30.0921120Z     {
+2026-11-23T14:20:30.0921418Z       "id": "form-select",
+2026-11-23T14:20:30.0921853Z       "status": "passed",
+2026-11-23T14:20:30.0922205Z       "summary": {
+2026-11-23T14:20:30.0922566Z         "expected": 36,
+2026-11-23T14:20:30.0922983Z         "observed": 36,
+2026-11-23T14:20:30.0923323Z         "passed": 36,
+2026-11-23T14:20:30.0923721Z         "failed": 0,
+2026-11-23T14:20:30.0924137Z         "incomplete": 0,
+2026-11-23T14:20:30.0924545Z         "notSelected": 0
+2026-11-23T14:20:30.0924944Z       }
+2026-11-23T14:20:30.0925285Z     },
+2026-11-23T14:20:30.0926927Z     {
+2026-11-23T14:20:30.0927450Z       "id": "ordinary-linked-consumers",
+2026-11-23T14:20:30.0927980Z       "status": "passed",
+2026-11-23T14:20:30.0928372Z       "summary": {
+2026-11-23T14:20:30.0928787Z         "expected": 12,
+2026-11-23T14:20:30.0929229Z         "observed": 12,
+2026-11-23T14:20:30.0929595Z         "passed": 12,
+2026-11-23T14:20:30.0930047Z         "failed": 0,
+2026-11-23T14:20:30.0930457Z         "incomplete": 0,
+2026-11-23T14:20:30.0930905Z         "notSelected": 0
+2026-11-23T14:20:30.0931261Z       }
+2026-11-23T14:20:30.0931535Z     },
+2026-11-23T14:20:30.0931799Z     {
+2026-11-23T14:20:30.0932133Z       "id": "compiled-consumers",
+2026-11-23T14:20:30.0932532Z       "status": "passed",
+2026-11-23T14:20:30.0934701Z       "summary": {
+2026-11-23T14:20:30.0935347Z         "expected": 20,
+2026-11-23T14:20:30.0935995Z         "observed": 20,
+2026-11-23T14:20:30.0936364Z         "passed": 20,
+2026-11-23T14:20:30.0936657Z         "failed": 0,
+2026-11-23T14:20:30.0936961Z         "incomplete": 0,
+2026-11-23T14:20:30.0937324Z         "notSelected": 0
+2026-11-23T14:20:30.0937667Z       }
+2026-11-23T14:20:30.0937936Z     },
+2026-11-23T14:20:30.0938195Z     {
+2026-11-23T14:20:30.0938465Z       "id": "site",
+2026-11-23T14:20:30.0938803Z       "status": "passed",
+2026-11-23T14:20:30.0939147Z       "summary": {
+2026-11-23T14:20:30.0939462Z         "expected": 42,
+2026-11-23T14:20:30.0939785Z         "observed": 42,
+2026-11-23T14:20:30.0940097Z         "passed": 42,
+2026-11-23T14:20:30.0940416Z         "failed": 0,
+2026-11-23T14:20:30.0940725Z         "incomplete": 0,
+2026-11-23T14:20:30.0941067Z         "notSelected": 0
+2026-11-23T14:20:30.0941400Z       }
+2026-11-23T14:20:30.0941702Z     },
+2026-11-23T14:20:30.0941979Z     {
+2026-11-23T14:20:30.0942353Z       "id": "preferences",
+2026-11-23T14:20:30.0942713Z       "status": "passed",
+2026-11-23T14:20:30.0942943Z       "summary": {
+2026-11-23T14:20:30.0943146Z         "expected": 4,
+2026-11-23T14:20:30.0943355Z         "observed": 4,
+2026-11-23T14:20:30.0943560Z         "passed": 4,
+2026-11-23T14:20:30.0943761Z         "failed": 0,
+2026-11-23T14:20:30.0943962Z         "incomplete": 0,
+2026-11-23T14:20:30.0944185Z         "notSelected": 0
+2026-11-23T14:20:30.0944401Z       }
+2026-11-23T14:20:30.0944573Z     },
+2026-11-23T14:20:30.0944745Z     {
+2026-11-23T14:20:30.0944935Z       "id": "collapsible",
+2026-11-23T14:20:30.0945160Z       "status": "passed",
+2026-11-23T14:20:30.0945375Z       "summary": {
+2026-11-23T14:20:30.0945833Z         "expected": 23,
+2026-11-23T14:20:30.0946241Z         "observed": 23,
+2026-11-23T14:20:30.0946671Z         "passed": 23,
+2026-11-23T14:20:30.0946915Z         "failed": 0,
+2026-11-23T14:20:30.0947119Z         "incomplete": 0,
+2026-11-23T14:20:30.0947548Z         "notSelected": 18
+2026-11-23T14:20:30.0947770Z       }
+2026-11-23T14:20:30.0947953Z     },
+2026-11-23T14:20:30.0948125Z     {
+2026-11-23T14:20:30.0948310Z       "id": "accordion",
+2026-11-23T14:20:30.0948534Z       "status": "passed",
+2026-11-23T14:20:30.0948750Z       "summary": {
+2026-11-23T14:20:30.0948949Z         "expected": 23,
+2026-11-23T14:20:30.0949165Z         "observed": 23,
+2026-11-23T14:20:30.0949372Z         "passed": 23,
+2026-11-23T14:20:30.0949577Z         "failed": 0,
+2026-11-23T14:20:30.0949785Z         "incomplete": 0,
+2026-11-23T14:20:30.0950008Z         "notSelected": 5
+2026-11-23T14:20:30.0950213Z       }
+2026-11-23T14:20:30.0950396Z     }
+2026-11-23T14:20:30.0950577Z   ]
+2026-11-23T14:20:30.0950753Z }
+2026-11-23T14:20:30.1053070Z ##[group]Run actions/upload-artifact@v4
+2026-11-23T14:20:30.1053381Z with:
+2026-11-23T14:20:30.1053735Z   name: sprint2-consumers-9d0f47d4ef67bbc3676e4db24c7906f8721e5b42-45188583301
+2026-11-23T14:20:30.1054416Z   path: /home/runner/work/_temp/sprint2-consumers
+!/home/runner/work/_temp/sprint2-consumers/**/cache/**
+
+2026-11-23T14:20:30.1054975Z   if-no-files-found: warn
+2026-11-23T14:20:30.1055220Z   retention-days: 30
+2026-11-23T14:20:30.1055441Z   compression-level: 6
+2026-11-23T14:20:30.1055937Z   overwrite: false
+2026-11-23T14:20:30.1056161Z   include-hidden-files: false
+2026-11-23T14:20:30.1056401Z env:
+2026-11-23T14:20:30.1056603Z   CHROME_PATH: /usr/bin/google-chrome
+2026-11-23T14:20:30.1056868Z ##[endgroup]
+2026-11-23T14:20:30.2912843Z (node:15731) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-23T14:20:30.2914262Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-23T14:20:30.5108918Z With the provided path, there will be 1019 files uploaded
+2026-11-23T14:20:30.5113866Z Artifact name is valid!
+2026-11-23T14:20:30.5114522Z Root directory input is valid!
+2026-11-23T14:20:30.7491512Z Beginning upload of artifact content to blob storage
+2026-11-23T14:20:31.2326062Z (node:15731) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-23T14:20:31.3620028Z Uploaded bytes 8388608
+2026-11-23T14:20:31.8514397Z Uploaded bytes 16777216
+2026-11-23T14:20:32.0977908Z Uploaded bytes 25165824
+2026-11-23T14:20:32.3651154Z Uploaded bytes 33554432
+2026-11-23T14:20:32.6958601Z Uploaded bytes 41943040
+2026-11-23T14:20:33.1295405Z Uploaded bytes 50331648
+2026-11-23T14:20:33.5290868Z Uploaded bytes 58720256
+2026-11-23T14:20:33.8105292Z Uploaded bytes 64794471
+2026-11-23T14:20:33.8303964Z Finished uploading artifact content to blob storage!
+2026-11-23T14:20:33.8308845Z SHA256 digest of uploaded artifact zip is 48ffcfc5a814d129d1cefa8faed91b4dc5529b5a1677c7d752faa12210519781
+2026-11-23T14:20:33.8310604Z Finalizing artifact upload
+2026-11-23T14:20:34.1828016Z Artifact sprint2-consumers-9d0f47d4ef67bbc3676e4db24c7906f8721e5b42-45188583301.zip successfully finalized. Artifact ID 14826253625
+2026-11-23T14:20:34.1830981Z Artifact sprint2-consumers-9d0f47d4ef67bbc3676e4db24c7906f8721e5b42-45188583301 has been successfully uploaded! Final size is 64794471 bytes. Artifact ID is 14826253625
+2026-11-23T14:20:34.1836910Z Artifact download URL: https://github.com/Proto-UI/Proto-UI/actions/runs/45188583301/artifacts/14826253625
+2026-11-23T14:20:34.2230105Z Post job cleanup.
+2026-11-23T14:20:34.3598488Z (node:15743) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-23T14:20:34.3600085Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-23T14:20:34.3856228Z Post job cleanup.
+2026-11-23T14:20:34.5218127Z [command]/usr/bin/git version
+2026-11-23T14:20:34.5298886Z git version 2.56.1
+2026-11-23T14:20:34.5382938Z Temporarily overriding HOME='/home/runner/work/_temp/6f59c9c3-6b12-4d40-97dd-bc3bfbf49536' before making global git config changes
+2026-11-23T14:20:34.5387130Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-23T14:20:34.5390310Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Proto-UI/Proto-UI
+2026-11-23T14:20:34.5476863Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-23T14:20:34.5507832Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-23T14:20:34.5860283Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-23T14:20:34.5905335Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-23T14:20:34.6286167Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-23T14:20:34.6320994Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-23T14:20:34.6912896Z Cleaning up orphan processes
+2026-11-23T14:20:34.7351508Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

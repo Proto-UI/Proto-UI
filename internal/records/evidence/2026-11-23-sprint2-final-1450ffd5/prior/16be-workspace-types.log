@@ -1,0 +1,15 @@
+
+> proto-ui@ check:types:workspace <GITHUB_ACTIONS_CHECKOUT>
+> tsc -p tsconfig.workspace.json --noEmit
+
+packages/compiler/test/text-reset-native.test.ts(163,63): error TS2345: Argument of type '(type: string, listener: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions | undefined) => void' is not assignable to parameter of type 'NormalizedPrecedure<{ <K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLInputElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined): voi...'.
+  Types of parameters 'type' and 'args' are incompatible.
+    Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined] | [type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions | undefined]'.
+      Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions | undefined]'.
+        Source provides no match for required element at position 2 in target.
+packages/compiler/test/text-reset-native.test.ts(167,66): error TS2345: Argument of type '(type: string, listener: EventListenerOrEventListenerObject, options: boolean | EventListenerOptions | undefined) => void' is not assignable to parameter of type 'NormalizedPrecedure<{ <K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLInputElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined): void; ...'.
+  Types of parameters 'type' and 'args' are incompatible.
+    Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions | undefined] | [type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | EventListenerOptions | undefined]'.
+      Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | EventListenerOptions | undefined]'.
+        Source provides no match for required element at position 2 in target.
+ ELIFECYCLE  Command failed with exit code 2.

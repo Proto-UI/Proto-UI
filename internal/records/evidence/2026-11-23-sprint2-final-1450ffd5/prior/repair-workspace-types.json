@@ -1,0 +1,29 @@
+{
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "check:types:workspace"
+  ],
+  "status": "failed",
+  "before": {
+    "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "status": " M packages/compiler/test/text-reset-native.test.ts\n M packages/prototypes/base/src/checkbox/root.proto.ts\n M packages/prototypes/base/test/notification-retirement-lifecycle.test.ts\n",
+    "files": {
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4",
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+    }
+  },
+  "exit_code": 2,
+  "duration_seconds": 211.44051337899873,
+  "after": {
+    "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+    "status": "M  packages/compiler/test/text-reset-native.test.ts\nM  packages/prototypes/base/src/checkbox/root.proto.ts\nM  packages/prototypes/base/test/notification-retirement-lifecycle.test.ts\n",
+    "files": {
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4",
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+    }
+  },
+  "log_sha256": "adb427539ae46bb90197eeb8cb437f27777fa8f9cafd0f70c35c14355ba301d0"
+}

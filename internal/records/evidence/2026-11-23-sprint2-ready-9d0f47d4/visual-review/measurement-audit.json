@@ -1,0 +1,1423 @@
+{
+  "source": {
+    "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+    "status": "",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "untracked": []
+  },
+  "browser": [
+    "157.0.8103.78"
+  ],
+  "captureCount": 100,
+  "actualThemes": {
+    "light requested / light actual / enhanced": 39,
+    "dark requested / dark actual / enhanced": 32,
+    "light requested / light actual / failed-scripts": 13,
+    "dark requested / dark actual / failed-scripts": 12,
+    "light requested / dark actual / no-js": 4
+  },
+  "siteCases": {
+    "total": 42,
+    "unique": 42,
+    "passed": 42,
+    "pending": 0,
+    "failed": 0,
+    "sameExecutedNamesAs1450": true
+  },
+  "retainedPaintEntries": {
+    "total": 80,
+    "shadcn": 40,
+    "brutalist": 40,
+    "desktop": 64,
+    "mobile": 16,
+    "desktopHeight": 32,
+    "mobileHeight": 44,
+    "maximumOwnerPaintWidthDifference": 0,
+    "note": "Retained observations include repeated group-hover values in later focus metadata; these are not 80 independent tests."
+  },
+  "nativeScroll": [
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "trusted": true,
+      "includesScroller": true,
+      "deltaY": -32,
+      "actualTop": 690,
+      "expectedTop": 690
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "trusted": true,
+      "includesScroller": true,
+      "deltaY": -32,
+      "actualTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "trusted": true,
+      "includesScroller": true,
+      "deltaY": -32,
+      "actualTop": 690,
+      "expectedTop": 690
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "trusted": true,
+      "includesScroller": true,
+      "deltaY": -32,
+      "actualTop": 2216,
+      "expectedTop": 2216
+    }
+  ],
+  "mobileHitOwners": [
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-no-js",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-no-js",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-no-js",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-no-js",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-no-js",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-no-js",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-no-js",
+      "owner": "groupHit",
+      "points": 4,
+      "allMatch": true
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-no-js",
+      "owner": "leafHit",
+      "points": 4,
+      "allMatch": true
+    }
+  ],
+  "rawHashes": {
+    "receipt.json": "b169a04ad9004030ee79d4194e638acd182376fc6e50941615e0285b5bf184c1",
+    "site/report.json": "655e8ca755f5cbdf71aa7cd527b4eed6e8629087d1ce990226847ea023ac0eee",
+    "site/run.log": "43332d2a1d56c86eade04eb6400d1d3ffa728c025cf675c5906db32ae6586fdd"
+  },
+  "paintEntries": [
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "shadcn",
+      "mobile": false,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover",
+      "observationPath": "observations",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus",
+      "observationPath": "observations.groupHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus",
+      "observationPath": "observations.leafHover",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 203,
+      "paintWidth": 203
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus",
+      "observationPath": "observations.focused",
+      "family": "brutalist",
+      "mobile": false,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 32,
+      "width": 224,
+      "paintWidth": 224
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "observationPath": "observations.groupPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 326,
+      "paintWidth": 326
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "observationPath": "observations.leafPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 305,
+      "paintWidth": 305
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-no-js",
+      "observationPath": "observations.groupPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 310,
+      "paintWidth": 310
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-no-js",
+      "observationPath": "observations.leafPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 289,
+      "paintWidth": 289
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "observationPath": "observations.groupPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 322,
+      "paintWidth": 322
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "observationPath": "observations.leafPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 301,
+      "paintWidth": 301
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-no-js",
+      "observationPath": "observations.groupPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 310,
+      "paintWidth": 310
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-no-js",
+      "observationPath": "observations.leafPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 289,
+      "paintWidth": 289
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "observationPath": "observations.groupPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 326,
+      "paintWidth": 326
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "observationPath": "observations.leafPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 305,
+      "paintWidth": 305
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-no-js",
+      "observationPath": "observations.groupPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 310,
+      "paintWidth": 310
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-no-js",
+      "observationPath": "observations.leafPaint",
+      "family": "shadcn",
+      "mobile": true,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "height": 44,
+      "width": 289,
+      "paintWidth": 289
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "observationPath": "observations.groupPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 322,
+      "paintWidth": 322
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "observationPath": "observations.leafPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 301,
+      "paintWidth": 301
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-no-js",
+      "observationPath": "observations.groupPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 310,
+      "paintWidth": 310
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-no-js",
+      "observationPath": "observations.leafPaint",
+      "family": "brutalist",
+      "mobile": true,
+      "radius": [
+        "5px",
+        "5px",
+        "5px",
+        "5px"
+      ],
+      "height": 44,
+      "width": 289,
+      "paintWidth": 289
+    }
+  ],
+  "executedSiteNames": [
+    "B: en/wc switches one live Tabs owner through all three exhibition profiles",
+    "B: en/react switches one live Tabs owner through all three exhibition profiles",
+    "B: en/vue switches one live Tabs owner through all three exhibition profiles",
+    "B: en/vue2 switches one live Tabs owner through all three exhibition profiles",
+    "B: zh-cn/wc switches one live Tabs owner through all three exhibition profiles",
+    "B: zh-cn/react switches one live Tabs owner through all three exhibition profiles",
+    "B: zh-cn/vue switches one live Tabs owner through all three exhibition profiles",
+    "B: zh-cn/vue2 switches one live Tabs owner through all three exhibition profiles",
+    "C: en/light/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+    "C: en/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: en/light/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+    "C: en/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: en/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+    "C: en/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: en/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+    "C: en/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/light/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/light/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/light/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/light/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/dark/shadcn/enhanced preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/dark/shadcn/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/dark/brutalist/enhanced preserves group/leaf geometry and native disclosure",
+    "C: zh-cn/dark/brutalist/failed-scripts preserves group/leaf geometry and native disclosure",
+    "C: en/shadcn/enhanced keeps full mobile navigation targets",
+    "C: en/shadcn/no-js keeps full mobile navigation targets",
+    "C: en/brutalist/enhanced keeps full mobile navigation targets",
+    "C: en/brutalist/no-js keeps full mobile navigation targets",
+    "C: zh-cn/shadcn/enhanced keeps full mobile navigation targets",
+    "C: zh-cn/shadcn/no-js keeps full mobile navigation targets",
+    "C: zh-cn/brutalist/enhanced keeps full mobile navigation targets",
+    "C: zh-cn/brutalist/no-js keeps full mobile navigation targets",
+    "D: en/light/enhanced preserves a native, focused Hero pill without prose underline",
+    "D: en/light/failed-scripts preserves a native, focused Hero pill without prose underline",
+    "D: en/dark/enhanced preserves a native, focused Hero pill without prose underline",
+    "D: en/dark/failed-scripts preserves a native, focused Hero pill without prose underline",
+    "D: zh-cn/light/enhanced preserves a native, focused Hero pill without prose underline",
+    "D: zh-cn/light/failed-scripts preserves a native, focused Hero pill without prose underline",
+    "D: zh-cn/dark/enhanced preserves a native, focused Hero pill without prose underline",
+    "D: zh-cn/dark/failed-scripts preserves a native, focused Hero pill without prose underline",
+    "#1154: en renders the current public Hook evidence without accepting the historical candidate",
+    "#1154: zh-cn renders the current public Hook evidence without accepting the historical candidate"
+  ]
+}

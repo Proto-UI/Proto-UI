@@ -1,0 +1,116 @@
+{
+  "sheet": "brutalist-historical-comparison.png",
+  "sheetSha256": "61a10e1355aeefa8f81ae607b02c8bbbadfdad21b5928964dc7ad82b1c7bd616",
+  "size": [
+    1230,
+    636
+  ],
+  "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+  "items": [
+    {
+      "source": "../historical-d0392fb/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+      "sourceSha256": "3a7f9602749abc835dbf1e02be4b303e974793b84e20f1e769959443cad939f6",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "crop": [
+        15,
+        380,
+        280,
+        960
+      ],
+      "viewSize": [
+        265,
+        580
+      ],
+      "caption": "historical d039 | enhanced | measured 5px,5px,5px,5px",
+      "sheetBounds": [
+        0,
+        0,
+        300,
+        636
+      ],
+      "sourceHead": "d0392fb31513b12f55b9e99b1fcf26a6338569c9"
+    },
+    {
+      "source": "../historical-d0392fb/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+      "sourceSha256": "57ac2180099d9ef6a61dc4fff6cd145da135a24be920dde2f4b6a13e222d756e",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "crop": [
+        15,
+        380,
+        280,
+        960
+      ],
+      "viewSize": [
+        265,
+        580
+      ],
+      "caption": "historical d039 | failed-scripts | measured 0px,0px,0px,0px",
+      "sheetBounds": [
+        310,
+        0,
+        610,
+        636
+      ],
+      "sourceHead": "d0392fb31513b12f55b9e99b1fcf26a6338569c9"
+    },
+    {
+      "source": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+      "sourceSha256": "d19191157cc013644b8a475fd7c9009e034d07309c72596f3d9d9b209ab8d45e",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "crop": [
+        15,
+        380,
+        280,
+        960
+      ],
+      "viewSize": [
+        265,
+        580
+      ],
+      "caption": "candidate 1450 | enhanced | measured 5px,5px,5px,5px",
+      "sheetBounds": [
+        620,
+        0,
+        920,
+        636
+      ],
+      "sourceHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad"
+    },
+    {
+      "source": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+      "sourceSha256": "783f6ddb8e19206f09c47a3c33d94a1545433df7f266720cf65f4c443f1ec9ef",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "crop": [
+        15,
+        380,
+        280,
+        960
+      ],
+      "viewSize": [
+        265,
+        580
+      ],
+      "caption": "candidate 1450 | failed-scripts | measured 5px,5px,5px,5px",
+      "sheetBounds": [
+        930,
+        0,
+        1230,
+        636
+      ],
+      "sourceHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad"
+    }
+  ],
+  "id": "brutalist-historical-comparison"
+}

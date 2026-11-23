@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "consumerRevision": "91a775546ebd21a87d76d76568195a6513437719",
+  "upstreamRevision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "authoredSourceSha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78",
+  "originalProducerSha256": "505eb1d89703dd5a3ce17d0209fddc6541aab62450eb29e956da0f6bd60a307d",
+  "authoredAndProducerUnchanged": true,
+  "artifacts": 20,
+  "cargo": "UNTESTED",
+  "desktopRuntime": "UNTESTED"
+}

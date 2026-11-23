@@ -1,0 +1,80 @@
+{
+  "upstream": {
+    "revision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672"
+  },
+  "shenko": {
+    "repository": "https://github.com/cyjin-yl/shenko",
+    "revision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+    "authoredSourceCount": 39,
+    "authoredSourceSha256": {
+      "crates/shenko-ui/web/prototypes/message-bubble.proto.ts": "50915675a5fb64b14bf4784594819ea64a76ceb2234e15f7db3321be03f61e8d",
+      "crates/shenko-ui/web/prototypes/transport-badge.proto.ts": "2ee02ccc9ca4fdd8bb4d031d4d390ba4fe78113d290cd9f011735f77c1d272ae",
+      "crates/shenko-ui/web/src/app.css": "fc7f0e247c63b335fa486a661ffbe571989bcf0c5f5d53d1dc289ea3f3bc1304",
+      "crates/shenko-ui/web/src/composer.tsx": "804e2be3454c1f42faf8bb0854fb14cc13e5b79d4946b6385d9787983a6a5df0",
+      "crates/shenko-ui/web/src/config-panel.tsx": "b073f75e6e939bbd67eec6702bdc1056b2e458fa8fa2a2286a9cb200dd59540f",
+      "crates/shenko-ui/web/src/conversation-data.ts": "e1f3ab94d10c1571dc270a0e69cee805fe1d90f7bf7617dd4389c832ebf0b231",
+      "crates/shenko-ui/web/src/delegation-branches.tsx": "7b6b64de2004fdbd174bb9b6f67dfd7071fa1b1220ba0a8aa79e7c81eedc031e",
+      "crates/shenko-ui/web/src/demo-controller.ts": "6988542e28730d39ac2a83b31995e4410b2abed85247fed507e445612b4cdecb",
+      "crates/shenko-ui/web/src/demo-fixtures.ts": "dead61324f4559491e42001e353d9c18007be5213cfb18523af0278825f0b443",
+      "crates/shenko-ui/web/src/document-view.tsx": "31925e9fc8ce42c12208d030699ccfe25d03a7e791650b99ffbed98d48981703",
+      "crates/shenko-ui/web/src/files-view.tsx": "90cb59539e75d138de0c598d07874cfa4fdfedd7638814c7f5eaa2689d58b5a1",
+      "crates/shenko-ui/web/src/icons.tsx": "4d098a0bd6117394c8665aff8a412f29e5e58ce27d7e27568543b42583e25093",
+      "crates/shenko-ui/web/src/im.tsx": "86d0b4f6c95be6d2bbe93561d290e14d74e8a1147204e9cb6799d79c01315512",
+      "crates/shenko-ui/web/src/input-reducer.ts": "bcda3a7992cf28c5c112931930ca84f3a800439278ffb713e28df6b3b54ac95e",
+      "crates/shenko-ui/web/src/live-controller.ts": "2299b298632e0438beaddb4e63ad0c88b8f02d15d99687b7fb6133318aa2fca6",
+      "crates/shenko-ui/web/src/live-read-models.ts": "ab95e7893dce51ca01ea8a24ee7db49d1707e78b9cd0b627522ccce43e2b7c37",
+      "crates/shenko-ui/web/src/live-state.ts": "2ea156de1531a58ad57c466f7b5b1f2e1e8303b9c9bb8a4e8b746ac6ebdde676",
+      "crates/shenko-ui/web/src/live-validation.ts": "e36755cce996ba25c09c2e713aae6b13869e0b941fa5629c1d0ad7b9e595dad2",
+      "crates/shenko-ui/web/src/main.tsx": "fb33bd2a136840dce1f5191ee8a65bd7b09029f8cead33305b4e054d2b5614fd",
+      "crates/shenko-ui/web/src/markdown.tsx": "ba282e4e91fc187a253e7196abf1f7f35d5e81df973de469371316b22d66f7ff",
+      "crates/shenko-ui/web/src/messages.ts": "ad72d6b2605be863c028a1c6980be228d53e70428dae01be78a7fed8f12fdbcd",
+      "crates/shenko-ui/web/src/pending-inputs.ts": "6216e409175ac220e547aa36a2e5d50b7679c2701ca3f6cb2152904a5da623df",
+      "crates/shenko-ui/web/src/projection.ts": "af3f932c9b9d545669d33e401c7714f623dc1875c835880b7b6160f35c656a68",
+      "crates/shenko-ui/web/src/react-renderer.tsx": "68e84341c95e992fc0d9ef130b14cda3ba215a7bc90007d741590bfd6114d125",
+      "crates/shenko-ui/web/src/reading-state.ts": "8e19f5c00e8758c170ad7c1031c0db83d9f5407a7630551f72a3ec828a332b51",
+      "crates/shenko-ui/web/src/revision-disclosure.ts": "ee3e3098e0522cc7f3db51a787a923edf0f336d870ebd57dd538d3da4ed3a89e",
+      "crates/shenko-ui/web/src/slots.ts": "7495e1a01a85db77a85cded62bbc7bb3f7a7607c3323b93377d754b4acdba4ce",
+      "crates/shenko-ui/web/src/socket-transport.ts": "3360894d2695aba32b3a4c5f8ca385b56c5d01bfb2363db1187cc5b1f6830539",
+      "crates/shenko-ui/web/src/submission-history.tsx": "bd1fb940b16b1897667179d4879aace989f4170cb4b2404569fb0b8c8ee5d783",
+      "crates/shenko-ui/web/src/surfaces.tsx": "15b600e18736205b3e76e3b191c28e7de377bfa758af4e2cda552c1db709cc07",
+      "crates/shenko-ui/web/src/theme-bootstrap.js": "6fe832f8731ccbcebfc746413f6d197ed6d3abadaa8c74e032e234b0283e1f4d",
+      "crates/shenko-ui/web/src/threads.ts": "1aca979b5c6ef134c63dce93ec417ac2339f4ad7edcbc5cf27ead9d7758051f8",
+      "crates/shenko-ui/web/src/timeline-entries.tsx": "f088cf9cd30ab5862129ab66277a6711a1918cab09104b18b26ff72ed83a4ceb",
+      "crates/shenko-ui/web/src/timeline-reducer.ts": "0b3c8e4a4ac8c29fbbf748830fb3c32eed3c77cf0daf92c5f5ddfca70795b168",
+      "crates/shenko-ui/web/src/timeline-surface.tsx": "395b7b543c3e923b3b7529f44fc57914af99cf37f16602a145e89826ab478472",
+      "crates/shenko-ui/web/src/ui-api.ts": "faf9acf3f68f1c9697ffce47baa3f1c5b71ec8fa1fd35f323e5c5cebb475db0c",
+      "crates/shenko-ui/web/src/ui-kit.tsx": "46600498c0fd46d54721333ec81fdcfd8dfab699d3d8e6f1f8bd1c488c43871e",
+      "crates/shenko-ui/web/src/ui-preferences.ts": "927540c1592a40da83fc052c9fb8a74a7196f9353a9e1037eb17197eab0d212c",
+      "crates/shenko-ui/web/src/work-frame.tsx": "8c72ed323a78b370c43469f707cdfe2f941e0a8337d922417d2452b9b79c67db"
+    },
+    "matchFrozenCommit": true,
+    "unchanged": true,
+    "actualInstall": {
+      "mode": "frozen",
+      "lockSha256": "567b7b1d37e6aef4ce9e6436f024cddf3e59993f716ad1a7bc724779d4756c3e",
+      "claim": "Actual frozen pnpm install; install lifecycle scripts disabled.",
+      "verifiedDirectVersions": {
+        "react": "19.3.1",
+        "react-dom": "19.3.1",
+        "@types/react": "19.3.0",
+        "@types/react-dom": "19.3.0",
+        "esbuild": "0.25.12",
+        "typescript": "5.9.3"
+      }
+    }
+  },
+  "verdant": {
+    "ok": true,
+    "consumerRevision": "91a775546ebd21a87d76d76568195a6513437719",
+    "upstreamRevision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "authoredSourceSha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78",
+    "originalProducerSha256": "505eb1d89703dd5a3ce17d0209fddc6541aab62450eb29e956da0f6bd60a307d",
+    "authoredAndProducerUnchanged": true,
+    "artifacts": 20,
+    "cargo": "UNTESTED",
+    "desktopRuntime": "UNTESTED"
+  },
+  "note": "The original Git inputs were recovered into disposable working copies. Consumer-only adaptation patches and all actual negative controls remain separately visible."
+}

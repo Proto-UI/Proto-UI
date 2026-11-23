@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-23T14:06:39.102995+00:00",
+  "ownedPgid": 1358369,
+  "priorStatus": "FAIL",
+  "lastCommand": {
+    "name": "workspace-types",
+    "argv": [
+      "corepack",
+      "pnpm@10.32.1",
+      "check:types"
+    ],
+    "cwd": "$PRODUCT_1450",
+    "expectedExit": 0,
+    "stdout": "logs/workspace-types.stdout.log",
+    "stderr": "logs/workspace-types.stderr.log",
+    "exitCode": null,
+    "error": "Command '['corepack', 'pnpm@10.32.1', 'check:types']' timed out after 1200 seconds",
+    "wallSeconds": 1200.055,
+    "stdoutSha256": "de958f4990c0aa799a31a92fcfdedfefc7f9fa0e95e823cd5a8e5a8fc6a0dcb0",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "signals": [],
+  "before": [],
+  "after": [],
+  "ownedGroupHasLiveMembers": false
+}

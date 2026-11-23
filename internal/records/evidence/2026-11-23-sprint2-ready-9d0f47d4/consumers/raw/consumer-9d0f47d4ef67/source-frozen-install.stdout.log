@@ -1,0 +1,160 @@
+Scope: all 62 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +557
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 557, reused 0, downloaded 0, added 0
+Progress: resolved 557, reused 1, downloaded 0, added 0
+Progress: resolved 557, reused 7, downloaded 0, added 0
+Progress: resolved 557, reused 9, downloaded 0, added 0
+Progress: resolved 557, reused 10, downloaded 0, added 0
+Progress: resolved 557, reused 12, downloaded 0, added 0
+Progress: resolved 557, reused 13, downloaded 0, added 0
+Progress: resolved 557, reused 14, downloaded 0, added 0
+Progress: resolved 557, reused 15, downloaded 0, added 0
+Progress: resolved 557, reused 16, downloaded 0, added 0
+Progress: resolved 557, reused 17, downloaded 0, added 0
+Progress: resolved 557, reused 22, downloaded 0, added 0
+Progress: resolved 557, reused 23, downloaded 0, added 0
+Progress: resolved 557, reused 27, downloaded 0, added 0
+Progress: resolved 557, reused 29, downloaded 0, added 0
+Progress: resolved 557, reused 32, downloaded 0, added 0
+Progress: resolved 557, reused 33, downloaded 0, added 0
+Progress: resolved 557, reused 37, downloaded 0, added 0
+Progress: resolved 557, reused 40, downloaded 0, added 0
+Progress: resolved 557, reused 41, downloaded 0, added 0
+Progress: resolved 557, reused 45, downloaded 0, added 0
+Progress: resolved 557, reused 50, downloaded 0, added 0
+Progress: resolved 557, reused 57, downloaded 0, added 0
+Progress: resolved 557, reused 64, downloaded 0, added 0
+Progress: resolved 557, reused 66, downloaded 0, added 0
+Progress: resolved 557, reused 74, downloaded 0, added 0
+Progress: resolved 557, reused 82, downloaded 0, added 0
+Progress: resolved 557, reused 89, downloaded 0, added 0
+Progress: resolved 557, reused 98, downloaded 0, added 0
+Progress: resolved 557, reused 112, downloaded 0, added 0
+Progress: resolved 557, reused 118, downloaded 0, added 0
+Progress: resolved 557, reused 135, downloaded 0, added 0
+Progress: resolved 557, reused 143, downloaded 0, added 0
+Progress: resolved 557, reused 166, downloaded 0, added 0
+Progress: resolved 557, reused 175, downloaded 0, added 0
+Progress: resolved 557, reused 184, downloaded 0, added 0
+Progress: resolved 557, reused 185, downloaded 0, added 0
+Progress: resolved 557, reused 186, downloaded 0, added 0
+Progress: resolved 557, reused 187, downloaded 0, added 0
+Progress: resolved 557, reused 188, downloaded 0, added 0
+Progress: resolved 557, reused 194, downloaded 0, added 0
+Progress: resolved 557, reused 195, downloaded 0, added 0
+Progress: resolved 557, reused 200, downloaded 0, added 0
+Progress: resolved 557, reused 201, downloaded 0, added 0
+Progress: resolved 557, reused 205, downloaded 0, added 0
+Progress: resolved 557, reused 206, downloaded 0, added 0
+Progress: resolved 557, reused 208, downloaded 0, added 0
+Progress: resolved 557, reused 214, downloaded 0, added 0
+Progress: resolved 557, reused 218, downloaded 0, added 0
+Progress: resolved 557, reused 219, downloaded 0, added 0
+Progress: resolved 557, reused 225, downloaded 0, added 0
+Progress: resolved 557, reused 230, downloaded 0, added 0
+Progress: resolved 557, reused 238, downloaded 0, added 0
+Progress: resolved 557, reused 244, downloaded 0, added 0
+Progress: resolved 557, reused 245, downloaded 0, added 0
+Progress: resolved 557, reused 251, downloaded 0, added 0
+Progress: resolved 557, reused 261, downloaded 0, added 0
+Progress: resolved 557, reused 264, downloaded 0, added 0
+Progress: resolved 557, reused 270, downloaded 0, added 0
+Progress: resolved 557, reused 281, downloaded 0, added 0
+Progress: resolved 557, reused 284, downloaded 0, added 0
+Progress: resolved 557, reused 291, downloaded 0, added 0
+Progress: resolved 557, reused 295, downloaded 0, added 0
+Progress: resolved 557, reused 301, downloaded 0, added 0
+Progress: resolved 557, reused 309, downloaded 0, added 0
+Progress: resolved 557, reused 310, downloaded 0, added 0
+Progress: resolved 557, reused 320, downloaded 0, added 0
+Progress: resolved 557, reused 330, downloaded 0, added 0
+Progress: resolved 557, reused 344, downloaded 0, added 0
+Progress: resolved 557, reused 353, downloaded 0, added 0
+Progress: resolved 557, reused 354, downloaded 0, added 0
+Progress: resolved 557, reused 372, downloaded 0, added 0
+Progress: resolved 557, reused 378, downloaded 0, added 0
+Progress: resolved 557, reused 385, downloaded 0, added 0
+Progress: resolved 557, reused 399, downloaded 0, added 0
+Progress: resolved 557, reused 406, downloaded 0, added 0
+Progress: resolved 557, reused 418, downloaded 0, added 0
+Progress: resolved 557, reused 427, downloaded 0, added 0
+Progress: resolved 557, reused 431, downloaded 0, added 0
+Progress: resolved 557, reused 445, downloaded 0, added 0
+Progress: resolved 557, reused 451, downloaded 0, added 0
+Progress: resolved 557, reused 465, downloaded 0, added 0
+Progress: resolved 557, reused 470, downloaded 0, added 0
+Progress: resolved 557, reused 477, downloaded 0, added 0
+Progress: resolved 557, reused 494, downloaded 0, added 0
+Progress: resolved 557, reused 505, downloaded 0, added 0
+Progress: resolved 557, reused 512, downloaded 0, added 0
+Progress: resolved 557, reused 528, downloaded 0, added 0
+Progress: resolved 557, reused 530, downloaded 0, added 0
+Progress: resolved 557, reused 531, downloaded 0, added 0
+Progress: resolved 557, reused 545, downloaded 0, added 0
+Progress: resolved 557, reused 547, downloaded 0, added 0
+Progress: resolved 557, reused 552, downloaded 0, added 1
+Progress: resolved 557, reused 552, downloaded 0, added 2
+Progress: resolved 557, reused 553, downloaded 0, added 2
+Progress: resolved 557, reused 554, downloaded 0, added 5
+Progress: resolved 557, reused 554, downloaded 0, added 6
+Progress: resolved 557, reused 554, downloaded 0, added 15
+Progress: resolved 557, reused 554, downloaded 0, added 16
+Progress: resolved 557, reused 554, downloaded 0, added 17
+Progress: resolved 557, reused 554, downloaded 0, added 24
+Progress: resolved 557, reused 554, downloaded 0, added 44
+Progress: resolved 557, reused 554, downloaded 0, added 59
+Progress: resolved 557, reused 554, downloaded 0, added 60
+Progress: resolved 557, reused 554, downloaded 0, added 115
+Progress: resolved 557, reused 554, downloaded 0, added 318
+Progress: resolved 557, reused 554, downloaded 0, added 333
+Progress: resolved 557, reused 554, downloaded 0, added 334
+Progress: resolved 557, reused 554, downloaded 0, added 381
+Progress: resolved 557, reused 554, downloaded 0, added 382
+Progress: resolved 557, reused 554, downloaded 0, added 428
+Progress: resolved 557, reused 554, downloaded 0, added 472
+Progress: resolved 557, reused 554, downloaded 0, added 546
+Progress: resolved 557, reused 554, downloaded 0, added 551
+Progress: resolved 557, reused 554, downloaded 0, added 552
+Progress: resolved 557, reused 554, downloaded 0, added 553
+Progress: resolved 557, reused 554, downloaded 0, added 554
+Progress: resolved 557, reused 555, downloaded 0, added 554
+Progress: resolved 557, reused 555, downloaded 0, added 555
+Progress: resolved 557, reused 556, downloaded 0, added 555
+Progress: resolved 557, reused 556, downloaded 0, added 556
+Progress: resolved 557, reused 557, downloaded 0, added 556
+Progress: resolved 557, reused 557, downloaded 0, added 557
+Progress: resolved 557, reused 557, downloaded 0, added 557, done
+
+devDependencies:
++ @astrojs/compiler 2.13.1
++ @mdx-js/mdx 3.1.1
++ @proto.ui/spec-schema 0.1.0 <- packages/spec/schema
++ @proto.ui/types 0.3.0-alpha.2 <- packages/types
++ @types/node 25.6.2
++ @vue/compiler-dom 3.5.31
++ @vue/compiler-sfc 3.5.31
++ ajv 8.18.0
++ esbuild 0.25.12
++ happy-dom 15.11.7
++ hast-util-from-html 2.0.3
++ hast-util-to-html 9.0.5
++ husky 9.1.7
++ import-meta-resolve 4.2.0
++ lint-staged 16.4.0
++ mdast-util-from-markdown 2.0.3
++ mdast-util-gfm 3.1.0
++ mdast-util-to-hast 13.2.1
++ micromark-extension-gfm 3.0.0
++ npm 11.14.1
++ parse5 7.3.0
++ prettier 3.8.1
++ prettier-plugin-astro 0.14.1
++ tsx 4.21.0
++ typescript 5.9.3
++ vitest 2.1.9
++ yaml 2.8.3
+
+Done in 4m 34.4s using pnpm v10.32.1

@@ -35,3 +35,7 @@ internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
+
+# Exact Sprint 2 acceptance receipts and PNGs on this evidence-only branch.
+internal/records/evidence/2026-11-23-sprint2-final-1450ffd5/
+internal/records/evidence/2026-11-23-sprint2-ready-9d0f47d4/

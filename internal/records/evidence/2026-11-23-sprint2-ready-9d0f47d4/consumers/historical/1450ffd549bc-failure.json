@@ -1,0 +1,57 @@
+{
+  "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "runStatus": "FAIL",
+  "acceptanceClaim": false,
+  "startedAt": "2026-11-23T13:22:28.212602+00:00",
+  "finishedAt": "2026-11-23T13:53:32.167170+00:00",
+  "lastActualCommand": {
+    "name": "workspace-types",
+    "argv": [
+      "corepack",
+      "pnpm@10.32.1",
+      "check:types"
+    ],
+    "cwd": "$PRODUCT_1450",
+    "expectedExit": 0,
+    "stdout": "logs/workspace-types.stdout.log",
+    "stderr": "logs/workspace-types.stderr.log",
+    "exitCode": null,
+    "error": "Command '['corepack', 'pnpm@10.32.1', 'check:types']' timed out after 1200 seconds",
+    "wallSeconds": 1200.055,
+    "stdoutSha256": "de958f4990c0aa799a31a92fcfdedfefc7f9fa0e95e823cd5a8e5a8fc6a0dcb0",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "failure": {
+    "message": "workspace-types: expected exit 0, observed None; see $CONTROL/consumer-1450ffd549bc/evidence-run-001/logs/workspace-types.stderr.log",
+    "traceback": "Traceback (most recent call last):\n  File \"$CONTROL/consumer-1450ffd549bc/run-final-consumers.py\", line 333, in main\n    replay.execute()\n    ~~~~~~~~~~~~~~^^\n  File \"$CONTROL/consumer-1450ffd549bc/run-final-consumers.py\", line 306, in execute\n    self.run('workspace-types', ['corepack', 'pnpm@10.32.1', 'check:types'])\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"$CONTROL/consumer-1450ffd549bc/run-final-consumers.py\", line 131, in run\n    raise RuntimeError(f'{name}: expected exit {expected}, observed {record[\"exitCode\"]}; see {stderr}')\nRuntimeError: workspace-types: expected exit 0, observed None; see $CONTROL/consumer-1450ffd549bc/evidence-run-001/logs/workspace-types.stderr.log\n"
+  },
+  "explanation": "The additional aggregate check:types timed out after 1200 seconds. This is a real timeout, not a proven TypeScript diagnostic and not a pass. Tabs 13 did not execute in that historical run.",
+  "originalRecord": "consumer-1450ffd549bc/evidence-run-001/summary.json",
+  "originalRecordSha256": "0a2d2815a20b05b5b3d174521cb5cf8b7cdd13b0ccb005ef0360e841ff9ad0ec",
+  "ownedProcessCleanup": {
+    "checkedAt": "2026-11-23T14:06:39.102995+00:00",
+    "ownedPgid": 1358369,
+    "priorStatus": "FAIL",
+    "lastCommand": {
+      "name": "workspace-types",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:types"
+      ],
+      "cwd": "$PRODUCT_1450",
+      "expectedExit": 0,
+      "stdout": "logs/workspace-types.stdout.log",
+      "stderr": "logs/workspace-types.stderr.log",
+      "exitCode": null,
+      "error": "Command '['corepack', 'pnpm@10.32.1', 'check:types']' timed out after 1200 seconds",
+      "wallSeconds": 1200.055,
+      "stdoutSha256": "de958f4990c0aa799a31a92fcfdedfefc7f9fa0e95e823cd5a8e5a8fc6a0dcb0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "signals": [],
+    "before": [],
+    "after": [],
+    "ownedGroupHasLiveMembers": false
+  }
+}

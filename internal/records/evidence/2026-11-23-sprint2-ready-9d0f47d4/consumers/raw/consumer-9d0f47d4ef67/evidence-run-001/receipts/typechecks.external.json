@@ -1,0 +1,21 @@
+{
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "aggregate": {
+    "command": "corepack pnpm@10.32.1 check:types",
+    "status": "NOT_RUN_HERE",
+    "claim": "No all-types acceptance claim from this bounded local replay."
+  },
+  "workspace": {
+    "command": "corepack pnpm@10.32.1 check:types:workspace",
+    "owner": "official Sprint 2 hosted consumer workflow",
+    "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188583301",
+    "localStatus": "NOT_RUN_HERE",
+    "externalStatus": "REQUIRES_INDEPENDENT_READBACK"
+  },
+  "docs": {
+    "command": "corepack pnpm@10.32.1 check:types:docs",
+    "localStatus": "NOT_EXECUTED_YET",
+    "owner": "this replay after complete public build and Tabs 13",
+    "prerequisite": "corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "kind": "external-workspace-typecheck-readback",
+  "readAt": "2026-11-23T14:32:05.195224+00:00",
+  "source": {
+    "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+    "status": "",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "untracked": []
+  },
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188583301",
+  "artifactId": 14826253625,
+  "rawReceipt": "hosted-9d0f47d4-45188583301/extracted/receipt.json",
+  "rawReceiptSha256": "b169a04ad9004030ee79d4194e638acd182376fc6e50941615e0285b5bf184c1",
+  "scope": "Exact-head workspace typecheck only; docs types belong to separate local stage.",
+  "actualStep": {
+    "id": "workspace-types",
+    "startedAt": "2026-11-23T13:59:33.988Z",
+    "status": "passed",
+    "invocation": {
+      "command": "corepack",
+      "args": [
+        "pnpm@10.32.1",
+        "check:types:workspace"
+      ],
+      "cwd": "$GITHUB_WORKSPACE/",
+      "log": "$GITHUB_TEMP/sprint2-consumers/workspace-types/run.log"
+    },
+    "process": {
+      "code": 0,
+      "signal": null,
+      "timeout": false
+    },
+    "finishedAt": "2026-11-23T14:00:21.198Z"
+  },
+  "status": "PASS",
+  "aggregateAcceptanceClaim": false
+}

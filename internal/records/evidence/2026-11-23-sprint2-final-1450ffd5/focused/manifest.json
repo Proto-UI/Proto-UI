@@ -1,0 +1,120 @@
+{
+  "status": "passed",
+  "started_utc": "2026-11-23T13:23:49.284303+00:00",
+  "expected_head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "expected_tree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+  "expected_cases": 275,
+  "test_files": [
+    "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+    "packages/prototypes/base/test/checkbox.test.ts",
+    "packages/prototypes/base/test/field-choices.test.ts",
+    "packages/compiler/test/text-reset-native.test.ts",
+    "packages/compiler/test/text-selection-consumer.test.ts",
+    "packages/compiler/test/native-support-plan.test.ts"
+  ],
+  "runner_sha256": "14be24cb99c5691543d8db2300008e6a05f39cb3ea88e758998b8c44cf2ec682",
+  "before": {
+    "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "tree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+    "status": "",
+    "files": {
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/prototypes/base/test/checkbox.test.ts": "252fa99ab135a3192de9e3e8d22aa87d4399ee60f13cc8e04b705b2d9b6977d8",
+      "packages/prototypes/base/test/field-choices.test.ts": "c9c45a19d052bd055bf17160695a4c04ff0ff1ded8e5e9c197240b0898dcffa4",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d",
+      "packages/compiler/test/text-selection-consumer.test.ts": "a197f4a84327d01cce980c7a90fc316966d7a05ab515bada944f635f282fc4e4",
+      "packages/compiler/test/native-support-plan.test.ts": "9b2ab77ab9e77f8edbd0bcaa0ef47b451f5579fd9cc95a0dac6da141776ca460",
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4",
+      "packages/compiler/src/native-support/dom-modules.template.ts": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a"
+    }
+  },
+  "node_version": "v24.22.3",
+  "pnpm_version": "10.32.1",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+    "packages/prototypes/base/test/checkbox.test.ts",
+    "packages/prototypes/base/test/field-choices.test.ts",
+    "packages/compiler/test/text-reset-native.test.ts",
+    "packages/compiler/test/text-selection-consumer.test.ts",
+    "packages/compiler/test/native-support-plan.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--pool=forks",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=<REVIEW_EVIDENCE_DIR>/final-validation-1450ffd5-20261123/vitest.json"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 82.44562068901723,
+  "log_sha256": "71835fd332b2dd0a6ab3144351a903e7d51e40cfbc2925b19f1fc9c22137f67f",
+  "json_sha256": "c78d7a2110b66a2040bf6d8f7f001e39ef44cf90027a3c98677cf1c4e3d23dec",
+  "files": [
+    {
+      "path": "packages/compiler/test/native-support-plan.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 25
+      }
+    },
+    {
+      "path": "packages/compiler/test/text-reset-native.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 28
+      }
+    },
+    {
+      "path": "packages/compiler/test/text-selection-consumer.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 20
+      }
+    },
+    {
+      "path": "packages/prototypes/base/test/checkbox.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "packages/prototypes/base/test/field-choices.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 36
+      }
+    },
+    {
+      "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 158
+      }
+    }
+  ],
+  "assertion_counts": {
+    "passed": 275
+  },
+  "after": {
+    "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "tree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+    "status": "",
+    "files": {
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/prototypes/base/test/checkbox.test.ts": "252fa99ab135a3192de9e3e8d22aa87d4399ee60f13cc8e04b705b2d9b6977d8",
+      "packages/prototypes/base/test/field-choices.test.ts": "c9c45a19d052bd055bf17160695a4c04ff0ff1ded8e5e9c197240b0898dcffa4",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d",
+      "packages/compiler/test/text-selection-consumer.test.ts": "a197f4a84327d01cce980c7a90fc316966d7a05ab515bada944f635f282fc4e4",
+      "packages/compiler/test/native-support-plan.test.ts": "9b2ab77ab9e77f8edbd0bcaa0ef47b451f5579fd9cc95a0dac6da141776ca460",
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4",
+      "packages/compiler/src/native-support/dom-modules.template.ts": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a"
+    }
+  },
+  "source_binding_unchanged": true,
+  "finished_utc": "2026-11-23T13:25:12.553989+00:00"
+}

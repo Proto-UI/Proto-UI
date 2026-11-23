@@ -1,0 +1,3557 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-bound-current-head-visual-review",
+  "status": "accepted-within-recorded-matrix",
+  "currentPrVisualAcceptance": true,
+  "acceptedPrHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "platformApprovalAssessed": false,
+  "scope": "The recorded 100-image website matrix at 9d0f47d4 only. No blanket closure of original B/C/D, historical C23/C24, or Hook conditions; no platform approval.",
+  "source": {
+    "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+    "status": "",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "untracked": []
+  },
+  "reviewer": "Codex / s2_integration_review",
+  "reviewerImplementationScope": "Compiler native text reset/selection integration and Checkbox reset; did not author the CSS, sidebar, Tabs examples, Hero or Hook documentation fixes.",
+  "workflowRun": 45188583301,
+  "job": 137740608739,
+  "artifactId": 14826253625,
+  "zipSha256": "48ffcfc5a814d129d1cefa8faed91b4dc5529b5a1677c7d752faa12210519781",
+  "zipBytes": 64794471,
+  "browser": "157.0.8103.78",
+  "reviewedAtUtc": "2026-11-23T14:56:32.847107+00:00",
+  "capturePairsVerified": 100,
+  "changedCurrentPngsActuallyInspected": 44,
+  "byteIdenticalPngsWithPriorActualInspectionReused": 56,
+  "confirmedVisualBlockersInObservedMatrix": [],
+  "automatedSiteCases": {
+    "total": 42,
+    "unique": 42,
+    "passed": 42,
+    "pending": 0,
+    "failed": 0,
+    "sameExecutedNamesAs1450": true,
+    "groups": {
+      "B": 8,
+      "C": 24,
+      "D": 8,
+      "Hook": 2
+    },
+    "report": "../hosted/site/report.json",
+    "reportSha256": "655e8ca755f5cbdf71aa7cd527b4eed6e8629087d1ce990226847ea023ac0eee",
+    "log": "../hosted/site/run.log",
+    "logSha256": "43332d2a1d56c86eade04eb6400d1d3ffa728c025cf675c5906db32ae6586fdd"
+  },
+  "metadataIntegrity": {
+    "expected": 100,
+    "matched": 100,
+    "missing": 0,
+    "duplicate": 0,
+    "unexpected": 0,
+    "problems": []
+  },
+  "actualThemeMappings": {
+    "light requested / light actual / enhanced": 39,
+    "dark requested / dark actual / enhanced": 32,
+    "light requested / light actual / failed-scripts": 13,
+    "dark requested / dark actual / failed-scripts": 12,
+    "light requested / dark actual / no-js": 4
+  },
+  "previousReview": {
+    "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "index": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+    "indexSha256": "4d8da8092316a2893fd715bbf65d9c77ec1cf42e22dee5b2ae48889ab79770a6"
+  },
+  "method": {
+    "newContactSheetsActuallyViewed": 22,
+    "newIndividualFullFramesActuallyViewed": 3,
+    "contactSheetSourceMappings": "review-process.json",
+    "comparison": "pixel-comparison.json",
+    "measurements": "measurement-audit.json",
+    "rawPngsUnmodified": true
+  },
+  "captures": [
+    {
+      "id": "tabs-en-wc-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-0-rhea.png",
+      "pngSha256": "0a1d594addcfcbef34260fe8ae8593ad170b7aa674348aefe9f5a61f8bb28a91",
+      "metadata": "../hosted/site/tabs-en-wc-0-rhea.json",
+      "metadataSha256": "d74dbcfc01a18365440a04be90f35dececf89b2a101623ece4194bae229e05ad",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-wc",
+          "9d-changed-overview-1",
+          "tabs-en-wc-0-rhea-original"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "9f440616e53a3605dc3bf9c18501a95710623e0dadabbe017a95da13ad898759",
+        "changedPixelCount": 140281,
+        "changedPixelBounds": [
+          251,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-wc-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-1-nova.png",
+      "pngSha256": "28a52f9c5a0b003657d3918dd53c6ad38003ee0bdc6e01a277d2c098f77be371",
+      "metadata": "../hosted/site/tabs-en-wc-1-nova.json",
+      "metadataSha256": "18109761451145b4be1a1f7640ae63eb9cd875ad05e8a3534997b8ad36c3b954",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-wc",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "96940fc362ee5b720d883dc4b31efb2c00d2bb6beca608cc668d69d7fd8623d2",
+        "changedPixelCount": 140450,
+        "changedPixelBounds": [
+          251,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-wc-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-2-rhea.png",
+      "pngSha256": "cb961776d2ff0a968583e2d3977d0fae562e3e5e34a912d13ff998d58006fc39",
+      "metadata": "../hosted/site/tabs-en-wc-2-rhea.json",
+      "metadataSha256": "bcf45529994d17d07c2a8347efaeaaee477a058b3c5dafd5f52a41ce670c3361",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-wc",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "c14ebdbf7cff39b5d71888f189304a804f21bf627016162fdfb86bdcab5769e4",
+        "changedPixelCount": 140281,
+        "changedPixelBounds": [
+          251,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-wc-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-3-new-york-v4.png",
+      "pngSha256": "d4215c367d2a7944c6d6954e53c1b828d3b94e57010c5fdb05234da81fd23325",
+      "metadata": "../hosted/site/tabs-en-wc-3-new-york-v4.json",
+      "metadataSha256": "2ef2e257e8de5ae288d9ee5f2258285d71c2f7e8d8fa2fb35bf09b808973054a",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-wc",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "6b9649bb3975e062798018ba7dc63f5327c26026bb484ced5c071709585c10c3",
+        "changedPixelCount": 142067,
+        "changedPixelBounds": [
+          243,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-wc-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-4-nova.png",
+      "pngSha256": "8cf50e6de9d279b60f364c351b95269280f641fbe60a528987b3b31e900ffbd2",
+      "metadata": "../hosted/site/tabs-en-wc-4-nova.json",
+      "metadataSha256": "8defec7333882e079eb9d3393a02044c125fbf3d0f1e3c10ea7dd57408f86000",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-wc",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "0202058ae0b05eb0056562d6252e875bba4134e5708c61de6e8779e8b3948d96",
+        "changedPixelCount": 140521,
+        "changedPixelBounds": [
+          225,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-react-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-0-rhea.png",
+      "pngSha256": "8d44a58acf43d0a93145ab853f0b1207c575181773bf0ccb4bc5672624fc1db2",
+      "metadata": "../hosted/site/tabs-en-react-0-rhea.json",
+      "metadataSha256": "4bc07db632c6c015d0c0fd899c29dee5b29224b0cdfec5236da48fad71dbafee",
+      "locale": "en",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-react",
+          "9d-changed-overview-1"
+        ],
+        "note": "The dark English Tabs exhibition remains readable. The profile labels and distinct recipe geometry match the requested frames; Password remains selected, its panel wording stays stable, and disabled Billing remains visibly muted. No clipping or visual state loss is visible; DOM identity is supported separately by the executed test.",
+        "previousPngSha256": "367b133e88d89089761e14d8589c205d1fc4ed5ae1627595745bb211ab5e3b4c",
+        "changedPixelCount": 3236,
+        "changedPixelBounds": [
+          1151,
+          149,
+          1377,
+          258
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-react-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-1-nova.png",
+      "pngSha256": "070eeff32cf5684b61e2ad59e27eeb1b1dc865876217640aadc9db52c19b7049",
+      "metadata": "../hosted/site/tabs-en-react-1-nova.json",
+      "metadataSha256": "49d269687efe06c545d22921566d0676e0fafd779544bb4bcf9b4b6783a787fe",
+      "locale": "en",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-react",
+          "9d-changed-overview-1"
+        ],
+        "note": "The dark English Tabs exhibition remains readable. The profile labels and distinct recipe geometry match the requested frames; Password remains selected, its panel wording stays stable, and disabled Billing remains visibly muted. No clipping or visual state loss is visible; DOM identity is supported separately by the executed test.",
+        "previousPngSha256": "4da006fb701e2dbc80fa1ef2fe5a20f5d37788ed343fbe21e658c2719c343aed",
+        "changedPixelCount": 20,
+        "changedPixelBounds": [
+          244,
+          467,
+          248,
+          473
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-react-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-2-rhea.png",
+      "pngSha256": "7acd03afda7507eccea119119ffc4b961fcd24c0688d26211170f52e36b56139",
+      "metadata": "../hosted/site/tabs-en-react-2-rhea.json",
+      "metadataSha256": "3cfa6d831cad2e352a20f0935e00e6f2cf3dc88d15f2043f91e9430401a9115c",
+      "locale": "en",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "7acd03afda7507eccea119119ffc4b961fcd24c0688d26211170f52e36b56139",
+        "previousActualNote": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed rhea label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-react"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-en-react-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-3-new-york-v4.png",
+      "pngSha256": "92814ac0335c2bef4e05097fd49a496cd6849979f0e674b18035e1ff9f1c0b55",
+      "metadata": "../hosted/site/tabs-en-react-3-new-york-v4.json",
+      "metadataSha256": "b481288da51be0440104be3310baac3d781e991127f9ad68ba96294ca7f94323",
+      "locale": "en",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "92814ac0335c2bef4e05097fd49a496cd6849979f0e674b18035e1ff9f1c0b55",
+        "previousActualNote": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed new-york-v4 label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-react"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-en-react-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-4-nova.png",
+      "pngSha256": "04ad2ec37abb269b77c5932863b52211b08e4af7b58510e1d510c7bd3683bdbe",
+      "metadata": "../hosted/site/tabs-en-react-4-nova.json",
+      "metadataSha256": "2d3b9666c5530e89b70cbf3e0074f1ab4e6aadab66e4583fb19fad22baecf438",
+      "locale": "en",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "04ad2ec37abb269b77c5932863b52211b08e4af7b58510e1d510c7bd3683bdbe",
+        "previousActualNote": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed nova label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-react"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-en-vue-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-0-rhea.png",
+      "pngSha256": "146c282ed40001e6dc73213b6c211e16520938b38874a40ec7d78bcb43b9c45e",
+      "metadata": "../hosted/site/tabs-en-vue-0-rhea.json",
+      "metadataSha256": "836e4bd988d75db19f04410a20071295b9c56afaa2cf25da141d1faa5dee7693",
+      "locale": "en",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-vue",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "ae58881174860ab2ab1d245c544de2d1e7a52f053f5a031a92461b8487643cef",
+        "changedPixelCount": 132398,
+        "changedPixelBounds": [
+          359,
+          33,
+          1379,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-vue-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-1-nova.png",
+      "pngSha256": "930ebdda8021858c2e5e853a13e9047efe1500cadf7951dada395341eca7b5e0",
+      "metadata": "../hosted/site/tabs-en-vue-1-nova.json",
+      "metadataSha256": "76fe206d1572f5e697a9cadcc7a6ddacbf184dd8932b28e860ee88e9fc1c2e2e",
+      "locale": "en",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-vue",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "94f12f21b44975f10963cf87c0b5ec9efe17e38214f51d40f645d6a46f496406",
+        "changedPixelCount": 131441,
+        "changedPixelBounds": [
+          359,
+          33,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-vue-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-2-rhea.png",
+      "pngSha256": "b38e4efac5009bb8b95c2ae5e7e37741f73d096a3610ef8fc07f4af1e08c697f",
+      "metadata": "../hosted/site/tabs-en-vue-2-rhea.json",
+      "metadataSha256": "e05fbe189268f0c3118ac382b515bb0e525ab047ca2ce6eb206d27314ad4eed0",
+      "locale": "en",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-vue",
+          "9d-changed-overview-1"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "f967aec3c40343cd3c88cc2679e955da6374230872ce6905051b50b4f03de88f",
+        "changedPixelCount": 131272,
+        "changedPixelBounds": [
+          359,
+          33,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-vue-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-3-new-york-v4.png",
+      "pngSha256": "77308287dd2a3a9ccedcbfc9144a880506046420ea230b089298b2771e550453",
+      "metadata": "../hosted/site/tabs-en-vue-3-new-york-v4.json",
+      "metadataSha256": "1f50ce8a2420035155e24c2f94840de3c6907604256ae22aacbf0b7c6bd087c1",
+      "locale": "en",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-vue",
+          "9d-changed-overview-2"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "1b8052d4e083b9f909ace021bfe8777fb7a3425dab9961f4a985a8d291a87c96",
+        "changedPixelCount": 133188,
+        "changedPixelBounds": [
+          243,
+          33,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-vue-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-4-nova.png",
+      "pngSha256": "b4c3c2342f0194e62e871df7ad9872e797a7bb5e8e099b3a46e4a283b6807d76",
+      "metadata": "../hosted/site/tabs-en-vue-4-nova.json",
+      "metadataSha256": "d09fd68f8369631abebc360b1d5762307b7418a3c54368f8161642a71d5ccc54",
+      "locale": "en",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-vue",
+          "9d-changed-overview-2"
+        ],
+        "note": "English authored-coverage boundary and switching instructions remain readable. The captured profile label and corresponding geometry agree; Password stays visibly selected with the same panel wording and disabled Billing. No clipping or unexpected state loss is visible. Identity retention remains supported by the executed assertions, not pixels alone.",
+        "previousPngSha256": "363ffb9fc7c2fd6540207ceda4e30b39f75a825abb72f1cd6b0aaa3edf0d0daf",
+        "changedPixelCount": 131470,
+        "changedPixelBounds": [
+          225,
+          33,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-vue2-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-0-rhea.png",
+      "pngSha256": "1454c45ab1bb42d9ab67b77e3495a9e4012eb5ec7e61799136ae62e5e8c71207",
+      "metadata": "../hosted/site/tabs-en-vue2-0-rhea.json",
+      "metadataSha256": "40d91c9a290daca17cc1cff71dc49e5bd31fb7fbfe83310d8e22cab11c786fd1",
+      "locale": "en",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-en-vue2",
+          "9d-changed-overview-2"
+        ],
+        "note": "The dark English Tabs exhibition remains readable. The profile labels and distinct recipe geometry match the requested frames; Password remains selected, its panel wording stays stable, and disabled Billing remains visibly muted. No clipping or visual state loss is visible; DOM identity is supported separately by the executed test.",
+        "previousPngSha256": "ab181b884ca302b998f36c2e19224252590a433a2db64d2b75c6bc15fef5fdab",
+        "changedPixelCount": 4,
+        "changedPixelBounds": [
+          1378,
+          161,
+          1379,
+          259
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-en-vue2-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-1-nova.png",
+      "pngSha256": "f8211a8b2d64cb1f265bd6eed541edc2b9bba307c990fe095a6ffb7a944b9d22",
+      "metadata": "../hosted/site/tabs-en-vue2-1-nova.json",
+      "metadataSha256": "a2a4dc208d82f2ef5dc60d9ea2ba706b373e90f1c7b02346dea654889a2e4c7e",
+      "locale": "en",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "f8211a8b2d64cb1f265bd6eed541edc2b9bba307c990fe095a6ffb7a944b9d22",
+        "previousActualNote": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: nova matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-2-rhea.png",
+      "pngSha256": "2de6500e411bafb7304aa7e1b68f2751ad917a76e36b9d7dd04263fb10efd2ea",
+      "metadata": "../hosted/site/tabs-en-vue2-2-rhea.json",
+      "metadataSha256": "bbbed0982736fc7d2f58052687a73d04639e62d706b4a52bf264b2a2154172ce",
+      "locale": "en",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "2de6500e411bafb7304aa7e1b68f2751ad917a76e36b9d7dd04263fb10efd2ea",
+        "previousActualNote": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: rhea matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-3-new-york-v4.png",
+      "pngSha256": "d520383ba6664df74f1d2e8134ad979810acd275466a06e8f0e4c280571b72c2",
+      "metadata": "../hosted/site/tabs-en-vue2-3-new-york-v4.json",
+      "metadataSha256": "9e5d086dd3e275a13a8ebdcb4acab7c5d77e7ca9d24c7c516f04a15affa9a3e8",
+      "locale": "en",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "d520383ba6664df74f1d2e8134ad979810acd275466a06e8f0e4c280571b72c2",
+        "previousActualNote": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: new-york-v4 matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-4-nova.png",
+      "pngSha256": "2451263ef149ffe482220b7452baff08a6160e0bbb5fcc08183a47030ee41b78",
+      "metadata": "../hosted/site/tabs-en-vue2-4-nova.json",
+      "metadataSha256": "1a8f22f37675483877c9f19deb42221d25e84abf38577f16eb4a89625c346276",
+      "locale": "en",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "2451263ef149ffe482220b7452baff08a6160e0bbb5fcc08183a47030ee41b78",
+        "previousActualNote": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: nova matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-en-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-0-rhea.png",
+      "pngSha256": "fd79ab90ffd3b525e715e66f401c28584d6b1a03826ebbb0686eca3f73d7f733",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-0-rhea.json",
+      "metadataSha256": "1f0b2f1b44e233309702fb4bcad5e203ba4efe036df15fb238e100ee8ca6a1ba",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-wc",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "09c615f6df822343c2671b6956d55b62aebed8970f4f8c4d70e5984ff2b4e211",
+        "changedPixelCount": 132387,
+        "changedPixelBounds": [
+          251,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-1-nova.png",
+      "pngSha256": "4805925941529af27f71ffc02fb85548a62fb3da744aaa838f87a4cff0c24b7c",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-1-nova.json",
+      "metadataSha256": "0272b5e5fd48f925b1ff10ad8ce9b58f56ad181f7386b65d89eca1e3304a0c58",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-wc",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "497807ed893a81cef6ec18fe49942433ef6bc764b9080e7963f2a9cf7c32b6f9",
+        "changedPixelCount": 132525,
+        "changedPixelBounds": [
+          359,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-2-rhea.png",
+      "pngSha256": "4f21aa257c55f77708e40e91ed36027b3e51d5a806483bb8b0c546b4f4362c56",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-2-rhea.json",
+      "metadataSha256": "5e6ae5c1272b4a3459bf2e7a40e8f9e69ecbb7a408359259b7a2f73101eba9b3",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-wc",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "570f8836873e373fd4625f01c5ca5d5c6d89c7c75f97e2b3ccad825717e031da",
+        "changedPixelCount": 132365,
+        "changedPixelBounds": [
+          359,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-3-new-york-v4.png",
+      "pngSha256": "e004ab8e056d89eba5073a48d045fd3cf7c0d7baefb4a7135a4cdc741f38d409",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-3-new-york-v4.json",
+      "metadataSha256": "b30c1cbfe411e1ea4d4c154890c78bc42731e263daad94a7b1c3d754d5a59f76",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-wc",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "9d622bfe76a248a80614d3ff419ce79a1677e0c0e9c1f34c3bf1b46ba84a5c6d",
+        "changedPixelCount": 134139,
+        "changedPixelBounds": [
+          359,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-4-nova.png",
+      "pngSha256": "e81e5d3e4b44f48e67fab7e72160e7b493dd2a644b55178933f6d20c563928c6",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-4-nova.json",
+      "metadataSha256": "1bc1220dd8218fec9e33d7e1230bbad858f434d7283328c51fb0b13199735b28",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-wc",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "196a67e3b0d871aec0999d26ce9b57a21805a08e5e3ea05505fb31a6e45cfa56",
+        "changedPixelCount": 132551,
+        "changedPixelBounds": [
+          213,
+          72,
+          1032,
+          1000
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-0-rhea.png",
+      "pngSha256": "88b70d6e70fb4390ea21f06b4552a80b552e1e13a928f162f68bac937745f317",
+      "metadata": "../hosted/site/tabs-zh-cn-react-0-rhea.json",
+      "metadataSha256": "b0a86f8ec3d501c1983b0152476fa2bf416f0ab32e2cf132bb0d4318f8678468",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "88b70d6e70fb4390ea21f06b4552a80b552e1e13a928f162f68bac937745f317",
+        "previousActualNote": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to rhea; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-1-nova.png",
+      "pngSha256": "1eb9f6506f71a8b866e7dc7ea6a65e9e0ac6754f7bb85f40068eea5e44a52874",
+      "metadata": "../hosted/site/tabs-zh-cn-react-1-nova.json",
+      "metadataSha256": "3f222197f1e45dc46e0087e1fbe2d65d7415be633b363721b2a704e4df5a5b84",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "1eb9f6506f71a8b866e7dc7ea6a65e9e0ac6754f7bb85f40068eea5e44a52874",
+        "previousActualNote": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to nova; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-2-rhea.png",
+      "pngSha256": "6aa13ff4b4c3b3c3a68ccf4f6335f573617241235d6ae661d91c870115b031ea",
+      "metadata": "../hosted/site/tabs-zh-cn-react-2-rhea.json",
+      "metadataSha256": "6f9af0898977c1ec1ca327aea9bf3186a7334c71be2ddf339d6c49b9765542a5",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "6aa13ff4b4c3b3c3a68ccf4f6335f573617241235d6ae661d91c870115b031ea",
+        "previousActualNote": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to rhea; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-3-new-york-v4.png",
+      "pngSha256": "c51a13b40d7b3f0052f480c37a5e7ca835dc2c1ad77a248e530ef440fd1a19f4",
+      "metadata": "../hosted/site/tabs-zh-cn-react-3-new-york-v4.json",
+      "metadataSha256": "2ca63f7b106b8ea316eb8b37e545a57951be1a9c286bcf0edefeff4b925f7270",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "c51a13b40d7b3f0052f480c37a5e7ca835dc2c1ad77a248e530ef440fd1a19f4",
+        "previousActualNote": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to new-york-v4; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-4-nova.png",
+      "pngSha256": "aa760f953440e481950849d428a2b82d692862d8369e6a4d9d6139dd16bdcc1c",
+      "metadata": "../hosted/site/tabs-zh-cn-react-4-nova.json",
+      "metadataSha256": "a9a713fecc0edf205109d107bc057ecb993c6a23dbbef5634829901d80d15905",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "aa760f953440e481950849d428a2b82d692862d8369e6a4d9d6139dd16bdcc1c",
+        "previousActualNote": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to nova; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-0-rhea.png",
+      "pngSha256": "4646d190b8930b310111d7ae12450ccff6151d112ffbc79b63ef7e037f91841d",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-0-rhea.json",
+      "metadataSha256": "20f78c606c687cd9eeb2ee96af05a5555b6501db9b4160bea35e704e94726169",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-vue",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "0a930d7fb5281f1188a4efa58c83f1960e392e6215aaf20e8adfe40c1e5ab211",
+        "changedPixelCount": 2421,
+        "changedPixelBounds": [
+          1153,
+          152,
+          1379,
+          263
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-1-nova.png",
+      "pngSha256": "05267951b956537dec9348cefcf6b7d466ebdeaafe5701c66c9b166519bb0b68",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-1-nova.json",
+      "metadataSha256": "c148896d582d71bd2f00913266f91597bb9dcb780f76a9044ccf6935d1846609",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-vue",
+          "9d-changed-overview-2"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "d65eb31867a797eb0c78613e07e0a9c0a7f09a2b2668f589fb2494bbd62ab728",
+        "changedPixelCount": 20,
+        "changedPixelBounds": [
+          244,
+          467,
+          248,
+          473
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-2-rhea.png",
+      "pngSha256": "75994986c2d3d7c033b41082bb350b88923620ae505bc296ceefa4425f65f36a",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-2-rhea.json",
+      "metadataSha256": "acd537208cad5fdd875f75c749925159dacbb47dc6fbca78ad81c8c7cffb834b",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "75994986c2d3d7c033b41082bb350b88923620ae505bc296ceefa4425f65f36a",
+        "previousActualNote": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: rhea and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-zh-cn-vue"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-3-new-york-v4.png",
+      "pngSha256": "40fd732b4626a7d3f9a79a540b9f8cd71f7a9f876f7716370fd9f0cd8d2b695d",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-3-new-york-v4.json",
+      "metadataSha256": "b1f131508f3638dc971848de5d60730354f8dd4e2d7b82d71970586dafbcb260",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "40fd732b4626a7d3f9a79a540b9f8cd71f7a9f876f7716370fd9f0cd8d2b695d",
+        "previousActualNote": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: new-york-v4 and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-zh-cn-vue"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-4-nova.png",
+      "pngSha256": "db5f118f4ed482055a81a7cb349a297454faa749d7d1d128cd397ecb1ccd4f42",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-4-nova.json",
+      "metadataSha256": "32c054ae9f04bd3020f0d8fd93fd92553441bd4c489b19ade6b0fec3a77bd401",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-vue",
+          "9d-changed-overview-3"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "05267951b956537dec9348cefcf6b7d466ebdeaafe5701c66c9b166519bb0b68",
+        "changedPixelCount": 77,
+        "changedPixelBounds": [
+          213,
+          502,
+          253,
+          858
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-0-rhea.png",
+      "pngSha256": "df039e1b7c8df6e516f63687a23e24b57ee3cee3c71add97bd921ee85288367b",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-0-rhea.json",
+      "metadataSha256": "68b09bb84bbd769e992de1499962b55a022222798749c5f11ff2633fcff07833",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-tabs-detail-zh-cn-vue2",
+          "9d-changed-overview-3"
+        ],
+        "note": "Chinese authored-coverage boundaries and keyboard/pointer instructions are legible without missing glyphs or clipping. The shown profile and geometry agree; Password remains selected with stable panel wording and muted disabled Billing. The four keyboard transitions retain state visually; identity and the narrower later pointer outcome come from the separately executed assertions.",
+        "previousPngSha256": "89e0b6a97708579d8af89370eb3bf9439b690f3b9031ae53b865201c9d94c39f",
+        "changedPixelCount": 2669,
+        "changedPixelBounds": [
+          1153,
+          152,
+          1379,
+          263
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-1-nova.png",
+      "pngSha256": "30cef57c72257cb730c54a812ea270619e772cc066c926311de34a03182bf1bf",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-1-nova.json",
+      "metadataSha256": "61afa540e2eae6148ae2daac3dc806f5b1467f197f3ac8bf7042f61bd150df8a",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "30cef57c72257cb730c54a812ea270619e772cc066c926311de34a03182bf1bf",
+        "previousActualNote": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: nova and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-zh-cn-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-2-rhea.png",
+      "pngSha256": "257e4c32ff3883598b002ef7f931351df44a0cdf8aad758e92e7e30e435bb2dd",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-2-rhea.json",
+      "metadataSha256": "cfee606f28dab38887808905cfd1ecfc90832b242a94cac75dc73c9159bfb4cd",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "257e4c32ff3883598b002ef7f931351df44a0cdf8aad758e92e7e30e435bb2dd",
+        "previousActualNote": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: rhea and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-zh-cn-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-3-new-york-v4.png",
+      "pngSha256": "3d9585d7a6e9e01e76da4d13fbe56e11770358192bedda97b0d3789e9f3214cd",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-3-new-york-v4.json",
+      "metadataSha256": "57714cf013495673525a543ace59914e4d74d0ad73af58d5783222d82f790a9c",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "3d9585d7a6e9e01e76da4d13fbe56e11770358192bedda97b0d3789e9f3214cd",
+        "previousActualNote": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: new-york-v4 and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-zh-cn-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-4-nova.png",
+      "pngSha256": "675baf994f64c83d1ec5030e342dd07012829a62b66f3ce18cf4e4aa61c8857a",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-4-nova.json",
+      "metadataSha256": "f151d5d144d22949e96844cf79a022716ecf57a0d1eb0f6afb9f14b5d3782cb8",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "675baf994f64c83d1ec5030e342dd07012829a62b66f3ce18cf4e4aa61c8857a",
+        "previousActualNote": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: nova and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-tabs-detail-zh-cn-vue2"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-enhanced-group-hover.png",
+      "pngSha256": "780c92f0b4f93c17dc495e337be5a359ea180e6651f276f8982cc36abd411456",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "93b4db2f7f4fed4a470a67f46c493079022197173f3c27f695afcd4e7702a7e2",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-en-light-shadcn",
+          "9d-changed-overview-3"
+        ],
+        "note": "English group and leaf labels, hierarchy, disclosure arrows and longer wrapped labels remain legible. Hover fill and a distinct outer focus outline follow the selected family shape. Shadcn remains restrained and rounded; Brutalist retains stronger family styling and rounded fallback/focus geometry. Exact 8px/5px radii and 32px desktop target geometry are verified by the retained measurements and source-bound assertions; group and leaf observations are not assumed simultaneous.",
+        "previousPngSha256": "f0ee109113b800947f5ef42cf81e5673ccd81e3b55c5f69e780790b55298c48e",
+        "changedPixelCount": 23,
+        "changedPixelBounds": [
+          225,
+          843,
+          253,
+          858
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-enhanced-focus.png",
+      "pngSha256": "254f995cc53fd9ff6e9117cc8825bf81992a88d8906f8ad35b25b9e84db4fef3",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-enhanced-focus.json",
+      "metadataSha256": "fb7681d884806d420622c6e81bdf05301406eff2d442500e28dd5251af223660",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-en-light-shadcn",
+          "9d-changed-overview-3"
+        ],
+        "note": "English group and leaf labels, hierarchy, disclosure arrows and longer wrapped labels remain legible. Hover fill and a distinct outer focus outline follow the selected family shape. Shadcn remains restrained and rounded; Brutalist retains stronger family styling and rounded fallback/focus geometry. Exact 8px/5px radii and 32px desktop target geometry are verified by the retained measurements and source-bound assertions; group and leaf observations are not assumed simultaneous.",
+        "previousPngSha256": "3555bb4813380b8e37c0a1aa992c907ebf98b91c11ab22368f558cbbd663f625",
+        "changedPixelCount": 23,
+        "changedPixelBounds": [
+          225,
+          669,
+          253,
+          684
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "b840b4fa14afb66dfa98f3c005e951e666fcb8221634cf4e2eddc59426708c13",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "5e32024e7b0a82bb104cb0e0303e29e0258643191dc32164f034fe9b5295012b",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "b840b4fa14afb66dfa98f3c005e951e666fcb8221634cf4e2eddc59426708c13",
+        "previousActualNote": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-en-light-shadcn"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-focus.png",
+      "pngSha256": "d5275cec1649b6c2f89bb0e4a316bca5bff1f569c5e054e6e6deb0f7ad9c2bfa",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "362337623857ad6c19c2b6b01837bab0e90760250cecc61390b76b96255fe7a7",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "d5275cec1649b6c2f89bb0e4a316bca5bff1f569c5e054e6e6deb0f7ad9c2bfa",
+        "previousActualNote": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-en-light-shadcn"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-enhanced-group-hover.png",
+      "pngSha256": "73b6655f4ba401bc41ed8e8b2c0a0e597f9aa5842f81591aa1c92b59b050ce85",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "e3a4fb6251d6892636589f66841f3a9b5b60967cb1a744fa39a8e7af27cba409",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-en-light-brutalist",
+          "9d-changed-overview-3"
+        ],
+        "note": "English group and leaf labels, hierarchy, disclosure arrows and longer wrapped labels remain legible. Hover fill and a distinct outer focus outline follow the selected family shape. Shadcn remains restrained and rounded; Brutalist retains stronger family styling and rounded fallback/focus geometry. Exact 8px/5px radii and 32px desktop target geometry are verified by the retained measurements and source-bound assertions; group and leaf observations are not assumed simultaneous.",
+        "previousPngSha256": "95f3933026802999d4b3a824ea64e414a02d897a764e46eea8f52d3117a3d871",
+        "changedPixelCount": 6,
+        "changedPixelBounds": [
+          1367,
+          16,
+          1368,
+          56
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-enhanced-focus.png",
+      "pngSha256": "c2743e0a4db072d83cb1666f42968ca00675d668def87ee2ddfb80bc0504f4c3",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-enhanced-focus.json",
+      "metadataSha256": "c636060d5c3022201f2de3fd1a70752029877d655ef3cab6d1c5da96a37deefe",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-en-light-brutalist",
+          "9d-changed-overview-3"
+        ],
+        "note": "English group and leaf labels, hierarchy, disclosure arrows and longer wrapped labels remain legible. Hover fill and a distinct outer focus outline follow the selected family shape. Shadcn remains restrained and rounded; Brutalist retains stronger family styling and rounded fallback/focus geometry. Exact 8px/5px radii and 32px desktop target geometry are verified by the retained measurements and source-bound assertions; group and leaf observations are not assumed simultaneous.",
+        "previousPngSha256": "3f079b4fadea71d51ff556519f48b86e21ca6180786d66ca3568049b461413e0",
+        "changedPixelCount": 6,
+        "changedPixelBounds": [
+          1367,
+          16,
+          1368,
+          56
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "de61ee7788c4ee0808119aeaa5c250508e8fc55694392d8cd5821adcf903da3b",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "d8fd5b6575a21c34270ef405017779ae79290787c8b245e41c87b7daa697128e",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "de61ee7788c4ee0808119aeaa5c250508e8fc55694392d8cd5821adcf903da3b",
+        "previousActualNote": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-en-light-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-focus.png",
+      "pngSha256": "7aed699862bd740a3ab670157df926deb7060a0177c225930875fa9f9193f3fb",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "45e2824830ed6d65f7c7374028a9f1ea06485817fa05f788f04e0645c57434b4",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-en-light-brutalist",
+          "9d-changed-overview-3"
+        ],
+        "note": "English group and leaf labels, hierarchy, disclosure arrows and longer wrapped labels remain legible. Hover fill and a distinct outer focus outline follow the selected family shape. Shadcn remains restrained and rounded; Brutalist retains stronger family styling and rounded fallback/focus geometry. Exact 8px/5px radii and 32px desktop target geometry are verified by the retained measurements and source-bound assertions; group and leaf observations are not assumed simultaneous.",
+        "previousPngSha256": "e2c260add98d05b1f8378956afc787e6443309456a86e8a2d92a8db11ca0e9c9",
+        "changedPixelCount": 1,
+        "changedPixelBounds": [
+          33,
+          524,
+          34,
+          525
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-enhanced-group-hover.png",
+      "pngSha256": "c7b67ccb28b356f4700ef63ac3d59a31fa502a9733c3e42a3578a7e0a7171358",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "81a3815f0630ca53009fd58296c9108e2ce708321a24bfea29dd9b7055a04a46",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "c7b67ccb28b356f4700ef63ac3d59a31fa502a9733c3e42a3578a7e0a7171358",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-enhanced-focus.png",
+      "pngSha256": "4c532b02831977414c48f6bdbd7d772b7f2a8bbf189f1f6ce1cfc76461696962",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-enhanced-focus.json",
+      "metadataSha256": "8bf0994c5a08cab2c557087dc04e9943cb45403d344fd75528df96b245d82c58",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "4c532b02831977414c48f6bdbd7d772b7f2a8bbf189f1f6ce1cfc76461696962",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "7fcad832d9852398ff66e8e5f3503ef84a43147f5d355a0a022b196e435d67e3",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "408a22b80f8433ec555546a408bfd27bf36658cb6f560317413d760e520e893e",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "7fcad832d9852398ff66e8e5f3503ef84a43147f5d355a0a022b196e435d67e3",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-focus.png",
+      "pngSha256": "ea99e5b1100f3991b24e63c85b4a9219439ee833895f48471176422797fce433",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "7a54a5fe1ded5edd6b89c5f4aaa8f233f99045a794f265a13dd37774a7538415",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "ea99e5b1100f3991b24e63c85b4a9219439ee833895f48471176422797fce433",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-enhanced-group-hover.png",
+      "pngSha256": "643cd0b6066eb3191d6b4c1fda74a9b796cbb6b47c4eb992649c4ccfeb71fcca",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "de86c5e9771a256ab5332a26969c63cdc820dbb1f471e4b40b070642f23693d2",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "643cd0b6066eb3191d6b4c1fda74a9b796cbb6b47c4eb992649c4ccfeb71fcca",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-en-dark-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-enhanced-focus.png",
+      "pngSha256": "0a7e1c571d40a17013b76b32db15a154fdc8dabcaf49cc6e6775daf001b82202",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-enhanced-focus.json",
+      "metadataSha256": "abe9f02940c81d2dae76391eb88679c6e749f34e63de397ad7a0c11819efe9f5",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "0a7e1c571d40a17013b76b32db15a154fdc8dabcaf49cc6e6775daf001b82202",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-en-dark-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "51a94e51b91df4f7ecf8cf6ab4295bb5ce084518e1bdc167085fda3fc5c4fd1b",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "5b308165f0c27e8eb4908672d0c4ad725eeb3a663b208a53e1e104797599ccb6",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "51a94e51b91df4f7ecf8cf6ab4295bb5ce084518e1bdc167085fda3fc5c4fd1b",
+        "previousActualNote": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-en-dark-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-focus.png",
+      "pngSha256": "c851e82d442669e3becca8e550d7b8735434d2e83ac932bbeb56a00169e2bc8e",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "4ee8709989316f41e8493398b7828f20ff8d623d2af50dc1a5480a471b3c9b2f",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-en-dark-brutalist",
+          "9d-changed-overview-3"
+        ],
+        "note": "English group and leaf labels, hierarchy, disclosure arrows and longer wrapped labels remain legible. Hover fill and a distinct outer focus outline follow the selected family shape. Shadcn remains restrained and rounded; Brutalist retains stronger family styling and rounded fallback/focus geometry. Exact 8px/5px radii and 32px desktop target geometry are verified by the retained measurements and source-bound assertions; group and leaf observations are not assumed simultaneous.",
+        "previousPngSha256": "d7186bce0468aedf0ec1eb452e3cbff226efd2aa0e46b6cab2978d0c5b2e6428",
+        "changedPixelCount": 2,
+        "changedPixelBounds": [
+          33,
+          524,
+          36,
+          525
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-group-hover.png",
+      "pngSha256": "d277e37bbb7ac93baa202191b956ed4d9549269177bc8d970ab473d5446f567f",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "5f6ca8b4e52b2ea2245bb92a56bf69a61bdc07635265f60eb11de51a7fea3892",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-zh-cn-light-shadcn",
+          "9d-changed-overview-3"
+        ],
+        "note": "Chinese navigation and status labels are readable. Indentation, disclosure arrows, hover fill and the outer focus outline remain clear. The selected family keeps its rounded group/focus shape in both enhancement modes; Brutalist remains visually distinct from Shadcn. The image does not imply group and current leaf are always simultaneously in view; exact target geometry is established separately by current-source JSON and assertions.",
+        "previousPngSha256": "72ab16138da9b7ee93977707ed465f6e8bd55d920b548dc41109c7aeb42f2307",
+        "changedPixelCount": 26,
+        "changedPixelBounds": [
+          213,
+          836,
+          246,
+          858
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-focus.png",
+      "pngSha256": "86720bb6d48ee6afe93de8564d6a8227b850690d365ae0dc2070d3faaa89d761",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-focus.json",
+      "metadataSha256": "ded87a0b6a0852feb10971087ccd46aa07fb98136e254b78e5081642af4aa93e",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "86720bb6d48ee6afe93de8564d6a8227b850690d365ae0dc2070d3faaa89d761",
+        "previousActualNote": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-light-shadcn"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "a2b5d9a6d474c6af3a0ebab71bbe1e3c38ad4336ffc03c68da5b4cb40cb0d447",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "a0fff89d9a82f8a99b896c0bd9730db5320bc4f6945b6646f12f7b3fa1f6562c",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "a2b5d9a6d474c6af3a0ebab71bbe1e3c38ad4336ffc03c68da5b4cb40cb0d447",
+        "previousActualNote": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-light-shadcn"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-focus.png",
+      "pngSha256": "730b31777164a1c252780ea0f3eeb624cb350b7d73ffd7acb79b9f455878345a",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "bcfeed8854919b0d2aae048b0d0ff0cd6fdcf813a639084e7695a0e5a68467f3",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "730b31777164a1c252780ea0f3eeb624cb350b7d73ffd7acb79b9f455878345a",
+        "previousActualNote": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-light-shadcn"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+      "pngSha256": "3a7f9602749abc835dbf1e02be4b303e974793b84e20f1e769959443cad939f6",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "f4283c8a8fd409f04ecf7ec9bbcf09aa33ad427f439229955faba7d3b57fbc5c",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-zh-cn-light-brutalist",
+          "9d-changed-overview-3"
+        ],
+        "note": "Chinese navigation and status labels are readable. Indentation, disclosure arrows, hover fill and the outer focus outline remain clear. The selected family keeps its rounded group/focus shape in both enhancement modes; Brutalist remains visually distinct from Shadcn. The image does not imply group and current leaf are always simultaneously in view; exact target geometry is established separately by current-source JSON and assertions.",
+        "previousPngSha256": "d19191157cc013644b8a475fd7c9009e034d07309c72596f3d9d9b209ab8d45e",
+        "changedPixelCount": 6,
+        "changedPixelBounds": [
+          1367,
+          16,
+          1368,
+          56
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-focus.png",
+      "pngSha256": "d88b989eb3821920f98c7971c3a2d8021f576c16b5ae1b0bea967dfe6a1f7641",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-focus.json",
+      "metadataSha256": "0e21c0522a3ca25d3e6a9ecf1f4258523de3980351def11e6efc023747573444",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-zh-cn-light-brutalist",
+          "9d-changed-overview-4"
+        ],
+        "note": "Chinese navigation and status labels are readable. Indentation, disclosure arrows, hover fill and the outer focus outline remain clear. The selected family keeps its rounded group/focus shape in both enhancement modes; Brutalist remains visually distinct from Shadcn. The image does not imply group and current leaf are always simultaneously in view; exact target geometry is established separately by current-source JSON and assertions.",
+        "previousPngSha256": "ba5195b7575503f88922e3737cdbc0509a50c8317b25fc46db8c6a81325faecf",
+        "changedPixelCount": 6,
+        "changedPixelBounds": [
+          1367,
+          16,
+          1368,
+          56
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "783f6ddb8e19206f09c47a3c33d94a1545433df7f266720cf65f4c443f1ec9ef",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "d8aa0e37558784a321afbd61c9e788ccd49e66bc87ef0b6b3be9136d6c03c3f6",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "783f6ddb8e19206f09c47a3c33d94a1545433df7f266720cf65f4c443f1ec9ef",
+        "previousActualNote": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-light-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-focus.png",
+      "pngSha256": "648cc145c098e94863c3add09d2ebca8b935899053b4c25ec441447f5795de04",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "4b16016ed1639248cb6e9b45fa60e327a6c9eb1bc55289b1bfa2c51369679b5d",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-zh-cn-light-brutalist",
+          "9d-changed-overview-4"
+        ],
+        "note": "Chinese navigation and status labels are readable. Indentation, disclosure arrows, hover fill and the outer focus outline remain clear. The selected family keeps its rounded group/focus shape in both enhancement modes; Brutalist remains visually distinct from Shadcn. The image does not imply group and current leaf are always simultaneously in view; exact target geometry is established separately by current-source JSON and assertions.",
+        "previousPngSha256": "2bb4e8eed5de23cad927724677bbf7a40434bbb062fc22921ef4ac2f26802518",
+        "changedPixelCount": 1,
+        "changedPixelBounds": [
+          33,
+          524,
+          34,
+          525
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-group-hover.png",
+      "pngSha256": "47820a56fa41d89c7a995d5d3da2beccf18b0867628e7ad0459180c3ecd1408d",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "03fa0f53f0e94b138e98add54eb26227a31ea14aada699f43bc4dd20bd5484dc",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "47820a56fa41d89c7a995d5d3da2beccf18b0867628e7ad0459180c3ecd1408d",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-focus.png",
+      "pngSha256": "e1e12555fe2987f510010436b46269b1dbd1b3315c9e25ddd3e6f5a616b0b52f",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-focus.json",
+      "metadataSha256": "faf9d81318e58eb9511a7a4c63aa0b4eb954d73939f237ea9ff394f3a4747577",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "e1e12555fe2987f510010436b46269b1dbd1b3315c9e25ddd3e6f5a616b0b52f",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "8072e10b177d674501536d1ed2ee1ba6c6b3f8e7f5941d2519aa16e0432804a7",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "74e2b9c6c0a776b234f67ca22955a57419b34a8532d70e704fd67c93c84a4765",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "8072e10b177d674501536d1ed2ee1ba6c6b3f8e7f5941d2519aa16e0432804a7",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-focus.png",
+      "pngSha256": "0decda1db5bcabd7b235ae49eb5cba48794872d81bc82e29ff3e8e9cd0c2d1e7",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "b022abf9fd8682163a7c3d1bbec0ea2c2dbceba542ee62af620aefde6a210845",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "0decda1db5bcabd7b235ae49eb5cba48794872d81bc82e29ff3e8e9cd0c2d1e7",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-group-hover.png",
+      "pngSha256": "c625a8f6e6c4aea006e31f3eafe9a1113e2b6d7300084229bb1580433a4bf460",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "dfad3f345c1d29f8a8e05919dfddc5246d78847fe95bb90aa91580a3ecca5212",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "c625a8f6e6c4aea006e31f3eafe9a1113e2b6d7300084229bb1580433a4bf460",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-dark-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-focus.png",
+      "pngSha256": "cfccd1d437e339c6a9a1636d5a7c41b14215dcab279d3719c561e565cbce52d4",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-focus.json",
+      "metadataSha256": "703076262b38b9ee6e7fd634209c7d0be1272eab86acfc75c412c28c0a96fa9e",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "cfccd1d437e339c6a9a1636d5a7c41b14215dcab279d3719c561e565cbce52d4",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-dark-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "28dd9503dda1bf05ef68d2f7ee5181b0a659ca95b4a7ce0b8f30a042e1a70919",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "c959b68b4a62d05a26301c5ddbcb62fafe116001a3729af6ab20a35acd96dd7b",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "28dd9503dda1bf05ef68d2f7ee5181b0a659ca95b4a7ce0b8f30a042e1a70919",
+        "previousActualNote": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-sidebar-detail-zh-cn-dark-brutalist"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-focus.png",
+      "pngSha256": "caf812c2ec96b5a7bd3725b69be42d7b9e751c39e06b60b304529fc0cb656def",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "6259c13e390954536eca9757f9c0ba2ac2477afa58e64b8ac479d54da1d152c5",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-sidebar-detail-zh-cn-dark-brutalist",
+          "9d-changed-overview-4"
+        ],
+        "note": "Chinese navigation and status labels are readable. Indentation, disclosure arrows, hover fill and the outer focus outline remain clear. The selected family keeps its rounded group/focus shape in both enhancement modes; Brutalist remains visually distinct from Shadcn. The image does not imply group and current leaf are always simultaneously in view; exact target geometry is established separately by current-source JSON and assertions.",
+        "previousPngSha256": "7ce2d5316bb2cb5362a0e9a51199e332033d9a4750a7cd8a586f8048f7baafa2",
+        "changedPixelCount": 2,
+        "changedPixelBounds": [
+          33,
+          524,
+          36,
+          525
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-shadcn-enhanced.png",
+      "pngSha256": "12df67556e38d058b1f776ed16e3740147fa72b187f34682f26a3c78b67f7f7c",
+      "metadata": "../hosted/site/sidebar-mobile-en-shadcn-enhanced.json",
+      "metadataSha256": "498295b97f88e8352573ac8cb03f000c854f9dfcfc458d45b81e315f6a5cd1b9",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "12df67556e38d058b1f776ed16e3740147fa72b187f34682f26a3c78b67f7f7c",
+        "previousActualNote": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-shadcn-no-js.png",
+      "pngSha256": "b607e009503a3edec426a136da45871271f4adcdf7a9c7eb463ccff0986073c6",
+      "metadata": "../hosted/site/sidebar-mobile-en-shadcn-no-js.json",
+      "metadataSha256": "cf1bf8606c4d7132f411e86f865112c04a012ac4715c60d891fae06b96640414",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "b607e009503a3edec426a136da45871271f4adcdf7a9c7eb463ccff0986073c6",
+        "previousActualNote": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-brutalist-enhanced.png",
+      "pngSha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4",
+      "metadata": "../hosted/site/sidebar-mobile-en-brutalist-enhanced.json",
+      "metadataSha256": "9f7f053558cf711e28a348cf64f376069e6598a4cad394c01bbf5aefab14980f",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4",
+        "previousActualNote": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-brutalist-no-js.png",
+      "pngSha256": "cbecaa3ae0cc138994e460794018c6beb9bd2c7aa9249a1a96d3898b1f2985d3",
+      "metadata": "../hosted/site/sidebar-mobile-en-brutalist-no-js.json",
+      "metadataSha256": "41a2812aabd49e61af2a0ef118e1b491bfc027af644fd06659182edeb6816c00",
+      "locale": "en",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "cbecaa3ae0cc138994e460794018c6beb9bd2c7aa9249a1a96d3898b1f2985d3",
+        "previousActualNote": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-shadcn-enhanced.png",
+      "pngSha256": "5f738c5bba116ddfe99dfe9a9919de2b5b2206412aff841c959b54b11de59715",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-shadcn-enhanced.json",
+      "metadataSha256": "c153fe380fa2fca2edbe2197f282c3a763e089a975c6ab6e7eb2e92537a1ee56",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "5f738c5bba116ddfe99dfe9a9919de2b5b2206412aff841c959b54b11de59715",
+        "previousActualNote": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-shadcn-no-js.png",
+      "pngSha256": "413af64df8efb33434ef608312429d1d4e9928b1d657b986f69cfa2a72f861b1",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-shadcn-no-js.json",
+      "metadataSha256": "b83c331f39e45923b68815bd3104e8b164d55cc08f0bf06ad2502168519646ab",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "shadcn",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "413af64df8efb33434ef608312429d1d4e9928b1d657b986f69cfa2a72f861b1",
+        "previousActualNote": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-brutalist-enhanced.png",
+      "pngSha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-brutalist-enhanced.json",
+      "metadataSha256": "44a5a5f8e4291fc389bf7cacbdd2fa1d9041e686451b022d80f3cd396d377d1f",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4",
+        "previousActualNote": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-brutalist-no-js.png",
+      "pngSha256": "96eb8a0eaced1a102302d73290e7085c80767b8756a4a2301c2bbe18dda467f2",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-brutalist-no-js.json",
+      "metadataSha256": "ced6161c5efbba50e5932799fa96d5fee006f0815e033ca2ec19d3b8f363ec62",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": "brutalist",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "96eb8a0eaced1a102302d73290e7085c80767b8756a4a2301c2bbe18dda467f2",
+        "previousActualNote": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-en-light-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-enhanced-hover.png",
+      "pngSha256": "833d45b151a7f925c9537ef84cc4029e227c2c1cfa66f96f099cbf59fe2d2fa8",
+      "metadata": "../hosted/site/hero-en-light-enhanced-hover.json",
+      "metadataSha256": "a5ceac7353249000492f32be3ab46f9e9031864778914d0fcffa7d5b619f0309",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-en-light",
+          "9d-changed-overview-4"
+        ],
+        "note": "The English Hero pill is readable and intentionally rounded without underlined text. Hover fill is visible, focus frames show one clear outer focus ring without competing inner focus paint, and the EN/light forced-colors frames retain visible blue focus treatment. Native href, accessible-name and Enter behavior are established by executed assertions; the image review is limited to this Hero treatment.",
+        "previousPngSha256": "852fd5cb9af44ac2fd3d9ae5f5700cc43ea036a7128c716db2433612c603a04c",
+        "changedPixelCount": 9264,
+        "changedPixelBounds": [
+          555,
+          136,
+          885,
+          165
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-en-light-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-enhanced-focus.png",
+      "pngSha256": "032be5c53bcfe24cfe930c71fe9d7f06dd615b411923c3ce657338f80faa097c",
+      "metadata": "../hosted/site/hero-en-light-enhanced-focus.json",
+      "metadataSha256": "d3c1a3de4938459706399e4ef51c5fdf32ec3bbf191813fe3d5164ef00f1d3d9",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "032be5c53bcfe24cfe930c71fe9d7f06dd615b411923c3ce657338f80faa097c",
+        "previousActualNote": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual light palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-en-light"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-en-light-enhanced-forced-colors",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-enhanced-forced-colors.png",
+      "pngSha256": "bf79f5e2d8b7a4d7a5a2a4dc6f0129235a3394551d17cc987b197f556c25a71e",
+      "metadata": "../hosted/site/hero-en-light-enhanced-forced-colors.json",
+      "metadataSha256": "ec3eaff06d0f9800e993642e966444a98fb1e18351b8f854537b75943868561d",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "bf79f5e2d8b7a4d7a5a2a4dc6f0129235a3394551d17cc987b197f556c25a71e",
+        "previousActualNote": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. Forced-colors retains a clear blue outline and readable link text against white. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-en-light"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-en-light-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-failed-scripts-hover.png",
+      "pngSha256": "b36f441d856f410a40af1aeb29b12bc53e3e145965f6cf7d374d9b35c07457b5",
+      "metadata": "../hosted/site/hero-en-light-failed-scripts-hover.json",
+      "metadataSha256": "e3a1f0ab71a9d98de9bb0e59604e0b41711fb8d008946f4300160efdd8873d4f",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-en-light",
+          "9d-changed-overview-4"
+        ],
+        "note": "The English Hero pill is readable and intentionally rounded without underlined text. Hover fill is visible, focus frames show one clear outer focus ring without competing inner focus paint, and the EN/light forced-colors frames retain visible blue focus treatment. Native href, accessible-name and Enter behavior are established by executed assertions; the image review is limited to this Hero treatment.",
+        "previousPngSha256": "6eab25de7e9899514eeb0d18cbfd18617e564a318f07969260990dfa07972e93",
+        "changedPixelCount": 7818,
+        "changedPixelBounds": [
+          553,
+          136,
+          887,
+          160
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-en-light-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-failed-scripts-focus.png",
+      "pngSha256": "42f0556300f33d60d28ca911e83df7cd145c73cc44661b1096fe167ed3f84981",
+      "metadata": "../hosted/site/hero-en-light-failed-scripts-focus.json",
+      "metadataSha256": "9c80e8c54f1a0d76cab503fb81e654f1c6238c35800e0fe1921f138bf49e0c93",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-en-light",
+          "9d-changed-overview-4"
+        ],
+        "note": "The English Hero pill is readable and intentionally rounded without underlined text. Hover fill is visible, focus frames show one clear outer focus ring without competing inner focus paint, and the EN/light forced-colors frames retain visible blue focus treatment. Native href, accessible-name and Enter behavior are established by executed assertions; the image review is limited to this Hero treatment.",
+        "previousPngSha256": "db9e03e17b63a9d6dd55ae12c95c986f815db3a59bc5cbe56cb07789dac72d51",
+        "changedPixelCount": 25,
+        "changedPixelBounds": [
+          553,
+          136,
+          887,
+          160
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-en-light-failed-scripts-forced-colors",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-failed-scripts-forced-colors.png",
+      "pngSha256": "fdc7ce4b268ea0a3be1f7fdd96784c59ab5822ebcd7ce3cde6674309ab60ba25",
+      "metadata": "../hosted/site/hero-en-light-failed-scripts-forced-colors.json",
+      "metadataSha256": "14940c471f475d1176d927da84fac37bdddf18efb79c832e1a800fd432ecaf5f",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "fdc7ce4b268ea0a3be1f7fdd96784c59ab5822ebcd7ce3cde6674309ab60ba25",
+        "previousActualNote": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. Forced-colors retains a clear blue outline and readable link text against white. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-en-light"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-en-dark-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-enhanced-hover.png",
+      "pngSha256": "1fe046c941077f79f0b0dd78c14edf1faf3ba27e50a17a40fdc057fd24ddf401",
+      "metadata": "../hosted/site/hero-en-dark-enhanced-hover.json",
+      "metadataSha256": "6789aa0afe9e76e35d9e63727c3e67704bb94ef2761a2f39bdf39f596d388894",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-en-dark",
+          "9d-changed-overview-4"
+        ],
+        "note": "The English Hero pill is readable and intentionally rounded without underlined text. Hover fill is visible, focus frames show one clear outer focus ring without competing inner focus paint, and the EN/light forced-colors frames retain visible blue focus treatment. Native href, accessible-name and Enter behavior are established by executed assertions; the image review is limited to this Hero treatment.",
+        "previousPngSha256": "d4eb88c228c845be8fe48da7632d307337b4e5aef1a648b908cf2b99a12972dc",
+        "changedPixelCount": 9318,
+        "changedPixelBounds": [
+          555,
+          136,
+          885,
+          165
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-en-dark-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-enhanced-focus.png",
+      "pngSha256": "90c47b5bb376fd3e24f98702ae33150f753bd52c282f98fc92ad4993bf109664",
+      "metadata": "../hosted/site/hero-en-dark-enhanced-focus.json",
+      "metadataSha256": "1719253921290ee0b10ac6dd5856f6c10f9b7a65cb65b842b33f0edbe3d8055c",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "90c47b5bb376fd3e24f98702ae33150f753bd52c282f98fc92ad4993bf109664",
+        "previousActualNote": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-en-dark"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-en-dark-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-failed-scripts-hover.png",
+      "pngSha256": "b9f60a5a343a8b643d96b48401426ff65be2d99aa1536b3f113e5258fe0ad650",
+      "metadata": "../hosted/site/hero-en-dark-failed-scripts-hover.json",
+      "metadataSha256": "513cf92d0c65b87a1e1b0ee5574c7a949d857e5bb540f3ac87af9d93c8a4b878",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "b9f60a5a343a8b643d96b48401426ff65be2d99aa1536b3f113e5258fe0ad650",
+        "previousActualNote": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-en-dark"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-en-dark-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-failed-scripts-focus.png",
+      "pngSha256": "86ee0103da5929f5b8bb2b23a9156775c206e975fe3c2c3579a378ec111cc5b4",
+      "metadata": "../hosted/site/hero-en-dark-failed-scripts-focus.json",
+      "metadataSha256": "dc188fe4afe08007732f42d66070258a7302da69369c18b54988d4f225a47955",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "86ee0103da5929f5b8bb2b23a9156775c206e975fe3c2c3579a378ec111cc5b4",
+        "previousActualNote": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-en-dark"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-enhanced-hover.png",
+      "pngSha256": "f5c61398b5b8f04f5375c89e0f3f80ac9326eb99c8f7c9213835fdeda7fd6cdf",
+      "metadata": "../hosted/site/hero-zh-cn-light-enhanced-hover.json",
+      "metadataSha256": "77cddcc69ada1cceb156e7839c1df326741fe06e1085ed5e09862620e4c6dcdf",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-zh-cn-light",
+          "9d-changed-overview-4"
+        ],
+        "note": "The Chinese Hero pill text and main heading remain legible in the recorded actual theme. The rounded link has no prose underline, hover fill is visible, and focus shows a single outer outline without a competing inner focus treatment. Blocked-script fallback is readable; this does not accept the unavailable interactive homepage demonstrations.",
+        "previousPngSha256": "b562ff04327a2754f31064e593ecfbcff46d7d6d3f21d441a11eed608779f80e",
+        "changedPixelCount": 5572,
+        "changedPixelBounds": [
+          621,
+          136,
+          819,
+          165
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-enhanced-focus.png",
+      "pngSha256": "f2a17edb0398c0c31a142d16ce29ab263761889e735f2da7d9c8783916057e3d",
+      "metadata": "../hosted/site/hero-zh-cn-light-enhanced-focus.json",
+      "metadataSha256": "4a81ca64f7389053b13c1e2aacbcb52abbfd149eac8ff50ff6f66c62125fe71e",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "f2a17edb0398c0c31a142d16ce29ab263761889e735f2da7d9c8783916057e3d",
+        "previousActualNote": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-zh-cn-light"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-failed-scripts-hover.png",
+      "pngSha256": "b2ed2f39dbd250678efeff83b950765e0ffb1c855a9ffa381d1fe3173667c480",
+      "metadata": "../hosted/site/hero-zh-cn-light-failed-scripts-hover.json",
+      "metadataSha256": "fc77bdc6ccc3ce17c25a878738b8973df22d7d13cffa3e29f30ea66285dd67fb",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-zh-cn-light",
+          "9d-changed-overview-4"
+        ],
+        "note": "The Chinese Hero pill text and main heading remain legible in the recorded actual theme. The rounded link has no prose underline, hover fill is visible, and focus shows a single outer outline without a competing inner focus treatment. Blocked-script fallback is readable; this does not accept the unavailable interactive homepage demonstrations.",
+        "previousPngSha256": "002e6e2942ba1d54650d353e44cfb1d3c8430b9128ccfef5d53e9f629fd0e884",
+        "changedPixelCount": 4709,
+        "changedPixelBounds": [
+          619,
+          136,
+          821,
+          160
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-failed-scripts-focus.png",
+      "pngSha256": "a05ae21cfb764a5d5c747dcd076de7d547988452f9a2260c1479fec3e53773ac",
+      "metadata": "../hosted/site/hero-zh-cn-light-failed-scripts-focus.json",
+      "metadataSha256": "898c110b3f852df9d61d5180eca386d2dd5622a63f2350146bba6e4e866b9825",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-zh-cn-light",
+          "9d-changed-overview-4"
+        ],
+        "note": "The Chinese Hero pill text and main heading remain legible in the recorded actual theme. The rounded link has no prose underline, hover fill is visible, and focus shows a single outer outline without a competing inner focus treatment. Blocked-script fallback is readable; this does not accept the unavailable interactive homepage demonstrations.",
+        "previousPngSha256": "db9770ba359036b03ede0ef6fcee83db84ecaeac4bc6941f16d1cf42ad6bb14f",
+        "changedPixelCount": 25,
+        "changedPixelBounds": [
+          619,
+          136,
+          821,
+          160
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-enhanced-hover.png",
+      "pngSha256": "791396b2d578ada6c771386b9880efaf802deeae1453051d352f34003104afa0",
+      "metadata": "../hosted/site/hero-zh-cn-dark-enhanced-hover.json",
+      "metadataSha256": "0857ac83055d8baf78a747a1d8cf7bb1ca3eadced9c50009aeafef1f8865ce8d",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-zh-cn-dark",
+          "9d-changed-overview-5"
+        ],
+        "note": "The Chinese Hero pill text and main heading remain legible in the recorded actual theme. The rounded link has no prose underline, hover fill is visible, and focus shows a single outer outline without a competing inner focus treatment. Blocked-script fallback is readable; this does not accept the unavailable interactive homepage demonstrations.",
+        "previousPngSha256": "b5d0b956e1ece0be31ea01d68582d038ae0af4a212eafd23798f2464e9c88d94",
+        "changedPixelCount": 5536,
+        "changedPixelBounds": [
+          621,
+          136,
+          819,
+          165
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-enhanced-focus.png",
+      "pngSha256": "7f201190087ce96fb3ac674f2c5703b5f27363d6161453d94d594efddd32437d",
+      "metadata": "../hosted/site/hero-zh-cn-dark-enhanced-focus.json",
+      "metadataSha256": "01811a5f9268610f1468c32ebc6361a4e6219724229a07b887130a9df39deeba",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "7f201190087ce96fb3ac674f2c5703b5f27363d6161453d94d594efddd32437d",
+        "previousActualNote": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-zh-cn-dark"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-failed-scripts-hover.png",
+      "pngSha256": "1a58e0f902eadc1b9a1c4c93353bcd93ba20078c8b1e292696bd489ea3319003",
+      "metadata": "../hosted/site/hero-zh-cn-dark-failed-scripts-hover.json",
+      "metadataSha256": "2af0ba3db59b2df5c8df0e024b1491b21e161094e15da53890b77a7f2aca84f5",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-hero-detail-zh-cn-dark",
+          "9d-changed-overview-5"
+        ],
+        "note": "The Chinese Hero pill text and main heading remain legible in the recorded actual theme. The rounded link has no prose underline, hover fill is visible, and focus shows a single outer outline without a competing inner focus treatment. Blocked-script fallback is readable; this does not accept the unavailable interactive homepage demonstrations.",
+        "previousPngSha256": "883778dbf90435b2ac1f2b523ccbec712af1fc839876efcfde12b9efff61ea3f",
+        "changedPixelCount": 4652,
+        "changedPixelBounds": [
+          619,
+          136,
+          821,
+          160
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-failed-scripts-focus.png",
+      "pngSha256": "e76029e78d76e33c489835039dffdcb71ba1f5c7d71804ead245d743e17c6631",
+      "metadata": "../hosted/site/hero-zh-cn-dark-failed-scripts-focus.json",
+      "metadataSha256": "cacab9504f45c849479a945cc2c7124635f3479a5c91c89fd7304a083cc68cf8",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "byte-identical-png-prior-actual-pixel-inspection-reused",
+        "previousReviewHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "previousReviewIndex": "../../2026-11-23-sprint2-final-1450ffd5/visual-review/index.json",
+        "previousPngSha256": "e76029e78d76e33c489835039dffdcb71ba1f5c7d71804ead245d743e17c6631",
+        "previousActualNote": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept.",
+        "currentMetadataIndependentlyVerified": true,
+        "additionalCurrentContactViews": [
+          "9d-hero-detail-zh-cn-dark"
+        ],
+        "note": "Current PNG bytes exactly match the previously visually inspected 1450 image; current source, route, dimensions, actual theme, preferred scheme and source-bound script mode were independently verified. This reuses actual prior pixel inspection without relabeling old execution metadata."
+      }
+    },
+    {
+      "id": "hook-evidence-en",
+      "criterion": "1154-rendered-evidence",
+      "png": "../hosted/site/hook-evidence-en.png",
+      "pngSha256": "399d42c52f3778b4695d5436e65a5626939c1c6d86d0d5e576e61574858fbdc9",
+      "metadata": "../hosted/site/hook-evidence-en.json",
+      "metadataSha256": "23a8806f8ae2456959488cf65c512dbc07a374fe490b6244b78d57ba3b6fc1fa",
+      "locale": "en",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/specifications/as-hook/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-changed-overview-5",
+          "hook-evidence-en-original"
+        ],
+        "note": "The full English article frame is readable. Its underlined historical evidence link remains distinct from the Hero pill. The displayed text explicitly retains the missing Module declaration-array failure, exit 1, unreached later freezing assertions, all 13 generic conditions and both #1154 conditions unearned, and no draft promotion. Rendering this record does not rerun or accept the historical candidate.",
+        "previousPngSha256": "d7a877805537afcf24449b9c9c1f95bb86d6789f35bf3eca535b92410f0959b8",
+        "changedPixelCount": 17040,
+        "changedPixelBounds": [
+          1143,
+          145,
+          1371,
+          250
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    },
+    {
+      "id": "hook-evidence-zh-cn",
+      "criterion": "1154-rendered-evidence",
+      "png": "../hosted/site/hook-evidence-zh-cn.png",
+      "pngSha256": "af84353b9fafb1bb66e529703fcdd4a5219a5b92e72263b7b8f74bedd5f82236",
+      "metadata": "../hosted/site/hook-evidence-zh-cn.json",
+      "metadataSha256": "c6dacf7d56ff5edb2c001d12fbd1a13ceb0c829bbe15fb2bb492a7bd9c635146",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "family": null,
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/specifications/as-hook/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "reviewed": true,
+        "status": "accepted-within-recorded-scope",
+        "method": "changed-current-png-actually-inspected",
+        "views": [
+          "9d-changed-overview-5",
+          "hook-evidence-zh-cn-original"
+        ],
+        "note": "The full Chinese Hook article frame is legible, including the underlined historical evidence link and the missing Module declaration-array failure. It explicitly preserves exit 1, unreached order/identity/required-field/freezing assertions, the original 13 generic and two #1154 conditions incomplete, and no draft/target-profile promotion. The record renders correctly without granting historical semantic acceptance.",
+        "previousPngSha256": "7b4236a0b6728f313b6ca3c1b5882c9708de2438b44cbbf0e9429cdf0c4ca477",
+        "changedPixelCount": 17132,
+        "changedPixelBounds": [
+          1145,
+          162,
+          1370,
+          579
+        ],
+        "currentMetadataIndependentlyVerified": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+

@@ -1,0 +1,64 @@
+{
+  "kind": "sprint2-final-scope-reconciliation",
+  "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "sourceTree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "scope": "Original Sprint 2 bounded product, consumers, website visual and type requirements; no platform approval or merge.",
+  "sprint2ScopeAccepted": true,
+  "formalPlatformApprovalGranted": false,
+  "mergePerformed": false,
+  "hosted": {
+    "runId": 45188583301,
+    "jobId": 137740608739,
+    "artifactId": 14826253625,
+    "phasesPassed": 13,
+    "casesPassed": 304,
+    "nativeBrowser": 292,
+    "nodeHappyDom": 12,
+    "originalCaseIdsPreserved": true,
+    "preparationPhasesPassed": 3
+  },
+  "website": {
+    "cases": 42,
+    "pngs": 100,
+    "metadata": 100,
+    "changedImagesReviewed": 44,
+    "identicalImagesWithExplicitPriorReviewReuse": 56,
+    "currentMatrixAccepted": true
+  },
+  "local": {
+    "initialReplayStatus": "FAIL",
+    "followupStatus": "PASS",
+    "combinedLocalScope": "PASS",
+    "tabs": {
+      "suites": 2,
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0
+    },
+    "docsStyle": {
+      "exitCode": 0,
+      "seconds": 135.453
+    },
+    "docsTypes": {
+      "exitCode": 0,
+      "seconds": 477.341
+    },
+    "rootReadRawFollowupAndTabsJson": true,
+    "sourceGuardsConsistent": true,
+    "originalFailedSummaryUnchanged": true
+  },
+  "reviews": {
+    "code": "independent/code-review.md",
+    "visual": "visual-review/README.md",
+    "originalIssueMapping": "independent/issue-1488-acceptance-mapping.md",
+    "finalArchiveScopeReview": "independent/archive-scope-review.md"
+  },
+  "boundaries": [
+    "Historical1450 global check:types timeout remains TIMEOUT.",
+    "Initial9d worker-init failure remains FAIL; only minWorkers execution setting corrected in follow-up.",
+    "Unsupported14/23 entries, Cargo/desktop, broader Harness/IME/AT/non-Web and original Hook conditions remain unaccepted.",
+    "Ready existed already; no duplicate transition or authored platform approval.",
+    "Archive commit is not the product execution source."
+  ]
+}

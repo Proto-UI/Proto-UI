@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "mode": "publish",
+  "unit": "pitch-gesture-surface",
+  "upstreamRevision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "packageName": "generated-gpui-52a219f9ca39675f081eb32a4b3fe30f",
+  "componentName": "PitchGestureSurface",
+  "artifacts": 20,
+  "outputDirectory": "frontend/proto-ui/generated/pitch-gesture-surface",
+  "receipt": "frontend/proto-ui/receipts/pitch-gesture-surface.json"
+}

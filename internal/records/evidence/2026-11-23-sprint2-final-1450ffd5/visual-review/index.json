@@ -1,0 +1,2753 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-bound-candidate-visual-review",
+  "status": "inspected-within-recorded-matrix",
+  "currentPrVisualAcceptance": false,
+  "source": {
+    "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "tree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked": []
+  },
+  "scope": {
+    "sourceHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "prHeadReportedDuringReview": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "currentPrVisualAcceptance": false,
+    "scope": "Historical/candidate 1450 visual matrix only; subsequent CSS/source changes require their own validation."
+  },
+  "reviewer": "Codex / s2_integration_review",
+  "reviewerImplementationScope": "Compiler native text reset/selection integration and Checkbox reset; did not author the CSS, sidebar, Tabs examples, Hero or Hook documentation fixes.",
+  "workflowRun": 45183604935,
+  "job": 137723420016,
+  "artifactId": 14823732540,
+  "zipSha256": "273454fef6331bebdc8b110699db3b8ffba885d4f1b29f3daac6576289220667",
+  "zipBytes": 64782377,
+  "browser": "157.0.8103.78",
+  "reviewedAtUtc": "2026-11-23T14:10:43.091933+00:00",
+  "inspectedCaptures": 100,
+  "confirmedVisualBlockersInObservedMatrix": [],
+  "automatedSiteCases": {
+    "count": 42,
+    "unique": 42,
+    "passed": 42,
+    "groups": {
+      "B": 8,
+      "C": 24,
+      "D": 8,
+      "Hook": 2
+    },
+    "report": "../hosted/site/report.json",
+    "reportSha256": "2a4a2cf287cb70e8709f4eea64d1a674159b0dd21a3028c48bc92f5d9d644cc3",
+    "log": "../hosted/site/run.log",
+    "logSha256": "66340c55ac95f47e48e6546a4715a604fd1d6fe0f581cea8fa89d7857a4e8fdb"
+  },
+  "metadataIntegrity": {
+    "expected": 100,
+    "matched": 100,
+    "missing": 0,
+    "duplicate": 0,
+    "unexpected": 0,
+    "problems": []
+  },
+  "actualThemeMappings": {
+    "light requested / light actual / enhanced": 39,
+    "dark requested / dark actual / enhanced": 32,
+    "light requested / light actual / failed-scripts": 13,
+    "dark requested / dark actual / failed-scripts": 12,
+    "light requested / dark actual / no-js": 4
+  },
+  "method": {
+    "contactSheetsViewed": 33,
+    "contactSheetSourceMappings": "review-process.json",
+    "individualOriginalViews": [
+      "tabs-zh-cn-wc-0-rhea",
+      "hero-zh-cn-light-enhanced-focus",
+      "sidebar-mobile-zh-cn-brutalist-no-js",
+      "hook-evidence-zh-cn",
+      "tabs-en-react-0-rhea",
+      "tabs-zh-cn-vue2-0-rhea",
+      "hook-evidence-en"
+    ],
+    "rawImagesUnmodified": true
+  },
+  "captures": [
+    {
+      "id": "tabs-en-wc-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-0-rhea.png",
+      "pngSha256": "9f440616e53a3605dc3bf9c18501a95710623e0dadabbe017a95da13ad898759",
+      "metadata": "../hosted/site/tabs-en-wc-0-rhea.json",
+      "metadataSha256": "f5a5c1a813d0bdddc4af08db1cf04811af40eab1d6f1af0540e21b3087993e32",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-wc",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed rhea label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-wc-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-1-nova.png",
+      "pngSha256": "96940fc362ee5b720d883dc4b31efb2c00d2bb6beca608cc668d69d7fd8623d2",
+      "metadata": "../hosted/site/tabs-en-wc-1-nova.json",
+      "metadataSha256": "fd04974358e0445c77720d7da65f3c1467f87860abac06d087a1eb965fbba8c6",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-wc",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed nova label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-wc-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-2-rhea.png",
+      "pngSha256": "c14ebdbf7cff39b5d71888f189304a804f21bf627016162fdfb86bdcab5769e4",
+      "metadata": "../hosted/site/tabs-en-wc-2-rhea.json",
+      "metadataSha256": "cb6ebda18d3b5bb318357a0d2f0f4d86ca305bd43d32d61c726142c962564f6f",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-wc",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed rhea label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-wc-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-3-new-york-v4.png",
+      "pngSha256": "6b9649bb3975e062798018ba7dc63f5327c26026bb484ced5c071709585c10c3",
+      "metadata": "../hosted/site/tabs-en-wc-3-new-york-v4.json",
+      "metadataSha256": "61da7e7e506ac290bb6b886e330a25be0d9c838782a1bb4ab8be4e55172eecb3",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-wc",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed new-york-v4 label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-wc-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-wc-4-nova.png",
+      "pngSha256": "0202058ae0b05eb0056562d6252e875bba4134e5708c61de6e8779e8b3948d96",
+      "metadata": "../hosted/site/tabs-en-wc-4-nova.json",
+      "metadataSha256": "a2b8319c0070e1d5c1a52081fd19be4af5db9a31c64155eb1d2d49803fc228c5",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-wc",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed nova label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-react-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-0-rhea.png",
+      "pngSha256": "367b133e88d89089761e14d8589c205d1fc4ed5ae1627595745bb211ab5e3b4c",
+      "metadata": "../hosted/site/tabs-en-react-0-rhea.json",
+      "metadataSha256": "7dda1f9ace33d4c25cfffe770c5a58e4b879182c43ba15d54086d0441cdef698",
+      "locale": "en",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-react",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed rhea label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-react-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-1-nova.png",
+      "pngSha256": "4da006fb701e2dbc80fa1ef2fe5a20f5d37788ed343fbe21e658c2719c343aed",
+      "metadata": "../hosted/site/tabs-en-react-1-nova.json",
+      "metadataSha256": "6feebaf5b23e411b89ee79541df88327c83353ac51afc8007ea3a611bc560353",
+      "locale": "en",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-react",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed nova label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-react-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-2-rhea.png",
+      "pngSha256": "7acd03afda7507eccea119119ffc4b961fcd24c0688d26211170f52e36b56139",
+      "metadata": "../hosted/site/tabs-en-react-2-rhea.json",
+      "metadataSha256": "a44a4d0c6ab61600a1f1d74d13c7a85e79af113f003f605aa6f3ce6f081e7770",
+      "locale": "en",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-react",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed rhea label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-react-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-3-new-york-v4.png",
+      "pngSha256": "92814ac0335c2bef4e05097fd49a496cd6849979f0e674b18035e1ff9f1c0b55",
+      "metadata": "../hosted/site/tabs-en-react-3-new-york-v4.json",
+      "metadataSha256": "042eee3148b103fe34b756775af637c15d5ffca5dc569d1e1a86ebce400a22c7",
+      "locale": "en",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-react",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed new-york-v4 label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-react-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-react-4-nova.png",
+      "pngSha256": "04ad2ec37abb269b77c5932863b52211b08e4af7b58510e1d510c7bd3683bdbe",
+      "metadata": "../hosted/site/tabs-en-react-4-nova.json",
+      "metadataSha256": "8202c03082b3c9d1237d79a0ec6ba97697f75ef2515ee71d4e59758a015ebc4c",
+      "locale": "en",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-react",
+          "tabs-context-1"
+        ],
+        "note": "English explanation and the live demo are legible. Password remains visibly selected with its unchanged panel text; Billing stays muted. The displayed nova label matches this frame. Rhea, Nova and New York v4 have visibly distinct geometry without clipping or resetting the displayed selection. Native focus/DOM identity retention is established by the executed case and adjacent observations, not inferred from pixels alone."
+      }
+    },
+    {
+      "id": "tabs-en-vue-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-0-rhea.png",
+      "pngSha256": "ae58881174860ab2ab1d245c544de2d1e7a52f053f5a031a92461b8487643cef",
+      "metadata": "../hosted/site/tabs-en-vue-0-rhea.json",
+      "metadataSha256": "3be46d03c32f869bf2382c235b0f0ba8bddebdafb017b9b7b3cc3417d9f26391",
+      "locale": "en",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: rhea matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-1-nova.png",
+      "pngSha256": "94f12f21b44975f10963cf87c0b5ec9efe17e38214f51d40f645d6a46f496406",
+      "metadata": "../hosted/site/tabs-en-vue-1-nova.json",
+      "metadataSha256": "a58a6422c5c2a52bf4732d8dcaaac339b893b6324c8b3a2ddb3afef05aa287bc",
+      "locale": "en",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: nova matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-2-rhea.png",
+      "pngSha256": "f967aec3c40343cd3c88cc2679e955da6374230872ce6905051b50b4f03de88f",
+      "metadata": "../hosted/site/tabs-en-vue-2-rhea.json",
+      "metadataSha256": "6bdc5e950333d21e703c81fea171f82c368405537fae7f3df00785cd83ce67aa",
+      "locale": "en",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: rhea matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-3-new-york-v4.png",
+      "pngSha256": "1b8052d4e083b9f909ace021bfe8777fb7a3425dab9961f4a985a8d291a87c96",
+      "metadata": "../hosted/site/tabs-en-vue-3-new-york-v4.json",
+      "metadataSha256": "905fc9b11731ba2654a8d4f48b51f1aaef31bdb9f3f2cf7137eb052faed9786b",
+      "locale": "en",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: new-york-v4 matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue-4-nova.png",
+      "pngSha256": "363ffb9fc7c2fd6540207ceda4e30b39f75a825abb72f1cd6b0aaa3edf0d0daf",
+      "metadata": "../hosted/site/tabs-en-vue-4-nova.json",
+      "metadataSha256": "c32f2165352cfada3a50c6afb50ef85decc4c7a7dcd7eac41dac9710ca389326",
+      "locale": "en",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: nova matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-0-rhea.png",
+      "pngSha256": "ab181b884ca302b998f36c2e19224252590a433a2db64d2b75c6bc15fef5fdab",
+      "metadata": "../hosted/site/tabs-en-vue2-0-rhea.json",
+      "metadataSha256": "c11b5bb76c1c5f3a17d8b38d60cc93e408edb157a4b5f865ccd9220f0c97eb80",
+      "locale": "en",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue2",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: rhea matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-1-nova.png",
+      "pngSha256": "f8211a8b2d64cb1f265bd6eed541edc2b9bba307c990fe095a6ffb7a944b9d22",
+      "metadata": "../hosted/site/tabs-en-vue2-1-nova.json",
+      "metadataSha256": "036d89a758995372d9af5bfa1b842d4b5d6ab2c8489c34f6dfe3baba8920dc01",
+      "locale": "en",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue2",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: nova matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-2-rhea.png",
+      "pngSha256": "2de6500e411bafb7304aa7e1b68f2751ad917a76e36b9d7dd04263fb10efd2ea",
+      "metadata": "../hosted/site/tabs-en-vue2-2-rhea.json",
+      "metadataSha256": "1e5f1824f739a256a2d408f660e80c5879c84f60785d1ee6b65ca79e73125ba8",
+      "locale": "en",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue2",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: rhea matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-3-new-york-v4.png",
+      "pngSha256": "d520383ba6664df74f1d2e8134ad979810acd275466a06e8f0e4c280571b72c2",
+      "metadata": "../hosted/site/tabs-en-vue2-3-new-york-v4.json",
+      "metadataSha256": "a86ad339424699e39946d89fd47dad17d890ed357c908a5853da0c6a3274e619",
+      "locale": "en",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue2",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: new-york-v4 matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-en-vue2-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-en-vue2-4-nova.png",
+      "pngSha256": "2451263ef149ffe482220b7452baff08a6160e0bbb5fcc08183a47030ee41b78",
+      "metadata": "../hosted/site/tabs-en-vue2-4-nova.json",
+      "metadataSha256": "c2b90ab071d3f28f5bab635371d45f2e64276310596825f7eafc118ff6f86693",
+      "locale": "en",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-en-vue2",
+          "tabs-context-2"
+        ],
+        "note": "English Vue/Vue 2 live demo stays legible and aligned. Password and its panel remain displayed; Billing stays muted, and Profile: nova matches the captured state. Profile-specific pill/corner geometry changes and restores as expected, without visible clipping. Native identity/focus continuity is separately asserted by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-0-rhea.png",
+      "pngSha256": "09c615f6df822343c2671b6956d55b62aebed8970f4f8c4d70e5984ff2b4e211",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-0-rhea.json",
+      "metadataSha256": "6ddaabb46249dffb0d99bb5a1eb08e74aecfbfbd3497a322001e43c34ff83b56",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-wc",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to rhea; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-1-nova.png",
+      "pngSha256": "497807ed893a81cef6ec18fe49942433ef6bc764b9080e7963f2a9cf7c32b6f9",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-1-nova.json",
+      "metadataSha256": "40c01c6b17c8d17f34e3a1983ad4b07e6df64e7364b04aa27ff7774991e806f0",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-wc",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to nova; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-2-rhea.png",
+      "pngSha256": "570f8836873e373fd4625f01c5ca5d5c6d89c7c75f97e2b3ccad825717e031da",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-2-rhea.json",
+      "metadataSha256": "5a1d290660cfd8a0e690269cf6796050a8dad8b3197078fab5e1dfa368090182",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-wc",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to rhea; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-3-new-york-v4.png",
+      "pngSha256": "9d622bfe76a248a80614d3ff419ce79a1677e0c0e9c1f34c3bf1b46ba84a5c6d",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-3-new-york-v4.json",
+      "metadataSha256": "1a0aaea1824799a5b25d3199cc9ba8ef08904539fa0da130092cc4c52722203d",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-wc",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to new-york-v4; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-wc-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-wc-4-nova.png",
+      "pngSha256": "196a67e3b0d871aec0999d26ce9b57a21805a08e5e3ea05505fb31a6e45cfa56",
+      "metadata": "../hosted/site/tabs-zh-cn-wc-4-nova.json",
+      "metadataSha256": "6265b8872268a518db45f0e07c2ee832ea6998089b05af23a49bc77071576328",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-wc",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to nova; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-0-rhea.png",
+      "pngSha256": "88b70d6e70fb4390ea21f06b4552a80b552e1e13a928f162f68bac937745f317",
+      "metadata": "../hosted/site/tabs-zh-cn-react-0-rhea.json",
+      "metadataSha256": "280d2a337722f2c2740efb276d5813e146c89acb3ad745132e4b1290db3e3e59",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-react",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to rhea; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-1-nova.png",
+      "pngSha256": "1eb9f6506f71a8b866e7dc7ea6a65e9e0ac6754f7bb85f40068eea5e44a52874",
+      "metadata": "../hosted/site/tabs-zh-cn-react-1-nova.json",
+      "metadataSha256": "1b23b2700d83a83629f427daf165ef6dc7007b869ffb8aa972a31e335e903d4b",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-react",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to nova; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-2-rhea.png",
+      "pngSha256": "6aa13ff4b4c3b3c3a68ccf4f6335f573617241235d6ae661d91c870115b031ea",
+      "metadata": "../hosted/site/tabs-zh-cn-react-2-rhea.json",
+      "metadataSha256": "38fb942f212410b57ec121216220e474a6da38968042fca6e7e49aecbb7a777e",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-react",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to rhea; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-3-new-york-v4.png",
+      "pngSha256": "c51a13b40d7b3f0052f480c37a5e7ca835dc2c1ad77a248e530ef440fd1a19f4",
+      "metadata": "../hosted/site/tabs-zh-cn-react-3-new-york-v4.json",
+      "metadataSha256": "7e27ae4e9321da809887d85add6fbdf70dc074f01fd33b4aec54c3e13be1dad4",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-react",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to new-york-v4; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-react-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-react-4-nova.png",
+      "pngSha256": "aa760f953440e481950849d428a2b82d692862d8369e6a4d9d6139dd16bdcc1c",
+      "metadata": "../hosted/site/tabs-zh-cn-react-4-nova.json",
+      "metadataSha256": "6c7e65f39109cef6c3dc2f58caee914d0ad00d26f3c8ba5e17b2a89d2128dbe5",
+      "locale": "zh-cn",
+      "runtime": "react",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-react",
+          "tabs-context-3"
+        ],
+        "note": "CJK exhibition and same-instance instructions are clear, without missing glyphs or clipping. Password and its panel persist visually while the label changes to nova; disabled Billing remains distinct. Rounded Rhea and less-rounded Nova/New York v4 presentations match the named states. Native focus/identity evidence remains the executed case, not a pixel-only claim."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-0-rhea.png",
+      "pngSha256": "0a930d7fb5281f1188a4efa58c83f1960e392e6215aaf20e8adfe40c1e5ab211",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-0-rhea.json",
+      "metadataSha256": "d0b31872ee4c190c97992401dd17d3712f444fdd1b873192467105a15292ebf3",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: rhea and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-1-nova.png",
+      "pngSha256": "d65eb31867a797eb0c78613e07e0a9c0a7f09a2b2668f589fb2494bbd62ab728",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-1-nova.json",
+      "metadataSha256": "61f27baf772269e77afdbaba0d166bfa2fe27ef935c6361bf441f99f37a07258",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: nova and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-2-rhea.png",
+      "pngSha256": "75994986c2d3d7c033b41082bb350b88923620ae505bc296ceefa4425f65f36a",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-2-rhea.json",
+      "metadataSha256": "10bfdd01041b39f9099baff4f0952c1cdaee5f283170ec783008e4cd035e2025",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: rhea and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-3-new-york-v4.png",
+      "pngSha256": "40fd732b4626a7d3f9a79a540b9f8cd71f7a9f876f7716370fd9f0cd8d2b695d",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-3-new-york-v4.json",
+      "metadataSha256": "c2651689d82fbfa20ada8be3d0b2701cc9f0310f0ed7dc4b8a9e399e79b555e0",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: new-york-v4 and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue-4-nova.png",
+      "pngSha256": "05267951b956537dec9348cefcf6b7d466ebdeaafe5701c66c9b166519bb0b68",
+      "metadata": "../hosted/site/tabs-zh-cn-vue-4-nova.json",
+      "metadataSha256": "82f9fc9095599b8d208e0c08ff21e38cbb8a8a60c008b393c7e166205afaea91",
+      "locale": "zh-cn",
+      "runtime": "vue",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: nova and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-0-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-0-rhea.png",
+      "pngSha256": "89e0b6a97708579d8af89370eb3bf9439b690f3b9031ae53b865201c9d94c39f",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-0-rhea.json",
+      "metadataSha256": "498419b0d302e1c36422109023122d954d9f4e6d6fbb4a02258962c9be07d8f1",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue2",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: rhea and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-1-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-1-nova.png",
+      "pngSha256": "30cef57c72257cb730c54a812ea270619e772cc066c926311de34a03182bf1bf",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-1-nova.json",
+      "metadataSha256": "79bf052b0226b5a46792651b1f295989e02389eca2b1f7ca82a4d502c4c53f86",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue2",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: nova and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-2-rhea",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-2-rhea.png",
+      "pngSha256": "257e4c32ff3883598b002ef7f931351df44a0cdf8aad758e92e7e30e435bb2dd",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-2-rhea.json",
+      "metadataSha256": "ea1af4f0771640e763ef92f90b8ec1031f169ff20a96e2526cbfcd1bf74b8c33",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue2",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: rhea and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-3-new-york-v4",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-3-new-york-v4.png",
+      "pngSha256": "3d9585d7a6e9e01e76da4d13fbe56e11770358192bedda97b0d3789e9f3214cd",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-3-new-york-v4.json",
+      "metadataSha256": "788c9d34ddd11798fbef144f3d75040a62900d08ff961bee53808258261c82ee",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue2",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: new-york-v4 and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "tabs-zh-cn-vue2-4-nova",
+      "criterion": "1488-B",
+      "png": "../hosted/site/tabs-zh-cn-vue2-4-nova.png",
+      "pngSha256": "675baf994f64c83d1ec5030e342dd07012829a62b66f3ce18cf4e4aa61c8857a",
+      "metadata": "../hosted/site/tabs-zh-cn-vue2-4-nova.json",
+      "metadataSha256": "5bba33ec4209939966c2322234229dc4330e79473281e5f70b134718937928e4",
+      "locale": "zh-cn",
+      "runtime": "vue2",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "tabs-detail-zh-cn-vue2",
+          "tabs-context-4"
+        ],
+        "note": "Chinese source-coverage disclaimer and keyboard/pointer instructions remain legible. Password selection and panel persist; Billing remains visibly disabled. Profile: nova and the changed/restored corner geometry agree across the five captured states, without visible layout damage. Native identity/focus continuity is corroborated by the executed case."
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-enhanced-group-hover.png",
+      "pngSha256": "f0ee109113b800947f5ef42cf81e5673ccd81e3b55c5f69e780790b55298c48e",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "2a3e05f18342604056424f81b60f351307c19fe6008f8c77a012a7d71f25e90e",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-shadcn",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-enhanced-focus.png",
+      "pngSha256": "3555bb4813380b8e37c0a1aa992c907ebf98b91c11ab22368f558cbbd663f625",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-enhanced-focus.json",
+      "metadataSha256": "ccc0fc85151dcfd42b9d715d1add57aaa6f3b6efb27e395292d37f35d39b1db7",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-shadcn",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "b840b4fa14afb66dfa98f3c005e951e666fcb8221634cf4e2eddc59426708c13",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "d00816e2295c1ebf169266001159e7ac947fb3a8950738618a7d0d3aeb4c76fe",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-shadcn",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-focus.png",
+      "pngSha256": "d5275cec1649b6c2f89bb0e4a316bca5bff1f569c5e054e6e6deb0f7ad9c2bfa",
+      "metadata": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "cca8bd0a26c3e8f406e58dff03da8caf68c79c956141433721b84c9fecaf302e",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-shadcn",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-enhanced-group-hover.png",
+      "pngSha256": "95f3933026802999d4b3a824ea64e414a02d897a764e46eea8f52d3117a3d871",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "700d53f994fdc868e0459ae5ef5e577d7f643c666ee3690d6793af7a4519fbba",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-brutalist",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-enhanced-focus.png",
+      "pngSha256": "3f079b4fadea71d51ff556519f48b86e21ca6180786d66ca3568049b461413e0",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-enhanced-focus.json",
+      "metadataSha256": "6cc6c1a33ab8063e41f233df29587faccd34917f3d939099dcefee6749ff51b7",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-brutalist",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "de61ee7788c4ee0808119aeaa5c250508e8fc55694392d8cd5821adcf903da3b",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "bb4afec4bf121d90c39ad25bdd2520382b4a7e95628fb10c6446756b4bafbaa6",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-brutalist",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-light-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-focus.png",
+      "pngSha256": "e2c260add98d05b1f8378956afc787e6443309456a86e8a2d92a8db11ca0e9c9",
+      "metadata": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "7a94323513a6b6404e2c7f59bfebc00e430473458bc6a25afaadee65b81f4060",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-light-brutalist",
+          "sidebar-context-1"
+        ],
+        "note": "English labels and hierarchy are readable, including wrapped longer labels. The group hover fill and the focus frame are distinct; rounded family geometry is visible in both enhanced and failed-script views. Shadcn keeps restrained rounded treatment, while Brutalist keeps its own stronger family treatment. Leaf/current state outside a given viewport is evidenced by the same case JSON, not claimed as simultaneously pictured."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-enhanced-group-hover.png",
+      "pngSha256": "c7b67ccb28b356f4700ef63ac3d59a31fa502a9733c3e42a3578a7e0a7171358",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "63b811c65eeb61ec35f4de57ba38a7c2365683bde84532b3f9570f0411aa07e4",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-shadcn",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-enhanced-focus.png",
+      "pngSha256": "4c532b02831977414c48f6bdbd7d772b7f2a8bbf189f1f6ce1cfc76461696962",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-enhanced-focus.json",
+      "metadataSha256": "802c1c35ecae79ba5bf1df7ecb11f17d9088c2959d2a322189edce50df28d070",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-shadcn",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "7fcad832d9852398ff66e8e5f3503ef84a43147f5d355a0a022b196e435d67e3",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "4f24d28e73390335453950edc15913e23f83e728223f44bce97db680f29c796d",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-shadcn",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-focus.png",
+      "pngSha256": "ea99e5b1100f3991b24e63c85b4a9219439ee833895f48471176422797fce433",
+      "metadata": "../hosted/site/sidebar-en-dark-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "7cb1c1c7e166aba952e53591f0fa090e394994d62d349b154fdc968d69a16878",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-shadcn",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-enhanced-group-hover.png",
+      "pngSha256": "643cd0b6066eb3191d6b4c1fda74a9b796cbb6b47c4eb992649c4ccfeb71fcca",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "0e5428c41b6585914c53c2bc40a17bd73b39a0f140e719f6acb60fa25ba3a8cd",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-brutalist",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-enhanced-focus.png",
+      "pngSha256": "0a7e1c571d40a17013b76b32db15a154fdc8dabcaf49cc6e6775daf001b82202",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-enhanced-focus.json",
+      "metadataSha256": "21009f7d4704c147e9eac8db38f7d2b45cefa014e85bd6fc4e5e09490658ab55",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-brutalist",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "51a94e51b91df4f7ecf8cf6ab4295bb5ce084518e1bdc167085fda3fc5c4fd1b",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "143ce36b7cc73742c48f59255019e3d0c7a2f11c12622c2649a1007f3f4e5c23",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-brutalist",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-en-dark-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-focus.png",
+      "pngSha256": "d7186bce0468aedf0ec1eb452e3cbff226efd2aa0e46b6cab2978d0c5b2e6428",
+      "metadata": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "07dab35e613078ce34ac7e10290673d1da758f79966c311f5c6000e574b50e17",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-en-dark-brutalist",
+          "sidebar-context-2"
+        ],
+        "note": "Dark English navigation keeps readable labels, visible hierarchy and naturally wrapped longer items. Hover and focus remain distinct. Group corners are visibly rounded in enhanced and failed-script captures; Brutalist uses a strong bright focus outline and retains its own dark family treatment, while Shadcn remains visually separate. Do not infer offscreen leaf pixels from the group capture."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-group-hover.png",
+      "pngSha256": "72ab16138da9b7ee93977707ed465f6e8bd55d920b548dc41109c7aeb42f2307",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "74f4a68af5297315faad4c38da9e9dd10d4a3945c42a356f7dc76ce5c58607c5",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-shadcn",
+          "sidebar-context-3"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-focus.png",
+      "pngSha256": "86720bb6d48ee6afe93de8564d6a8227b850690d365ae0dc2070d3faaa89d761",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-focus.json",
+      "metadataSha256": "b2ba1d5e6b915e3afa4b543ed24d047f30d09219c7ba0eecf9aeec42f147ae49",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-shadcn",
+          "sidebar-context-3"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "a2b5d9a6d474c6af3a0ebab71bbe1e3c38ad4336ffc03c68da5b4cb40cb0d447",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "8b32369ac680cf48264d628193d1fda34aa98739edd057d8d9b36da742f79c76",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-shadcn",
+          "sidebar-context-3"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-focus.png",
+      "pngSha256": "730b31777164a1c252780ea0f3eeb624cb350b7d73ffd7acb79b9f455878345a",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "6a4c5adeeb0030a18bf9f2e1412c218df63f385b1b8cb5ba7ea084fc685ca4e6",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-shadcn",
+          "sidebar-context-3"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+      "pngSha256": "d19191157cc013644b8a475fd7c9009e034d07309c72596f3d9d9b209ab8d45e",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "432b12150b91f75fab130cc888780e4661605112df4f875d4725c0c4531a4653",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-brutalist",
+          "sidebar-context-3",
+          "brutalist-historical-comparison"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-focus.png",
+      "pngSha256": "ba5195b7575503f88922e3737cdbc0509a50c8317b25fc46db8c6a81325faecf",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-focus.json",
+      "metadataSha256": "83f1f66d699169345a731e4da52a878de86876368535c79a209a8933c50b10da",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-brutalist",
+          "sidebar-context-3"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "783f6ddb8e19206f09c47a3c33d94a1545433df7f266720cf65f4c443f1ec9ef",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "814f9b070dbb35a245eb2e31899757d97cc7bb00efc862d337dc09bce18b6b5b",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-brutalist",
+          "sidebar-context-3",
+          "brutalist-historical-comparison"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-light-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-focus.png",
+      "pngSha256": "2bb4e8eed5de23cad927724677bbf7a40434bbb062fc22921ef4ac2f26802518",
+      "metadata": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "a72f1c7d72c210b178090f060542377d9b1bef468194eec9afbccb3089d10a0f",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-light-brutalist",
+          "sidebar-context-3"
+        ],
+        "note": "Chinese labels remain legible and hierarchical. Group hover fill and focus outline are distinct, with rounded corners in enhanced and failed-script modes. Brutalist retains pale-blue canvas/stronger family decoration; Shadcn retains its restrained appearance. The final Brutalist failed-script group is visibly rounded, unlike the verified historical square fallback; historical enhanced was already rounded."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-group-hover.png",
+      "pngSha256": "47820a56fa41d89c7a995d5d3da2beccf18b0867628e7ad0459180c3ecd1408d",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-group-hover.json",
+      "metadataSha256": "56037814339d816ab6cf5db714cd08e62ebf37947e1ac82f390851969b1f1504",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-shadcn",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-focus.png",
+      "pngSha256": "e1e12555fe2987f510010436b46269b1dbd1b3315c9e25ddd3e6f5a616b0b52f",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-enhanced-focus.json",
+      "metadataSha256": "ef72207d5cd8852acf92a8a7f54c178c943ca01c8f152313b90e8449bd5e01df",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-shadcn",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover.png",
+      "pngSha256": "8072e10b177d674501536d1ed2ee1ba6c6b3f8e7f5941d2519aa16e0432804a7",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover.json",
+      "metadataSha256": "ca885808bdbfaac8687125d5231fd59f634571c54c7404ba7dc1fe6f7c8f5185",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-shadcn",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-shadcn-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-focus.png",
+      "pngSha256": "0decda1db5bcabd7b235ae49eb5cba48794872d81bc82e29ff3e8e9cd0c2d1e7",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-shadcn-failed-scripts-focus.json",
+      "metadataSha256": "23da4c11f05de491f1f5f1f824799ac815f0dcdb5ba7f8839521e56435e8a131",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-shadcn",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-group-hover.png",
+      "pngSha256": "c625a8f6e6c4aea006e31f3eafe9a1113e2b6d7300084229bb1580433a4bf460",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-group-hover.json",
+      "metadataSha256": "e73fd96e247994806a763b32beff0555a3f90cb1911c31acc3573c6b369925f8",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-brutalist",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-enhanced-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-focus.png",
+      "pngSha256": "cfccd1d437e339c6a9a1636d5a7c41b14215dcab279d3719c561e565cbce52d4",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-focus.json",
+      "metadataSha256": "c12b5a7324d80f84b85e4795e42a055402f08bdf0c4dc15fce1a39a764e1f728",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-brutalist",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover.png",
+      "pngSha256": "28dd9503dda1bf05ef68d2f7ee5181b0a659ca95b4a7ce0b8f30a042e1a70919",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover.json",
+      "metadataSha256": "842f97fb805d87957e47b36183f38daf403daa4a03647df1b798134f14b4b723",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-brutalist",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-focus.png",
+      "pngSha256": "7ce2d5316bb2cb5362a0e9a51199e332033d9a4750a7cd8a586f8048f7baafa2",
+      "metadata": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-focus.json",
+      "metadataSha256": "3be335a53494a23c6285b080d8707c68a7790c503d96ca9459e866ac6568a619",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-detail-zh-cn-dark-brutalist",
+          "sidebar-context-4"
+        ],
+        "note": "Dark Chinese sidebar labels and hierarchy remain readable, without missing glyphs. Hover fill and group focus ring are visually distinct in both enhancement modes; family-specific corner/decorative treatment remains separate. Current leaf state or hit targets outside the pictured group viewport are supported only by the same-case observations, not presumed visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-shadcn-enhanced.png",
+      "pngSha256": "12df67556e38d058b1f776ed16e3740147fa72b187f34682f26a3c78b67f7f7c",
+      "metadata": "../hosted/site/sidebar-mobile-en-shadcn-enhanced.json",
+      "metadataSha256": "286953c022f6d3d7934a5ceded0bf224f8a7f4a5bf630f96e74d46ea9d2cea13",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-en"
+        ],
+        "note": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-shadcn-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-shadcn-no-js.png",
+      "pngSha256": "b607e009503a3edec426a136da45871271f4adcdf7a9c7eb463ccff0986073c6",
+      "metadata": "../hosted/site/sidebar-mobile-en-shadcn-no-js.json",
+      "metadataSha256": "c5619932828d863f2d5a87bdc90705f41c7b63aeba4e33ddde5b0a07f21395e1",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-en"
+        ],
+        "note": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-brutalist-enhanced.png",
+      "pngSha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4",
+      "metadata": "../hosted/site/sidebar-mobile-en-brutalist-enhanced.json",
+      "metadataSha256": "2e2ca13b47e0de7a15795371507904be9616bf91543c2d3d15368f2c0b4753c6",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-en"
+        ],
+        "note": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-en-brutalist-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-en-brutalist-no-js.png",
+      "pngSha256": "cbecaa3ae0cc138994e460794018c6beb9bd2c7aa9249a1a96d3898b1f2985d3",
+      "metadata": "../hosted/site/sidebar-mobile-en-brutalist-no-js.json",
+      "metadataSha256": "247b55d69218d4a4cadd2decbeb9744fad73f787cc5c06d440b2cc7e23ed8f6c",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/en/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-en"
+        ],
+        "note": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-shadcn-enhanced.png",
+      "pngSha256": "5f738c5bba116ddfe99dfe9a9919de2b5b2206412aff841c959b54b11de59715",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-shadcn-enhanced.json",
+      "metadataSha256": "0eee978862c998bb30a0dac99f956463f05f5d588c145ba3cbb5f3aa74f37c4a",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-zh-cn"
+        ],
+        "note": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-shadcn-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-shadcn-no-js.png",
+      "pngSha256": "413af64df8efb33434ef608312429d1d4e9928b1d657b986f69cfa2a72f861b1",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-shadcn-no-js.json",
+      "metadataSha256": "2d2edeee1ebe0aa104d6ff36f8b158782f6379fa84725d4a417abf26c8d8142c",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-zh-cn"
+        ],
+        "note": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Shadcn current Tabs uses a restrained rounded fill. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-enhanced",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-brutalist-enhanced.png",
+      "pngSha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-brutalist-enhanced.json",
+      "metadataSha256": "0dbf1c1c2694378069b601df15e26dd00fa00dd87463220d7ec450426abc1c7d",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-zh-cn"
+        ],
+        "note": "Enhanced mobile navigation is legible; the visible current leaf has a full, rounded target with family-specific styling. Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "sidebar-mobile-zh-cn-brutalist-no-js",
+      "criterion": "1488-C",
+      "png": "../hosted/site/sidebar-mobile-zh-cn-brutalist-no-js.png",
+      "pngSha256": "96eb8a0eaced1a102302d73290e7085c80767b8756a4a2301c2bbe18dda467f2",
+      "metadata": "../hosted/site/sidebar-mobile-zh-cn-brutalist-no-js.json",
+      "metadataSha256": "e5e5e862087a786bc35da06b88a95f4eb2affe2941b68a24a5797e9a32663318",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "no-js",
+      "actualTheme": "dark",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "sidebar-mobile-zh-cn"
+        ],
+        "note": "Actual SSR dark theme is preserved despite a light browser preference. In-flow navigation and the explicit JavaScript-required fallback remain readable. The fallback search label wraps in the narrow header.Brutalist current Button uses a strong blue fill and rounded border. This is the final leaf-scrolled frame; prior group hit/paint and wheel observations are recorded at earlier instants in the same case, not necessarily simultaneously visible."
+      }
+    },
+    {
+      "id": "hero-en-light-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-enhanced-hover.png",
+      "pngSha256": "852fd5cb9af44ac2fd3d9ae5f5700cc43ea036a7128c716db2433612c603a04c",
+      "metadata": "../hosted/site/hero-en-light-enhanced-hover.json",
+      "metadataSha256": "18c9db8f259e15e128dded075cb56174b01e55baabd8627d2ca39a140c1c6eaa",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-light"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual light palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-light-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-enhanced-focus.png",
+      "pngSha256": "032be5c53bcfe24cfe930c71fe9d7f06dd615b411923c3ce657338f80faa097c",
+      "metadata": "../hosted/site/hero-en-light-enhanced-focus.json",
+      "metadataSha256": "ed72c83fb4b07627dfa31f5b74559e07621f85490d3cc290730695d46d158578",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-light"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual light palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-light-enhanced-forced-colors",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-enhanced-forced-colors.png",
+      "pngSha256": "bf79f5e2d8b7a4d7a5a2a4dc6f0129235a3394551d17cc987b197f556c25a71e",
+      "metadata": "../hosted/site/hero-en-light-enhanced-forced-colors.json",
+      "metadataSha256": "086246cd58ca6cb04988d2b56c85396779c2f32014dc6a0324659fb232fc5949",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-light"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. Forced-colors retains a clear blue outline and readable link text against white. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-light-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-failed-scripts-hover.png",
+      "pngSha256": "6eab25de7e9899514eeb0d18cbfd18617e564a318f07969260990dfa07972e93",
+      "metadata": "../hosted/site/hero-en-light-failed-scripts-hover.json",
+      "metadataSha256": "5825d1b2874c88b850e8a508411d31dc80cf3f734a4dc1eded3dd0ae6acd40f6",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-light"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual light palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-light-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-failed-scripts-focus.png",
+      "pngSha256": "db9e03e17b63a9d6dd55ae12c95c986f815db3a59bc5cbe56cb07789dac72d51",
+      "metadata": "../hosted/site/hero-en-light-failed-scripts-focus.json",
+      "metadataSha256": "a7886f56fbb2cdd9b5d3df5b5a10dc38a215c879ae943f9dca86bc9b6247a222",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-light"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual light palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-light-failed-scripts-forced-colors",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-light-failed-scripts-forced-colors.png",
+      "pngSha256": "fdc7ce4b268ea0a3be1f7fdd96784c59ab5822ebcd7ce3cde6674309ab60ba25",
+      "metadata": "../hosted/site/hero-en-light-failed-scripts-forced-colors.json",
+      "metadataSha256": "0ea2791e2008f364b2155be71834a7ff49eab4bd4e0fd6092899e9d95f1f9a99",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-light"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. Forced-colors retains a clear blue outline and readable link text against white. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-dark-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-enhanced-hover.png",
+      "pngSha256": "d4eb88c228c845be8fe48da7632d307337b4e5aef1a648b908cf2b99a12972dc",
+      "metadata": "../hosted/site/hero-en-dark-enhanced-hover.json",
+      "metadataSha256": "876ff00d4d162d0a75dd98c3ed1f5eff5f649ee7c4501f61e54f66cf5c6119a5",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-dark"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-dark-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-enhanced-focus.png",
+      "pngSha256": "90c47b5bb376fd3e24f98702ae33150f753bd52c282f98fc92ad4993bf109664",
+      "metadata": "../hosted/site/hero-en-dark-enhanced-focus.json",
+      "metadataSha256": "625b7f5a0de638e6c0e7fb2fb4607a32ae714dde48b3eb14e29e28e9b3455e3c",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-dark"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-dark-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-failed-scripts-hover.png",
+      "pngSha256": "b9f60a5a343a8b643d96b48401426ff65be2d99aa1536b3f113e5258fe0ad650",
+      "metadata": "../hosted/site/hero-en-dark-failed-scripts-hover.json",
+      "metadataSha256": "9f93a4e2eba7c06d21e8d6df9ba914e56284c40cc0b7cecc4166c2f08d3b26af",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-dark"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-en-dark-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-en-dark-failed-scripts-focus.png",
+      "pngSha256": "86ee0103da5929f5b8bb2b23a9156775c206e975fe3c2c3579a378ec111cc5b4",
+      "metadata": "../hosted/site/hero-en-dark-failed-scripts-focus.json",
+      "metadataSha256": "05d0097f918d4bd7a0def4497e4d0d7019be076f0a0d2ff1ad423576f712521f",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/en/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-en-dark"
+        ],
+        "note": "English pill text is fully legible and not underlined. Hover has a filled capsule; focus shows one outer ring around the native link, with no competing inner ring. The actual dark palette and heading remain readable. Failed scripts retain the native Hero link but do not establish readiness of the absent interactive homepage demos."
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-enhanced-hover.png",
+      "pngSha256": "b562ff04327a2754f31064e593ecfbcff46d7d6d3f21d441a11eed608779f80e",
+      "metadata": "../hosted/site/hero-zh-cn-light-enhanced-hover.json",
+      "metadataSha256": "486c62fb2810387474ca8870c6f142e7b56e70603a81618154e3707c85ff3458",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-light",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-enhanced-focus.png",
+      "pngSha256": "f2a17edb0398c0c31a142d16ce29ab263761889e735f2da7d9c8783916057e3d",
+      "metadata": "../hosted/site/hero-zh-cn-light-enhanced-focus.json",
+      "metadataSha256": "18ace10ce336893d816d11470dd9278f7253d7695f0d6512d0d29de95c7f694a",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-light",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-failed-scripts-hover.png",
+      "pngSha256": "002e6e2942ba1d54650d353e44cfb1d3c8430b9128ccfef5d53e9f629fd0e884",
+      "metadata": "../hosted/site/hero-zh-cn-light-failed-scripts-hover.json",
+      "metadataSha256": "05b32ef903f882aa1411c06e49aec910b796b03b583f479d626edb0dc19b1b28",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-light",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-light-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-light-failed-scripts-focus.png",
+      "pngSha256": "db9770ba359036b03ede0ef6fcee83db84ecaeac4bc6941f16d1cf42ad6bb14f",
+      "metadata": "../hosted/site/hero-zh-cn-light-failed-scripts-focus.json",
+      "metadataSha256": "ef91b8b381136c0514224a02aea2acc8c11bcb12c5afad811ef009ef84bf60b5",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-light",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-enhanced-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-enhanced-hover.png",
+      "pngSha256": "b5d0b956e1ece0be31ea01d68582d038ae0af4a212eafd23798f2464e9c88d94",
+      "metadata": "../hosted/site/hero-zh-cn-dark-enhanced-hover.json",
+      "metadataSha256": "a71f61a08789c4a37fd7d879a3947f6979c9762948a91aed2e0961f75edf1c35",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-dark",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-enhanced-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-enhanced-focus.png",
+      "pngSha256": "7f201190087ce96fb3ac674f2c5703b5f27363d6161453d94d594efddd32437d",
+      "metadata": "../hosted/site/hero-zh-cn-dark-enhanced-focus.json",
+      "metadataSha256": "371ca8221cf9319ba90cd74cbd5747e5a39d1d9020a4d9127c227bd4f5a131a6",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-dark",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-failed-scripts-hover",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-failed-scripts-hover.png",
+      "pngSha256": "883778dbf90435b2ac1f2b523ccbec712af1fc839876efcfde12b9efff61ea3f",
+      "metadata": "../hosted/site/hero-zh-cn-dark-failed-scripts-hover.json",
+      "metadataSha256": "6fd901be9efef6b2419d51c87ebf0ecd5c3f65d28a33d892497a978ea89d1301",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-dark",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hero-zh-cn-dark-failed-scripts-focus",
+      "criterion": "1488-D",
+      "png": "../hosted/site/hero-zh-cn-dark-failed-scripts-focus.png",
+      "pngSha256": "e76029e78d76e33c489835039dffdcb71ba1f5c7d71804ead245d743e17c6631",
+      "metadata": "../hosted/site/hero-zh-cn-dark-failed-scripts-focus.json",
+      "metadataSha256": "ec0121e878dffc1cfa7cf4fff4d7156e83e270c4f058fd12ffa4f262946c25a0",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "failed-scripts",
+      "actualTheme": "dark",
+      "preferredColorScheme": "dark",
+      "route": "/zh-cn/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "views": [
+          "hero-detail-zh-cn-dark",
+          "hero-context-2"
+        ],
+        "note": "Chinese Hero label, heading and supporting prose are readable without missing glyphs or clipping. The pill is visibly rounded and not underlined; focus shows one outer ring. Both actual light and dark palettes preserve the link in enhanced and failed-script modes. Failed scripts leave interactive homepage demos unavailable, which this Hero-specific review does not accept."
+      }
+    },
+    {
+      "id": "hook-evidence-en",
+      "criterion": "1154-rendered-evidence",
+      "png": "../hosted/site/hook-evidence-en.png",
+      "pngSha256": "d7a877805537afcf24449b9c9c1f95bb86d6789f35bf3eca535b92410f0959b8",
+      "metadata": "../hosted/site/hook-evidence-en.json",
+      "metadataSha256": "027f6f095f153be1c6bca389978714e706313a850b901177bb53b37279ea67dd",
+      "locale": "en",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/en/specifications/as-hook/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "view": "individual-full-frame",
+        "note": "English evidence prose is readable. It visibly retains the missing Module declaration array failure, container exit 1, unreached freezing assertions, and incomplete 13 original generic conditions/two #1154 checkboxes. The historical record link remains ordinary underlined article prose; render acceptance does not accept the underlying historical conditions."
+      }
+    },
+    {
+      "id": "hook-evidence-zh-cn",
+      "criterion": "1154-rendered-evidence",
+      "png": "../hosted/site/hook-evidence-zh-cn.png",
+      "pngSha256": "7b4236a0b6728f313b6ca3c1b5882c9708de2438b44cbbf0e9429cdf0c4ca477",
+      "metadata": "../hosted/site/hook-evidence-zh-cn.json",
+      "metadataSha256": "24f485eedb2663619f0543ca244461aeb6099df5da16af61c3ce313ad984ddb0",
+      "locale": "zh-cn",
+      "runtime": "wc",
+      "scriptModeFromSourceBoundTest": "enhanced",
+      "actualTheme": "light",
+      "preferredColorScheme": "light",
+      "route": "/zh-cn/specifications/as-hook/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "visualReview": {
+        "status": "inspected-no-blocker-within-described-scope",
+        "reviewed": true,
+        "view": "individual-full-frame",
+        "note": "CJK evidence prose is readable. Visible R3 text retains exit 1, missing Module declaration array, unexecuted freezing assertions, and incomplete original 13 generic conditions/two #1154 checkboxes. Historical evidence hyperlink is underlined as ordinary article prose."
+      }
+    }
+  ]
+}

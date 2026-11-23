@@ -1,0 +1,585 @@
+{
+  "schemaVersion": 1,
+  "kind": "public-evidence-sanitization",
+  "preparedAt": "2026-11-23T13:56:24Z",
+  "productHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "productTree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+  "evidenceBranch": "codex/sprint2-evidence-1450ffd5",
+  "scope": "Initial 13 text copies plus actual independent public code review; no later assembled file is certified by this inventory.",
+  "pathPolicy": "Deterministic literal private-prefix replacement, longest prefix first; original private prefixes intentionally omitted here.",
+  "sourceLocatorBase": "Original private execution-record directory; sourceRelativePath is a relative locator, not a public URL.",
+  "rules": [
+    {
+      "id": "repair-checkout",
+      "replacement": "<S2_REPAIR_CHECKOUT>",
+      "meaning": "Repair checkout used for red, uncommitted repair and final 1450 runs; recorded head/tree/dirty fields distinguish them."
+    },
+    {
+      "id": "evidence-directory",
+      "replacement": "<REVIEW_EVIDENCE_DIR>",
+      "meaning": "Private execution-record directory; original source locators below are relative to it."
+    },
+    {
+      "id": "historical-checkout",
+      "replacement": "<S2_16BE_CHECKOUT>",
+      "meaning": "Checkout used for the recorded 16be executions; a historical role, not the current branch of that directory."
+    },
+    {
+      "id": "hosted-checkout",
+      "replacement": "<GITHUB_ACTIONS_CHECKOUT>",
+      "meaning": "Hosted CI checkout prefix; repository-relative diagnostics remain unchanged."
+    },
+    {
+      "id": "reviewer-task",
+      "replacement": "<INDEPENDENT_REVIEW_AGENT>",
+      "meaning": "Independent reviewer task identifier; not a GitHub approver identity."
+    }
+  ],
+  "embeddedHashes": "Preserved and still refer to original execution bytes. Use publicSha256 below for transformed public copies.",
+  "initialAssembly": {
+    "path": "assembly.json",
+    "originalSha256": "d417ad876b4e8941280c1af813b44fb01e386794d1c930ca6e84b9b66e810745",
+    "bytes": 3574,
+    "unchangedByThisPreparation": true,
+    "role": "Pre-sanitization collection snapshot; its hashes and modified:false flags are not claims about public transformed files."
+  },
+  "files": [
+    {
+      "path": "focused/manifest.json",
+      "sourceRelativePath": "final-validation-1450ffd5-20261123/manifest.json",
+      "originalSha256": "8625744debde13a7b5955677bac791de4690f3c88e3917290294d6e06f2c978a",
+      "originalBytes": 5242,
+      "publicSha256": "0434d4660c57692a655f54972719ea3a1ee4298cae555c362f1f8b3ea0444d60",
+      "publicBytes": 5205,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "evidence-directory": 1
+      },
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "focused/vitest.json",
+      "sourceRelativePath": "final-validation-1450ffd5-20261123/vitest.json",
+      "originalSha256": "c78d7a2110b66a2040bf6d8f7f001e39ef44cf90027a3c98677cf1c4e3d23dec",
+      "originalBytes": 81260,
+      "publicSha256": "03eabd38357b64cb42d2c06e5e2391921c29426044880b4fcda0afbb015303ab",
+      "publicBytes": 80984,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "repair-checkout": 6
+      },
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "focused/vitest.log",
+      "sourceRelativePath": "final-validation-1450ffd5-20261123/vitest.log",
+      "originalSha256": "71835fd332b2dd0a6ab3144351a903e7d51e40cfbc2925b19f1fc9c22137f67f",
+      "originalBytes": 506081,
+      "publicSha256": "e2da3e4db5f05deb33b4952dcfa22e76b438608d6c716bd2a027e6121c3f6d7a",
+      "publicBytes": 460044,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "repair-checkout": 1000,
+        "evidence-directory": 1
+      },
+      "verification": "All non-path bytes preserved by literal prefix substitution.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/16be-workspace-types.log",
+      "sourceRelativePath": "hosted-16be2a37-45175883003/extracted/workspace-types/run.log",
+      "originalSha256": "43c44a8f5989d5280d342cb66be41a2c846ceed838b1acf14984f48be6fb6a15",
+      "originalBytes": 2907,
+      "publicSha256": "03a4600932bd89167ca14051a87bdace99d65e63b39d7dce6cb42976caf7f9f3",
+      "publicBytes": 2897,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "hosted-checkout": 1
+      },
+      "verification": "All non-path bytes preserved by literal prefix substitution.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/16be-review.md",
+      "sourceRelativePath": "independent-final-review-16be-r1.md",
+      "originalSha256": "be477e00b452fa4dc9b932b5da28ec0c4be97fcc9f0c6aeb6bb1b97ffcaf0197",
+      "originalBytes": 11920,
+      "publicSha256": "90032edc91b44b8402a76b11306fa406b067da259d0270e2a1459b6d030f9755",
+      "publicBytes": 11850,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "evidence-directory": 1,
+        "historical-checkout": 1,
+        "reviewer-task": 1
+      },
+      "verification": "All non-path bytes preserved by literal prefix substitution.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/16be-r5.mts",
+      "sourceRelativePath": "independent-checkbox-reset-16be-r5.mts",
+      "originalSha256": "6812599c7dbbfa79963f3039e404ba1c51d99e1f4f105697cf4fcc5978a37222",
+      "originalBytes": 6482,
+      "publicSha256": "f2fb0938d17f15ec0610ae748b2401a71395b0ad8ca77eaedbb155b38f473415",
+      "publicBytes": 6369,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "evidence-directory": 1,
+        "historical-checkout": 2
+      },
+      "verification": "All non-path bytes preserved by literal prefix substitution.",
+      "archivedExecutionRecord": true
+    },
+    {
+      "path": "prior/16be-r5.json",
+      "sourceRelativePath": "independent-checkbox-reset-16be-r5.json",
+      "originalSha256": "848d1a14274644332390d2dc8726a382ebec3071008ca59a2d1a69d98de99778",
+      "originalBytes": 5186,
+      "publicSha256": "848d1a14274644332390d2dc8726a382ebec3071008ca59a2d1a69d98de99778",
+      "publicBytes": 5186,
+      "modified": false,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {},
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/repair-red-receipt.json",
+      "sourceRelativePath": "checkbox-repair/red-receipt.json",
+      "originalSha256": "52d6444a20aff4f334cefb1de5ceba5046fab64cfa2e6e65b248da79383ea84f",
+      "originalBytes": 4561,
+      "publicSha256": "a2c0f3937c3cc46a42e25ca7a666b94b0ecf0b74545e1e4b11ba19456577e999",
+      "publicBytes": 4441,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "repair-checkout": 1,
+        "evidence-directory": 2
+      },
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/repair-red-vitest.json",
+      "sourceRelativePath": "checkbox-repair/red-vitest.json",
+      "originalSha256": "6aa6ab1dec80c0960c55eb3676249106c476f9550887da4ad829da8fdd4707cd",
+      "originalBytes": 52696,
+      "publicSha256": "1b44b3e87d368fac59bec6dc059aedc01cd52772b00137cc171f4b43abb2dc4f",
+      "publicBytes": 49338,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "repair-checkout": 73
+      },
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/repair-workspace-types.json",
+      "sourceRelativePath": "checkbox-repair/workspace-types-receipt.json",
+      "originalSha256": "aae680f3bf21678550626db1a98048fc2f31504b2c4100ac8709adae2f7e073d",
+      "originalBytes": 1656,
+      "publicSha256": "aae680f3bf21678550626db1a98048fc2f31504b2c4100ac8709adae2f7e073d",
+      "publicBytes": 1656,
+      "modified": false,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {},
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "prior/repair-workspace-types.log",
+      "sourceRelativePath": "checkbox-repair/workspace-types.log",
+      "originalSha256": "adb427539ae46bb90197eeb8cb437f27777fa8f9cafd0f70c35c14355ba301d0",
+      "originalBytes": 589,
+      "publicSha256": "d74b6eb3a2103408be136fda42377afffa70ac1446d812e22228d41f95139f82",
+      "publicBytes": 543,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "repair-checkout": 1
+      },
+      "verification": "All non-path bytes preserved by literal prefix substitution.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "independent/1450-r5.mts",
+      "sourceRelativePath": "independent-checkbox-reset-1450ffd5-r5.mts",
+      "originalSha256": "fb4842aa23b2b1369b95a658ee3e194a244b8213df9fa1bda4dd89529a9a1925",
+      "originalBytes": 8408,
+      "publicSha256": "573f7315b8735a14c6d10b24507cc18eeda40d4471393992fab760361463ebfc",
+      "publicBytes": 8049,
+      "modified": true,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {
+        "repair-checkout": 7,
+        "evidence-directory": 1
+      },
+      "verification": "All non-path bytes preserved by literal prefix substitution.",
+      "archivedExecutionRecord": true
+    },
+    {
+      "path": "independent/1450-r5.json",
+      "sourceRelativePath": "independent-checkbox-reset-1450ffd5-r5.json",
+      "originalSha256": "bdc22803025d8ff38e8c856fa0174d0609fcd9765857168d429c029555c2ebef",
+      "originalBytes": 5175,
+      "publicSha256": "bdc22803025d8ff38e8c856fa0174d0609fcd9765857168d429c029555c2ebef",
+      "publicBytes": 5175,
+      "modified": false,
+      "operation": "literal-private-prefix-replacement-only",
+      "replacementCounts": {},
+      "verification": "Recursive JSON equivalence after string-only prefix substitution; keys, numbers, booleans, arrays, errors and statuses preserved.",
+      "archivedExecutionRecord": false
+    },
+    {
+      "path": "independent/code-review.md",
+      "sourceRelativePath": "independent-final-review-1450ffd5.public.md",
+      "originalSha256": "2bd25ef66c02db663580372f8d600f834030a6c75ff591c2c209b2fb7d748105",
+      "originalBytes": 21237,
+      "publicSha256": "23e90f5e2e1f0b72ba17513bd045910fee5f6c3657e3aff5d4b92c8bb9f8cc85",
+      "publicBytes": 26809,
+      "modified": true,
+      "operation": "historical-scope-preface-plus-existing-public-review-and-separately-labeled-platform-hosted-updates",
+      "replacementCounts": {},
+      "prefaceSha256": "92969538ebd3ebb83b478c57404fa40be884d2c260d3e6a04d23d6100766c689",
+      "prefaceBytes": 757,
+      "appendixSha256": "166e69f9e2dc48421bca1d4df3d4ea262ed60789ef6bf892396be5384811f3b8",
+      "appendixBytes": 4815,
+      "verification": "Entire original public source review retained verbatim between a prominent historical-scope preface and separately sourced chronological appendices. No result is rebound to the later PR head.",
+      "archivedExecutionRecord": false
+    }
+  ],
+  "newDocuments": [
+    {
+      "path": "PUBLICATION-NOTES.md",
+      "sha256": "9529f2132472410b2806c67d1228b11f332c2a2b01b771e6ea236e75ca6c912d",
+      "bytes": 10416,
+      "provenance": "New explanation and original/public hash table; no original execution counterpart."
+    }
+  ],
+  "platformSnapshot": {
+    "inspectedAt": "2026-11-23T13:43:56Z",
+    "source": "Actual GitHub raw REST responses independently read; volatile snapshot, not a CI or approval assertion.",
+    "ready": {
+      "eventId": 37012490109,
+      "actor": "cyjin-yl",
+      "event": "ready_for_review",
+      "createdAt": "2026-11-23T13:28:14Z",
+      "sourceUrl": "https://api.github.com/repos/Proto-UI/Proto-UI/issues/events/37012490109"
+    },
+    "bot": {
+      "commentId": 7102584307,
+      "createdAt": "2026-11-23T13:28:24Z",
+      "actor": "chatgpt-codex-connector[bot]",
+      "body": "You have reached your Codex usage limits for code reviews. You can see your limits in the [Codex usage dashboard](https://chatgpt.com/codex/cloud/settings/usage).",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/pull/1716#issuecomment-7102584307"
+    },
+    "reviewCount": 0,
+    "reviewsSource": "https://api.github.com/repos/Proto-UI/Proto-UI/pulls/1716/reviews?per_page=100",
+    "statuses": [
+      {
+        "context": "Vercel",
+        "state": "failure",
+        "description": "Deployment rate limited — retry in 24 hours.",
+        "updatedAt": "2026-11-23T13:24:09Z"
+      }
+    ],
+    "statusSource": "https://api.github.com/repos/Proto-UI/Proto-UI/commits/1450ffd549bce8da636f2ccd45044aff5121e6ad/status",
+    "checks": [
+      {
+        "name": "cycle-report",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:29:55Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137726481884"
+      },
+      {
+        "name": "test",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:29:55Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137726481496"
+      },
+      {
+        "name": "test-general",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:29:55Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137726480918"
+      },
+      {
+        "name": "test-browser",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:29:55Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137726480466"
+      },
+      {
+        "name": "public_package_build",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:25:46Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137724143581"
+      },
+      {
+        "name": "cli-smoke",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:25:46Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137724142669"
+      },
+      {
+        "name": "release-consumer-react",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:25:46Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137724142436"
+      },
+      {
+        "name": "release-stage",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:25:46Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137724142241"
+      },
+      {
+        "name": "browser-evidence",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:30Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183604935/job/137723422700"
+      },
+      {
+        "name": "sprint2-consumers",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "in_progress",
+        "conclusion": null,
+        "completedAt": null,
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183604935/job/137723420016"
+      },
+      {
+        "name": "compiler-gpui-consumers",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723371178"
+      },
+      {
+        "name": "agent-operations-fixtures",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723360354"
+      },
+      {
+        "name": "cycle-plan",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723354420"
+      },
+      {
+        "name": "rust",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723336451"
+      },
+      {
+        "name": "release-scan",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723279965"
+      },
+      {
+        "name": "type-check",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723279932"
+      },
+      {
+        "name": "coverage-governance",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723279877"
+      },
+      {
+        "name": "rust-interop",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723279564"
+      },
+      {
+        "name": "rust-macos",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723279049"
+      },
+      {
+        "name": "production-suites",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "skipped",
+        "completedAt": "2026-11-23T13:24:15Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723278833"
+      },
+      {
+        "name": "test-plan",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-11-23T13:29:55Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723277363"
+      },
+      {
+        "name": "public_package_plan",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-11-23T13:25:46Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723276918"
+      },
+      {
+        "name": "lockstep-check",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-11-23T13:25:30Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723276781"
+      },
+      {
+        "name": "ci-config-audit",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-11-23T13:25:01Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183565290/job/137723276206"
+      },
+      {
+        "name": "DCO",
+        "headSha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-11-23T13:24:11Z",
+        "url": "https://github.com/Proto-UI/Proto-UI/runs/137723239402"
+      }
+    ],
+    "checksSource": "https://api.github.com/repos/Proto-UI/Proto-UI/commits/1450ffd549bce8da636f2ccd45044aff5121e6ad/check-runs?per_page=100"
+  },
+  "laterHostedUpdate": {
+    "inspectedAt": "2026-11-23T13:48:28Z",
+    "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "tree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+    "check": {
+      "name": "sprint2-consumers",
+      "head_sha": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+      "status": "completed",
+      "conclusion": "success",
+      "completed_at": "2026-11-23T13:44:25Z",
+      "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183604935/job/137723420016"
+    },
+    "receiptSourceRelativePath": "hosted-1450ffd5-45183604935/extracted/receipt.json",
+    "receiptSha256": "447048497f3d8b0793a939dfca0b350522b6de3ca760717ef2c326e482ccdd9f",
+    "receiptStatus": "passed",
+    "receiptFinishedAt": "2026-11-23T13:44:20.689Z",
+    "workspaceTypes": {
+      "status": "passed",
+      "code": 0,
+      "timeout": false,
+      "finishedAt": "2026-11-23T13:29:14.177Z"
+    },
+    "phases": 13,
+    "functionalPassed": 304,
+    "nativeBrowserPassed": 292,
+    "nodeHappyDomPassed": 12,
+    "siteScreenshots": 100,
+    "countProvenance": "Actual raw receipt plus separately read root reconciliation, not a reviewer rerun of the complete suite.",
+    "zipSha256": "273454fef6331bebdc8b110699db3b8ffba885d4f1b29f3daac6576289220667",
+    "zipVerificationProvenance": "Read actual download-receipt.json recording verified ZIP; original artifact is separately assembled by root.",
+    "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183604935/artifacts/14823732540",
+    "findingClosed": "S2-FINAL-002",
+    "remaining": "Broader consumers/global types/actual visual acceptance remain independently evaluated; no complete acceptance or platform approval claim."
+  },
+  "supersession": {
+    "inspectedAt": "2026-11-23T13:56:24Z",
+    "reviewedHistoricalHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "observedCurrentPrHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "prUpdatedAt": "2026-11-23T13:54:21Z",
+    "prUrl": "https://github.com/Proto-UI/Proto-UI/pull/1716",
+    "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "source": "Actual GitHub PR info and exact commit read by reviewer; the 1450 results remain historical and are not current-head acceptance."
+  },
+  "verification": {
+    "originalFilesVerified": 14,
+    "initialAssemblyEntriesVerified": 13,
+    "sourceControlOriginalsUnchanged": true,
+    "initialAssemblyUnchanged": true,
+    "productSourceUnchangedByThisPreparation": true,
+    "productVerification": "Exclusive evidence-destination write whitelist plus exact HEAD and three product-source hash bindings before/after.",
+    "checkedProductSourceHashes": {
+      "packages/prototypes/base/src/checkbox/root.proto.ts": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4",
+      "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626",
+      "packages/compiler/test/text-reset-native.test.ts": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+    },
+    "gitIndexContentUnchanged": true,
+    "jsonChecks": "Recursive equivalence after permitted string-only replacements.",
+    "archivedProbeChecks": "No changes except declared prefix replacements; public archived probes are not claimed directly runnable.",
+    "preservedStates": {
+      "oldProbeOk": false,
+      "oldProbeCases": 8,
+      "repairRedPassed": 4,
+      "repairRedFailed": 8,
+      "repairRedPending": 146,
+      "focusedPassed": 275,
+      "focusedFailed": 0,
+      "focusedPending": 0,
+      "finalProbeOk": true,
+      "finalProbeCases": 8
+    },
+    "credentialPatternNames": [
+      "github-token",
+      "api-secret-token",
+      "private-key",
+      "authorization-value",
+      "url-credentials",
+      "aws-access-key",
+      "query-secret"
+    ],
+    "credentialPatternMatches": 0,
+    "privatePathOrDeviceMatches": 0,
+    "disclosureScanScope": "14 inventoried files, PUBLICATION-NOTES.md and this manifest; not future additions.",
+    "noStageCommitOrExternalWrite": true
+  },
+  "acceptanceBoundary": "Internal independent source review with separately attributed observed results; no canonical clean packet, GitHub APPROVE or complete acceptance assertion."
+}

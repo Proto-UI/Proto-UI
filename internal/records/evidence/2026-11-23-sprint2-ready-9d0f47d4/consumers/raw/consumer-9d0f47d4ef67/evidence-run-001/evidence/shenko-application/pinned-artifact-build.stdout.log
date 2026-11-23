@@ -1,0 +1,6 @@
+Shenko prototypes compiled by Proto-UI 9d0f47d4ef67bbc3676e4db24c7906f8721e5b42 (react-dom-source-v1): transport-badge, message-bubble
+[proto-ui] tokens(preset): wrote ../src/static/proto-ui-tokens.generated.css
+[proto-ui] theme(shadcn): wrote ../src/static/shadcn-theme.css
+[proto-ui] style: wrote ../src/static/proto-ui-style.css
+[proto-ui] setup(shadcn): completed tokens + theme + proto-ui style in $CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko/crates/shenko-ui/src/static
+Shenko UI built with Proto-UI 9d0f47d4ef67bbc3676e4db24c7906f8721e5b42; 12 hashed assets

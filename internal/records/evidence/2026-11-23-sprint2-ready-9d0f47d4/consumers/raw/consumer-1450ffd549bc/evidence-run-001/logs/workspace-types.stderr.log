@@ -1,0 +1,11 @@
+file://$PRODUCT_1450/apps/www/scripts/generate-cli-init-docs.mjs:89
+      throw new Error(
+            ^
+
+Error: CLI build failed: spawnSync $NODE24_BIN/node ETIMEDOUT
+
+
+    at generateCliInitDocs (file://$PRODUCT_1450/apps/www/scripts/generate-cli-init-docs.mjs:89:13)
+    at async file://$PRODUCT_1450/apps/www/scripts/generate-cli-init-docs.mjs:167:3
+
+Node.js v24.22.3

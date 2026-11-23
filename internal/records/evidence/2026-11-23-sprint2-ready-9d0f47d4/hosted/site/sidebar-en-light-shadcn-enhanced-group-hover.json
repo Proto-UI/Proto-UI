@@ -1,0 +1,45 @@
+{
+  "source": {
+    "sha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked": []
+  },
+  "capturedAt": "2026-11-23T14:09:02.119Z",
+  "browser": "157.0.8103.78",
+  "route": "/en/ui-libraries/shadcn/tabs/",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "theme": "light",
+  "preferredColorScheme": "light",
+  "observations": {
+    "nativeTag": "summary",
+    "enhanced": "true",
+    "text": "Shadcn",
+    "href": null,
+    "current": null,
+    "radius": [
+      "8px",
+      "8px",
+      "8px",
+      "8px"
+    ],
+    "brutalistRadius": "5px",
+    "borders": [
+      "0px",
+      "0px",
+      "0px",
+      "0px"
+    ],
+    "background": "lab(96.52 -0.0000298023 0.0000119209)",
+    "outline": "none",
+    "outlineWidth": "3px",
+    "boxShadow": "none",
+    "width": 224,
+    "height": 32,
+    "paintWidth": 224,
+    "paintHeight": 32,
+    "focused": false
+  }
+}

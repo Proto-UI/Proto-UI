@@ -1,0 +1,421 @@
+{
+  "kind": "independent-reconciliation-of-hosted-receipts",
+  "observedAt": "2026-11-23T13:46:21.996450+00:00",
+  "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "tree": "15e67863a668e5e7a09af69731fd9c4c668ff9f1",
+  "runId": 45183604935,
+  "artifact": {
+    "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+    "run": 45183604935,
+    "artifact": 14823732540,
+    "expectedZipSha256": "273454fef6331bebdc8b110699db3b8ffba885d4f1b29f3daac6576289220667",
+    "startedAt": "2026-11-23T13:45:52.140864+00:00",
+    "status": "verified",
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183604935/artifacts/14823732540",
+    "downloadExit": 0,
+    "zipSha256": "273454fef6331bebdc8b110699db3b8ffba885d4f1b29f3daac6576289220667",
+    "members": 1019,
+    "sitePngs": 100,
+    "receiptSha256": "447048497f3d8b0793a939dfca0b350522b6de3ca760717ef2c326e482ccdd9f",
+    "finishedAt": "2026-11-23T13:46:10.516084+00:00"
+  },
+  "receiptSha256": "447048497f3d8b0793a939dfca0b350522b6de3ca760717ef2c326e482ccdd9f",
+  "previousReceiptSha256": "50f63eebde2d7186eade1097329988d809426151bc894ac79f5400581cd1cfb3",
+  "previousSourceHead": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+  "previousRunId": 45175883003,
+  "functionalPassed": 304,
+  "nativeBrowserPassed": 292,
+  "nodeHappyDomPassed": 12,
+  "siteScreenshots": 100,
+  "phases": [
+    {
+      "id": "public-packages",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "styles",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "workspace-types",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "input",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "collections",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "geometry",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "form-select",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "ordinary-linked-consumers",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "compiled-consumers",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "site",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "preferences",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "collapsible",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    },
+    {
+      "id": "accordion",
+      "status": "passed",
+      "process": {
+        "code": 0,
+        "signal": null,
+        "timeout": false
+      }
+    }
+  ],
+  "suites": [
+    {
+      "id": "input",
+      "status": "passed",
+      "expected": 72,
+      "observed": 72,
+      "passed": 72,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "collections",
+      "status": "passed",
+      "expected": 36,
+      "observed": 36,
+      "passed": 36,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "geometry",
+      "status": "passed",
+      "expected": 36,
+      "observed": 36,
+      "passed": 36,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "form-select",
+      "status": "passed",
+      "expected": 36,
+      "observed": 36,
+      "passed": 36,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "ordinary-linked-consumers",
+      "status": "passed",
+      "expected": 12,
+      "observed": 12,
+      "passed": 12,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "compiled-consumers",
+      "status": "passed",
+      "expected": 20,
+      "observed": 20,
+      "passed": 20,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "site",
+      "status": "passed",
+      "expected": 42,
+      "observed": 42,
+      "passed": 42,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "preferences",
+      "status": "passed",
+      "expected": 4,
+      "observed": 4,
+      "passed": 4,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 0,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "collapsible",
+      "status": "passed",
+      "expected": 23,
+      "observed": 23,
+      "passed": 23,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 18,
+      "caseInventoryMatchesPrevious304": true
+    },
+    {
+      "id": "accordion",
+      "status": "passed",
+      "expected": 23,
+      "observed": 23,
+      "passed": 23,
+      "failed": 0,
+      "incomplete": 0,
+      "notSelected": 5,
+      "caseInventoryMatchesPrevious304": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "exact final source head",
+      "passed": true
+    },
+    {
+      "name": "exact final tree",
+      "passed": true
+    },
+    {
+      "name": "source was clean at receipt collection",
+      "passed": true
+    },
+    {
+      "name": "13 original phases only",
+      "passed": true
+    },
+    {
+      "name": "input original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "input all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "input process clean exit",
+      "passed": true
+    },
+    {
+      "name": "collections original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "collections all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "collections process clean exit",
+      "passed": true
+    },
+    {
+      "name": "geometry original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "geometry all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "geometry process clean exit",
+      "passed": true
+    },
+    {
+      "name": "form-select original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "form-select all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "form-select process clean exit",
+      "passed": true
+    },
+    {
+      "name": "ordinary-linked-consumers original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "ordinary-linked-consumers all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "ordinary-linked-consumers process clean exit",
+      "passed": true
+    },
+    {
+      "name": "compiled-consumers original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled-consumers all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "compiled-consumers process clean exit",
+      "passed": true
+    },
+    {
+      "name": "site original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "site all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "site process clean exit",
+      "passed": true
+    },
+    {
+      "name": "preferences original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "preferences all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "preferences process clean exit",
+      "passed": true
+    },
+    {
+      "name": "collapsible original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "collapsible all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "collapsible process clean exit",
+      "passed": true
+    },
+    {
+      "name": "accordion original distinct IDs",
+      "passed": true
+    },
+    {
+      "name": "accordion all selected cases passed",
+      "passed": true
+    },
+    {
+      "name": "accordion process clean exit",
+      "passed": true
+    },
+    {
+      "name": "public-packages passed",
+      "passed": true
+    },
+    {
+      "name": "styles passed",
+      "passed": true
+    },
+    {
+      "name": "workspace-types passed",
+      "passed": true
+    },
+    {
+      "name": "100 distinct site captures",
+      "passed": true
+    },
+    {
+      "name": "overall terminal pass",
+      "passed": true
+    }
+  ],
+  "allChecksPassed": true,
+  "scope": "Recounts the actual selected cases and exact IDs against the prior 304-case receipt; distinct preparation phases are not counted as tests. Not a visual review, platform approval, full scheduled-cycle or physical IME/AT acceptance."
+}

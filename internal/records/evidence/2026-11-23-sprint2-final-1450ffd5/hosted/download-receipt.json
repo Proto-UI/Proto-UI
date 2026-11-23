@@ -1,0 +1,15 @@
+{
+  "head": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "run": 45183604935,
+  "artifact": 14823732540,
+  "expectedZipSha256": "273454fef6331bebdc8b110699db3b8ffba885d4f1b29f3daac6576289220667",
+  "startedAt": "2026-11-23T13:45:52.140864+00:00",
+  "status": "verified",
+  "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45183604935/artifacts/14823732540",
+  "downloadExit": 0,
+  "zipSha256": "273454fef6331bebdc8b110699db3b8ffba885d4f1b29f3daac6576289220667",
+  "members": 1019,
+  "sitePngs": 100,
+  "receiptSha256": "447048497f3d8b0793a939dfca0b350522b6de3ca760717ef2c326e482ccdd9f",
+  "finishedAt": "2026-11-23T13:46:10.516084+00:00"
+}

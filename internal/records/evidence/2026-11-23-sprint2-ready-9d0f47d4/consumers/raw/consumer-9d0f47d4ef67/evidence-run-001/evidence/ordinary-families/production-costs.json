@@ -1,0 +1,979 @@
+{
+  "compilerBuild": {
+    "schema": "proto-ui.compiler-build.v1",
+    "revision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "profilesSha256": "112b14d8e28db9d802d97438dee8bc4636c5a20c156a5bf55bc266a94156e1d6",
+    "node": "24.22.3",
+    "typescript": "5.9.3",
+    "esbuild": "0.25.12"
+  },
+  "tool": {
+    "esbuild": "0.25.12",
+    "node": "v24.22.3"
+  },
+  "scope": "Three full authored family Button modules: 1 Base module and N=3 Base/Shadcn/Brutalist modules. Browser ESM production bundles retain their exported component APIs. Source bytes, retained uncompressed output and gzip bytes are different measurements. No historical baseline or speed comparison.",
+  "rows": [
+    {
+      "profile": "react-dom-source-v1",
+      "modules": 1,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        }
+      ],
+      "entrySha256": "1a02d5bb8e50ae4afde2d2aa35b654382b0bf760385a02310c70e5611406379f",
+      "bundleSha256": "b393cf59004a80fb773e2fd5bdff6ec2852556abf8e833d07aed3af769f23bce",
+      "generatedInputSourceBytes": 235866,
+      "supportInputSourceBytes": 178765,
+      "retainedProductionBytes": 82840,
+      "retainedGzipBytes": 27764,
+      "retainedSupportingBytes": 50552,
+      "retainedInputs": [
+        {
+          "path": "node_modules/react/cjs/react.production.js",
+          "bytesInOutput": 7616,
+          "sourceBytes": 17217,
+          "sha256": "f4860eb156f9cab3878103a196822083db8fe6e7a1bba701acbd372c9a75b92c"
+        },
+        {
+          "path": "node_modules/react/index.js",
+          "bytesInOutput": 51,
+          "sourceBytes": 186,
+          "sha256": "60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e"
+        },
+        {
+          "path": "node_modules/react-dom/cjs/react-dom.production.js",
+          "bytesInOutput": 3343,
+          "sourceBytes": 6655,
+          "sha256": "ec8130a495522e7b601a112d6344fc387c0d081fc927b6a9bd7cc3eced3f72dd"
+        },
+        {
+          "path": "node_modules/react-dom/index.js",
+          "bytesInOutput": 253,
+          "sourceBytes": 1359,
+          "sha256": "ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505"
+        },
+        {
+          "path": "generated/BaseButton.tsx",
+          "bytesInOutput": 19802,
+          "sourceBytes": 57101,
+          "sha256": "8163c26f221b827a58d941550255d4f72ac42fcd4ae42252b3cd293bfbce22ee"
+        },
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 3804,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/.proto-ui/context/react-v1.ts",
+          "bytesInOutput": 48,
+          "sourceBytes": 161,
+          "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1964,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17306,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10471,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 15992,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "production-1.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 54,
+          "sha256": "1a02d5bb8e50ae4afde2d2aa35b654382b0bf760385a02310c70e5611406379f"
+        }
+      ]
+    },
+    {
+      "profile": "react-dom-source-v1",
+      "modules": 3,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        },
+        {
+          "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sourceGraphSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72"
+        },
+        {
+          "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sourceGraphSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1"
+        }
+      ],
+      "entrySha256": "796d9911c8537f71a9f88cd08d24b395ebddd0e1f9c06c6569b1e5577a196ca7",
+      "bundleSha256": "21e0953861839c7e99bf9cbe6abb89069595248ac295586541fd20982ba9457f",
+      "generatedInputSourceBytes": 447322,
+      "supportInputSourceBytes": 195618,
+      "retainedProductionBytes": 169963,
+      "retainedGzipBytes": 44403,
+      "retainedSupportingBytes": 57702,
+      "retainedInputs": [
+        {
+          "path": "node_modules/react/cjs/react.production.js",
+          "bytesInOutput": 7659,
+          "sourceBytes": 17217,
+          "sha256": "f4860eb156f9cab3878103a196822083db8fe6e7a1bba701acbd372c9a75b92c"
+        },
+        {
+          "path": "node_modules/react/index.js",
+          "bytesInOutput": 51,
+          "sourceBytes": 186,
+          "sha256": "60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e"
+        },
+        {
+          "path": "node_modules/react-dom/cjs/react-dom.production.js",
+          "bytesInOutput": 3343,
+          "sourceBytes": 6655,
+          "sha256": "ec8130a495522e7b601a112d6344fc387c0d081fc927b6a9bd7cc3eced3f72dd"
+        },
+        {
+          "path": "node_modules/react-dom/index.js",
+          "bytesInOutput": 253,
+          "sourceBytes": 1359,
+          "sha256": "ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505"
+        },
+        {
+          "path": "generated/BaseButton.tsx",
+          "bytesInOutput": 19731,
+          "sourceBytes": 57101,
+          "sha256": "8163c26f221b827a58d941550255d4f72ac42fcd4ae42252b3cd293bfbce22ee"
+        },
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 3804,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/.proto-ui/context/react-v1.ts",
+          "bytesInOutput": 48,
+          "sourceBytes": 161,
+          "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1964,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17369,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10490,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 16040,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "production-3.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 178,
+          "sha256": "796d9911c8537f71a9f88cd08d24b395ebddd0e1f9c06c6569b1e5577a196ca7"
+        },
+        {
+          "path": "generated/ShadcnButton.tsx",
+          "bytesInOutput": 53101,
+          "sourceBytes": 123383,
+          "sha256": "d2864cb6a50104d9e81e9f80d2bcd60f7f6686c5f5ee1ef8b300e5ee3cc75d3d"
+        },
+        {
+          "path": "generated/.proto-ui/meta/subscription-v1.ts",
+          "bytesInOutput": 501,
+          "sourceBytes": 1137,
+          "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+        },
+        {
+          "path": "generated/.proto-ui/meta/web-snapshot-v1.ts",
+          "bytesInOutput": 1408,
+          "sourceBytes": 2163,
+          "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+        },
+        {
+          "path": "generated/.proto-ui/meta/color-scheme-source-v1.ts",
+          "bytesInOutput": 831,
+          "sourceBytes": 2319,
+          "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+        },
+        {
+          "path": "generated/.proto-ui/owner/authored-hooks-v1.ts",
+          "bytesInOutput": 2530,
+          "sourceBytes": 6755,
+          "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486"
+        },
+        {
+          "path": "generated/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+          "bytesInOutput": 76,
+          "sourceBytes": 626,
+          "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+        },
+        {
+          "path": "generated/BrutalistButton.tsx",
+          "bytesInOutput": 26859,
+          "sourceBytes": 71220,
+          "sha256": "7f7f61fdd09e575f329856d13c4c2268637abc24dbcf4c02b8b431082a807066"
+        },
+        {
+          "path": "generated/.proto-ui/meta/preference-source-v1.ts",
+          "bytesInOutput": 1674,
+          "sourceBytes": 3853,
+          "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+        }
+      ]
+    },
+    {
+      "profile": "vue-source-v1",
+      "modules": 1,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        }
+      ],
+      "entrySha256": "24df7e8f3b25718101e5192cc79e2c9c04c05e6501b29eadd320fd121d1316d1",
+      "bundleSha256": "0ebcbe26b2d60f9f76bac1b26ed2b48410879f0b40371ceb068f11bd6f13c7ad",
+      "generatedInputSourceBytes": 233918,
+      "supportInputSourceBytes": 178604,
+      "retainedProductionBytes": 89078,
+      "retainedGzipBytes": 30979,
+      "retainedSupportingBytes": 49398,
+      "retainedInputs": [
+        {
+          "path": "node_modules/@vue/shared/dist/shared.esm-bundler.js",
+          "bytesInOutput": 1913,
+          "sourceBytes": 23016,
+          "sha256": "4abb72e420e88e1d4197cf8d38c642450f47b5925389e71d75b30a268f7b3dad"
+        },
+        {
+          "path": "node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js",
+          "bytesInOutput": 9635,
+          "sourceBytes": 54032,
+          "sha256": "24a3c5d0310d3d62c41b94805d2fda1306998738c8975a138b544217d29815fb"
+        },
+        {
+          "path": "node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js",
+          "bytesInOutput": 10389,
+          "sourceBytes": 270419,
+          "sha256": "08a2f6bbdeac5434d88c3487310738af67f038cbf8c7bfa49fb2eb250d3bd4a9"
+        },
+        {
+          "path": "node_modules/vue/dist/vue.runtime.esm-bundler.js",
+          "bytesInOutput": 0,
+          "sourceBytes": 580,
+          "sha256": "ba7340bc8442c66a7356eb0631fa6297489311d3ca4a465c3611e00053be3b5a"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1964,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17291,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10472,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 16088,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 2616,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/BaseButton.ts",
+          "bytesInOutput": 17013,
+          "sourceBytes": 55314,
+          "sha256": "fea6e534fa1e4bb9b80560f9c7c06fe9092a71c4b1dece1167921f47dcd48c9d"
+        },
+        {
+          "path": "production-1.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 53,
+          "sha256": "24df7e8f3b25718101e5192cc79e2c9c04c05e6501b29eadd320fd121d1316d1"
+        }
+      ]
+    },
+    {
+      "profile": "vue-source-v1",
+      "modules": 3,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        },
+        {
+          "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sourceGraphSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72"
+        },
+        {
+          "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sourceGraphSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1"
+        }
+      ],
+      "entrySha256": "a9f84240d8781825a191fa9553e046977b541e1e3ea9ed6306c345c98cdd073d",
+      "bundleSha256": "c033586819755cecb15c810da4a4fab352d7179fa018dadd1f339cbe2f58f871",
+      "generatedInputSourceBytes": 445904,
+      "supportInputSourceBytes": 195457,
+      "retainedProductionBytes": 171966,
+      "retainedGzipBytes": 47646,
+      "retainedSupportingBytes": 57987,
+      "retainedInputs": [
+        {
+          "path": "node_modules/@vue/shared/dist/shared.esm-bundler.js",
+          "bytesInOutput": 1913,
+          "sourceBytes": 23016,
+          "sha256": "4abb72e420e88e1d4197cf8d38c642450f47b5925389e71d75b30a268f7b3dad"
+        },
+        {
+          "path": "node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js",
+          "bytesInOutput": 9635,
+          "sourceBytes": 54032,
+          "sha256": "24a3c5d0310d3d62c41b94805d2fda1306998738c8975a138b544217d29815fb"
+        },
+        {
+          "path": "node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js",
+          "bytesInOutput": 10414,
+          "sourceBytes": 270419,
+          "sha256": "08a2f6bbdeac5434d88c3487310738af67f038cbf8c7bfa49fb2eb250d3bd4a9"
+        },
+        {
+          "path": "node_modules/vue/dist/vue.runtime.esm-bundler.js",
+          "bytesInOutput": 0,
+          "sourceBytes": 580,
+          "sha256": "ba7340bc8442c66a7356eb0631fa6297489311d3ca4a465c3611e00053be3b5a"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1964,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17436,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10506,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 16281,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 3804,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/BaseButton.ts",
+          "bytesInOutput": 16850,
+          "sourceBytes": 55314,
+          "sha256": "fea6e534fa1e4bb9b80560f9c7c06fe9092a71c4b1dece1167921f47dcd48c9d"
+        },
+        {
+          "path": "production-3.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 175,
+          "sha256": "a9f84240d8781825a191fa9553e046977b541e1e3ea9ed6306c345c98cdd073d"
+        },
+        {
+          "path": "generated/.proto-ui/meta/subscription-v1.ts",
+          "bytesInOutput": 501,
+          "sourceBytes": 1137,
+          "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+        },
+        {
+          "path": "generated/.proto-ui/meta/web-snapshot-v1.ts",
+          "bytesInOutput": 1408,
+          "sourceBytes": 2163,
+          "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+        },
+        {
+          "path": "generated/.proto-ui/meta/color-scheme-source-v1.ts",
+          "bytesInOutput": 831,
+          "sourceBytes": 2319,
+          "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+        },
+        {
+          "path": "generated/.proto-ui/owner/authored-hooks-v1.ts",
+          "bytesInOutput": 2530,
+          "sourceBytes": 6755,
+          "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486"
+        },
+        {
+          "path": "generated/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+          "bytesInOutput": 76,
+          "sourceBytes": 626,
+          "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+        },
+        {
+          "path": "generated/ShadcnButton.ts",
+          "bytesInOutput": 50562,
+          "sourceBytes": 125614,
+          "sha256": "3ff0dd07afc2bc17978d71f2c9cceb9184b4d4d1cede9f01f1d62525f85171cb"
+        },
+        {
+          "path": "generated/.proto-ui/meta/preference-source-v1.ts",
+          "bytesInOutput": 1683,
+          "sourceBytes": 3853,
+          "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+        },
+        {
+          "path": "generated/BrutalistButton.ts",
+          "bytesInOutput": 23834,
+          "sourceBytes": 69519,
+          "sha256": "0b393752ebc347ecbcabe0912995fe56a6039c16d2f34bf70059ffc0651b8c33"
+        }
+      ]
+    },
+    {
+      "profile": "vue2-source-v1",
+      "modules": 1,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        }
+      ],
+      "entrySha256": "ca458631ec5d9c57b9073d6705470e4b158152db9793be337c5751d6e57f67ca",
+      "bundleSha256": "598761a7f036c14e0a662a5e671fec89ffc9c64b6a3ec00d0fd392a4c6f6361c",
+      "generatedInputSourceBytes": 240273,
+      "supportInputSourceBytes": 180960,
+      "retainedProductionBytes": 68970,
+      "retainedGzipBytes": 23356,
+      "retainedSupportingBytes": 49976,
+      "retainedInputs": [
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17280,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/vue2-associations-v1.ts",
+          "bytesInOutput": 749,
+          "sourceBytes": 2356,
+          "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1917,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10464,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 15983,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 2616,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/BaseButton.js",
+          "bytesInOutput": 18927,
+          "sourceBytes": 59313,
+          "sha256": "22050d0318ab170e960e3389d29561058373117d6f06bab1b439695934839186"
+        },
+        {
+          "path": "production-1.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 53,
+          "sha256": "ca458631ec5d9c57b9073d6705470e4b158152db9793be337c5751d6e57f67ca"
+        }
+      ]
+    },
+    {
+      "profile": "vue2-source-v1",
+      "modules": 3,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        },
+        {
+          "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sourceGraphSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72"
+        },
+        {
+          "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sourceGraphSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1"
+        }
+      ],
+      "entrySha256": "55e9345278953340a54b0e3cb4f2a6fb92f005526075f8fc0e18beef0f5eebde",
+      "bundleSha256": "0fcba79aca69fbbd8bd0ee2079512aec1abf17ef10070f8b82cf184ab86a5c16",
+      "generatedInputSourceBytes": 462310,
+      "supportInputSourceBytes": 197813,
+      "retainedProductionBytes": 162910,
+      "retainedGzipBytes": 40573,
+      "retainedSupportingBytes": 58316,
+      "retainedInputs": [
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17319,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/vue2-associations-v1.ts",
+          "bytesInOutput": 749,
+          "sourceBytes": 2356,
+          "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1917,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10475,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 16079,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 3804,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/BaseButton.js",
+          "bytesInOutput": 18879,
+          "sourceBytes": 59313,
+          "sha256": "22050d0318ab170e960e3389d29561058373117d6f06bab1b439695934839186"
+        },
+        {
+          "path": "production-3.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 175,
+          "sha256": "55e9345278953340a54b0e3cb4f2a6fb92f005526075f8fc0e18beef0f5eebde"
+        },
+        {
+          "path": "generated/.proto-ui/meta/subscription-v1.ts",
+          "bytesInOutput": 501,
+          "sourceBytes": 1137,
+          "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+        },
+        {
+          "path": "generated/.proto-ui/meta/web-snapshot-v1.ts",
+          "bytesInOutput": 1408,
+          "sourceBytes": 2163,
+          "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+        },
+        {
+          "path": "generated/.proto-ui/meta/color-scheme-source-v1.ts",
+          "bytesInOutput": 831,
+          "sourceBytes": 2319,
+          "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+        },
+        {
+          "path": "generated/.proto-ui/owner/authored-hooks-v1.ts",
+          "bytesInOutput": 2522,
+          "sourceBytes": 6755,
+          "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486"
+        },
+        {
+          "path": "generated/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+          "bytesInOutput": 76,
+          "sourceBytes": 626,
+          "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+        },
+        {
+          "path": "generated/ShadcnButton.js",
+          "bytesInOutput": 58669,
+          "sourceBytes": 130930,
+          "sha256": "851fe090239f6c5267f32c58b78c95bb7c42a3c8c61df79fc840a1a6acb2b3f2"
+        },
+        {
+          "path": "generated/.proto-ui/meta/preference-source-v1.ts",
+          "bytesInOutput": 1668,
+          "sourceBytes": 3853,
+          "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+        },
+        {
+          "path": "generated/BrutalistButton.js",
+          "bytesInOutput": 26938,
+          "sourceBytes": 74254,
+          "sha256": "2c217b69a9404845043c40d33006a658eef74676d245ade22c4b163397aba30e"
+        }
+      ]
+    },
+    {
+      "profile": "web-component-source-v1",
+      "modules": 1,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        }
+      ],
+      "entrySha256": "24df7e8f3b25718101e5192cc79e2c9c04c05e6501b29eadd320fd121d1316d1",
+      "bundleSha256": "6a49cceb363423ebc0fbf22cece3fb21ac67e9b077fa2f0df254ed9081880a62",
+      "generatedInputSourceBytes": 237886,
+      "supportInputSourceBytes": 191388,
+      "retainedProductionBytes": 71894,
+      "retainedGzipBytes": 24048,
+      "retainedSupportingBytes": 56095,
+      "retainedInputs": [
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 3815,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17248,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/web-component/browser-v1.ts",
+          "bytesInOutput": 5677,
+          "sourceBytes": 12784,
+          "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1917,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10442,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 16029,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "generated/BaseButton.ts",
+          "bytesInOutput": 15732,
+          "sourceBytes": 46498,
+          "sha256": "7c0f31b6a603a0a1dc9cc3a22b8a9de688723980556c4a6bb8ec39da047e6bd7"
+        },
+        {
+          "path": "production-1.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 53,
+          "sha256": "24df7e8f3b25718101e5192cc79e2c9c04c05e6501b29eadd320fd121d1316d1"
+        }
+      ]
+    },
+    {
+      "profile": "web-component-source-v1",
+      "modules": 3,
+      "sources": [
+        {
+          "entry": "packages/prototypes/base/src/button/button.proto.ts",
+          "sourceGraphSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7"
+        },
+        {
+          "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sourceGraphSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72"
+        },
+        {
+          "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sourceGraphSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1"
+        }
+      ],
+      "entrySha256": "a9f84240d8781825a191fa9553e046977b541e1e3ea9ed6306c345c98cdd073d",
+      "bundleSha256": "f9003e481a593e938958eab9e8838c2578bd88ecbc0ca2736a43f759c15e1ab3",
+      "generatedInputSourceBytes": 430218,
+      "supportInputSourceBytes": 208241,
+      "retainedProductionBytes": 151192,
+      "retainedGzipBytes": 39031,
+      "retainedSupportingBytes": 63121,
+      "retainedInputs": [
+        {
+          "path": "generated/.proto-ui/context/scope-v1.ts",
+          "bytesInOutput": 3815,
+          "sourceBytes": 8996,
+          "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/control-label-v1.ts",
+          "bytesInOutput": 17246,
+          "sourceBytes": 58048,
+          "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+        },
+        {
+          "path": "generated/.proto-ui/web-component/browser-v1.ts",
+          "bytesInOutput": 5677,
+          "sourceBytes": 12784,
+          "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+        },
+        {
+          "path": "generated/.proto-ui/style/native-v1.ts",
+          "bytesInOutput": 1917,
+          "sourceBytes": 5912,
+          "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/ownership-v2.ts",
+          "bytesInOutput": 728,
+          "sourceBytes": 4849,
+          "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/focus-ownership-v2.ts",
+          "bytesInOutput": 239,
+          "sourceBytes": 798,
+          "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 10437,
+          "sourceBytes": 45790,
+          "sha256": "4b69dff0a9a95a7bc959c0b03f09b57694fbd1162bedcf1c164d51612a54edd3"
+        },
+        {
+          "path": "generated/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+          "bytesInOutput": 16056,
+          "sourceBytes": 54211,
+          "sha256": "af2296399b5a29e54c6208f6fde4eb5abf873c4b3c3bce31deb110a6ff0826fe"
+        },
+        {
+          "path": "generated/BaseButton.ts",
+          "bytesInOutput": 15730,
+          "sourceBytes": 46498,
+          "sha256": "7c0f31b6a603a0a1dc9cc3a22b8a9de688723980556c4a6bb8ec39da047e6bd7"
+        },
+        {
+          "path": "production-3.ts",
+          "bytesInOutput": 0,
+          "sourceBytes": 175,
+          "sha256": "a9f84240d8781825a191fa9553e046977b541e1e3ea9ed6306c345c98cdd073d"
+        },
+        {
+          "path": "generated/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+          "bytesInOutput": 76,
+          "sourceBytes": 626,
+          "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+        },
+        {
+          "path": "generated/.proto-ui/meta/subscription-v1.ts",
+          "bytesInOutput": 501,
+          "sourceBytes": 1137,
+          "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+        },
+        {
+          "path": "generated/.proto-ui/meta/web-snapshot-v1.ts",
+          "bytesInOutput": 1408,
+          "sourceBytes": 2163,
+          "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+        },
+        {
+          "path": "generated/.proto-ui/meta/color-scheme-source-v1.ts",
+          "bytesInOutput": 831,
+          "sourceBytes": 2319,
+          "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+        },
+        {
+          "path": "generated/.proto-ui/owner/authored-hooks-v1.ts",
+          "bytesInOutput": 2522,
+          "sourceBytes": 6755,
+          "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486"
+        },
+        {
+          "path": "generated/ShadcnButton.ts",
+          "bytesInOutput": 49404,
+          "sourceBytes": 114925,
+          "sha256": "dfaec280e0cbba8beaba19985d9c409ffb97b406fbae93f98ecab208e437b763"
+        },
+        {
+          "path": "generated/.proto-ui/meta/preference-source-v1.ts",
+          "bytesInOutput": 1668,
+          "sourceBytes": 3853,
+          "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+        },
+        {
+          "path": "generated/BrutalistButton.ts",
+          "bytesInOutput": 22829,
+          "sourceBytes": 60554,
+          "sha256": "1c2d7282e0a4cca08415ebfba3e24fd3025e28634e9d48c2804051c536b82697"
+        }
+      ]
+    }
+  ],
+  "initialization": {
+    "scope": "Single observations of already-imported bundled production React owner mounts in Happy DOM, including native framework flush. Not browser layout latency, a performance budget, allocation accounting or a comparison with Adapter.",
+    "rows": [
+      {
+        "componentModules": 1,
+        "mountedOwnerCount": 1,
+        "initializationMs": 16.797728000000006,
+        "cleanupMs": 1.582587999999987,
+        "rootNodesAfterCleanup": 0,
+        "disposedHandlesRejected": 1
+      },
+      {
+        "componentModules": 3,
+        "mountedOwnerCount": 3,
+        "initializationMs": 16.091278999999986,
+        "cleanupMs": 1.78904,
+        "rootNodesAfterCleanup": 0,
+        "disposedHandlesRejected": 3
+      }
+    ]
+  }
+}

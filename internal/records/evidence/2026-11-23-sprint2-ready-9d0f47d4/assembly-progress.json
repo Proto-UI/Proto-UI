@@ -1,0 +1,75 @@
+{
+  "status": "small-evidence-copied; consumer/docs/visual still pending",
+  "copiedAt": "2026-11-23T14:31:00.201938+00:00",
+  "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "sourceTree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "carrierBase": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "files": [
+    {
+      "path": "hosted/receipt.json",
+      "sha256": "b169a04ad9004030ee79d4194e638acd182376fc6e50941615e0285b5bf184c1",
+      "bytes": 60323,
+      "modified": false
+    },
+    {
+      "path": "hosted/download-receipt.json",
+      "sha256": "cbfbc1fa6717adcd5d109073ac124591d620746578329eaaf5e428a091070ec3",
+      "bytes": 649,
+      "modified": false
+    },
+    {
+      "path": "hosted/reconciliation.json",
+      "sha256": "4a186fe343253b5d4ea6a3a945eecc34fc0f081ff63d6fb17b724d7eec55ef74",
+      "bytes": 8607,
+      "modified": false
+    },
+    {
+      "path": "hosted/selected-case-ids.json",
+      "sha256": "e3b11d41313cf7c8f4c32b0a40ddb5f234e2e67b4f7f3223a1a1d2694df220be",
+      "bytes": 20210,
+      "modified": false
+    },
+    {
+      "path": "hosted/job-137740608739.log",
+      "sha256": "d5e726a32f712c7cdd9ef785a015a276264ab993a1101a07331616b5d9ef8666",
+      "bytes": 38513,
+      "modified": false
+    },
+    {
+      "path": "hosted/workspace-types.log",
+      "sha256": "2cbe792f57134d37b57d4fabbe86de300eea0a151ae5655194ad2bbea482ac8a",
+      "bytes": 114,
+      "modified": false
+    },
+    {
+      "path": "hosted/site/report.json",
+      "sha256": "655e8ca755f5cbdf71aa7cd527b4eed6e8629087d1ce990226847ea023ac0eee",
+      "bytes": 12619,
+      "modified": false
+    },
+    {
+      "path": "hosted/site/run.log",
+      "sha256": "43332d2a1d56c86eade04eb6400d1d3ffa728c025cf675c5906db32ae6586fdd",
+      "bytes": 15486,
+      "modified": false
+    },
+    {
+      "path": "independent/code-review.md",
+      "sha256": "01026f83ca46e4c70233c2076ff3c77dfc8b4b581c267f22b2e884715a14ed97",
+      "bytes": 14651,
+      "modified": false
+    },
+    {
+      "path": "independent/source-binding.json",
+      "sha256": "4f898a3548db51cc2c3684e5e13a25a65cbabbbb8bc0ccd79cadda4428e18143",
+      "bytes": 83124,
+      "modified": false
+    },
+    {
+      "path": "independent/delivery-receipt.json",
+      "sha256": "d87cf6e88c615ed8af8ed0a8bde27eaa6d48ebfb4ba3ee345c8fd5b0715dd3c5",
+      "bytes": 1517,
+      "modified": false
+    }
+  ]
+}

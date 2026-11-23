@@ -1,0 +1,47 @@
+{
+  "kind": "independent-delta-review-delivery",
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "files": [
+    {
+      "path": "independent-delta-review-9d0f47d4.md",
+      "sha256": "01026f83ca46e4c70233c2076ff3c77dfc8b4b581c267f22b2e884715a14ed97",
+      "bytes": 14651
+    },
+    {
+      "path": "independent-delta-review-9d0f47d4-binding.json",
+      "sha256": "4f898a3548db51cc2c3684e5e13a25a65cbabbbb8bc0ccd79cadda4428e18143",
+      "bytes": 83124
+    }
+  ],
+  "outputHashes": "Actual native device SHA-256 readback after successful exact-content writes.",
+  "publicationScan": [
+    {
+      "path": "independent-delta-review-9d0f47d4.md",
+      "findings": {
+        "private-path": 0,
+        "device-id": 0,
+        "credential": 0,
+        "private-key": 0,
+        "url-credential": 0
+      }
+    },
+    {
+      "path": "independent-delta-review-9d0f47d4-binding.json",
+      "findings": {
+        "private-path": 0,
+        "device-id": 0,
+        "credential": 0,
+        "private-key": 0,
+        "url-credential": 0
+      }
+    }
+  ],
+  "blockingProductFindings": 0,
+  "orchestrationSourceFinding": "S2-DELTA-ACCEPTANCE-001 repaired and independently re-reviewed; actual external/local types results still require terminal verification.",
+  "frozenArchiveIdentity": "134/134 same Git blob and size as main.",
+  "completeAcceptanceClaim": false,
+  "platformApproval": false,
+  "sourceEdited": false,
+  "stageCommitOrExternalWrite": false
+}

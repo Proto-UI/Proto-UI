@@ -1,0 +1,163 @@
+{
+  "source": {
+    "sha": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "trackedPatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "untracked": []
+  },
+  "capturedAt": "2026-11-23T14:10:15.347Z",
+  "browser": "157.0.8103.78",
+  "route": "/zh-cn/ui-libraries/shadcn/tabs/",
+  "viewport": {
+    "width": 390,
+    "height": 1000
+  },
+  "theme": "dark",
+  "preferredColorScheme": "light",
+  "observations": {
+    "scriptMode": "no-js",
+    "groupPaint": {
+      "nativeTag": "summary",
+      "enhanced": null,
+      "text": "Shadcn",
+      "href": null,
+      "current": null,
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "brutalistRadius": "5px",
+      "borders": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "background": "lab(15.204 0 -0.00000596046)",
+      "outline": "none",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "width": 310,
+      "height": 44,
+      "paintWidth": 310,
+      "paintHeight": 44,
+      "focused": false
+    },
+    "leafPaint": {
+      "nativeTag": "a",
+      "enhanced": null,
+      "text": "Tabs",
+      "href": "/zh-cn/ui-libraries/shadcn/tabs/",
+      "current": "page",
+      "radius": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "brutalistRadius": "5px",
+      "borders": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "background": "lab(27.036 0 0)",
+      "outline": "none",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "width": 289,
+      "height": 44,
+      "paintWidth": 289,
+      "paintHeight": 44,
+      "focused": false
+    },
+    "groupHit": {
+      "bounds": {
+        "x": 40,
+        "y": 317,
+        "width": 310,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 40
+      },
+      "points": [
+        {
+          "x": 43,
+          "y": 339,
+          "matchesOwner": true,
+          "hitTag": "summary",
+          "hitText": "Shadcn"
+        },
+        {
+          "x": 347,
+          "y": 339,
+          "matchesOwner": true,
+          "hitTag": "summary",
+          "hitText": "Shadcn"
+        },
+        {
+          "x": 195,
+          "y": 320,
+          "matchesOwner": true,
+          "hitTag": "summary",
+          "hitText": "Shadcn"
+        },
+        {
+          "x": 195,
+          "y": 358,
+          "matchesOwner": true,
+          "hitTag": "summary",
+          "hitText": "Shadcn"
+        }
+      ],
+      "enhanced": null
+    },
+    "leafHit": {
+      "bounds": {
+        "x": 61,
+        "y": 317,
+        "width": 289,
+        "height": 44,
+        "top": 317,
+        "right": 350,
+        "bottom": 361,
+        "left": 61
+      },
+      "points": [
+        {
+          "x": 64,
+          "y": 339,
+          "matchesOwner": true,
+          "hitTag": "a",
+          "hitText": "Tabs"
+        },
+        {
+          "x": 347,
+          "y": 339,
+          "matchesOwner": true,
+          "hitTag": "a",
+          "hitText": "Tabs"
+        },
+        {
+          "x": 205.5,
+          "y": 320,
+          "matchesOwner": true,
+          "hitTag": "a",
+          "hitText": "Tabs"
+        },
+        {
+          "x": 205.5,
+          "y": 358,
+          "matchesOwner": true,
+          "hitTag": "a",
+          "hitText": "Tabs"
+        }
+      ],
+      "enhanced": null
+    }
+  }
+}

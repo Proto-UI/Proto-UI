@@ -1,0 +1,121 @@
+{
+  "status": "FAIL",
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "source": "$PRODUCT_9D",
+  "readOnlyObjectSource": "$OBJECT_SOURCE_9D",
+  "startedAt": "2026-11-23T14:15:11.420931+00:00",
+  "pid": 1554927,
+  "pgid": 1554927,
+  "commands": [
+    {
+      "name": "original-exact-tree",
+      "argv": [
+        "git",
+        "-C",
+        "$OBJECT_SOURCE_9D",
+        "rev-parse",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42^{tree}"
+      ],
+      "cwd": "$CONTROL",
+      "exitCode": 0,
+      "wallSeconds": 8.936,
+      "stdoutSha256": "9ae6a9c14ddf8ccd70105ae5719f89e74fda86123771073b60043d45b640d27e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clone-shared-readonly-objects",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "$OBJECT_SOURCE_9D",
+        "$PRODUCT_9D"
+      ],
+      "cwd": "$CONTROL",
+      "exitCode": 0,
+      "wallSeconds": 8.028,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "ebcd6e980a5c7b0481b2edefce1b1f08f614c93d2f59ccabdff77257eada6dbb"
+    },
+    {
+      "name": "checkout-exact-head",
+      "argv": [
+        "git",
+        "checkout",
+        "--detach",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 132.858,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "88116ba087e5db53734f4498ade7133ee4e962cc4e494a69c63be976c8ece56d"
+    },
+    {
+      "name": "source-head",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 0.317,
+      "stdoutSha256": "dd7442bb4317ef8c8b20f81f3534b3c20504141e58b0c1189a6493bb02efadd3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-tree",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 0.004,
+      "stdoutSha256": "9ae6a9c14ddf8ccd70105ae5719f89e74fda86123771073b60043d45b640d27e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-clean",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=normal"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 0.765,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "bootstrap",
+      "argv": [
+        "python3",
+        "$CONTROL/consumer-next-9d0f47d4/bootstrap.py",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+      ],
+      "cwd": "$CONTROL",
+      "exitCode": 1,
+      "wallSeconds": 2021.107,
+      "stdoutSha256": "6c2432f2d69dd810a6bc61bbe9fa7e9bf05488c607ac777c77951c1bc590bbe0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "acceptanceClaim": false,
+  "readInstructionSha256": {
+    "AGENTS.md": "1503df22eb41cbd6265cf250d5ba60d1d8c499e996d12291d0d326a4f287d8cd",
+    ".agents/skills/pui-dev/SKILL.md": "e3c2294093aac66722417dcbf03ffba2648e7baaaf4f97c84cb35a87dd129b41"
+  },
+  "sourcePrepared": true,
+  "failure": {
+    "message": "bootstrap failed; see $CONTROL/consumer-9d0f47d4ef67-source-preparation/bootstrap.stderr.log",
+    "traceback": "Traceback (most recent call last):\n  File \"$CONTROL/consumer-next-9d0f47d4/prepare-source-and-run.py\", line 53, in <module>\n    run('bootstrap',['python3',parent/'consumer-next-9d0f47d4/bootstrap.py',head],timeout=7200)\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"$CONTROL/consumer-next-9d0f47d4/prepare-source-and-run.py\", line 31, in run\n    if row['exitCode']!=0:raise RuntimeError(name+' failed; see '+str(err))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: bootstrap failed; see $CONTROL/consumer-9d0f47d4ef67-source-preparation/bootstrap.stderr.log\n"
+  },
+  "finishedAt": "2026-11-23T14:51:24.088867+00:00"
+}

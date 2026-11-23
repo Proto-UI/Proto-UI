@@ -1,0 +1,239 @@
+{
+  "head": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+  "ok": false,
+  "cases": [
+    {
+      "name": "ordinary-checkbox",
+      "scenario": "ordinary-reset",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [],
+      "checked": false,
+      "mixed": true,
+      "passed": true
+    },
+    {
+      "name": "ordinary-checkbox",
+      "scenario": "mixed-only-confirmation",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [
+        {
+          "phase": "mixed-only-ack",
+          "checked": true,
+          "mixed": true
+        }
+      ],
+      "checked": false,
+      "mixed": true,
+      "passed": true
+    },
+    {
+      "name": "ordinary-checkbox",
+      "scenario": "new-owner-in-reset-mixed-callback",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [
+        {
+          "phase": "new-owner-after-apply",
+          "checked": true
+        }
+      ],
+      "checked": false,
+      "mixed": true,
+      "passed": false
+    },
+    {
+      "name": "ordinary-checkbox",
+      "scenario": "aba-owner-in-reset-mixed-callback",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [
+        {
+          "phase": "new-owner-after-apply",
+          "checked": true
+        },
+        {
+          "phase": "aba-owner-after-apply",
+          "checked": false
+        }
+      ],
+      "checked": false,
+      "mixed": true,
+      "passed": false
+    },
+    {
+      "name": "field-checkbox",
+      "scenario": "ordinary-reset",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [],
+      "checked": false,
+      "mixed": true,
+      "passed": true
+    },
+    {
+      "name": "field-checkbox",
+      "scenario": "mixed-only-confirmation",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [
+        {
+          "phase": "mixed-only-ack",
+          "checked": true,
+          "mixed": true
+        }
+      ],
+      "checked": false,
+      "mixed": true,
+      "passed": true
+    },
+    {
+      "name": "field-checkbox",
+      "scenario": "new-owner-in-reset-mixed-callback",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [
+        {
+          "phase": "new-owner-after-apply",
+          "checked": true
+        }
+      ],
+      "checked": false,
+      "mixed": true,
+      "passed": false
+    },
+    {
+      "name": "field-checkbox",
+      "scenario": "aba-owner-in-reset-mixed-callback",
+      "accepted": true,
+      "signals": [
+        {
+          "event": "indeterminateChange",
+          "payload": {
+            "indeterminate": true
+          }
+        },
+        {
+          "event": "checkedChange",
+          "payload": {
+            "checked": false,
+            "indeterminate": true
+          }
+        }
+      ],
+      "ownerReads": [
+        {
+          "phase": "new-owner-after-apply",
+          "checked": true
+        },
+        {
+          "phase": "aba-owner-after-apply",
+          "checked": false
+        }
+      ],
+      "checked": false,
+      "mixed": true,
+      "passed": false
+    }
+  ],
+  "boundary": "Independent actual Runtime with synthetic host; exact current source, no native browser"
+}

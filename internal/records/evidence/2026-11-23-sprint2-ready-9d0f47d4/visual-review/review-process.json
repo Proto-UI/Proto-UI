@@ -1,0 +1,3295 @@
+{
+  "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "rawPngsUnmodified": true,
+  "contactSheetsActuallyViewed": 22,
+  "individualFullFramesActuallyViewed": 3,
+  "displayEncoding": "Lossless WebP display copies; no original PNG modification. The final six streamed views also checked decoded RGB equality against their source PNG.",
+  "sheetImagesIncludedInThisFolder": [
+    "9d-sidebar-detail-zh-cn-light-brutalist.png",
+    "9d-hero-detail-zh-cn-light.png"
+  ],
+  "note": "All original PNGs are retained in hosted/site. Sheets not retained here remain reconstructible from these exact source hashes, crops and placement records. Captions lie outside screenshot pixels.",
+  "sheets": [
+    {
+      "sheet": "9d-tabs-detail-en-wc.png",
+      "sheetSha256": "ef536d3823ef58ed627828b89f86d1576d4e6cc2e04035e1934ff1506e26f07d",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-en-wc-0-rhea.png",
+          "sourceSha256": "0a1d594addcfcbef34260fe8ae8593ad170b7aa674348aefe9f5a61f8bb28a91",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-wc-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-1-nova.png",
+          "sourceSha256": "28a52f9c5a0b003657d3918dd53c6ad38003ee0bdc6e01a277d2c098f77be371",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-wc-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-2-rhea.png",
+          "sourceSha256": "cb961776d2ff0a968583e2d3977d0fae562e3e5e34a912d13ff998d58006fc39",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-wc-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-3-new-york-v4.png",
+          "sourceSha256": "d4215c367d2a7944c6d6954e53c1b828d3b94e57010c5fdb05234da81fd23325",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-wc-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-4-nova.png",
+          "sourceSha256": "8cf50e6de9d279b60f364c351b95269280f641fbe60a528987b3b31e900ffbd2",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-wc-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-en-wc",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-tabs-detail-en-vue.png",
+      "sheetSha256": "9c48130a88f4d2b13a223d6d5b72bcd7078d554f830b6b721fe3d383780e5de6",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-en-vue-0-rhea.png",
+          "sourceSha256": "146c282ed40001e6dc73213b6c211e16520938b38874a40ec7d78bcb43b9c45e",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-1-nova.png",
+          "sourceSha256": "930ebdda8021858c2e5e853a13e9047efe1500cadf7951dada395341eca7b5e0",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-2-rhea.png",
+          "sourceSha256": "b38e4efac5009bb8b95c2ae5e7e37741f73d096a3610ef8fc07f4af1e08c697f",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-3-new-york-v4.png",
+          "sourceSha256": "77308287dd2a3a9ccedcbfc9144a880506046420ea230b089298b2771e550453",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-4-nova.png",
+          "sourceSha256": "b4c3c2342f0194e62e871df7ad9872e797a7bb5e8e099b3a46e4a283b6807d76",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-en-vue",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-tabs-detail-en-react.png",
+      "sheetSha256": "7fe4ef5df45ed2ff8beca6690040a75dd7a541e566d311eb702633f9b9f57367",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-en-react-0-rhea.png",
+          "sourceSha256": "8d44a58acf43d0a93145ab853f0b1207c575181773bf0ccb4bc5672624fc1db2",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-react-0-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-react-1-nova.png",
+          "sourceSha256": "070eeff32cf5684b61e2ad59e27eeb1b1dc865876217640aadc9db52c19b7049",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-react-1-nova | actual dark | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-react-2-rhea.png",
+          "sourceSha256": "7acd03afda7507eccea119119ffc4b961fcd24c0688d26211170f52e36b56139",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-react-2-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-react-3-new-york-v4.png",
+          "sourceSha256": "92814ac0335c2bef4e05097fd49a496cd6849979f0e674b18035e1ff9f1c0b55",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-react-3-new-york-v4 | actual dark | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-react-4-nova.png",
+          "sourceSha256": "04ad2ec37abb269b77c5932863b52211b08e4af7b58510e1d510c7bd3683bdbe",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-react-4-nova | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-en-react",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-tabs-detail-en-vue2.png",
+      "sheetSha256": "5adfaf36dfccbf26a619a22665ea3a48b785380bdd71959d2e60f471475fe7ee",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-en-vue2-0-rhea.png",
+          "sourceSha256": "1454c45ab1bb42d9ab67b77e3495a9e4012eb5ec7e61799136ae62e5e8c71207",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue2-0-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue2-1-nova.png",
+          "sourceSha256": "f8211a8b2d64cb1f265bd6eed541edc2b9bba307c990fe095a6ffb7a944b9d22",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue2-1-nova | actual dark | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue2-2-rhea.png",
+          "sourceSha256": "2de6500e411bafb7304aa7e1b68f2751ad917a76e36b9d7dd04263fb10efd2ea",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue2-2-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue2-3-new-york-v4.png",
+          "sourceSha256": "d520383ba6664df74f1d2e8134ad979810acd275466a06e8f0e4c280571b72c2",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue2-3-new-york-v4 | actual dark | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue2-4-nova.png",
+          "sourceSha256": "2451263ef149ffe482220b7452baff08a6160e0bbb5fcc08183a47030ee41b78",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-en-vue2-4-nova | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-en-vue2",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-tabs-detail-zh-cn-wc.png",
+      "sheetSha256": "5e7a17ee7565d0ef6d09e5434ab1a31948c66d96552e54496877f2c54927ed8f",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-0-rhea.png",
+          "sourceSha256": "fd79ab90ffd3b525e715e66f401c28584d6b1a03826ebbb0686eca3f73d7f733",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-wc-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-1-nova.png",
+          "sourceSha256": "4805925941529af27f71ffc02fb85548a62fb3da744aaa838f87a4cff0c24b7c",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-wc-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-2-rhea.png",
+          "sourceSha256": "4f21aa257c55f77708e40e91ed36027b3e51d5a806483bb8b0c546b4f4362c56",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-wc-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-3-new-york-v4.png",
+          "sourceSha256": "e004ab8e056d89eba5073a48d045fd3cf7c0d7baefb4a7135a4cdc741f38d409",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-wc-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-4-nova.png",
+          "sourceSha256": "e81e5d3e4b44f48e67fab7e72160e7b493dd2a644b55178933f6d20c563928c6",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-wc-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-zh-cn-wc",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-tabs-detail-zh-cn-vue.png",
+      "sheetSha256": "1bc2a8224ecb8af53ee052261e74d4a388a705d4d5aca904333acacafd2b80e8",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-0-rhea.png",
+          "sourceSha256": "4646d190b8930b310111d7ae12450ccff6151d112ffbc79b63ef7e037f91841d",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-1-nova.png",
+          "sourceSha256": "05267951b956537dec9348cefcf6b7d466ebdeaafe5701c66c9b166519bb0b68",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-2-rhea.png",
+          "sourceSha256": "75994986c2d3d7c033b41082bb350b88923620ae505bc296ceefa4425f65f36a",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-3-new-york-v4.png",
+          "sourceSha256": "40fd732b4626a7d3f9a79a540b9f8cd71f7a9f876f7716370fd9f0cd8d2b695d",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-4-nova.png",
+          "sourceSha256": "db5f118f4ed482055a81a7cb349a297454faa749d7d1d128cd397ecb1ccd4f42",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-zh-cn-vue",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-tabs-detail-zh-cn-vue2.png",
+      "sheetSha256": "816eb3b451711a7dd182be5e99e46afcbec0316a5b6b2e35a85cf827c59891aa",
+      "size": [
+        1510,
+        1862
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue2-0-rhea.png",
+          "sourceSha256": "df039e1b7c8df6e516f63687a23e24b57ee3cee3c71add97bd921ee85288367b",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue2-0-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            750,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue2-1-nova.png",
+          "sourceSha256": "30cef57c72257cb730c54a812ea270619e772cc066c926311de34a03182bf1bf",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue2-1-nova | actual dark | enhanced",
+          "sheetBounds": [
+            760,
+            0,
+            1510,
+            614
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue2-2-rhea.png",
+          "sourceSha256": "257e4c32ff3883598b002ef7f931351df44a0cdf8aad758e92e7e30e435bb2dd",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue2-2-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            624,
+            750,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue2-3-new-york-v4.png",
+          "sourceSha256": "3d9585d7a6e9e01e76da4d13fbe56e11770358192bedda97b0d3789e9f3214cd",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue2-3-new-york-v4 | actual dark | enhanced",
+          "sheetBounds": [
+            760,
+            624,
+            1510,
+            1238
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue2-4-nova.png",
+          "sourceSha256": "675baf994f64c83d1ec5030e342dd07012829a62b66f3ce18cf4e4aa61c8857a",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            330,
+            390,
+            1080,
+            970
+          ],
+          "viewSize": [
+            750,
+            580
+          ],
+          "caption": "tabs-zh-cn-vue2-4-nova | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            1248,
+            750,
+            1862
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-tabs-detail-zh-cn-vue2",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-sidebar-detail-en-light-shadcn.png",
+      "sheetSha256": "e4ad040aef242e14eacd23a6bedb69e834f135be9a5276172dc05823c8b3cecd",
+      "size": [
+        1250,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-en-light-shadcn-enhanced-group-hover.png",
+          "sourceSha256": "780c92f0b4f93c17dc495e337be5a359ea180e6651f276f8982cc36abd411456",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-shadcn-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            305,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-shadcn-enhanced-focus.png",
+          "sourceSha256": "254f995cc53fd9ff6e9117cc8825bf81992a88d8906f8ad35b25b9e84db4fef3",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-shadcn-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            315,
+            0,
+            620,
+            1056
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-group-hover.png",
+          "sourceSha256": "b840b4fa14afb66dfa98f3c005e951e666fcb8221634cf4e2eddc59426708c13",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-shadcn-failed-scripts-group-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            630,
+            0,
+            935,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-shadcn-failed-scripts-focus.png",
+          "sourceSha256": "d5275cec1649b6c2f89bb0e4a316bca5bff1f569c5e054e6e6deb0f7ad9c2bfa",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-shadcn-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            945,
+            0,
+            1250,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-sidebar-detail-en-light-shadcn",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-sidebar-detail-en-light-brutalist.png",
+      "sheetSha256": "0e275312f10f86c79710715d92ccddcd7b7de6a2d056bcfa309d27cab6240208",
+      "size": [
+        1250,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-enhanced-group-hover.png",
+          "sourceSha256": "73b6655f4ba401bc41ed8e8b2c0a0e597f9aa5842f81591aa1c92b59b050ce85",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-brutalist-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            305,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-enhanced-focus.png",
+          "sourceSha256": "c2743e0a4db072d83cb1666f42968ca00675d668def87ee2ddfb80bc0504f4c3",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-brutalist-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            315,
+            0,
+            620,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-group-hover.png",
+          "sourceSha256": "de61ee7788c4ee0808119aeaa5c250508e8fc55694392d8cd5821adcf903da3b",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-brutalist-failed-scripts-group-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            630,
+            0,
+            935,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "7aed699862bd740a3ab670157df926deb7060a0177c225930875fa9f9193f3fb",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-light-brutalist-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            945,
+            0,
+            1250,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-sidebar-detail-en-light-brutalist",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-sidebar-detail-en-dark-brutalist.png",
+      "sheetSha256": "1f0e9397d46f8c6d10dac566eff37835850f565861cca4d1b6b08274429b473a",
+      "size": [
+        1250,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-en-dark-brutalist-enhanced-group-hover.png",
+          "sourceSha256": "643cd0b6066eb3191d6b4c1fda74a9b796cbb6b47c4eb992649c4ccfeb71fcca",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-dark-brutalist-enhanced-group-hover | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            305,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-dark-brutalist-enhanced-focus.png",
+          "sourceSha256": "0a7e1c571d40a17013b76b32db15a154fdc8dabcaf49cc6e6775daf001b82202",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-dark-brutalist-enhanced-focus | actual dark | enhanced",
+          "sheetBounds": [
+            315,
+            0,
+            620,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-group-hover.png",
+          "sourceSha256": "51a94e51b91df4f7ecf8cf6ab4295bb5ce084518e1bdc167085fda3fc5c4fd1b",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-dark-brutalist-failed-scripts-group-hover | actual dark | failed-scripts",
+          "sheetBounds": [
+            630,
+            0,
+            935,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "c851e82d442669e3becca8e550d7b8735434d2e83ac932bbeb56a00169e2bc8e",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-en-dark-brutalist-failed-scripts-focus | actual dark | failed-scripts",
+          "sheetBounds": [
+            945,
+            0,
+            1250,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-sidebar-detail-en-dark-brutalist",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-sidebar-detail-zh-cn-light-shadcn.png",
+      "sheetSha256": "3ad4d995161246d443ee8de321193f4211545122e803fabcc8a03e25607f3d99",
+      "size": [
+        1250,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-group-hover.png",
+          "sourceSha256": "d277e37bbb7ac93baa202191b956ed4d9549269177bc8d970ab473d5446f567f",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-shadcn-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            305,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-focus.png",
+          "sourceSha256": "86720bb6d48ee6afe93de8564d6a8227b850690d365ae0dc2070d3faaa89d761",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-shadcn-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            315,
+            0,
+            620,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover.png",
+          "sourceSha256": "a2b5d9a6d474c6af3a0ebab71bbe1e3c38ad4336ffc03c68da5b4cb40cb0d447",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-shadcn-failed-scripts-group-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            630,
+            0,
+            935,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-shadcn-failed-scripts-focus.png",
+          "sourceSha256": "730b31777164a1c252780ea0f3eeb624cb350b7d73ffd7acb79b9f455878345a",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-shadcn-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            945,
+            0,
+            1250,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-sidebar-detail-zh-cn-light-shadcn",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-sidebar-detail-zh-cn-light-brutalist.png",
+      "sheetSha256": "7c97dc2dc35aed9b4b90d5b68c9140612847457baa32bebfd5b41513ab26183a",
+      "size": [
+        1250,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+          "sourceSha256": "3a7f9602749abc835dbf1e02be4b303e974793b84e20f1e769959443cad939f6",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            305,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-focus.png",
+          "sourceSha256": "d88b989eb3821920f98c7971c3a2d8021f576c16b5ae1b0bea967dfe6a1f7641",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            315,
+            0,
+            620,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+          "sourceSha256": "783f6ddb8e19206f09c47a3c33d94a1545433df7f266720cf65f4c443f1ec9ef",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-failed-scripts-group-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            630,
+            0,
+            935,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "648cc145c098e94863c3add09d2ebca8b935899053b4c25ec441447f5795de04",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            945,
+            0,
+            1250,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-sidebar-detail-zh-cn-light-brutalist",
+      "sheetRetainedInThisPacket": true,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-sidebar-detail-zh-cn-dark-brutalist.png",
+      "sheetSha256": "e71c53c9c2c9e664aea1745655c85fe48219b175afaca9b5505f8ce2811e2745",
+      "size": [
+        1250,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-group-hover.png",
+          "sourceSha256": "c625a8f6e6c4aea006e31f3eafe9a1113e2b6d7300084229bb1580433a4bf460",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-dark-brutalist-enhanced-group-hover | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            305,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-dark-brutalist-enhanced-focus.png",
+          "sourceSha256": "cfccd1d437e339c6a9a1636d5a7c41b14215dcab279d3719c561e565cbce52d4",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-dark-brutalist-enhanced-focus | actual dark | enhanced",
+          "sheetBounds": [
+            315,
+            0,
+            620,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover.png",
+          "sourceSha256": "28dd9503dda1bf05ef68d2f7ee5181b0a659ca95b4a7ce0b8f30a042e1a70919",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover | actual dark | failed-scripts",
+          "sheetBounds": [
+            630,
+            0,
+            935,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "caf812c2ec96b5a7bd3725b69be42d7b9e751c39e06b60b304529fc0cb656def",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            0,
+            0,
+            305,
+            1000
+          ],
+          "viewSize": [
+            305,
+            1000
+          ],
+          "caption": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus | actual dark | failed-scripts",
+          "sheetBounds": [
+            945,
+            0,
+            1250,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-sidebar-detail-zh-cn-dark-brutalist",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-hero-detail-en-light.png",
+      "sheetSha256": "fed830bffa1d1d6b59de170bab5ecb265854be264e87c0545007c9397cfcf934",
+      "size": [
+        1890,
+        962
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/hero-en-light-enhanced-hover.png",
+          "sourceSha256": "833d45b151a7f925c9537ef84cc4029e227c2c1cfa66f96f099cbf59fe2d2fa8",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-light-enhanced-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            940,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-enhanced-focus.png",
+          "sourceSha256": "032be5c53bcfe24cfe930c71fe9d7f06dd615b411923c3ce657338f80faa097c",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-light-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            950,
+            0,
+            1890,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-enhanced-forced-colors.png",
+          "sourceSha256": "bf79f5e2d8b7a4d7a5a2a4dc6f0129235a3394551d17cc987b197f556c25a71e",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-light-enhanced-forced-colors | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            324,
+            940,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-failed-scripts-hover.png",
+          "sourceSha256": "b36f441d856f410a40af1aeb29b12bc53e3e145965f6cf7d374d9b35c07457b5",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-light-failed-scripts-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            950,
+            324,
+            1890,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-failed-scripts-focus.png",
+          "sourceSha256": "42f0556300f33d60d28ca911e83df7cd145c73cc44661b1096fe167ed3f84981",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-light-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            0,
+            648,
+            940,
+            962
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-failed-scripts-forced-colors.png",
+          "sourceSha256": "fdc7ce4b268ea0a3be1f7fdd96784c59ab5822ebcd7ce3cde6674309ab60ba25",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-light-failed-scripts-forced-colors | actual light | failed-scripts",
+          "sheetBounds": [
+            950,
+            648,
+            1890,
+            962
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-hero-detail-en-light",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-hero-detail-en-dark.png",
+      "sheetSha256": "f37db4b65fdb1f5fda7983dbf2ca18697739692af841776e5d82a218739cf2d1",
+      "size": [
+        1890,
+        638
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/hero-en-dark-enhanced-hover.png",
+          "sourceSha256": "1fe046c941077f79f0b0dd78c14edf1faf3ba27e50a17a40fdc057fd24ddf401",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-dark-enhanced-hover | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            940,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-dark-enhanced-focus.png",
+          "sourceSha256": "90c47b5bb376fd3e24f98702ae33150f753bd52c282f98fc92ad4993bf109664",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-dark-enhanced-focus | actual dark | enhanced",
+          "sheetBounds": [
+            950,
+            0,
+            1890,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-dark-failed-scripts-hover.png",
+          "sourceSha256": "b9f60a5a343a8b643d96b48401426ff65be2d99aa1536b3f113e5258fe0ad650",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-dark-failed-scripts-hover | actual dark | failed-scripts",
+          "sheetBounds": [
+            0,
+            324,
+            940,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-dark-failed-scripts-focus.png",
+          "sourceSha256": "86ee0103da5929f5b8bb2b23a9156775c206e975fe3c2c3579a378ec111cc5b4",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-en-dark-failed-scripts-focus | actual dark | failed-scripts",
+          "sheetBounds": [
+            950,
+            324,
+            1890,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-hero-detail-en-dark",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-hero-detail-zh-cn-light.png",
+      "sheetSha256": "68943e3f6720a6a7505c94835a881e88b37e50a4f9fb0d2316205f9939732742",
+      "size": [
+        1890,
+        638
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/hero-zh-cn-light-enhanced-hover.png",
+          "sourceSha256": "f5c61398b5b8f04f5375c89e0f3f80ac9326eb99c8f7c9213835fdeda7fd6cdf",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-light-enhanced-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            940,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-light-enhanced-focus.png",
+          "sourceSha256": "f2a17edb0398c0c31a142d16ce29ab263761889e735f2da7d9c8783916057e3d",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-light-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            950,
+            0,
+            1890,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-light-failed-scripts-hover.png",
+          "sourceSha256": "b2ed2f39dbd250678efeff83b950765e0ffb1c855a9ffa381d1fe3173667c480",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-light-failed-scripts-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            0,
+            324,
+            940,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-light-failed-scripts-focus.png",
+          "sourceSha256": "a05ae21cfb764a5d5c747dcd076de7d547988452f9a2260c1479fec3e53773ac",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-light-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            950,
+            324,
+            1890,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-hero-detail-zh-cn-light",
+      "sheetRetainedInThisPacket": true,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-hero-detail-zh-cn-dark.png",
+      "sheetSha256": "61e24c94ee7dce5300217ec5592109c04f6e72c05f8822749308699ddfcba969",
+      "size": [
+        1890,
+        638
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/hero-zh-cn-dark-enhanced-hover.png",
+          "sourceSha256": "791396b2d578ada6c771386b9880efaf802deeae1453051d352f34003104afa0",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-dark-enhanced-hover | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            940,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-dark-enhanced-focus.png",
+          "sourceSha256": "7f201190087ce96fb3ac674f2c5703b5f27363d6161453d94d594efddd32437d",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-dark-enhanced-focus | actual dark | enhanced",
+          "sheetBounds": [
+            950,
+            0,
+            1890,
+            314
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-dark-failed-scripts-hover.png",
+          "sourceSha256": "1a58e0f902eadc1b9a1c4c93353bcd93ba20078c8b1e292696bd489ea3319003",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-dark-failed-scripts-hover | actual dark | failed-scripts",
+          "sheetBounds": [
+            0,
+            324,
+            940,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-dark-failed-scripts-focus.png",
+          "sourceSha256": "e76029e78d76e33c489835039dffdcb71ba1f5c7d71804ead245d743e17c6631",
+          "sourceSize": [
+            1440,
+            1000
+          ],
+          "crop": [
+            250,
+            90,
+            1190,
+            370
+          ],
+          "viewSize": [
+            940,
+            280
+          ],
+          "caption": "hero-zh-cn-dark-failed-scripts-focus | actual dark | failed-scripts",
+          "sheetBounds": [
+            950,
+            324,
+            1890,
+            638
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-hero-detail-zh-cn-dark",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-changed-overview-1.png",
+      "sheetSha256": "7c79bea9d43c4ed16049602267c26e1a96d3ef69bed9d5de7c879ce03b0e6109",
+      "size": [
+        1450,
+        2710
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-en-wc-0-rhea.png",
+          "sourceSha256": "0a1d594addcfcbef34260fe8ae8593ad170b7aa674348aefe9f5a61f8bb28a91",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-wc-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            720,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-1-nova.png",
+          "sourceSha256": "28a52f9c5a0b003657d3918dd53c6ad38003ee0bdc6e01a277d2c098f77be371",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-wc-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            0,
+            1450,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-2-rhea.png",
+          "sourceSha256": "cb961776d2ff0a968583e2d3977d0fae562e3e5e34a912d13ff998d58006fc39",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-wc-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            544,
+            720,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-3-new-york-v4.png",
+          "sourceSha256": "d4215c367d2a7944c6d6954e53c1b828d3b94e57010c5fdb05234da81fd23325",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-wc-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            544,
+            1450,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-wc-4-nova.png",
+          "sourceSha256": "8cf50e6de9d279b60f364c351b95269280f641fbe60a528987b3b31e900ffbd2",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-wc-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1088,
+            720,
+            1622
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-react-0-rhea.png",
+          "sourceSha256": "8d44a58acf43d0a93145ab853f0b1207c575181773bf0ccb4bc5672624fc1db2",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-react-0-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            730,
+            1088,
+            1450,
+            1622
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-react-1-nova.png",
+          "sourceSha256": "070eeff32cf5684b61e2ad59e27eeb1b1dc865876217640aadc9db52c19b7049",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-react-1-nova | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            1632,
+            720,
+            2166
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-0-rhea.png",
+          "sourceSha256": "146c282ed40001e6dc73213b6c211e16520938b38874a40ec7d78bcb43b9c45e",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-vue-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            1632,
+            1450,
+            2166
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-1-nova.png",
+          "sourceSha256": "930ebdda8021858c2e5e853a13e9047efe1500cadf7951dada395341eca7b5e0",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-vue-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            2176,
+            720,
+            2710
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-2-rhea.png",
+          "sourceSha256": "b38e4efac5009bb8b95c2ae5e7e37741f73d096a3610ef8fc07f4af1e08c697f",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-vue-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            2176,
+            1450,
+            2710
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-changed-overview-1",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-changed-overview-2.png",
+      "sheetSha256": "9b699420fe3f4085c86def4d21ae91f11188d9c5a25d1898ab3cc946d646addc",
+      "size": [
+        1450,
+        2710
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-en-vue-3-new-york-v4.png",
+          "sourceSha256": "77308287dd2a3a9ccedcbfc9144a880506046420ea230b089298b2771e550453",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-vue-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            720,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue-4-nova.png",
+          "sourceSha256": "b4c3c2342f0194e62e871df7ad9872e797a7bb5e8e099b3a46e4a283b6807d76",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-vue-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            0,
+            1450,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-en-vue2-0-rhea.png",
+          "sourceSha256": "1454c45ab1bb42d9ab67b77e3495a9e4012eb5ec7e61799136ae62e5e8c71207",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-en-vue2-0-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            544,
+            720,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-0-rhea.png",
+          "sourceSha256": "fd79ab90ffd3b525e715e66f401c28584d6b1a03826ebbb0686eca3f73d7f733",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-wc-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            544,
+            1450,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-1-nova.png",
+          "sourceSha256": "4805925941529af27f71ffc02fb85548a62fb3da744aaa838f87a4cff0c24b7c",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-wc-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1088,
+            720,
+            1622
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-2-rhea.png",
+          "sourceSha256": "4f21aa257c55f77708e40e91ed36027b3e51d5a806483bb8b0c546b4f4362c56",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-wc-2-rhea | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            1088,
+            1450,
+            1622
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-3-new-york-v4.png",
+          "sourceSha256": "e004ab8e056d89eba5073a48d045fd3cf7c0d7baefb4a7135a4cdc741f38d409",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-wc-3-new-york-v4 | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1632,
+            720,
+            2166
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-wc-4-nova.png",
+          "sourceSha256": "e81e5d3e4b44f48e67fab7e72160e7b493dd2a644b55178933f6d20c563928c6",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-wc-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            1632,
+            1450,
+            2166
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-0-rhea.png",
+          "sourceSha256": "4646d190b8930b310111d7ae12450ccff6151d112ffbc79b63ef7e037f91841d",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-vue-0-rhea | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            2176,
+            720,
+            2710
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-1-nova.png",
+          "sourceSha256": "05267951b956537dec9348cefcf6b7d466ebdeaafe5701c66c9b166519bb0b68",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-vue-1-nova | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            2176,
+            1450,
+            2710
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-changed-overview-2",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-changed-overview-3.png",
+      "sheetSha256": "b84498e24ecec8f838880b0f65dfaf7c6258b0eae6f88f1ae4dc873beca300c0",
+      "size": [
+        1450,
+        2710
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue-4-nova.png",
+          "sourceSha256": "db5f118f4ed482055a81a7cb349a297454faa749d7d1d128cd397ecb1ccd4f42",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-vue-4-nova | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            720,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/tabs-zh-cn-vue2-0-rhea.png",
+          "sourceSha256": "df039e1b7c8df6e516f63687a23e24b57ee3cee3c71add97bd921ee85288367b",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "tabs-zh-cn-vue2-0-rhea | actual dark | enhanced",
+          "sheetBounds": [
+            730,
+            0,
+            1450,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-shadcn-enhanced-group-hover.png",
+          "sourceSha256": "780c92f0b4f93c17dc495e337be5a359ea180e6651f276f8982cc36abd411456",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-en-light-shadcn-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            544,
+            720,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-shadcn-enhanced-focus.png",
+          "sourceSha256": "254f995cc53fd9ff6e9117cc8825bf81992a88d8906f8ad35b25b9e84db4fef3",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-en-light-shadcn-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            544,
+            1450,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-enhanced-group-hover.png",
+          "sourceSha256": "73b6655f4ba401bc41ed8e8b2c0a0e597f9aa5842f81591aa1c92b59b050ce85",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-en-light-brutalist-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            1088,
+            720,
+            1622
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-enhanced-focus.png",
+          "sourceSha256": "c2743e0a4db072d83cb1666f42968ca00675d668def87ee2ddfb80bc0504f4c3",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-en-light-brutalist-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            1088,
+            1450,
+            1622
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-light-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "7aed699862bd740a3ab670157df926deb7060a0177c225930875fa9f9193f3fb",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-en-light-brutalist-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            0,
+            1632,
+            720,
+            2166
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-en-dark-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "c851e82d442669e3becca8e550d7b8735434d2e83ac932bbeb56a00169e2bc8e",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-en-dark-brutalist-failed-scripts-focus | actual dark | failed-scripts",
+          "sheetBounds": [
+            730,
+            1632,
+            1450,
+            2166
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-shadcn-enhanced-group-hover.png",
+          "sourceSha256": "d277e37bbb7ac93baa202191b956ed4d9549269177bc8d970ab473d5446f567f",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-zh-cn-light-shadcn-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            2176,
+            720,
+            2710
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+          "sourceSha256": "3a7f9602749abc835dbf1e02be4b303e974793b84e20f1e769959443cad939f6",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-enhanced-group-hover | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            2176,
+            1450,
+            2710
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-changed-overview-3",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-changed-overview-4.png",
+      "sheetSha256": "b1f0ba813bad10bed86b7a7d3751c4238deea346b6bc64f65f8341439779da5f",
+      "size": [
+        1450,
+        2732
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-enhanced-focus.png",
+          "sourceSha256": "d88b989eb3821920f98c7971c3a2d8021f576c16b5ae1b0bea967dfe6a1f7641",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-enhanced-focus | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            720,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-light-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "648cc145c098e94863c3add09d2ebca8b935899053b4c25ec441447f5795de04",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-zh-cn-light-brutalist-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            730,
+            0,
+            1450,
+            556
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/sidebar-zh-cn-dark-brutalist-failed-scripts-focus.png",
+          "sourceSha256": "caf812c2ec96b5a7bd3725b69be42d7b9e751c39e06b60b304529fc0cb656def",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "sidebar-zh-cn-dark-brutalist-failed-scripts-focus | actual dark | failed-scripts",
+          "sheetBounds": [
+            0,
+            566,
+            720,
+            1100
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-enhanced-hover.png",
+          "sourceSha256": "833d45b151a7f925c9537ef84cc4029e227c2c1cfa66f96f099cbf59fe2d2fa8",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-en-light-enhanced-hover | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            566,
+            1450,
+            1100
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-failed-scripts-hover.png",
+          "sourceSha256": "b36f441d856f410a40af1aeb29b12bc53e3e145965f6cf7d374d9b35c07457b5",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-en-light-failed-scripts-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            0,
+            1110,
+            720,
+            1644
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-light-failed-scripts-focus.png",
+          "sourceSha256": "42f0556300f33d60d28ca911e83df7cd145c73cc44661b1096fe167ed3f84981",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-en-light-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            730,
+            1110,
+            1450,
+            1644
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-en-dark-enhanced-hover.png",
+          "sourceSha256": "1fe046c941077f79f0b0dd78c14edf1faf3ba27e50a17a40fdc057fd24ddf401",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-en-dark-enhanced-hover | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            1654,
+            720,
+            2188
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-light-enhanced-hover.png",
+          "sourceSha256": "f5c61398b5b8f04f5375c89e0f3f80ac9326eb99c8f7c9213835fdeda7fd6cdf",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-zh-cn-light-enhanced-hover | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            1654,
+            1450,
+            2188
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-light-failed-scripts-hover.png",
+          "sourceSha256": "b2ed2f39dbd250678efeff83b950765e0ffb1c855a9ffa381d1fe3173667c480",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-zh-cn-light-failed-scripts-hover | actual light | failed-scripts",
+          "sheetBounds": [
+            0,
+            2198,
+            720,
+            2732
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-light-failed-scripts-focus.png",
+          "sourceSha256": "a05ae21cfb764a5d5c747dcd076de7d547988452f9a2260c1479fec3e53773ac",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-zh-cn-light-failed-scripts-focus | actual light | failed-scripts",
+          "sheetBounds": [
+            730,
+            2198,
+            1450,
+            2732
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-changed-overview-4",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    },
+    {
+      "sheet": "9d-changed-overview-5.png",
+      "sheetSha256": "30f1479fb7211562b563f9336526ec02c3ff58ca37be321394d942e71db16a20",
+      "size": [
+        1450,
+        1078
+      ],
+      "operation": "Display-only contact sheet from source PNG pixels; captions lie outside each screenshot. Visual decisions are recorded separately.",
+      "items": [
+        {
+          "source": "../hosted/site/hero-zh-cn-dark-enhanced-hover.png",
+          "sourceSha256": "791396b2d578ada6c771386b9880efaf802deeae1453051d352f34003104afa0",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-zh-cn-dark-enhanced-hover | actual dark | enhanced",
+          "sheetBounds": [
+            0,
+            0,
+            720,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hero-zh-cn-dark-failed-scripts-hover.png",
+          "sourceSha256": "1a58e0f902eadc1b9a1c4c93353bcd93ba20078c8b1e292696bd489ea3319003",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hero-zh-cn-dark-failed-scripts-hover | actual dark | failed-scripts",
+          "sheetBounds": [
+            730,
+            0,
+            1450,
+            534
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hook-evidence-en.png",
+          "sourceSha256": "399d42c52f3778b4695d5436e65a5626939c1c6d86d0d5e576e61574858fbdc9",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hook-evidence-en | actual light | enhanced",
+          "sheetBounds": [
+            0,
+            544,
+            720,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        },
+        {
+          "source": "../hosted/site/hook-evidence-zh-cn.png",
+          "sourceSha256": "af84353b9fafb1bb66e529703fcdd4a5219a5b92e72263b7b8f74bedd5f82236",
+          "sourceSize": [
+            720,
+            500
+          ],
+          "crop": null,
+          "viewSize": [
+            720,
+            500
+          ],
+          "caption": "hook-evidence-zh-cn | actual light | enhanced",
+          "sheetBounds": [
+            730,
+            544,
+            1450,
+            1078
+          ],
+          "sourceHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+        }
+      ],
+      "id": "9d-changed-overview-5",
+      "sheetRetainedInThisPacket": false,
+      "reviewed": true
+    }
+  ],
+  "originalViews": [
+    {
+      "source": "../hosted/site/tabs-en-wc-0-rhea.png",
+      "sourceSha256": "0a1d594addcfcbef34260fe8ae8593ad170b7aa674348aefe9f5a61f8bb28a91",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "viewSize": [
+        1440,
+        1000
+      ],
+      "crop": null,
+      "resized": false,
+      "displayEncoding": "lossless WebP display copy; source PNG unmodified"
+    },
+    {
+      "source": "../hosted/site/hook-evidence-en.png",
+      "sourceSha256": "399d42c52f3778b4695d5436e65a5626939c1c6d86d0d5e576e61574858fbdc9",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "viewSize": [
+        1440,
+        1000
+      ],
+      "crop": null,
+      "resized": false,
+      "displayEncoding": "lossless WebP display copy; source PNG unmodified"
+    },
+    {
+      "source": "../hosted/site/hook-evidence-zh-cn.png",
+      "sourceSha256": "af84353b9fafb1bb66e529703fcdd4a5219a5b92e72263b7b8f74bedd5f82236",
+      "sourceSize": [
+        1440,
+        1000
+      ],
+      "viewSize": [
+        1440,
+        1000
+      ],
+      "crop": null,
+      "resized": false,
+      "displayEncoding": "lossless WebP display copy; source PNG unmodified"
+    }
+  ]
+}

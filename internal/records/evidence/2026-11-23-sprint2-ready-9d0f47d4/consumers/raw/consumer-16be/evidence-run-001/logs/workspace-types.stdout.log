@@ -1,0 +1,23 @@
+
+> proto-ui@ check:types $PRODUCT_16BE
+> corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style && corepack pnpm@10.32.1 -s check:types:workspace && corepack pnpm@10.32.1 -s check:types:docs
+
+
+> apps-www@0.0.1 generate:proto-ui-style $PRODUCT_16BE/apps/www
+> node ./scripts/generate-cli-init-docs.mjs && node ../../packages/cli/bin/proto-ui.js theme shadcn --out ./src/styles/shadcn-theme.css && node ./scripts/generate-website-prototype-tokens.mjs && node ../../packages/cli/bin/proto-ui.js style --out ./src/styles/proto-ui-style.css --theme-import ./shadcn-theme.css --tokens-import ./proto-ui-tokens.generated.css
+
+[docs] extracted real @proto.ui/cli@0.3.0-alpha.2 init: 4 files
+[proto-ui] theme(shadcn): wrote src/styles/shadcn-theme.css
+[website-prototypes] generated one style sheet and its Shadow companion from 1452 package + website tokens
+[proto-ui] style: wrote src/styles/proto-ui-style.css
+packages/compiler/test/text-reset-native.test.ts(163,63): error TS2345: Argument of type '(type: string, listener: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions | undefined) => void' is not assignable to parameter of type 'NormalizedPrecedure<{ <K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLInputElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined): voi...'.
+  Types of parameters 'type' and 'args' are incompatible.
+    Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined] | [type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions | undefined]'.
+      Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | AddEventListenerOptions | undefined]'.
+        Source provides no match for required element at position 2 in target.
+packages/compiler/test/text-reset-native.test.ts(167,66): error TS2345: Argument of type '(type: string, listener: EventListenerOrEventListenerObject, options: boolean | EventListenerOptions | undefined) => void' is not assignable to parameter of type 'NormalizedPrecedure<{ <K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLInputElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined): void; ...'.
+  Types of parameters 'type' and 'args' are incompatible.
+    Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions | undefined] | [type: string, listener: EventListenerOrEventListenerObject, options?: boolean | ... 1 more ... | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | EventListenerOptions | undefined]'.
+      Type '[type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions | undefined]' is not assignable to type '[type: string, listener: EventListenerOrEventListenerObject, options: boolean | EventListenerOptions | undefined]'.
+        Source provides no match for required element at position 2 in target.
+ ELIFECYCLE  Command failed with exit code 2.

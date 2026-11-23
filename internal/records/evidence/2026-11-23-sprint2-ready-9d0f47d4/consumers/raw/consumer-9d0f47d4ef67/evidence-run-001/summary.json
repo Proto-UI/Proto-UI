@@ -1,0 +1,1479 @@
+{
+  "schema": "proto-ui.sprint2.final-consumer-replay.v1",
+  "startedAt": "2026-11-23T14:23:32.513444+00:00",
+  "expectedHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "source": "$PRODUCT_9D",
+  "orchestratorSha256": "95a201bcf878822d0315a2cac18095076cb60d826fb39e483871584af67a3488",
+  "scope": "Pinned compiler build/install/determinism and CLI; ordinary real framework mounts in Happy DOM; frozen Shenko application build/Node tests; frozen Verdant producer; all 47 public builds and separate Tabs 13. Separate docs style generation and check:types:docs are executed locally; the aggregate check:types is NOT_RUN_HERE and check:types:workspace belongs to official hosted run 45188583301 with independent readback. No native-browser, Cargo, desktop, live backend or release claim.",
+  "work": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b",
+  "status": "FAIL",
+  "commands": [
+    {
+      "name": "node-version",
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/node-version.stdout.log",
+      "stderr": "logs/node-version.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 0.068,
+      "stdoutSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pnpm-version",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "--version"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/pnpm-version.stdout.log",
+      "stderr": "logs/pnpm-version.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 2.12,
+      "stdoutSha256": "f71ff3f5176cd06dce75ef9c6a6a4ea9eacefa43f5bd92c6cc9322dd2c8216a3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-clone",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "$FROZEN_SHENKO",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/shenko-clone.stdout.log",
+      "stderr": "logs/shenko-clone.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 53.975,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "1af300ef4ffea3d5e440b6afffc6ef37616177884b928c8526cbb3170b6f7b7e"
+    },
+    {
+      "name": "shenko-sparse",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "--no-sparse-index",
+        "/AGENTS.md",
+        "/.agents/skills/shenko-dev/",
+        "/crates/shenko-ui/"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/shenko-sparse.stdout.log",
+      "stderr": "logs/shenko-sparse.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 0.066,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-checkout",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "checkout",
+        "--detach",
+        "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/shenko-checkout.stdout.log",
+      "stderr": "logs/shenko-checkout.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 72.677,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "dc29692a76f64a17b76b10e5135049a6150f0c6b8901921d1320d13a8e2822c7"
+    },
+    {
+      "name": "verdant-clone",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "$CONTROL/consumer-16be/frozen-verdant",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/verdant-clone.stdout.log",
+      "stderr": "logs/verdant-clone.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 0.918,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e1cc7d1b1b6c274c6b286193f10dcb4afbaa2c88b73235e343b035d509e9e5ef"
+    },
+    {
+      "name": "verdant-sparse",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "--no-sparse-index",
+        "/AGENTS.md",
+        "/frontend/proto-ui/",
+        "/frontend/Cargo.toml"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/verdant-sparse.stdout.log",
+      "stderr": "logs/verdant-sparse.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 0.008,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-checkout",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+        "checkout",
+        "--detach",
+        "91a775546ebd21a87d76d76568195a6513437719"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/verdant-checkout.stdout.log",
+      "stderr": "logs/verdant-checkout.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 0.033,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "eeb1bf047f83bba637d4ba7e4b26390b7b48df75b254b06a6a7ce6529ef71817"
+    },
+    {
+      "name": "pinned-build-a",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/build-pinned.ts",
+        "--revision",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+        "--output",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/pinned-build-a.stdout.log",
+      "stderr": "logs/pinned-build-a.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 18.057,
+      "stdoutSha256": "998298608620dd384e9cb8316da6894768fafa6eaaa0465749ce9886911bde9d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-build-b",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/build-pinned.ts",
+        "--revision",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+        "--output",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-b"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/pinned-build-b.stdout.log",
+      "stderr": "logs/pinned-build-b.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 6.038,
+      "stdoutSha256": "47de9d32e369a1e61127741e5ab972f271153a066d5ea22544d6374b0b996240",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-artifact-install",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a",
+      "expectedExit": 0,
+      "stdout": "logs/pinned-artifact-install.stdout.log",
+      "stderr": "logs/pinned-artifact-install.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 1.121,
+      "stdoutSha256": "9312232a6f347f71c5a05bdcc6f2dc711a3c2b202638d45001b037237e722772",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-cli",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/pinned-cli-smoke.mjs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/pinned-cli.stdout.log",
+      "stderr": "logs/pinned-cli.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 238.55,
+      "stdoutSha256": "a7cdbdf1bfe432d71387b1ed80f7cf9d834dcd12bc3d7cb68442caa74c633597",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ordinary-frameworks",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/native-consumer-smoke.mjs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/ordinary-frameworks.stdout.log",
+      "stderr": "logs/ordinary-frameworks.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 357.988,
+      "stdoutSha256": "051f466c214b2fd77c3a9ad5771d66a1672740d5f53fcd5255e147cfc1cd6e1a",
+      "stderrSha256": "62d44763e08e4822ed8156f1233ec1ec4a7df20913f578553eed0fb626becf3a"
+    },
+    {
+      "name": "ordinary-families",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/release-family-smoke.mjs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/ordinary-families.stdout.log",
+      "stderr": "logs/ordinary-families.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 67.404,
+      "stdoutSha256": "a31beed646b3fb1a8e06f243e538f7b98166681319ce3d627659098000e96608",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "family-production-costs",
+      "argv": [
+        "node",
+        "scripts/compiler/release-family-costs.mjs",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-release-families-7GRQgm/summary.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/family-production-costs.stdout.log",
+      "stderr": "logs/family-production-costs.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 2.176,
+      "stdoutSha256": "9554f553d11dcb323c8ad3ebca710added066a0094c5dcb24fbc4a7088dfc69e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "frozen-source-inventory",
+      "argv": [
+        "node",
+        "scripts/compiler/sprint2-consumer-inventory.mjs",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+        "$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/source-admission.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/frozen-source-inventory.stdout.log",
+      "stderr": "logs/frozen-source-inventory.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 24.583,
+      "stdoutSha256": "cbed493ec9321db3fc215a9b9062808e2e88252211a89685c1a466ab2bc96a07",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-shenko-closure",
+      "argv": [
+        "node",
+        "scripts/build/public-packages.mjs",
+        "--package",
+        "@proto.ui/adapter-react",
+        "--package",
+        "@proto.ui/prototypes-shadcn",
+        "--package",
+        "@proto.ui/cli",
+        "--json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/public-shenko-closure.stdout.log",
+      "stderr": "logs/public-shenko-closure.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 151.659,
+      "stdoutSha256": "51cfea225c2bc15871e71b46a089d0dbb8632ad0c323b4ecff0b978ffb973553",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-frozen-install",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--fetch-retries=0",
+        "--fetch-timeout=30000"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko/crates/shenko-ui/web",
+      "expectedExit": 0,
+      "stdout": "logs/shenko-frozen-install.stdout.log",
+      "stderr": "logs/shenko-frozen-install.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 18.678,
+      "stdoutSha256": "26c75e0f07308107306228820a6ca71e7acc4f051f7ba40a33b131b9d01a654d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-application",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/shenko-consumer-smoke.mjs",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a",
+        "$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/public-build-shenko-closure.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/shenko-application.stdout.log",
+      "stderr": "logs/shenko-application.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 33.257,
+      "stdoutSha256": "7f6be225eeec720dcf6f1a9bf2914693faf2a5016cb2a103c02546f0f7e7b3b4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-original-pin-rejection",
+      "argv": [
+        "node",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "$PRODUCT_9D",
+        "--check"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "expectedExit": 2,
+      "stdout": "logs/verdant-original-pin-rejection.stdout.log",
+      "stderr": "logs/verdant-original-pin-rejection.stderr.log",
+      "exitCode": 2,
+      "wallSeconds": 0.566,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "717e060dd00b1cc3d7fc3069d8d28887fe64f7fbebf7247f7a7cf3f239efe310"
+    },
+    {
+      "name": "verdant-producer",
+      "argv": [
+        "node",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "$PRODUCT_9D"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "expectedExit": 0,
+      "stdout": "logs/verdant-producer.stdout.log",
+      "stderr": "logs/verdant-producer.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 4.779,
+      "stdoutSha256": "2de8fed66b1fc63095c74d650121c656292003c0c10e2df2a3f7807cd33c3131",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-producer-check",
+      "argv": [
+        "node",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "$PRODUCT_9D",
+        "--check"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "expectedExit": 0,
+      "stdout": "logs/verdant-producer-check.stdout.log",
+      "stderr": "logs/verdant-producer-check.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 2.883,
+      "stdoutSha256": "66e6248d82a133c4434d998c4f23d7517292b1ef071ffced006db6943d929ee9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-all-47-before-tabs",
+      "argv": [
+        "node",
+        "scripts/build/public-packages.mjs",
+        "--json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/public-all-47-before-tabs.stdout.log",
+      "stderr": "logs/public-all-47-before-tabs.stderr.log",
+      "exitCode": 0,
+      "wallSeconds": 420.551,
+      "stdoutSha256": "523fa14c7f84b010030dba423d5c652d5372d2a5ce672245af3ad61e5b9aa68b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tabs-profile-switch-separate-13",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+        "--maxWorkers=1",
+        "--reporter=json",
+        "--outputFile=$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/tabs-profile-switch.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "stdout": "logs/tabs-profile-switch-separate-13.stdout.log",
+      "stderr": "logs/tabs-profile-switch-separate-13.stderr.log",
+      "exitCode": 1,
+      "wallSeconds": 7.088,
+      "stdoutSha256": "170d266da65c58ef330564982009d168c88c5accec3094d069cc116842626d1f",
+      "stderrSha256": "1c32066e9790af82666b64346700aced4ad969da35f42e2b4e93ac7d7d2ad801"
+    }
+  ],
+  "evidenceMappings": [
+    {
+      "originalRoot": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a",
+      "archivedRoot": "evidence/pinned-artifact",
+      "omittedPayloads": [
+        "node_modules",
+        ".git",
+        ".npm-cache"
+      ],
+      "note": "Raw receipts retain original paths. Dependency delivery receipts retain payload identities."
+    },
+    {
+      "originalRoot": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-pinned-cli-onWeMO",
+      "archivedRoot": "evidence/pinned-cli",
+      "omittedPayloads": [
+        "node_modules",
+        ".git",
+        ".npm-cache"
+      ],
+      "note": "Raw receipts retain original paths. Dependency delivery receipts retain payload identities."
+    },
+    {
+      "originalRoot": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O",
+      "archivedRoot": "evidence/ordinary-frameworks",
+      "omittedPayloads": [
+        "node_modules",
+        ".git",
+        ".npm-cache"
+      ],
+      "note": "Raw receipts retain original paths. Dependency delivery receipts retain payload identities."
+    },
+    {
+      "originalRoot": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-release-families-7GRQgm",
+      "archivedRoot": "evidence/ordinary-families",
+      "omittedPayloads": [
+        "node_modules",
+        ".git",
+        ".npm-cache"
+      ],
+      "note": "Raw receipts retain original paths. Dependency delivery receipts retain payload identities."
+    },
+    {
+      "originalRoot": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-shenko-replay-zF7lUO",
+      "archivedRoot": "evidence/shenko-application",
+      "omittedPayloads": [
+        "node_modules",
+        ".git",
+        ".npm-cache"
+      ],
+      "note": "Raw receipts retain original paths. Dependency delivery receipts retain payload identities."
+    },
+    {
+      "originalRoot": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/generated/pitch-gesture-surface",
+      "archivedRoot": "evidence/verdant-generated",
+      "omittedPayloads": [
+        "node_modules",
+        ".git",
+        ".npm-cache"
+      ],
+      "note": "Raw receipts retain original paths. Dependency delivery receipts retain payload identities."
+    }
+  ],
+  "results": {
+    "pinned-cli": {
+      "ok": true,
+      "originalEvidence": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-pinned-cli-onWeMO"
+    },
+    "ordinary-frameworks": {
+      "ok": true,
+      "originalEvidence": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-native-consumers-nvDh8O"
+    },
+    "ordinary-families": {
+      "ok": true,
+      "originalEvidence": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-release-families-7GRQgm"
+    },
+    "shenko-application": {
+      "ok": true,
+      "originalEvidence": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-shenko-replay-zF7lUO"
+    },
+    "public-all-47-before-tabs": {
+      "ok": true,
+      "built": 47,
+      "scope": "Actual complete public export builds before ordinary Code consumption"
+    }
+  },
+  "tools": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1"
+  },
+  "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+  "executedToolInputs": [
+    {
+      "path": "scripts/compiler/build-pinned.ts",
+      "sha256": "4b514e4eb43e21785a808a19cba90ab263ba0c2b83744f2067e780f533f816d7"
+    },
+    {
+      "path": "scripts/compiler/pinned-cli-smoke.mjs",
+      "sha256": "e64dfe410c6e849328aba8bea8d1ef93d5ae139103531e7cee2873afca726066"
+    },
+    {
+      "path": "scripts/compiler/native-consumer-smoke.mjs",
+      "sha256": "f67db1458c857d7636fe1cf94dad312bb997418afaaa008bbbfa90c14ce79748"
+    },
+    {
+      "path": "scripts/compiler/release-family-smoke.mjs",
+      "sha256": "db7e1ca1ff8fb1db92521dd560155fde489edae3de33a86045f6467a41812ca2"
+    },
+    {
+      "path": "scripts/compiler/release-family-runtime.mjs",
+      "sha256": "48e889c3d78ca1bce7f812b66c786f61c3ea2eccc86621fd2ff089a2f6ba6fec"
+    },
+    {
+      "path": "scripts/compiler/release-family-costs.mjs",
+      "sha256": "600128376bd31b05ec970332492fd6d0a00aefe9b1b53c642c1c849ae2e39a30"
+    },
+    {
+      "path": "scripts/compiler/sprint2-consumer-inventory.mjs",
+      "sha256": "46ea0d30587db815bc7ad08dbdd5c62eb3adb514a6b9bf991e98bd95fd89ec1c"
+    },
+    {
+      "path": "scripts/compiler/shenko-consumer-smoke.mjs",
+      "sha256": "3d45ce98ca38eda6799f9751db27fc80e9de6d7478bc2c0e85d53a9a9581abca"
+    },
+    {
+      "path": "scripts/build/public-packages.mjs",
+      "sha256": "e4a75b022484f99091fa9aa167f392bafea807e7476c901c75b2e265f785c6d8"
+    }
+  ],
+  "frozenConsumers": [
+    {
+      "name": "Shenko",
+      "revision": "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42",
+      "path": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+      "sparsePaths": [
+        "/AGENTS.md",
+        "/.agents/skills/shenko-dev/",
+        "/crates/shenko-ui/"
+      ]
+    },
+    {
+      "name": "Verdant",
+      "revision": "91a775546ebd21a87d76d76568195a6513437719",
+      "path": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "sparsePaths": [
+        "/AGENTS.md",
+        "/frontend/proto-ui/",
+        "/frontend/Cargo.toml"
+      ]
+    }
+  ],
+  "compilerBuild": {
+    "schema": "proto-ui.compiler-build.v1",
+    "revision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+    "profilesSha256": "112b14d8e28db9d802d97438dee8bc4636c5a20c156a5bf55bc266a94156e1d6",
+    "node": "24.22.3",
+    "typescript": "5.9.3",
+    "esbuild": "0.25.12",
+    "repository": "https://github.com/Proto-UI/Proto-UI",
+    "status": "private-source-pinned",
+    "packageManager": "pnpm@10.32.1",
+    "externalImports": [
+      "node:crypto",
+      "node:fs",
+      "node:fs/promises",
+      "node:path",
+      "node:url",
+      "node:util",
+      "typescript"
+    ],
+    "inputs": [
+      {
+        "path": "LICENSE",
+        "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66",
+        "bytes": 1078
+      },
+      {
+        "path": "package.json",
+        "sha256": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b",
+        "bytes": 11274
+      },
+      {
+        "path": "packages/cli/src/services/proto-style-css.ts",
+        "sha256": "f5dbe914fdc196626b0562d30f088d23d0778d6825cbf576fde2de797c1048b9",
+        "bytes": 78103
+      },
+      {
+        "path": "packages/compiler/package.json",
+        "sha256": "393793c94cc5f71cef2d835edc1b4552412743bec00b76ea7f053e2d2cf20f2f",
+        "bytes": 801
+      },
+      {
+        "path": "packages/compiler/src/a11y-event-types.ts",
+        "sha256": "4cb44709aa11bbf351de815240efd21f48fc383de1d0a6c56bb145f279ea0f1d",
+        "bytes": 13485
+      },
+      {
+        "path": "packages/compiler/src/artifact-library.ts",
+        "sha256": "71a24d1dfc4ef0765933b42065b3fde0f0858f75f0c12a91953b8e1037e4ff41",
+        "bytes": 27903
+      },
+      {
+        "path": "packages/compiler/src/artifact-linking.ts",
+        "sha256": "e59d6054e69554c3a1a672f8e24562d7714601deb4f542e4855831362a4e5700",
+        "bytes": 14004
+      },
+      {
+        "path": "packages/compiler/src/artifact-output.ts",
+        "sha256": "593ec6b6c9e4210170766ab34c5ffba013c1c645f418cc34de2a7647969889ed",
+        "bytes": 22073
+      },
+      {
+        "path": "packages/compiler/src/callable-effects.ts",
+        "sha256": "31f1ca339ea4d16046b4afad0dd24898d67e68754ee82f29f67f22e2ba2e8b2f",
+        "bytes": 56562
+      },
+      {
+        "path": "packages/compiler/src/capture-analysis.ts",
+        "sha256": "9cb9953fa34ff71b39b8db4cc3aadfc7c552e1c9b6bd8a0f3388eee4bf878804",
+        "bytes": 8083
+      },
+      {
+        "path": "packages/compiler/src/cli.ts",
+        "sha256": "33c6a7a18d877fc00e37c353a0bfbd85a005b0d2b77c43ed8a41c96d09255cb6",
+        "bytes": 30223
+      },
+      {
+        "path": "packages/compiler/src/compile.ts",
+        "sha256": "9fff0036ec7bd9c1af3828b4b5aae1be84b645c91a6f5fa1a4247be6dc707811",
+        "bytes": 11240
+      },
+      {
+        "path": "packages/compiler/src/compiler-build.ts",
+        "sha256": "9b696d4da0c00c3212a447b0ad184ff6f54d744676722e45c33f7dc9afdbf3cc",
+        "bytes": 590
+      },
+      {
+        "path": "packages/compiler/src/conformance/registry.ts",
+        "sha256": "7511fc8f17d17ed32b986aeaafd5d7a996f3dc3d5d555dfe710211015bf55328",
+        "bytes": 11634
+      },
+      {
+        "path": "packages/compiler/src/conformance/result.ts",
+        "sha256": "c455cca122d8b2ae43a50d97647844f12e98638e7b420a56a995216d06523f86",
+        "bytes": 7200
+      },
+      {
+        "path": "packages/compiler/src/conformance/sequences.ts",
+        "sha256": "05b1e52821ba8d4e77c2afb4ab73e2158e85606196836f517994883c1784b8f4",
+        "bytes": 1727
+      },
+      {
+        "path": "packages/compiler/src/conformance/trace.ts",
+        "sha256": "d8fdc1486aaa5d8e64627ed448330a3106702a642ac01012b3c44efc1b9077fa",
+        "bytes": 8205
+      },
+      {
+        "path": "packages/compiler/src/consumer-closure.ts",
+        "sha256": "823dc2d107f4e3c647dc9a27fe5f824839aefee232f08c3d38be27a877616315",
+        "bytes": 36297
+      },
+      {
+        "path": "packages/compiler/src/context-declarations.ts",
+        "sha256": "c53f6ce08cefa2189e854f4dbcc93b3f26a68d3d784c9b7251f39bfa46de4d21",
+        "bytes": 2345
+      },
+      {
+        "path": "packages/compiler/src/core-value-types.ts",
+        "sha256": "443d4abf73e90dc143f78b35206462a9ba56bf38bd5e7efa748519b2c48320a4",
+        "bytes": 5670
+      },
+      {
+        "path": "packages/compiler/src/data-types.ts",
+        "sha256": "57e974df306ff4c4cb071d68fa4d29b41c9a98138956a61b03efb500aa467ee4",
+        "bytes": 15278
+      },
+      {
+        "path": "packages/compiler/src/declaration-order.ts",
+        "sha256": "352e15bb4f04194413338cb9ad3024dba52a39cf8a4c93183fcd2fa06727daa6",
+        "bytes": 1412
+      },
+      {
+        "path": "packages/compiler/src/deferred.ts",
+        "sha256": "9b334b80b30b460417d2c94080fb60d0e4e78b936041aea1f544b8501a4c162b",
+        "bytes": 338
+      },
+      {
+        "path": "packages/compiler/src/demand-pruning.ts",
+        "sha256": "0ab0215925b44a29d627ba36e33903b11bcf94173983a9a8287be68342096f64",
+        "bytes": 11513
+      },
+      {
+        "path": "packages/compiler/src/diagnostic-format.ts",
+        "sha256": "afd1efdc78dae92e4efb4b232f9cd928b759c46ffe6748eca19bb93231e812e9",
+        "bytes": 9008
+      },
+      {
+        "path": "packages/compiler/src/diagnostics.ts",
+        "sha256": "b879cdbe08a416fb40d2941c678b80fdd1b4cf5cc11afe07c8845f883df5851f",
+        "bytes": 557
+      },
+      {
+        "path": "packages/compiler/src/emitter-map.ts",
+        "sha256": "f7abd459f03889a189fc3a1d3d98d811a416a91fdedd320323c01b5cc8838e5f",
+        "bytes": 2650
+      },
+      {
+        "path": "packages/compiler/src/event-types.ts",
+        "sha256": "05494b958ff400e6d6dfa4a685067fa2902f2ec3107febfde78e3000070d79c9",
+        "bytes": 1723
+      },
+      {
+        "path": "packages/compiler/src/expression-types.ts",
+        "sha256": "c47458fa8f409d29293b8b236c3f0e6941ae99438dffc0b1decaf9415f6a929d",
+        "bytes": 22199
+      },
+      {
+        "path": "packages/compiler/src/flow-proof.ts",
+        "sha256": "8781a8581daf370466d5cfb6eb98f3f4645190f5428fad5938c3f48433022340",
+        "bytes": 6203
+      },
+      {
+        "path": "packages/compiler/src/flutter-native-host.ts",
+        "sha256": "d217af72508d14fe94191943904be01bfcb881196f155392f6dcb67405966507",
+        "bytes": 67678
+      },
+      {
+        "path": "packages/compiler/src/flutter-native-modules.ts",
+        "sha256": "ba589bd9dc86f5ffa6381e43132b029f877b7d85ffaf20eb849d8819a775da39",
+        "bytes": 74847
+      },
+      {
+        "path": "packages/compiler/src/flutter-source.ts",
+        "sha256": "d95212b29e54d052b5583096ad2b465ea8fd77d44cac93f548afd567a1205354",
+        "bytes": 68832
+      },
+      {
+        "path": "packages/compiler/src/gpui-capabilities.ts",
+        "sha256": "aaba68b492afd7445313c2f806f08f65c11eface8cd41c27094292c4362224ab",
+        "bytes": 2100
+      },
+      {
+        "path": "packages/compiler/src/gpui-data-methods.ts",
+        "sha256": "2f2c5eb15d2ac814cb1df6d9e4c6ef35c9bfbe0ce584e6c0fd33c6802b461f88",
+        "bytes": 309
+      },
+      {
+        "path": "packages/compiler/src/gpui-lexical-names.ts",
+        "sha256": "82114909c9039a02b015ca6818426ab98e4d3ea5c36ce5e0a3e2cd77fe397517",
+        "bytes": 8315
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-a11y.ts",
+        "sha256": "dd81f2793472795a1582ef55ca47d1b7952e6278ceec79ce1e858a7a31a421ac",
+        "bytes": 17745
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-async.ts",
+        "sha256": "aaf3a4e22e1d265db553c49e1806d6855021c7058a7508d3c0388b2d06c2c6e6",
+        "bytes": 12207
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-authored-hooks.ts",
+        "sha256": "58a947faa353750cc45bb93b631febb2f39f7f01b250d1934530151b696c62bb",
+        "bytes": 20636
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-boundary.ts",
+        "sha256": "2e92ddc2b63d68520e42cbffbfec455cd91c05681b7702ee8123e7727d61e74a",
+        "bytes": 6598
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-host.ts",
+        "sha256": "4bbb55c4faa3f3f3db64ac0232fc7ab7a77e94c8939419f58b8755361c53f761",
+        "bytes": 1844
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-hover.ts",
+        "sha256": "83e90304e1dfc594d6bf782ae15cd60de01fe25b2566a6574562520c45db9b5c",
+        "bytes": 15624
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-image.ts",
+        "sha256": "8a728abc4fa638c5ff8095d3ec5975de260c56721b16ca6b7c81f991d0095bae",
+        "bytes": 11142
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-key.ts",
+        "sha256": "d2401ca105d8e3b334241a3d0cca1df554ce1f3f4c729f099d578e2a98bcc1d2",
+        "bytes": 7098
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-manifest.ts",
+        "sha256": "06c2cbfe858a288006d60428ea5d4fa4264fbe38115a3cbf62f91c5155fedf0e",
+        "bytes": 1548
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-modules.ts",
+        "sha256": "a862de8d78927c0bd80bff565b2d177b5e824de23810c258f1d3afe48209d32e",
+        "bytes": 44668
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-move.ts",
+        "sha256": "41676d9558d32c7dd7df4b8ff719bcb144551da61cd4cbe5501e575c3a8ce43c",
+        "bytes": 24517
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-notify.ts",
+        "sha256": "55752020cc66b4e16dc80a6a080fb721becc7689735689535dd30b6cc88e586c",
+        "bytes": 15452
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-overlay.ts",
+        "sha256": "96dc752ed6074282f85a04969eaa9100ec881918c267c1722e77b5e105667fb8",
+        "bytes": 17720
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-owner.ts",
+        "sha256": "d06a7ecb887e560167b5e309fafec5e3054898243c56b263c096c574d9bb19c7",
+        "bytes": 112412
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-positioning.ts",
+        "sha256": "13fec3f365c755a906b745350e0eb5a48ec1549934b7d20fe0a6f43a8b8f34dd",
+        "bytes": 14386
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-scroll.ts",
+        "sha256": "43a5f6ab44b6fe52b18e11b2f196b6c7b0f0a1de86a1f0c1cd8903f7a9a79004",
+        "bytes": 13781
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-sdk-compatibility.ts",
+        "sha256": "13ca7d6232242921d15fd85cbef1919faf58e25f9e0cf973ed81e6d825dc1526",
+        "bytes": 14024
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-sdk.ts",
+        "sha256": "4bb57bb1d24916e060ff9f1c3278549bd6de74ec50e04b46236011a6c0a1dffa",
+        "bytes": 6020
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-style.ts",
+        "sha256": "19176f635b013995d12e634f563bc4aa0677aced23a5128a7c7743dd1ffa7b50",
+        "bytes": 103637
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-table.ts",
+        "sha256": "c07348e43737d3601312f772428d4a683e19ffa44b32f69634a928789df24fbc",
+        "bytes": 12457
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-text.ts",
+        "sha256": "ad7432eba96c59bfbbb575117503b27a1e97d4671c0d5021138c4db99156b748",
+        "bytes": 48396
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-topology.ts",
+        "sha256": "cbc8664c6865a6fae668a16c36ab38d6babc0c53af86fef77ece82f423ab62b4",
+        "bytes": 14104
+      },
+      {
+        "path": "packages/compiler/src/gpui-native-values.ts",
+        "sha256": "3647c9b1807d33339a4955de1cac90f47f3e71816fcf9f10aa42201537746187",
+        "bytes": 7189
+      },
+      {
+        "path": "packages/compiler/src/gpui-source.ts",
+        "sha256": "4b0c00c48a3ae876e0db4bf36a4fc8db575fdd8b6cdb74859cb945867405a3c8",
+        "bytes": 139887
+      },
+      {
+        "path": "packages/compiler/src/hook-admission.ts",
+        "sha256": "6ad383788543ff8d67672eb5731332236ea1167792bb17b11f469501b3b7cf2c",
+        "bytes": 2553
+      },
+      {
+        "path": "packages/compiler/src/index.ts",
+        "sha256": "fb3ddedd6527cba0ae09b8baf61eef64cba81df5db969a60604a25452c83313f",
+        "bytes": 4948
+      },
+      {
+        "path": "packages/compiler/src/interaction-value-shape.ts",
+        "sha256": "2aed743c7bfe340df6e0c794d4a8d9b9728e21ca02f921d3a06be78e6fb3a483",
+        "bytes": 6273
+      },
+      {
+        "path": "packages/compiler/src/ir-validation.ts",
+        "sha256": "e2b5dde9040e7689d4b70221c29d7684946488c000e5aa6c6dff935904eaca6b",
+        "bytes": 96928
+      },
+      {
+        "path": "packages/compiler/src/ir.ts",
+        "sha256": "240261bc6ba44ad94e9f36f8fdf1ca68876cdedaed2c56db0029e2938c62e625",
+        "bytes": 16526
+      },
+      {
+        "path": "packages/compiler/src/legacy-native-admission.ts",
+        "sha256": "1751aa9e9fc1a9254744f854f9b803414662843a59ead2c0956b94635a6e1fae",
+        "bytes": 4761
+      },
+      {
+        "path": "packages/compiler/src/native-adapter-modules.ts",
+        "sha256": "b731d925efe0cc648bcb29c7b1f3b33232ef272b40b60ae2787129a050c8988c",
+        "bytes": 2450
+      },
+      {
+        "path": "packages/compiler/src/native-async.ts",
+        "sha256": "43d32bb5b112c4d50c5ff6ae3d66ff49d1f6486ba294104dfe4ec1241bc835a1",
+        "bytes": 28314
+      },
+      {
+        "path": "packages/compiler/src/native-authored-hooks.ts",
+        "sha256": "aa417d5a5b73f7b8a260e07bd78356fdb93c8aedb55fa157d438a37d360bb7a2",
+        "bytes": 9719
+      },
+      {
+        "path": "packages/compiler/src/native-context-legacy.ts",
+        "sha256": "9afc1c780ae8f9939f3d147e17ad09a009726782ee9f97c683698cb860404dd4",
+        "bytes": 9301
+      },
+      {
+        "path": "packages/compiler/src/native-context.ts",
+        "sha256": "e1c04e57a199cba6d27ee86dce61720960fdfac18e6e19a14231997e122309e5",
+        "bytes": 11171
+      },
+      {
+        "path": "packages/compiler/src/native-control-label.ts",
+        "sha256": "c5af25dc2a129bcf17c8578053e15226734e571fd44145dad02521eba27151ab",
+        "bytes": 48240
+      },
+      {
+        "path": "packages/compiler/src/native-image-view.ts",
+        "sha256": "bf4125a6bbf7086f2d7005905e63c48d2c7816c3c2df914fa119e6e60f2dbd5e",
+        "bytes": 14668
+      },
+      {
+        "path": "packages/compiler/src/native-instance-associations.ts",
+        "sha256": "68e2120609e67d184b405b25f8426c139bbe160f84086bad6e797807d95804e1",
+        "bytes": 841
+      },
+      {
+        "path": "packages/compiler/src/native-interaction.ts",
+        "sha256": "753b463f37b2fdfb7d1c8e21a2eee2aee274c2e8ec49506cb6672db6185ca2e2",
+        "bytes": 15611
+      },
+      {
+        "path": "packages/compiler/src/native-public-values.ts",
+        "sha256": "f09317eb31e6ec8497b1dc7fda018c05db244ce383694935a1fa5c19f8531f07",
+        "bytes": 9392
+      },
+      {
+        "path": "packages/compiler/src/native-scroll-reveal.ts",
+        "sha256": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+        "bytes": 6744
+      },
+      {
+        "path": "packages/compiler/src/native-static-declarations.ts",
+        "sha256": "22b2635ca9593e4aa756c02827e542c8ec67cb5da262be20d90e720b6587cbb5",
+        "bytes": 3782
+      },
+      {
+        "path": "packages/compiler/src/native-style.ts",
+        "sha256": "9387a66aba4d17c36341cb1956a07e4377c5248ea8afdad88cd9dc008028533a",
+        "bytes": 7951
+      },
+      {
+        "path": "packages/compiler/src/native-support-legacy.ts",
+        "sha256": "e99b3a51f2613839c0860749a936490d12413206d742b78f30e8b333cee43873",
+        "bytes": 173256
+      },
+      {
+        "path": "packages/compiler/src/native-support-migration.ts",
+        "sha256": "88a6c956982f7c2f0098c1d0ecf30598e9a1e55dc6c9cb3a527f28100d68038f",
+        "bytes": 28893
+      },
+      {
+        "path": "packages/compiler/src/native-support/artifacts.ts",
+        "sha256": "cbc7c85fa85463616abec9d24fb0ca32c12fa5b01e71505f0e7fbb83e9a87b76",
+        "bytes": 10640
+      },
+      {
+        "path": "packages/compiler/src/native-support/dom-interaction.template.ts",
+        "sha256": "d89c83e155c20df458add8231755e7d6fc57be8a7abdffbc5c51f9e0defa9222",
+        "bytes": 42117
+      },
+      {
+        "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+        "sha256": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a",
+        "bytes": 150760
+      },
+      {
+        "path": "packages/compiler/src/native-support/legacy-text-v1.template.ts",
+        "sha256": "ef6762716678e06b621121ac269f76b234c84fda93377a2480f08159dc3d4009",
+        "bytes": 30569
+      },
+      {
+        "path": "packages/compiler/src/native-support/part-relationships.template.ts",
+        "sha256": "c4e33fbc362ab5ef54774391eeaa51dc20e16a48a47641e63067f468331d9632",
+        "bytes": 12998
+      },
+      {
+        "path": "packages/compiler/src/native-support/plan.ts",
+        "sha256": "ed6c75653150edb1a3e75a4c917568d74755a0dd4aa393a068ea3026fdc93422",
+        "bytes": 9128
+      },
+      {
+        "path": "packages/compiler/src/native-support/specialize.ts",
+        "sha256": "06c7ecfad621fe8f6593e73074b17bccf77b3264e4ed18fd552652e7ff9a7661",
+        "bytes": 12568
+      },
+      {
+        "path": "packages/compiler/src/native-support/template-ast.ts",
+        "sha256": "0ab3759a95708ce010ac0611abf815bb518c707532dddd24e9e7f3b45ab730e3",
+        "bytes": 5732
+      },
+      {
+        "path": "packages/compiler/src/native-value-lowering.ts",
+        "sha256": "3f77e520894d990d4517fb9314a4c7c11ea012cb291bffe5467f34d87a12bce2",
+        "bytes": 15119
+      },
+      {
+        "path": "packages/compiler/src/native-vue2-associations.ts",
+        "sha256": "7633f8b773a82b9118dc1b9f34e0b631858f978ca9ea5ec035a11e4c4819fbd8",
+        "bytes": 2612
+      },
+      {
+        "path": "packages/compiler/src/notification-plan.ts",
+        "sha256": "174b0cbec7e7743721fbebd7b9fc7df7cf7d5a1456a81d48884a819de893b3f1",
+        "bytes": 1650
+      },
+      {
+        "path": "packages/compiler/src/observable-semantics.ts",
+        "sha256": "2e22b1f5f5e13a25818287b7b54e1cbbeb321e2122e9852bbba2be441041054d",
+        "bytes": 2690
+      },
+      {
+        "path": "packages/compiler/src/operations.ts",
+        "sha256": "5452d45bdfc626ed424f20d3f23eb45d55622e968219c0e20c99b0ce6ca981f6",
+        "bytes": 84643
+      },
+      {
+        "path": "packages/compiler/src/parser-module.ts",
+        "sha256": "5dfda1b60c6116551cdc2fc45a403da243cb206700c4bf03dbbf39b6e457fc81",
+        "bytes": 32960
+      },
+      {
+        "path": "packages/compiler/src/parser.ts",
+        "sha256": "97fe461f4e6b9507bc7cd0e37a2cf314c3a0c32f596e92170db90bd8ac919d4c",
+        "bytes": 158304
+      },
+      {
+        "path": "packages/compiler/src/pointer-facts-admission.ts",
+        "sha256": "0e994a26e17cb2b8dda74c27728ef5e4af050a9cdba00e8000785b4575c24385",
+        "bytes": 12344
+      },
+      {
+        "path": "packages/compiler/src/portable-data-methods.ts",
+        "sha256": "8f2877067ea1b17eb834d09a43b7cd621ed1298790d1b7d84df80d2d4b07594c",
+        "bytes": 7641
+      },
+      {
+        "path": "packages/compiler/src/project-output.ts",
+        "sha256": "a50d91d75d0ace4fe2d149e1da7a376738525892031fe3190290e52e28ba7624",
+        "bytes": 10060
+      },
+      {
+        "path": "packages/compiler/src/project.ts",
+        "sha256": "7d2db0a50e60e7dcb8a885911138a7ea29cfe64cff6090b10d59ca3a17fad576",
+        "bytes": 12013
+      },
+      {
+        "path": "packages/compiler/src/qt-native-context.ts",
+        "sha256": "3c2889a595e1815c917f61bc7beb857de00b82034697c1e59c87008380656fb5",
+        "bytes": 10471
+      },
+      {
+        "path": "packages/compiler/src/qt-native-controls.ts",
+        "sha256": "6e7e3d7eae6c84c19e94fac604bfae68b75fe7105bd0f539cc9c1f12f4bc3920",
+        "bytes": 10217
+      },
+      {
+        "path": "packages/compiler/src/qt-native-host.ts",
+        "sha256": "edb5aa4ca8e13ddddc157ec5b84c66e6090dd403a8a6c1f6cdf9a00bbd239035",
+        "bytes": 26074
+      },
+      {
+        "path": "packages/compiler/src/qt-native-interaction.ts",
+        "sha256": "a380821e8ea10dcd951d27b834ba3d450a6fd3311fdb14c774d67f0ce1fffac0",
+        "bytes": 19547
+      },
+      {
+        "path": "packages/compiler/src/qt-native-owner.ts",
+        "sha256": "198a08a043eb7ad7be3f8ff4c8d6786533dc91725eee38f6009e72e07f30c128",
+        "bytes": 23922
+      },
+      {
+        "path": "packages/compiler/src/qt-native-presentation.ts",
+        "sha256": "67d7e0c0612e7e8a0c67d3754771faae0e84c3d56b69d92e02e6ce26d96cbad5",
+        "bytes": 5999
+      },
+      {
+        "path": "packages/compiler/src/qt-native-style.ts",
+        "sha256": "b030490ebb75ef806a58cbaa28e0cfaf42303d137f5f276f70855c2e00f486e0",
+        "bytes": 6973
+      },
+      {
+        "path": "packages/compiler/src/qt-native-table.ts",
+        "sha256": "51f8f50a5270497d5b26738b2a3fc3b7f6fb1e4ad883d386b5cafbc648643888",
+        "bytes": 856
+      },
+      {
+        "path": "packages/compiler/src/qt-native-topology.ts",
+        "sha256": "881aa215cc81bb01cd453cfafe588717854d023fc4dc42325aa2bed45b1e3df3",
+        "bytes": 26504
+      },
+      {
+        "path": "packages/compiler/src/qt-native-view.ts",
+        "sha256": "17e11227c4dd899fc18abfb4ff91bd022bd74972b9f5c62e187db054b2d0b7aa",
+        "bytes": 17783
+      },
+      {
+        "path": "packages/compiler/src/qt-source.ts",
+        "sha256": "3a25bea072d000e6bcb8dbed74401248d0e874dee7c8d6947263a0facc575370",
+        "bytes": 28921
+      },
+      {
+        "path": "packages/compiler/src/react-source.ts",
+        "sha256": "f3e571d5a6ab8500c45a9535334f27cec06876b2a779846b93149f273124fb70",
+        "bytes": 81023
+      },
+      {
+        "path": "packages/compiler/src/react-ssr-source.ts",
+        "sha256": "8f427544d02340555314ef9ce8fad3c603b8d3b964a9e2ece2ca18ee96adc4d6",
+        "bytes": 14084
+      },
+      {
+        "path": "packages/compiler/src/react.ts",
+        "sha256": "ef5c89444cdc28781629d5479203a5d19cd35023f7b561563aad1ff70ea0e8a0",
+        "bytes": 22639
+      },
+      {
+        "path": "packages/compiler/src/resolved-props.ts",
+        "sha256": "8900eb188c0d3ea536328c8f7679a6a4f303ce10395140e1e769cb504f2af1dc",
+        "bytes": 7723
+      },
+      {
+        "path": "packages/compiler/src/rule-declarations.ts",
+        "sha256": "85ba623274cdacad451e2d761634d4a0a2593992f000ec1c60c82d05793b912b",
+        "bytes": 23822
+      },
+      {
+        "path": "packages/compiler/src/rule-plan.ts",
+        "sha256": "3bd9ef6bb25abdc8d7c4bbc2fc69fab2b502833dd94c29bd7ca04a641b1cc1b7",
+        "bytes": 13635
+      },
+      {
+        "path": "packages/compiler/src/rust-data-source.ts",
+        "sha256": "ffa31e88647fd741cbc6ce9d19bb9c63e8f5295895846d5917142061649c124a",
+        "bytes": 38161
+      },
+      {
+        "path": "packages/compiler/src/rust-data-support.ts",
+        "sha256": "6de04f194690bab39ae490d70afcf3dd5188b97996fe9450fdf02b151c13d077",
+        "bytes": 1649
+      },
+      {
+        "path": "packages/compiler/src/rust-data.ts",
+        "sha256": "9bc122c1589a8afdacdbe0227737361579ac42276edf9c3d215bccf8156e7c3d",
+        "bytes": 6158
+      },
+      {
+        "path": "packages/compiler/src/rust-scalar-intrinsics.ts",
+        "sha256": "abb4c23d06c3853c24d2877719105cf91751511f7e93c9ca356e4b295b745840",
+        "bytes": 560
+      },
+      {
+        "path": "packages/compiler/src/rust-scalar-semantics.ts",
+        "sha256": "40d088681706d433ce99bdc956aeff686279b2cc8b926fd1f4ba746c599d1ceb",
+        "bytes": 4581
+      },
+      {
+        "path": "packages/compiler/src/source-loader.ts",
+        "sha256": "076257fa2e1231d51befccff537fa31473ed9b6c2412ebdcaa4016ab71771796",
+        "bytes": 17291
+      },
+      {
+        "path": "packages/compiler/src/source-map.ts",
+        "sha256": "ac9ba1039e818771920507eef2ccd170c822ffe42e0f667f8f1e752d5718fbbe",
+        "bytes": 7010
+      },
+      {
+        "path": "packages/compiler/src/source-module-bindings.ts",
+        "sha256": "9728caa9bc2039f2a022051235299f06cc82f41c16cacfc1b504f27799b22007",
+        "bytes": 2202
+      },
+      {
+        "path": "packages/compiler/src/source-resolution.ts",
+        "sha256": "9a4570feb45b6546b5690de357d50d9a52454cc7f263d25958157fece03bcac1",
+        "bytes": 5688
+      },
+      {
+        "path": "packages/compiler/src/source-syntax.ts",
+        "sha256": "bc8b842e7774dbca364a492f90984e3dc6593f37ec5af7bfd470d54b06ba8d25",
+        "bytes": 4924
+      },
+      {
+        "path": "packages/compiler/src/source-type-resolution.ts",
+        "sha256": "294dac34705a8439bcda69f8390c665dd76ff247074f494a505d3470f6bb9d62",
+        "bytes": 12238
+      },
+      {
+        "path": "packages/compiler/src/source-types.ts",
+        "sha256": "ea18c8a15c36b97ece9fdca856f8df288eb1fd4553ff18e1141984a90b03665c",
+        "bytes": 1853
+      },
+      {
+        "path": "packages/compiler/src/source-values.ts",
+        "sha256": "e8e0ca333ec6afdb80823623bf9f1a119783965eae63f541e45c9d7ca8fc7e02",
+        "bytes": 17478
+      },
+      {
+        "path": "packages/compiler/src/static-declarations.ts",
+        "sha256": "e76b738d2a9f27e00cac09679052b176e7611ee7e8e0150f410ab7000ac651f2",
+        "bytes": 8702
+      },
+      {
+        "path": "packages/compiler/src/style-plan.ts",
+        "sha256": "b53597b1abb3d71f0c50cfeabdcc91f84f30ff83efc5590b3d43e7881afaa3e4",
+        "bytes": 12053
+      },
+      {
+        "path": "packages/compiler/src/targets.ts",
+        "sha256": "be8d23b83e60accdc73d05a13d545c9c862f54aff958306f5962b310de2d67e3",
+        "bytes": 29012
+      },
+      {
+        "path": "packages/compiler/src/template-shape.ts",
+        "sha256": "cebe764ff5aea5bfc3169f4b92fb6e11b23c9703bce6f7a0c30cd96919b15430",
+        "bytes": 14757
+      },
+      {
+        "path": "packages/compiler/src/value-children.ts",
+        "sha256": "0db8cf768e65833e6ba038ea6ae2310ebb1e162f2c38b5e602ca51d4f77c5f16",
+        "bytes": 745
+      },
+      {
+        "path": "packages/compiler/src/value-types.ts",
+        "sha256": "53df48ebc9fd33dd530070cad1f451839ae3f00852a9ad099af6d5f7947cfec1",
+        "bytes": 18062
+      },
+      {
+        "path": "packages/compiler/src/vue-source.ts",
+        "sha256": "1a58470d1ce9ee56bd053a2fe8c65d30ebb1f0c8adf87d12a82bbb93205b8082",
+        "bytes": 96883
+      },
+      {
+        "path": "packages/compiler/src/vue-ssr-support.ts",
+        "sha256": "608eb599495aea7c972cd3a4bd646f8764f62fade50def909a3042fe58d9a050",
+        "bytes": 6433
+      },
+      {
+        "path": "packages/compiler/src/vue2-native-template.ts",
+        "sha256": "32d59f997de38899c19ae4889d8f9dbf16e7e55b8e77022b7c51976aec95e415",
+        "bytes": 37894
+      },
+      {
+        "path": "packages/compiler/src/vue2-source.ts",
+        "sha256": "765c97e39ed30efa4954100586f88a67ef2b004d64cb0c71038e3b44f2352b81",
+        "bytes": 95182
+      },
+      {
+        "path": "packages/compiler/src/vue2-ssr-entry.ts",
+        "sha256": "2c2d441cf0fd03585d6cf237b107241eaec1b67ef26c799bccf238208e01f648",
+        "bytes": 8995
+      },
+      {
+        "path": "packages/compiler/src/watch.ts",
+        "sha256": "455e89ec4b85f81ca5aa02d9a11f5e07791ef88697375e8cd2a96fe2ed2c1ac1",
+        "bytes": 19585
+      },
+      {
+        "path": "packages/compiler/src/web-component-browser-support.ts",
+        "sha256": "a224b0424db459eb488bfbf897e0858e2240da7c52df7260837a9e96078f4507",
+        "bytes": 13266
+      },
+      {
+        "path": "packages/compiler/src/web-component-source.ts",
+        "sha256": "8e99788edfc6cd9b3a5efc9542eb3f01d061525bc9f792c2720135fd178f38d9",
+        "bytes": 91210
+      },
+      {
+        "path": "packages/compiler/src/web-component-ssr-style.ts",
+        "sha256": "b95ca1dd44e4837672087199524c0595116a4e19b4a37d0f5075cee2485fe644",
+        "bytes": 14480
+      },
+      {
+        "path": "packages/compiler/src/web-component-ssr-support.ts",
+        "sha256": "24b39831c60fe1ebcc0fdc9202f0f464a12a9e2ea098895f9f214b9d647b9822",
+        "bytes": 55274
+      },
+      {
+        "path": "packages/core/src/control-label.ts",
+        "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6",
+        "bytes": 5484
+      },
+      {
+        "path": "packages/core/src/spec/feedback/placeholder.ts",
+        "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052",
+        "bytes": 387
+      },
+      {
+        "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+        "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58",
+        "bytes": 5658
+      },
+      {
+        "path": "packages/core/src/spec/feedback/style.ts",
+        "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc",
+        "bytes": 1155
+      },
+      {
+        "path": "packages/core/src/spec/feedback/tokens.ts",
+        "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3",
+        "bytes": 4438
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "sha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+        "bytes": 263502
+      },
+      {
+        "path": "scripts/compiler/build-pinned.ts",
+        "sha256": "4b514e4eb43e21785a808a19cba90ab263ba0c2b83744f2067e780f533f816d7",
+        "bytes": 10328
+      }
+    ],
+    "files": [
+      {
+        "path": "cli.js",
+        "bytes": 287,
+        "sha256": "f464769067a25b4e8631413042710cc5ad2de7efe904c1eb3abc18bc79e321aa"
+      },
+      {
+        "path": "index.js",
+        "bytes": 3119978,
+        "sha256": "c17c54964f3de016107fd5ba7086acdae22280138e5d7cb4525e7e016c1499ab"
+      },
+      {
+        "path": "index.js.map",
+        "bytes": 4597755,
+        "sha256": "5807982d29249f5117ee4ed8b463fceac8d05c99215b7dbd15cac2339d3e474f"
+      },
+      {
+        "path": "LICENSE",
+        "bytes": 1078,
+        "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+      },
+      {
+        "path": "package-lock.json",
+        "bytes": 926,
+        "sha256": "9bc8b429fbcf1d2f2e9d009f78eba4d4e5728474dde0042ed50f697c26f9aade"
+      },
+      {
+        "path": "package.json",
+        "bytes": 542,
+        "sha256": "18de5b215af6149bef36a3a2fdbc18aca75b36446a9707c7bef68b1565f5bd34"
+      },
+      {
+        "path": "profiles.json",
+        "bytes": 85347,
+        "sha256": "112b14d8e28db9d802d97438dee8bc4636c5a20c156a5bf55bc266a94156e1d6"
+      },
+      {
+        "path": "README.md",
+        "bytes": 1037,
+        "sha256": "4a4a0935d7acc09c7452855c2ab776cba3e7ecfc6201a40ff0ecc3b0687b5bc7"
+      }
+    ],
+    "costs": {
+      "bundledSourceBytes": 3120265,
+      "mapBytes": 4597755,
+      "retainedConsumerBytes": null,
+      "consumerInitialization": null
+    }
+  },
+  "externalGates": {
+    "typechecks": {
+      "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+      "aggregate": {
+        "command": "corepack pnpm@10.32.1 check:types",
+        "status": "NOT_RUN_HERE",
+        "claim": "No all-types acceptance claim from this bounded local replay."
+      },
+      "workspace": {
+        "command": "corepack pnpm@10.32.1 check:types:workspace",
+        "owner": "official Sprint 2 hosted consumer workflow",
+        "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45188583301",
+        "localStatus": "NOT_RUN_HERE",
+        "externalStatus": "REQUIRES_INDEPENDENT_READBACK"
+      },
+      "docs": {
+        "command": "corepack pnpm@10.32.1 check:types:docs",
+        "localStatus": "NOT_EXECUTED_YET",
+        "owner": "this replay after complete public build and Tabs 13",
+        "prerequisite": "corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style"
+      }
+    }
+  },
+  "acceptanceClaim": false,
+  "failure": {
+    "message": "tabs-profile-switch-separate-13: expected exit 0, observed 1; see $CONTROL/consumer-9d0f47d4ef67/evidence-run-001/logs/tabs-profile-switch-separate-13.stderr.log",
+    "traceback": "Traceback (most recent call last):\n  File \"$CONTROL/consumer-9d0f47d4ef67/run-final-consumers.py\", line 385, in main\n    replay.execute()\n    ~~~~~~~~~~~~~~^^\n  File \"$CONTROL/consumer-9d0f47d4ef67/run-final-consumers.py\", line 341, in execute\n    self.run('tabs-profile-switch-separate-13', ['corepack', 'pnpm@10.32.1', 'exec', 'vitest', 'run',\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        'apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts',\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        'apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts',\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        '--maxWorkers=1', '--reporter=json', '--outputFile=' + str(tabs_receipt)])\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"$CONTROL/consumer-9d0f47d4ef67/run-final-consumers.py\", line 131, in run\n    raise RuntimeError(f'{name}: expected exit {expected}, observed {record[\"exitCode\"]}; see {stderr}')\nRuntimeError: tabs-profile-switch-separate-13: expected exit 0, observed 1; see $CONTROL/consumer-9d0f47d4ef67/evidence-run-001/logs/tabs-profile-switch-separate-13.stderr.log\n"
+  },
+  "finishedAt": "2026-11-23T14:51:23.558287+00:00"
+}

@@ -1,0 +1,1729 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-source-delta-review",
+  "reviewerRole": "Independent reviewer; no product implementation, no GitHub review publication, no platform APPROVE.",
+  "reviewedHead": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "reviewedTree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "previousReviewedHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "main": "b715b8a6d08c2c79417272c8d4ca9254984feadb",
+  "parents": [
+    "f78c407efa14659294e795105f0b7af6caa48246",
+    "1450ffd549bce8da636f2ccd45044aff5121e6ad"
+  ],
+  "compare": {
+    "status": "ahead",
+    "ahead": 4,
+    "behind": 0,
+    "changedFiles": 66,
+    "nonRecordFiles": 17,
+    "recordFiles": 49,
+    "recordGzipFiles": 44,
+    "fileListCompleteWithinGithub300FileLimit": true
+  },
+  "publicSources": {
+    "comparison": "https://api.github.com/repos/Proto-UI/Proto-UI/compare/1450ffd549bce8da636f2ccd45044aff5121e6ad...9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+    "head": "https://github.com/Proto-UI/Proto-UI/commit/9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+  },
+  "productDelta": [
+    {
+      "path": ".prettierignore",
+      "gitBlob": "9536443889dea5fc39aad9969fe66bc82c8385c1",
+      "added": 12,
+      "deleted": 0
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+      "gitBlob": "f47918043971225f8db2971a0e73a9e0f47c7aa8",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "gitBlob": "5fcd105974faee8c216be497540fae4defcc0f1d",
+      "added": 19,
+      "deleted": 3
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "gitBlob": "55bc4a48b92b1ea5207e050b3a8444a3c1461672",
+      "added": 0,
+      "deleted": 4
+    },
+    {
+      "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "gitBlob": "ac83a9fc16e7a55cddb56b81f31a02ddd504cfe5",
+      "added": 3,
+      "deleted": 2
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-registry.ts",
+      "gitBlob": "684cb52da9e09a70cbcb83087227272ea9d4098d",
+      "added": 1,
+      "deleted": 2
+    },
+    {
+      "path": "packages/compiler/src/flutter-source.ts",
+      "gitBlob": "f9ca949f85e6db8e26946135eb429906a414c102",
+      "added": 5,
+      "deleted": 4
+    },
+    {
+      "path": "packages/compiler/src/gpui-source.ts",
+      "gitBlob": "1a7294dbdedb71471df1b592c8659e9194fd393b",
+      "added": 2,
+      "deleted": 1
+    },
+    {
+      "path": "packages/compiler/src/ir-validation.ts",
+      "gitBlob": "7db7d597242bc378fa0a01587f19e76c3395bfb9",
+      "added": 10,
+      "deleted": 6
+    },
+    {
+      "path": "packages/compiler/src/parser.ts",
+      "gitBlob": "080bc00db991123892c476e96656a8d8bca65ac4",
+      "added": 150,
+      "deleted": 36
+    },
+    {
+      "path": "packages/compiler/src/qt-source.ts",
+      "gitBlob": "4286dbf0d69d06aabd9ecc03f0fc812b395f0182",
+      "added": 2,
+      "deleted": 1
+    },
+    {
+      "path": "packages/compiler/src/react.ts",
+      "gitBlob": "e6f41fa4b6ae0f018f3bc264472a7d5d26bd9ad1",
+      "added": 5,
+      "deleted": 3
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "gitBlob": "7492fe74f6065d92227092359d6e518455d9e681",
+      "added": 18,
+      "deleted": 5
+    },
+    {
+      "path": "packages/prototypes/base/package.json",
+      "gitBlob": "f63989d6f778d0f6fc7ce70e64d3f0c2ca7d896b",
+      "added": 1,
+      "deleted": 1
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/produce-button.mjs",
+      "gitBlob": "3f41ecbd68a377c0b6e2b02647419b00ec95d790",
+      "added": 240,
+      "deleted": 53
+    },
+    {
+      "path": "scripts/governance/history-audit.mjs",
+      "gitBlob": "a0c440aced65158208509e501a2b8e1633f7863b",
+      "added": 7,
+      "deleted": 2
+    },
+    {
+      "path": "spec/contracts/C-COMPILER-GPUI-A11Y-VALUE-0001.yaml",
+      "gitBlob": "8100ebe691758b84ade859e16538f96fc76164fe",
+      "added": 2,
+      "deleted": 0
+    }
+  ],
+  "retainedFixFiles": [
+    {
+      "path": "packages/prototypes/base/src/checkbox/root.proto.ts",
+      "sha256": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4"
+    },
+    {
+      "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+      "sha256": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626"
+    },
+    {
+      "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+      "sha256": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a"
+    },
+    {
+      "path": "packages/compiler/test/text-reset-native.test.ts",
+      "sha256": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+    }
+  ],
+  "retainedFixBinding": "Exact complete 1450-to-9d comparison has no change to these files; source hashes originate from actual prior independent binding and match the new committed source-binding record. No new 9d runtime execution by this reviewer is implied.",
+  "generatedManifestChecks": [
+    {
+      "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+      "sha256": "bd8bf4841ff0acb8306bbf1e29bc3eca3962502ba2e64584e13da2c168181237",
+      "tokens": 555
+    },
+    {
+      "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+      "sha256": "232c977a85e10786f289457d874f8a67ee195b99ef2a3b2a81813761af8abe1d",
+      "tokens": 954
+    },
+    {
+      "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "sha256": "7cf8a7a58458fe309a03d0deaa56b0d5f8439ebd2b50cb13d8f6c4725a81bb75",
+      "tokensByFamily": {
+        "bootstrap-2-3-2": 655,
+        "liquid-glass": 449
+      }
+    }
+  ],
+  "generatedManifestMethod": "Reviewer fetched exact GitHub UTF-8 source at 9d, recomputed SHA-256 using hashlib, parsed literal arrays without executing source and confirmed sorted unique contents and logged counts.",
+  "authorCheckReceiptsRead": [
+    {
+      "sourceRelativePath": "concurrent-format-equivalence.log",
+      "sha256": "122eda814832a7269abde65ca5a88990f70fd1c2622fc011e53cb5dcb1ac7bbe",
+      "bytes": 4672,
+      "scope": "Author's canonical formatter-equivalence record for 11 files; patch independently read, not claimed reviewer rerun."
+    },
+    {
+      "sourceRelativePath": "presets-current.log",
+      "sha256": "513e338a0d3e8dce8bde9067bf987eacff766ae0b623fd7030951c2c22707bf7",
+      "bytes": 2052,
+      "scope": "Author's strict generated-style --check receipt and 13 motion-palette tests; current three generated manifests independently bound above."
+    },
+    {
+      "sourceRelativePath": "frozen-main-byte-manifest.json",
+      "sha256": "72ae1372fab85850732606dd0079159cdf89c23b692d4deb446172b0867654a8",
+      "bytes": 39276,
+      "scope": "Author's 134-file inventory; source hash matches the committed archival binding, then actual main and 9d objects were independently queried."
+    }
+  ],
+  "protectedArchiveAudit": {
+    "count": 134,
+    "allMatch": true,
+    "method": "GitHub exact-ref Contents directory entries plus complete nonrecursive Git Trees for three root files beyond the Contents 1000-entry limit. Compare actual Git blob and byte size at main and 9d to each inventory row.",
+    "mainRootRecordTree": {
+      "sha": "e2c0e276160f6c164b3f9dfe11f016c318b2a368",
+      "truncated": false,
+      "entries": 1051
+    },
+    "headRootRecordTree": {
+      "sha": "fb263f8c1139009894e0924c408bcbf57cc6c511",
+      "truncated": false,
+      "entries": 1064
+    },
+    "sha256Boundary": "Per-file SHA-256 values below come from the hash-bound original inventory; reviewer independently proved same Git blob and size at both immutable commits, without pretending to decompress/hash every historical archive.",
+    "files": [
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-batch-001.md",
+        "manifestSha256": "14bdb4d08d81faea7cc912730cdad748dfc490a5da02b300824bd8ea8845d027",
+        "expectedBytes": 20360,
+        "expectedGitBlob": "2b73416475d7ac73c9a663b5f7c3da37a219baf9",
+        "mainGitBlob": "2b73416475d7ac73c9a663b5f7c3da37a219baf9",
+        "headGitBlob": "2b73416475d7ac73c9a663b5f7c3da37a219baf9",
+        "mainBytes": 20360,
+        "headBytes": 20360,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/README.md",
+        "manifestSha256": "4b65268e369d4b5208bca12c6c9464f23f52a804a5b20e3f7317cfabd2b25099",
+        "expectedBytes": 933,
+        "expectedGitBlob": "a02cdf0ed0099dff9c0fe56a7fb2266a99ca8155",
+        "mainGitBlob": "a02cdf0ed0099dff9c0fe56a7fb2266a99ca8155",
+        "headGitBlob": "a02cdf0ed0099dff9c0fe56a7fb2266a99ca8155",
+        "mainBytes": 933,
+        "headBytes": 933,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/index.json",
+        "manifestSha256": "c1745dd1f7b3edc74fb818ffd0c94597bad096ea1c905321737c6825cd72907b",
+        "expectedBytes": 161094,
+        "expectedGitBlob": "e7093eb51175d62a9397c4c36e97b733a3b2ee45",
+        "mainGitBlob": "e7093eb51175d62a9397c4c36e97b733a3b2ee45",
+        "headGitBlob": "e7093eb51175d62a9397c4c36e97b733a3b2ee45",
+        "mainBytes": 161094,
+        "headBytes": 161094,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-01",
+        "manifestSha256": "e935e2690093d021fe7ead203f0deaf2007162ed8b45b3d4e459835b3230a5de",
+        "expectedBytes": 4194304,
+        "expectedGitBlob": "9f703c3619800e203bc8f68e57e8410e78b40f5f",
+        "mainGitBlob": "9f703c3619800e203bc8f68e57e8410e78b40f5f",
+        "headGitBlob": "9f703c3619800e203bc8f68e57e8410e78b40f5f",
+        "mainBytes": 4194304,
+        "headBytes": 4194304,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-02",
+        "manifestSha256": "660004355e48e57ab1239c6137535db9cc33d4476d9d6bd931920351ad5e482d",
+        "expectedBytes": 4194304,
+        "expectedGitBlob": "90e54f6d99c43a5817a042aa13b01b291c9802a0",
+        "mainGitBlob": "90e54f6d99c43a5817a042aa13b01b291c9802a0",
+        "headGitBlob": "90e54f6d99c43a5817a042aa13b01b291c9802a0",
+        "mainBytes": 4194304,
+        "headBytes": 4194304,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-03",
+        "manifestSha256": "64e76658bc95ed30f0aaa31fab2b2c974cf3989238268d59794b10d6786c78b1",
+        "expectedBytes": 4194304,
+        "expectedGitBlob": "8f9258cabfe074e7430adac1ff21cf95eb65b4e3",
+        "mainGitBlob": "8f9258cabfe074e7430adac1ff21cf95eb65b4e3",
+        "headGitBlob": "8f9258cabfe074e7430adac1ff21cf95eb65b4e3",
+        "mainBytes": 4194304,
+        "headBytes": 4194304,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-04",
+        "manifestSha256": "9a38237b9186d62cc43750d2b4e783209903867377778caf9b6ce097369b7557",
+        "expectedBytes": 3290325,
+        "expectedGitBlob": "ac973bb60dea4025cbe84ff358e9c9f4d7d39d92",
+        "mainGitBlob": "ac973bb60dea4025cbe84ff358e9c9f4d7d39d92",
+        "headGitBlob": "ac973bb60dea4025cbe84ff358e9c9f4d7d39d92",
+        "mainBytes": 3290325,
+        "headBytes": 3290325,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json",
+        "manifestSha256": "c369ddc80cd2a520c4eabd835c209bd489e5dc3f6b85d1d361edf8ed569b9791",
+        "expectedBytes": 61714,
+        "expectedGitBlob": "46059124a253c3eb7ac8ed0cb1dccaf50ba2bae4",
+        "mainGitBlob": "46059124a253c3eb7ac8ed0cb1dccaf50ba2bae4",
+        "headGitBlob": "46059124a253c3eb7ac8ed0cb1dccaf50ba2bae4",
+        "mainBytes": 61714,
+        "headBytes": 61714,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/timeline.json.gz",
+        "manifestSha256": "c0c0521c54bd6aaf7403cbb59e342d9c49227de492146f70c814f5e15ccf7be6",
+        "expectedBytes": 67362,
+        "expectedGitBlob": "1421a25377e94111f8ed3eb0741036b3e155f3e5",
+        "mainGitBlob": "1421a25377e94111f8ed3eb0741036b3e155f3e5",
+        "headGitBlob": "1421a25377e94111f8ed3eb0741036b3e155f3e5",
+        "mainBytes": 67362,
+        "headBytes": 67362,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history.decisions.json.gz",
+        "manifestSha256": "b09eaa9cc7e5635af8486f4d2e2f0e85ec1587370c842041cc32dcb52342c532",
+        "expectedBytes": 5908260,
+        "expectedGitBlob": "3fce0d511e534a1deb202c1df8ac92cc7698c3dc",
+        "mainGitBlob": "3fce0d511e534a1deb202c1df8ac92cc7698c3dc",
+        "headGitBlob": "3fce0d511e534a1deb202c1df8ac92cc7698c3dc",
+        "mainBytes": 5908260,
+        "headBytes": 5908260,
+        "equal": true
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history.snapshot.json.gz",
+        "manifestSha256": "e27a20141287b63ff39334b44111ee322831d12083f405eac400c3607ba1544d",
+        "expectedBytes": 8634307,
+        "expectedGitBlob": "bfb217b1211a95e3e1936905f269a83534bcf568",
+        "mainGitBlob": "bfb217b1211a95e3e1936905f269a83534bcf568",
+        "headGitBlob": "bfb217b1211a95e3e1936905f269a83534bcf568",
+        "mainBytes": 8634307,
+        "headBytes": 8634307,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/56362cea090710530685d12ca516405abec7ceb3.commit.txt",
+        "manifestSha256": "40c2b3e9863ad32a37f3bb77c1a9e60f48a58c66952fc12faf08dbbf8c619de4",
+        "expectedBytes": 534,
+        "expectedGitBlob": "9ca15344a8b788f1a4219f1a84742b64eca4ade9",
+        "mainGitBlob": "9ca15344a8b788f1a4219f1a84742b64eca4ade9",
+        "headGitBlob": "9ca15344a8b788f1a4219f1a84742b64eca4ade9",
+        "mainBytes": 534,
+        "headBytes": 534,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md",
+        "manifestSha256": "119579a5b7f3a665537250c35c64998ed97ed8928b32ec3d3255f33f27ff98bb",
+        "expectedBytes": 6828,
+        "expectedGitBlob": "f5b7ccda977d504bd2e199d1710d89e3c34d7288",
+        "mainGitBlob": "f5b7ccda977d504bd2e199d1710d89e3c34d7288",
+        "headGitBlob": "f5b7ccda977d504bd2e199d1710d89e3c34d7288",
+        "mainBytes": 6828,
+        "headBytes": 6828,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-doc.stderr.log",
+        "manifestSha256": "d8af77d5951e3f17b5549523bd3f14a2c877ed0204e3268440e62fc7ae1ac01e",
+        "expectedBytes": 1333,
+        "expectedGitBlob": "1ce4d3b65d81248b97b25030f0dd40ab68fd5370",
+        "mainGitBlob": "1ce4d3b65d81248b97b25030f0dd40ab68fd5370",
+        "headGitBlob": "1ce4d3b65d81248b97b25030f0dd40ab68fd5370",
+        "mainBytes": 1333,
+        "headBytes": 1333,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-doc.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-operations-tests.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-operations-tests.stdout.log",
+        "manifestSha256": "d80ef5fcca0e32974a60b9a8c7d41b64499a20714bf05fc8175a97d736a60bb2",
+        "expectedBytes": 136277,
+        "expectedGitBlob": "b09e5839e4284122f2ee4495fb70c1d2d93e033e",
+        "mainGitBlob": "b09e5839e4284122f2ee4495fb70c1d2d93e033e",
+        "headGitBlob": "b09e5839e4284122f2ee4495fb70c1d2d93e033e",
+        "mainBytes": 136277,
+        "headBytes": 136277,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-operations.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-operations.stdout.log",
+        "manifestSha256": "f49bfafcc2b85c98c728ae44495e063d9d73b93e6bcec2edb96d2fe75738a252",
+        "expectedBytes": 22,
+        "expectedGitBlob": "930ff36502db02c914e02704c4abfd54b53fbfe9",
+        "mainGitBlob": "930ff36502db02c914e02704c4abfd54b53fbfe9",
+        "headGitBlob": "930ff36502db02c914e02704c4abfd54b53fbfe9",
+        "mainBytes": 22,
+        "headBytes": 22,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/b42fd96b279787c8c9a6fb39a2a88f30918cec89.commit.txt",
+        "manifestSha256": "cd1cac5ffefb498fffde860e52f09e6bed99d25a34acd95e8de5a323a237d8d2",
+        "expectedBytes": 682,
+        "expectedGitBlob": "cb78d86573838e477f7bda79796d6cb1cc97699c",
+        "mainGitBlob": "cb78d86573838e477f7bda79796d6cb1cc97699c",
+        "headGitBlob": "cb78d86573838e477f7bda79796d6cb1cc97699c",
+        "mainBytes": 682,
+        "headBytes": 682,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/bundle-parts.json",
+        "manifestSha256": "6b79cbf493ba3eb051043fed95409f88e660b4f71f8aa1a27642de468d34ae13",
+        "expectedBytes": 1473,
+        "expectedGitBlob": "353a8514dfe88f22de7453286775999b286ae286",
+        "mainGitBlob": "353a8514dfe88f22de7453286775999b286ae286",
+        "headGitBlob": "353a8514dfe88f22de7453286775999b286ae286",
+        "mainBytes": 1473,
+        "headBytes": 1473,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/bundle-verify.stderr.log",
+        "manifestSha256": "ac3dcc17da644e71ec4a45a4c215f5e0a383e11eb930de0bd76fc621eee879fb",
+        "expectedBytes": 157,
+        "expectedGitBlob": "6b9d4648256597c36535bc1b88fbc2e10e5450cd",
+        "mainGitBlob": "6b9d4648256597c36535bc1b88fbc2e10e5450cd",
+        "headGitBlob": "6b9d4648256597c36535bc1b88fbc2e10e5450cd",
+        "mainBytes": 157,
+        "headBytes": 157,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/bundle-verify.stdout.log",
+        "manifestSha256": "1b6e6c75d9d144ba5dba854030c7c49386fe8d031d90b68fc7a771ae8752da5c",
+        "expectedBytes": 215,
+        "expectedGitBlob": "9c5fcccc2af5164e6b418559433e5a993dc603d9",
+        "mainGitBlob": "9c5fcccc2af5164e6b418559433e5a993dc603d9",
+        "headGitBlob": "9c5fcccc2af5164e6b418559433e5a993dc603d9",
+        "mainBytes": 215,
+        "headBytes": 215,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/check.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/check.stdout.log",
+        "manifestSha256": "e024fda99a28349a8ff44f11eec2466572fb83ad37b3112206d02efd11a4ff99",
+        "expectedBytes": 358,
+        "expectedGitBlob": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76",
+        "mainGitBlob": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76",
+        "headGitBlob": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76",
+        "mainBytes": 358,
+        "headBytes": 358,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/commands.json",
+        "manifestSha256": "d2eb5aa7ca60cbc018f40be315bcc8f34c7c36b50c469f92e761e97961eef63c",
+        "expectedBytes": 1848,
+        "expectedGitBlob": "83ea8a4afc7139e8de53c0ea3633c9dc93955f30",
+        "mainGitBlob": "83ea8a4afc7139e8de53c0ea3633c9dc93955f30",
+        "headGitBlob": "83ea8a4afc7139e8de53c0ea3633c9dc93955f30",
+        "mainBytes": 1848,
+        "headBytes": 1848,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/contributor-skills.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/contributor-skills.stdout.log",
+        "manifestSha256": "ff3fb2dbb064b19df441c8398aa50f74d61416afd6e01aecd4be415f17348dea",
+        "expectedBytes": 88,
+        "expectedGitBlob": "0b9222dc8434bf582f240909d71d97bf9890b9d1",
+        "mainGitBlob": "0b9222dc8434bf582f240909d71d97bf9890b9d1",
+        "headGitBlob": "0b9222dc8434bf582f240909d71d97bf9890b9d1",
+        "mainBytes": 88,
+        "headBytes": 88,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-01",
+        "manifestSha256": "e38fc8f48b4a1e022183e353a457d8e541491007707529bdf6b4d65ed821432b",
+        "expectedBytes": 4194304,
+        "expectedGitBlob": "2d64beab020e4fbf657ab95c32369357b62cb16c",
+        "mainGitBlob": "2d64beab020e4fbf657ab95c32369357b62cb16c",
+        "headGitBlob": "2d64beab020e4fbf657ab95c32369357b62cb16c",
+        "mainBytes": 4194304,
+        "headBytes": 4194304,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-02",
+        "manifestSha256": "91678617fd529631dce28b4a04486828b1ec2438cf30e27939e1447972ba744f",
+        "expectedBytes": 4194304,
+        "expectedGitBlob": "008a70cd0a626f7a8403d2d63315ccc06498e1ac",
+        "mainGitBlob": "008a70cd0a626f7a8403d2d63315ccc06498e1ac",
+        "headGitBlob": "008a70cd0a626f7a8403d2d63315ccc06498e1ac",
+        "mainBytes": 4194304,
+        "headBytes": 4194304,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-03",
+        "manifestSha256": "6bda73e601bb38eab6904536066d0070b07691dbaf9441fe10dacdd13b3b2327",
+        "expectedBytes": 4194304,
+        "expectedGitBlob": "41e744c3670775a5db13dc089e1c99eee6ddf3b8",
+        "mainGitBlob": "41e744c3670775a5db13dc089e1c99eee6ddf3b8",
+        "headGitBlob": "41e744c3670775a5db13dc089e1c99eee6ddf3b8",
+        "mainBytes": 4194304,
+        "headBytes": 4194304,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-04",
+        "manifestSha256": "6b46d6438245cce357aba4f2fe114e7ef329c9914aefb921a932e2539021edc3",
+        "expectedBytes": 3259137,
+        "expectedGitBlob": "86493809ad79b570ef2ecd7c338dd00f010f9f21",
+        "mainGitBlob": "86493809ad79b570ef2ecd7c338dd00f010f9f21",
+        "headGitBlob": "86493809ad79b570ef2ecd7c338dd00f010f9f21",
+        "mainBytes": 3259137,
+        "headBytes": 3259137,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/public-docs.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/public-docs.stdout.log",
+        "manifestSha256": "5f314de48806e074ea18f7a0420396ecfa6ac1b0736646acdbc67cc43b20c79f",
+        "expectedBytes": 187,
+        "expectedGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "headGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainBytes": 187,
+        "headBytes": 187,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/ready.stderr.log",
+        "manifestSha256": "0debf0490874d2b85b287511ed5e9cc33efbdda3600ec383d35c38be44629821",
+        "expectedBytes": 117,
+        "expectedGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "mainGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "headGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "mainBytes": 117,
+        "headBytes": 117,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/ready.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/repository-checks.json",
+        "manifestSha256": "b4096f4494415e1b01ec3d4637beedb827ef336d98d2aaa8aae8ecdb6f55697e",
+        "expectedBytes": 5398,
+        "expectedGitBlob": "1bdc4e856a2deadd8517b96339eb63e90f1b0b9b",
+        "mainGitBlob": "1bdc4e856a2deadd8517b96339eb63e90f1b0b9b",
+        "headGitBlob": "1bdc4e856a2deadd8517b96339eb63e90f1b0b9b",
+        "mainBytes": 5398,
+        "headBytes": 5398,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json",
+        "manifestSha256": "a4b8c066ed376d3e71079d6762e75a8d5ed278978d7eebc059aedb08761cebcd",
+        "expectedBytes": 12671,
+        "expectedGitBlob": "8df3cf6e460903e5a978a51e29c17634426ed319",
+        "mainGitBlob": "8df3cf6e460903e5a978a51e29c17634426ed319",
+        "headGitBlob": "8df3cf6e460903e5a978a51e29c17634426ed319",
+        "mainBytes": 12671,
+        "headBytes": 12671,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/tests.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/tests.stdout.log",
+        "manifestSha256": "6c4aeb780659b1d56b7a44e9ac5d359541051a203396a3fd0f5f3914789755ca",
+        "expectedBytes": 1027,
+        "expectedGitBlob": "48f966019096950cc831cacc12d43facdbfc4beb",
+        "mainGitBlob": "48f966019096950cc831cacc12d43facdbfc4beb",
+        "headGitBlob": "48f966019096950cc831cacc12d43facdbfc4beb",
+        "mainBytes": 1027,
+        "headBytes": 1027,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/README.md",
+        "manifestSha256": "e92d6ad81bfb90fcca8e7dffdf3dd0b53365a7eaf77db0759ab70a5a6d56ebd7",
+        "expectedBytes": 4941,
+        "expectedGitBlob": "05fec0dff5553d6a8f519b3a9eb413a26dba71d5",
+        "mainGitBlob": "05fec0dff5553d6a8f519b3a9eb413a26dba71d5",
+        "headGitBlob": "05fec0dff5553d6a8f519b3a9eb413a26dba71d5",
+        "mainBytes": 4941,
+        "headBytes": 4941,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/agent-doc.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/agent-doc.stdout.log",
+        "manifestSha256": "3d48dbd398d26c23ab6f71684e3cef84fedaecde6bfc4527bca49de3f2c361ee",
+        "expectedBytes": 129,
+        "expectedGitBlob": "a8bd323b1ea2da35fe68e2420f849be23e70185e",
+        "mainGitBlob": "a8bd323b1ea2da35fe68e2420f849be23e70185e",
+        "headGitBlob": "a8bd323b1ea2da35fe68e2420f849be23e70185e",
+        "mainBytes": 129,
+        "headBytes": 129,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/check-replay.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/check-replay.stdout.log",
+        "manifestSha256": "e024fda99a28349a8ff44f11eec2466572fb83ad37b3112206d02efd11a4ff99",
+        "expectedBytes": 358,
+        "expectedGitBlob": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76",
+        "mainGitBlob": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76",
+        "headGitBlob": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76",
+        "mainBytes": 358,
+        "headBytes": 358,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/commands.json",
+        "manifestSha256": "d0c3b911614ad224315b5a8af757163b8fb00c86ce617dba4ef41ecb1ab748a2",
+        "expectedBytes": 6415,
+        "expectedGitBlob": "cb7c1a9b43cf9e43f75b4e40516ab83f47a69419",
+        "mainGitBlob": "cb7c1a9b43cf9e43f75b4e40516ab83f47a69419",
+        "headGitBlob": "cb7c1a9b43cf9e43f75b4e40516ab83f47a69419",
+        "mainBytes": 6415,
+        "headBytes": 6415,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/decisions-replay.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/decisions-replay.stdout.log",
+        "manifestSha256": "0a2d6c9692030080ae00356378ea72cc457069ab51f941c04ff05d3fa66f40a5",
+        "expectedBytes": 434,
+        "expectedGitBlob": "9fffbd41ab7aa7f35007cfb8b26b497afb5bfd66",
+        "mainGitBlob": "9fffbd41ab7aa7f35007cfb8b26b497afb5bfd66",
+        "headGitBlob": "9fffbd41ab7aa7f35007cfb8b26b497afb5bfd66",
+        "mainBytes": 434,
+        "headBytes": 434,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/final-docs.json",
+        "manifestSha256": "b6d698338cb94f96a8e4c17ff1d2badb3d571f843e7cab5952964b355760dd68",
+        "expectedBytes": 737,
+        "expectedGitBlob": "e0c9997d532539eea0647668c7b2b14d0e052fa7",
+        "mainGitBlob": "e0c9997d532539eea0647668c7b2b14d0e052fa7",
+        "headGitBlob": "e0c9997d532539eea0647668c7b2b14d0e052fa7",
+        "mainBytes": 737,
+        "headBytes": 737,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/final-docs.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/final-docs.stdout.log",
+        "manifestSha256": "5f314de48806e074ea18f7a0420396ecfa6ac1b0736646acdbc67cc43b20c79f",
+        "expectedBytes": 187,
+        "expectedGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "headGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainBytes": 187,
+        "headBytes": 187,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-checkpoint-review.json",
+        "manifestSha256": "fefd5587653a9a8dd3c6d3e3ca2e02b237b3cea55ba7cf95cdecaa2ec272fbe6",
+        "expectedBytes": 25689,
+        "expectedGitBlob": "aed34a6601fa51bd86a4b9a1244f9b5e5bab3b81",
+        "mainGitBlob": "aed34a6601fa51bd86a4b9a1244f9b5e5bab3b81",
+        "headGitBlob": "aed34a6601fa51bd86a4b9a1244f9b5e5bab3b81",
+        "mainBytes": 25689,
+        "headBytes": 25689,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-generator-review.json",
+        "manifestSha256": "01f1eb5314964910dca248bb9d7eb18682a6e02a75ab7dc9a9841d62200b77ea",
+        "expectedBytes": 13519,
+        "expectedGitBlob": "5aef6b065d0485c2bd7cc14fe9fddf0e897326da",
+        "mainGitBlob": "5aef6b065d0485c2bd7cc14fe9fddf0e897326da",
+        "headGitBlob": "5aef6b065d0485c2bd7cc14fe9fddf0e897326da",
+        "mainBytes": 13519,
+        "headBytes": 13519,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/manual-drift-rejected.stderr.log",
+        "manifestSha256": "5bf01da07a501b13193e86468a2c2fd63d0bf010d29c0a94cf861d7bfd2cb82b",
+        "expectedBytes": 575,
+        "expectedGitBlob": "3e5a7771321c49abb54c0a458855e4ae3e16222b",
+        "mainGitBlob": "3e5a7771321c49abb54c0a458855e4ae3e16222b",
+        "headGitBlob": "3e5a7771321c49abb54c0a458855e4ae3e16222b",
+        "mainBytes": 575,
+        "headBytes": 575,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/manual-drift-rejected.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-index-race-storage.json",
+        "manifestSha256": "43fa75ca6b218bb94406f51098079cdd76a42cf83f89b354547fc540e8a19c80",
+        "expectedBytes": 565,
+        "expectedGitBlob": "fb8cdf9cefc5d3a8b0d174cd2578e44ffa20e1cd",
+        "mainGitBlob": "fb8cdf9cefc5d3a8b0d174cd2578e44ffa20e1cd",
+        "headGitBlob": "fb8cdf9cefc5d3a8b0d174cd2578e44ffa20e1cd",
+        "mainBytes": 565,
+        "headBytes": 565,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-index-race.json",
+        "manifestSha256": "72effd2a92a91a577051172fc1c25c851c27176602f9fed40501a1de594a3db2",
+        "expectedBytes": 1166,
+        "expectedGitBlob": "fbc6949c06fef68fbd20ea71f233416337f11c35",
+        "mainGitBlob": "fbc6949c06fef68fbd20ea71f233416337f11c35",
+        "headGitBlob": "fbc6949c06fef68fbd20ea71f233416337f11c35",
+        "mainBytes": 1166,
+        "headBytes": 1166,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-index-race.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-index-race.stdout.log.gz",
+        "manifestSha256": "3e65ca66d02fb499ed6fa36821da23cbb97ad2d1da41f64a49eb830a75bacf94",
+        "expectedBytes": 531,
+        "expectedGitBlob": "f412d425d911758781cc33cd05a7b91740c0da00",
+        "mainGitBlob": "f412d425d911758781cc33cd05a7b91740c0da00",
+        "headGitBlob": "f412d425d911758781cc33cd05a7b91740c0da00",
+        "mainBytes": 531,
+        "headBytes": 531,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-manual-decisions.json",
+        "manifestSha256": "fab8b955ef2596aa3b1fbcab60865dcaef861d9b369c1329a658eba65b4d59b0",
+        "expectedBytes": 79663,
+        "expectedGitBlob": "667132375df62dd80580ee672607aeea17d18ec6",
+        "mainGitBlob": "667132375df62dd80580ee672607aeea17d18ec6",
+        "headGitBlob": "667132375df62dd80580ee672607aeea17d18ec6",
+        "mainBytes": 79663,
+        "headBytes": 79663,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/agent-doc-retry.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/agent-doc-retry.stdout.log",
+        "manifestSha256": "3d48dbd398d26c23ab6f71684e3cef84fedaecde6bfc4527bca49de3f2c361ee",
+        "expectedBytes": 129,
+        "expectedGitBlob": "a8bd323b1ea2da35fe68e2420f849be23e70185e",
+        "mainGitBlob": "a8bd323b1ea2da35fe68e2420f849be23e70185e",
+        "headGitBlob": "a8bd323b1ea2da35fe68e2420f849be23e70185e",
+        "mainBytes": 129,
+        "headBytes": 129,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/commands.json",
+        "manifestSha256": "dace7d5ed177f9ecb3fdf8d492cea2481e1c6b8d7a5c4b1edb2595cede541566",
+        "expectedBytes": 5573,
+        "expectedGitBlob": "2fe2a0c9cb604d971f967d26fbc90954c49ad7ff",
+        "mainGitBlob": "2fe2a0c9cb604d971f967d26fbc90954c49ad7ff",
+        "headGitBlob": "2fe2a0c9cb604d971f967d26fbc90954c49ad7ff",
+        "mainBytes": 5573,
+        "headBytes": 5573,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/decisions-replay.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/decisions-replay.stdout.log",
+        "manifestSha256": "0a2d6c9692030080ae00356378ea72cc457069ab51f941c04ff05d3fa66f40a5",
+        "expectedBytes": 434,
+        "expectedGitBlob": "9fffbd41ab7aa7f35007cfb8b26b497afb5bfd66",
+        "mainGitBlob": "9fffbd41ab7aa7f35007cfb8b26b497afb5bfd66",
+        "headGitBlob": "9fffbd41ab7aa7f35007cfb8b26b497afb5bfd66",
+        "mainBytes": 434,
+        "headBytes": 434,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/manual-drift-rejected.stderr.log",
+        "manifestSha256": "5bf01da07a501b13193e86468a2c2fd63d0bf010d29c0a94cf861d7bfd2cb82b",
+        "expectedBytes": 575,
+        "expectedGitBlob": "3e5a7771321c49abb54c0a458855e4ae3e16222b",
+        "mainGitBlob": "3e5a7771321c49abb54c0a458855e4ae3e16222b",
+        "headGitBlob": "3e5a7771321c49abb54c0a458855e4ae3e16222b",
+        "mainBytes": 575,
+        "headBytes": 575,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/manual-drift-rejected.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/public-docs.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/public-docs.stdout.log",
+        "manifestSha256": "5f314de48806e074ea18f7a0420396ecfa6ac1b0736646acdbc67cc43b20c79f",
+        "expectedBytes": 187,
+        "expectedGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "headGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainBytes": 187,
+        "headBytes": 187,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/raw-archive-drift-rejected.stderr.log",
+        "manifestSha256": "d6dc67b8441b527c5810e8992414b6c93e381a79794c2fff9cb6dd513ea57ad5",
+        "expectedBytes": 576,
+        "expectedGitBlob": "cbab5f50a82cab5fb639e1260d5963f0b1689e50",
+        "mainGitBlob": "cbab5f50a82cab5fb639e1260d5963f0b1689e50",
+        "headGitBlob": "cbab5f50a82cab5fb639e1260d5963f0b1689e50",
+        "mainBytes": 576,
+        "headBytes": 576,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/raw-archive-drift-rejected.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/ready-still-rejected.stderr.log",
+        "manifestSha256": "0debf0490874d2b85b287511ed5e9cc33efbdda3600ec383d35c38be44629821",
+        "expectedBytes": 117,
+        "expectedGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "mainGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "headGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "mainBytes": 117,
+        "headBytes": 117,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/ready-still-rejected.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/replay-comparison.json",
+        "manifestSha256": "a299af8f9407e918dd9f5ad5dc0b01020fe62044ead82bed943da3f06b4057be",
+        "expectedBytes": 630,
+        "expectedGitBlob": "6340f88f948aebf8afdc8f8084e38b937a1409e4",
+        "mainGitBlob": "6340f88f948aebf8afdc8f8084e38b937a1409e4",
+        "headGitBlob": "6340f88f948aebf8afdc8f8084e38b937a1409e4",
+        "mainBytes": 630,
+        "headBytes": 630,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/snapshot-replay.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/snapshot-replay.stdout.log",
+        "manifestSha256": "0109b8749185b9b02a8006ff3a290519a9c2ee44be27c3117f2f626a4d57468c",
+        "expectedBytes": 218,
+        "expectedGitBlob": "dab87bba8644e548ab50ad74eee3eec44b186b8a",
+        "mainGitBlob": "dab87bba8644e548ab50ad74eee3eec44b186b8a",
+        "headGitBlob": "dab87bba8644e548ab50ad74eee3eec44b186b8a",
+        "mainBytes": 218,
+        "headBytes": 218,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source-state.json",
+        "manifestSha256": "1d14f385e75a72ce9a30f9bd502eca2aca511642e4c99b641619e52cd3ae3e12",
+        "expectedBytes": 2317,
+        "expectedGitBlob": "53037aed9b7f728eec709aa5de908e9e27ef4889",
+        "mainGitBlob": "53037aed9b7f728eec709aa5de908e9e27ef4889",
+        "headGitBlob": "53037aed9b7f728eec709aa5de908e9e27ef4889",
+        "mainBytes": 2317,
+        "headBytes": 2317,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/build-history-snapshot.mjs.txt",
+        "manifestSha256": "e143acfca1e0e4292d3e1a169fa9f7d78e9487322226eafe80dbc4adf46718fc",
+        "expectedBytes": 6794,
+        "expectedGitBlob": "8aee472b5ce28e89d7be637d9af60dd6e020e902",
+        "mainGitBlob": "8aee472b5ce28e89d7be637d9af60dd6e020e902",
+        "headGitBlob": "8aee472b5ce28e89d7be637d9af60dd6e020e902",
+        "mainBytes": 6794,
+        "headBytes": 6794,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/decode-history-archive.mjs.txt",
+        "manifestSha256": "21c9839438533b3457c70b81ae4b596cb27d55eaa6b5455ec3b68615f931ea7a",
+        "expectedBytes": 6072,
+        "expectedGitBlob": "ac72d1facd22fa92c527c283170c1a6bdaf82069",
+        "mainGitBlob": "ac72d1facd22fa92c527c283170c1a6bdaf82069",
+        "headGitBlob": "ac72d1facd22fa92c527c283170c1a6bdaf82069",
+        "mainBytes": 6072,
+        "headBytes": 6072,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/history-audit.mjs.txt",
+        "manifestSha256": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
+        "expectedBytes": 22253,
+        "expectedGitBlob": "ef58ebd2c866fedc0280601c1e5f8c4a45fa520f",
+        "mainGitBlob": "ef58ebd2c866fedc0280601c1e5f8c4a45fa520f",
+        "headGitBlob": "ef58ebd2c866fedc0280601c1e5f8c4a45fa520f",
+        "mainBytes": 22253,
+        "headBytes": 22253,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/history-audit.test.mjs.txt",
+        "manifestSha256": "4b59bef34093c90ea86dff6708325848f0cfb7f242a322071b460bff40e8366e",
+        "expectedBytes": 9178,
+        "expectedGitBlob": "80947332da61816fda4ddcdf4ab23b201dbed06b",
+        "mainGitBlob": "80947332da61816fda4ddcdf4ab23b201dbed06b",
+        "headGitBlob": "80947332da61816fda4ddcdf4ab23b201dbed06b",
+        "mainBytes": 9178,
+        "headBytes": 9178,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/history-files.mjs.txt",
+        "manifestSha256": "5503054586be4e43ccdb00d13ce0b4815c9e99ffa910c28ab887a2000f23cd5a",
+        "expectedBytes": 2038,
+        "expectedGitBlob": "7b940e79a17814df56d0eb89f93f4e7196687f0d",
+        "mainGitBlob": "7b940e79a17814df56d0eb89f93f4e7196687f0d",
+        "headGitBlob": "7b940e79a17814df56d0eb89f93f4e7196687f0d",
+        "mainBytes": 2038,
+        "headBytes": 2038,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/history-source-bindings.mjs.txt",
+        "manifestSha256": "728af159aa3e0330af68e724c5644f6b8f093bacb681f1301a593a006bd30c94",
+        "expectedBytes": 2393,
+        "expectedGitBlob": "7d17ebf24c19bb70627278f66911d2f40a1a047e",
+        "mainGitBlob": "7d17ebf24c19bb70627278f66911d2f40a1a047e",
+        "headGitBlob": "7d17ebf24c19bb70627278f66911d2f40a1a047e",
+        "mainBytes": 2393,
+        "headBytes": 2393,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/history-source-bindings.test.mjs.txt",
+        "manifestSha256": "590dbfdfb05a158355ce0a909cd71b3df54787158ff424f4afbef0676cb03d1b",
+        "expectedBytes": 4793,
+        "expectedGitBlob": "65115c02d7cca95ef92f9f0de454e40e4ee52b13",
+        "mainGitBlob": "65115c02d7cca95ef92f9f0de454e40e4ee52b13",
+        "headGitBlob": "65115c02d7cca95ef92f9f0de454e40e4ee52b13",
+        "mainBytes": 4793,
+        "headBytes": 4793,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/source/scripts/governance/reconcile-history-decisions.mjs.txt",
+        "manifestSha256": "7b11f5874218d46762531855fc71feac8ab5fa63d024c9ceb844cffe346a1074",
+        "expectedBytes": 18473,
+        "expectedGitBlob": "8c3e4c88a0863b3f347b91c53fcc4a638b33369e",
+        "mainGitBlob": "8c3e4c88a0863b3f347b91c53fcc4a638b33369e",
+        "headGitBlob": "8c3e4c88a0863b3f347b91c53fcc4a638b33369e",
+        "mainBytes": 18473,
+        "headBytes": 18473,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/tests.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/pre-index-fix/tests.stdout.log",
+        "manifestSha256": "aa4bb6a4fbb0d5eefc106329375277de138c0c62f0aa92b34a17fe61d7722398",
+        "expectedBytes": 1892,
+        "expectedGitBlob": "c6a787581196db2097f4ed27dc3921d67e4e881b",
+        "mainGitBlob": "c6a787581196db2097f4ed27dc3921d67e4e881b",
+        "headGitBlob": "c6a787581196db2097f4ed27dc3921d67e4e881b",
+        "mainBytes": 1892,
+        "headBytes": 1892,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/public-docs.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/public-docs.stdout.log",
+        "manifestSha256": "5f314de48806e074ea18f7a0420396ecfa6ac1b0736646acdbc67cc43b20c79f",
+        "expectedBytes": 187,
+        "expectedGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "headGitBlob": "4286e1682dfd192631c55bac75cf8cd0e5e65ded",
+        "mainBytes": 187,
+        "headBytes": 187,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/raw-archive-drift-rejected.stderr.log",
+        "manifestSha256": "d6dc67b8441b527c5810e8992414b6c93e381a79794c2fff9cb6dd513ea57ad5",
+        "expectedBytes": 576,
+        "expectedGitBlob": "cbab5f50a82cab5fb639e1260d5963f0b1689e50",
+        "mainGitBlob": "cbab5f50a82cab5fb639e1260d5963f0b1689e50",
+        "headGitBlob": "cbab5f50a82cab5fb639e1260d5963f0b1689e50",
+        "mainBytes": 576,
+        "headBytes": 576,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/raw-archive-drift-rejected.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/ready-still-rejected.stderr.log",
+        "manifestSha256": "0debf0490874d2b85b287511ed5e9cc33efbdda3600ec383d35c38be44629821",
+        "expectedBytes": 117,
+        "expectedGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "mainGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "headGitBlob": "843db1e78da72f658c649776d39b1d0736be806d",
+        "mainBytes": 117,
+        "headBytes": 117,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/ready-still-rejected.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/replay-comparison.json",
+        "manifestSha256": "a299af8f9407e918dd9f5ad5dc0b01020fe62044ead82bed943da3f06b4057be",
+        "expectedBytes": 630,
+        "expectedGitBlob": "6340f88f948aebf8afdc8f8084e38b937a1409e4",
+        "mainGitBlob": "6340f88f948aebf8afdc8f8084e38b937a1409e4",
+        "headGitBlob": "6340f88f948aebf8afdc8f8084e38b937a1409e4",
+        "mainBytes": 630,
+        "headBytes": 630,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/snapshot-replay.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/snapshot-replay.stdout.log",
+        "manifestSha256": "525646fb51314f24d331d1a2d75d1ead3698e8c601188310217f49f56e7fbe52",
+        "expectedBytes": 217,
+        "expectedGitBlob": "335d279ec5d9d07e0a05248d27ba7d23ce9d55b5",
+        "mainGitBlob": "335d279ec5d9d07e0a05248d27ba7d23ce9d55b5",
+        "headGitBlob": "335d279ec5d9d07e0a05248d27ba7d23ce9d55b5",
+        "mainBytes": 217,
+        "headBytes": 217,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/tested-source-files.json",
+        "manifestSha256": "8a16fcf11d3307d0892e2bff335ed14ce0de10fc48b172ffbc1bc2ba4fcbbc31",
+        "expectedBytes": 1531,
+        "expectedGitBlob": "f8f2632e03437bd7f3c04697bf5a962f962ea991",
+        "mainGitBlob": "f8f2632e03437bd7f3c04697bf5a962f962ea991",
+        "headGitBlob": "f8f2632e03437bd7f3c04697bf5a962f962ea991",
+        "mainBytes": 1531,
+        "headBytes": 1531,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/tests.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/tests.stdout.log",
+        "manifestSha256": "f33908929791cea410e0dcb76bf911a647c97b9c90f203556b17bb9ac7aedab5",
+        "expectedBytes": 2171,
+        "expectedGitBlob": "6d6b1f6ebca3224d096c5800b276cd19d2be7858",
+        "mainGitBlob": "6d6b1f6ebca3224d096c5800b276cd19d2be7858",
+        "headGitBlob": "6d6b1f6ebca3224d096c5800b276cd19d2be7858",
+        "mainBytes": 2171,
+        "headBytes": 2171,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/validation.json",
+        "manifestSha256": "2b83c014dfb5c2320eacd52b7d17333feb42e4d13af6616a5a9d7acfbe4d7f56",
+        "expectedBytes": 9998,
+        "expectedGitBlob": "86f90faf562ef2f1a050316225e26eb680633c5f",
+        "mainGitBlob": "86f90faf562ef2f1a050316225e26eb680633c5f",
+        "headGitBlob": "86f90faf562ef2f1a050316225e26eb680633c5f",
+        "mainBytes": 9998,
+        "headBytes": 9998,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/README.md",
+        "manifestSha256": "fc2c3784444503559c476f7b442dc5745aafa553f306f770b91d836da56c374f",
+        "expectedBytes": 4280,
+        "expectedGitBlob": "d71341e96e0956fe476e5239ce54d148806c9171",
+        "mainGitBlob": "d71341e96e0956fe476e5239ce54d148806c9171",
+        "headGitBlob": "d71341e96e0956fe476e5239ce54d148806c9171",
+        "mainBytes": 4280,
+        "headBytes": 4280,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/consumer-broker.stderr.log",
+        "manifestSha256": "b46ac08c3500eb6ef230826480a8ed01f1d4a2433b87f9aa5fb5a08c892c2519",
+        "expectedBytes": 1065,
+        "expectedGitBlob": "f80c05ba51a7ccce53298d2ee25518be7299e73b",
+        "mainGitBlob": "f80c05ba51a7ccce53298d2ee25518be7299e73b",
+        "headGitBlob": "f80c05ba51a7ccce53298d2ee25518be7299e73b",
+        "mainBytes": 1065,
+        "headBytes": 1065,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/consumer-broker.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent-review.json",
+        "manifestSha256": "e20c80a7f1ae1eed82d6c2e614e8226f0bef0a589882f9493b804933b890b1d5",
+        "expectedBytes": 11426,
+        "expectedGitBlob": "22b6e0c8f0eebede66b7c1723cf90b7410b2995a",
+        "mainGitBlob": "22b6e0c8f0eebede66b7c1723cf90b7410b2995a",
+        "headGitBlob": "22b6e0c8f0eebede66b7c1723cf90b7410b2995a",
+        "mainBytes": 11426,
+        "headBytes": 11426,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-consumer-broker.stderr.log",
+        "manifestSha256": "c1e8f09b88657cfa3796b806c6ebbde3ff77c410c054fddd7ded46c79acdd959",
+        "expectedBytes": 1065,
+        "expectedGitBlob": "f450c411fba51d55a8f2f6d2097e7d3ce4f21d9b",
+        "mainGitBlob": "f450c411fba51d55a8f2f6d2097e7d3ce4f21d9b",
+        "headGitBlob": "f450c411fba51d55a8f2f6d2097e7d3ce4f21d9b",
+        "mainBytes": 1065,
+        "headBytes": 1065,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-consumer-broker.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-model-request.stderr.log",
+        "manifestSha256": "a92418f7181f2d09f2e948252290b3979aecd6e6f6dfaaaf4c9e7eb4f265afa0",
+        "expectedBytes": 1345,
+        "expectedGitBlob": "dfc17e4540800ccc62a8d8ade51071b585642807",
+        "mainGitBlob": "dfc17e4540800ccc62a8d8ade51071b585642807",
+        "headGitBlob": "dfc17e4540800ccc62a8d8ade51071b585642807",
+        "mainBytes": 1345,
+        "headBytes": 1345,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-model-request.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-red-readback.json",
+        "manifestSha256": "ffe3ae37cae8d993bde25e17e12ab3ac210b15a5f18265dce0ec5a5b34ec85a5",
+        "expectedBytes": 1444,
+        "expectedGitBlob": "0d99ddc24a82f2e50fff09f1f96e123714522382",
+        "mainGitBlob": "0d99ddc24a82f2e50fff09f1f96e123714522382",
+        "headGitBlob": "0d99ddc24a82f2e50fff09f1f96e123714522382",
+        "mainBytes": 1444,
+        "headBytes": 1444,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json",
+        "manifestSha256": "ad9c246af02afc280244aeb4947c2c411895eb14c024759e68fd23da3abbb3a6",
+        "expectedBytes": 5679,
+        "expectedGitBlob": "5c178f7cd521b2613d2b69f6761e7b653a9f70c6",
+        "mainGitBlob": "5c178f7cd521b2613d2b69f6761e7b653a9f70c6",
+        "headGitBlob": "5c178f7cd521b2613d2b69f6761e7b653a9f70c6",
+        "mainBytes": 5679,
+        "headBytes": 5679,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/storage.json",
+        "manifestSha256": "b44a46bd8b48a4a99152873737526183d5adcaa01e51bef7f7c0165a31a7bf56",
+        "expectedBytes": 2648,
+        "expectedGitBlob": "18d41fa2d2a118ddf01cebd1075a9b416e179e62",
+        "mainGitBlob": "18d41fa2d2a118ddf01cebd1075a9b416e179e62",
+        "headGitBlob": "18d41fa2d2a118ddf01cebd1075a9b416e179e62",
+        "mainBytes": 2648,
+        "headBytes": 2648,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/model-request.stderr.log",
+        "manifestSha256": "3eea58862ed4dc1fc5072e6a9611d39c1b06d3384e3615f864e6a03f76e27975",
+        "expectedBytes": 1345,
+        "expectedGitBlob": "fb0a9cd82b1c761f812679f3c59ac42f1b0f1da5",
+        "mainGitBlob": "fb0a9cd82b1c761f812679f3c59ac42f1b0f1da5",
+        "headGitBlob": "fb0a9cd82b1c761f812679f3c59ac42f1b0f1da5",
+        "mainBytes": 1345,
+        "headBytes": 1345,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/model-request.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/original-rebuild-red.json",
+        "manifestSha256": "9f7f2f0a2fb735ad4ca392b3554527a73591445827956cf8fc381e5d876f0b7f",
+        "expectedBytes": 1833,
+        "expectedGitBlob": "184bbbc8c41fb60d96dcb832872983309a2c624c",
+        "mainGitBlob": "184bbbc8c41fb60d96dcb832872983309a2c624c",
+        "headGitBlob": "184bbbc8c41fb60d96dcb832872983309a2c624c",
+        "mainBytes": 1833,
+        "headBytes": 1833,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/original-rebuild-red.stderr.log.gz",
+        "manifestSha256": "ebfa039af9c4fbb0b009a05b2e8c1d3d36ef9c20c3a7e4bb88c2c9a71d5f82df",
+        "expectedBytes": 687,
+        "expectedGitBlob": "428b74e1c22a5ced43d734bd1ca5a5b4596907bb",
+        "mainGitBlob": "428b74e1c22a5ced43d734bd1ca5a5b4596907bb",
+        "headGitBlob": "428b74e1c22a5ced43d734bd1ca5a5b4596907bb",
+        "mainBytes": 687,
+        "headBytes": 687,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/original-rebuild-red.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/public-docs.command.json",
+        "manifestSha256": "7ffa191f986b53d647ebc9edcf337317b114edd4839bb9ef87bd4dbd7b15b836",
+        "expectedBytes": 2752,
+        "expectedGitBlob": "c9e2704651946c3f110ae18e7f48e057f394195b",
+        "mainGitBlob": "c9e2704651946c3f110ae18e7f48e057f394195b",
+        "headGitBlob": "c9e2704651946c3f110ae18e7f48e057f394195b",
+        "mainBytes": 2752,
+        "headBytes": 2752,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/public-docs.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/public-docs.stdout.log",
+        "manifestSha256": "cf431e4f786f612ab9cc37079a644b2d62b12a8d332b81fcfe58e0441b4d2492",
+        "expectedBytes": 145,
+        "expectedGitBlob": "4379e64868bf3b92273b1d3284f3b275bb5fe1c8",
+        "mainGitBlob": "4379e64868bf3b92273b1d3284f3b275bb5fe1c8",
+        "headGitBlob": "4379e64868bf3b92273b1d3284f3b275bb5fe1c8",
+        "mainBytes": 145,
+        "headBytes": 145,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json",
+        "manifestSha256": "a8baf9bdfa3126fd0ace800074d18a5a8ad78a12615c2d79e6d9ecbb149ff846",
+        "expectedBytes": 3608,
+        "expectedGitBlob": "a49127635364a874cfbdc05756f733ec1912190c",
+        "mainGitBlob": "a49127635364a874cfbdc05756f733ec1912190c",
+        "headGitBlob": "a49127635364a874cfbdc05756f733ec1912190c",
+        "mainBytes": 3608,
+        "headBytes": 3608,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md",
+        "manifestSha256": "4e8d3ea30b51f84544c6591e479aabef6aca5d39df993edf3ca5db290e1ca09b",
+        "expectedBytes": 4822,
+        "expectedGitBlob": "439c953341c824eae677e5f6f8cca8858a09899d",
+        "mainGitBlob": "439c953341c824eae677e5f6f8cca8858a09899d",
+        "headGitBlob": "439c953341c824eae677e5f6f8cca8858a09899d",
+        "mainBytes": 4822,
+        "headBytes": 4822,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/commands.json",
+        "manifestSha256": "893b8aaf15672de8d42e5e6d2b9ede4e1fbab7bffcbb00d41926e2c8a3976c8b",
+        "expectedBytes": 2236,
+        "expectedGitBlob": "0fb54e9d2654426a47e4b1a15b74a480bc4f25db",
+        "mainGitBlob": "0fb54e9d2654426a47e4b1a15b74a480bc4f25db",
+        "headGitBlob": "0fb54e9d2654426a47e4b1a15b74a480bc4f25db",
+        "mainBytes": 2236,
+        "headBytes": 2236,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/consumer-broker.stderr.log",
+        "manifestSha256": "053f30295a142af60f11caf0723bfbda9c0bd274b77f47895d59e3e6d02b5906",
+        "expectedBytes": 916,
+        "expectedGitBlob": "da786f142f7f85550aa86b3d2665c0092d3d2d77",
+        "mainGitBlob": "da786f142f7f85550aa86b3d2665c0092d3d2d77",
+        "headGitBlob": "da786f142f7f85550aa86b3d2665c0092d3d2d77",
+        "mainBytes": 916,
+        "headBytes": 916,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/consumer-broker.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/independent-review.json",
+        "manifestSha256": "8f6676d95212ee6aaa0165cd5c84ca9e57912c04f98ec935e7eb59f26b5a969f",
+        "expectedBytes": 9361,
+        "expectedGitBlob": "067038d6a1155d7bec06d533df30dd33a09b3630",
+        "mainGitBlob": "067038d6a1155d7bec06d533df30dd33a09b3630",
+        "headGitBlob": "067038d6a1155d7bec06d533df30dd33a09b3630",
+        "mainBytes": 9361,
+        "headBytes": 9361,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/model-request.stderr.log",
+        "manifestSha256": "3eea58862ed4dc1fc5072e6a9611d39c1b06d3384e3615f864e6a03f76e27975",
+        "expectedBytes": 1345,
+        "expectedGitBlob": "fb0a9cd82b1c761f812679f3c59ac42f1b0f1da5",
+        "mainGitBlob": "fb0a9cd82b1c761f812679f3c59ac42f1b0f1da5",
+        "headGitBlob": "fb0a9cd82b1c761f812679f3c59ac42f1b0f1da5",
+        "mainBytes": 1345,
+        "headBytes": 1345,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/model-request.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/public-docs.command.json",
+        "manifestSha256": "df0f8759a66aae9c033cfa8b1115b191291a676bd57a903c4ef9508a66bb670d",
+        "expectedBytes": 2644,
+        "expectedGitBlob": "f00055beb3cde143794ae1938289b17e0d632183",
+        "mainGitBlob": "f00055beb3cde143794ae1938289b17e0d632183",
+        "headGitBlob": "f00055beb3cde143794ae1938289b17e0d632183",
+        "mainBytes": 2644,
+        "headBytes": 2644,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/public-docs.stderr.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/public-docs.stdout.log",
+        "manifestSha256": "cf431e4f786f612ab9cc37079a644b2d62b12a8d332b81fcfe58e0441b4d2492",
+        "expectedBytes": 145,
+        "expectedGitBlob": "4379e64868bf3b92273b1d3284f3b275bb5fe1c8",
+        "mainGitBlob": "4379e64868bf3b92273b1d3284f3b275bb5fe1c8",
+        "headGitBlob": "4379e64868bf3b92273b1d3284f3b275bb5fe1c8",
+        "mainBytes": 145,
+        "headBytes": 145,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/setup-attempt/public-docs.command.json",
+        "manifestSha256": "371196dab323e3fc96b3a428a75f0405c9e61712cded45b2d22f412f65010d3e",
+        "expectedBytes": 2449,
+        "expectedGitBlob": "1b52595c748002fcc915f6671d6fb41b8fda0fa2",
+        "mainGitBlob": "1b52595c748002fcc915f6671d6fb41b8fda0fa2",
+        "headGitBlob": "1b52595c748002fcc915f6671d6fb41b8fda0fa2",
+        "mainBytes": 2449,
+        "headBytes": 2449,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/setup-attempt/public-docs.stderr.log",
+        "manifestSha256": "3e3a355781b68fd3e540591ebafb0af1b71bf7300c44003d8094411372dcd206",
+        "expectedBytes": 1069,
+        "expectedGitBlob": "f7cf4443d4f5b95d2f0b28a72be7075930812d6a",
+        "mainGitBlob": "f7cf4443d4f5b95d2f0b28a72be7075930812d6a",
+        "headGitBlob": "f7cf4443d4f5b95d2f0b28a72be7075930812d6a",
+        "mainBytes": 1069,
+        "headBytes": 1069,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/setup-attempt/public-docs.stdout.log",
+        "manifestSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expectedBytes": 0,
+        "expectedGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "headGitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mainBytes": 0,
+        "headBytes": 0,
+        "equal": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json",
+        "manifestSha256": "29cfe5378bd0c6257a05d9a1c27d728cc196e84e7e1d81ad4463240f9b21c0d6",
+        "expectedBytes": 7121,
+        "expectedGitBlob": "510771159471257c13dcd463f96b444ff3108a7a",
+        "mainGitBlob": "510771159471257c13dcd463f96b444ff3108a7a",
+        "headGitBlob": "510771159471257c13dcd463f96b444ff3108a7a",
+        "mainBytes": 7121,
+        "headBytes": 7121,
+        "equal": true
+      }
+    ],
+    "historicalAcceptanceClaim": false
+  },
+  "findings": {
+    "productBlocking": [],
+    "acceptanceOrchestration": [
+      {
+        "id": "S2-DELTA-ACCEPTANCE-001",
+        "severity": "P2",
+        "scope": "Temporary consumer runner, not product delta",
+        "status": "Resolved in reviewed runner source; actual external/local execution gates still pending",
+        "authority": "Current-user instruction retains original validation conditions; package.json lines109-111 defines full check:types; hosted runner lines337-339 only runs workspace subset.",
+        "observation": "Replacing original global check:types with hosted workspace-types omits docs; unconditional acceptanceClaim:true is invalid while external gates are NOT_RUN_HERE.",
+        "requiredResolution": "Keep actual old timeout; execute 9d generate:proto-ui-style plus check:types:docs separately, use actual exact-head hosted workspace result, and leave aggregate acceptance false until receipts are joined.",
+        "repair": {
+          "templateSourceRelativePath": "consumer-next-9d0f47d4/run-final-consumers.py",
+          "sha256": "95a201bcf878822d0315a2cac18095076cb60d826fb39e483871584af67a3488",
+          "bytes": 23321,
+          "reviewedChanges": [
+            "Preserves original consumer assertions and the 47-build/Tabs13 steps",
+            "Runs actual apps-www generate:proto-ui-style then check:types:docs",
+            "Separates aggregate NOT_RUN_HERE, workspace REQUIRES_INDEPENDENT_READBACK and docs local result",
+            "Retains timeout and error outputs",
+            "Sets acceptanceClaim false even when bounded local verification passes"
+          ],
+          "reviewerReadScope": "Actual revised template read in full, compared with prior versions, plus native SHA-256 readback of both template and later copied execution file. Both are identical; runtime summary still needs its own actual terminal results.",
+          "executionResultsClaimed": false,
+          "frozenExecutionCopy": {
+            "sourceRelativePath": "consumer-9d0f47d4ef67/run-final-consumers.py",
+            "sha256": "95a201bcf878822d0315a2cac18095076cb60d826fb39e483871584af67a3488",
+            "bytes": 23321,
+            "independentlyReadBack": true,
+            "resultBoundary": "Confirms the actual copied execution file matches reviewed source; does not claim pipeline completion."
+          }
+        }
+      }
+    ]
+  },
+  "acceptanceBoundary": "This is an internal exact-SHA source-delta and archive-identity review, not a canonical clean packet or platform approval. Prior 1450 test runs are historical; final 9d functional/consumer/types/visual results require their own actual receipts.",
+  "reviewedAt": "2026-11-23 14:18:29 UTC",
+  "archiveBindingPath": "internal/records/evidence/2026-11-23-sprint2-readiness/source-binding.json",
+  "historical1450ConsumerDisposition": {
+    "status": "FAIL",
+    "failingStage": "additional full check:types",
+    "observation": "Consumer audit owner reports actual 1200.055s timeout with exitCode null; original raw receipt retained. Earlier successful bounded stages do not turn the full run into a pass.",
+    "provenance": "Owner status received during review; not claimed reviewer rerun or independent terminal raw-receipt audit in this source-delta report.",
+    "subsequentTabs13": "NOT_RUN in that historical pipeline"
+  }
+}

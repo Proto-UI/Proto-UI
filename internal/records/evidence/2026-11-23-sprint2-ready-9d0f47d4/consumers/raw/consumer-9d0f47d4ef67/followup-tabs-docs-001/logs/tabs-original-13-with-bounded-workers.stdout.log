@@ -1,0 +1,34 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m$PRODUCT_9D[39m
+
+[90mstdout[2m | apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts[2m > [22m[2mvue2: switches a live profile without resetting selected value, focus, handles or children
+[22m[39mDownload the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools
+You are running Vue in development mode.
+Make sure to turn on production mode when deploying for production.
+See more tips at https://vuejs.org/guide/deployment.html
+
+ [32m✓[39m apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 4281[2mms[22m[39m
+   [33m[2m✓[22m[39m wc: switches a live profile without resetting selected value, focus, handles or children [33m342[2mms[22m[39m
+   [33m[2m✓[22m[39m react: switches a live profile without resetting selected value, focus, handles or children [33m813[2mms[22m[39m
+   [33m[2m✓[22m[39m vue: switches a live profile without resetting selected value, focus, handles or children [33m2118[2mms[22m[39m
+   [33m[2m✓[22m[39m vue2: switches a live profile without resetting selected value, focus, handles or children [33m749[2mms[22m[39m
+[90mstdout[2m | apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts[2m > [22m[2mvue2: the published profile-switch source builds and preserves its live Tabs child
+[22m[39mDownload the Vue Devtools extension for a better development experience:
+https://github.com/vuejs/vue-devtools
+You are running Vue in development mode.
+Make sure to turn on production mode when deploying for production.
+See more tips at https://vuejs.org/guide/deployment.html
+
+ [32m✓[39m apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 5363[2mms[22m[39m
+   [33m[2m✓[22m[39m wc: the published profile-switch source builds and preserves its live Tabs child [33m3892[2mms[22m[39m
+   [33m[2m✓[22m[39m react: the published profile-switch source builds and preserves its live Tabs child [33m702[2mms[22m[39m
+   [33m[2m✓[22m[39m vue: the published profile-switch source builds and preserves its live Tabs child [33m414[2mms[22m[39m
+   [33m[2m✓[22m[39m vue2: the published profile-switch source builds and preserves its live Tabs child [33m354[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m   Start at [22m 22:59:12
+[2m   Duration [22m 54.81s[2m (transform 5.99s, setup 0ms, collect 6.43s, tests 9.64s, environment 37.00s, prepare 965ms)[22m
+
+JSON report written to $CONTROL/consumer-9d0f47d4ef67/followup-tabs-docs-001/receipts/tabs-13.json

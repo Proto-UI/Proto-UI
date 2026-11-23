@@ -1,0 +1,12 @@
+{
+  "schema": "proto-ui.compiler-build.v1",
+  "revision": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "lockSha256": "96dbd55a65d85ba1fcf2f4268a42842c20844c409f41f1a0e457019c4cdd5672",
+  "profilesSha256": "112b14d8e28db9d802d97438dee8bc4636c5a20c156a5bf55bc266a94156e1d6",
+  "node": "24.22.3",
+  "typescript": "5.9.3",
+  "esbuild": "0.25.12",
+  "directory": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-b",
+  "files": 9
+}
+

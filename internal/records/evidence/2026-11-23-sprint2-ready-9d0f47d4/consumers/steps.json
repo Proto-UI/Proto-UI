@@ -1,0 +1,812 @@
+{
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "note": "Nested wrappers are recorded separately; their durations must not be added to child durations.",
+  "sourcePreparation": [
+    {
+      "name": "original-exact-tree",
+      "argv": [
+        "git",
+        "-C",
+        "$OBJECT_SOURCE_9D",
+        "rev-parse",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42^{tree}"
+      ],
+      "cwd": "$CONTROL",
+      "exitCode": 0,
+      "wallSeconds": 8.936,
+      "stdoutSha256": "9ae6a9c14ddf8ccd70105ae5719f89e74fda86123771073b60043d45b640d27e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clone-shared-readonly-objects",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "$OBJECT_SOURCE_9D",
+        "$PRODUCT_9D"
+      ],
+      "cwd": "$CONTROL",
+      "exitCode": 0,
+      "wallSeconds": 8.028,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "ebcd6e980a5c7b0481b2edefce1b1f08f614c93d2f59ccabdff77257eada6dbb"
+    },
+    {
+      "name": "checkout-exact-head",
+      "argv": [
+        "git",
+        "checkout",
+        "--detach",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 132.858,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "88116ba087e5db53734f4498ade7133ee4e962cc4e494a69c63be976c8ece56d"
+    },
+    {
+      "name": "source-head",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 0.317,
+      "stdoutSha256": "dd7442bb4317ef8c8b20f81f3534b3c20504141e58b0c1189a6493bb02efadd3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-tree",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 0.004,
+      "stdoutSha256": "9ae6a9c14ddf8ccd70105ae5719f89e74fda86123771073b60043d45b640d27e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-clean",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=normal"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "wallSeconds": 0.765,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "bootstrap",
+      "argv": [
+        "python3",
+        "$CONTROL/consumer-next-9d0f47d4/bootstrap.py",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42"
+      ],
+      "cwd": "$CONTROL",
+      "exitCode": 1,
+      "wallSeconds": 2021.107,
+      "stdoutSha256": "6c2432f2d69dd810a6bc61bbe9fa7e9bf05488c607ac777c77951c1bc590bbe0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "bootstrap": [
+    {
+      "name": "source-head",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "seconds": 0.003977611951995641,
+      "stdoutSha256": "dd7442bb4317ef8c8b20f81f3534b3c20504141e58b0c1189a6493bb02efadd3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-tree",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "seconds": 0.0039009079919196665,
+      "stdoutSha256": "9ae6a9c14ddf8ccd70105ae5719f89e74fda86123771073b60043d45b640d27e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-clean",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=normal"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "seconds": 0.12360891298158094,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "node-version",
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67",
+      "exitCode": 0,
+      "seconds": 0.06833121599629521,
+      "stdoutSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pnpm-version",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "--version"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67",
+      "exitCode": 0,
+      "seconds": 0.9161637179786339,
+      "stdoutSha256": "f71ff3f5176cd06dce75ef9c6a6a4ea9eacefa43f5bd92c6cc9322dd2c8216a3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-frozen-install",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--fetch-retries=0",
+        "--fetch-timeout=30000"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "seconds": 274.9308391250088,
+      "stdoutSha256": "f818f0f695417f5ebe741e3410fa78ed7313936fa997788263a8595b2c1ff2b7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-clean-after-install",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=normal"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "exitCode": 0,
+      "seconds": 42.0220256060129,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-original-commit",
+      "argv": [
+        "git",
+        "cat-file",
+        "-t",
+        "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42"
+      ],
+      "cwd": "$FROZEN_SHENKO",
+      "exitCode": 0,
+      "seconds": 26.38788062002277,
+      "stdoutSha256": "50836eee574ecff79dea3b4fd40673d7d000f7a5f177d8a6a3000b59c78383b8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-original-commit",
+      "argv": [
+        "git",
+        "cat-file",
+        "-t",
+        "91a775546ebd21a87d76d76568195a6513437719"
+      ],
+      "cwd": "$CONTROL/consumer-16be/frozen-verdant",
+      "exitCode": 0,
+      "seconds": 4.394198784953915,
+      "stdoutSha256": "50836eee574ecff79dea3b4fd40673d7d000f7a5f177d8a6a3000b59c78383b8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pipeline",
+      "argv": [
+        "python3",
+        "$CONTROL/consumer-9d0f47d4ef67/run-final-consumers.py",
+        "--source",
+        "$PRODUCT_9D",
+        "--head",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+        "--out",
+        "$CONTROL/consumer-9d0f47d4ef67/evidence-run-001",
+        "--shenko-repository",
+        "$FROZEN_SHENKO",
+        "--verdant-repository",
+        "$CONTROL/consumer-16be/frozen-verdant"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67",
+      "exitCode": 1,
+      "seconds": 1671.62048254197,
+      "stdoutSha256": "9fdbb8254e0ed153ee22e03677d6f59cfb25e1f65b4c218c255466fc88ad9ada",
+      "stderrSha256": "7b28bd61d92a0fab8a3f2e06a8126ea3c426bab7e58a8b3d0f6b2d66554edeb5"
+    }
+  ],
+  "initialConsumerReplay": [
+    {
+      "name": "node-version",
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 0.068,
+      "stdout": "logs/node-version.stdout.log",
+      "stderr": "logs/node-version.stderr.log",
+      "stdoutSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pnpm-version",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "--version"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 2.12,
+      "stdout": "logs/pnpm-version.stdout.log",
+      "stderr": "logs/pnpm-version.stderr.log",
+      "stdoutSha256": "f71ff3f5176cd06dce75ef9c6a6a4ea9eacefa43f5bd92c6cc9322dd2c8216a3",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-clone",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "$FROZEN_SHENKO",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 53.975,
+      "stdout": "logs/shenko-clone.stdout.log",
+      "stderr": "logs/shenko-clone.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "1af300ef4ffea3d5e440b6afffc6ef37616177884b928c8526cbb3170b6f7b7e"
+    },
+    {
+      "name": "shenko-sparse",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "--no-sparse-index",
+        "/AGENTS.md",
+        "/.agents/skills/shenko-dev/",
+        "/crates/shenko-ui/"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 0.066,
+      "stdout": "logs/shenko-sparse.stdout.log",
+      "stderr": "logs/shenko-sparse.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-checkout",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "checkout",
+        "--detach",
+        "f3fa6f4d8bf22cfd2baf490d9c3a08bd39af4d42"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 72.677,
+      "stdout": "logs/shenko-checkout.stdout.log",
+      "stderr": "logs/shenko-checkout.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "dc29692a76f64a17b76b10e5135049a6150f0c6b8901921d1320d13a8e2822c7"
+    },
+    {
+      "name": "verdant-clone",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "$CONTROL/consumer-16be/frozen-verdant",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 0.918,
+      "stdout": "logs/verdant-clone.stdout.log",
+      "stderr": "logs/verdant-clone.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e1cc7d1b1b6c274c6b286193f10dcb4afbaa2c88b73235e343b035d509e9e5ef"
+    },
+    {
+      "name": "verdant-sparse",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "--no-sparse-index",
+        "/AGENTS.md",
+        "/frontend/proto-ui/",
+        "/frontend/Cargo.toml"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 0.008,
+      "stdout": "logs/verdant-sparse.stdout.log",
+      "stderr": "logs/verdant-sparse.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-checkout",
+      "argv": [
+        "git",
+        "-C",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+        "checkout",
+        "--detach",
+        "91a775546ebd21a87d76d76568195a6513437719"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 0.033,
+      "stdout": "logs/verdant-checkout.stdout.log",
+      "stderr": "logs/verdant-checkout.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "eeb1bf047f83bba637d4ba7e4b26390b7b48df75b254b06a6a7ce6529ef71817"
+    },
+    {
+      "name": "pinned-build-a",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/build-pinned.ts",
+        "--revision",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+        "--output",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 18.057,
+      "stdout": "logs/pinned-build-a.stdout.log",
+      "stderr": "logs/pinned-build-a.stderr.log",
+      "stdoutSha256": "998298608620dd384e9cb8316da6894768fafa6eaaa0465749ce9886911bde9d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-build-b",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/build-pinned.ts",
+        "--revision",
+        "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+        "--output",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-b"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 6.038,
+      "stdout": "logs/pinned-build-b.stdout.log",
+      "stderr": "logs/pinned-build-b.stderr.log",
+      "stdoutSha256": "47de9d32e369a1e61127741e5ab972f271153a066d5ea22544d6374b0b996240",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-artifact-install",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 1.121,
+      "stdout": "logs/pinned-artifact-install.stdout.log",
+      "stderr": "logs/pinned-artifact-install.stderr.log",
+      "stdoutSha256": "9312232a6f347f71c5a05bdcc6f2dc711a3c2b202638d45001b037237e722772",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-cli",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/pinned-cli-smoke.mjs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 238.55,
+      "stdout": "logs/pinned-cli.stdout.log",
+      "stderr": "logs/pinned-cli.stderr.log",
+      "stdoutSha256": "a7cdbdf1bfe432d71387b1ed80f7cf9d834dcd12bc3d7cb68442caa74c633597",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ordinary-frameworks",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/native-consumer-smoke.mjs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 357.988,
+      "stdout": "logs/ordinary-frameworks.stdout.log",
+      "stderr": "logs/ordinary-frameworks.stderr.log",
+      "stdoutSha256": "051f466c214b2fd77c3a9ad5771d66a1672740d5f53fcd5255e147cfc1cd6e1a",
+      "stderrSha256": "62d44763e08e4822ed8156f1233ec1ec4a7df20913f578553eed0fb626becf3a"
+    },
+    {
+      "name": "ordinary-families",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/release-family-smoke.mjs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 67.404,
+      "stdout": "logs/ordinary-families.stdout.log",
+      "stderr": "logs/ordinary-families.stderr.log",
+      "stdoutSha256": "a31beed646b3fb1a8e06f243e538f7b98166681319ce3d627659098000e96608",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "family-production-costs",
+      "argv": [
+        "node",
+        "scripts/compiler/release-family-costs.mjs",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-release-families-7GRQgm/summary.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 2.176,
+      "stdout": "logs/family-production-costs.stdout.log",
+      "stderr": "logs/family-production-costs.stderr.log",
+      "stdoutSha256": "9554f553d11dcb323c8ad3ebca710added066a0094c5dcb24fbc4a7088dfc69e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "frozen-source-inventory",
+      "argv": [
+        "node",
+        "scripts/compiler/sprint2-consumer-inventory.mjs",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+        "$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/source-admission.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 24.583,
+      "stdout": "logs/frozen-source-inventory.stdout.log",
+      "stderr": "logs/frozen-source-inventory.stderr.log",
+      "stdoutSha256": "cbed493ec9321db3fc215a9b9062808e2e88252211a89685c1a466ab2bc96a07",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-shenko-closure",
+      "argv": [
+        "node",
+        "scripts/build/public-packages.mjs",
+        "--package",
+        "@proto.ui/adapter-react",
+        "--package",
+        "@proto.ui/prototypes-shadcn",
+        "--package",
+        "@proto.ui/cli",
+        "--json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 151.659,
+      "stdout": "logs/public-shenko-closure.stdout.log",
+      "stderr": "logs/public-shenko-closure.stderr.log",
+      "stdoutSha256": "51cfea225c2bc15871e71b46a089d0dbb8632ad0c323b4ecff0b978ffb973553",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-frozen-install",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--fetch-retries=0",
+        "--fetch-timeout=30000"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko/crates/shenko-ui/web",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 18.678,
+      "stdout": "logs/shenko-frozen-install.stdout.log",
+      "stderr": "logs/shenko-frozen-install.stderr.log",
+      "stdoutSha256": "26c75e0f07308107306228820a6ca71e7acc4f051f7ba40a33b131b9d01a654d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shenko-application",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/compiler/shenko-consumer-smoke.mjs",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/shenko",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/compiler-a",
+        "$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/public-build-shenko-closure.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 33.257,
+      "stdout": "logs/shenko-application.stdout.log",
+      "stderr": "logs/shenko-application.stderr.log",
+      "stdoutSha256": "7f6be225eeec720dcf6f1a9bf2914693faf2a5016cb2a103c02546f0f7e7b3b4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-original-pin-rejection",
+      "argv": [
+        "node",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "$PRODUCT_9D",
+        "--check"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "expectedExit": 2,
+      "exitCode": 2,
+      "wallSeconds": 0.566,
+      "stdout": "logs/verdant-original-pin-rejection.stdout.log",
+      "stderr": "logs/verdant-original-pin-rejection.stderr.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "717e060dd00b1cc3d7fc3069d8d28887fe64f7fbebf7247f7a7cf3f239efe310"
+    },
+    {
+      "name": "verdant-producer",
+      "argv": [
+        "node",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "$PRODUCT_9D"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 4.779,
+      "stdout": "logs/verdant-producer.stdout.log",
+      "stderr": "logs/verdant-producer.stderr.log",
+      "stdoutSha256": "2de8fed66b1fc63095c74d650121c656292003c0c10e2df2a3f7807cd33c3131",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "verdant-producer-check",
+      "argv": [
+        "node",
+        "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "$PRODUCT_9D",
+        "--check"
+      ],
+      "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 2.883,
+      "stdout": "logs/verdant-producer-check.stdout.log",
+      "stderr": "logs/verdant-producer-check.stderr.log",
+      "stdoutSha256": "66e6248d82a133c4434d998c4f23d7517292b1ef071ffced006db6943d929ee9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "public-all-47-before-tabs",
+      "argv": [
+        "node",
+        "scripts/build/public-packages.mjs",
+        "--json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 420.551,
+      "stdout": "logs/public-all-47-before-tabs.stdout.log",
+      "stderr": "logs/public-all-47-before-tabs.stderr.log",
+      "stdoutSha256": "523fa14c7f84b010030dba423d5c652d5372d2a5ce672245af3ad61e5b9aa68b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tabs-profile-switch-separate-13",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+        "--maxWorkers=1",
+        "--reporter=json",
+        "--outputFile=$CONTROL/consumer-9d0f47d4ef67/evidence-run-001/receipts/tabs-profile-switch.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 1,
+      "wallSeconds": 7.088,
+      "stdout": "logs/tabs-profile-switch-separate-13.stdout.log",
+      "stderr": "logs/tabs-profile-switch-separate-13.stderr.log",
+      "stdoutSha256": "170d266da65c58ef330564982009d168c88c5accec3094d069cc116842626d1f",
+      "stderrSha256": "1c32066e9790af82666b64346700aced4ad969da35f42e2b4e93ac7d7d2ad801"
+    }
+  ],
+  "tabsAndDocsFollowup": [
+    {
+      "name": "tabs-worker-diagnostic",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=$CONTROL/consumer-9d0f47d4ef67/followup-tabs-docs-001/receipts/tabs-diagnostic.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": null,
+      "exitCode": 1,
+      "wallSeconds": 4.343,
+      "stdout": "logs/tabs-worker-diagnostic.stdout.log",
+      "stderr": "logs/tabs-worker-diagnostic.stderr.log",
+      "stdoutSha256": "cfcb7556970ddf68c47e352f0bb7751ccfc133f55c7489cf89c64bb03b233688",
+      "stderrSha256": "83be7fee6312fca521ff70b451c546e10e0a38340fdbe29aa12880b01fddc2d6"
+    },
+    {
+      "name": "tabs-original-13-with-bounded-workers",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch.test.ts",
+        "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=$CONTROL/consumer-9d0f47d4ef67/followup-tabs-docs-001/receipts/tabs-13.json"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 56.012,
+      "stdout": "logs/tabs-original-13-with-bounded-workers.stdout.log",
+      "stderr": "logs/tabs-original-13-with-bounded-workers.stderr.log",
+      "stdoutSha256": "131f2d0284557359255af0b30e832f88ab97f0c5e3dfd3788f552084b0495990",
+      "stderrSha256": "66b18b63fdfe1604c74123627b8eb5419996f187779084342c9e7eae95b04de3"
+    },
+    {
+      "name": "docs-generate-proto-ui-style",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "--filter",
+        "apps-www",
+        "generate:proto-ui-style"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 135.453,
+      "stdout": "logs/docs-generate-proto-ui-style.stdout.log",
+      "stderr": "logs/docs-generate-proto-ui-style.stderr.log",
+      "stdoutSha256": "772f7a5570ee07fde42a63c401c21b7fe4b9bc1a96c72aeba7d62ef2687e61bb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "docs-types",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:types:docs"
+      ],
+      "cwd": "$PRODUCT_9D",
+      "expectedExit": 0,
+      "exitCode": 0,
+      "wallSeconds": 477.341,
+      "stdout": "logs/docs-types.stdout.log",
+      "stderr": "logs/docs-types.stderr.log",
+      "stdoutSha256": "b569c6579c4752a0abbdf7c76784f6514567681d256085e28b2ff0a0dc20ad83",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "externalWorkspaceTypecheck": {
+    "id": "workspace-types",
+    "startedAt": "2026-11-23T13:59:33.988Z",
+    "status": "passed",
+    "invocation": {
+      "command": "corepack",
+      "args": [
+        "pnpm@10.32.1",
+        "check:types:workspace"
+      ],
+      "cwd": "$GITHUB_WORKSPACE/",
+      "log": "$GITHUB_TEMP/sprint2-consumers/workspace-types/run.log"
+    },
+    "process": {
+      "code": 0,
+      "signal": null,
+      "timeout": false
+    },
+    "finishedAt": "2026-11-23T14:00:21.198Z"
+  }
+}

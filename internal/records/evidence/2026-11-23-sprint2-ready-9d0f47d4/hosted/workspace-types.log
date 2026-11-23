@@ -1,0 +1,4 @@
+
+> proto-ui@ check:types:workspace /home/runner/work/Proto-UI/Proto-UI
+> tsc -p tsconfig.workspace.json --noEmit
+

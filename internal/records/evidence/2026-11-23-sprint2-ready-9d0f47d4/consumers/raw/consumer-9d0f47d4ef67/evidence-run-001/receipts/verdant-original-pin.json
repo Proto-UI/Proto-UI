@@ -1,0 +1,26 @@
+{
+  "schema": "verdant.proto-ui.compiler-pin.v1",
+  "upstream": {
+    "repository": "https://github.com/Proto-UI/Proto-UI",
+    "revision": "e56b2d1a3d6b688a1cbc6930dab1d6757304d733"
+  },
+  "packageVersions": {
+    "protoUi": "0.3.0-alpha.2",
+    "packageManager": "pnpm@10.32.1",
+    "nodeEngine": "24.x"
+  },
+  "target": {
+    "profile": "gpui-source-v1",
+    "gpuiDependency": "workspace",
+    "componentName": "PitchGestureSurface"
+  },
+  "gpu": {
+    "upstreamGpuiRevision": "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+    "workspaceGpuiRevision": "e5f2f9db75e97613232b5c1946333e61fa3828ab"
+  },
+  "source": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
+  "output": {
+    "directory": "frontend/proto-ui/generated/pitch-gesture-surface",
+    "receipt": "frontend/proto-ui/receipts/pitch-gesture-surface.json"
+  }
+}

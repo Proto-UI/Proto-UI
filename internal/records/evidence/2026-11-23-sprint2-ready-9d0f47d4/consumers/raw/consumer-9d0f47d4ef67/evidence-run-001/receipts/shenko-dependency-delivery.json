@@ -1,0 +1,13 @@
+{
+  "mode": "frozen",
+  "lockSha256": "567b7b1d37e6aef4ce9e6436f024cddf3e59993f716ad1a7bc724779d4756c3e",
+  "claim": "Actual frozen pnpm install; install lifecycle scripts disabled.",
+  "verifiedDirectVersions": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}

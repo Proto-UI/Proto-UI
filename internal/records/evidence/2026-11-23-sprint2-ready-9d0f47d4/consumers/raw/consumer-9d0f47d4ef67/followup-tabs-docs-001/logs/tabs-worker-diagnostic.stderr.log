@@ -1,0 +1,26 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mRangeError[22m: options.minThreads and options.maxThreads must not conflict[39m
+[90m [2m❯[22m new Tinypool node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/dist/index.js:[2m745:120[22m[39m
+[90m [2m❯[22m createForksPool node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:[2m6756:16[22m[39m
+[90m [2m❯[22m forks node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:[2m7664:20[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:[2m7690:27[22m[39m
+[90m [2m❯[22m executeTests node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js:[2m7681:5[22m[39m
+[90m [2m❯[22m node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:[2m10818:9[22m[39m
+[90m [2m❯[22m Vitest.runFiles node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:[2m10840:12[22m[39m
+[90m [2m❯[22m Vitest.start node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:[2m10682:7[22m[39m
+[90m [2m❯[22m startVitest node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js:[2m11848:7[22m[39m
+
+

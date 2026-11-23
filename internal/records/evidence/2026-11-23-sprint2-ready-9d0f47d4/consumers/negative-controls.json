@@ -1,0 +1,31 @@
+{
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "shenkoLegacyIdentity": {
+    "tests": 4,
+    "pass": 3,
+    "fail": 1,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "verdantOriginalPinRejection": {
+    "name": "verdant-original-pin-rejection",
+    "argv": [
+      "node",
+      "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant/frontend/proto-ui/tools/build-proto-ui.mjs",
+      "--upstream",
+      "$PRODUCT_9D",
+      "--check"
+    ],
+    "cwd": "$CONTROL/consumer-9d0f47d4ef67/runtime/proto-s2-final-consumers-tg9z9p9b/verdant",
+    "expectedExit": 2,
+    "exitCode": 2,
+    "wallSeconds": 0.566,
+    "stdout": "logs/verdant-original-pin-rejection.stdout.log",
+    "stderr": "logs/verdant-original-pin-rejection.stderr.log",
+    "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSha256": "717e060dd00b1cc3d7fc3069d8d28887fe64f7fbebf7247f7a7cf3f239efe310"
+  },
+  "ordinaryFrameworkControls": "The maintained smoke deliberately injects invalid generated code and runtime-import/helper-closure faults. Expected negative diagnostics remain in the original framework logs and summary.",
+  "consumerAdaptations": "Shenko temporary identity-only assertion migration and Verdant temporary upstream revision change are preserved as patches, not changes to original authored sources."
+}

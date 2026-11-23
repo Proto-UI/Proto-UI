@@ -1,0 +1,60 @@
+{
+  "sourceHead": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+  "currentPrHeadAtReview": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "packetSha256": "e7b6bad347ce64c4ed0ffd5de178986808c6ba348b50148065701c3449a62851",
+  "packetBytes": 348534,
+  "extractedAt": "2026-11-23T14:17:11.485727+00:00",
+  "files": [
+    {
+      "path": "visual-review/README.md",
+      "sha256": "88e75e14770a093f82bd0a03c90d64b923026c9d105f6a078d3b1d7c4cc16996",
+      "bytes": 11429
+    },
+    {
+      "path": "visual-review/brutalist-historical-comparison.json",
+      "sha256": "37aeb86368e65f78ff08bdc8b02dec47df7f1ac6650db8cecd0b01520d9b97fc",
+      "bytes": 2815
+    },
+    {
+      "path": "visual-review/brutalist-historical-comparison.png",
+      "sha256": "61a10e1355aeefa8f81ae607b02c8bbbadfdad21b5928964dc7ad82b1c7bd616",
+      "bytes": 56442
+    },
+    {
+      "path": "visual-review/index.json",
+      "sha256": "4d8da8092316a2893fd715bbf65d9c77ec1cf42e22dee5b2ae48889ab79770a6",
+      "bytes": 134047
+    },
+    {
+      "path": "visual-review/review-process.json",
+      "sha256": "4d7a663032d3439c25fd15d3a644c6af778f54543cdbc233eb3c8660fd31865f",
+      "bytes": 139504
+    },
+    {
+      "path": "historical-d0392fb/provenance.json",
+      "sha256": "012b0d142586f11f8adf66dcfbedb3361fcbeb1f09b5cad7ee3e321ccafd6a8c",
+      "bytes": 2546
+    },
+    {
+      "path": "historical-d0392fb/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.json",
+      "sha256": "3c33132e2b89328b6110ca83ddd7a6aff981e9bcabc4d8199a9c2501593c446e",
+      "bytes": 914
+    },
+    {
+      "path": "historical-d0392fb/site/sidebar-zh-cn-light-brutalist-enhanced-group-hover.png",
+      "sha256": "3a7f9602749abc835dbf1e02be4b303e974793b84e20f1e769959443cad939f6",
+      "bytes": 137341
+    },
+    {
+      "path": "historical-d0392fb/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.json",
+      "sha256": "d627348c82e082860ca64109a65a1366303a5a4625eae26c76408556dcc98ba0",
+      "bytes": 912
+    },
+    {
+      "path": "historical-d0392fb/site/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover.png",
+      "sha256": "57ac2180099d9ef6a61dc4fff6cd145da135a24be920dde2f4b6a13e222d756e",
+      "bytes": 135414
+    }
+  ],
+  "status": "verified-and-extracted"
+}

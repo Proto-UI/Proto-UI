@@ -1,0 +1,13 @@
+{
+  "pid": 1554927,
+  "pgid": 1554927,
+  "startedAt": "2026-11-23T14:15:10.344645+00:00",
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "tree": "0c9d31e5bb05d3af79932ec3c62a61480197f9eb",
+  "fileSha256": {
+    "run-final-consumers.py": "95a201bcf878822d0315a2cac18095076cb60d826fb39e483871584af67a3488",
+    "bootstrap.py": "5fcb95efe54637e5337617ecb17e513124b0fffbf028a6170c06d4095f384694",
+    "prepare-source-and-run.py": "7148fb82c9c1561bc1c47bb054f42be1d33463c382f75a00eb05f82dc560dfe0"
+  },
+  "mode": "background; full isolated source clone, frozen install, maintained non-native consumers, full 47 public builds, Tabs13, separate docs generation/types"
+}

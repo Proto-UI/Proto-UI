@@ -1,0 +1,8 @@
+{
+  "pid": 1728990,
+  "pgid": 1728990,
+  "startedAt": "2026-11-23T14:59:02.685554+00:00",
+  "scriptSha256": "7e3c9cc3f97292e405fda0c702328c455ca6abed04d8f6e151eaec4e454fa62d",
+  "head": "9d0f47d4ef67bbc3676e4db24c7906f8721e5b42",
+  "scope": "Original Tabs diagnostic and exact 13 with worker bounds, then separate original docs generation/typecheck; no repeat of passed consumer stages."
+}
