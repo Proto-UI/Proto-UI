@@ -77,6 +77,9 @@ describe('site Shadcn control bridge', () => {
       expect(root.dataset.siteControlFamily).toBe(family);
       expect(content.dataset.siteControlFamily).toBe(family);
       expect(replay).toHaveBeenCalledWith({});
+      expect(
+        root.querySelector<HTMLElement>(`wc-${family}-select-item-text`)!.style.whiteSpace
+      ).toBe('');
       expect(selectValue(root)).toBe('vue');
       expect(root.querySelector(`wc-${family}-select-value`)?.textContent).toBe('Vue');
       expect(root.querySelector('[data-value="vue"]')?.getAttribute('aria-selected')).toBe('true');
@@ -345,10 +348,22 @@ describe('site family projections', () => {
       outside.dataset.siteButton = '';
       header.append(button, root);
       document.body.append(header, outside);
+      const projectStyle = vi.spyOn(button.style, 'setProperty');
+      const outsideStyle = vi.spyOn(outside.style, 'setProperty');
       initSiteShadcnControls(document);
       await settle();
-      expect(button.style.width).toBe('2.75rem');
-      expect(button.style.height).toBe('2.75rem');
+      // HappyDOM does not retain var() on width/height. Observe the actual CSS
+      // projection call; the native Navbar lane checks resolved 44/40px paint.
+      expect(projectStyle).toHaveBeenCalledWith(
+        'width',
+        'var(--site-header-icon-size, 2.75rem)',
+        ''
+      );
+      expect(projectStyle).toHaveBeenCalledWith(
+        'height',
+        'var(--site-header-icon-size, 2.75rem)',
+        ''
+      );
       expect(button.style.padding).toBe('0px');
       expect(root.style.width).toBe('100%');
       expect(root.style.minWidth).toBe('0');
@@ -368,6 +383,7 @@ describe('site family projections', () => {
       expect(item.textContent).toBe('Web Components');
       expect(trigger.getAttribute('aria-labelledby')).toBe('header-runtime-label');
       expect(outside.style.width).not.toBe('2.75rem');
+      expect(outsideStyle.mock.calls.some(([property]) => property === 'width')).toBe(false);
       setSelectValue(root, 'react');
       setSiteSelectDisabled(root, true);
       await settle();
@@ -382,11 +398,22 @@ it.each(['shadcn', 'brutalist'] as const)(
   'allows Docs %s runtime values to wrap through supported surface inputs and keeps full props',
   async (family) => {
     registerSiteShadcnControls();
+    const item = `<wc-${family}-select-item data-value="wc" data-text-value="Web Components">${
+      family === 'shadcn'
+        ? '<wc-shadcn-select-item-text>Web Components</wc-shadcn-select-item-text>'
+        : 'Web Components'
+    }</wc-${family}-select-item>`;
+    const items =
+      family === 'shadcn'
+        ? `<wc-shadcn-select-surface><wc-shadcn-select-viewport>${item}</wc-shadcn-select-viewport></wc-shadcn-select-surface>`
+        : item;
     document.body.innerHTML = `<header data-site-header data-docs-site-header><div data-adapter-select>
       <wc-${family}-select-root data-site-select-root data-site-initial-value="wc">
         <wc-${family}-select-trigger data-size="sm" data-appearance="elevated"><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
-        <wc-${family}-select-content><wc-${family}-select-item data-value="wc" data-text-value="Web Components">Web Components</wc-${family}-select-item></wc-${family}-select-content>
+        <wc-${family}-select-content data-position="popper">${items}</wc-${family}-select-content>
       </wc-${family}-select-root></div></header>`;
+    const content = document.querySelector<SiteSelectRoot>(`wc-${family}-select-content`)!;
+    const replay = vi.spyOn(content, 'setProps');
     initSiteShadcnControls(document);
     await settle();
     const trigger = document.querySelector<HTMLElement>(`wc-${family}-select-trigger`)!;
@@ -408,6 +435,17 @@ it.each(['shadcn', 'brutalist'] as const)(
     expect(value.style.overflow).toBe('visible');
     expect(value.style.overflowWrap).toBe('anywhere');
     expect(value.textContent).toBe('Web Components');
+    expect(replay).toHaveBeenCalledWith({ position: 'popper' });
+    if (family === 'shadcn') {
+      const text = document.querySelector<HTMLElement>('wc-shadcn-select-item-text')!;
+      expect(text.textContent).toBe('Web Components');
+      expect(text.style.minWidth).toBe('0');
+      expect(text.style.flex).toBe('1 1 auto');
+      expect(text.style.whiteSpace).toBe('normal');
+      expect(text.style.overflowWrap).toBe('anywhere');
+      expect(text.closest('wc-shadcn-select-viewport')).not.toBeNull();
+      expect(text.closest('wc-shadcn-select-surface')).not.toBeNull();
+    }
     initSiteShadcnControls(document);
     await settle();
     expect(trigger.getAttribute('role')).toBe('combobox');
@@ -444,15 +482,35 @@ it('bounds the existing local adapter field without clipping enlarged value text
 it('maps a legacy ghost alias to the existing public Brutalist surface variant', async () => {
   document.body.innerHTML =
     '<header data-site-header><wc-brutalist-button data-site-button data-variant="ghost" data-size="icon">Menu</wc-brutalist-button></header>';
+  const button = document.querySelector<HTMLElement>('wc-brutalist-button')!;
+  const projectStyle = vi.spyOn(button.style, 'setProperty');
   initSiteShadcnControls(document);
   await settle();
-  const button = document.querySelector<HTMLElement>('wc-brutalist-button')!;
   const tokens = button.getAttribute('data-pui-style')!;
   expect(button.getAttribute('role')).toBe('button');
   expect(tokens).toContain('border-black');
   expect(tokens).toContain('bg-secondary-background');
   expect(tokens).toContain('shadow-[4px_4px_0_0_#000]');
-  expect(button.style.width).toBe('2.75rem');
+  expect(projectStyle).toHaveBeenCalledWith('width', 'var(--site-header-icon-size, 2.75rem)', '');
+});
+
+it('retains the Bootstrap theme command intent when its public size has normalized to default', async () => {
+  document.body.innerHTML =
+    '<header data-site-header><wc-bootstrap-2-3-2-button data-site-button data-theme-toggle data-header-button-size="icon" data-variant="default" data-size="default">Theme</wc-bootstrap-2-3-2-button></header>';
+  initSiteShadcnControls(document);
+  await settle();
+  const button = document.querySelector<HTMLElement>('wc-bootstrap-2-3-2-button')!;
+  const tokens = button.getAttribute('data-pui-style')!.split(' ');
+  expect(button.getAttribute('role')).toBe('button');
+  expect(tokens).toContain('bg-transparent');
+  expect(tokens).toContain('text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)]');
+  expect(tokens.some((token) => token.includes('linear-gradient'))).toBe(false);
+  expect(tokens).toContain('shadow-none');
+  const identity = button;
+  initSiteShadcnControls(document);
+  await settle();
+  expect(document.querySelector('wc-bootstrap-2-3-2-button')).toBe(identity);
+  expect(button.getAttribute('data-pui-style')!.split(' ')).toEqual(tokens);
 });
 
 it.each(['react', 'vue', 'vue2'])(

@@ -1,0 +1,9 @@
+{
+  "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "fixtureSha256": "78009efe8cd85289acca6b1a86215943cd441a769f557e3c0fbe82dedefc593c",
+  "kind": "same-product-source-fixture-repair-control",
+  "expectedCases": 61,
+  "originalCases": 42,
+  "targetCases": 20,
+  "extraTargetRepetitions": 19
+}

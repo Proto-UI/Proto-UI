@@ -1,0 +1,26 @@
+{
+  "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+  "runId": 45018120859,
+  "jobId": 137194765805,
+  "artifactZipSha256": "adf0b5a64a3641ca10295e352880583cbd44fe3a7254450875a30297c50cdbbc",
+  "files": [
+    {
+      "file": "afde-bootstrap-docs-dark-focus-defect.png",
+      "originalArtifactFile": "docs-dark-390-focus.png",
+      "sha256": "aa9db5835f0396038b56a3bc10d3518db82582b5a0327201f03ddae52113cc68",
+      "bytes": 5153
+    },
+    {
+      "file": "afde-bootstrap-home-dark-focus-control.png",
+      "originalArtifactFile": "home-wc-dark-390-focus.png",
+      "sha256": "8a6dae1226af95e54f528b448e45474ce8fc1a45b2f41bde0369f73c4047becd",
+      "bytes": 4792
+    },
+    {
+      "file": "afde-navbar-focus-pixel-observations.json",
+      "sha256": "ab7912f7a7dc095fae7a150d10d64efc07e1871bfcc2fefe705c5d55d1b5a731",
+      "bytes": 4817
+    }
+  ],
+  "observation": "Actual PNG focus-ring pixels; original native suite asserted width only. No focus-phase computed-color record exists in that manifest. Source ring-primary-foreground inherits page palette; P-BUTTON-NAVBAR requires white 2px."
+}

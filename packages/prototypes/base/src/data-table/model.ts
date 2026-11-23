@@ -7,6 +7,7 @@ export function dataView(
     sortKey?: string;
     sortDirection?: SortDirection;
     filter?: string;
+    columnFilters?: Readonly<Record<string, string>>;
     page?: number;
     pageSize?: number;
   } = {}
@@ -17,15 +18,25 @@ export function dataView(
   )
     throw new Error('Data table records require unique non-empty id');
   const query = (options.filter ?? '').trim().toLocaleLowerCase();
+  const columnQueries = Object.entries(options.columnFilters ?? {}).map(
+    ([key, query]) => [key, query.trim().toLocaleLowerCase()] as const
+  );
   let result = rows
     .map((row, index) => ({ row, index }))
     .filter(
       ({ row }) =>
-        !query ||
-        Object.values(row).some((value) =>
-          String(value ?? '')
-            .toLocaleLowerCase()
-            .includes(query)
+        (!query ||
+          Object.values(row).some((value) =>
+            String(value ?? '')
+              .toLocaleLowerCase()
+              .includes(query)
+          )) &&
+        columnQueries.every(
+          ([key, columnQuery]) =>
+            !columnQuery ||
+            String(row[key] ?? '')
+              .toLocaleLowerCase()
+              .includes(columnQuery)
         )
     );
   if (options.sortKey && options.sortDirection !== 'none') {

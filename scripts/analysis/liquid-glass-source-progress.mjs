@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { distribution } from './liquid-glass-frame-budget.mjs';
+import { verifyOverlay } from './liquid-glass-controlled-frame-overlay.mjs';
 
 // Separate fairness evidence. This does not instrument or replace the main
 // 60-press latency probe, and it does not infer source-to-presentation latency.
@@ -66,11 +67,13 @@ const ownedPaint = (paint) =>
   paint.geometryMatches === true;
 
 async function progressSourceIdentity(root) {
-  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+  const git = (...args) =>
+    execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 32 << 20 }).trim();
   const identity = {
     sha: git('rev-parse', 'HEAD'),
     tree: git('rev-parse', 'HEAD^{tree}'),
-    changes: git('status', '--porcelain'),
+    changes: git('status', '--porcelain=v1', '--untracked-files=all'),
+    diffSha256: sha256(git('diff', '--binary', 'HEAD')),
     hashes: {},
   };
   for (const file of [...SOURCE_FILES, ...OPTIONAL_SOURCE_FILES]) {
@@ -91,14 +94,85 @@ async function progressProbeIdentity() {
     latencyProbeSha256: sha256(
       await readFile(new URL('./liquid-glass-frame-budget.mjs', import.meta.url))
     ),
+    overlayVerifierSha256: sha256(
+      await readFile(new URL('./liquid-glass-controlled-frame-overlay.mjs', import.meta.url))
+    ),
   };
 }
 
-export function assertProgressIdentityStable(source, sourceAtEnd, probe, probeAtEnd) {
+function assertProgressSourceAdmission(source, admission) {
+  if (admission.mode === 'clean-source') {
+    assert.equal(source.changes, '', 'Source-bound diagnostic requires a clean checkout');
+    return;
+  }
+  assert.equal(admission.mode, 'controlled-overlay', 'Unknown progress source admission');
+  assert.match(admission.receiptSha256, /^[a-f0-9]{64}$/, 'Verified overlay receipt is required');
+  for (const key of ['sha', 'tree', 'changes', 'diffSha256'])
+    assert.equal(
+      source[key],
+      admission.source[key],
+      `Progress source differs from receipt: ${key}`
+    );
+}
+
+export async function admitProgressSource({ root, source, receiptFile, phase }) {
+  if (receiptFile === undefined) {
+    const admission = { mode: 'clean-source' };
+    assertProgressSourceAdmission(source, admission);
+    return admission;
+  }
+  assert.ok(
+    ['before-baseline-progress', 'after-baseline-progress'].includes(phase),
+    'Controlled progress requires a bounded verification phase'
+  );
+  const raw = await readFile(receiptFile),
+    receipt = JSON.parse(raw);
+  assert.equal(
+    await realpath(root),
+    receipt.roots.baseline,
+    'Controlled progress must observe the prepared baseline tree'
+  );
+  // Recheck both complete trees, the exact overlay inventory, the retained patch
+  // and each implementation against its own commit. A receipt is not a dirty-tree waiver.
+  const verification = await verifyOverlay({
+    receiptFile,
+    baseline: root,
+    candidate: receipt.roots.candidate,
+    phase,
+  });
+  assert.equal(verification.receiptSha256, sha256(raw), 'Overlay receipt changed during admission');
+  const expected = receipt.after.baseline;
+  const admission = {
+    mode: 'controlled-overlay',
+    receiptSha256: verification.receiptSha256,
+    source: {
+      sha: expected.sha,
+      tree: expected.tree,
+      changes: expected.changes,
+      diffSha256: expected.probeDiffSha256,
+    },
+  };
+  assertProgressSourceAdmission(source, admission);
+  return admission;
+}
+
+export function assertProgressIdentityStable(
+  source,
+  sourceAtEnd,
+  probe,
+  probeAtEnd,
+  admission = { mode: 'clean-source' },
+  admissionAtEnd = admission
+) {
   assert.ok(sourceAtEnd, 'Missing final source identity');
   assert.ok(probeAtEnd, 'Missing final instrument identity');
-  assert.equal(source.changes, '', 'Progress source started with changes');
-  assert.equal(sourceAtEnd.changes, '', 'Progress source ended with changes');
+  assertProgressSourceAdmission(source, admission);
+  assertProgressSourceAdmission(sourceAtEnd, admissionAtEnd);
+  assert.deepEqual(
+    admissionAtEnd,
+    admission,
+    'Source admission changed during progress observation'
+  );
   assert.deepEqual(sourceAtEnd, source, 'Source changed during progress observation');
   assert.deepEqual(probeAtEnd, probe, 'Instrument changed during progress observation');
 }
@@ -622,7 +696,7 @@ export function assertNoProgressResurrection(immediate, settled, taskMetricsRequ
   }
 }
 
-async function observe(output) {
+async function observe(output, receiptFile) {
   assert.ok(
     !process.env.PROTO_UI_BROWSER_BASE_URL,
     'Source-bound diagnostic requires the owned local harness'
@@ -630,11 +704,18 @@ async function observe(output) {
   const root = process.cwd();
   await mkdir(output, { recursive: true });
   const source = await progressSourceIdentity(root);
-  assert.equal(source.changes, '', 'Source-bound diagnostic requires a clean checkout');
+  const sourceAdmission = await admitProgressSource({
+    root,
+    source,
+    receiptFile,
+    phase: 'before-baseline-progress',
+  });
   const report = {
     started: new Date().toISOString(),
     kind: 'independent-four-host-source-progress',
     source,
+    sourceAdmission,
+    sourceAdmissionAtEnd: null,
     probe: await progressProbeIdentity(),
     sourceAtEnd: null,
     probeAtEnd: null,
@@ -650,6 +731,9 @@ async function observe(output) {
     },
     limitations: [
       'Separate diagnostic, not the main 60-press latency result; no source-to-commit or physical FPS/latency claim.',
+      sourceAdmission.mode === 'controlled-overlay'
+        ? 'Explicit controlled overlay: baseline algorithm with candidate dependency recipe and fixture, verified before and after progress; not clean historical-source acceptance.'
+        : 'Clean source is required; no controlled overlay was admitted.',
       'The companion latency probe is bound by its actual SHA-256; a changed hash identifies a new measurement instrument revision, not an unchanged historical probe.',
       'MO observes published frame/revision markers. Owned paint is synchronously confirmed only at the recorded boundaries; observer delivery may coalesce intermediate frames.',
       'Revision skips describe gaps between observed published revisions, not exact source notifications, lost events or measured source-to-paint latency.',
@@ -875,11 +959,19 @@ async function observe(output) {
     try {
       report.sourceAtEnd = await progressSourceIdentity(root);
       report.probeAtEnd = await progressProbeIdentity();
+      report.sourceAdmissionAtEnd = await admitProgressSource({
+        root,
+        source: report.sourceAtEnd,
+        receiptFile,
+        phase: 'after-baseline-progress',
+      });
       assertProgressIdentityStable(
         report.source,
         report.sourceAtEnd,
         report.probe,
-        report.probeAtEnd
+        report.probeAtEnd,
+        report.sourceAdmission,
+        report.sourceAdmissionAtEnd
       );
       report.sourceAndProbeStable = true;
     } catch (error) {
@@ -904,11 +996,19 @@ async function observe(output) {
   );
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  assert.equal(
-    process.argv.length,
-    3,
-    'Usage: node --import tsx liquid-glass-source-progress.mjs OUTPUT'
+export function parseProgressArguments(args) {
+  assert.ok(
+    (args.length === 1 && args[0]) ||
+      (args.length === 3 && args[0] && args[1] === '--controlled-overlay' && args[2]),
+    'Usage: node --import tsx liquid-glass-source-progress.mjs OUTPUT [--controlled-overlay RECEIPT]'
   );
-  await observe(path.resolve(process.argv[2]));
+  return {
+    output: path.resolve(args[0]),
+    receiptFile: args.length === 3 ? path.resolve(args[2]) : undefined,
+  };
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const { output, receiptFile } = parseProgressArguments(process.argv.slice(2));
+  await observe(output, receiptFile);
 }

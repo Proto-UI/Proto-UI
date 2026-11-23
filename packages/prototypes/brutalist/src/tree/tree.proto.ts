@@ -69,19 +69,18 @@ export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
   name: 'brutalist-tree-group',
   setup(def) {
     const behavior = asTreeGroup();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1 pl-4'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[brutalist-tree] Group state unavailable.');
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1'));
+    def.rule({
+      when: (w) => w.state(state.direction).eq('ltr'),
+      intent: (i) => i.feedback.style.use(tw('pl-4')),
+    });
+    def.rule({
+      when: (w) => w.state(state.direction).eq('rtl'),
+      intent: (i) => i.feedback.style.use(tw('pr-4')),
+    });
+    return behavior.render;
   },
 });
 export { treeGroup as brutalistTreeGroup };

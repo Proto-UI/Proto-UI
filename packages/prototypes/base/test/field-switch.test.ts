@@ -228,3 +228,48 @@ it('cancels an already queued change notification when its control is removed', 
   await flush();
   expect(requests).toHaveLength(1);
 });
+
+it('FieldSwitch reset cancels its own active axis preview and permits a fresh contact', async () => {
+  const m = mount({ draggable: true });
+  m.root.style.cssText = 'box-sizing:border-box;width:32px;height:20px;border:1px solid;padding:0';
+  m.root.getBoundingClientRect = () => ({ left: 0, top: 0, width: 32, height: 20 }) as DOMRect;
+  m.thumb.style.cssText = 'width:16px;height:16px';
+  m.thumb.getBoundingClientRect = () => ({ left: 1, top: 2, width: 16, height: 16 }) as DOMRect;
+  await flush();
+  const send = (type: string, x = 9) =>
+    m.root.dispatchEvent(
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 47,
+        pointerType: 'mouse',
+        isPrimary: true,
+        button: 0,
+        clientX: x,
+        clientY: 10,
+        detail: 1,
+      })
+    );
+  const api = m.root.getExposes(),
+    changes: boolean[] = [];
+  m.root.addEventListener('checkedChange', (event: CustomEvent) =>
+    changes.push(event.detail.checked)
+  );
+  send('pointerdown');
+  send('pointermove', 16);
+  expect(api.dragging.get()).toBe(true);
+  expect(api.percentage.get()).toBe(50);
+  expect(api.resetValue()).toBe(true);
+  expect(api.dragging.get()).toBe(false);
+  expect(api.percentage.get()).toBe(0);
+  expect(api.checked.get()).toBe(false);
+  send('pointerup', 23);
+  send('click', 23);
+  expect(changes).toEqual([]);
+  send('pointerdown');
+  send('pointermove', 23);
+  send('pointerup', 23);
+  send('click', 23);
+  expect(changes).toEqual([true]);
+  expect(api.checked.get()).toBe(true);
+});

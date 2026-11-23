@@ -1,6 +1,7 @@
 import { pruneDeadValues } from './demand-pruning';
 import {
   emitJavaScriptValue,
+  emitJavaScriptRecord,
   emitJavaScriptParameters,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -244,9 +245,11 @@ export function emitReact(
             return `${builder}.${node.type === 'true' ? 't' : 'f'}()`;
           if (node.type === 'eq') {
             const signal =
-              node.left.type === 'prop'
-                ? `${builder}.prop(${JSON.stringify(node.left.key)})`
-                : `${builder}.state(${expression(states.get(node.left.id)!, depth)})`;
+              node.left.type === 'meta'
+                ? `${builder}.meta(${JSON.stringify(node.left.key)})`
+                : node.left.type === 'prop'
+                  ? `${builder}.prop(${JSON.stringify(node.left.key)})`
+                  : `${builder}.state(${expression(states.get(node.left.id)!, depth)})`;
             return `${signal}.eq(${JSON.stringify(node.right)})`;
           }
           if (node.type === 'not') return `${builder}.not(${condition(node.expr)})`;
@@ -276,7 +279,7 @@ export function emitReact(
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${value.entries.map((entry) => `${entry.key === '__proto__' ? `[${JSON.stringify(entry.key)}]` : JSON.stringify(entry.key)}: ${expression(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(value, (item) => expression(item, depth), typeName);
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':

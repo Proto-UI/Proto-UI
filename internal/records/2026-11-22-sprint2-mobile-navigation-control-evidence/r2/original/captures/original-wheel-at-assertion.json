@@ -1,0 +1,80 @@
+{
+  "source": {
+    "sha": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+    "trackedPatchSha256": "d85b3a7737ae2864e8b540227f9ace10c38224f50e17598c1a7b10098f8419e7",
+    "untracked": []
+  },
+  "capturedAt": "2026-11-22T16:06:03.530Z",
+  "browser": "157.0.8103.78",
+  "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+  "viewport": {
+    "width": 390,
+    "height": 1000
+  },
+  "theme": "light",
+  "observations": {
+    "wheel": {
+      "received": true,
+      "trusted": true,
+      "deltaY": -32,
+      "startTop": 2248,
+      "expectedTop": 2216,
+      "includesLeaf": true,
+      "includesScroller": true,
+      "targetTag": "a",
+      "clientX": 205,
+      "clientY": 968,
+      "pathTags": [
+        "a#.astro-osdwpxxd site-native-link",
+        "li#.astro-osdwpxxd",
+        "ul#.astro-osdwpxxd",
+        "details#.astro-osdwpxxd",
+        "li#.astro-osdwpxxd",
+        "ul#.astro-osdwpxxd",
+        "details#.astro-osdwpxxd",
+        "li#.astro-osdwpxxd",
+        "ul#.top-level astro-osdwpxxd",
+        "sl-sidebar-state-persist#.contents",
+        "div#.mobile-sidebar-content sidebar-content sl-flex astro-ceehzq5e",
+        "div#starlight__sidebar.mobile-sidebar-pane sidebar-pane astro-ceehzq5e",
+        "nav#.docs-sidebar text-sidebar-foreground astro-ceehzq5e",
+        "div#.min-w-0 min-h-0 p-4 pui-projection-box",
+        "wc-brutalist-popover-content#pui-popover-1-content.pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root",
+        "body#.astro-jy47tizg",
+        "html#.astro-jy47tizg",
+        "[object HTMLDocument]",
+        "[object Window]"
+      ],
+      "ownerAtEvent": {
+        "html": "<wc-brutalist-popover-content data-demo-ref=\"contents-panel\" class=\"pui-projection-prototype pui-projection-owner-73_69_74_65_2d_63_6f_6e_74_65_6e_74_73_2d_70_61_6e_65_6c_2d_31_2d_64_6f_63_73_2d_31 pui-projection-family-62_72_75_74_61_6c_69_73_74 pui-projection-runtime-77_63 pui-projection-generation-31 pui-projection-prototype-62_72_75_74_61_6c_69_73_74_2d_70_6f_70_6f_76_65_72_2d_63_6f_6e_74_65_6e_74 pui-host-root\" data-pui-root=\"\" data-demo-owner=\"demo-7\" data-projection-owner=\"site-contents-panel-1-docs-1\" data-projection-family=\"brutalist\" data-projection-runtime=\"wc\" data-projection-generation=\"1\" data-projection-prototype=\"brutalist-popover-content\" data-transition-state=\"entered\" data-open=\"\" data-is-present=\"\" dir=\"ltr\" data-pui-style=\"rounded-base border-2 border-black bg-backgrou",
+        "bounds": {
+          "x": 8,
+          "y": 60,
+          "width": 374,
+          "height": 932,
+          "top": 60,
+          "right": 382,
+          "bottom": 992,
+          "left": 8
+        },
+        "top": 2248
+      },
+      "leafAtEvent": {
+        "x": 55,
+        "y": 942,
+        "width": 301,
+        "height": 44,
+        "top": 942,
+        "right": 356,
+        "bottom": 986,
+        "left": 55
+      }
+    },
+    "actualScroller": {
+      "top": 2216,
+      "max": 5394,
+      "tag": "wc-brutalist-popover-content"
+    },
+    "screenshotTiming": "after original wheel event observation, before unchanged assertion"
+  }
+}

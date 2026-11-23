@@ -812,6 +812,7 @@ describe('@proto.ui/cli', () => {
       private: true,
       dependencies: {
         react: '^19.0.0',
+        'react-dom': '^19.0.0',
       },
     });
 
@@ -830,6 +831,8 @@ describe('@proto.ui/cli', () => {
     const config = JSON.parse(await fs.readFile(path.join(cwd, 'proto-ui/config.json'), 'utf8'));
 
     expect(reactIndex).toContain(`createReactAdapter`);
+    expect(reactIndex).toContain(`import { createPortal } from 'react-dom';`);
+    expect(reactIndex).toContain(`createReactAdapter({ ...React, createPortal })`);
     expect(reactIndex).toContain(`shadcnButton`);
     expect(reactIndex).toContain(
       `import { shadcnButton } from '@proto.ui/prototypes-shadcn/button';`
@@ -850,6 +853,7 @@ describe('@proto.ui/cli', () => {
         private: true,
         dependencies: {
           react: '^19.0.0',
+          'react-dom': '^19.0.0',
           '@proto.ui/adapter-react': cliVersion,
           '@proto.ui/prototypes-shadcn': cliVersion,
         },
@@ -1271,5 +1275,35 @@ describe('@proto.ui/cli', () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('React runtime is required');
     expect(result.stderr).toContain('react-dom');
+  });
+
+  it('rejects a React-only project before writing a facade that requires react-dom portals', async () => {
+    const cwd = await createTempProject('pui-cli-missing-react-dom', {
+      name: 'pui-cli-missing-react-dom',
+      private: true,
+      dependencies: { react: '^19.0.0' },
+    });
+    try {
+      expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+      const configPath = path.join(cwd, 'proto-ui/config.json');
+      const packagePath = path.join(cwd, 'package.json');
+      const configBefore = await fs.readFile(configPath, 'utf8');
+      const packageBefore = await fs.readFile(packagePath, 'utf8');
+      const result = runCli(cwd, ['add', 'react', 'shadcn-tooltip', '--no-install']);
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('React runtime is required');
+      expect(result.stderr).toContain('react-dom');
+      expect(result.stdout).not.toContain('generated');
+      expect(await fs.readFile(configPath, 'utf8')).toBe(configBefore);
+      expect(await fs.readFile(packagePath, 'utf8')).toBe(packageBefore);
+      await expect(
+        fs.stat(path.join(cwd, 'proto-ui/components/react/index.js'))
+      ).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+    } finally {
+      await fs.rm(cwd, { recursive: true, force: true });
+    }
   });
 });

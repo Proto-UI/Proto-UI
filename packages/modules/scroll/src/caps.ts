@@ -25,6 +25,8 @@ export type ScrollSurfaceHostAttachment = ScrollSurfaceHostConnection &
 export interface ScrollSurfaceHostLease {
   update(connection: ScrollSurfaceHostAttachment): void;
   request(request: import('@proto.ui/core').ScrollSurfacePositionRequest): void;
+  /** No geometry/focus mutation; absent support rejects the semantic pause. */
+  pauseFollowing?(): boolean;
   /** Internal target resolution only; absent support rejects the portable request. */
   reveal?(target: unknown, axis: 'vertical', isCurrentTarget: () => boolean): boolean;
   dispose(): void;

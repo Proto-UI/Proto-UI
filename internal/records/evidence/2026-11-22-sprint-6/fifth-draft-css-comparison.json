@@ -1,0 +1,86 @@
+{
+  "purpose": "Independent semantic impact readback; not a new browser execution.",
+  "beforeSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+  "currentCheckedOutHead": "afde3097f880dca9d09e9b67b40913bc1576db59",
+  "capturedAt": "2026-11-22T12:44:25.960Z",
+  "sources": {
+    "renderer": {
+      "repositoryPath": "packages/cli/src/services/proto-style-css.ts",
+      "beforeSha256": "8c07314c177e521ad5892b334e3ffeba15904aa118f9a3fe2f155d8fb9eb4bc2",
+      "currentSha256": "83b6dc23fb1ddb02aad6b01d7ea5028940ad8985a9def11336d83b84f882fec6"
+    },
+    "tokens": {
+      "repositoryPath": "packages/cli/src/generated/draft-family-style-tokens.ts",
+      "beforeSha256": "03683c176a80a116c2b679a44a7de84f2994c5820e9b367ffc852286a8b38b63",
+      "currentSha256": "fdc8da1e683f9542313d39cb327c4d39075380a64584df46d20aeef6e473afbe"
+    }
+  },
+  "familyTokens": {
+    "bootstrap-2-3-2": {
+      "identical": false,
+      "beforeCount": 664,
+      "currentCount": 664,
+      "removed": [
+        "data-[focus-visible]:ring-primary-foreground",
+        "ring-primary-foreground"
+      ],
+      "added": [
+        "data-[focus-visible]:ring-white",
+        "ring-white"
+      ]
+    },
+    "liquid-glass": {
+      "identical": true,
+      "beforeCount": 451,
+      "currentCount": 451,
+      "removed": [],
+      "added": []
+    }
+  },
+  "union": {
+    "beforeCount": 811,
+    "currentCount": 811,
+    "commonCount": 809,
+    "removed": [
+      "data-[focus-visible]:ring-primary-foreground",
+      "ring-primary-foreground"
+    ],
+    "added": [
+      "data-[focus-visible]:ring-white",
+      "ring-white"
+    ]
+  },
+  "changedTokensAbsentFromLiquid": true,
+  "targets": {
+    "document": {
+      "unionBeforeSha256": "2a635591d9e654da244712bc4d85876cad1f5f11cdbee872902caf52f0bbf758",
+      "unionCurrentSha256": "0750eceb207a33fff8c7c15ab40ca4227515022176f9c9b3358e4dba5f762d28",
+      "fullUnionCssIdentical": false,
+      "liquidBeforeSha256": "22617c796e478e7bbeb9e8b88d5a477123700fb5218f1033c1b663c7d870362c",
+      "liquidCurrentSha256": "22617c796e478e7bbeb9e8b88d5a477123700fb5218f1033c1b663c7d870362c",
+      "liquidCssIdentical": true,
+      "commonTokenOutputIdentical": true,
+      "currentContainsUnsupportedTokens": false
+    },
+    "shadow": {
+      "unionBeforeSha256": "2a635591d9e654da244712bc4d85876cad1f5f11cdbee872902caf52f0bbf758",
+      "unionCurrentSha256": "0750eceb207a33fff8c7c15ab40ca4227515022176f9c9b3358e4dba5f762d28",
+      "fullUnionCssIdentical": false,
+      "liquidBeforeSha256": "22617c796e478e7bbeb9e8b88d5a477123700fb5218f1033c1b663c7d870362c",
+      "liquidCurrentSha256": "22617c796e478e7bbeb9e8b88d5a477123700fb5218f1033c1b663c7d870362c",
+      "liquidCssIdentical": true,
+      "commonTokenOutputIdentical": true,
+      "currentContainsUnsupportedTokens": false
+    },
+    "split": {
+      "unionBeforeSha256": "ec433b41a164aea491771f1d8ce8d217bd1e0ba7f31e29e5a618baf3b883ed9f",
+      "unionCurrentSha256": "35dae1372e6825547ab1770e2136d69e6032443fd2b0e63a7c313dc593e3fbae",
+      "fullUnionCssIdentical": false,
+      "liquidBeforeSha256": "30f0181604cd4eca5085c1c99dfd284419d64bfde87cc9370b75ad16501a9872",
+      "liquidCurrentSha256": "30f0181604cd4eca5085c1c99dfd284419d64bfde87cc9370b75ad16501a9872",
+      "liquidCssIdentical": true,
+      "commonTokenOutputIdentical": true,
+      "currentContainsUnsupportedTokens": false
+    }
+  }
+}

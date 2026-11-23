@@ -90,9 +90,45 @@ export function canonicalizeTextControlValue(value: string, lineMode: TextContro
 export type TextControlEventType =
   | 'input'
   | 'change'
+  | 'selectionchange'
   | 'compositionstart'
   | 'compositionupdate'
   | 'compositionend';
+
+/** Host-owned UTF-16 offsets into the accompanying canonical value. */
+export type TextControlSelection = Readonly<{
+  start: number;
+  end: number;
+  direction: 'forward' | 'backward' | 'none';
+}>;
+
+/** Validate source offsets and normalize them with the same value transform. */
+export function canonicalizeTextControlSelection(
+  selection: unknown,
+  value: string,
+  lineMode: TextControlLineMode
+): TextControlSelection | null {
+  if (!selection || typeof selection !== 'object') return null;
+  try {
+    const { start, end, direction } = selection as TextControlSelection;
+    if (
+      !Number.isInteger(start) ||
+      !Number.isInteger(end) ||
+      start < 0 ||
+      end < start ||
+      end > value.length ||
+      (direction !== 'forward' && direction !== 'backward' && direction !== 'none')
+    )
+      return null;
+    return Object.freeze({
+      start: canonicalizeTextControlValue(value.slice(0, start), lineMode).length,
+      end: canonicalizeTextControlValue(value.slice(0, end), lineMode).length,
+      direction,
+    });
+  } catch {
+    return null;
+  }
+}
 
 export type TextControlEvent = Readonly<{
   type: TextControlEventType;
@@ -100,11 +136,14 @@ export type TextControlEvent = Readonly<{
   composing: boolean;
   data: string | null;
   inputType: string | null;
+  /** Missing on older hosts means unknown, not an insertion position. */
+  selection?: TextControlSelection | null;
 }>;
 
 export type TextControlSnapshot = Readonly<{
   value: string;
   composing: boolean;
+  selection?: TextControlSelection | null;
 }>;
 
 export interface TextControlHandle<

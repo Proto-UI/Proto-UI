@@ -20,7 +20,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback', './program', './style']),
   }),
   'packages/adapters/base/src/material/preferences.ts': Object.freeze({
-    sourceSha256: '65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819',
+    sourceSha256: 'b1ffcdca8b3b58ff4ba7f9edc6d9dd8595b1e99b513fa7e71086af14759b533f',
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
@@ -83,7 +83,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/adapters/base/src/material/style-tint-profile.ts': Object.freeze({
-    sourceSha256: '5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246',
+    sourceSha256: '2e9bb4ca8c903ec0863f4d5a6b18c7486c609a4ef4e806ba6eaf459cd49003cc',
     specifiers: Object.freeze(['./contact-profile', './liquidgl-kernel.generated', './style']),
   }),
   'apps/www/src/components/library-card-client.ts': Object.freeze({

@@ -93,6 +93,7 @@ function setupViewport(
   def.expose.state('following', scroll.endFollow.state);
   def.expose.state('requestStatus', scroll.endFollow.requestStatus);
   def.expose.method('jumpToEnd', () => scroll.request({ kind: 'to-end', axis: 'vertical' }));
+  def.expose.method('pauseFollowing', () => scroll.pauseFollowing());
   const publish = (run: RunHandle<any>) => {
     const c = run.context.tryRead(MESSAGE_SCROLLER_CONTEXT);
     if (!c) return;

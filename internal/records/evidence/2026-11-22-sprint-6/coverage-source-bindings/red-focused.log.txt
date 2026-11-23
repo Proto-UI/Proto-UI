@@ -1,0 +1,109 @@
+TAP version 13
+# Subtest: diagnostic import review rejects owner, body and edge drift: liquid-glass-state-controls.astro
+not ok 1 - diagnostic import review rejects owner, body and edge drift: liquid-glass-state-controls.astro
+  ---
+  duration_ms: 428.408789
+  type: 'test'
+  location: '/workspace/scratch/cd1b397ad8e7/proto-ui-liquid-coverage/scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:19057:3'
+  failureType: 'testCodeFailure'
+  error: 'the exact reviewed diagnostic import is admitted'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///workspace/scratch/cd1b397ad8e7/proto-ui-liquid-coverage/scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:19065:12)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.start (node:internal/test_runner/test:1262:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: Sprint 6 Liquid state-controls admits the exact four-runtime demonstration
+not ok 2 - Sprint 6 Liquid state-controls admits the exact four-runtime demonstration
+  ---
+  duration_ms: 13.842396
+  type: 'test'
+  location: '/workspace/scratch/cd1b397ad8e7/proto-ui-liquid-coverage/scripts/coverage-matrices/test/check-website-production-bundle.test.mjs:1341:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   'Website shell entry `apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/web-component/src/adapt.ts?used',
+    +   'Website shell entry `apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts` dynamically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): node_modules/react/index.js, node_modules/vue/dist/vue.runtime.esm.js, packages/adapters/react/src/index.ts, packages/adapters/vue/src/index.ts, packages/adapters/vue2/src/index.ts'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'Website shell entry `apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/web-component/src/adapt.ts?used'
+    1: 'Website shell entry `apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts` dynamically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): node_modules/react/index.js, node_modules/vue/dist/vue.runtime.esm.js, packages/adapters/react/src/index.ts, packages/adapters/vue/src/index.ts, packages/adapters/vue2/src/index.ts'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///workspace/scratch/cd1b397ad8e7/proto-ui-liquid-coverage/scripts/coverage-matrices/test/check-website-production-bundle.test.mjs:1342:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.start (node:internal/test_runner/test:1262:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: Sprint 6 Liquid state-controls still rejects static-react
+not ok 3 - Sprint 6 Liquid state-controls still rejects static-react
+  ---
+  duration_ms: 1.261765
+  type: 'test'
+  location: '/workspace/scratch/cd1b397ad8e7/proto-ui-liquid-coverage/scripts/coverage-matrices/test/check-website-production-bundle.test.mjs:1346:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Website shell entry `apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): node_modules/react/index.js, packages/adapters/react/src/index.ts, packages/adapters/web-component/src/adapt.ts?used
+    Website shell entry `apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts` dynamically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): node_modules/vue/dist/vue.runtime.esm.js, packages/adapters/vue/src/index.ts, packages/adapters/vue2/src/index.ts
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///workspace/scratch/cd1b397ad8e7/proto-ui-liquid-coverage/scripts/coverage-matrices/test/check-website-production-bundle.test.mjs:1357:12)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+  ...
+# Subtest: Sprint 6 Liquid state-controls still rejects copied-entry
+ok 4 - Sprint 6 Liquid state-controls still rejects copied-entry
+  ---
+  duration_ms: 0.857384
+  type: 'test'
+  ...
+# Subtest: Sprint 6 Liquid state-controls still rejects ordinary-shell-import
+ok 5 - Sprint 6 Liquid state-controls still rejects ordinary-shell-import
+  ---
+  duration_ms: 0.810824
+  type: 'test'
+  ...
+# Subtest: Sprint 6 fixture classification retains static Adapter rejection for liquid-tint-stage-diagnostic
+ok 6 - Sprint 6 fixture classification retains static Adapter rejection for liquid-tint-stage-diagnostic
+  ---
+  duration_ms: 0.929313
+  type: 'test'
+  ...
+# Subtest: Sprint 6 fixture classification retains static Adapter rejection for liquid-visible-refraction-diagnostic
+ok 7 - Sprint 6 fixture classification retains static Adapter rejection for liquid-visible-refraction-diagnostic
+  ---
+  duration_ms: 0.686446
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 4
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2418.183599

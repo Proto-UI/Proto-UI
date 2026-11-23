@@ -23,3 +23,77 @@ scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
 
 # Exact audited shader bytes and legal text are emitted by the checked generator.
 packages/adapters/base/src/material/liquidgl-kernel.generated.ts
+
+# Historical evidence bytes bound by retained SHA manifests; see
+# internal/records/2026-11-23-integration-archived-evidence-bytes.md
+internal/records/2026-11-22-sprint2-mobile-navigation-control-evidence/
+internal/records/2026-11-22-sprint2-mobile-navigation-fixture-evidence/
+internal/records/evidence/2026-11-22-sprint2-collections-review/
+internal/records/evidence/2026-11-22-sprint2-compiled-native-repair/
+internal/records/evidence/2026-11-22-sprint2-compiler/
+internal/records/evidence/2026-11-22-sprint2-datepicker-review/
+internal/records/evidence/2026-11-22-sprint2-input/
+internal/records/evidence/2026-11-22-sprint2-native-round1/
+
+# Original Sprint 4 raw observations and execution receipts.
+internal/records/evidence/2026-11-22-sprint4/
+internal/records/evidence/2026-11-23-sprint-followthrough/sprint4-source-admission/
+
+# Original Sprint 5 source, native, and publication evidence bytes.
+internal/records/evidence/2026-11-22-sprint5-gpui-public/
+internal/records/evidence/2026-11-22-sprint5-gpui/
+internal/records/evidence/2026-11-22-sprint5-integration/
+internal/records/evidence/2026-11-23-sprint5-compiled-control-label/
+internal/records/evidence/2026-11-23-sprint5-continuation/
+
+# Original Sprint 1 terminal reads, execution receipts, and the exact reviewed record.
+internal/records/evidence/2026-11-22-sprint1-followup/
+internal/records/evidence/2026-11-22-sprint1/
+internal/records/evidence/2026-11-23-sprint-continuation/sprint1/
+internal/records/evidence/2026-11-23-sprint-followthrough/sprint1-search-handback/
+internal/records/evidence/2026-11-23-sprint-followthrough/sprint1-source-bindings/
+internal/records/2026-11-22-sprint-1-ci-intake.json
+internal/records/2026-11-22-sprint-1-integration-followup.md
+
+# Exact Sprint 3 consumer observations, inventories, and continuation receipts.
+internal/records/evidence/2026-11-23-sprint-continuation/sprint3/
+internal/records/2026-11-22-sprint3-application-consumers.json
+internal/records/2026-11-22-sprint3-audit-public-primaries.json
+internal/records/2026-11-22-sprint3-candidate-application-consumers.json
+internal/records/2026-11-22-sprint3-history-acceptance.json
+internal/records/2026-11-22-sprint3-scroll-observer-original-readback.json
+internal/records/2026-11-22-sprint3-shadcn-scroll-thumb.json
+internal/records/2026-11-22-sprint3-tooltip-public-consumers.json
+internal/records/2026-11-22-sprint3-website-readiness.json
+internal/records/2026-11-22-whitepaper-diagram-inventory.json
+
+# Exact Sprint 6 original observations, source readbacks, and retained-byte inventories.
+internal/records/evidence/2026-11-22-sprint-6/
+internal/records/2026-11-22-sprint-6-coverage-source-bindings.json
+internal/records/evidence/2026-11-23-sprint6-preserved/manifest.json
+internal/records/evidence/2026-11-23-sprint6-preserved/baseline-terminal-jobs.json
+internal/records/evidence/2026-11-23-sprint6-preserved/verification-receipt.json
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-01.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-02.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-03.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-04.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-05.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-06.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-07.tar.gz
+internal/records/evidence/2026-11-23-sprint6-preserved/originals-08.tar.gz
+
+# Exact Sprint 7 historical observations and pinned upstream schema/license bytes.
+internal/records/2026-11-22-sprint-7-harness-evidence/
+internal/records/evidence/2026-11-22-s7-declarative/
+internal/records/evidence/2026-11-22-s7-scroll-pause/
+internal/records/evidence/2026-11-23-s7-continuation/
+scripts/analysis/declarative-agent-ui/upstream/catalog.json
+scripts/analysis/declarative-agent-ui/upstream/common_types.json
+scripts/analysis/declarative-agent-ui/upstream/agent_to_renderer.json
+scripts/analysis/declarative-agent-ui/upstream/LICENSE
+# Frozen source archives and historical evidence retain their original bytes and hashes.
+internal/records/2026-11-22-sprint-7-history-sources/
+internal/records/evidence/2026-11-22-sprint7-history-continuation/
+internal/records/evidence/2026-11-22-sprint7-history-source-binding/
+internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
+internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/

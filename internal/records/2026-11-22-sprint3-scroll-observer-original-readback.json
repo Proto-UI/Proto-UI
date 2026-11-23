@@ -1,0 +1,144 @@
+{
+  "source": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+  "archiveSHA256": "95303ded4c27553932e093e7f79615d454ebcb6ddc572c5246ad41a3d70e0f84",
+  "classifierSHA256": "sha256:55df96fdfdc13bd267b2e45231bd7f8e430b77e731d123d4146dbb8265a64ef6",
+  "rows": [
+    {
+      "name": "scroll-area-wc-light-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:3f8f95acaa8467f6a34d8ddd97323658b3346b031634dc7627ea1848741b6c06",
+      "imageDigest": "sha256:1caf75c9f30ba1a3e510b60f0cc22d7a8172f09b1230a43957f02cd7ee4b71bb",
+      "factsDigest": "sha256:44e206f262407f64dc6bef2d383a33d00c143f4bc4e1f5c157ccf9effd347146",
+      "fingerprintsDigest": "sha256:7ef9b8745a5028dc9b30712f4832789b91951fe38b1010200ad1f89720691bd5",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-wc-dark-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:8e5821eacb26b9963dcfd18b2bd0b6cf15d59928f3344f6b55674e91830ea226",
+      "imageDigest": "sha256:5f6737d7bce87409998f662c2552da29d77a2e02f4ab3e15c12edd0437087d6a",
+      "factsDigest": "sha256:8d2decf923b72e454eaf0884cfaba31bba87625182c8b9927a4c4104dbd9ef8f",
+      "fingerprintsDigest": "sha256:4a9c02d886b47c88b0417e3452d689fd229b007a2446ca4193a821189e3efeca",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-react-light-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:61c188a6a4b5f409b8c4163bc70ff94b1fd1f753f3745e46ff34578d0f225e71",
+      "imageDigest": "sha256:3648317d3308ba2fff4b261e14ab481c968fb228ca43e0aa061c11852bca6ff1",
+      "factsDigest": "sha256:e11e52b4daf1d926d26c61787d6a57bb7eeae5f682e9fe2ba63300848363d43c",
+      "fingerprintsDigest": "sha256:97c30e9ed00df5cb36e3411cdd308ae75f58bdac035545962f5f404521d8ac14",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-react-dark-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:9ef9ade9e624c2cd89ed8056634d801b8af33fbf3dcae0eaa670eee91088c806",
+      "imageDigest": "sha256:b6768b0ae2ead7b7a96a685e70dbc50abc5bae8d8800c2bffb1e8d44383bf28d",
+      "factsDigest": "sha256:e11a52ec9ffcfc1e8bcfddede498b49b3128ef1a3ee7850c0781324749cdc6c1",
+      "fingerprintsDigest": "sha256:4cd74d6971cd51581642024995f29fc8c7bbc2d02e613501e50073d05d96122d",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-vue-light-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:e7ad31d136023edf245323995ea1decdf5dc755bbbc0fc56997bc166fc649606",
+      "imageDigest": "sha256:52f8a1aec72e33fa93863ce2f239401292377553da96ee0223ef9e67e6f06997",
+      "factsDigest": "sha256:a80aef4b368a7f23eaf8f3a9c81d3d2ce088a4153ca33fe790e7539995fcb468",
+      "fingerprintsDigest": "sha256:e6a71658f3caa959c58f9dae0fb1870fb80d4ec8ecdf440dc3b0a1db186e93e2",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-vue-dark-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:57bdb1c74d4553e9a9cfb4fcd1f2f5267fcf045811056b2794ecc4017f0515d6",
+      "imageDigest": "sha256:e0b1fa7595443e5ae48451a45be641782fcc749b8b00582051647a3e34ae18a3",
+      "factsDigest": "sha256:dbfa5bb5ade167ce93cf5446b3f8862e23062d37d1aa4167ef0dc04a71f19037",
+      "fingerprintsDigest": "sha256:9812ce802b4932cb4cea1ef62562b1745dbff9dd5eaf023498e9d0f0b50aeaf3",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-vue2-light-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:f43c9c9dd42e485e2694bd38bd77e7319952b99c94abb947485c2e9837e98985",
+      "imageDigest": "sha256:525cd4284f7cef849ea45f3d87bfd1121e4d735436d23dd3cb285032c3c7ac06",
+      "factsDigest": "sha256:2ccdd6d13b725bf3f746cbe4a0ae2303fbe5080ba81c8ed5766f047fd461fe44",
+      "fingerprintsDigest": "sha256:c2c7a3de42b8dcd69ae64b2d0860853094b3c6830801eb448f11402a3789719c",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    },
+    {
+      "name": "scroll-area-vue2-dark-rest",
+      "originalStatus": "failed",
+      "frameDigest": "sha256:6318c6f889b7001f6411883667dfb037055a4322e3b66037b36e8bce9c4e0099",
+      "imageDigest": "sha256:5f53c0e33107f38005ba3e4ea0ea2aa45f6b3dff717706e3a198aeff611a145e",
+      "factsDigest": "sha256:11467d6b383244dad8ba1fd69c79e09479cac4fe9ba98a0043c78052b1f8607b",
+      "fingerprintsDigest": "sha256:3bf3b7fbdc0e24d23856024d4b01ea0aae596cc4b6c2457c3e544c865c48b90a",
+      "classifierResult": null,
+      "primaryAchieved": false,
+      "primaryLimits": ["unsupported-rounded-overflow-clip"],
+      "missingMetadata": {
+        "primaryPhysicalNodeId": true,
+        "factsRaster": true,
+        "factsImageDigest": true,
+        "surfacePhysicalIds": true
+      }
+    }
+  ],
+  "boundary": "Actual original eight raw receipts remain failed; missing required producer metadata is not reconstructed or promoted to known-unsupported."
+}

@@ -1,4 +1,5 @@
 export { parsePrototype } from './parser';
+export { compilerBuildIdentity, type CompilerBuildIdentity } from './compiler-build';
 export {
   compilePrototype,
   compileFile,

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { installRenderingOpportunities } from '../../test-utils/rendering-opportunities';
 import { selectContent, selectItem, selectRoot, selectTrigger, selectValue } from '../src/select';
 
 AdaptToWebComponent(selectRoot as any);
@@ -608,24 +609,34 @@ describe('prototypes/base: select', () => {
   it('uses Transition as Overlay presence and applies anchored positioning props', async () => {
     // T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     vi.useFakeTimers();
-    const { trigger, content } = createSelect({
-      content: { side: 'top', align: 'end', sideOffset: 12, alignOffset: 3 },
-    });
-    await settle();
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    const frame = installRenderingOpportunities();
+    try {
+      const { trigger, content } = createSelect({
+        content: { side: 'top', align: 'end', sideOffset: 12, alignOffset: 3 },
+      });
+      await settle();
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
 
-    trigger.click();
-    await settle();
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
-    expect(content.getExposes().transitionState.get()).toBe('entered');
-    expect(content.style.position).toBe('fixed');
-    expect(content.dataset.side).toBe('top');
-    expect(content.dataset.align).toBe('end');
+      trigger.click();
+      await settle();
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      expect(content.getExposes().transitionState.get()).toBe('entered');
+      expect(content.style.position).toBe('fixed');
+      expect(content.dataset.side).toBe('top');
+      expect(content.dataset.align).toBe('end');
 
-    trigger.click();
-    await settle();
-    expect(content.getExposes().transitionState.get()).toBe('closed');
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      trigger.click();
+      await settle();
+      expect(content.getExposes().transitionState.get()).toBe('closed');
+      // A portaled view crosses the existing two-frame compositor conceal
+      // barrier after semantic closure, before its physical projection retires.
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    } finally {
+      frame.restore();
+    }
   });
 
   it('refreshes placeholder and raw-value fallback through the Value display state', async () => {

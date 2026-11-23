@@ -1,0 +1,685 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.sprint3-history-acceptance",
+  "recordedAt": "2026-11-22T10:51:39.271948+00:00",
+  "issues": [1164, 1153, 1142, 1087, 1086, 1165, 782],
+  "scope": "Historical source verification and current local repair evidence. No old CI/review rewriting, native/AT acceptance, release or publication claim.",
+  "baseline": {
+    "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "tree": "513879bf79a93cc9325f5193fa0559e16ea57108"
+  },
+  "repairSource": {
+    "calendarCommit": "407d735683d78ceb16e24570fe08087c44e4e233",
+    "fixtureCommit": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+    "tree": "d09cacce6c7c0e61f960b29752e8638b97b5c9c7",
+    "binding": "Tests ran against these source bytes in the isolated worktree before these commits were created. Documentation-only changes are not product reruns; later integration revisions retain their own checks."
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "linux",
+    "arch": "x64",
+    "pnpm": "10.32.1"
+  },
+  "sourceBindings": [
+    {
+      "path": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "revision": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+      "blob": "c816080d442a118084abce63b5e501345fad961e",
+      "sha256": "78eb76f45d995af8723cf0314252535687109187ed28a596ae84234d3fb9e535"
+    },
+    {
+      "path": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "revision": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+      "blob": "607c62fb768226fdfa99c6b913e671eee54b4a31",
+      "sha256": "86f8f324cc6624a29ec7a110673a527f91da7c660c43360faeea455589f048e9"
+    },
+    {
+      "path": "packages/prototypes/base/src/number-field/root.proto.ts",
+      "revision": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+      "blob": "902263c16d6b69b80784e935f4d12c332d2ff817",
+      "sha256": "607493090d0f8b50116a4607830efff88caa7fbc34658c5f59467769d950ac88"
+    },
+    {
+      "path": "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "revision": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+      "blob": "cae4615194f7160324d55a094e2c51b2890f269b",
+      "sha256": "25ab78a473ad0a2d9f51167697f86247b76ef5d9327b8acb74208489818668f2"
+    },
+    {
+      "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+      "revision": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+      "blob": "8420f939e9c7dc61499f91622cb5b0fb0cd1b916",
+      "sha256": "39a4e4bc119768f1045dea73b21636eb1c3b0173aa3c4f2694890d8551c55934"
+    }
+  ],
+  "historicalRecords": [
+    {
+      "path": "internal/records/2026-11-10-pr884-foundation-verification.json",
+      "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "blob": "6aa132d232a87fe15f0f769d923ceba48584844f",
+      "sha256": "40298703202f8eac7048184f0ac09cff0b399ee63de053ceb8462c3ba3920820"
+    },
+    {
+      "path": "internal/records/2026-11-10-issue-1139-todo-reconciliation-sources.json",
+      "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "blob": "5e5bc8b976df6318a417775f5d76565730e96f66",
+      "sha256": "43009036308b89991e519d65d3c9a45cf88fb36805b51422e2f8583ae79ff02b"
+    },
+    {
+      "path": "internal/records/2026-10-14-finf-source-closure.json",
+      "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "blob": "1c618b3411e03bc73795f0f66c9f35fc192d2328",
+      "sha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5"
+    },
+    {
+      "path": "internal/governance/release-0.3-source-ledger.json",
+      "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "blob": "f97e4a44443666b40592e09ff5a74631c581b633",
+      "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e"
+    }
+  ],
+  "historicalSourceVerification": {
+    "schemaVersion": 1,
+    "kind": "proto-ui.sprint3-historical-source-verification",
+    "baseline": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "candidateSource": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+    "historicalRecord": "internal/records/2026-11-10-pr884-foundation-verification.json",
+    "historicalSourceBindingsVerified": 40,
+    "preservedSourceBodiesVerified": 22,
+    "corruptDigestRejected": true,
+    "baselineUnchanged": 36,
+    "baselineChanged": 4,
+    "rows": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/collapsible-focus-observation.test.ts",
+        "baselineSha256": "46f8b74cdfdc35b6b5ab41376f9f788b0dcf26524396ae86296bdd215cf1e26b",
+        "historicalAssignedBaseSha256": "46f8b74cdfdc35b6b5ab41376f9f788b0dcf26524396ae86296bdd215cf1e26b",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "46f8b74cdfdc35b6b5ab41376f9f788b0dcf26524396ae86296bdd215cf1e26b"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/collapsible-focus-observation.ts",
+        "baselineSha256": "1f5da8914c8ee50470bf0492199ec93b90752fbbaa2d6c4856a33223dd692dfc",
+        "historicalAssignedBaseSha256": "1f5da8914c8ee50470bf0492199ec93b90752fbbaa2d6c4856a33223dd692dfc",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "1f5da8914c8ee50470bf0492199ec93b90752fbbaa2d6c4856a33223dd692dfc"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+        "baselineSha256": "0142b9bdfd5baeb605ae8f17852ad7ae9c5ce9bde603eb5b527ddc9de5bca02a",
+        "historicalAssignedBaseSha256": "0142b9bdfd5baeb605ae8f17852ad7ae9c5ce9bde603eb5b527ddc9de5bca02a",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "0142b9bdfd5baeb605ae8f17852ad7ae9c5ce9bde603eb5b527ddc9de5bca02a"
+      },
+      {
+        "path": "internal/contracts/lifecycle/component-lifecycle.v0.md",
+        "baselineSha256": "262f4345920fcfa5b4829ace01ca1b5933d07a6047b92fab54d1650f0ef68033",
+        "historicalAssignedBaseSha256": "262f4345920fcfa5b4829ace01ca1b5933d07a6047b92fab54d1650f0ef68033",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "262f4345920fcfa5b4829ace01ca1b5933d07a6047b92fab54d1650f0ef68033"
+      },
+      {
+        "path": "internal/contracts/prototype-base/form-completion.v0.md",
+        "baselineSha256": "8cadb32b9e22bf6e228908823019965750c0f61aee66720b6360324194da75bc",
+        "historicalAssignedBaseSha256": "8cadb32b9e22bf6e228908823019965750c0f61aee66720b6360324194da75bc",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "8cadb32b9e22bf6e228908823019965750c0f61aee66720b6360324194da75bc"
+      },
+      {
+        "path": "internal/contracts/prototype-base/notification-completion.v0.md",
+        "baselineSha256": "52940a389fb77a891205aff7ee26de795e78df033190ece9d26faeed47a27426",
+        "historicalAssignedBaseSha256": "52940a389fb77a891205aff7ee26de795e78df033190ece9d26faeed47a27426",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "52940a389fb77a891205aff7ee26de795e78df033190ece9d26faeed47a27426"
+      },
+      {
+        "path": "internal/contracts/prototype-base/search-selection-completion.v0.md",
+        "baselineSha256": "5af4599dfb5d10187805bb690bad3d973ead6a84f48ec73d3f171da261efc382",
+        "historicalAssignedBaseSha256": "5af4599dfb5d10187805bb690bad3d973ead6a84f48ec73d3f171da261efc382",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "5af4599dfb5d10187805bb690bad3d973ead6a84f48ec73d3f171da261efc382"
+      },
+      {
+        "path": "internal/records/2026-10-10-anatomy-runtime-lifecycle-budget.json",
+        "baselineSha256": "cdf4bbed30eb0d039858d56eff5bf5a1961bbc2afe572c0978ab4f402b3371bd",
+        "historicalAssignedBaseSha256": "cdf4bbed30eb0d039858d56eff5bf5a1961bbc2afe572c0978ab4f402b3371bd",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "cdf4bbed30eb0d039858d56eff5bf5a1961bbc2afe572c0978ab4f402b3371bd"
+      },
+      {
+        "path": "internal/records/2026-10-14-finf-source-closure.json",
+        "baselineSha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5",
+        "historicalAssignedBaseSha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/root.proto.ts",
+        "baselineSha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b",
+        "historicalAssignedBaseSha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b"
+      },
+      {
+        "path": "packages/prototypes/base/src/calendar/index.ts",
+        "baselineSha256": "5f17db886e2279c4fedabb7b01ae97c885afd919c25acbf1257cc7b2df1270f0",
+        "historicalAssignedBaseSha256": "5f17db886e2279c4fedabb7b01ae97c885afd919c25acbf1257cc7b2df1270f0",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "5f17db886e2279c4fedabb7b01ae97c885afd919c25acbf1257cc7b2df1270f0"
+      },
+      {
+        "path": "packages/prototypes/base/src/carousel/index.ts",
+        "baselineSha256": "edf2646674c981baeccdcdd3e4aa2f13b6e440528eb925307aec28d47c35d090",
+        "historicalAssignedBaseSha256": "edf2646674c981baeccdcdd3e4aa2f13b6e440528eb925307aec28d47c35d090",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "edf2646674c981baeccdcdd3e4aa2f13b6e440528eb925307aec28d47c35d090"
+      },
+      {
+        "path": "packages/prototypes/base/src/checkbox-group/root.proto.ts",
+        "baselineSha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32",
+        "historicalAssignedBaseSha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32"
+      },
+      {
+        "path": "packages/prototypes/base/src/context-menu/root.proto.ts",
+        "baselineSha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df",
+        "historicalAssignedBaseSha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df"
+      },
+      {
+        "path": "packages/prototypes/base/src/data-table/index.ts",
+        "baselineSha256": "8646c96e39a939eef92a5716abfa63760bb517b7cf95c8a5e9817fe6cfe5d03a",
+        "historicalAssignedBaseSha256": "8646c96e39a939eef92a5716abfa63760bb517b7cf95c8a5e9817fe6cfe5d03a",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "8646c96e39a939eef92a5716abfa63760bb517b7cf95c8a5e9817fe6cfe5d03a"
+      },
+      {
+        "path": "packages/prototypes/base/src/field/control.proto.ts",
+        "baselineSha256": "db01d727ad2f04598992eca967daef88065f107369c420a55832e09d3a5ce86c",
+        "historicalAssignedBaseSha256": "a39428853bb52207bf3b4c5fae681b9bda1524713e553ba75f8b793901c84c1b",
+        "unchangedAtBaseline": false,
+        "candidateSha256": "db01d727ad2f04598992eca967daef88065f107369c420a55832e09d3a5ce86c"
+      },
+      {
+        "path": "packages/prototypes/base/src/form/root.proto.ts",
+        "baselineSha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988",
+        "historicalAssignedBaseSha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988"
+      },
+      {
+        "path": "packages/prototypes/base/src/input-otp/root.proto.ts",
+        "baselineSha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e",
+        "historicalAssignedBaseSha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e"
+      },
+      {
+        "path": "packages/prototypes/base/src/menu-primitives/family.ts",
+        "baselineSha256": "958dc8517d38b6fcd4497f35fb1a8fa7a550c468fbb63abb8633763c9658fcd7",
+        "historicalAssignedBaseSha256": "958dc8517d38b6fcd4497f35fb1a8fa7a550c468fbb63abb8633763c9658fcd7",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "958dc8517d38b6fcd4497f35fb1a8fa7a550c468fbb63abb8633763c9658fcd7"
+      },
+      {
+        "path": "packages/prototypes/base/src/number-field/root.proto.ts",
+        "baselineSha256": "607493090d0f8b50116a4607830efff88caa7fbc34658c5f59467769d950ac88",
+        "historicalAssignedBaseSha256": "05e67c05dc46df2cc6d7bc9fec35e46d99b4325e372f9dc8d4738c4a3fff349f",
+        "unchangedAtBaseline": false,
+        "candidateSha256": "607493090d0f8b50116a4607830efff88caa7fbc34658c5f59467769d950ac88"
+      },
+      {
+        "path": "packages/prototypes/base/src/search-primitives/family.ts",
+        "baselineSha256": "98ffd8a35890f8d50cc0ab167f6b6afbc4b0c53646af919dc189534870de017a",
+        "historicalAssignedBaseSha256": "e077dd47cadc5907c261f49ea816c7a01ea82476d3c7017c8630b75c2955b2c5",
+        "unchangedAtBaseline": false,
+        "candidateSha256": "98ffd8a35890f8d50cc0ab167f6b6afbc4b0c53646af919dc189534870de017a"
+      },
+      {
+        "path": "packages/prototypes/base/src/slider/root.proto.ts",
+        "baselineSha256": "9e00bc93d71e0a05af1e72ded8f25c9c3fb2f1d8bf38c5636f8ccd103dbf4b0e",
+        "historicalAssignedBaseSha256": "9e00bc93d71e0a05af1e72ded8f25c9c3fb2f1d8bf38c5636f8ccd103dbf4b0e",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "9e00bc93d71e0a05af1e72ded8f25c9c3fb2f1d8bf38c5636f8ccd103dbf4b0e"
+      },
+      {
+        "path": "packages/prototypes/base/src/slider/values-root.proto.ts",
+        "baselineSha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5",
+        "historicalAssignedBaseSha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5"
+      },
+      {
+        "path": "packages/prototypes/base/src/toast/root.proto.ts",
+        "baselineSha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c",
+        "historicalAssignedBaseSha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c"
+      },
+      {
+        "path": "packages/prototypes/base/src/toolbar/separator.proto.ts",
+        "baselineSha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d",
+        "historicalAssignedBaseSha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d"
+      },
+      {
+        "path": "packages/prototypes/base/src/tree/index.ts",
+        "baselineSha256": "7d885efd494ca8c3745d0a96163fc500ee0637810a70991742e03b002be07cfd",
+        "historicalAssignedBaseSha256": "7d885efd494ca8c3745d0a96163fc500ee0637810a70991742e03b002be07cfd",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "7d885efd494ca8c3745d0a96163fc500ee0637810a70991742e03b002be07cfd"
+      },
+      {
+        "path": "packages/prototypes/base/test/navigation-overlays/search.test.ts",
+        "baselineSha256": "0050ac5ff305fd1be521df6e1e913a517bd63c6a8b042092121d7bff827cf5e9",
+        "historicalAssignedBaseSha256": "0050ac5ff305fd1be521df6e1e913a517bd63c6a8b042092121d7bff827cf5e9",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "0050ac5ff305fd1be521df6e1e913a517bd63c6a8b042092121d7bff827cf5e9"
+      },
+      {
+        "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+        "baselineSha256": "315132430bab096eeee446770a549bb02850178e4f8c81aaf0ba1b3b2b478eeb",
+        "historicalAssignedBaseSha256": "9819d01406180b70b93ceba0222cf0096ad1e8399bb970a818574211a1c2912b",
+        "unchangedAtBaseline": false,
+        "candidateSha256": "39a4e4bc119768f1045dea73b21636eb1c3b0173aa3c4f2694890d8551c55934"
+      },
+      {
+        "path": "packages/prototypes/base/test/popup-snap-validation-lifecycle.test.ts",
+        "baselineSha256": "b43edcf14cb048ecbf76541fb18d969734c5b89bd762fd43b564beb201d58f86",
+        "historicalAssignedBaseSha256": "b43edcf14cb048ecbf76541fb18d969734c5b89bd762fd43b564beb201d58f86",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "b43edcf14cb048ecbf76541fb18d969734c5b89bd762fd43b564beb201d58f86"
+      },
+      {
+        "path": "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+        "baselineSha256": "887fe8880dc636004519c85a5599febfaa7bed4bf43bd26ad88cd8db7c5fccf7",
+        "historicalAssignedBaseSha256": "887fe8880dc636004519c85a5599febfaa7bed4bf43bd26ad88cd8db7c5fccf7",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "25ab78a473ad0a2d9f51167697f86247b76ef5d9327b8acb74208489818668f2"
+      },
+      {
+        "path": "packages/prototypes/base/test/slider-root-lifecycle.test.ts",
+        "baselineSha256": "724d3b854c248868fb4cbd38d7eb864db41229ea1b8f72a37e9be3b0080445a9",
+        "historicalAssignedBaseSha256": "724d3b854c248868fb4cbd38d7eb864db41229ea1b8f72a37e9be3b0080445a9",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "724d3b854c248868fb4cbd38d7eb864db41229ea1b8f72a37e9be3b0080445a9"
+      },
+      {
+        "path": "packages/prototypes/base/test/slider-values-publication.test.ts",
+        "baselineSha256": "180ac79650683a9e64aa46dccd80f0a2cee4f228a850068e5e51416fb12d1c05",
+        "historicalAssignedBaseSha256": "180ac79650683a9e64aa46dccd80f0a2cee4f228a850068e5e51416fb12d1c05",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "180ac79650683a9e64aa46dccd80f0a2cee4f228a850068e5e51416fb12d1c05"
+      },
+      {
+        "path": "packages/prototypes/base/test/toolbar-separator-lifecycle.test.ts",
+        "baselineSha256": "b72e41357dd600117aef7d3fb0740c50014e5b6056b859790d9dd06b9aa904ff",
+        "historicalAssignedBaseSha256": "b72e41357dd600117aef7d3fb0740c50014e5b6056b859790d9dd06b9aa904ff",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "b72e41357dd600117aef7d3fb0740c50014e5b6056b859790d9dd06b9aa904ff"
+      },
+      {
+        "path": "packages/runtime/src/instance/session.ts",
+        "baselineSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "historicalAssignedBaseSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0"
+      },
+      {
+        "path": "packages/runtime/test/contract/delay.v0.contract.test.ts",
+        "baselineSha256": "eb9355f22fad6fc0f9c1af94aaa156efcd2a551e0761de06ab9a8ee07a406a9d",
+        "historicalAssignedBaseSha256": "eb9355f22fad6fc0f9c1af94aaa156efcd2a551e0761de06ab9a8ee07a406a9d",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "eb9355f22fad6fc0f9c1af94aaa156efcd2a551e0761de06ab9a8ee07a406a9d"
+      },
+      {
+        "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "baselineSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0",
+        "historicalAssignedBaseSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0"
+      },
+      {
+        "path": "packages/spec/fixtures/src/lifecycle/callback-order.ts",
+        "baselineSha256": "c0bd14632f89c39b172f1184c10f48ae777e6297761a506e95c64296196375d6",
+        "historicalAssignedBaseSha256": "c0bd14632f89c39b172f1184c10f48ae777e6297761a506e95c64296196375d6",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "c0bd14632f89c39b172f1184c10f48ae777e6297761a506e95c64296196375d6"
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "baselineSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "historicalAssignedBaseSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498"
+      },
+      {
+        "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+        "baselineSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+        "historicalAssignedBaseSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d"
+      },
+      {
+        "path": "packages/cli/test/lowered-hook-coverage.test.ts",
+        "baselineSha256": "4f88a87ef96250899605b5ccfc823df47e968eef0f812b87da9a443a6b97bafa",
+        "historicalAssignedBaseSha256": "4f88a87ef96250899605b5ccfc823df47e968eef0f812b87da9a443a6b97bafa",
+        "unchangedAtBaseline": true,
+        "candidateSha256": "4f88a87ef96250899605b5ccfc823df47e968eef0f812b87da9a443a6b97bafa"
+      }
+    ]
+  },
+  "executions": [
+    {
+      "id": "foundation-before",
+      "revision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/content/docs/zh-cn/collapsible-focus-observation.test.ts",
+        "packages/adapters/web-component/test/anatomy-reparent-rollback.test.ts",
+        "packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts",
+        "packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts",
+        "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "packages/runtime/test/contract/delay.v0.contract.test.ts",
+        "packages/prototypes/base/test/navigation-overlays/search.test.ts",
+        "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+        "packages/prototypes/base/test/popup-snap-validation-lifecycle.test.ts",
+        "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+        "packages/prototypes/base/test/slider-root-lifecycle.test.ts",
+        "packages/prototypes/base/test/slider-values-publication.test.ts",
+        "packages/prototypes/base/test/toolbar-separator-lifecycle.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose"
+      ],
+      "result": "failed",
+      "exitCode": 1,
+      "files": {
+        "passed": 11,
+        "failed": 2,
+        "total": 13
+      },
+      "tests": {
+        "passed": 363,
+        "failed": 8,
+        "total": 371
+      },
+      "log": {
+        "filename": "pr884-current-unit.log",
+        "sha256": "8159daddac8f2aeb70f8a4fc47b79a4f572ba81a88072208f4a9669a6d20ea39",
+        "bytes": 295025,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    },
+    {
+      "id": "calendar-original-source-negative-control",
+      "sourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "testRevision": "407d735683d78ceb16e24570fe08087c44e4e233",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+        "-t",
+        "completion waits for its live selection callback",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose"
+      ],
+      "result": "failed-as-expected",
+      "exitCode": 1,
+      "tests": {
+        "selected": 16,
+        "failed": 16,
+        "unselected": 69
+      },
+      "boundary": "Only the Calendar implementation was restored temporarily to its original bytes; the source was restored to the repair after the child process. This targeted negative run is not a full-suite skip waiver.",
+      "log": {
+        "filename": "calendar-notification-negative.log",
+        "sha256": "3c43d77ea949fd5f867e4b8d9066861b105e8e5cb96426ce3ab2c222dd1fc49f",
+        "bytes": 148325,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    },
+    {
+      "id": "calendar-repaired",
+      "sourceRevision": "407d735683d78ceb16e24570fe08087c44e4e233",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+        "packages/prototypes/base/test/calendar-selection.test.ts",
+        "packages/prototypes/base/test/calendar-controlled-month.test.ts",
+        "packages/prototypes/base/test/calendar-semantics.test.ts",
+        "packages/prototypes/base/test/calendar-public-handles.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose"
+      ],
+      "result": "passed",
+      "exitCode": 0,
+      "files": 5,
+      "tests": 133,
+      "log": {
+        "filename": "calendar-notification-fixed.log",
+        "sha256": "dff17a9630b6eccf67fdd981da59601e173d11c0c0f989bcf4ecbf0f1bdb7664",
+        "bytes": 203252,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    },
+    {
+      "id": "foundation-repaired",
+      "sourceRevision": "522dc46fbbf2d788ea5475bf75ee929c678288b1",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "apps/www/src/content/docs/zh-cn/collapsible-focus-observation.test.ts",
+        "packages/adapters/web-component/test/anatomy-reparent-rollback.test.ts",
+        "packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts",
+        "packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts",
+        "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "packages/runtime/test/contract/delay.v0.contract.test.ts",
+        "packages/prototypes/base/test/navigation-overlays/search.test.ts",
+        "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+        "packages/prototypes/base/test/popup-snap-validation-lifecycle.test.ts",
+        "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+        "packages/prototypes/base/test/slider-root-lifecycle.test.ts",
+        "packages/prototypes/base/test/slider-values-publication.test.ts",
+        "packages/prototypes/base/test/toolbar-separator-lifecycle.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose"
+      ],
+      "result": "passed",
+      "exitCode": 0,
+      "files": 13,
+      "tests": 391,
+      "overlaps": "calendar-repaired includes selection-reset-lifecycle.test.ts; do not add test counts.",
+      "log": {
+        "filename": "pr884-current-unit-fixed.log",
+        "sha256": "d932c7a2e86f92f4799145c845e7a3282da6de8cb1b34dfed28f7632cd8b6704",
+        "bytes": 294719,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    },
+    {
+      "id": "public-docs-before-object-recovery",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "test:public-docs"],
+      "result": "failed",
+      "exitCode": 1,
+      "tests": {
+        "passed": 463,
+        "failed": 3,
+        "total": 466
+      },
+      "cause": "Missing immutable HIG Git objects; original pins and assertions unchanged.",
+      "log": {
+        "filename": "public-docs.log",
+        "sha256": "a4bc01b997bc227f0e823fa4704c9b2fff9c7ee38fd345ce3fc8ba4bd7d96516",
+        "bytes": 51771,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    },
+    {
+      "id": "hig-after-object-recovery",
+      "command": [
+        "node",
+        "--test",
+        "scripts/docs/test/hig-comparison-record.test.mjs",
+        "scripts/docs/test/hig-source-reconciliation.test.mjs"
+      ],
+      "result": "passed",
+      "exitCode": 0,
+      "files": 2,
+      "tests": 12,
+      "log": {
+        "filename": "hig-recovered-source-tests.log",
+        "sha256": "4dea7cb3ab64d03e2637d17c3e7c44d8d0bb63b99992db47137ddbe46fc7d8c4",
+        "bytes": 1316,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    },
+    {
+      "id": "diagram-generation",
+      "command": ["node", "apps/www/scripts/generate-whitepaper-diagrams.mjs"],
+      "result": "passed",
+      "exitCode": 0,
+      "generatedSVGs": 10,
+      "changedAssetBytes": false
+    },
+    {
+      "id": "agent-static-validators",
+      "commands": [
+        ["node", "scripts/agent-operations/check-agent-operations.mjs"],
+        ["node", "scripts/agent-operations/check-contributor-skills.mjs"]
+      ],
+      "result": "passed",
+      "exitCode": 0
+    },
+    {
+      "id": "agent-full-tests",
+      "command": ["corepack", "pnpm@10.32.1", "-s", "check:agent-operations"],
+      "result": "passed",
+      "exitCode": 0,
+      "tests": 1549,
+      "durationMs": 734822.293945,
+      "acceptedAsFrozenCandidate": false,
+      "sourceBoundary": "Agent implementation/tests unchanged; long execution overlapped unrelated worktree repair/documentation commits. Not exact-final-head CI."
+    },
+    {
+      "id": "authored-checker-initial",
+      "result": "terminated",
+      "signal": "SIGKILL",
+      "directProcessExitCode": 137,
+      "cause": "Formatting an intentionally unequal large SVG buffer in assert.deepEqual expanded the failure diagnostic. Replaced with exact built/source SHA-256 comparison; original mismatch rejection retained."
+    },
+    {
+      "id": "authored-checker-repaired",
+      "collectorSourceRevision": "e2ee0b9f0f0d047f96781af2c2048f026eb333dd",
+      "inventoryInputRevision": "e466b0638b826c2c1a8e0d1dfd2035496be01a37",
+      "command": [
+        "node",
+        "--test",
+        "scripts/docs/test/authored-diagram-evidence.test.mjs",
+        "scripts/docs/test/whitepaper-diagram-inventory.test.mjs"
+      ],
+      "result": "passed",
+      "exitCode": 0,
+      "files": 2,
+      "tests": 9,
+      "log": {
+        "filename": "authored-diagram-checker-tests.log",
+        "sha256": "642a70c2f3eb6a9ae7b5168e9654572b8f061848aa8abda7badd59e018a4d4b1",
+        "bytes": 990,
+        "location": "Local retained raw artifact; external publication is owned by integration."
+      }
+    }
+  ],
+  "recoveredGitObjects": [
+    "25c3d0731e39003d87f541afc5e1a294a9d95568",
+    "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+    "c8a006403f4dfc850ee3cec5633c17f394ccd308",
+    "136e16b57c19de961532fa17cef51961f926bd7e"
+  ],
+  "recoveryCommand": [
+    "git",
+    "fetch",
+    "--no-tags",
+    "--no-write-fetch-head",
+    "origin",
+    "<exact-original-sha>"
+  ],
+  "diagramEvidence": {
+    "record": "internal/records/2026-11-22-whitepaper-diagram-dispositions.md",
+    "inventory": "internal/records/2026-11-22-whitepaper-diagram-inventory.json",
+    "assets": 17,
+    "references": 22,
+    "existingProductionProfiles": 5,
+    "existingCaptureCases": 60,
+    "fontProbes": 24,
+    "coveredAssets": 11,
+    "authoredAssetsRequiringSeparatePageReview": 6,
+    "actualBrowserResult": "pending integration-owned execution",
+    "inkscapeResult": "unsupported rendering; rejected as browser/visual acceptance",
+    "authoredCollector": "apps/www/scripts/capture-authored-diagram-evidence.mjs",
+    "authoredCaptureCases": 32,
+    "authoredPNGs": 64,
+    "authoredCollectorRevision": "e2ee0b9f0f0d047f96781af2c2048f026eb333dd"
+  },
+  "missingPrivateEvidence": {
+    "issue": 1175,
+    "publicReport": "https://github.com/Proto-UI/Proto-UI/issues/1175#issuecomment-6809413156",
+    "driver": "capture-issue-1175-camoufox.ts",
+    "driverSha256": "c42d69db759ea58b86f53ae90e6679b256afa3b855e339797817b96feab845dc",
+    "searches": [
+      "available Git history and refs",
+      "public repository code",
+      "original Issue420 conditions",
+      "PR1444 changed-file inventory"
+    ],
+    "result": "Original private runner/raw archive not recovered; report hashes are not file bytes.",
+    "preservedOriginalOutcome": {
+      "phases": 76,
+      "phasePassed": 0,
+      "phaseFailed": 76,
+      "subjects": 155,
+      "subjectPassed": 5,
+      "subjectFailed": 145,
+      "subjectUnknown": 5,
+      "rawImages": 1402
+    },
+    "replacementChromeRunAllowedAsOriginalAcceptance": false
+  },
+  "remaining": [
+    "Final exact-source CI/DCO and genuine independent review",
+    "Native supervised audit, Focus package graph/budget and packed consumers",
+    "Current Collapsible and Scroll Area native/visual integration",
+    "Real assistive-technology observations",
+    "Current native Windows portability witness if claimed",
+    "HIG independent project compatibility/adoption decisions",
+    "17-asset actual bilingual/themed article and applicable preview review",
+    "Original GPUI, Bootstrap and Liquid conditions in their assigned later workstreams",
+    "Original private Camoufox driver/archive recovery"
+  ],
+  "historicalApprovalFabricated": false,
+  "issueOrPRMutationBySliceOwner": false
+}

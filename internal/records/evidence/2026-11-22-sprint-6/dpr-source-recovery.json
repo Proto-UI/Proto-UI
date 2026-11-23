@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-recovery-after-execution-environment-loss",
+  "recoveredAt": "2026-11-22T13:53:53Z",
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 1712,
+  "branch": "sprint6/bootstrap-liquid-delivery-20261122",
+  "parent": "3801353bb6086d11b257dace4f0dc347fea98488",
+  "parentTree": "209d3cb4396bc5a9070d3445bdbaede921d63aa3",
+  "method": "Read actual immutable parent source through GitHub; apply the exact previously tested/reviewed changes; compare SHA-256 of every complete source file with the frozen pre-interruption digest.",
+  "files": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+      "baseSha256": "f2d7ce4e94c9e520c961ad59643550b8250e23fc88eeb8be6012b7b9e927dfdc",
+      "candidateSha256": "591262014e5be6db86b013dfd21cde229b1f467e2e37568aa9172bafbd9cf5cf",
+      "length": 21209
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.test.ts",
+      "baseSha256": "1fef790d5b7c8607b5faae2e62a758a94c5320f4f22586c07ce7c17e87d57abd",
+      "candidateSha256": "98e32ea0649c579bd7ec4eea3f2640dec590d9a74cfd540952023a3bb2e19f84",
+      "length": 29539
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "baseSha256": "4a0f43054f31ee7c0a5635fb649fdfef32362277ee9b0ad140076c64256d1476",
+      "candidateSha256": "b7aa9c8e6b94607f2d6166521787838c24b4adacf57e68fd023ba5bcbce6cf57",
+      "length": 125878
+    }
+  ],
+  "validation": {
+    "producerUnit": {
+      "negative": {
+        "source": "3801353bb6086d11b257dace4f0dc347fea98488",
+        "selectedTests": 2,
+        "failed": 2,
+        "exitCode": 1,
+        "scope": "Controlled notification-before-readable-DPR ordering; not a reconstruction of Chromium callback ordering in the native failure."
+      },
+      "candidate": {
+        "tests": 27,
+        "passed": 27,
+        "failed": 0,
+        "pending": 0,
+        "todo": 0,
+        "exitCode": 0,
+        "sourceSha256": "591262014e5be6db86b013dfd21cde229b1f467e2e37568aa9172bafbd9cf5cf",
+        "testSha256": "98e32ea0649c579bd7ec4eea3f2640dec590d9a74cfd540952023a3bb2e19f84"
+      },
+      "originalLogs": "Recorded as executed before the environment disconnected. Complete original local logs/reports are currently inaccessible and are not represented by this manifest."
+    },
+    "nativeOracle": {
+      "sourceSha256": "b7aa9c8e6b94607f2d6166521787838c24b4adacf57e68fd023ba5bcbce6cf57",
+      "syntaxAndAstCheck": "passed before interruption",
+      "semanticTypeCheck": "unknown: session 48256 interrupted before a terminal result",
+      "nativeExecution": "not yet executed for this candidate"
+    },
+    "independentSourceReview": {
+      "reviewer": "/root/review",
+      "scope": "All three exact source files reviewed before interruption; reviewer did not implement them.",
+      "platformApproval": false
+    },
+    "fullCandidateAcceptance": "pending"
+  },
+  "unpublishedLocalArchives": {
+    "status": "inaccessible after execution environment loss; not included in this publication",
+    "fifthNativeJsonMembers": 283,
+    "originalZipArtifacts": [
+      14755937251,
+      14756256217,
+      14756555319,
+      14755838322,
+      14755524869,
+      14756565080,
+      14755664697
+    ]
+  },
+  "publication": {
+    "transport": "authorized existing GitHub connector",
+    "localCliExecutionClaim": false,
+    "ruleBypass": false,
+    "forcePush": false,
+    "readyOrMergeClaim": false
+  }
+}

@@ -64,7 +64,8 @@ function setupRoot(def: DefHandle<VirtualListRootProps, VirtualListRootExposes>)
   };
   def.lifecycle.onCreated(sync);
   def.props.watchAll(sync);
-  def.lifecycle.onUnmounted(() => collection.invalidate());
+  def.lifecycle.onUnmounted(() => collection.retireMaterializer());
+  def.lifecycle.onBeforeDispose(() => collection.retireMaterializer());
 }
 export const asVirtualListRoot = defineAsHook<
   VirtualListRootProps,

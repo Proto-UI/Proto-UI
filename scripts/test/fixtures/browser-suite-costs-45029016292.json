@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "runId": 45029016292,
+  "headSha": "f8e7d12ebe64343b8caec71a7f23a6b9761b6ef7",
+  "purpose": "Scheduling observation from the full terminal file summary, including standalone server startup. Only site exceeds the existing 120-second unmeasured reserve. The compiled file failed after 45597ms; retain that original failure and the 120-second reserve until its repaired startup is measured. No timeout, shard budget, acceptance denominator or original observation is weakened.",
+  "artifactId": 14757716300,
+  "artifactZipSha256": "acd5bebb98575a3fb417f6b4897138f4861fee81b6f65b211a8eb91f0dad72ac",
+  "observations": [
+    {
+      "suite": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+      "durationMs": 162295,
+      "summary": "42 tests | 42 passed; includes file setup/teardown",
+      "fileOutcome": "passed",
+      "jobId": 137228248258,
+      "jobCompletedVitest": true,
+      "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45029016292/job/137228248258",
+      "logSha256": "88ec97593c21a6c94883bf240ff471d82084e3ffcd65f99920732a0acb86c2bf",
+      "logArtifactPath": "site/run.log"
+    }
+  ]
+}

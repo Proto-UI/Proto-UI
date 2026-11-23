@@ -1,0 +1,24 @@
+id: C-WINDOW-MATERIALIZER-OWNER-0001
+type: contract
+title: Portable exclusive window materializer ownership
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Sprint 2 requires a portable window owner rather than an implicitly exclusive Web helper. The lease is host-independent; independent target and assistive-technology admission remains open.
+summary: A logical window collection grants at most one physical materializer lease; retiring it invalidates stale requests and releases its physical resources before a replacement is accepted.
+criteria:
+  - id: C-WINDOW-MATERIALIZER-OWNER-0001-EXCLUSIVE
+    text: acquireMaterializer obtains one exclusive opaque lease for a logical collection, independent of DOM, widget type or physical measurement units. A second acquisition fails before mutating either host. A lease exposes only isCurrent and idempotent release; release revokes only that lease. Root retirement may revoke the current lease. Logical setItems/configure invalidates a request generation without transferring ownership.
+  - id: C-WINDOW-MATERIALIZER-OWNER-0001-RETIRE
+    text: Retirement revokes the lease and current window generation before notifying its cleanup callback and subscribers. Old requests cannot commit, old refresh/resize/scroll callbacks cannot materialize again, and a repeated old release cannot invalidate a later owner. Cleanup removes owned listeners, measurements, observations, rows and spacers. A failed initial attachment releases its acquired lease so a corrected consumer can retry.
+  - id: C-WINDOW-MATERIALIZER-OWNER-0001-BOUNDARY
+    text: Root owns complete logical keys and finite window policy. The model owns proposed/committed ranges and revision/generation checks. The lease owns physical materialization lifetime. A host translates measured visibility into item indices, creates and destroys its views, and supplies logical accessibility positions. The existing low-level generation API remains usable by model tests and explicit coordinators; it does not implicitly acquire or transfer a materializer lease. Web geometry is an explicitly experimental host projection, not a portable prop or proof of non-Web delivery.
+dependsOn:
+  contracts: [C-LIFECYCLE-0008]
+sources:
+  - path: packages/prototypes/base/src/virtual-list/
+  - path: packages/prototypes/base/test/virtual-list-owner.test.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define exclusive portable ownership and retirement independently of window geometry and host implementation.
+tags: [virtual-list, window, ownership, lifecycle]

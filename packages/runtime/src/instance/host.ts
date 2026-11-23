@@ -51,6 +51,9 @@ export interface RuntimeHost<P extends PropsBaseType> {
   /** Optional diagnostics hook for repeatable, epoch-aware lifecycle events. */
   onLifecycleEvent?(event: RuntimeLifecycleEvent): void;
 
+  /** Secondary rollback errors before a setup-failed session can be published. */
+  onSetupCleanupError?(error: unknown): void;
+
   /** host must provide raw props snapshot (may include undeclared keys) */
   getRawProps(): Readonly<P & PropsBaseType>;
 

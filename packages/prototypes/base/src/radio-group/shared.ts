@@ -6,11 +6,11 @@ import {
 } from '@proto.ui/core';
 import type { RadioGroupItemProps, RadioGroupRootProps } from './types';
 
-
 export type RadioGroupContextValue = {
   value: string;
   controlled: boolean;
   disabled: boolean;
+  readOnly?: boolean;
   selectedItemId: string;
   currentItemId: string;
 };
@@ -68,7 +68,6 @@ export function registerRadioGroupCoordinator(
   };
 }
 
-
 let nextRadioGroupItemId = 0;
 
 export function createRadioGroupItemId(): string {
@@ -105,7 +104,6 @@ export function getRadioGroupItems(
     .filter((snapshot): snapshot is RadioGroupItemSnapshot => snapshot !== null);
 }
 
-
 export function requestRadioGroupValue(
   run: RunHandle<RadioGroupItemProps>,
   value: string
@@ -126,6 +124,12 @@ export function setRadioGroupCurrentItem(
   requestRadioGroupValue(run, run.context.read(RADIO_GROUP_CONTEXT).value);
 }
 
+export function notifyRadioGroupFocus(run: RunHandle<RadioGroupItemProps>): void {
+  // The public no-op value request enters the Root callback scope. Never
+  // mutate another instance through an unbound function in a module WeakMap.
+  requestRadioGroupValue(run, run.context.read(RADIO_GROUP_CONTEXT).value);
+}
+
 export function notifyRadioGroupItemsChanged(run: RunHandle<RadioGroupItemProps>): void {
   requestRadioGroupValue(run, run.context.read(RADIO_GROUP_CONTEXT).value);
 }
@@ -142,7 +146,6 @@ export const RADIO_GROUP_FAMILY = createAnatomyFamily('base-radio-group', {
   ],
 });
 
-export const RADIO_GROUP_CONTEXT =
-  createContextKey<RadioGroupContextValue>('base-radio-group');
+export const RADIO_GROUP_CONTEXT = createContextKey<RadioGroupContextValue>('base-radio-group');
 export const RADIO_GROUP_ITEM_CONTEXT =
   createContextKey<RadioGroupItemContextValue>('base-radio-group-item');

@@ -1,5 +1,6 @@
 import {
   canonicalizeLineEndings,
+  canonicalizeTextControlSelection,
   type TextControlEvent,
   type TextControlPatch,
   type TextControlSnapshot,
@@ -58,6 +59,52 @@ function attachTarget(
   let composing = false;
   let disposed = false;
   let valueProjectionDeferred = false;
+  let applyingPatch = true;
+  let selectionQueued = false;
+  let lastSelection = '';
+  const readSelection = () => {
+    try {
+      return canonicalizeTextControlSelection(
+        {
+          start: target.selectionStart,
+          end: target.selectionEnd,
+          direction: target.selectionDirection,
+        },
+        target.value,
+        isWebInput(target) ? 'single' : 'multiline'
+      );
+    } catch {
+      return null;
+    }
+  };
+  const selectionKey = () => JSON.stringify([target.value, readSelection()]);
+  const emitSelection = (event?: Event) => {
+    if (disposed || applyingPatch) return;
+    assertTextCompatibleTarget(target);
+    if (options.stopPropagation && (event?.type === 'select' || event?.type === 'selectionchange'))
+      event.stopPropagation();
+    const next = selectionKey();
+    if (next === lastSelection) return;
+    lastSelection = next;
+    connection.onEvent(
+      Object.freeze({
+        type: 'selectionchange',
+        value: canonicalizeLineEndings(target.value),
+        composing,
+        data: null,
+        inputType: null,
+        selection: readSelection(),
+      })
+    );
+  };
+  const queueSelection = () => {
+    if (selectionQueued || disposed) return;
+    selectionQueued = true;
+    queueMicrotask(() => {
+      selectionQueued = false;
+      emitSelection();
+    });
+  };
 
   const emit = (event: Event) => {
     if (disposed) return;
@@ -78,6 +125,7 @@ function attachTarget(
     if (type === 'compositionstart') composing = true;
     if (type === 'input' && editingEvent.isComposing === true) composing = true;
     if (type === 'compositionend') composing = false;
+    lastSelection = selectionKey();
     connection.onEvent(
       Object.freeze({
         type,
@@ -85,12 +133,19 @@ function attachTarget(
         composing,
         data,
         inputType,
+        selection: readSelection(),
       })
     );
     if (disposed) return;
     if (type === 'compositionend' && valueProjectionDeferred) {
       assertTextCompatibleTarget(target);
-      valueProjectionDeferred = applyPatch(target, patch, true);
+      applyingPatch = true;
+      try {
+        valueProjectionDeferred = applyPatch(target, patch, true);
+      } finally {
+        applyingPatch = false;
+      }
+      queueSelection();
     }
   };
 
@@ -102,23 +157,46 @@ function attachTarget(
     'compositionend',
   ] as const;
   for (const type of eventTypes) target.addEventListener(type, emit);
-  valueProjectionDeferred = applyPatch(target, patch, true);
+  const selectionTypes = ['select', 'selectionchange', 'keyup', 'pointerup', 'focus'] as const;
+  for (const type of selectionTypes) target.addEventListener(type, emitSelection);
+  const documentTarget = target.ownerDocument;
+  const onDocumentSelection = () => {
+    const root = target.getRootNode() as Document | ShadowRoot;
+    if (root.activeElement === target) emitSelection();
+  };
+  documentTarget.addEventListener('selectionchange', onDocumentSelection);
+  valueProjectionDeferred = applyPatch(target, patch, true, true);
+  lastSelection = selectionKey();
+  applyingPatch = false;
 
   return {
     update(next) {
       if (disposed) return;
       assertTextCompatibleTarget(target);
       patch = next;
-      valueProjectionDeferred = applyPatch(target, patch, !composing);
+      applyingPatch = true;
+      try {
+        valueProjectionDeferred = applyPatch(target, patch, !composing);
+      } finally {
+        applyingPatch = false;
+      }
+      queueSelection();
     },
     snapshot(): TextControlSnapshot {
+      if (disposed) throw new Error('[TextControl] cannot snapshot a disposed Web host lease.');
       assertTextCompatibleTarget(target);
-      return Object.freeze({ value: canonicalizeLineEndings(target.value), composing });
+      return Object.freeze({
+        value: canonicalizeLineEndings(target.value),
+        composing,
+        selection: readSelection(),
+      });
     },
     dispose() {
       if (disposed) return;
       disposed = true;
       for (const type of eventTypes) target.removeEventListener(type, emit);
+      for (const type of selectionTypes) target.removeEventListener(type, emitSelection);
+      documentTarget.removeEventListener('selectionchange', onDocumentSelection);
     },
   };
 }
@@ -132,14 +210,15 @@ function assertTextCompatibleTarget(target: WebTextControl): void {
 function applyPatch(
   target: WebTextControl,
   patch: TextControlPatch,
-  allowValueProjection: boolean
+  allowValueProjection: boolean,
+  initial = false
 ): boolean {
   let valueProjectionDeferred = false;
   if (typeof patch.defaultValue === 'string' && target.defaultValue !== patch.defaultValue) {
     target.defaultValue = patch.defaultValue;
   }
   const value =
-    patch.value ?? (patch.valueMode === 'uncontrolled' ? patch.defaultValue : undefined);
+    patch.value ?? (initial && patch.valueMode === 'uncontrolled' ? patch.defaultValue : undefined);
   if (typeof value === 'string' && target.value !== value) {
     if (allowValueProjection) replaceValuePreservingEditingSession(target, value);
     else valueProjectionDeferred = true;

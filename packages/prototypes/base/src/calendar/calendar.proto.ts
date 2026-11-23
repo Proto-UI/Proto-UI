@@ -50,6 +50,8 @@ import type {
   CalendarDayExposes,
   CalendarDayContract,
   CalendarRootAsHookContract,
+  CalendarRootHandles,
+  CalendarSelectionCapture,
   CalendarGridProps,
   CalendarGridExposes,
   CalendarRowProps,
@@ -219,6 +221,15 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   let values: string[] = [];
   let range: CalendarRange = {};
   let selectionId = 0;
+  const selectionCaptures = new Set<CalendarSelectionCapture>();
+  def.expose.method('registerSelectionCapture', (capture: CalendarSelectionCapture) => {
+    if (typeof capture !== 'function') return false;
+    if (selectionCaptures.has(capture)) return true;
+    // This owned cleanup also enforces the setup-only registration boundary.
+    def.lifecycle.onBeforeDispose(() => selectionCaptures.delete(capture));
+    selectionCaptures.add(capture);
+    return true;
+  });
   let publicationId = 0;
   let pendingSelection: {
     id: number;
@@ -228,6 +239,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     complete: boolean;
     reason: CalendarSelectionReason;
     allowMinimumProgress: boolean;
+    proposalDelivered: boolean;
   } | null = null;
   def.expose.method('getValues', () => [...values]);
   def.expose.method('getRange', () => ({ ...range }));
@@ -274,12 +286,16 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
             ? calendarRangeAvailable(next.range, p)
             : dateAvailable(next.value, next.min, next.max, next.unavailable));
       if (eligible && key === pending.expected) {
-        next.selectionCommit = {
-          id: pending.id,
-          complete: pending.complete,
-          reason: pending.reason,
-        };
-        completedSelection = true;
+        // Canonical facts may update inside a proposal callback, but completion
+        // belongs to the still-current request after that callback returns.
+        if (pending.proposalDelivered) {
+          next.selectionCommit = {
+            id: pending.id,
+            complete: pending.complete,
+            reason: pending.reason,
+          };
+          completedSelection = true;
+        }
       } else if (
         next.disabled ||
         next.readOnly ||
@@ -409,8 +425,39 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       complete: c.mode === 'single' || (c.mode === 'range' && !!nextRange.from && !!nextRange.to),
       reason,
       allowMinimumProgress,
+      proposalDelivered: false,
     };
     pendingNavigation = null;
+    const capture = Object.freeze({
+      id,
+      viewEpoch: epoch,
+      context: Object.freeze({ read: current.context.read }),
+    });
+    try {
+      for (const record of selectionCaptures) {
+        record(capture);
+        if (
+          owner !== current ||
+          viewEpoch !== epoch ||
+          selectionId !== id ||
+          pendingSelection?.id !== id
+        )
+          return true;
+      }
+    } catch (error) {
+      if (pendingSelection?.id === id) pendingSelection = null;
+      throw error;
+    }
+    // The capture already recorded causality. This ordinary Context transition
+    // may drain after other channels and is not used to infer a request's start.
+    current.context.update(CALENDAR_CONTEXT, { ...c, selectionRequestId: id });
+    if (
+      owner !== current ||
+      viewEpoch !== epoch ||
+      selectionId !== id ||
+      pendingSelection?.id !== id
+    )
+      return true;
     if (c.mode === 'multiple') {
       if (!current.props.isProvided('values')) values = [...nextValues];
     } else if (c.mode === 'range') {
@@ -424,6 +471,11 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     if (c.mode === 'multiple') current.expose.emit('valuesChange', { values: [...nextValues] });
     else if (c.mode === 'range') current.expose.emit('rangeChange', { range: { ...nextRange } });
     else current.expose.emit('valueChange', { value: nextValue });
+    if (owner !== current || viewEpoch !== epoch || selectionId !== id) return true;
+    if (pendingSelection?.id === id) {
+      pendingSelection.proposalDelivered = true;
+      publish(current);
+    }
     return true;
   };
   def.expose.method('requestValues', (next: readonly string[]) => {
@@ -508,10 +560,19 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
 export const asCalendarRoot = defineAsHook<
   CalendarRootProps,
   CalendarRootExposes,
-  CalendarRootAsHookContract
+  CalendarRootAsHookContract,
+  CalendarRootHandles
 >({
   name: 'as-calendar-root',
   setup: setupRoot,
+  projectHandle(result) {
+    return {
+      ...result,
+      registerSelectionCapture: result.getMethod!(
+        'registerSelectionCapture'
+      ) as CalendarRootHandles['registerSelectionCapture'],
+    };
+  },
 });
 export const calendarRoot = definePrototype({ name: 'base-calendar-root', setup: setupRoot });
 function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {

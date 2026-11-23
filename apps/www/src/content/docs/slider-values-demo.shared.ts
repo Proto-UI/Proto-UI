@@ -16,10 +16,10 @@ const display = (value: unknown): string =>
 /**
  * Slider Values is the additive multi-thumb draft: Root is the sole value and
  * logical-completion owner, each editable slot needs exactly one live Thumb,
- * Track is structural only, and there is no pointer drag session. The demo
+ * Track owns shared input with portable Thumb-origin facts. The demo
  * composes all six parts with explicit indexed Thumbs and exercises the real
  * public methods (requestThumbValue, requestKeyboardValue, resetValue) plus
- * the union-valued valueChange/valueCommit events — never a faked pointer.
+ * real pointer input and the union-valued valueChange/valueCommit events.
  */
 export function createSliderValuesDemo(family: string): DemoSpec {
   const component = 'slider-values';
@@ -31,6 +31,22 @@ export function createSliderValuesDemo(family: string): DemoSpec {
   ): DemoNode => ({
     kind: 'proto',
     prototypeId: `${family}-${component}-${role}`,
+    ...(family === 'base'
+      ? {
+          className: (
+            {
+              root: 'flex w-full min-w-0 flex-wrap items-center gap-3',
+              label: 'block w-full',
+              track: 'relative block h-3 w-full rounded bg-slate-200',
+              indicator:
+                'pointer-events-none absolute left-[calc(var(--pui-start-percentage)*1%)] top-0 h-full w-[calc(var(--pui-extent)*1%)] bg-slate-700',
+              thumb:
+                'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-slate-900 bg-white',
+              value: 'block tabular-nums',
+            } as Record<string, string>
+          )[role],
+        }
+      : {}),
     ...(ref ? { ref } : {}),
     props,
     children,
@@ -103,8 +119,7 @@ export function createSliderValuesDemo(family: string): DemoSpec {
       api.setProps('controlled', {
         onValueChange: (event: { value: number | readonly number[] }) => {
           api.setProps('controlled', { value: event.value });
-          if (refs.controlledDisplay)
-            refs.controlledDisplay.textContent = display(event.value);
+          if (refs.controlledDisplay) refs.controlledDisplay.textContent = display(event.value);
         },
       });
       return () => cancelAnimationFrame(frame);
@@ -157,7 +172,7 @@ export function createSliderValuesDemo(family: string): DemoSpec {
           kind: 'box',
           className: 'text-xs text-muted-foreground',
           children: [
-            'Controlled owner accepts keyboard proposals · 受控所有者接受键盘提案',
+            'Controlled owner accepts pointer and keyboard proposals · 受控所有者接受指针与键盘提案',
           ],
         },
         part(
@@ -186,7 +201,7 @@ export function createSliderValuesDemo(family: string): DemoSpec {
           kind: 'box',
           className: 'text-xs text-muted-foreground',
           children: [
-            'No pointer drag is simulated: Track stays structural and edits flow only through keyboard or the public request methods.',
+            'Drag a Thumb without a grab jump, click the Track to seek the nearest Thumb, or use arrow keys. · 拖动滑块保持抓取偏移，点击轨道移动最近滑块，也可使用方向键。',
           ],
         },
       ],

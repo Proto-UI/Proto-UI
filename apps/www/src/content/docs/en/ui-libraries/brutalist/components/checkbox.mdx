@@ -29,6 +29,12 @@ Import Root and Indicator from the already-public `@proto.ui/prototypes-brutalis
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Checkbox guarantee.
 
+## Read-only and explicit Form composition
+
+Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. Ordinary Root does not automatically register with Field or Form.
+
+Use `fieldCheckbox` from `@proto.ui/prototypes-brutalist/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+
 ## API
 
 Checkbox is workspace source. There is no public `proto-ui add` target. Passing `checked` or `indeterminate` selects controlled mode for that fact.
@@ -38,9 +44,9 @@ Checkbox is workspace source. There is no public `proto-ui add` target. Passing 
   rows={[
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
   ]}
 />
 
 These props belong to Root. Indicator has no props.
-

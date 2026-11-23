@@ -160,6 +160,167 @@ function frames() {
 }
 
 describe('Compiler Scroll current-view and reveal host closure', () => {
+  it('keeps an explicit pause through a valid reveal at the current end', () => {
+    const f = fixture({ atEnd: true });
+    f.scroll.pauseFollowing();
+    const states: string[] = [];
+    f.scroll.endFollow.state.subscribe((event: { next: string }) => states.push(event.next));
+    expect(f.reveal()).toEqual({ kind: 'dispatched' });
+    expect(f.surface.scrollTop).toBe(300);
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    expect(states).not.toContain('following');
+  });
+
+  it('resumes on actual composed wheel arrival while preserving pause for public and clamped movement', () => {
+    // The independent reviewer supplied the failing composed-wheel case.
+    const f = fixture({ mount: false });
+    f.scroll.configure({ projection: 'composed' });
+    f.scroll.bindComposedChrome({
+      anatomy: f.family,
+      scrollbarRole: 'scrollbar',
+      thumbRole: 'thumb',
+      orientationExpose: 'orientation',
+      scope: 'local',
+    });
+    f.owner.modules.mount();
+    f.scroll.pauseFollowing();
+    f.scroll.request({ kind: 'by', axis: 'vertical', delta: 1000 });
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 1000 }));
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    f.scroll.request({ kind: 'to', axis: 'vertical', position: 0.5 });
+    f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 1000 }));
+    f.surface.dispatchEvent(new Event('scroll'));
+    expect(f.surface.scrollTop).toBe(300);
+    expect(f.scroll.endFollow.state.get()).toBe('following');
+  });
+
+  it.each(['wheel', 'pointer'] as const)(
+    'retires %s arrival intent that precedes an explicit pause',
+    (input) => {
+      const f = fixture({ atEnd: true });
+      if (input === 'wheel') f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+      else f.surface.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientY: 30 }));
+      f.scroll.pauseFollowing();
+      f.grow();
+      f.surface.scrollTop = 400;
+      f.surface.dispatchEvent(new Event('scroll'));
+      if (input === 'pointer')
+        document.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7 }));
+      expect(f.scroll.endFollow.state.get()).toBe('paused');
+      // A fresh, followed-axis reader arrival still resumes normally.
+      f.surface.scrollTop = 350;
+      f.surface.dispatchEvent(new Event('scroll'));
+      if (input === 'wheel') f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+      else {
+        f.surface.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 8, clientY: 30 }));
+        f.surface.dispatchEvent(
+          new PointerEvent('pointermove', { pointerId: 8, clientY: 60, bubbles: true })
+        );
+      }
+      f.surface.scrollTop = 400;
+      f.surface.dispatchEvent(new Event('scroll'));
+      if (input === 'pointer')
+        document.dispatchEvent(new PointerEvent('pointerup', { pointerId: 8 }));
+      expect(f.scroll.endFollow.state.get()).toBe('following');
+    }
+  );
+
+  it('keeps explicit pause through resize movement and unrelated-axis input', () => {
+    const f = fixture({ atEnd: true });
+    f.scroll.pauseFollowing();
+    f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+    Object.defineProperty(f.surface, 'scrollHeight', { configurable: true, value: 300 });
+    f.surface.scrollTop = 200;
+    f.surface.dispatchEvent(new Event('scroll'));
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    f.scroll.pauseFollowing();
+    f.surface.scrollTop = 100;
+    f.surface.dispatchEvent(new Event('scroll'));
+    f.surface.dispatchEvent(new WheelEvent('wheel', { deltaX: 100 }));
+    f.surface.scrollTop = 200;
+    f.surface.dispatchEvent(new Event('scroll'));
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+  });
+
+  it('pauses following at the current anchor through layout and cancels pending growth', () => {
+    const frame = frames(),
+      f = fixture({ atEnd: true });
+    f.target.tabIndex = 0;
+    f.target.focus();
+    f.grow();
+    expect(frame.pending.size).toBe(1);
+    expect(f.scroll.pauseFollowing()).toEqual({ kind: 'dispatched' });
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    expect(f.scroll.endFollow.requestStatus.get()).toBe('rejected');
+    expect(frame.pending.size).toBe(0);
+    f.grow();
+    frame.flush();
+    expect(f.surface.scrollTop).toBe(300);
+    expect(f.surface.scrollLeft).toBe(17);
+    expect(document.activeElement).toBe(f.target);
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    expect(f.scroll.request({ kind: 'to-end', axis: 'vertical' })).toEqual({ kind: 'dispatched' });
+    expect(f.surface.scrollTop).toBe(400);
+    expect(f.scroll.endFollow.state.get()).toBe('following');
+  });
+
+  it('keeps an explicit pause at end until a reader action or resume command', () => {
+    const frame = frames(),
+      f = fixture({ atEnd: true });
+    expect(f.scroll.pauseFollowing()).toEqual({ kind: 'dispatched' });
+    // A no-motion observation at the end is not an explicit resume.
+    f.surface.dispatchEvent(new Event('scroll'));
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    f.grow();
+    frame.flush();
+    expect(f.surface.scrollTop).toBe(300);
+    f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+    f.surface.scrollTop = 400;
+    f.surface.dispatchEvent(new Event('scroll'));
+    expect(f.scroll.endFollow.state.get()).toBe('following');
+  });
+
+  it('queues a pause in attachment order and does not replay a rejected pre-mount pause', () => {
+    const f = fixture({ mount: false, atEnd: true });
+    expect(f.scroll.pauseFollowing()).toEqual({ kind: 'rejected', reason: 'not-mounted' });
+    let outcome: unknown;
+    f.scroll.projection.watch(() => {
+      expect(f.scroll.request({ kind: 'to-end', axis: 'vertical' })).toEqual({ kind: 'queued' });
+      outcome = f.scroll.pauseFollowing();
+    });
+    f.owner.modules.mount();
+    expect(outcome).toEqual({ kind: 'queued' });
+    expect(f.scroll.endFollow.state.get()).toBe('paused');
+    expect(f.surface.scrollTop).toBe(300);
+  });
+
+  it('preserves a newer explicit resume issued by a cancellation subscriber', () => {
+    const frame = frames(),
+      f = fixture({ atEnd: true });
+    f.scroll.endFollow.requestStatus.subscribe((event: { next: string }) => {
+      if (event.next === 'rejected') f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    });
+    f.grow();
+    expect(f.scroll.pauseFollowing()).toEqual({ kind: 'dispatched' });
+    frame.flush();
+    expect(f.surface.scrollTop).toBe(400);
+    expect(f.scroll.endFollow.state.get()).toBe('following');
+    expect(f.scroll.endFollow.requestStatus.get()).toBe('applied');
+  });
+
+  it('rejects pause with the follow policy off or a replaced host view', () => {
+    const f = fixture({ mount: false });
+    f.scroll.configure({ endFollow: { mode: 'off' } });
+    f.owner.modules.mount();
+    expect(f.scroll.pauseFollowing()).toEqual(unavailable);
+    const replacement = document.createElement('div');
+    f.owner.replace(replacement, false);
+    expect(f.scroll.pauseFollowing()).toEqual(unavailable);
+    expect(f.surface.scrollTop).toBe(50);
+    expect(replacement.scrollTop).toBe(0);
+  });
+
   it('returns not-mounted or unavailable without replaying into a later root', () => {
     const f = fixture({ mount: false });
     expect(f.scroll.request({ kind: 'to', axis: 'vertical', position: 0.5 })).toEqual({
@@ -772,4 +933,44 @@ describe('Compiler Scroll current-view and reveal host closure', () => {
   it('keeps the entire reached standalone Scroll support graph strictly typed', () => {
     expect(typecheckSupport(support.files)).toBe('');
   });
+});
+
+// Independent review counterexamples from /root/harness.
+it('review: unrelated key and stationary scroll observation do not undo explicit pause', () => {
+  frames();
+  const f = fixture({ atEnd: true });
+  f.scroll.pauseFollowing();
+  f.surface.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
+  f.surface.dispatchEvent(new Event('scroll'));
+  expect(f.scroll.endFollow.state.get()).toBe('paused');
+});
+it('review: attachment reentrant commands remain after the existing pause in FIFO order', () => {
+  const f = fixture({ mount: false });
+  let once = false,
+    nested: unknown;
+  f.scroll.projection.watch(() => {
+    f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    f.scroll.pauseFollowing();
+  });
+  f.scroll.vertical.atEnd.subscribe((event: { next: boolean }) => {
+    if (event.next && !once) {
+      once = true;
+      nested = f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    }
+  });
+  f.owner.modules.mount();
+  expect(nested).toEqual({ kind: 'queued' });
+  expect(f.scroll.endFollow.state.get()).toBe('following');
+});
+it('review: a pause issued by an end-arrival subscriber survives the older end request', () => {
+  const f = fixture();
+  let once = false;
+  f.scroll.vertical.atEnd.subscribe((event: { next: boolean }) => {
+    if (event.next && !once) {
+      once = true;
+      f.scroll.pauseFollowing();
+    }
+  });
+  f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+  expect(f.scroll.endFollow.state.get()).toBe('paused');
 });

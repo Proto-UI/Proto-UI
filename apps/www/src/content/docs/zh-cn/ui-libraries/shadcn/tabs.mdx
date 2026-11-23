@@ -9,6 +9,7 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
+import { tabsProfileSwitchCode } from '@/content/docs/demo_components/tabs/tabs-profile-switch-code';
 import { getCode } from '@/utils/conversionUtils';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
@@ -66,9 +67,57 @@ import { getCode } from '@/utils/conversionUtils';
 
 ## Style Profile 预设展示
 
-上游 Shadcn Registry 为 Tabs 定义了多个 style profile（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`、`new-york-v4`）。当前仅 `nova`、`rhea`、`new-york-v4` 完成 bounded text-default 投影（见 `internal/fixtures/shadcn-tabs-style/coverage.json`），其余 profile 尚未支持，会在运行时拒绝。
+当前 Tabs 源码已编写八种现代 profile（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`）及独立的 `new-york-v4` 配方。这表示源码覆盖，不代表完整视觉或辅助技术验收；未知 ID 会明确拒绝，不会借用另一种样式。
 
-以下三个示例使用**完全相同的 children、defaultValue 和 disabled 状态**，仅切换 `styleProfile`，以证明预设切换不会重置 value、focus 或 children。每个示例独立渲染，不共享运行时实例。
+### 在同一个 Tabs 实例上切换样式
+
+先选中 Password，再点击下方 Nova、Rhea 或 New York v4。这里只更新外层 style scope，同一个 Tabs owner 保留已选值和子节点。要在 Tab 保持键盘焦点时切换，请在示例内按 **Alt+1**、**Alt+2** 或 **Alt+3**；点击样式按钮时仍遵循浏览器正常的焦点行为。
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.wc}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.react}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.vue}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-profile-switch"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={tabsProfileSwitchCode.vue2}
+  />
+</div>
+
+以下三个独立示例使用相同内容与默认状态，仅用于比较静态外观；上方交互示例才演示同实例更新。
 
 ### Nova
 
@@ -241,7 +290,4 @@ Web Component 会保留 custom element 作为 owner，并在 internal view detac
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']} />

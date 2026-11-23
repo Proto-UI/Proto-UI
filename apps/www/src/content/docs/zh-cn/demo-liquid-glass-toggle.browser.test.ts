@@ -188,7 +188,7 @@ function optical(facts: Awaited<ReturnType<typeof observe>>) {
   expect(facts.pixels!.max - facts.pixels!.min).toBeGreaterThan(5);
   expect(facts.border).toEqual(['1px', '1px', '1px', '1px']);
   expect(facts.receipt.profile).toBe(
-    facts.active === 'true' ? 'pui-regular-style-tint-contact-5' : 'liquidgl-v2-contact-canvas-1'
+    facts.active === 'true' ? 'pui-regular-style-tint-contact-6' : 'liquidgl-v2-contact-canvas-1'
   );
 }
 async function capture(
@@ -313,8 +313,8 @@ async function capture(
       expect(facts.foreground).toEqual(facts.palette.primaryForeground);
       expect(facts.receipt.profile).toBe(
         facts.carrier.marker === 'contact-v1'
-          ? 'pui-regular-style-tint-contact-5'
-          : 'pui-regular-style-tint-5'
+          ? 'pui-regular-style-tint-contact-6'
+          : 'pui-regular-style-tint-6'
       );
       // Selected tint remains accent-directed, but environmental hue/brightness
       // must not be constrained to an almost constant distance from solid blue.
@@ -434,13 +434,10 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           }));
           try {
             for (const direction of ['ltr', 'rtl'] as const) {
-              await bare.evaluate(
-                (host, dir) => {
-                  host.setAttribute('dir', dir);
-                  (host as HTMLElement).style.fontSize = '28px';
-                },
-                direction
-              );
+              await bare.evaluate((host, dir) => {
+                host.setAttribute('dir', dir);
+                (host as HTMLElement).style.fontSize = '28px';
+              }, direction);
               await capture(
                 `${runtime}-${theme}-no-provider-${direction}-large-text`,
                 bare,
@@ -449,14 +446,11 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
               );
             }
           } finally {
-            await bare.evaluate(
-              (host, original) => {
-                if (original.dir === null) host.removeAttribute('dir');
-                else host.setAttribute('dir', original.dir);
-                (host as HTMLElement).style.fontSize = original.fontSize;
-              },
-              originalGeometryStyle
-            );
+            await bare.evaluate((host, original) => {
+              if (original.dir === null) host.removeAttribute('dir');
+              else host.setAttribute('dir', original.dir);
+              (host as HTMLElement).style.fontSize = original.fontSize;
+            }, originalGeometryStyle);
           }
           expect(await subject('disabled').getAttribute('aria-pressed')).toBe('true');
 
@@ -992,7 +986,7 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
         expect(row.frameUnchanged, label).toBe(true);
         expect(row.fixedTime, label).toBe(0);
         expect(row.expectedTintProfile, label).toBe(
-          row.phase === 'static' ? 'pui-regular-style-tint-5' : 'pui-regular-style-tint-contact-5'
+          row.phase === 'static' ? 'pui-regular-style-tint-6' : 'pui-regular-style-tint-contact-6'
         );
         for (const name of ['tinted', 'zeroRefraction', 'interleavedTint'] as const) {
           const rendered = row.controls[name];

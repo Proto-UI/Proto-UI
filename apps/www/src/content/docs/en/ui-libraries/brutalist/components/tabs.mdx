@@ -17,7 +17,7 @@ Tabs inherit Base selection, activation, and descendant-first panel focus-entry 
 
 ## API
 
-Tabs is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+Tabs is workspace source. For this workspace version, the CLI target is `brutalist-tabs`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -30,4 +30,3 @@ Tabs is workspace source. There is no public `proto-ui add` target. Passing `val
 />
 
 The first three props belong to Root. `appearance` belongs to List and Trigger. List also defaults `orientation` to `horizontal`, `loop` to `false` and `a11yLabel` to `''`. Trigger also defaults `value` to `''` and `disabled` to `false`. Content defaults `value` to `''` and `keepMounted` to `false`. Indicator has no props.
-

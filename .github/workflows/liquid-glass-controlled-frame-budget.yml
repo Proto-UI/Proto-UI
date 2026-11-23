@@ -1,0 +1,22 @@
+name: Liquid Glass controlled-overlay frame-budget experiment
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_sha:
+        description: Exact original algorithm commit; candidate fixture and dependency recipe are explicitly overlaid
+        type: string
+        required: true
+        default: 543c8a2990239dec7c08458a902da3f5a97b49dd
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-overlay:
+    uses: ./.github/workflows/liquid-glass-frame-budget.yml
+    with:
+      baseline_sha: ${{ inputs.baseline_sha }}
+      controlled_overlay: true
+    permissions:
+      contents: read

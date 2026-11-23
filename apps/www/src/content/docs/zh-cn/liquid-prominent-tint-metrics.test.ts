@@ -6,6 +6,7 @@ import {
   prominentTintRasterGeometry,
   assertProminentTintRaster,
   measureProminentTintPair,
+  measureConstantTintField,
   classifyProminentTintEvidence,
   verifyProminentTintBinding,
   type DetailImage,
@@ -35,6 +36,29 @@ const positive = mapPair((v) => [10 + v * 0.6, 20 + v * 0.6, 40 + v * 0.6]);
 const flat = mapPair(() => [0, 97, 204]);
 const evaluate = (output: TintPair) => measureProminentTintPair(sources, output, cells);
 describe('predeclared prominent tint source response diagnostics', () => {
+  it('measures actual constant-field brightness without relabeling it as structured optics', () => {
+    const first = measureConstantTintField(
+      image(() => [32, 32, 32]),
+      cells
+    );
+    const second = measureConstantTintField(
+      image(() => [96, 96, 96]),
+      cells
+    );
+    expect(first.fullyOpaque).toBe(true);
+    expect(first.meanLuma).toBeCloseTo(32, 12);
+    expect(second.meanLuma - first.meanLuma).toBeCloseTo(64, 12);
+    expect(measureConstantTintField(flat[0], cells)).toEqual(
+      measureConstantTintField(flat[1], cells)
+    );
+    expect(() => measureConstantTintField(flat[0], [])).toThrow('Empty');
+    const transparent = image(() => [32, 32, 32]);
+    const transparentBytes = Uint8Array.from(transparent.data);
+    transparentBytes[(cells[0].y * width + cells[0].x) * 4 + 3] = 254;
+    expect(
+      measureConstantTintField({ ...transparent, data: transparentBytes }, cells).fullyOpaque
+    ).toBe(false);
+  });
   it('preserves structured/luma thresholds and declares chroma diagnostic-only', () => {
     expect(PROMINENT_TINT_POLICY).toMatchObject({
       minimumLumaSpan: 8,

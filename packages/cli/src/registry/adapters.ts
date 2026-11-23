@@ -21,10 +21,11 @@ export const ADAPTER_REGISTRY: Record<string, Adapter> = {
     label: 'React',
     aliases: ['react'],
     packageName: '@proto.ui/adapter-react',
-    runtimePackages: [{ name: 'react' }],
+    runtimePackages: [{ name: 'react' }, { name: 'react-dom' }],
     createImport: `import { createReactAdapter } from '@proto.ui/adapter-react';`,
-    runtimeImport: `import * as React from 'react';`,
-    adapterStatement: `const adapt = createReactAdapter(React);`,
+    runtimeImport: `import * as React from 'react';
+import { createPortal } from 'react-dom';`,
+    adapterStatement: `const adapt = createReactAdapter({ ...React, createPortal });`,
     rootAliasPrefix: 'React',
   },
   vue: {

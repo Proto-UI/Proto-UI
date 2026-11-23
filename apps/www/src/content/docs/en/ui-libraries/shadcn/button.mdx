@@ -26,13 +26,15 @@ Buttons trigger actions. This is Proto UI's unofficial Shadcn projection over Ba
 
 First [initialize an existing application](/en/start-here/quick-start/). The published stable 0.2.0 baseline uses:
 
-<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-button" manager="npm" />
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@0.2.0 add wc shadcn-button',
+    pnpm: 'pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button',
+  }}
+  manager="npm"
+/>
 
-```sh
-pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button
-```
-
-Replace `wc` with `react` or `vue` for those stable hosts. The CLI installs `@proto.ui/prototypes-shadcn` and the corresponding Adapter at its own exact version and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named style profiles shown below require matching workspace 0.3 CLI/Adapter/Prototype source. Stable `@latest` does not establish that delivery; the workspace `0.3.0-alpha.1` manifest does not establish registry publication.
+Replace `wc` with `react` or `vue` for those stable hosts. The CLI installs `@proto.ui/prototypes-shadcn` and the corresponding Adapter at its own exact version and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named style profiles shown below require matching workspace 0.3 CLI/Adapter/Prototype source. Stable `@latest` does not establish that delivery; a workspace manifest version does not establish registry publication.
 
 ## Usage and presentation
 

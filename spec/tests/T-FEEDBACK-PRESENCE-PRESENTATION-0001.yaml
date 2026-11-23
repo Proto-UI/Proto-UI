@@ -54,6 +54,28 @@ cases:
     covers: [P-SHADCN-DRAWER-MOTION-EVIDENCE]
     expectation: Exact-source native traces must establish physical movement, fade, retained close and reversal. The intrinsic-height public cold entry must animate independently of its fixed-height diagnostic control; source or DOM-model results cannot substitute for these observations.
 implementations:
+  - id: presence-native-declaration-and-owner
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/native-presence-presentation.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-SNAPSHOT
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE
+    notes:
+      - Ordinary four-Web imports of actual authored asTransition and direct generated host controls use a deterministic DOM-model clock. They do not establish physical browser frames or the original Drawer evidence.
+  - id: presence-native-and-runtime-browser
+    kind: workspace-check
+    status: planned
+    path: packages/compiler/test/presence-presentation.browser.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE
+    notes:
+      - Sandboxed Chromium must observe the same authored Transition with nominal side selection through Runtime and four native Web imports. Source presence is not an execution receipt; all original Drawer/document acceptance conditions remain independently mapped.
   - id: drawer-authored-presentation
     kind: module-test
     status: planned
@@ -144,6 +166,9 @@ exercises:
     - id: P-SHADCN-DRAWER-MOTION
       since: 0.3.0-alpha.1
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Map native compiler declaration and lifecycle controls plus the separate same-source Runtime/native physical browser suite without promoting the draft or replacing original Drawer evidence.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Define independently verifiable declaration, authority and application cases without claiming host pixels.

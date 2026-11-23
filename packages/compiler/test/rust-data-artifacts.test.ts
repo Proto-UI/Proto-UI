@@ -230,3 +230,105 @@ describe('private Rust data source and artifact boundary', () => {
     120_000
   );
 });
+
+describe('Rust data source-license artifact provenance', () => {
+  it('forwards file options and binds license-only changes into the artifact inventory', async () => {
+    const root = await temporary();
+    await writeFile(path.join(root, 'entry.proto.ts'), source('./helper'));
+    await writeFile(path.join(root, 'helper.ts'), helper(2));
+    const first = compiled(
+      await compileRustDataFile('entry.proto.ts', {
+        ...options,
+        root,
+        sourceLicense: 'AGPL-3.0-or-later',
+      })
+    );
+    const second = compiled(
+      await compileRustDataFile('entry.proto.ts', { ...options, root, sourceLicense: 'MIT' })
+    );
+    expect(first.ir).toEqual(second.ir);
+    expect(first.output.code).toBe(second.output.code);
+    expect(receipt(first).sourceLicense).toBe('AGPL-3.0-or-later');
+    expect(receipt(second).sourceLicense).toBe('MIT');
+    expect(receipt(first).sourceFiles).toEqual(receipt(second).sourceFiles);
+    const firstArtifacts = rustDataCompilationArtifacts(first);
+    const secondArtifacts = rustDataCompilationArtifacts(second);
+    expect(
+      firstArtifacts
+        .filter(
+          (file) =>
+            secondArtifacts.find(({ path }) => path === file.path)?.contents !== file.contents
+        )
+        .map(({ path }) => path)
+        .sort()
+    ).toEqual(['Cargo.toml', 'provenance.json']);
+    for (const candidate of [first, second]) {
+      for (const file of receipt(candidate).artifacts) {
+        const artifact = rustDataCompilationArtifacts(candidate).find(
+          ({ path }) => path === file.path
+        )!;
+        expect(createHash('sha256').update(artifact.contents).digest('hex')).toBe(file.sha256);
+      }
+    }
+    const output = path.join(root, 'retained');
+    expect((await writeRustDataCompilation(first, output)).ok).toBe(true);
+    const diff = await diffRustDataCompilation(second, output);
+    expect(diff.ok).toBe(true);
+    if (!diff.ok) throw new Error(JSON.stringify(diff.diagnostics));
+    expect(
+      diff.value.changes
+        .filter(({ status }) => status !== 'unchanged')
+        .map(({ path }) => path)
+        .sort()
+    ).toEqual(['Cargo.toml', 'provenance.json']);
+    expect(await readFile(path.join(output, 'Cargo.toml'), 'utf8')).toBe(
+      firstArtifacts.find(({ path }) => path === 'Cargo.toml')!.contents
+    );
+  });
+
+  nativeTest(
+    'exposes selected or absent source-license metadata through the real Cargo manifest parser',
+    async () => {
+      const root = await temporary();
+      await writeFile(path.join(root, 'entry.proto.ts'), source('./helper'));
+      await writeFile(path.join(root, 'helper.ts'), helper(2));
+      const selected = ['AGPL-3.0-or-later', 'Apache-2.0 OR MIT', undefined];
+      for (let index = 0; index < selected.length; index++) {
+        const sourceLicense = selected[index];
+        const candidate = compiled(
+          await compileRustDataFile('entry.proto.ts', { ...options, root, sourceLicense })
+        );
+        const output = path.join(root, 'metadata-' + index);
+        expect((await writeRustDataCompilation(candidate, output)).ok).toBe(true);
+        const manifest = path.join(output, 'Cargo.toml');
+        const invoke = (args: string[]) => {
+          const result = spawnSync(cargo, args, { encoding: 'utf8', timeout: 60_000 });
+          if (result.error) throw result.error;
+          expect(result.status, result.stdout + result.stderr).toBe(0);
+          return result.stdout;
+        };
+        invoke(['generate-lockfile', '--offline', '--manifest-path', manifest]);
+        const metadata = JSON.parse(
+          invoke([
+            'metadata',
+            '--offline',
+            '--locked',
+            '--format-version',
+            '1',
+            '--manifest-path',
+            manifest,
+          ])
+        );
+        expect(metadata.packages).toHaveLength(1);
+        expect(metadata.packages[0]).toMatchObject({
+          name: 'headless-decisions',
+          license: sourceLicense ?? null,
+          publish: [],
+        });
+        expect(metadata.resolve.nodes).toHaveLength(1);
+        expect(metadata.resolve.nodes[0].dependencies).toEqual([]);
+      }
+    },
+    60_000
+  );
+});

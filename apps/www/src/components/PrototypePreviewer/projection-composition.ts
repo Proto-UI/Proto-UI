@@ -367,16 +367,14 @@ function pushNestedOwnedThemeSurfaces(
   if (typeof node === 'string' || node.kind === 'text') return;
   if (node.kind === 'proto' && inheritTheme && node.ref && api.setSurfaceStyle) {
     const style = node.surfaceStyle;
-    const themeEntry = Array.isArray(style) ? style.at(-1) : style;
+    const themeEntry = rendererThemeEntries.get(node);
     if (
       themeEntry &&
-      typeof themeEntry === 'object' &&
-      Object.keys(theme).some((property) =>
-        Object.prototype.hasOwnProperty.call(themeEntry, property)
-      )
+      (style === themeEntry || (Array.isArray(style) && style.includes(themeEntry)))
     ) {
-      // Committed snapshots freeze author styles: rebuild the trailing theme
-      // block with the new values instead of mutating the stored entry.
+      // Only construction grants this lease. An authored --pui-* value is not
+      // an owned theme block, including inside frozen dynamic child snapshots.
+      // Rebuild the owned trailing block for the normalized renderer channel.
       const pushed = Array.isArray(style)
         ? [...style.slice(0, -1), { ...themeEntry, ...theme }]
         : { ...themeEntry, ...theme };
@@ -532,7 +530,10 @@ function createProjectedProto(
     props: { ...(input.props ?? {}) },
     surfaceStyle: mergeSurfaceStyle(input.surfaceStyle, themeSurfaceStyle) ?? {},
   };
-  if (themeSurfaceStyle && Object.keys(themeSurfaceStyle).length > 0) {
+  // An omitted initial palette still supplies a private empty renderer slot.
+  // Register that slot now so the first palette update has the same owner;
+  // undefined is reserved for nested authored surfaces that only inherit it.
+  if (themeSurfaceStyle !== undefined) {
     const style = node.surfaceStyle;
     const entry = Array.isArray(style) ? style.at(-1) : style;
     if (!entry || typeof entry === 'string') {

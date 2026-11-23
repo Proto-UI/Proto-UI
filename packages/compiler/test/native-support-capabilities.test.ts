@@ -307,7 +307,15 @@ describe('mixed generated native owner lifetime', () => {
       view.text.value = 'native edit';
       view.text.dispatchEvent(new Event('input', { bubbles: true }));
       trace.textSnapshot = method(method(view.innerOwner, 'getExposes'), 'read');
-      expect(trace.textSnapshot).toEqual({ value: 'native edit', composing: false });
+      expect(trace.textSnapshot).toEqual({
+        value: 'native edit',
+        composing: false,
+        selection: {
+          start: view.text.selectionStart,
+          end: view.text.selectionEnd,
+          direction: view.text.selectionDirection,
+        },
+      });
       view.text.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
       for (const key of [' ', 'Enter']) {
         view.text.dispatchEvent(

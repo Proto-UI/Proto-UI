@@ -44,3 +44,8 @@ export type {
 
 export { default as fieldSwitch, default as shadcnFieldSwitch } from './switch.proto';
 export type { ShadcnFieldSwitchProps, ShadcnFieldSwitchExposes } from './switch.proto';
+
+export { default as fieldCheckbox, default as shadcnFieldCheckbox } from './checkbox.proto';
+export type { ShadcnFieldCheckboxProps, ShadcnFieldCheckboxExposes } from './checkbox.proto';
+export { default as fieldRadioGroup, default as shadcnFieldRadioGroup } from './radio-group.proto';
+export type { ShadcnFieldRadioGroupProps, ShadcnFieldRadioGroupExposes } from './radio-group.proto';

@@ -8,8 +8,10 @@ statement:
   zh-CN: >-
     Base Radio Group 是 `base-radio-group` anatomy family 的 root 与唯一 selected-value owner。Root 以 Collection 顺序协调 Item，以 Focus Roving 提供双轴循环键盘移动，并投影一个具名 `radiogroup` 对象。Item 只能请求 selection 并从 Root 派生 checked/effective-disabled；空值、无法匹配值、结构变化和受控 props 都不会被静默改写。第一轮不声明原生 radio、form、Toolbar、orientation 或 loop API。
 
+
   en: >-
     Base Radio Group is the root and sole selected-value owner of the `base-radio-group` anatomy family. Root coordinates Items in Collection order, provides both-axis wrapped keyboard movement through Focus Roving, and projects one named `radiogroup` object. Items may only request selection and derive checked/effective-disabled facts from Root; empty or unmatched values, structural changes, and controlled props are never silently rewritten. The first pass does not claim native radio, form, Toolbar, orientation, or loop APIs.
+
 
 anatomy:
   family: base-radio-group
@@ -45,14 +47,14 @@ criteria:
       decisions: [D-BASE-PROTOTYPE-INDEPENDENCE-0001]
   - id: P-BASE-RADIO-GROUP-EXACT-PROPS
     text:
-      zh-CN: 'Root props 仅为 `value?: string`、`defaultValue?: string`、`disabled?: boolean` 与 `a11yLabel?: string`；默认 defaultValue/a11yLabel 为空字符串且 disabled 为 false，不包含 callback、form、required、orientation、loop 或视觉 props。'
-      en: 'Root props are exactly `value?: string`, `defaultValue?: string`, `disabled?: boolean`, and `a11yLabel?: string`; defaultValue/a11yLabel default to the empty string and disabled defaults to false, with no callback, form, required, orientation, loop, or visual props.'
+      zh-CN: 'Root props 仅为 `value?: string`、`defaultValue?: string`、`disabled?: boolean`、`readOnly?: boolean` 与 `a11yLabel?: string`；默认 defaultValue/a11yLabel 为空字符串且 disabled/readOnly 为 false，不包含 callback、form、required、orientation、loop 或视觉 props。'
+      en: 'Root props are exactly `value?: string`, `defaultValue?: string`, `disabled?: boolean`, `readOnly?: boolean`, and `a11yLabel?: string`; defaultValue/a11yLabel default to the empty string and disabled/readOnly default to false, with no callback, form, required, orientation, loop, or visual props.'
     dependsOn:
       contracts: [C-PROPS-0001]
   - id: P-BASE-RADIO-GROUP-EXACT-EXPOSES
     text:
-      zh-CN: Root 仅 expose value、disabled、Collection count/items、valueChange、requestValue 与 focusFirst/focusLast/focusNext/focusPrev/focusSelected；private Context 或协调通路不得成为 public family export/expose。
-      en: Root exposes only value, disabled, Collection count/items, valueChange, requestValue, and focusFirst/focusLast/focusNext/focusPrev/focusSelected; private Context or coordination channels must not become public family exports/exposes.
+      zh-CN: Root expose value、disabled、readOnly、focused、Collection count/items、valueChange、requestValue、resetValue、focusSelf 与 focusFirst/focusLast/focusNext/focusPrev/focusSelected；private Context 或协调通路不得成为 public family export/expose。
+      en: Root exposes value, disabled, readOnly, focused, Collection count/items, valueChange, requestValue, resetValue, focusSelf, and focusFirst/focusLast/focusNext/focusPrev/focusSelected; private Context or coordination channels must not become public family exports/exposes.
     dependsOn:
       contracts: [C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
   - id: P-BASE-RADIO-GROUP-UNCONTROLLED-REQUEST
@@ -113,8 +115,8 @@ criteria:
       decisions: [D-A11Y-SEMANTIC-DOMAIN-0001]
   - id: P-BASE-RADIO-GROUP-DEFERRED-BOUNDARIES
     text:
-      zh-CN: 第一轮不包含 name/form owner/submission/reset/validation/required/hidden 或 native input、Toolbar 规则、公开 orientation/loop、Label/Description、视觉参数或 Shadcn/Radix 兼容性声明。
-      en: The first pass excludes name/form owner/submission/reset/validation/required/hidden or native inputs, Toolbar rules, public orientation/loop, Label/Description, visual parameters, and Shadcn/Radix compatibility claims.
+      zh-CN: 普通 Root 不拥有 name/form owner/submission/validation/required/hidden 或 native input、Toolbar 规则、公开 orientation/loop、Field Label/Description 或视觉参数。readOnly 与初始值 reset 属于 Root 编辑策略；显式 FieldRadioGroup 接入由 P-BASE-FIELD-CHOICES 定义，不将普通根自动注册表单。
+      en: The ordinary Root excludes name/form ownership, submission, validation, required/hidden/native inputs, Toolbar rules, public orientation/loop, Field Label/Description and visual parameters. ReadOnly and initial-value reset belong to Root editing policy; P-BASE-FIELD-CHOICES defines explicit FieldRadioGroup integration without automatically registering ordinary roots.
 sources:
   - path: docs/superpowers/specs/2026-08-12-base-radio-group-semantic-design.md
     sections:

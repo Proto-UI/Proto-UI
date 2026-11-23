@@ -1,0 +1,1192 @@
+[
+  {
+    "path": "captures/hero-en-dark-enhanced-focus-control-0107.json",
+    "bytes": 429,
+    "sha256": "0b778e0cb97f40af31fe7160d159fb4606070140337da9e24251b142e630ff11"
+  },
+  {
+    "path": "captures/hero-en-dark-enhanced-focus-control-0107.png",
+    "bytes": 165383,
+    "sha256": "90c47b5bb376fd3e24f98702ae33150f753bd52c282f98fc92ad4993bf109664"
+  },
+  {
+    "path": "captures/hero-en-dark-enhanced-hover-control-0106.json",
+    "bytes": 526,
+    "sha256": "19ea6ac03ba635fe52effde2a7b1f273b128a5973208db3b8bf1c4c57e8ac475"
+  },
+  {
+    "path": "captures/hero-en-dark-enhanced-hover-control-0106.png",
+    "bytes": 164089,
+    "sha256": "d4eb88c228c845be8fe48da7632d307337b4e5aef1a648b908cf2b99a12972dc"
+  },
+  {
+    "path": "captures/hero-en-dark-failed-scripts-focus-control-0109.json",
+    "bytes": 429,
+    "sha256": "a75fd05acd46ecddf26cf54f524288cb149bb81ac748bb5118e9d0b07dfa55c6"
+  },
+  {
+    "path": "captures/hero-en-dark-failed-scripts-focus-control-0109.png",
+    "bytes": 48166,
+    "sha256": "86ee0103da5929f5b8bb2b23a9156775c206e975fe3c2c3579a378ec111cc5b4"
+  },
+  {
+    "path": "captures/hero-en-dark-failed-scripts-hover-control-0108.json",
+    "bytes": 498,
+    "sha256": "658035256b6862a6a84d322e775389762ef396cc1613553df42000d02d10399b"
+  },
+  {
+    "path": "captures/hero-en-dark-failed-scripts-hover-control-0108.png",
+    "bytes": 47117,
+    "sha256": "b9f60a5a343a8b643d96b48401426ff65be2d99aa1536b3f113e5258fe0ad650"
+  },
+  {
+    "path": "captures/hero-en-light-enhanced-focus-control-0101.json",
+    "bytes": 430,
+    "sha256": "163d6f348920aa7b91c99f3ac6dc81a88a480f3b8ec8bb568ad5dcb67289bb82"
+  },
+  {
+    "path": "captures/hero-en-light-enhanced-focus-control-0101.png",
+    "bytes": 164903,
+    "sha256": "032be5c53bcfe24cfe930c71fe9d7f06dd615b411923c3ce657338f80faa097c"
+  },
+  {
+    "path": "captures/hero-en-light-enhanced-forced-colors-control-0102.json",
+    "bytes": 506,
+    "sha256": "49ac5bc1903297b52ee2049dd7e2cba838160a97c0b8127bbfb25ed22d957011"
+  },
+  {
+    "path": "captures/hero-en-light-enhanced-forced-colors-control-0102.png",
+    "bytes": 164378,
+    "sha256": "bf79f5e2d8b7a4d7a5a2a4dc6f0129235a3394551d17cc987b197f556c25a71e"
+  },
+  {
+    "path": "captures/hero-en-light-enhanced-hover-control-0100.json",
+    "bytes": 527,
+    "sha256": "8f07dcc994ca5965ad0d16cf13c6d5e550d109f129eee6d4478d32e7b9f8dc82"
+  },
+  {
+    "path": "captures/hero-en-light-enhanced-hover-control-0100.png",
+    "bytes": 163464,
+    "sha256": "852fd5cb9af44ac2fd3d9ae5f5700cc43ea036a7128c716db2433612c603a04c"
+  },
+  {
+    "path": "captures/hero-en-light-failed-scripts-focus-control-0104.json",
+    "bytes": 430,
+    "sha256": "a020153588f2b2991693eaed1eed87e627c73c4e08382983ec9675140b436d2b"
+  },
+  {
+    "path": "captures/hero-en-light-failed-scripts-focus-control-0104.png",
+    "bytes": 48576,
+    "sha256": "db9e03e17b63a9d6dd55ae12c95c986f815db3a59bc5cbe56cb07789dac72d51"
+  },
+  {
+    "path": "captures/hero-en-light-failed-scripts-forced-colors-control-0105.json",
+    "bytes": 506,
+    "sha256": "0daaf3cff7c25036baf2b6cf0a76a910f5882de5522269e7457dd0e3cd74663c"
+  },
+  {
+    "path": "captures/hero-en-light-failed-scripts-forced-colors-control-0105.png",
+    "bytes": 50325,
+    "sha256": "fdc7ce4b268ea0a3be1f7fdd96784c59ab5822ebcd7ce3cde6674309ab60ba25"
+  },
+  {
+    "path": "captures/hero-en-light-failed-scripts-hover-control-0103.json",
+    "bytes": 499,
+    "sha256": "339068398928963e1865ef68aa38f7677af49762ff4c23e49d11a06160b958eb"
+  },
+  {
+    "path": "captures/hero-en-light-failed-scripts-hover-control-0103.png",
+    "bytes": 47494,
+    "sha256": "6eab25de7e9899514eeb0d18cbfd18617e564a318f07969260990dfa07972e93"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-enhanced-focus-control-0115.json",
+    "bytes": 432,
+    "sha256": "10a7cf0329d6ff22c913e01dd692ac4f1df6f0f8d570b830081e6222f06c5f00"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-enhanced-focus-control-0115.png",
+    "bytes": 183963,
+    "sha256": "7f201190087ce96fb3ac674f2c5703b5f27363d6161453d94d594efddd32437d"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-enhanced-hover-control-0114.json",
+    "bytes": 518,
+    "sha256": "cf80cc0e83b586d702cb4d9aabe825fb8402298b25e627d7ec8cbc8ebc99275f"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-enhanced-hover-control-0114.png",
+    "bytes": 182816,
+    "sha256": "b5d0b956e1ece0be31ea01d68582d038ae0af4a212eafd23798f2464e9c88d94"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-failed-scripts-focus-control-0117.json",
+    "bytes": 432,
+    "sha256": "cbdfdea6abc8082c58583b9d4ddcb3bc5aebef5285524cfef1e8b6ab10d0d96d"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-failed-scripts-focus-control-0117.png",
+    "bytes": 43494,
+    "sha256": "e76029e78d76e33c489835039dffdcb71ba1f5c7d71804ead245d743e17c6631"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-failed-scripts-hover-control-0116.json",
+    "bytes": 490,
+    "sha256": "c9f1b324a446bd2aaf45e9e0c52b527341c106db43232ec46d2fc4f7bf2cb47a"
+  },
+  {
+    "path": "captures/hero-zh-cn-dark-failed-scripts-hover-control-0116.png",
+    "bytes": 42364,
+    "sha256": "883778dbf90435b2ac1f2b523ccbec712af1fc839876efcfde12b9efff61ea3f"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-enhanced-focus-control-0111.json",
+    "bytes": 433,
+    "sha256": "fa4b074e76aba85f395edefe9425e572fb197b826a43a90c318357d1b0594a4f"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-enhanced-focus-control-0111.png",
+    "bytes": 182329,
+    "sha256": "f2a17edb0398c0c31a142d16ce29ab263761889e735f2da7d9c8783916057e3d"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-enhanced-hover-control-0110.json",
+    "bytes": 519,
+    "sha256": "1e8d40145858edb914aff38c54ea430440a4741c98c2b67c7b3022cf801822e6"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-enhanced-hover-control-0110.png",
+    "bytes": 181093,
+    "sha256": "5b76637a83a6ed1594e291e3e8c4e95c5819db892ce29f41db1a137dc176281c"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-failed-scripts-focus-control-0113.json",
+    "bytes": 433,
+    "sha256": "340710724cfdfdc19e2a6eb628a91bb1f55eec62c80c00ea3a554d914e4eaf99"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-failed-scripts-focus-control-0113.png",
+    "bytes": 43562,
+    "sha256": "db9770ba359036b03ede0ef6fcee83db84ecaeac4bc6941f16d1cf42ad6bb14f"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-failed-scripts-hover-control-0112.json",
+    "bytes": 491,
+    "sha256": "8934988a8f4b8d1bc8de3f84244ad75203ecc675263d2d75166311720e9cd5a8"
+  },
+  {
+    "path": "captures/hero-zh-cn-light-failed-scripts-hover-control-0112.png",
+    "bytes": 42436,
+    "sha256": "002e6e2942ba1d54650d353e44cfb1d3c8430b9128ccfef5d53e9f629fd0e884"
+  },
+  {
+    "path": "captures/hook-evidence-en-control-0118.json",
+    "bytes": 491,
+    "sha256": "c5112e0de8a3edaf48714ae303720f78ff69fe64a3ca30ff3e36d5d1bd5cffb8"
+  },
+  {
+    "path": "captures/hook-evidence-en-control-0118.png",
+    "bytes": 283845,
+    "sha256": "86df58c0657f57e6665f352dda6b69c2bb67d1d93ed18a8895287df184101679"
+  },
+  {
+    "path": "captures/hook-evidence-zh-cn-control-0119.json",
+    "bytes": 494,
+    "sha256": "9c4480cd66fd45980f49bb4d112909e62cc3c43f75ba1372fa4b2c51445fe990"
+  },
+  {
+    "path": "captures/hook-evidence-zh-cn-control-0119.png",
+    "bytes": 374962,
+    "sha256": "34c91ad7c76086f1045488cd946651fd32d6bc482ca2149c4d73e8b3f2fa27e9"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-enhanced-focus-control-0054.json",
+    "bytes": 2234,
+    "sha256": "c06e5d502a3c10406d2b45299cf17d941a242d21da48330959458e7939a1ea6f"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-enhanced-focus-control-0054.png",
+    "bytes": 131064,
+    "sha256": "0a7e1c571d40a17013b76b32db15a154fdc8dabcaf49cc6e6775daf001b82202"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-enhanced-group-hover-control-0053.json",
+    "bytes": 907,
+    "sha256": "ff3612b8328c81bfcba209ce1f8ae3ce3d606e6e4d8e02b06672f9e36844ad58"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-enhanced-group-hover-control-0053.png",
+    "bytes": 130612,
+    "sha256": "643cd0b6066eb3191d6b4c1fda74a9b796cbb6b47c4eb992649c4ccfeb71fcca"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-failed-scripts-focus-control-0056.json",
+    "bytes": 2156,
+    "sha256": "18a5d918b9138fbec8745083a82d4e62abb214253b34bbeb3bd32fbf20b70a8e"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-failed-scripts-focus-control-0056.png",
+    "bytes": 128334,
+    "sha256": "0cdf240bbc99eaf908d8bfdeaeb6031b58f07ab3412a73152a5df6ca87579b6c"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-failed-scripts-group-hover-control-0055.json",
+    "bytes": 905,
+    "sha256": "99083091b18cb9774af1b4440e75aef72e9eb2cbf20f122105c24a3c20bd0257"
+  },
+  {
+    "path": "captures/sidebar-en-dark-brutalist-failed-scripts-group-hover-control-0055.png",
+    "bytes": 130699,
+    "sha256": "d7c468c4675d23639e1ae747baf775e96958e97de8f87d8652604d53d0791e4f"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-enhanced-focus-control-0050.json",
+    "bytes": 2204,
+    "sha256": "f65f8af3d19afa7b63a3da512197b3af5c37ee3b0f1642730cadd77aafaf3088"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-enhanced-focus-control-0050.png",
+    "bytes": 198339,
+    "sha256": "4c532b02831977414c48f6bdbd7d772b7f2a8bbf189f1f6ce1cfc76461696962"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-enhanced-group-hover-control-0049.json",
+    "bytes": 901,
+    "sha256": "646c828bc6ffdf517d1f7a733b7b5697270d077ed596e9bf5841ab22d8a324e7"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-enhanced-group-hover-control-0049.png",
+    "bytes": 197676,
+    "sha256": "c7b67ccb28b356f4700ef63ac3d59a31fa502a9733c3e42a3578a7e0a7171358"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-failed-scripts-focus-control-0052.json",
+    "bytes": 2115,
+    "sha256": "2e4222cb27934300328ded8b87ed9bd9c9355c909032d14bb7014a6f8497c576"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-failed-scripts-focus-control-0052.png",
+    "bytes": 200384,
+    "sha256": "ea99e5b1100f3991b24e63c85b4a9219439ee833895f48471176422797fce433"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-failed-scripts-group-hover-control-0051.json",
+    "bytes": 899,
+    "sha256": "029c2f3b271bd8d622990fb58ae2abffae99f1f1aade0b8856bddd4ba913b70e"
+  },
+  {
+    "path": "captures/sidebar-en-dark-shadcn-failed-scripts-group-hover-control-0051.png",
+    "bytes": 197754,
+    "sha256": "7fcad832d9852398ff66e8e5f3503ef84a43147f5d355a0a022b196e435d67e3"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-enhanced-focus-control-0046.json",
+    "bytes": 2238,
+    "sha256": "d373a09238a5beb541f5f746a20aa03e722cf8f0a23fb26c2b88977496288fc5"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-enhanced-focus-control-0046.png",
+    "bytes": 136701,
+    "sha256": "3f079b4fadea71d51ff556519f48b86e21ca6180786d66ca3568049b461413e0"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-enhanced-group-hover-control-0045.json",
+    "bytes": 911,
+    "sha256": "0ae31a2b87ebf792fa9bd55a9f2156fe18bd8d918d9c9f0c20541217765eae6d"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-enhanced-group-hover-control-0045.png",
+    "bytes": 136204,
+    "sha256": "95f3933026802999d4b3a824ea64e414a02d897a764e46eea8f52d3117a3d871"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-failed-scripts-focus-control-0048.json",
+    "bytes": 2163,
+    "sha256": "6765078aeb955218dec9b02f9bc154f302088f18cd1279fc9407f3115ca4668c"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-failed-scripts-focus-control-0048.png",
+    "bytes": 134145,
+    "sha256": "69d171ebdc017a7dbba3677b50d7fa8eb7a05fbfc550df2722dd0d93f28e17da"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-failed-scripts-group-hover-control-0047.json",
+    "bytes": 909,
+    "sha256": "ba58f321e56f691bf8a6049e4de0b38e02806872b40378d389edf893f7634825"
+  },
+  {
+    "path": "captures/sidebar-en-light-brutalist-failed-scripts-group-hover-control-0047.png",
+    "bytes": 136987,
+    "sha256": "b57adcfd4d6e8d65aa397f50a441c5d4312a16cb08b6eb7f65f01c329928f436"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-enhanced-focus-control-0042.json",
+    "bytes": 2255,
+    "sha256": "f0f772569d2d7d5bf76cf73e25c2f553ea797fecf8889a56b9d5adbefa863d1d"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-enhanced-focus-control-0042.png",
+    "bytes": 195337,
+    "sha256": "254f995cc53fd9ff6e9117cc8825bf81992a88d8906f8ad35b25b9e84db4fef3"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-enhanced-group-hover-control-0041.json",
+    "bytes": 911,
+    "sha256": "91279ac8326cedd3c706d929b23d37b25585dda65ac0c44ca86d1005958e393f"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-enhanced-group-hover-control-0041.png",
+    "bytes": 194519,
+    "sha256": "f0ee109113b800947f5ef42cf81e5673ccd81e3b55c5f69e780790b55298c48e"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-failed-scripts-focus-control-0044.json",
+    "bytes": 2156,
+    "sha256": "6921ebd3b210abfed14614a2bb14f07e908521cba4c60012162e90651cd732e0"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-failed-scripts-focus-control-0044.png",
+    "bytes": 197568,
+    "sha256": "d5275cec1649b6c2f89bb0e4a316bca5bff1f569c5e054e6e6deb0f7ad9c2bfa"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-failed-scripts-group-hover-control-0043.json",
+    "bytes": 909,
+    "sha256": "303ea19d4724c5f4d7328ed733296b6d043bbea8ad363f9608188d68577486ef"
+  },
+  {
+    "path": "captures/sidebar-en-light-shadcn-failed-scripts-group-hover-control-0043.png",
+    "bytes": 195284,
+    "sha256": "b840b4fa14afb66dfa98f3c005e951e666fcb8221634cf4e2eddc59426708c13"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-brutalist-enhanced-control-0075.json",
+    "bytes": 5303,
+    "sha256": "517ac942b9116fe011ec116237eeed10f124d707f0a4d52e0f200e375661878b"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-brutalist-enhanced-control-0075.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-brutalist-no-js-control-0076.json",
+    "bytes": 3350,
+    "sha256": "4dfad80e139d798834aac4a489f7aa36ac644ee2dc2fffceafecab987e24ea68"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-brutalist-no-js-control-0076.png",
+    "bytes": 49223,
+    "sha256": "db2b8b52578c889ca8b3bbaa5b375cfa74da0c0f23793506216f495cd83fade6"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-shadcn-enhanced-control-0073.json",
+    "bytes": 5268,
+    "sha256": "1414dac170dc1d75dfb3d202aae89e4262322a73ecfd8640266bdde7acdc0a15"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-shadcn-enhanced-control-0073.png",
+    "bytes": 64223,
+    "sha256": "12df67556e38d058b1f776ed16e3740147fa72b187f34682f26a3c78b67f7f7c"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-shadcn-no-js-control-0074.json",
+    "bytes": 3279,
+    "sha256": "03ed76e19c7a541c66d400a453d4cdc5464be83d807512d8c6f9d37803013a95"
+  },
+  {
+    "path": "captures/sidebar-mobile-en-shadcn-no-js-control-0074.png",
+    "bytes": 60864,
+    "sha256": "b607e009503a3edec426a136da45871271f4adcdf7a9c7eb463ccff0986073c6"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0079.json",
+    "bytes": 5279,
+    "sha256": "e22f814f09f99233ebc9a6bc403163797f710009b80a290fac2a3c3c3e94e36a"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0079.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0081.json",
+    "bytes": 5309,
+    "sha256": "38e7cb9d82ba0dfd0ef940df17089a8f29dc05db37868a20b25e1b322ad30d8d"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0081.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0082.json",
+    "bytes": 5309,
+    "sha256": "49d6612e22f055f0320afdd3b5bccf130b6f7304cdec4f816d3b3035aa71feae"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0082.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0083.json",
+    "bytes": 5309,
+    "sha256": "8129e93c8f896c27c87e1bc81078836d1d1193113b67ef8319e7348bfa1a3529"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0083.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0084.json",
+    "bytes": 5309,
+    "sha256": "88f7b264522298d62b7cbc60f455ea226c52219464165de3e5643fb2929a6ffa"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0084.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0085.json",
+    "bytes": 5309,
+    "sha256": "7ab6522fa96206ad21509920f699c4ddb5b0fc8ef790d8ad971ad87d62869918"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0085.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0086.json",
+    "bytes": 5309,
+    "sha256": "35140ea9d7cd44ad02cf6adcbe0938f8c3b88e4b759061f27c1d3e843c41be5d"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0086.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0087.json",
+    "bytes": 5309,
+    "sha256": "c089da070cd32825e8a9585958eb75f91726ff23b46ecf4c5d24688d92dc6a77"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0087.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0088.json",
+    "bytes": 5309,
+    "sha256": "27176feda846a7d0208ddf1c655cd9b58347469a03919e5e1e6e3959f78c5cae"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0088.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0089.json",
+    "bytes": 5309,
+    "sha256": "942dfd12bf7c99553698254371b3b59133a54ab296e5217c6dc6a6c5c48bb14d"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0089.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0090.json",
+    "bytes": 5309,
+    "sha256": "3b74bfd5145852363e0b4dd102b1d27d77dfe8cee605d4feff70279ee7d2147f"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0090.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0091.json",
+    "bytes": 5309,
+    "sha256": "0666cad8181ab62616870c84d47cd1f836d8ebb329e805bcce713df9999f44dc"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0091.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0092.json",
+    "bytes": 5309,
+    "sha256": "baf1befca1db9761378dcd96b6644932d02b5de428a3e2d29776393a75438b3e"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0092.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0093.json",
+    "bytes": 5309,
+    "sha256": "a9da2caa76b60d27d8ee20a87d5544aa01dda271f2c96aa547e7e1a01bd15458"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0093.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0094.json",
+    "bytes": 5309,
+    "sha256": "06dd38719804fe8370bf2db95a21b52155c5cf8e38abdd8464f88dc2bc348981"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0094.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0095.json",
+    "bytes": 5309,
+    "sha256": "fa3d47a3675a5e63a7299f06c3e349b6bc2f462484088f111c53b3f98b62d203"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0095.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0096.json",
+    "bytes": 5309,
+    "sha256": "f83b1dac871a8a06b22fe7492f116c57075dda75a75cae97e15367b0a23fc9c5"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0096.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0097.json",
+    "bytes": 5309,
+    "sha256": "1cf51350589823711c2ec43c1d076c8daa8b7fc935469066bab772f4252090d7"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0097.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0098.json",
+    "bytes": 5309,
+    "sha256": "9a68445fee5c3b06e60384d20ae4bb7a56f6a3d9e2e4f3a8d38ed7e65175e6ca"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0098.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0099.json",
+    "bytes": 5309,
+    "sha256": "57a6caab458f0c2f3f0fcec644dbed0ca2cd9677120d245c85d77ceeaf152a1e"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-enhanced-control-0099.png",
+    "bytes": 36230,
+    "sha256": "ba397c0845bd5445bb1b03bbad7d3af3e986fedde36fc515b69271f1ff62daa4"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-no-js-control-0080.json",
+    "bytes": 3356,
+    "sha256": "a96f8715bb24c56b2f48e3e9a1f57a72f21a5af131c876d09e54c2bd710c6f83"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-brutalist-no-js-control-0080.png",
+    "bytes": 50545,
+    "sha256": "773fb29fd962e9bcacfb65b58cdb60efbb1d07458b3aca958243aada2e0774c1"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-shadcn-enhanced-control-0077.json",
+    "bytes": 5274,
+    "sha256": "85b0ed72b14f31804ff718b0046296e0417585d7afc7f6b49103d9140e064087"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-shadcn-enhanced-control-0077.png",
+    "bytes": 68876,
+    "sha256": "5f738c5bba116ddfe99dfe9a9919de2b5b2206412aff841c959b54b11de59715"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-shadcn-no-js-control-0078.json",
+    "bytes": 3285,
+    "sha256": "db44679776c94d88d0f9cecc35c70ede468b0328278df1a0c6102ed20976249d"
+  },
+  {
+    "path": "captures/sidebar-mobile-zh-cn-shadcn-no-js-control-0078.png",
+    "bytes": 66212,
+    "sha256": "413af64df8efb33434ef608312429d1d4e9928b1d657b986f69cfa2a72f861b1"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-enhanced-focus-control-0070.json",
+    "bytes": 2240,
+    "sha256": "bc411d586af2ba57c12e0c06fbc9f9ef89326155f7c4610e5e769449bc5565cb"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-enhanced-focus-control-0070.png",
+    "bytes": 132918,
+    "sha256": "cfccd1d437e339c6a9a1636d5a7c41b14215dcab279d3719c561e565cbce52d4"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-enhanced-group-hover-control-0069.json",
+    "bytes": 910,
+    "sha256": "5f968c3533a694eb30f3a4782a912cf6a151361c357773c2007630210238c2f4"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-enhanced-group-hover-control-0069.png",
+    "bytes": 132465,
+    "sha256": "c625a8f6e6c4aea006e31f3eafe9a1113e2b6d7300084229bb1580433a4bf460"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-failed-scripts-focus-control-0072.json",
+    "bytes": 2162,
+    "sha256": "cb71596f27025e2561aa763ce34fb0d8ef1f9827ea413fe3436233296c589c6b"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-failed-scripts-focus-control-0072.png",
+    "bytes": 128282,
+    "sha256": "07e5ae9bc28686947b179d7ef2d5c2c227a38fc5a7c09610eb81d2b668e1eb3f"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover-control-0071.json",
+    "bytes": 908,
+    "sha256": "b2f1a5a1b26cb928d092bb036edfa0d323cb261d32ca149e88f3c2b07a99de38"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-brutalist-failed-scripts-group-hover-control-0071.png",
+    "bytes": 130030,
+    "sha256": "f6e9e0756ab9b948fa94df61f4bbef37ddbccb6c8b06f53fa011dd9d5888b9f5"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-enhanced-focus-control-0066.json",
+    "bytes": 2210,
+    "sha256": "3752e6c822cd73243ed8c23cdd82bdfb625444c1a3da460681169cd45534600e"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-enhanced-focus-control-0066.png",
+    "bytes": 210329,
+    "sha256": "e1e12555fe2987f510010436b46269b1dbd1b3315c9e25ddd3e6f5a616b0b52f"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-enhanced-group-hover-control-0065.json",
+    "bytes": 904,
+    "sha256": "2a5265c66a2508dc50d08e93bb39ee9eb9b19aadcca5a9aef76c58dce27138a5"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-enhanced-group-hover-control-0065.png",
+    "bytes": 209522,
+    "sha256": "47820a56fa41d89c7a995d5d3da2beccf18b0867628e7ad0459180c3ecd1408d"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-failed-scripts-focus-control-0068.json",
+    "bytes": 2121,
+    "sha256": "16d572a5d5576e96cff477a06d0f67e6c33716b010075a7ba3fc1eb53831dc2a"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-failed-scripts-focus-control-0068.png",
+    "bytes": 206090,
+    "sha256": "0decda1db5bcabd7b235ae49eb5cba48794872d81bc82e29ff3e8e9cd0c2d1e7"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover-control-0067.json",
+    "bytes": 902,
+    "sha256": "6139c28c9e9e06b3765085706cb8319014bd9e3353d9043ef258b41a7cd54412"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-dark-shadcn-failed-scripts-group-hover-control-0067.png",
+    "bytes": 203904,
+    "sha256": "8072e10b177d674501536d1ed2ee1ba6c6b3f8e7f5941d2519aa16e0432804a7"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-enhanced-focus-control-0062.json",
+    "bytes": 2244,
+    "sha256": "9052c8f06ea666228bcf488024c48fc97129de8d65304e71b412245c3a8c7311"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-enhanced-focus-control-0062.png",
+    "bytes": 137795,
+    "sha256": "ba5195b7575503f88922e3737cdbc0509a50c8317b25fc46db8c6a81325faecf"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-enhanced-group-hover-control-0061.json",
+    "bytes": 914,
+    "sha256": "8329ad0ab3e5753608531722b93597074edca0043175a2a48b53d60cccd8e218"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-enhanced-group-hover-control-0061.png",
+    "bytes": 137289,
+    "sha256": "d19191157cc013644b8a475fd7c9009e034d07309c72596f3d9d9b209ab8d45e"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-failed-scripts-focus-control-0064.json",
+    "bytes": 2169,
+    "sha256": "3607c2643d5bf8ea4ff1dea4d756b78b689e58b7df7a58e92a35a2350782c252"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-failed-scripts-focus-control-0064.png",
+    "bytes": 133267,
+    "sha256": "52bc73edb48c84d97b05f0dac7359f01e07dc5d444400612955a3f4b8d4f4fbe"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover-control-0063.json",
+    "bytes": 912,
+    "sha256": "2cbe0160dff02a6193e03bf857a0093dc3fe065f91758ee60c5895db99ef4e48"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-brutalist-failed-scripts-group-hover-control-0063.png",
+    "bytes": 135414,
+    "sha256": "57ac2180099d9ef6a61dc4fff6cd145da135a24be920dde2f4b6a13e222d756e"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-enhanced-focus-control-0058.json",
+    "bytes": 2261,
+    "sha256": "64b0b8f95e55cf9567af64809e7fd7415e58540935e6ff448ce6ea84407cce49"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-enhanced-focus-control-0058.png",
+    "bytes": 205812,
+    "sha256": "86720bb6d48ee6afe93de8564d6a8227b850690d365ae0dc2070d3faaa89d761"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-enhanced-group-hover-control-0057.json",
+    "bytes": 914,
+    "sha256": "5aa3bcac1519e0b4a64cbfafead787ec08c061844b9846fcb5dea23affce4bcd"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-enhanced-group-hover-control-0057.png",
+    "bytes": 204969,
+    "sha256": "72ab16138da9b7ee93977707ed465f6e8bd55d920b548dc41109c7aeb42f2307"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-failed-scripts-focus-control-0060.json",
+    "bytes": 2162,
+    "sha256": "e73820a86d24733fd84686f1616144459a71a68099705ae50e90127767b8e027"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-failed-scripts-focus-control-0060.png",
+    "bytes": 202321,
+    "sha256": "730b31777164a1c252780ea0f3eeb624cb350b7d73ffd7acb79b9f455878345a"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover-control-0059.json",
+    "bytes": 912,
+    "sha256": "e80fc8ef6c0f964e64f62e68f3d49ea1eb3e58e4bb2e79479ff559539353b996"
+  },
+  {
+    "path": "captures/sidebar-zh-cn-light-shadcn-failed-scripts-group-hover-control-0059.png",
+    "bytes": 200885,
+    "sha256": "a2b5d9a6d474c6af3a0ebab71bbe1e3c38ad4336ffc03c68da5b4cb40cb0d447"
+  },
+  {
+    "path": "captures/tabs-en-react-new-york-v4-control-0009.json",
+    "bytes": 563,
+    "sha256": "abeaa9b63daee30aca9d429e417def2019b58de27ed5df21bf72d41c83af3179"
+  },
+  {
+    "path": "captures/tabs-en-react-new-york-v4-control-0009.png",
+    "bytes": 167188,
+    "sha256": "669eadea1707cadeb8e5a34b519ab47b10f0473cb1f92c3dc329a2f2b1b28775"
+  },
+  {
+    "path": "captures/tabs-en-react-nova-control-0007.json",
+    "bytes": 556,
+    "sha256": "10140ee2e2e6e8203ce000aae4e998ab7a6700b0a06a72ee3a6efcd5154267e3"
+  },
+  {
+    "path": "captures/tabs-en-react-nova-control-0007.png",
+    "bytes": 170373,
+    "sha256": "df933f7e5d1926c62f6ade141960c0577573988a7a00b30bd27226c9692c7bcf"
+  },
+  {
+    "path": "captures/tabs-en-react-nova-control-0010.json",
+    "bytes": 550,
+    "sha256": "2426d262b6d3a74d6a4f93bf372638025aa51e42cf32daaed6030bfa6e83012d"
+  },
+  {
+    "path": "captures/tabs-en-react-nova-control-0010.png",
+    "bytes": 170380,
+    "sha256": "d7c4a46c53f693755187c72fd5e766b839b679cb736e22be8b7a4add2102a7ac"
+  },
+  {
+    "path": "captures/tabs-en-react-rhea-control-0006.json",
+    "bytes": 460,
+    "sha256": "6e0616347a10f5db084d9e439d6f663394e55f35a4d20c9221430782edc628d7"
+  },
+  {
+    "path": "captures/tabs-en-react-rhea-control-0006.png",
+    "bytes": 170511,
+    "sha256": "ee0a144e520de6a4296b8635450e56c891904ac5447ff8e761dc0ed77f8b9832"
+  },
+  {
+    "path": "captures/tabs-en-react-rhea-control-0008.json",
+    "bytes": 556,
+    "sha256": "ba1901bd0eb65ad3db507fe747c64cac30013ce4b928dca2f53ff56edcf52301"
+  },
+  {
+    "path": "captures/tabs-en-react-rhea-control-0008.png",
+    "bytes": 170502,
+    "sha256": "f2b8bd118907bc9284c3df4960dc0c96834190045a7d670954e642fd7427d806"
+  },
+  {
+    "path": "captures/tabs-en-vue-new-york-v4-control-0014.json",
+    "bytes": 564,
+    "sha256": "7cb456f1e3eac2984862b29f9a3a0891eaa23fff9479ab0aaf65b7cac5c5d2f7"
+  },
+  {
+    "path": "captures/tabs-en-vue-new-york-v4-control-0014.png",
+    "bytes": 162718,
+    "sha256": "0ed361a7da092086f7ff3a7f4751bfc5ee4dca8680c2e5d2be91ef15ca5d9141"
+  },
+  {
+    "path": "captures/tabs-en-vue-nova-control-0012.json",
+    "bytes": 557,
+    "sha256": "9b3388a5bb6b03ff0b62be258f2386aaadda88cd9d21a1a53f3d4dd3413ca06d"
+  },
+  {
+    "path": "captures/tabs-en-vue-nova-control-0012.png",
+    "bytes": 164147,
+    "sha256": "ef1ba2391209402851f03bb690116b35c02ad8b0183204dd13148794bfe7a81f"
+  },
+  {
+    "path": "captures/tabs-en-vue-nova-control-0015.json",
+    "bytes": 551,
+    "sha256": "4224c96df8e68113c8e2b701fd12c4c14f08cba5d897af22892431687cbc4128"
+  },
+  {
+    "path": "captures/tabs-en-vue-nova-control-0015.png",
+    "bytes": 164084,
+    "sha256": "1a0c1aad593ba8b29a6d2189286870cbd08396f1dcef67b7b9ea88b0240523a5"
+  },
+  {
+    "path": "captures/tabs-en-vue-rhea-control-0011.json",
+    "bytes": 461,
+    "sha256": "d2826d5c5daeaacf712376b70acb894228567933c9ef34f116e3412c5eb32eae"
+  },
+  {
+    "path": "captures/tabs-en-vue-rhea-control-0011.png",
+    "bytes": 164131,
+    "sha256": "9d71dbe31125a9b61c162083556e2d998b106640d896b1bcfbdf56b5a68b2b2e"
+  },
+  {
+    "path": "captures/tabs-en-vue-rhea-control-0013.json",
+    "bytes": 557,
+    "sha256": "d56e1545a420910243bd2fae5a3c882d3785445c7734fa246a465da37d3a314e"
+  },
+  {
+    "path": "captures/tabs-en-vue-rhea-control-0013.png",
+    "bytes": 164151,
+    "sha256": "53b8eb7a383ea2001c5470c87ecc4d22a05ae42f01a7d24fa08d9e142cf25362"
+  },
+  {
+    "path": "captures/tabs-en-vue2-new-york-v4-control-0019.json",
+    "bytes": 563,
+    "sha256": "60ac87661955b59e34559858af2a635fe1486612301dc532cf2386861e6ac570"
+  },
+  {
+    "path": "captures/tabs-en-vue2-new-york-v4-control-0019.png",
+    "bytes": 170086,
+    "sha256": "44dba34e7b2cd826c74bbf25bad44663a9fd3309c5346433f8c3609ed8bee603"
+  },
+  {
+    "path": "captures/tabs-en-vue2-nova-control-0017.json",
+    "bytes": 550,
+    "sha256": "7bdd70aac946273b9662683c48364268546c76f983b85a62959f6a7984af246f"
+  },
+  {
+    "path": "captures/tabs-en-vue2-nova-control-0017.png",
+    "bytes": 171135,
+    "sha256": "9722f3e74fc259d28a544d5450250f43da96f75886c133974cdd3454215b5a5f"
+  },
+  {
+    "path": "captures/tabs-en-vue2-nova-control-0020.json",
+    "bytes": 550,
+    "sha256": "9ea62ff96b891d2869c924d66e1a75914eeb5d33cfbf1cdc7e17a30fed1a8d4c"
+  },
+  {
+    "path": "captures/tabs-en-vue2-nova-control-0020.png",
+    "bytes": 171111,
+    "sha256": "51f111cb59845bf2abfe6da7a03424b71922bd5c92cbc9faa52c9f707600034b"
+  },
+  {
+    "path": "captures/tabs-en-vue2-rhea-control-0016.json",
+    "bytes": 460,
+    "sha256": "36b9db3fd6dcedc604e0754b64450b23657337f579a9821be9e28204a33899d8"
+  },
+  {
+    "path": "captures/tabs-en-vue2-rhea-control-0016.png",
+    "bytes": 171282,
+    "sha256": "8051efd8148b562ee47a369ee1e7699bdc6619be0f01508b673aec388d754aa8"
+  },
+  {
+    "path": "captures/tabs-en-vue2-rhea-control-0018.json",
+    "bytes": 555,
+    "sha256": "0ac6401fbf9735906503b4c4bf0df5b831bfc1f4b4ef9d275466e543a0c2e259"
+  },
+  {
+    "path": "captures/tabs-en-vue2-rhea-control-0018.png",
+    "bytes": 171252,
+    "sha256": "e217bddd439f6cafc4c195b041b917a6187d58f1a6aea2dea1932e0c5fe2bc36"
+  },
+  {
+    "path": "captures/tabs-en-wc-new-york-v4-control-0004.json",
+    "bytes": 563,
+    "sha256": "14083c6f817e86201e403789286a081f59b7dfb13288b79cfdd6cd7f7c9f73ad"
+  },
+  {
+    "path": "captures/tabs-en-wc-new-york-v4-control-0004.png",
+    "bytes": 185645,
+    "sha256": "e0b7cb0166c265b19b9399662c73704d818c5c290d4775fb3c640ac0f8fd17db"
+  },
+  {
+    "path": "captures/tabs-en-wc-nova-control-0002.json",
+    "bytes": 557,
+    "sha256": "b229655913b3ba4a10e444eda479908b2bc27bac8a328bbb966e2bee782c0756"
+  },
+  {
+    "path": "captures/tabs-en-wc-nova-control-0002.png",
+    "bytes": 184401,
+    "sha256": "97ac286844ea850a9a7e74ec439bbcc201ccc00e0e48786e2a46987fcf52079b"
+  },
+  {
+    "path": "captures/tabs-en-wc-nova-control-0005.json",
+    "bytes": 551,
+    "sha256": "524e381e7aa75bf5fbe9d91d61a4d1e01ff797c0981ef4368f5f62d283776a05"
+  },
+  {
+    "path": "captures/tabs-en-wc-nova-control-0005.png",
+    "bytes": 184375,
+    "sha256": "7065c099547d5e3fed13b2848704d1058907c8102116275f3e63750d27a9f3f6"
+  },
+  {
+    "path": "captures/tabs-en-wc-rhea-control-0001.json",
+    "bytes": 461,
+    "sha256": "6626638037eb1077b37de48fc9975777b2beb020575cd0536585138ded0ea373"
+  },
+  {
+    "path": "captures/tabs-en-wc-rhea-control-0001.png",
+    "bytes": 184555,
+    "sha256": "0ea9270841e28da5b67cb8bd46dc1c46ef2b7536a41df5a2826e8d6dbdc02a8e"
+  },
+  {
+    "path": "captures/tabs-en-wc-rhea-control-0003.json",
+    "bytes": 557,
+    "sha256": "fd69176ecac387a71810c147e39927da39c4ee9fc642572a2778a25afd42fcdb"
+  },
+  {
+    "path": "captures/tabs-en-wc-rhea-control-0003.png",
+    "bytes": 184492,
+    "sha256": "1b14fe688486289806524cf2aeb87fcbeea0ea865e91d7649c7479de2761cc61"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-new-york-v4-control-0029.json",
+    "bytes": 566,
+    "sha256": "42fcc24bfffa2bb636a66f5c8a552921e7a675cf1c0a512291f1b714ae05aecc"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-new-york-v4-control-0029.png",
+    "bytes": 176430,
+    "sha256": "48f51340ca371e716f0a5d74693aece10f8de3decb9fc4e6d699184dfa0609f9"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-nova-control-0027.json",
+    "bytes": 559,
+    "sha256": "e2d6ff2fb7432863f7844af253fc099823923a2ab823bcdfc2dc80ba4acf90b0"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-nova-control-0027.png",
+    "bytes": 179777,
+    "sha256": "c53a69c8427a5ec7b39c48000bc37d2afc4297dd701594c1f8c890d12d56ef4b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-nova-control-0030.json",
+    "bytes": 553,
+    "sha256": "00be14558ca3457a130023eccc95252ce2d142b8f9bf9173559a188cc36e5052"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-nova-control-0030.png",
+    "bytes": 179617,
+    "sha256": "f481c2cf461d5d72f611090efdfed2dde9e46814a188e33a5411402a742979e5"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-rhea-control-0026.json",
+    "bytes": 463,
+    "sha256": "10b2b19af96d0fcf51e2ca7690374018bfc8f81e4f9dac5ed4d32c14b86ecc75"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-rhea-control-0026.png",
+    "bytes": 179471,
+    "sha256": "48a3d800b34d7366e814d9ee680789e97f5c8e0900b7deee92f8a0b153268ba9"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-rhea-control-0028.json",
+    "bytes": 559,
+    "sha256": "b6bd619c8cfbb6e0b2d1b6cc68a949dfd7864f753a0aea53f6df31e54e6f4d0f"
+  },
+  {
+    "path": "captures/tabs-zh-cn-react-rhea-control-0028.png",
+    "bytes": 179897,
+    "sha256": "fc6c21d53ad34a99d3df1be78d5babae77fe37f9284294d215a7b3f375ae8752"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-new-york-v4-control-0034.json",
+    "bytes": 567,
+    "sha256": "aa4d7cdd9473ee9a3975175211328450c86aa515b19262c6cadf0d1039cfdec4"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-new-york-v4-control-0034.png",
+    "bytes": 175093,
+    "sha256": "ce4e01d543761aa8590900bdd4a3f16fc26fe909941ca34603b19cdf2bfec85b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-nova-control-0032.json",
+    "bytes": 554,
+    "sha256": "d87f09a04fd9b1bf7deeb89ebbfc71157ee950683f4ec5433dc8f2b712b95eca"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-nova-control-0032.png",
+    "bytes": 173728,
+    "sha256": "988983491813e67481e73838147d1b9f1ed3d83683e7e5373ec8ee4c0634f62b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-nova-control-0035.json",
+    "bytes": 554,
+    "sha256": "fa2c5f0b137d6f2b5c9a9d921f03bd382e1166619edab545b3895aa3c04c1bd3"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-nova-control-0035.png",
+    "bytes": 173746,
+    "sha256": "10d52846627b2e709091098c79b31e4ed30d8831139833ccc1de5c5bb742b447"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-rhea-control-0031.json",
+    "bytes": 464,
+    "sha256": "1378d018e5dd59f3ab9e28137ad047162160da9b3cdaed57cba298be8e1d53e7"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-rhea-control-0031.png",
+    "bytes": 173645,
+    "sha256": "14649ca5050fd1ec43b918e16d8890b6cb035348d2a67262ac90fb3657da2289"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-rhea-control-0033.json",
+    "bytes": 560,
+    "sha256": "d8235e5e8cc4677a8124c6577134c368def81b68b3ab18ec5aa941cccbadf25e"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue-rhea-control-0033.png",
+    "bytes": 173766,
+    "sha256": "0c763f3fef98b188f4f2d884d3921e9dfac91027dd1da270c98f5bb02296285a"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-new-york-v4-control-0039.json",
+    "bytes": 566,
+    "sha256": "6bac984d246cce2777cb4f93b07bc6e4fe66066f6e103e5f40cf939072987c9f"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-new-york-v4-control-0039.png",
+    "bytes": 178832,
+    "sha256": "392a4cbcdf8a8f47ec58ed35b45c1202ef4c56418aa9dd29381e32ff27dafbc0"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-nova-control-0037.json",
+    "bytes": 559,
+    "sha256": "31e9b8f33cf164e681fcf119ecd8f04aa6269a056025c8c533a837fb3989dd22"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-nova-control-0037.png",
+    "bytes": 179942,
+    "sha256": "1f3e40e36171c146975590fb39148e843d1a10fa95308a694713d95e36e72c28"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-nova-control-0040.json",
+    "bytes": 553,
+    "sha256": "e9cb3df4e76695c53740d6d1b9e06a1ffc50bfff236d8d3ec925f45060dbfc2b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-nova-control-0040.png",
+    "bytes": 179849,
+    "sha256": "4ede06afa93ac25faa104048adfa5cd2b97c41882648c24f6ee66097efe435b3"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-rhea-control-0036.json",
+    "bytes": 463,
+    "sha256": "08ffc0132e49d47805a5e88f6e9f98589a7d14b903ae7f7e84ebced7cece770d"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-rhea-control-0036.png",
+    "bytes": 180206,
+    "sha256": "c293b550f5c955498ec207b84cda3f7418f955ffd2f9567a8f5c378ba3036fdf"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-rhea-control-0038.json",
+    "bytes": 558,
+    "sha256": "62d952d1146244dc7551515e92f9df5e6036604946df8393cc61bdc921e9aebf"
+  },
+  {
+    "path": "captures/tabs-zh-cn-vue2-rhea-control-0038.png",
+    "bytes": 180170,
+    "sha256": "92dc1f0ab39c4a701db6b511193668d5360dda28a527cb7317d4ba0b8330ed57"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-new-york-v4-control-0024.json",
+    "bytes": 567,
+    "sha256": "fcde05fc892d885d60ffbf8166c0c00bf67ffecfad8451a86001b5f59f27a13b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-new-york-v4-control-0024.png",
+    "bytes": 190734,
+    "sha256": "fecf9dd7f5fcabcee49bf051c7ccb5707a0b1092e55403080e33b5f11ff7c9d6"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-nova-control-0022.json",
+    "bytes": 560,
+    "sha256": "a17e26b7ea6c74dcc3d871c13ae96473fa4f38306dba2e97d8f3f855df1ec29c"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-nova-control-0022.png",
+    "bytes": 189369,
+    "sha256": "fef4a30d0a1f2c4473ab32d031e2d0020167ac9da1b08e9d63c579516225d674"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-nova-control-0025.json",
+    "bytes": 554,
+    "sha256": "fe96761044721bc8bd6b464a7af863f6673ed23bfd3063781c7a360d678ad632"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-nova-control-0025.png",
+    "bytes": 189352,
+    "sha256": "f94289bc6f3e95f50e10349e40dfea59063a431fe594281733584198328975af"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-rhea-control-0021.json",
+    "bytes": 464,
+    "sha256": "29b81d6c94a7a28d68a3424851151987a1e6740f2dcafa11172c456ea7a67e56"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-rhea-control-0021.png",
+    "bytes": 189647,
+    "sha256": "6e664cde44a1fbcd981afff74f8f208385669c3891f5ec039140047324d4c71b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-rhea-control-0023.json",
+    "bytes": 560,
+    "sha256": "044a16f066949ecd85b7020da794acc44aba017549aaff5bda4d3f65b8916e9b"
+  },
+  {
+    "path": "captures/tabs-zh-cn-wc-rhea-control-0023.png",
+    "bytes": 189555,
+    "sha256": "026cbe1ebfd72104d7c276dd0437acf2189368bcb2b248efaf85fd49f9e7634d"
+  }
+]

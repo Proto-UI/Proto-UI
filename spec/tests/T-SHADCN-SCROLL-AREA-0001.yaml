@@ -4,7 +4,7 @@ title: shadcn Scroll Area inheritance, fallback, package, geometry, and rendered
 status: draft
 lifecycleRationale: This execution map accompanies the draft Shadcn four-part slice. Direct fallback, package, geometry and browser tests are technical evidence for independent review, not activation of the mapped prototypes.
 since: 0.3.0-alpha.0
-summary: "Covers four-part API boundaries, independently mapped package/CLI checks, retained New York paint, a fallible composed preference, unsupported-composed fallback, two-axis host behavior, passive controls, teardown and separately mapped real cross-runtime geometry. The modified module consumer remains unrun."
+summary: 'Covers four-part API boundaries, independently mapped package/CLI checks, retained New York paint, a fallible composed preference, unsupported-composed fallback, two-axis host behavior, passive controls, teardown and separately mapped real cross-runtime geometry. Current focused module execution and outstanding native acceptance retain separate source-bound records.'
 cases:
   - id: T-SHADCN-SCROLL-AREA-0001-CASE-CORNER
     title: Rendered tracks reserve a continuous unpainted lower-right intersection with no second control
@@ -118,6 +118,7 @@ implementations:
     consumesCases: [T-SHADCN-SCROLL-AREA-0001-CASE-BROWSER]
     notes:
       - Current inherited Viewport radius, inward track borders and borderless Thumb require exact-source native geometry and visibility evidence; earlier execution is not acceptance of this paint revision.
+      - The browser consumer requires positive Thumb dimensions and direct pointer hit targets before its unchanged two-axis drag assertions. An intentional zero-flex-basis mutation must collapse the cross axis, then restore the original dimensions; this native counterexample is distinct from the original CI failure and remains unrun until an actual browser result is retained.
     exercises: *scroll-area-prototypes
 verifies:
   prototypes:
@@ -128,6 +129,9 @@ verifies:
 exercises:
   prototypes: *scroll-area-prototypes
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added cross-axis geometry, pointer hit attribution, zero-basis mutation and retained before/after scroll facts to the existing four-runtime drag consumer without extending its polling timeout or claiming native execution.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Replaced rejected private Shadcn corner-paint expectations with a continuous unpainted intersection and added forced-color Thumb visibility plus unchanged border-box and minimum-endpoint evidence.

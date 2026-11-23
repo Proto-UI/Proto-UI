@@ -37,6 +37,39 @@ corepack pnpm@10.32.1 test:public-docs
 
 Failures name the affected file/export, the governed release or catalog source, and the expected remediation so CI output can be acted on without reproducing a live registry check.
 
+## Current release website inventory and reading regressions
+
+Enumerate the current bilingual release routes and authored Preview/host cells:
+
+```sh
+node scripts/docs/release-website-inventory.mjs --check --out /tmp/release-website-inventory.json
+node --test scripts/docs/test/release-website-inventory.test.mjs
+```
+
+The inventory derives exported families from the same policy and package manifests as the public-documentation gate. It parses MDX elements instead of counting example text inside code fences or comments. Missing routes, unsupported hosts and dynamic Preview identity/host expressions remain explicit errors. Each row retains its source path; the report binds input bytes, policy, generator and checkout revision. Lucide's generated icon exports retain their shared protocol overview. `codePanel` describes the authored permission for a Preview code panel; automatic source-map resolution and meaningful Usage acceptance still require actual rendering and review.
+
+Every evidence field starts as `not-run`. The current inventory does not replace #1042's historical 518 routes/5,784 cells, #1141's retained Dropdown anatomy evidence or #1175's original Camoufox R5 driver/archive and matrix. A source count is not browser, package-installation, real-application, physical-device or assistive-technology acceptance.
+
+The focused current-source reading regression uses actual public Base Button, Shadcn Button and Shadcn Dialog pages:
+
+```sh
+PROTO_UI_RUNTIME_EVIDENCE_DIR=/tmp/release-website-evidence \
+corepack pnpm@10.32.1 exec vitest run apps/www/test/release-docs-reading.browser.test.ts \
+  --maxWorkers=1 --minWorkers=1 --no-file-parallelism
+```
+
+Its 24 separately terminal cases cover both locales, 320/390/1280 CSS-pixel viewport profiles, no-JavaScript source and command reading, the four declared Preview/Usage hosts, a separately labelled 200% CSS-text scenario, keyboard expansion, actual document navigation and an explicit Astro owner lifecycle probe. The suite retains JSON, source hashes and screenshots on success and failure. It uses the shared source server and keeps Chromium's sandbox enabled. Supply `CHROME_PATH` when the standard browser path is unavailable; environment launch failures remain failures. Captures still need visual review. This bounded regression does not complete the historical route matrices or replace installed consumer and real assistive-technology results.
+
+### Sprint 3 dispatch evidence
+
+`.github/workflows/sprint3-consumer-evidence.yml` is dispatch-only and checks out exactly `github.sha`. It uses Node 24, frozen pnpm dependencies, an identified Chromium executable and one serial runner. `scripts/test/sprint3-consumer-evidence.mjs` owns the complete suite inventory: component fixtures, generated/runtime Transition, four native Focus suites, reading, public Tooltip, Button, Select, Spinner and Scroll Area. The existing whitepaper workflow and required regression workflows retain their separate scope.
+
+The runner first executes independent fixtures, then builds the production website once and serves those exact emitted files from its own loopback listener. A file failure does not prevent later independent files from running. Missing prerequisites, cancellation, resource deadlines, missing JSON, a changed case count, skipped/todo cases and source drift all remain non-passing results. Process deadlines do not alter the suites' interaction assertions. The workflow always uploads the full planned inventory, per-suite Vitest JSON/logs, native capture files that the suite produces, source/lock hashes, build manifest and server request log. Internal Focus retry suites retain native state/assertion evidence; a suite without screenshots is recorded explicitly and receives no visual-acceptance claim.
+
+Finalization compares current captures, Vitest reports, logs and source receipts with the immutable hashes recorded at execution. Changed/missing artifacts, symlinks and read/write failures turn the saved outcome into a failure while preserving the original execution status and all readable observations. Output-directory validation resolves existing symlink ancestors before creating new directories; an external alias cannot write into an ignored source-checkout directory.
+
+For a local reproduction on a sandbox-capable Linux browser host, install the declared dependencies, set `CHROME_PATH`, bind `CANDIDATE_SHA` to the clean checkout and set `SPRINT3_EVIDENCE_DIR` to a fresh directory outside the repository. Run `node scripts/test/sprint3-consumer-evidence.mjs init`, then `run`, and finally `finalize` even when `run` fails. Each attempt needs a new directory; an old failed receipt is never overwritten. A green bounded dispatch still does not establish installed Shenko/OpenGreendam/Verdant application acceptance, historical Camoufox results, physical-device/OS assistive-technology acceptance, non-Web completion, or the full release cycle.
+
 ## Repository documentation references
 
 `check:public-docs` also runs the repository reference check. To inspect it independently:

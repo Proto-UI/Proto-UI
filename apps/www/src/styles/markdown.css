@@ -187,6 +187,13 @@
   main[data-pagefind-body] table td {
     @apply px-4 py-3 align-top text-foreground;
   }
+  /* These five channel names are identifiers. Preserve each short token in
+     the whitepaper's own table; its existing scroll wrapper owns any overflow. */
+  .whitepaper-channel-table :is(th, td):first-child code {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
   /* Light mode: subtle inner grid lines for readability */
   main[data-pagefind-body] table th,
   main[data-pagefind-body] table td {
