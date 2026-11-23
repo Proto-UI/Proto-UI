@@ -14,6 +14,121 @@ import type { StatePort } from '@proto.ui/module-state';
 import type { ResidentMotionProperty } from '@proto.ui/core';
 
 const variable = 'w-[calc(var(--pui-percentage)*1%)]';
+
+describe('admitted motion environment ownership', () => {
+  const environment: MotionEnvironment = {
+    visible: true,
+    preference: 'no-preference',
+    supportedProperties: ['width'],
+    width: 17,
+    height: 9,
+    containingBlockWidth: 400,
+    rootFontPx: 16,
+    palette: {},
+    paletteRevision: 0,
+  };
+
+  it('exposes one immutable property snapshot per admitted frame to the host', () => {
+    const observed: (readonly ResidentMotionProperty[])[] = [];
+    let callback = () => {};
+    const properties: ResidentMotionProperty[] = ['width'];
+    const sink = createResidentMotionProjector({
+      now: () => 0,
+      environment: (requested) => {
+        observed.push(requested);
+        return environment;
+      },
+      subscribe: () => () => {},
+      requestFrame: (next) => {
+        callback = next;
+        return 1;
+      },
+      cancelFrame: () => {},
+      project: () => ['width'],
+    });
+    sink.commit({
+      view: 1,
+      revision: 1,
+      style: { kind: 'tw', tokens: ['w-[100px]'] },
+      declarations: [{ properties, durationMs: 100, easing: [0, 0, 1, 1] }],
+    });
+    expect(observed[0]).toEqual(['width']);
+    expect(Object.isFrozen(observed[0])).toBe(true);
+    expect(() => (observed[0] as ResidentMotionProperty[]).push('translate')).toThrow(TypeError);
+    properties[0] = 'translate';
+    callback();
+    expect(observed[1]).toBe(observed[0]);
+    expect(observed[1]).toEqual(['width']);
+    sink.release(1);
+  });
+
+  it.each(['environment', 'now'] as const)(
+    'does not let a frame superseded inside %s mutate the current sampler',
+    (stage) => {
+      let now = 0,
+        revision = 0,
+        next = 0;
+      let reenter: typeof stage | null = null;
+      const callbacks = new Map<number, () => void>();
+      const widths: (number | undefined)[] = [];
+      const commit = (width: number) =>
+        sink.commit({
+          view: 1,
+          revision: ++revision,
+          style: { kind: 'tw', tokens: [`w-[${width}px]`] },
+          declarations: [{ properties: ['width'], durationMs: 100, easing: [0, 0, 1, 1] }],
+        });
+      const invoke = (current: typeof stage) => {
+        if (reenter !== current) return;
+        reenter = null;
+        commit(400);
+      };
+      const sink = createResidentMotionProjector({
+        now: () => {
+          invoke('now');
+          return now;
+        },
+        environment: () => {
+          invoke('environment');
+          return environment;
+        },
+        subscribe: () => () => {},
+        requestFrame: (callback) => {
+          callbacks.set(++next, callback);
+          return next;
+        },
+        cancelFrame: (id) => {
+          callbacks.delete(id as number);
+        },
+        project: (_style, presentation) => {
+          widths.push(presentation.width);
+          return ['width'];
+        },
+      });
+      const frame = (time: number) => {
+        now = time;
+        for (const [id, callback] of [...callbacks]) {
+          callbacks.delete(id);
+          callback();
+        }
+      };
+      commit(100);
+      frame(0);
+      commit(300);
+      reenter = stage;
+      frame(25);
+      expect(widths.at(-1)).toBe(100);
+      expect(callbacks.size).toBe(1);
+      frame(75);
+      expect(widths.at(-1)).toBeCloseTo(250);
+      frame(125);
+      expect(widths.at(-1)).toBe(400);
+      expect(callbacks.size).toBe(0);
+      sink.release(1);
+    }
+  );
+});
+
 function harness() {
   let now = 0,
     revision = 0,

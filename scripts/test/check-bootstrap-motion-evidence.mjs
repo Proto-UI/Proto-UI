@@ -14,8 +14,8 @@ export const BOOTSTRAP_MOTION_SUITES = Object.freeze([
     cases: 18,
   },
   { file: 'packages/adapters/web-component/test/portal-conceal.test.ts', cases: 30 },
-  { file: 'packages/modules/feedback/test/resident-width.test.ts', cases: 6 },
-  { file: 'packages/adapters/base/test/web-resident-width.test.ts', cases: 7 },
+  { file: 'packages/modules/feedback/test/resident-width.test.ts', cases: 9 },
+  { file: 'packages/adapters/base/test/web-resident-width.test.ts', cases: 11 },
   { file: 'packages/adapters/base/test/web-resident-width-adoption.test.ts', cases: 13 },
   { file: 'packages/runtime/test/contract/resident-width.contract.test.ts', cases: 2 },
   { file: 'packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts', cases: 6 },
@@ -350,7 +350,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       process.exitCode = 1;
     } else
       console.log(
-        'Bootstrap motion: 11 files / 129 assertions executed; native artifacts verified.'
+        'Bootstrap motion: 11 files / 136 assertions executed; native artifacts verified.'
       );
   }
 }

@@ -135,7 +135,7 @@ jobs:
             --pool=forks --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json \
             --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json"
-      - name: Require all 129 motion assertions and their native artifacts
+      - name: Require all 136 motion assertions and their native artifacts
         if: always()
         id: bootstrap-motion-gate
         env:

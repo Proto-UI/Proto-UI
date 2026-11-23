@@ -204,7 +204,8 @@ export function createWebResidentMotionSink(
   const sink = createResidentMotionProjector({
     diagnostics: options.diagnostics,
     now: () => win?.performance.now() ?? 0,
-    environment: () => {
+    environment: (requestedProperties) => {
+      widthRequested = requestedProperties.includes('width');
       detectLoss();
       const layout = widthRequested ? widthLayout() : { supported: false };
       const preference = readWebPreference(doc, 'preference.reducedMotion');
@@ -376,14 +377,5 @@ export function createWebResidentMotionSink(
       return accepted;
     },
   });
-  return {
-    commit(frame) {
-      widthRequested = frame.declarations.some((declaration) =>
-        declaration.properties.includes('width')
-      );
-      sink.commit(frame);
-    },
-    release: (view) => sink.release(view),
-    diagnostics: () => sink.diagnostics?.() ?? [],
-  };
+  return sink;
 }

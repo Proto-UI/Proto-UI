@@ -24,8 +24,8 @@ const writeJson = (file, value) => writeFileSync(file, JSON.stringify(value));
 function reportFixture() {
   return {
     success: true,
-    numTotalTests: 129,
-    numPassedTests: 129,
+    numTotalTests: 136,
+    numPassedTests: 136,
     numFailedTests: 0,
     // Vitest's describe/suite count is not its physical test-file count.
     numTotalTestSuites: 29,
@@ -51,11 +51,11 @@ function reportFixture() {
 const check = (report, stepOutcome = 'success') =>
   inspectBootstrapMotionReport(report, { root, stepOutcome });
 
-test('requires eleven exact files and 129 executed cases while separating positive and rejected profiles', async () => {
+test('requires eleven exact files and 136 executed cases while separating positive and rejected profiles', async () => {
   const result = await check(reportFixture());
   assert.equal(result.passed, true, result.failures.join('\n'));
   assert.equal(result.requiredFiles, 11);
-  assert.equal(result.requiredAssertions, 129);
+  assert.equal(result.requiredAssertions, 136);
   assert.deepEqual(result.nativePositiveCases, {
     modalDocument: 6,
     progressDocument: 3,
@@ -140,7 +140,7 @@ for (const [name, mutate] of [
   [
     'false assertion total',
     (report) => {
-      report.numTotalTests = 130;
+      report.numTotalTests = 137;
     },
   ],
   [
