@@ -1,7 +1,11 @@
 // @vitest-environment happy-dom
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, expect, it, vi } from 'vitest';
-import { compilePrototype } from '../src/compile';
-import { mountNativeOwner } from './native-owner-consumer';
+import { compilePrototype, writeCompilation } from '../src/compile';
+import { generatedSourcePath } from '../src/emitter-map';
+import { mountNativeOwner, type NativeOwnerHandle } from './native-owner-consumer';
 
 const source = `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'raw-watch-owner',setup(def){
@@ -28,6 +32,92 @@ export default definePrototype({name:'raw-watch-owner',setup(def){
   return r=>r.el('output','raw');
 }});`;
 const cleanups: (() => Promise<void>)[] = [];
+
+type RawPolicyElement = HTMLElement &
+  NativeOwnerHandle & {
+    setProps(props: Record<string, unknown>): void;
+    dispose(): void;
+    readonly logicalOwner: symbol | null;
+  };
+const propsPolicies = ['explicit', 'host'] as const;
+let rawPolicySequence = 0;
+
+async function mountWebRawOwner(
+  prototypeSource: string,
+  policy: (typeof propsPolicies)[number],
+  props: Record<string, unknown>
+) {
+  const profile = 'web-component-source-v1';
+  const compiled = compilePrototype(prototypeSource, {
+    profile: { profile, propsUpdatePolicy: policy },
+  });
+  if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+  const directory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'generated-modules');
+  await mkdir(directory, { recursive: true });
+  const temporary = await mkdtemp(path.join(directory, 'raw-policy-'));
+  const host = document.createElement('div');
+  const elements: RawPolicyElement[] = [];
+  cleanups.push(async () => {
+    try {
+      for (const element of elements) element.dispose();
+    } finally {
+      host.remove();
+      await rm(temporary, { recursive: true, force: true });
+    }
+  });
+  const output = path.join(temporary, 'output');
+  const written = await writeCompilation(compiled.value, output);
+  if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+  const generated = await import(
+    /* @vite-ignore */ path.join(output, generatedSourcePath(profile))
+  );
+  const tag = 'x-raw-policy-owner-' + ++rawPolicySequence;
+  generated.register(tag);
+  document.body.append(host);
+  const create = (next: Record<string, unknown>) => {
+    const element = document.createElement(tag) as RawPolicyElement;
+    elements.push(element);
+    element.setProps(next);
+    host.append(element);
+    return element;
+  };
+  const flush = async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  };
+  const element = create(props);
+  await flush();
+  return {
+    host,
+    element,
+    create,
+    flush,
+    async setProps(next: Record<string, unknown>) {
+      element.setProps(next);
+      await flush();
+    },
+  };
+}
+
+const policySource = `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'raw-policy-lifecycle',setup(def){
+  def.props.define({value:{type:'number',default:0}});
+  const value=def.state.numberDiscrete('value',0);let updates=0;
+  def.expose.event('rawTick',{payload:'void'});
+  def.expose.event('keyedTick',{payload:'void'});
+  def.expose.event('resolvedTick',{payload:'void'});
+  def.expose.method('value',()=>value.get());
+  def.expose.method('updates',()=>updates);
+  def.lifecycle.onCreated(run=>{value.set(run.props.get().value ?? 0);});
+  def.lifecycle.onUpdated(()=>{updates++;});
+  def.props.watch(['value'],(run,next)=>{
+    value.set(next.value ?? 0);run.expose.emit('resolvedTick');
+  });
+  def.props.watchRaw(['value'],run=>{run.expose.emit('keyedTick');});
+  def.props.watchRawAll(run=>{run.expose.emit('rawTick');});
+  return r=>r.el('output',String(value.get()));
+}});`;
+
 const rawWatchDomProfiles = [
   'react-dom-source-v1',
   'vue-source-v1',
@@ -90,9 +180,11 @@ it.each(rawWatchDomProfiles)(
   30_000
 );
 
-it('stops the raw and resolved batch when a Web Component raw notification disposes its owner', async () => {
-  vi.spyOn(console, 'warn').mockImplementation(() => {});
-  const terminal = `import {definePrototype} from '@proto.ui/core';
+it.each(propsPolicies)(
+  'stops the raw and resolved batch when a %s Web Component raw notification disposes its owner',
+  async (policy) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const terminal = `import {definePrototype} from '@proto.ui/core';
     export default definePrototype({name:'raw-watch-terminal',setup(def){
       def.props.define({value:{type:'number',default:0}});
       def.expose.event('rawTick',{payload:'void'});
@@ -104,23 +196,127 @@ it('stops the raw and resolved batch when a Web Component raw notification dispo
       def.props.watchRawAll((run)=>{run.expose.emit('rawTick');});
       return r=>r.el('output','terminal');
     }});`;
-  const owner = await mountNativeOwner(terminal, 'web-component-source-v1', {
-    props: { value: 1 },
-  });
-  cleanups.push(owner.dispose);
-  const element = owner.handle as typeof owner.handle & HTMLElement & { dispose(): void };
-  const exposed = owner.handle.getExposes();
-  const events: string[] = [];
-  element.addEventListener('rawTick', () => {
-    events.push('raw');
-    element.dispose();
-  });
-  element.addEventListener('keyedTick', () => events.push('keyed'));
-  element.addEventListener('resolvedTick', () => events.push('resolved'));
-  await expect(owner.setProps({ value: 2 })).resolves.toBeUndefined();
-  expect(events).toEqual(['raw']);
-  expect(() => exposed.value()).toThrow(/dispos|alive|terminal/i);
-}, 30_000);
+    const owner = await mountWebRawOwner(terminal, policy, { value: 1 });
+    const element = owner.element;
+    const exposed = element.getExposes();
+    const events: string[] = [];
+    element.addEventListener('rawTick', () => {
+      events.push('raw');
+      element.dispose();
+    });
+    element.addEventListener('keyedTick', () => events.push('keyed'));
+    element.addEventListener('resolvedTick', () => events.push('resolved'));
+    await expect(owner.setProps({ value: 2 })).resolves.toBeUndefined();
+    expect(events).toEqual(['raw']);
+    expect(() => exposed.value()).toThrow(/dispos|alive|terminal/i);
+  },
+  30_000
+);
+
+it.each(propsPolicies)(
+  'preserves normal %s Web Component props updates after raw delivery',
+  async (policy) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = await mountWebRawOwner(policySource, policy, { value: 1 });
+    const exposed = owner.element.getExposes();
+    const events: string[] = [];
+    owner.element.addEventListener('rawTick', () => events.push('raw'));
+    owner.element.addEventListener('keyedTick', () => events.push('keyed'));
+    owner.element.addEventListener('resolvedTick', () => events.push('resolved'));
+    expect((owner.element.shadowRoot ?? owner.element).querySelector('output')?.textContent).toBe(
+      '1'
+    );
+    expect(exposed.updates()).toBe(0);
+    await owner.setProps({ value: 2 });
+    expect(events).toEqual(['raw', 'keyed', 'resolved']);
+    expect(exposed.value()).toBe(2);
+    expect((owner.element.shadowRoot ?? owner.element).querySelector('output')?.textContent).toBe(
+      policy === 'host' ? '2' : '1'
+    );
+    expect(exposed.updates()).toBe(policy === 'host' ? 1 : 0);
+    if (policy === 'explicit') {
+      owner.element.update();
+      await owner.flush();
+    }
+    expect((owner.element.shadowRoot ?? owner.element).querySelector('output')?.textContent).toBe(
+      '2'
+    );
+    expect(exposed.updates()).toBe(1);
+    await owner.setProps({ value: 2 });
+    expect(exposed.updates()).toBe(1);
+  },
+  30_000
+);
+
+it.each(propsPolicies)(
+  'keeps a synchronously retired %s owner closed while a replacement mounts',
+  async (policy) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = await mountWebRawOwner(policySource, policy, { value: 1 });
+    const retired = owner.element.getExposes();
+    const identity = owner.element.logicalOwner;
+    const replacements: RawPolicyElement[] = [];
+    owner.element.addEventListener(
+      'rawTick',
+      () => {
+        owner.element.dispose();
+        owner.element.remove();
+        owner.host.append(owner.element);
+        replacements.push(owner.create({ value: 7 }));
+      },
+      { once: true }
+    );
+    await expect(owner.setProps({ value: 2 })).resolves.toBeUndefined();
+    expect(owner.element.logicalOwner).toBeNull();
+    expect(owner.element.getExposes()).toEqual({});
+    expect(() => retired.value()).toThrow(/dispos|alive|terminal/i);
+    expect(() => owner.element.setProps({ value: 3 })).toThrow(/dispos/i);
+    expect(replacements).toHaveLength(1);
+    const replacement = replacements[0]!;
+    expect(replacement.logicalOwner).not.toBeNull();
+    expect(replacement.logicalOwner).not.toBe(identity);
+    const exposed = replacement.getExposes();
+    expect(exposed.value()).toBe(7);
+    expect(exposed.updates()).toBe(0);
+    expect((replacement.shadowRoot ?? replacement).querySelector('output')?.textContent).toBe('7');
+    replacement.setProps({ value: 8 });
+    await owner.flush();
+    expect(exposed.value()).toBe(8);
+    expect(exposed.updates()).toBe(policy === 'host' ? 1 : 0);
+    expect((replacement.shadowRoot ?? replacement).querySelector('output')?.textContent).toBe(
+      policy === 'host' ? '8' : '7'
+    );
+  },
+  30_000
+);
+
+it.each(propsPolicies)(
+  'binds later %s props updates to the new owner after settled reconnection',
+  async (policy) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = await mountWebRawOwner(policySource, policy, { value: 1 });
+    const retired = owner.element.getExposes();
+    const identity = owner.element.logicalOwner;
+    owner.element.remove();
+    await owner.flush();
+    expect(owner.element.logicalOwner).toBeNull();
+    expect(() => retired.value()).toThrow(/dispos|alive|terminal/i);
+    owner.host.append(owner.element);
+    await owner.flush();
+    expect(owner.element.logicalOwner).not.toBeNull();
+    expect(owner.element.logicalOwner).not.toBe(identity);
+    const exposed = owner.element.getExposes();
+    expect(exposed.value()).toBe(1);
+    expect(exposed.updates()).toBe(0);
+    await owner.setProps({ value: 2 });
+    expect(exposed.value()).toBe(2);
+    expect((owner.element.shadowRoot ?? owner.element).querySelector('output')?.textContent).toBe(
+      policy === 'host' ? '2' : '1'
+    );
+    expect(exposed.updates()).toBe(policy === 'host' ? 1 : 0);
+  },
+  30_000
+);
 
 // C-PROPS-0012-F..K governs the observer semantics. Target admission remains
 // explicit: Vue2 still defers raw observers; the other native profiles admit

@@ -177,8 +177,13 @@ mod context_menu_tests {
     #[test]
     fn native_menu_key_beats_synthetic_text_and_keeps_modifiers() {
         let keystroke = Keystroke {
-            key: "menu".into(), key_char: Some("menu".into()),
-            modifiers: Modifiers { shift: true, control: true, ..Default::default() },
+            key: "menu".into(),
+            key_char: Some("menu".into()),
+            modifiers: Modifiers {
+                shift: true,
+                control: true,
+                ..Default::default()
+            },
         };
         assert_eq!(portable_key(&keystroke).as_deref(), Some("ContextMenu"));
         let modifiers = PortableModifiers::from(keystroke.modifiers);

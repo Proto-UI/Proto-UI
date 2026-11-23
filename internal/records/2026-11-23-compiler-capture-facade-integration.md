@@ -42,3 +42,11 @@ These local results identify their own inputs and do not substitute for the comp
 The ordinary producer emits 37 actual source units. The workflow executes its ordinary, delivery and capture-facade consumers, the numeric and sequential-focus consumers, the complete emitted SDK tests, official Button/Label consumers, the full compiler source directory, public Input browser journeys, types, documentation and catalog checks. Exact final commit identities, commands, outcomes and any existing skipped host conditions are retained by `.github/workflows/compiler-gpui-source-consumers.yml` and reported with the integration PR. Verdant pins a clean immutable compiler commit and separately verifies fresh artifacts, full application/SDK configurations and packaged OS input.
 
 This checkpoint does not promote the draft asHook contracts or the experimental compiler profile. Execution evidence is not original-author contribution-rights certification, DCO or formal independent acceptance. Native TestAppContext results do not claim physical OS input or assistive-technology acceptance.
+
+## Prepared raw-props follow-up integrated
+
+The seven-file follow-up published for review in PR #1731 is preserved with full-index patch SHA-256 `97918b628982008725cac12ff9cf77e3287554b90fa2aaf95a6295bf7e8904e9`. The WC host-policy tail now checks the original live owner after raw hydration before requesting an automatic update. Explicit disposal stays terminal, and a replacement cannot receive the retired owner's update. This is separate from the zero-argument renderer correction.
+
+The unchanged final raw-props fixtures produced 23 passes and two actual host-policy `null.update` failures before the emitter fix, then all 25 raw-props cases and 13 observable-policy cases passed without skips. The other source changes clarify undefined reset arguments and same-language Input documentation links, and format the existing native ContextMenu test. They do not replace or weaken the published lifecycle tests.
+
+The completed local native checkpoint for the capture/key/subtree changes is 53 SDK, 46 ordinary, five delivery and seven capture cases, all passed without filtering or ignored cases. The final workflow still binds the complete matrix to its own exact published commit.

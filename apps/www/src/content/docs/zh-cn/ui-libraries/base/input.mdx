@@ -39,7 +39,7 @@ Input 的 draft 契约在已挂载的 adapter handle 上公开 `resetValue(value
 
 两种所有权模式都会重置当前编辑／composition 会话，并同步公开的 `composing` 与 `value` state。受控返回 `false` 不表示 composition 仍在继续；修改受控值仍由 owner 负责。Reset 不合成 `valueChange`、`change` 或 `compositionEnd`，但操作期间可以触发公开 state observer。
 
-view 缺失、尚未初始化、已 detach，或传入非字符串参数时，返回 `false`；终止 dispose 后仍保留既有的 capability lifetime 错误。若同步回调再次 reset、detach 或 remount 编辑器，外层调用会失效并返回 `false`，不能把旧状态发布到新会话。完整的 `asInputRoot` hook 继承同一协议。
+显式传入 `undefined` 与省略参数相同。view 缺失、尚未初始化、已 detach，或传入其他非字符串参数时，返回 `false`；终止 dispose 后仍保留既有的 capability lifetime 错误。若同步回调再次 reset、detach 或 remount 编辑器，外层调用会失效并返回 `false`，不能把旧状态发布到新会话。完整的 `asInputRoot` hook 继承同一协议。
 
 ## 同一个物理目标
 

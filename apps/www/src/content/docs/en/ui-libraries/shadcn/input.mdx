@@ -30,6 +30,8 @@ Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
 
 Passing `value` selects controlled mode. `inputMode` and `enterKeyHint` are optional and have no Root default.
 
+The exposed `resetValue(value?: string): boolean` method is inherited from Base Input. See [resetting the mounted editor](../../base/input/#reset-the-mounted-editor) for value ownership, composition-session retirement, return values and lifecycle limits.
+
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
@@ -52,7 +54,4 @@ These props belong to Root.
 
 ## References
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-INPUT.yaml', 'P-BASE-INPUT.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-INPUT.yaml', 'P-BASE-INPUT.yaml']} />

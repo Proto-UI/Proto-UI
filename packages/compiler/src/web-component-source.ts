@@ -1098,7 +1098,11 @@ ${hookCode}    try {
 ${options.propsUpdatePolicy === 'host' ? `    const changed = Object.keys({ ...this.${prefix}Raw, ...next }).some(key => Object.hasOwn(this.${prefix}Raw, key) !== Object.hasOwn(next, key) || !Object.is(this.${prefix}Raw[key], next[key]));` : ''}
     if (Object.prototype.hasOwnProperty.call(next, 'instanceAssociations')) throw new TypeError('[InstanceAssociations] use the instanceAssociations property, outside Props');
     this.${prefix}Raw = { ...next };
-    if (this.${prefix}Owner) { this.${prefix}Owner.hydrate(this.${prefix}Raw); ${options.propsUpdatePolicy === 'host' ? `if (changed) this.${prefix}Owner.update();` : ''} }
+    const owner = this.${prefix}Owner;
+    if (owner) {
+      owner.hydrate(this.${prefix}Raw);
+${options.propsUpdatePolicy === 'host' ? `      if (changed && !this.${prefix}Closed && this.${prefix}Owner === owner) owner.update();` : ''}
+    }
   }
   update(): void {
     if (this.${prefix}Closed) throw new Error('Custom element is disposed');
