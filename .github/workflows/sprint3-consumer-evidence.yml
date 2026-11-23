@@ -2,9 +2,11 @@ name: Sprint 3 consumer evidence
 
 on:
   workflow_dispatch:
+  workflow_call:
 
-# Supplementary exact-source acceptance. No PR trigger, publication, secrets,
-# repository mutation, or additional branch-protection gate.
+# Supplementary exact-source acceptance, explicitly requested through the manual
+# repair carrier. No PR trigger, publication, secrets, repository mutation, or
+# additional branch-protection gate.
 permissions:
   contents: read
 
@@ -17,7 +19,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 65
     env:
-      CANDIDATE_SHA: ${{ github.sha }}
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       ASTRO_TELEMETRY_DISABLED: '1'
     steps:
       - name: Prepare owned temporary and artifact directories
@@ -25,13 +27,13 @@ jobs:
           set -euo pipefail
           # The runner context is unavailable in job-level env. Publish these
           # runner-owned paths only after the job starts.
-          SPRINT3_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-consumer-evidence-$GITHUB_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          SPRINT3_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-consumer-evidence-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           SPRINT3_TEMP_DIR="$RUNNER_TEMP/sprint3-consumer-tmp"
           mkdir -p "$SPRINT3_TEMP_DIR" "$SPRINT3_EVIDENCE_DIR"
           printf '%s\n' "SPRINT3_EVIDENCE_DIR=$SPRINT3_EVIDENCE_DIR" "TMPDIR=$SPRINT3_TEMP_DIR" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ env.CANDIDATE_SHA }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -53,7 +55,7 @@ jobs:
         id: runner-checks
         run: |
           set -euo pipefail
-          node --test scripts/test/sprint3-consumer-evidence.test.mjs scripts/test/sprint3-consumer-workflow.test.mjs 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/runner-checks.log"
+          node --test scripts/test/sprint3-consumer-evidence.test.mjs scripts/test/sprint3-consumer-workflow.test.mjs scripts/test/sprint3-consumer-profiles.test.mjs 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/runner-checks.log"
       - name: Identify Chromium and prepare public CJK font fallback
         id: environment
         timeout-minutes: 5
@@ -96,7 +98,239 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: sprint3-consumer-evidence-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: sprint3-consumer-evidence-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.SPRINT3_EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 30
+
+  base-select-consumers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Prepare owned temporary and artifact directories
+        run: |
+          set -euo pipefail
+          # The runner context is unavailable in job-level env. Publish these
+          # runner-owned paths only after the job starts.
+          SPRINT3_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-base-select-evidence-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          SPRINT3_TEMP_DIR="$RUNNER_TEMP/sprint3-base-select-tmp"
+          mkdir -p "$SPRINT3_TEMP_DIR" "$SPRINT3_EVIDENCE_DIR"
+          printf '%s\n' "SPRINT3_EVIDENCE_DIR=$SPRINT3_EVIDENCE_DIR" "TMPDIR=$SPRINT3_TEMP_DIR" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the exact candidate and independent eight-case Base Select profile
+        id: inventory
+        run: |
+          set -euo pipefail
+          mkdir -p "$TMPDIR"
+          node scripts/test/sprint3-consumer-evidence.mjs init --profile base-select
+      - name: Install the declared locked workspace
+        id: dependencies
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/install.log"
+      - name: Verify evidence retention and workflow admission
+        id: runner-checks
+        run: |
+          set -euo pipefail
+          node --test scripts/test/sprint3-consumer-evidence.test.mjs scripts/test/sprint3-consumer-workflow.test.mjs scripts/test/sprint3-consumer-profiles.test.mjs 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/runner-checks.log"
+      - name: Identify Chromium and prepare public CJK font fallback
+        id: environment
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          {
+            git rev-parse HEAD
+            node --version
+            corepack pnpm@10.32.1 --version
+            "$CHROME" --version
+            df -h "$TMPDIR" "$SPRINT3_EVIDENCE_DIR"
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
+          } 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/environment.log"
+      - name: Execute all eight Base Select cases on one owned production preview
+        id: consumers
+        # The runner has a 45-minute resource ceiling. Leave time for teardown,
+        # final unknown/blocked reconciliation and always-uploaded artifacts.
+        timeout-minutes: 50
+        run: |
+          set -euo pipefail
+          node scripts/test/sprint3-consumer-evidence.mjs run --profile base-select 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/runner.log"
+      - name: Preserve every terminal, blocked and interrupted outcome
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          : "${SPRINT3_EVIDENCE_DIR:?Evidence directory was not initialized}"
+          if [[ -f "$SPRINT3_EVIDENCE_DIR/results.json" ]]; then
+            node scripts/test/sprint3-consumer-evidence.mjs finalize --profile base-select
+          else
+            mkdir -p "$SPRINT3_EVIDENCE_DIR"
+            printf '%s\n' "$WORKFLOW_STEP_OUTCOMES" > "$SPRINT3_EVIDENCE_DIR/bootstrap-failure.json"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sprint3-base-select-evidence-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.SPRINT3_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+  release-rehearsal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 190
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Prepare an external evidence directory before setup
+        run: |
+          set -euo pipefail
+          REHEARSAL_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-release-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir -p "$REHEARSAL_EVIDENCE_DIR"
+          printf 'REHEARSAL_EVIDENCE_DIR=%s\n' "$REHEARSAL_EVIDENCE_DIR" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the exact clean source and locked toolchain
+        id: dependencies
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          {
+            git rev-parse HEAD &&
+            test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA" &&
+            test -z "$(git status --porcelain --untracked-files=normal)" &&
+            git rev-parse 'HEAD^{tree}' &&
+            sha256sum pnpm-lock.yaml &&
+            node --version &&
+            corepack enable &&
+            corepack pnpm@10.32.1 --version &&
+            corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          } 2>&1 | tee "$REHEARSAL_EVIDENCE_DIR/setup.log"
+      - name: Identify the sandboxed browser and public CJK fonts
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          printf 'CHROME_PATH=%s\nPUI_CHROME_EXECUTABLE=%s\n' "$CHROME" "$CHROME" >> "$GITHUB_ENV"
+          {
+            "$CHROME" --version &&
+            sudo apt-get update -qq &&
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk &&
+            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
+          } 2>&1 | tee "$REHEARSAL_EVIDENCE_DIR/environment.log"
+      - name: Execute all 15 original non-publishing release gates
+        id: rehearsal
+        # Leave job time for retained terminal/blocked outcomes and artifact upload.
+        timeout-minutes: 165
+        run: |
+          set -euo pipefail
+          node scripts/release/rehearse.mjs --out-dir "$REHEARSAL_EVIDENCE_DIR/rehearsal" --step-timeout-ms 1800000 \
+            2>&1 | tee "$REHEARSAL_EVIDENCE_DIR/runner.log"
+      - name: Verify the complete receipt and retain incomplete producer outcomes
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          : "${REHEARSAL_EVIDENCE_DIR:?Evidence directory was not initialized}"
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const directory = process.env.REHEARSAL_EVIDENCE_DIR;
+          const outcomes = JSON.parse(process.env.WORKFLOW_STEP_OUTCOMES);
+          const problems = [];
+          let receipt = null;
+          try {
+            receipt = JSON.parse(readFileSync(path.join(directory, 'rehearsal/rehearsal.json'), 'utf8'));
+          } catch (error) { problems.push('Original rehearsal receipt unavailable: ' + String(error)); }
+          const plannedGates = [
+            'Release identity',
+            'Release assets',
+            'Ordinary entity lifecycle review inventory',
+            'Prototype catalog',
+            'Workspace and docs types',
+            'Release script tests',
+            'Contract type tests',
+            'Runtime tests',
+            'Spec snapshot',
+            'Launch governance scan',
+            'Registry package identities',
+            'Package publish dry-run',
+            'React tarball consumer',
+            'CLI multi-host tarball consumer',
+            'Documentation build',
+          ];
+          if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt))
+            problems.push('Original rehearsal receipt is not an object.');
+          const gates = Array.isArray(receipt?.steps) ? receipt.steps : [];
+          if (receipt) {
+            if (receipt.source?.revision !== process.env.CANDIDATE_SHA ||
+                receipt.sourceAfter?.revision !== process.env.CANDIDATE_SHA)
+              problems.push('Rehearsal source does not match the dispatched candidate.');
+            if (receipt.status !== 'passed' || receipt.qualifiesAsFrozenCandidate !== true ||
+                receipt.sourceUnchanged !== true || receipt.source?.clean !== true ||
+                receipt.sourceAfter?.clean !== true)
+              problems.push('Rehearsal did not finish on an unchanged frozen candidate.');
+            if (gates.length !== plannedGates.length || gates.some((step, index) =>
+                step?.id !== 'step-' + String(index + 1).padStart(2, '0') ||
+                step?.label !== plannedGates[index] || step?.status !== 'passed'))
+              problems.push('The original 15-gate identity, order and result inventory did not pass.');
+          }
+          if (outcomes.rehearsal?.outcome !== 'success')
+            problems.push('The original rehearsal producer did not succeed.');
+          const terminal = {
+            candidate: process.env.CANDIDATE_SHA,
+            status: problems.length ? 'failed' : 'passed',
+            finishedAt: new Date().toISOString(),
+            workflowSteps: outcomes,
+            producerStatus: receipt?.status ?? 'missing',
+            gates: gates.map(step => ({
+              id: step?.id, label: step?.label, status: step?.status,
+              reason: step?.reason, log: step?.log,
+            })),
+            problems,
+            boundary: 'Original producer receipts and failure logs are preserved; this is not publication or release acceptance.',
+          };
+          writeFileSync(path.join(directory, 'terminal.json'), JSON.stringify(terminal, null, 2) + '\n');
+          console.log(JSON.stringify(terminal, null, 2));
+          if (problems.length) process.exitCode = 1;
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sprint3-release-rehearsal-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.REHEARSAL_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+  strict-package-budgets:
+    uses: ./.github/workflows/package-budget-evidence.yml
+    permissions:
+      contents: read
+
+  production-compiler:
+    uses: ./.github/workflows/compiler-browser-acceptance.yml
+    permissions:
+      contents: read
