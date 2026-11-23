@@ -16,7 +16,9 @@
     "treeShaking": true,
     "format": "esm",
     "platform": "browser",
-    "target": ["es2020"],
+    "target": [
+      "es2020"
+    ],
     "gzipLevel": 9,
     "external": [
       "prompts",

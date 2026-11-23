@@ -127,3 +127,25 @@ internal/records/evidence/2026-11-22-sprint7-history-continuation/
 internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
+
+# Original main 457d27f7 historical records and execution receipts retain their
+# recorded bytes. Maintained compiler, product, tests, scripts and spec stay formatted.
+internal/records/2026-11-23-gpui-authored-input-atoms.md
+internal/records/2026-11-23-gpui-direct-control-label.md
+internal/records/2026-11-23-gpui-native-consumer-composition.md
+internal/records/2026-11-23-shadow-s4-paint-partial.md
+internal/records/2026-11-23-train-package-budget.json
+internal/records/evidence/2026-11-23-liquid-view-operation/strict-project.json
+internal/records/evidence/2026-11-23-s3-intrinsic-full-width/frozen-css.json
+internal/records/evidence/2026-11-23-s3-intrinsic-full-width/s2-complete-gate-restored.json
+internal/records/evidence/2026-11-23-s3-intrinsic-full-width/transport-driver.mjs
+internal/records/evidence/2026-11-23-shadow-percentage-native/consumer-strict.json
+internal/records/evidence/2026-11-23-shadow-percentage-native/prepare-02-0-receipt.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-enhanced-group-hover.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-failed-scripts-group-hover.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-enhanced.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-no-js.json
+internal/records/evidence/2026-11-23-train-package-budget/candidate.json
+
+# Exact Sprint 6 integration receipts and archives; narrative records stay formatted.
+internal/records/evidence/2026-11-24-sprint6-integration/

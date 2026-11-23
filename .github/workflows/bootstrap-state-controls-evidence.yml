@@ -76,6 +76,7 @@ jobs:
           corepack pnpm@10.32.1 exec vitest run \
             packages/prototypes/bootstrap-2-3-2/test/controls.test.ts \
             apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/native-composition-evidence.test.ts \
             apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts \
             apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
@@ -170,7 +171,7 @@ jobs:
             status: previous.status === 'passed' && process.env.EVIDENCE_SUITE_STATUS === 'success' ? 'passed' : 'failed',
           }, null, 2));
           JS
-      - name: Require all fifteen original browser journeys and exact-source receipts
+      - name: Require original journeys, all composition combinations and exact-source receipts
         if: always()
         env:
           PROTO_UI_BOOTSTRAP_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-state-controls-evidence

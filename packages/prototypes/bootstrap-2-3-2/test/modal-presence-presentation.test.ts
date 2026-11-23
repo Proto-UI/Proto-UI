@@ -129,13 +129,18 @@ async function fixture(
     maskPhase: () => mask.getExposes().transitionState.get(),
   };
 }
-function expectRetainedClosedView(element: Host, owner: unknown) {
+function expectRetainedClosedView(
+  element: Host,
+  owner: unknown,
+  projectionParent: ParentNode | null
+) {
   expect(element.getExposes().transitionState.get()).toBe('closed');
   expect(element.getExposes().isPresent.get()).toBe(false);
   expect(element.getExposes().getPresentationOwner()).toBe(owner);
   expect(element.hasAttribute('data-pui-view-detached')).toBe(true);
   expect(element.isConnected).toBe(true);
   expect(isWebComponentPortaled(element)).toBe(true);
+  expect(element.parentNode).toBe(projectionParent);
   expect(element.hasAttribute('inert')).toBe(true);
   expect(element.style.getPropertyValue('visibility')).toBe('hidden');
   expect(element.style.getPropertyPriority('visibility')).toBe('important');
@@ -171,6 +176,10 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
       expect(f.phase()).toBe('entered');
       expect(f.content.style.top).not.toBe('-250px');
       const owner = f.content.getExposes().getPresentationOwner();
+      const contentProjectionParent = f.content.parentNode;
+      const maskProjectionParent = f.mask.parentNode;
+      expect(contentProjectionParent).not.toBe(f.root);
+      expect(maskProjectionParent).not.toBe(f.root);
       await f.target(false);
       expect(f.phase()).toBe('leaving');
       expect(f.maskPhase()).toBe('leaving');
@@ -178,19 +187,23 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
       expect(f.mask.hasAttribute('data-pui-view-detached')).toBe(false);
       await step(466);
       expect(f.maskPhase()).toBe('closed');
+      expect(f.mask.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(f.mask.parentNode).toBe(maskProjectionParent);
       expect(f.phase()).toBe('leaving');
       await step(616);
       expect(f.phase()).toBe('closed');
       // Not-present intent hides paint immediately. The original two-frame
       // barrier retains the owned DOM projection, not a visible layout surface.
-      expectRetainedClosedView(f.content, owner);
+      expectRetainedClosedView(f.content, owner, contentProjectionParent);
       await step(632);
-      expectRetainedClosedView(f.content, owner);
+      expectRetainedClosedView(f.content, owner, contentProjectionParent);
       await step(648);
       expect(f.content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(f.mask.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(isWebComponentPortaled(f.content)).toBe(false);
       expect(isWebComponentPortaled(f.mask)).toBe(false);
+      expect(f.content.parentNode).toBe(f.root);
+      expect(f.mask.parentNode).toBe(f.root);
     }
   );
   it('reopens during the closed portal barrier without losing its presence lease', async () => {
@@ -199,13 +212,16 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
     await step(16);
     await step(316);
     const owner = f.content.getExposes().getPresentationOwner();
+    const contentProjectionParent = f.content.parentNode;
+    expect(contentProjectionParent).not.toBe(f.root);
     await f.target(false);
     await step(616);
-    expectRetainedClosedView(f.content, owner);
+    expectRetainedClosedView(f.content, owner, contentProjectionParent);
     await f.target(true);
     expect(f.phase()).toBe('entering');
     expect(f.content.getExposes().getPresentationOwner()).toBe(owner);
     expect(isWebComponentPortaled(f.content)).toBe(true);
+    expect(f.content.parentNode).toBe(contentProjectionParent);
     expect(f.content.hasAttribute('data-pui-view-detached')).toBe(false);
     expect(f.content.style.opacity).toBe('0');
     expect(f.content.hasAttribute('inert')).toBe(false);
@@ -216,6 +232,7 @@ describe.each(families)('Bootstrap 2.3.2 $name authored modal motion', (family) 
     expect(Number(f.content.style.opacity)).toBeCloseTo(0.5, 6);
     await step(916);
     expect(f.phase()).toBe('entered');
+    expect(f.content.parentNode).toBe(contentProjectionParent);
   });
 
   it('controlled refusal leaves both accepted targets unchanged', async () => {

@@ -57,10 +57,11 @@ describe('Text public compiler consumption', () => {
         familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
       }
       if (family === 'bootstrap-2-3-2') {
-        // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION keeps the named rem scale,
-        // with the defined 24.5px-at-16px heading and 20/14 body ratio.
-        delete familyRequired['text-2xl'];
         delete familyRequired['leading-normal'];
+        // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION requires rem scaling, the
+        // archived 24.5px-at-16px-root 2xl size, 20/14 normal leading and
+        // 40px-at-16px-root 2xl relaxed leading. Muted ink is theme-owned.
+        delete familyRequired['text-2xl'];
         familyRequired['text-[1.53125rem]'] = 'font-size: 1.53125rem;';
         familyRequired['leading-[2.5rem]'] = 'line-height: 2.5rem;';
         familyRequired['leading-[1.1]'] = 'line-height: 1.1;';
@@ -79,6 +80,7 @@ describe('Text public compiler consumption', () => {
           'font-mono',
           'text-foreground',
           'text-muted-foreground',
+          ...(family === 'bootstrap-2-3-2' ? ['text-inherit'] : []),
         ])
       );
       expect(css).toContain('var(--pui-font-heading');

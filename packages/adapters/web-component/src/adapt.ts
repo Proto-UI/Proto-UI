@@ -1363,17 +1363,18 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         if (!snapshot.present) {
           currentEventGate?.disable();
-          // Retain the owned portal projection and mount epoch until the
-          // rendering barrier completes. The shared detached marker still
-          // excludes not-present content from layout, painting and input.
-          if (isWebComponentPortaled(thisEl)) this._portalConceal.conceal();
+          // The shared marker immediately projects not-present intent. The
+          // existing barrier only delays physical retirement.
+          setViewDetached(true);
           if (
             ownerResourcesReleased ||
             this._terminalDisposing ||
             requestVersion !== latestIntentVersion
           )
             return;
-          setViewDetached(true);
+          // Keep the owned conceal lease and its cleanup/reentry protection
+          // while the existing rendering barrier retains the portal projection.
+          if (isWebComponentPortaled(thisEl)) this._portalConceal.conceal();
           if (
             ownerResourcesReleased ||
             this._terminalDisposing ||

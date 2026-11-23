@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getLogicalTriggerSurfaceRoot } from '../src/platform/instance-tree';
+import { isWebComponentPortaled } from '../src/portal-mount';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
 import {
   dialogRoot,
@@ -11,6 +12,44 @@ import {
   dialogClose,
   button,
 } from '@proto.ui/prototypes-base';
+
+const contentViewLifecycle = { epoch: 0, mounted: 0, unmounted: 0 };
+
+async function waitForDialogInputReady(content: any, ...targets: HTMLElement[]): Promise<void> {
+  const ownerDocument = content.ownerDocument as Document;
+  const view = ownerDocument.defaultView!;
+  const portalParent = content.parentNode;
+  const owner = content.getExposes().getPresentationOwner();
+  const lifecycle = { ...contentViewLifecycle };
+  expect(lifecycle.epoch).toBeGreaterThan(0);
+  expect(isWebComponentPortaled(content)).toBe(true);
+
+  // Mounted callbacks precede the first Portal view's existing reveal barrier.
+  // Wait for those two host rendering opportunities, without completing Presence.
+  await new Promise<void>((resolve) =>
+    view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve()))
+  );
+
+  expect(content.isConnected).toBe(true);
+  expect(content.ownerDocument).toBe(ownerDocument);
+  expect(content.parentNode).toBe(portalParent);
+  expect(isWebComponentPortaled(content)).toBe(true);
+  expect(content.getExposes().getPresentationOwner()).toBe(owner);
+  expect(contentViewLifecycle).toEqual(lifecycle);
+  expect(content.hasAttribute('data-pui-portal-preparing')).toBe(false);
+  expect(content.hasAttribute('data-pui-view-revealing')).toBe(false);
+  for (const target of [content, ...targets]) {
+    expect(target.isConnected).toBe(true);
+    for (let element: HTMLElement | null = target; element; element = element.parentElement) {
+      const style = view.getComputedStyle(element);
+      expect(element.hasAttribute('data-pui-view-detached')).toBe(false);
+      expect(element.hasAttribute('inert')).toBe(false);
+      expect(style.display).not.toBe('none');
+      expect(style.visibility).not.toBe('hidden');
+      expect(style.visibility).not.toBe('collapse');
+    }
+  }
+}
 
 function registerDialogWcs() {
   const prototypes = [
@@ -27,7 +66,20 @@ function registerDialogWcs() {
   for (const proto of prototypes) {
     const wcName = 'wc-' + proto.name;
     if (!customElements.get(wcName)) {
-      const Ctor = AdaptToWebComponent(proto, { register: false, registerAs: wcName });
+      const Ctor = AdaptToWebComponent(proto, {
+        register: false,
+        registerAs: wcName,
+        diagnostics: {
+          onLifecycleEvent(event) {
+            if (proto !== dialogContent) return;
+            if (event.type === 'mount.mounted') {
+              contentViewLifecycle.epoch = event.epoch;
+              contentViewLifecycle.mounted++;
+            }
+            if (event.type === 'unmount.done') contentViewLifecycle.unmounted++;
+          },
+        },
+      });
       customElements.define(wcName, Ctor);
     }
   }
@@ -360,6 +412,8 @@ describe('adapter-web-component: dialog overlay', () => {
     await Promise.resolve();
     await Promise.resolve();
 
+    await waitForDialogInputReady(content, cancel, confirm);
+
     expect(document.activeElement).toBe(cancel);
 
     cancel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -449,6 +503,8 @@ describe('adapter-web-component: dialog overlay', () => {
     await Promise.resolve();
     await Promise.resolve();
     await Promise.resolve();
+
+    await waitForDialogInputReady(content, cancelButton, confirmButton);
 
     expect(cancel.tabIndex).toBe(-1);
     expect(cancel.hasAttribute('role')).toBe(false);

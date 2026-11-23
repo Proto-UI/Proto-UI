@@ -2,7 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, Locator, Page } from 'playwright-core';
+import type { Browser, CDPSession, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { withLiquidCardFailureObservation } from './library-liquid-card-observation';
 import {
@@ -131,6 +131,244 @@ async function selectMaterialSnapshot(previewer: Locator, phase: string) {
   }
 }
 
+async function selectObservationWithin<T>(
+  read: Promise<T>,
+  label: string,
+  onDeadline?: () => void
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      read,
+      new Promise<{ observationError: string }>((resolve) => {
+        timer = setTimeout(() => {
+          try {
+            onDeadline?.();
+          } catch {
+            // Diagnostic cleanup cannot change the original case outcome.
+          }
+          resolve({ observationError: `${label} exceeded 1000ms.` });
+        }, 1000);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+// Trigger text geometry is an observation, not an overflow assertion. A Range
+// describes pre-clip text-fragment bounds; overflow/scroll/ellipsis may legally hide
+// part of it. These reads do not scroll, focus, style or otherwise mutate DOM.
+async function selectTriggerGeometrySnapshot(page: Page, phase: string) {
+  try {
+    return await selectObservationWithin(
+      page.evaluate((phase) => {
+        const rect = (value: DOMRect) => ({
+          left: value.left,
+          right: value.right,
+          top: value.top,
+          bottom: value.bottom,
+          width: value.width,
+          height: value.height,
+        });
+        const describe = (node: Element) => {
+          const css = getComputedStyle(node);
+          return {
+            tag: node.localName,
+            ref: node.getAttribute('data-demo-ref'),
+            prototype: node.getAttribute('data-projection-prototype'),
+            className: node.getAttribute('class'),
+            rootStyleTokens: node.getAttribute('data-pui-style'),
+            bounds: rect(node.getBoundingClientRect()),
+            clientWidth: node.clientWidth,
+            clientHeight: node.clientHeight,
+            clientLeft: node.clientLeft,
+            clientTop: node.clientTop,
+            scrollWidth: node.scrollWidth,
+            scrollHeight: node.scrollHeight,
+            scrollLeft: node.scrollLeft,
+            scrollTop: node.scrollTop,
+            css: {
+              display: css.display,
+              position: css.position,
+              direction: css.direction,
+              fontSize: css.fontSize,
+              fontFamily: css.fontFamily,
+              lineHeight: css.lineHeight,
+              whiteSpace: css.whiteSpace,
+              overflowWrap: css.overflowWrap,
+              wordBreak: css.wordBreak,
+              width: css.width,
+              minWidth: css.minWidth,
+              maxWidth: css.maxWidth,
+              flex: css.flex,
+              flexWrap: css.flexWrap,
+              boxSizing: css.boxSizing,
+              paddingLeft: css.paddingLeft,
+              paddingRight: css.paddingRight,
+              borderLeftWidth: css.borderLeftWidth,
+              borderRightWidth: css.borderRightWidth,
+              overflowX: css.overflowX,
+              overflowY: css.overflowY,
+              textOverflow: css.textOverflow,
+              overflowClipMargin: css.getPropertyValue('overflow-clip-margin'),
+              lineClamp: css.getPropertyValue('-webkit-line-clamp'),
+              clip: css.clip,
+              clipPath: css.clipPath,
+              maskImage: css.maskImage,
+              contain: css.contain,
+              contentVisibility: css.contentVisibility,
+              transform: css.transform,
+              visibility: css.visibility,
+              opacity: css.opacity,
+            },
+          };
+        };
+        const parent = (node: Element): Element | null =>
+          node.parentElement ??
+          (node.getRootNode() instanceof ShadowRoot
+            ? (node.getRootNode() as ShadowRoot).host
+            : null);
+        const ancestors = (node: Element) => {
+          const items = [];
+          let current: Element | null = node;
+          for (; current && items.length < 24; current = parent(current))
+            items.push(describe(current));
+          return { items, truncated: !!current };
+        };
+        // openRoute uses this same first Previewer; no additional selector wait.
+        const previewer = document.querySelector('[data-previewer-id]');
+        const trigger = previewer?.querySelector<HTMLElement>(
+          '[data-projection-content] [data-demo-ref="rtlTrigger"]'
+        );
+        const valueNodes = trigger
+          ? [
+              ...trigger.querySelectorAll<HTMLElement>(
+                '[data-projection-prototype$="-select-value"]'
+              ),
+            ]
+          : [];
+        const values = valueNodes.slice(0, 4).map((value) => {
+          const chain = ancestors(value);
+          const walker = document.createTreeWalker(value, NodeFilter.SHOW_TEXT);
+          const textRanges = [];
+          let node: Node | null = null;
+          let visited = 0;
+          while ((node = walker.nextNode()) && visited++ < 128) {
+            if (!node.textContent?.trim()) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            const allRects = [...range.getClientRects()];
+            textRanges.push({
+              textLength: node.textContent.length,
+              parent: node.parentElement ? describe(node.parentElement) : null,
+              rects: allRects.slice(0, 128).map(rect),
+              rectsTruncated: allRects.length > 128,
+            });
+            range.detach();
+          }
+          return {
+            value: describe(value),
+            ancestors: chain,
+            textRanges,
+            textNodesTruncated: !!node,
+            clippingCandidates: chain.items.filter(
+              ({ css }) =>
+                css.overflowX !== 'visible' ||
+                css.overflowY !== 'visible' ||
+                css.clip !== 'auto' ||
+                css.clipPath !== 'none' ||
+                css.maskImage !== 'none' ||
+                /(?:paint|strict|content)/.test(css.contain)
+            ),
+          };
+        });
+        return {
+          phase,
+          observedAtMs: performance.now(),
+          meaning:
+            'Pre-clip text bounds and computed clip/scroll owners only; no visible-paint or product pass/fail inference.',
+          viewport: {
+            width: innerWidth,
+            height: innerHeight,
+            scrollX,
+            scrollY,
+            visual: visualViewport
+              ? {
+                  width: visualViewport.width,
+                  height: visualViewport.height,
+                  offsetLeft: visualViewport.offsetLeft,
+                  offsetTop: visualViewport.offsetTop,
+                  scale: visualViewport.scale,
+                }
+              : null,
+          },
+          document: describe(document.documentElement),
+          htmlFontSize: getComputedStyle(document.documentElement).fontSize,
+          fontStatus: document.fonts.status,
+          trigger: trigger ? describe(trigger) : null,
+          triggerAncestors: trigger ? ancestors(trigger) : null,
+          values,
+          valuesTruncated: valueNodes.length > values.length,
+        };
+      }, phase),
+      phase
+    );
+  } catch (error) {
+    return { phase, observationError: String(error) };
+  }
+}
+
+// Optional Chromium metadata runs after the existing assertions and captures.
+// Unsupported CDP, a missing Value, or the one-second read limit is recorded,
+// never made a new precondition for the existing browser case.
+async function selectTriggerPlatformFonts(page: Page) {
+  let session: CDPSession | undefined;
+  let expired = false;
+  const expiredResult = { unavailable: 'Optional font observation expired.' };
+  const observation = (async () => {
+    try {
+      session = await page.context().newCDPSession(page);
+      if (expired) return expiredResult;
+      await session.send('DOM.enable');
+      if (expired) return expiredResult;
+      await session.send('CSS.enable');
+      if (expired) return expiredResult;
+      const { root } = await session.send('DOM.getDocument', { depth: 1 });
+      if (expired) return expiredResult;
+      const previewer = await session.send('DOM.querySelector', {
+        nodeId: root.nodeId,
+        selector: '[data-previewer-id]',
+      });
+      if (expired) return expiredResult;
+      if (!previewer.nodeId) return { unavailable: 'The original Previewer is absent.' };
+      const value = await session.send('DOM.querySelector', {
+        nodeId: previewer.nodeId,
+        selector:
+          '[data-projection-content] [data-demo-ref="rtlTrigger"] [data-projection-prototype$="-select-value"]',
+      });
+      if (expired) return expiredResult;
+      if (!value.nodeId) return { unavailable: 'The original Select Value is absent.' };
+      const fonts = await session.send('CSS.getPlatformFontsForNode', { nodeId: value.nodeId });
+      return expired ? expiredResult : { method: 'CSS.getPlatformFontsForNode', ...fonts };
+    } catch (error) {
+      return { unavailable: String(error) };
+    } finally {
+      try {
+        await session?.detach();
+      } catch {
+        // Cleanup failure cannot replace the original browser outcome.
+      }
+    }
+  })();
+  return selectObservationWithin(observation, 'Optional font observation', () => {
+    expired = true;
+    // The session belongs only to this page/case. Late replies cannot change
+    // the returned timeout record or append evidence to another case.
+    void session?.detach().catch(() => {});
+  });
+}
+
 async function popup(page: Page, trigger: Locator) {
   const id = await trigger.getAttribute('aria-controls');
   if (!id) throw new Error('Select has no stable Content relationship.');
@@ -182,6 +420,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           const prefix = `${family}-${runtime}-${theme}`;
           const stageEvidence: Record<string, unknown>[] = [];
           const materialEvidence: unknown[] = [];
+          const triggerGeometryEvidence: unknown[] = [];
           try {
             await page.evaluate((theme) => {
               document.documentElement.classList.remove('light', 'dark');
@@ -407,6 +646,10 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             });
             const rtl = demo.locator('[data-demo-ref="rtlTrigger"]');
             await rtl.scrollIntoViewIfNeeded();
+            if (captureDir)
+              triggerGeometryEvidence.push(
+                await selectTriggerGeometrySnapshot(page, 'rtl-320-text200-before-open')
+              );
             await rtl.click();
             const rtlContent = await popup(page, rtl);
             const geometry = await rtlContent.evaluate((node) => {
@@ -437,6 +680,10 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 radius: paint.borderRadius,
               };
             });
+            if (captureDir)
+              triggerGeometryEvidence.push(
+                await selectTriggerGeometrySnapshot(page, 'rtl-320-text200-open')
+              );
             await withLiquidCardFailureObservation(
               async () => {
                 expect(geometry.direction).toBe('rtl');
@@ -503,6 +750,10 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           } catch (error) {
             if (family === 'liquid-glass')
               materialEvidence.push(await selectMaterialSnapshot(previewer, 'assertion-failure'));
+            if (captureDir)
+              triggerGeometryEvidence.push(
+                await selectTriggerGeometrySnapshot(page, 'assertion-failure')
+              );
             await captureFailure(page, prefix, {
               family,
               runtime,
@@ -514,6 +765,39 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             });
             throw error;
           } finally {
+            if (captureDir) {
+              try {
+                const binding = readSelectSourceBinding((args) =>
+                  execFileSync('git', args, { encoding: 'utf8' })
+                );
+                const platformFonts = await selectTriggerPlatformFonts(page);
+                await writeFile(
+                  path.join(captureDir, `${prefix}-trigger-geometry.json`),
+                  JSON.stringify(
+                    {
+                      schemaVersion: 1,
+                      ...binding,
+                      family,
+                      runtime,
+                      theme,
+                      observations: triggerGeometryEvidence,
+                      platformFonts,
+                      qualification:
+                        'Read-only diagnostics; snapshots and screenshots are separate observations. Range bounds precede CSS clipping and are not a product verdict.',
+                      opticalPaintClaim: false,
+                      gpuiClaim: false,
+                    },
+                    null,
+                    2
+                  )
+                );
+              } catch (observationError) {
+                console.warn(
+                  'Select trigger observation could not be retained',
+                  String(observationError)
+                );
+              }
+            }
             await context.close();
           }
         }, 120_000);

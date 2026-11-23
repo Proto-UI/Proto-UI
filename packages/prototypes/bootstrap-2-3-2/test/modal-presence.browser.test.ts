@@ -715,6 +715,7 @@ describe.each(['dialog', 'alert-dialog'] as const)(
           evidence.reversal = reversal;
           expect(reversal.closing.reason).toBe('condition');
           expect(reversal.before.content.portaled).toBe(true);
+          expect(reversal.before.content.connected).toBe(true);
           expect(reversal.before.content.owner).toBe(reversal.entered.content.owner);
           expect(reversal.before.content.viewEpoch).toBe(reversal.entered.content.viewEpoch);
           expect(reversal.before.content.created).toBe(reversal.entered.content.created);
