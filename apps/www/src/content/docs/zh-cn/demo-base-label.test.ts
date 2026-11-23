@@ -36,7 +36,7 @@ describe('Base Label documentation registration', () => {
     const config = readFileSync(resolve(process.cwd(), 'apps/www/astro.config.mjs'), 'utf8');
     expect(config).toContain("slug: 'ui-libraries/base/label'");
   });
-  it('admits the generated control-label recipe with nine associated labels', () => {
+  it('admits all eleven exact associations, including independent read-only controls', () => {
     const recipe = (recipes['./demo-base-label.demo.ts'] as { default?: DemoSpec } | undefined)
       ?.default;
     expect(recipe).toBeDefined();
@@ -44,12 +44,40 @@ describe('Base Label documentation registration', () => {
     assertDemoSpec(recipe);
     const root = (recipe as any).root;
     expect(root.kind).toBe('box');
-    const countProto = (node: any, prototypeId: string): number => {
-      if (!node || typeof node !== 'object') return 0;
-      let count = node.kind === 'proto' && node.prototypeId === prototypeId ? 1 : 0;
-      for (const child of node.children ?? []) count += countProto(child, prototypeId);
-      return count;
+    const prototypes: any[] = [];
+    const collect = (node: any) => {
+      if (!node || typeof node !== 'object') return;
+      if (node.kind === 'proto') prototypes.push(node);
+      for (const child of node.children ?? []) collect(child);
     };
-    expect(countProto(root, 'base-label-root')).toBe(9);
+    collect(root);
+    const labels = prototypes.filter((node) => node.prototypeId === 'base-label-root');
+    expect(labels.map((node) => node.associations?.controlLabel)).toEqual([
+      'checkbox',
+      'switch',
+      'radio-email',
+      'radio-push',
+      'input',
+      'textarea',
+      'readonly-input',
+      'readonly-textarea',
+      'disabled',
+      'controlled',
+      'passive',
+    ]);
+    for (const label of labels) {
+      const targets = prototypes.filter(
+        (node) =>
+          node !== label && node.associations?.controlLabel === label.associations.controlLabel
+      );
+      expect(targets).toHaveLength(1);
+      if (label.associations.controlLabel.startsWith('readonly-')) {
+        expect(targets[0].props.readOnly).toBe(true);
+        expect(targets[0].props).not.toHaveProperty('disabled');
+      }
+    }
+    expect(
+      labels.find((node) => node.associations.controlLabel === 'passive').props.activation
+    ).toBe(false);
   });
 });

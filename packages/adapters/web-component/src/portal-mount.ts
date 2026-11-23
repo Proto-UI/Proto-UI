@@ -16,6 +16,8 @@ import {
   setProtoParent,
 } from './platform/instance-tree';
 
+import { PUI_PORTAL_PREPARING_ATTR } from './host-display';
+
 /** Document-local WC portal projection. Logical origin owns its liveness;
  * a physical body child follows connected adoption and must not outlive a disconnected origin subtree.
  * No open-state writes or Runtime disposal here: restore the DOM projection
@@ -28,6 +30,18 @@ function relocate(el: HTMLElement, destination: Node, move: () => void): void {
     withWebComponentCallerDomMove([el], move)
   );
 }
+// This is the current Runtime mount acquisition window, not a new lifecycle
+// phase. A later projection of an already mounted view must retain its layout
+// and focus while the existing theme reveal guard runs.
+const acquiringViews = new WeakMap<HTMLElement, object>();
+export function beginWebComponentPortalViewAcquisition(el: HTMLElement): () => void {
+  const acquisition = {};
+  acquiringViews.set(el, acquisition);
+  return () => {
+    if (acquiringViews.get(el) === acquisition) acquiringViews.delete(el);
+  };
+}
+
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {
   refreshProjections.get(el)?.();
@@ -198,13 +212,17 @@ export function createWebComponentPortalMount() {
         const cancel = cancelReveal;
         cancelReveal = null;
         cancel?.();
-        if (
-          projectionEpochs.get(el) === epoch &&
-          el.getAttribute(PUI_VIEW_REVEALING_ATTR) === 'portal'
-        )
+        if (projectionEpochs.get(el) !== epoch) return;
+        if (el.getAttribute(PUI_VIEW_REVEALING_ATTR) === 'portal')
           el.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+        // Restore rendering only after withdrawing the transition guard, so
+        // the browser can apply authored @starting-style to this first render.
+        el.removeAttribute(PUI_PORTAL_PREPARING_ATTR);
       };
       const beginReveal = () => {
+        // Adoption before a first reveal carries that still-unpublished state.
+        // An already presented retained view never acquires this concealment.
+        const firstRender = acquiringViews.has(el) || el.hasAttribute(PUI_PORTAL_PREPARING_ATTR);
         endReveal();
         if (!isCurrent()) return;
         const doc = el.ownerDocument;
@@ -224,6 +242,7 @@ export function createWebComponentPortalMount() {
         doc.addEventListener('visibilitychange', onVisibility);
         // Reuse the host reveal barrier, allowing authored Presence keyframes.
         // Descendant theme reconciliation must settle before transitions resume.
+        if (firstRender) el.setAttribute(PUI_PORTAL_PREPARING_ATTR, '');
         el.setAttribute(PUI_VIEW_REVEALING_ATTR, 'portal');
         if (cancelReveal === cancel)
           cancelLayout = scheduleAfterWebLayout(el, finish, queueMicrotask);

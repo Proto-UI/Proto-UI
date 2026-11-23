@@ -105,6 +105,7 @@ try {
           '@happy-dom/global-registrator': '15.11.7',
           'happy-dom': '15.11.7',
           '@types/react': '19.2.14',
+          '@types/react-dom': '19.2.3',
           react: '19.2.6',
           'react-dom': '19.2.6',
           tsx: '4.21.0',

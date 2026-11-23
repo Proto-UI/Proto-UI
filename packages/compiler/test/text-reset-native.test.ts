@@ -8,6 +8,8 @@ afterEach(async () => {
   vi.restoreAllMocks();
   document.body.replaceChildren();
 });
+// C-TEXT-CONTROL-SELECTION-0001 binds snapshot selection to the physical editor.
+// Reset does not grant a second caret owner or permit inferring offsets from length.
 // Compare the observed host facts, never an inferred end caret.
 function hostSelection(input: HTMLInputElement) {
   return {
@@ -70,7 +72,7 @@ for (const profile of nativeOwnerProfiles) {
     expect(api.snapshot()).toEqual({
       value: 'ab😀',
       composing: false,
-      selection: { start: 1, end: 4, direction: 'backward' },
+      selection: hostSelection(input),
     });
     expect(api.calls.get()).toBe(0);
     await owner.act(() => api.reset());
@@ -94,7 +96,7 @@ for (const profile of nativeOwnerProfiles) {
     expect(api.snapshot()).toEqual({
       value: 'owner',
       composing: false,
-      selection: { start: 1, end: 4, direction: 'forward' },
+      selection: hostSelection(input),
     });
   });
   it(`${profile}: reentrant reset retires the current input callback lease`, async () => {
@@ -125,7 +127,7 @@ for (const profile of nativeOwnerProfiles) {
     expect(owner.handle.getExposes().snapshot()).toEqual({
       value: 'changed😀',
       composing: false,
-      selection: { start: 2, end: 9, direction: 'backward' },
+      selection: hostSelection(input),
     });
     expect(owner.handle.getExposes().calls.get()).toBe(0);
   });
@@ -143,7 +145,7 @@ for (const profile of nativeOwnerProfiles) {
     expect(owner.handle.getExposes().snapshot()).toEqual({
       value: 'owner',
       composing: false,
-      selection: { start: 2, end: 5, direction: 'forward' },
+      selection: hostSelection(input),
     });
     expect(input.value).toBe('owner');
   });

@@ -5,6 +5,11 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
+import {
+  AS_TRIGGER_GET_PROTO_CAP,
+  AS_TRIGGER_INSTANCE_CAP,
+  AS_TRIGGER_PARENT_CAP,
+} from '@proto.ui/module-as-trigger';
 import { styleContains } from '../../test-utils/style';
 import { BRUTALIST_STYLE_TOKENS } from '../../../cli/src/generated/brutalist-style-tokens';
 import { BRUTALIST_THEME_CSS } from '../../../cli/src/generated/brutalist-theme';
@@ -318,6 +323,13 @@ function executeFlatToggle() {
       task();
     },
     onRuntimeReady(wiring) {
+      // HC-TRIGGER-GROUP-0001: this real Toggle owns an isolated logical
+      // Trigger. Supply its host facts before executing the inherited setup.
+      wiring.attach('as-trigger', [
+        [AS_TRIGGER_INSTANCE_CAP, rootTarget],
+        [AS_TRIGGER_PARENT_CAP, () => null],
+        [AS_TRIGGER_GET_PROTO_CAP, () => toggle],
+      ]);
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => rootTarget],
         [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],

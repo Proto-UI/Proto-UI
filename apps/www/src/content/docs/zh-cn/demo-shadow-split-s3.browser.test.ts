@@ -2,7 +2,10 @@
 import type { Browser } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
-import { runS3Journey } from '../../../../../../scripts/analysis/shadow-s3-journey.mjs';
+import {
+  runS3Journey,
+  runS3SizeControl,
+} from '../../../../../../scripts/analysis/shadow-s3-journey.mjs';
 
 let browser: Browser;
 let baseUrl: string;
@@ -16,6 +19,25 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('S3 complete Tabs and settings native acceptance paths', () => {
+  for (const locale of ['zh-cn', 'en'])
+    it(`${locale}: rejects matched wrong Switch geometry and restores the source recipe`, async () => {
+      const context = await browser.newContext({
+        colorScheme: 'light',
+        viewport: { width: 1440, height: 1000 },
+      });
+      const page = await context.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s3`);
+        const control = await runS3SizeControl(page);
+        console.log('S3 source-geometry calibration', JSON.stringify({ locale, ...control }));
+        expect(errors).toEqual([]);
+      } finally {
+        await context.close();
+      }
+    }, 60_000);
+
   for (const locale of ['zh-cn', 'en'])
     for (const keepMounted of [false, true])
       it(`${locale}: Light/split/mixed with keepMounted=${keepMounted}`, async () => {

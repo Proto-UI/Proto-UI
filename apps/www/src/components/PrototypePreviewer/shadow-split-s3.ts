@@ -191,7 +191,9 @@ export function mountShadowSplitS3(
       panels.forEach((panel, i) =>
         setElementProps(panel, { value: ['a', 'b', 'c', 'd'][i], keepMounted: config.keepMounted })
       );
-      setElementProps(sw, { checked, disabled });
+      // Keep this acceptance fixture on the source-bound New York/default
+      // recipe even when the surrounding documentation selects another style.
+      setElementProps(sw, { checked, disabled, styleProfile: 'new-york-v4', size: 'default' });
       setElementProps(cb, { checked: checkboxChecked, disabled });
       setElementProps(save, { disabled });
       setElementProps(badge, { tone: tones[tone] });

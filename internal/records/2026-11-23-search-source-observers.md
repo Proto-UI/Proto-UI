@@ -1,0 +1,7 @@
+# Search source observers — 2026-11-23
+
+Two original `d0392fb3` source-contract failures described older call shapes. The actual composition now selects Bootstrap's public `dialog-content` through an explicit family conditional, while the other two families retain `command-dialog-content`. Results publication passes the literal `results` slot through its bounded publication owner before invoking `api.setChildren(slot, children)`, so acknowledgements and superseded owners remain tracked.
+
+The source observer now checks the exact family discriminator and both real content parts, and requires both the literal results publication and the public forwarding call. It keeps the public Dialog manifest, Root/Command composition, public-instance subscription, InputShell binding, focus operation, disposal, modifier guards and exact 1,000ms readiness budget. No product code, browser input, timeout or source-import permission changes.
+
+The four complete files passed **94/94**, zero skipped, in **50.15 seconds**: the source contract, real composition, actual four-runtime public-mode materializer, and publication/paint-cost controls. Source hashes and working-tree state were identical before and after. The two original failures and complete final log/receipt are retained in `evidence/2026-11-23-search-source-observers/`. These results do not replace the separately running exact-head browser queue.

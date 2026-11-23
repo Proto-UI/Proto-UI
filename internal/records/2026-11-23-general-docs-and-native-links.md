@@ -1,0 +1,16 @@
+# General documentation and native-link repairs — 2026-11-23
+
+The original `d0392fb3` general queue exposed two genuine ordinary-navigation regressions: Shadcn's `nav` composition reused a Rhea action layout that disabled text selection and requested a one-pixel pressed translation. The existing native-anchor ownership policy (`2026-10-05-native-link-preconnected-props.md`) and unchanged `site-action-appearance.test.ts` require selection to remain native and ordinary navigation to stay stationary. The website composition now omits only the two action selection declarations and the nav's pressed visual request. It retains the same public Rhea recipe, target geometry, hover/current/focus facts and native anchor; action and icon branches are unchanged.
+
+An independent source read by `/root/sprint12` found no conflicting authority or second Text selection override. The exact reviewed importer digest changes from `f691b11c6cd9b25d3be510eb515b6ec3069350a6877caf2597b77857bfc76b18` to `34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc`. The path, finite import list and all owner/admission dispositions remain unchanged. Both original import-boundary cases pass, including copied, modified and foreign-import negative controls. This review is not a GitHub approval or native visual acceptance.
+
+The other fixes correct exact observation boundaries without changing product behavior:
+
+- Base Input's demo already accepts the public normalized callback. Raw DOM `valueChange` events are not a second acceptance channel. The fixture retains initial and repeated complete-prop writes, sibling/duplicate-event rejection and late cleanup rejection; it explicitly checks a distinct raw DOM value cannot commit.
+- Base Label's two additional read-only editors account for the eleven labels. The check enumerates all eleven independent association keys, requires one target for each, checks both read-only targets are not disabled, and preserves the naming-only label's `activation: false`.
+- Base Tree now uses its public Group. The fixture verifies the actual Group loader, two top-level items, the single project Toggle/Group and its two precisely parented children, retaining four total items and one Root.
+- The WC ghost example assigns `variant` and `disabled` through `setElementProps`; the other three framework examples retain their authored attributes. The check requires that exact public WC assignment and all original enabled/disabled labels and counts.
+- The Dropdown evidence note is selected by its stable implementation ID instead of array position; its complete bilingual and related-component evidence limits are unchanged.
+- The private ChatUI Message/CodeBlock inventory recognizes only the exact independent `P-BASE-MESSAGE-SCROLLER.yaml` draft. Its private exports, release exclusion, absence from CLI and all other admission exclusions remain checked.
+
+All nine complete files pass: **62 tests, zero failures, zero skips**, with identical before/after source hashes. The eight original failures, complete log, source review and exact-boundary controls are retained in `evidence/2026-11-23-general-docs-and-native-links/`. The native browser and final integrated gates remain separate.

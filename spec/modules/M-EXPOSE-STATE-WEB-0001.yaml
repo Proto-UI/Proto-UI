@@ -32,6 +32,10 @@ criteria:
     text:
       en: The privileged port reports whether projection is active and maps internal State IDs to Expose keys, semantics, kinds and candidate Web names. It is internal optimization metadata, not App Maker authority or proof that every candidate CSS variable is emitted; emission still follows kind and mode.
       zh-CN: 特权 port 报告投影是否活动，并把 internal State ID 映射到 Expose key、semantic、kind 与候选 Web 名称。这是内部优化 metadata，不是 App Maker authority，也不证明每个候选 CSS variable 都会输出；实际输出仍由 kind/mode 决定。
+  - id: M-EXPOSE-STATE-WEB-0001-PROJECTION-WITNESS
+    text:
+      en: The draft optional privileged CSS projection query additionally checks one currently bound external source, its canonical target, unique mapped CSS name, current binding generation and this Module's actual last emitted value/priority against both the source and the target. Missing providers, inactive or revoked bindings, target replacement, absent emission, mapping collisions and foreign changes return false. It is read-only and grants no state write, public author facade, mirror ownership or arbitration of indistinguishable same-value writes. This witness remains distinct from F's candidate-name map.
+      zh-CN: Draft 可选特权 CSS projection query 另核当前唯一绑定的 external source、canonical target、唯一映射 CSS 名、当前 binding generation 及本 Module 实际最后输出的 value/priority 与 source 和 target 是否一致。缺失 provider、未激活或撤回 binding、target 替换、未实际输出、名称冲突与外部改写返回 false。它只读，不授予 State write、公开 author facade、mirror ownership，也不仲裁不可区分的同值写入；与 F 的候选名称 map 保持区分。
 dependsOn:
   modules:
     - M-EXPOSE-STATE-0001
@@ -45,6 +49,8 @@ requires:
 verifies:
   tests:
     - T-EXPOSE-STATE-WEB-0001
+    - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001
+      since: 0.3.0-alpha.2
 relates:
   contracts:
     - C-RULE-EXTENSION-0001
@@ -63,6 +69,9 @@ sources:
   - path: packages/modules/expose-state-web/src/caps.ts
   - path: internal/contracts/expose/expose-state.web-extension.v0.md
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added a draft optional read-only current CSS projection witness, preserving the candidate map and existing author facade.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged existing Web projection with bounded mapping, view binding and four Adapter evidence.

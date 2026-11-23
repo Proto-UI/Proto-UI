@@ -4,6 +4,7 @@ import { runInNewContext } from 'node:vm';
 import { Window, type HTMLElement } from 'happy-dom';
 import { ModuleKind, ScriptTarget, transpileModule } from 'typescript';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { navigateSiteLocale } from '../src/components/site-locale-navigation';
 
 const sourceUrl = new URL('../src/components/override/LanguageSelect.astro', import.meta.url);
 const source = readFileSync(sourceUrl, 'utf8');
@@ -66,6 +67,12 @@ function createHarness(
   const error = vi.fn();
   // Observe assignments without letting a test initiate a browser navigation.
   const location = {
+    get href() {
+      return 'https://language-select.test/en/docs/overview/';
+    },
+    set href(value: string) {
+      navigate(new URL(value).pathname);
+    },
     get pathname() {
       return '/en/docs/overview/';
     },
@@ -106,13 +113,14 @@ function createHarness(
       compiled.outputText,
       {
         document,
-        window: { location },
+        window: { location, localStorage, document },
         localStorage,
         console: { log, error },
         exports: {},
         require(id: string) {
-          if (id !== '../site-shadcn-controls') throw new Error(`Unexpected client import: ${id}`);
-          return { initSiteControls };
+          if (id === '../site-shadcn-controls') return { initSiteControls };
+          if (id === '../site-locale-navigation') return { navigateSiteLocale };
+          throw new Error(`Unexpected client import: ${id}`);
         },
       },
       { filename: sourceUrl.pathname, timeout: 1_000 }
@@ -254,8 +262,8 @@ describe('processed language selector script lifecycle', () => {
     expect(h.localStorage.getItem('preferred-locale')).toBe(next);
     expect(h.document.cookie).toBe(`preferred-locale=${next}`);
     expect(h.setCookie).toHaveBeenCalledTimes(1);
-    expect(h.setCookie.mock.calls[0][0]).toMatch(
-      new RegExp(`^preferred-locale=${next}; path=/; expires=.+ GMT; SameSite=Lax$`)
+    expect(h.setCookie.mock.calls[0][0]).toBe(
+      `preferred-locale=${next}; path=/; max-age=31536000; SameSite=Lax`
     );
   });
 

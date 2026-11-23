@@ -178,13 +178,15 @@ describe('HoverCard transient intent lifecycle', () => {
     expect(oldExposes.transitionState.get()).toBe('leaving');
     oldExposes.controls.complete();
     await flush();
-    expect(card.content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(oldExposes.transitionState.get()).toBe('closed');
+    expect(card.content.hasAttribute('data-pui-view-detached')).toBe(false);
     // The WC Portal intentionally waits two host rendering opportunities before
     // actual unmount. Its early hidden attribute alone is not lifecycle evidence.
     await new Promise<void>((resolve) =>
       window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()))
     );
     await flush();
+    expect(card.content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(card.probe.getExposes().snapshot().contentHovered).toBe(false);
     await advance(20);
     expect(card.requests.filter((request) => !request.open)).toEqual([
@@ -356,7 +358,7 @@ describe('HoverCard transient intent lifecycle', () => {
     expect(card.root.getExposes().open.get()).toBe(false);
   });
 
-  it('a borrowed operation returns false after Root shutdown and cannot affect a rebuilt Root', async () => {
+  it('a revoked borrowed operation rejects after Root shutdown and cannot affect a rebuilt Root', async () => {
     vi.useFakeTimers();
     const old = create();
     await flush();
@@ -370,7 +372,11 @@ describe('HoverCard transient intent lifecycle', () => {
     await enterContent(replacement);
     const current = replacement.probe.getExposes().snapshot();
     expect(current.contentInteractionOwner).not.toBe(id);
-    expect(release('content', id)).toBe(false);
+    // P-BASE-HOVER-CARD-INTERACTION-OWNER-BINDING: a fully revoked host calling
+    // surface follows the stale-handle rule instead of re-entering the Root.
+    expect(() => release('content', id)).toThrow(
+      '[AdapterHost] cannot invoke an exposed callable after terminal disposal'
+    );
     expect(replacement.probe.getExposes().snapshot()).toBe(current);
     await advance(100);
     expect(replacement.root.getExposes().open.get()).toBe(true);

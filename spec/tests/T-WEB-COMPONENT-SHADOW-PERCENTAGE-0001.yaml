@@ -1,0 +1,68 @@
+id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001
+type: test
+title: Finite Shadow Root percentage translation candidate evidence
+status: draft
+lifecycleRationale:
+  en: Candidate classification and current-owner recipe evidence do not establish native geometry, input or independent semantic acceptance. The exact native matrix remains an explicit draft blocker until executed and reviewed.
+  zh-CN: 候选分类与当前 owner recipe 证据不证明原生几何、输入或独立语义准入；精确原生矩阵在实际运行并审查前仍为 draft blocker。
+since: 0.3.0-alpha.2
+summary: Separately records finite-token provenance, real owner-state binding and native whole-Root obligations without weakening existing complete Switch or S3 gates.
+cases:
+  - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-TOKENS
+    title: Nine finite expressions retain canonical author provenance and reject near misses
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-TOKENS]
+    expectation: exact-finite-spellings-with-unchanged-static-and-collapsed-meaning
+  - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-OWNER
+    title: Only a live owner percentage projection and current companion authorize complete publication
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION
+      - M-EXPOSE-STATE-WEB-0001-PROJECTION-WITNESS
+    expectation: current-source-and-recipe-or-atomic-unchanged-targets
+  - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-NATIVE
+    title: Actual Root surface slot and host hit geometry agree through intermediate values and reversal
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION]
+    expectation: independent-formula-native-geometry-and-lifecycle-matrix
+implementations:
+  - id: finite-role-transport
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/percentage-root-translation.test.ts
+    required: true
+    consumesCases: [T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-TOKENS]
+  - id: current-owner-projection
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-percentage-translation.test.ts
+    required: true
+    consumesCases: [T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-OWNER]
+  - id: native-public-producer
+    kind: runtime-test
+    status: missing
+    required: true
+    consumesCases: [T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-CASE-NATIVE]
+    notes:
+      - No historical S3 replay or deterministic DOM test substitutes for the exact candidate's required native matrix.
+verifies:
+  modules:
+    - id: M-EXPOSE-STATE-WEB-0001
+      anchors: [M-EXPOSE-STATE-WEB-0001-PROJECTION-WITNESS]
+  decisions:
+    - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+      anchors:
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-TOKENS
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION
+exercises:
+  modules: [M-EXPOSE-STATE-0001]
+  adapters: [A-WEB-COMPONENT-0001]
+openQuestions:
+  - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001-Q-NATIVE
+    question:
+      en: Has the native candidate matrix run with complete raw evidence and independent review?
+    blocks:
+      - activation:T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001
+      - implementation:T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001#native-public-producer
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Separated finite token and owner-source candidate tests from required native acceptance; no stable admission claimed.
+tags: [test, shadow-dom, geometry, state, draft]
