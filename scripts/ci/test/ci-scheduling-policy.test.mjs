@@ -447,13 +447,18 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
 });
 
 function assertReusableCompilerInputBoundary(workflow) {
-  // Adapter and browser lanes have separate default-off reusable inputs.
-  // Package-budget and Website evidence remain manual-only.
+  // The reusable cycle retains its default-off Adapter input. Browser,
+  // package-budget and Website evidence remain separate manual opt-ins.
   assert.deepEqual(workflow.on.workflow_call, {
     inputs: {
       adapter_acceptance: { type: 'boolean', required: false, default: false },
-      browser_acceptance: { type: 'boolean', required: false, default: false },
     },
+  });
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.browser_acceptance, {
+    description: 'Run the separate browser compiler and source regression lanes',
+    type: 'boolean',
+    required: false,
+    default: false,
   });
   const browser = workflow.jobs['browser-compiler'];
   assert.equal(browser.if, '${{ inputs.browser_acceptance }}');
@@ -463,7 +468,7 @@ function assertReusableCompilerInputBoundary(workflow) {
   assert.deepEqual(browser.permissions, { contents: 'read' });
 }
 
-test('reusable compiler inputs preserve separate default-off Adapter and browser boundaries', () => {
+test('compiler inputs preserve the reusable Adapter and manual browser boundaries', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
   const mutations = [
@@ -480,13 +485,20 @@ test('reusable compiler inputs preserve separate default-off Adapter and browser
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.default = true;
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.default = true;
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.required = true;
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.required = true;
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.type = 'string';
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
     },
     (workflow) => {
       workflow.jobs['browser-compiler'].if = 'true';
