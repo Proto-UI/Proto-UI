@@ -4,9 +4,9 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { hashMetafileInputs } from './browser-inputs.mjs';
+import { browserRepositoryRoot, hashMetafileInputs } from './browser-inputs.mjs';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = browserRepositoryRoot;
 const compilerRoot = path.join(root, 'packages/compiler');
 const require = createRequire(path.join(compilerRoot, 'package.json'));
 export async function buildBrowserCompiler(

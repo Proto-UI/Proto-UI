@@ -3,11 +3,11 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { buildBrowserCompiler } from './build-browser.mjs';
 import { FileSourceGraph } from '../../packages/compiler/src/source-loader';
 import {
   assertSameInputFiles,
+  browserRepositoryRoot,
   digest,
   hashInputFiles,
   hashMetafileInputs,
@@ -15,7 +15,7 @@ import {
   snapshotBrowserRepositoryInputs,
 } from './browser-inputs.mjs';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = browserRepositoryRoot;
 const compilerRequire = createRequire(path.join(root, 'packages/compiler/package.json'));
 const wwwRequire = createRequire(path.join(root, 'apps/www/package.json'));
 let preparation: Promise<Map<string, string>> | undefined;
