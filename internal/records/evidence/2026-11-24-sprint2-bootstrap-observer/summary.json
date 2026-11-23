@@ -1,0 +1,300 @@
+{
+  "parentHead": "3d64911f980957ab78bfb616cdd5b523b5f4482c",
+  "candidateFixtureSha256": "f061d42f58be9c0118cbf8c3e145d7deb08af6376ca325e2a0caeb1e71f6dd02",
+  "archive": {
+    "path": "execution.tar.xz",
+    "bytes": 2281188,
+    "sha256": "3dc0e565f3c8d1a4f1fc79cb3e9a62b0c46dfb5265fddb51949879e3d4c96cca",
+    "payloadFiles": 56
+  },
+  "historical": {
+    "head": "6b6462b526094cee9d3fa385332162c384624e3e2",
+    "passed": 39,
+    "failed": 1
+  },
+  "calibration": {
+    "passed": 4,
+    "failed": 0,
+    "pageErrors": 0,
+    "updates": [
+      {
+        "runtime": "wc",
+        "direct": 0,
+        "legacy": 0
+      },
+      {
+        "runtime": "react",
+        "direct": 0,
+        "legacy": 15
+      },
+      {
+        "runtime": "vue",
+        "direct": 0,
+        "legacy": 15
+      },
+      {
+        "runtime": "vue2",
+        "direct": 0,
+        "legacy": 15
+      }
+    ]
+  },
+  "fourWeb": {
+    "passed": 40,
+    "failed": 0,
+    "errors": [],
+    "cases": [
+      {
+        "runtime": "wc",
+        "kind": "collapsible",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "collapsible",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "collapsible",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "collapsible",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "collapsible",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "accordion",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "accordion",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "accordion",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "accordion",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "wc",
+        "kind": "accordion",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "collapsible",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "collapsible",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "collapsible",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "collapsible",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "collapsible",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "accordion",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "accordion",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "accordion",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "accordion",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "react",
+        "kind": "accordion",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "collapsible",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "collapsible",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "collapsible",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "collapsible",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "collapsible",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "accordion",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "accordion",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "accordion",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "accordion",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue",
+        "kind": "accordion",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "collapsible",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "collapsible",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "collapsible",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "collapsible",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "collapsible",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "accordion",
+        "name": "cold-open-retained-close",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "accordion",
+        "name": "controlled-refusal-and-canonical-child-target",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "accordion",
+        "name": "interruption-reversal-and-keepMounted-identity",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "accordion",
+        "name": "content-grows-and-shrinks-during-entry",
+        "status": "passed"
+      },
+      {
+        "runtime": "vue2",
+        "kind": "accordion",
+        "name": "reduced-motion-and-disposal-retire-owned-writes",
+        "status": "passed"
+      }
+    ]
+  },
+  "verification": {
+    "exit": 0,
+    "summary": {
+      "passed": 40,
+      "failed": 0
+    },
+    "guardedSourcesStable": true,
+    "allBundleInputsStable": true,
+    "head": "3d64911f980957ab78bfb616cdd5b523b5f4482c",
+    "dirty": "M scripts/analysis/fixtures/bootstrap-collapse-browser.ts"
+  }
+}

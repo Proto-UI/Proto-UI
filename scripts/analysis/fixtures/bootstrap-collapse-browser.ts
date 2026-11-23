@@ -99,7 +99,16 @@ export async function mount(
   formerOwner = api?.getPublicInstance?.('content');
 }
 export function read(ref: string, path: string) {
-  return api?.call(ref, path);
+  // DemoRuntimeApi.call schedules a host update after invoking an exposed
+  // function. A frame observer must read the same public State getters without
+  // requesting three extra React/Vue updates for every native animation frame.
+  let value: unknown = api?.getExposes(ref);
+  for (const key of path.split('.')) {
+    if (value === null || (typeof value !== 'object' && typeof value !== 'function'))
+      return undefined;
+    value = (value as Record<string, unknown>)[key];
+  }
+  return typeof value === 'function' ? value() : undefined;
 }
 export async function accept(open: boolean) {
   api?.setProps('root', kind === 'collapsible' ? { open } : { openItems: open ? ['first'] : [] });
